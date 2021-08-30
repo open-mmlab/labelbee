@@ -1,0 +1,23 @@
+<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" width="21" height="23.011" viewBox="0 0 21 23.011">
+  <defs>
+    <style>
+      .cls-1 {
+        fill: #fff;
+      }
+
+      .cls-2 {
+        filter: url(#形状结合);
+      }
+    </style>
+    <filter id="形状结合" x="0" y="0" width="21" height="23.011" filterUnits="userSpaceOnUse">
+      <feOffset dy="1" input="SourceAlpha"/>
+      <feGaussianBlur stdDeviation="1.5" result="blur"/>
+      <feFlood flood-opacity="0.302"/>
+      <feComposite operator="in" in2="blur"/>
+      <feComposite in="SourceGraphic"/>
+    </filter>
+  </defs>
+  <g class="cls-2" transform="matrix(1, 0, 0, 1, 0, 0)">
+    <path id="形状结合-2" data-name="形状结合" class="cls-1" d="M5.252,13.674,0,7.744H12l-5.251,5.93a1,1,0,0,1-1.5,0ZM0,7.744V1A1,1,0,0,1,1,0H11a1,1,0,0,1,1,1V7.744Z" transform="translate(4.5 3.5)"/>
+  </g>
+</svg>

@@ -1,0 +1,24 @@
+.hotKey {
+  display: flex;
+  justify-content: space-between;
+  .item {
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    align-items: center;
+    cursor: pointer;
+    user-select: none;
+    .singleTool {
+      color: rgba(255, 255, 255, 0.4); // 暂时这样设置
+      margin: 0 21px;
+      cursor: pointer;
+      -moz-user-select: none;
+      -webkit-user-select: none;
+      -ms-user-select: none;
+      user-select: none;
+    }
+  }
+  .item:hover {
+    color: #666fff;
+  }
+}

@@ -1,0 +1,30 @@
+<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" width="16" height="16" viewBox="0 0 16 16">
+  <defs>
+    <style>
+      .cls-1 {
+        fill: none;
+      }
+
+      .cls-2 {
+        clip-path: url(#clip-path);
+      }
+
+      .cls-3 {
+        fill: #fff;
+      }
+    </style>
+    <clipPath id="clip-path">
+      <rect id="矩形" class="cls-1" width="12" height="12"/>
+    </clipPath>
+  </defs>
+  <g id="icon_enlarge" transform="translate(2 2)">
+    <rect id="矩形-2" data-name="矩形" class="cls-1" width="16" height="16" transform="translate(-2 -2)"/>
+    <g id="放大" class="cls-2">
+      <g id="放大-2" data-name="放大">
+        <path id="形状" class="cls-3" d="M11.25,11.952a.7.7,0,0,1-.5-.207l-1.7-1.7a5.607,5.607,0,1,1,2.178-4.429A5.541,5.541,0,0,1,10.04,9.055l1.7,1.7a.7.7,0,0,1-.492,1.195ZM5.614,1.07a4.545,4.545,0,1,0,4.544,4.544A4.55,4.55,0,0,0,5.614,1.07Z" transform="translate(0.004 0.007)"/>
+        <rect id="矩形_174" data-name="矩形 174" class="cls-3" width="4.404" height="1.016" rx="0.508" transform="translate(3.398 5.092)"/>
+        <rect id="矩形_175" data-name="矩形 175" class="cls-3" width="4.404" height="1.016" rx="0.508" transform="translate(6.108 3.398) rotate(90)"/>
+      </g>
+    </g>
+  </g>
+</svg>

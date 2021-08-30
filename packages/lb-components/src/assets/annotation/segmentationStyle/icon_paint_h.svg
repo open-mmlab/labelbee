@@ -1,0 +1,24 @@
+<svg id="icon_paint_h" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" width="21" height="18" viewBox="0 0 21 18">
+  <defs>
+    <style>
+      .cls-1 {
+        fill: none;
+      }
+
+      .cls-2 {
+        clip-path: url(#clip-path);
+      }
+
+      .cls-3 {
+        fill: #686aff;
+      }
+    </style>
+    <clipPath id="clip-path">
+      <path id="Clip_2" data-name="Clip 2" class="cls-1" d="M0,0H21V18H0Z"/>
+    </clipPath>
+  </defs>
+  <path id="Clip_2-2" data-name="Clip 2" class="cls-1" d="M0,0H21V18H0Z"/>
+  <g id="dianzibiaoge-youqitonggongju" class="cls-2">
+    <path id="Fill_1" data-name="Fill 1" class="cls-3" d="M8.028,18h0L0,9.73,9.45,0,17.475,8.27,8.029,18ZM9.447,2.889,3.209,9.315a4.586,4.586,0,0,0,2.925,1.009,6.018,6.018,0,0,0,.852-.063,4.944,4.944,0,0,0,2.5-1.068,5.508,5.508,0,0,1,2.3-1.083,5.338,5.338,0,0,1,2.851.122Zm8.132,14.706a2.109,2.109,0,0,1-2-2.2c0-.806.673-2.086,2-3.8,1.327,1.719,2,3,2,3.8A2.108,2.108,0,0,1,17.579,17.595Z"/>
+  </g>
+</svg>

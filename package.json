@@ -1,0 +1,26 @@
+{
+  "name": "beehive",
+  "private": true,
+  "version": "1.0.0",
+  "scripts": {
+    "dev": "lerna run --parallel --stream dev",
+    "bootstrap": "lerna bootstrap",
+    "start:demo": "node packages/bee-sdk-demo/scripts/start.js",
+    "clean": "lerna clean && rm -rf ./node_modules/ && rm -rf ./packages/**/node_modules"
+  },
+  "description": "",
+  "main": "index.js",
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "devDependencies": {
+    "husky": "^4.0.3",
+    "lerna": "^4.0.0",
+    "standard-version": "^9.3.1"
+  },
+  "husky": {
+    "hooks": {
+      "commit-msg": ""
+    }
+  }
+}

@@ -1,0 +1,71 @@
+<svg id="icon_mouseCanvasEdit_Hover" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" width="40.4" height="40" viewBox="0 0 40.4 40">
+  <defs>
+    <style>
+      .cls-1, .cls-2, .cls-6 {
+        fill: none;
+      }
+
+      .cls-1 {
+        clip-rule: evenodd;
+      }
+
+      .cls-3 {
+        clip-path: url(#clip-path);
+      }
+
+      .cls-4 {
+        clip-path: url(#clip-path-2);
+      }
+
+      .cls-5 {
+        clip-path: url(#clip-path-3);
+      }
+
+      .cls-6, .cls-9 {
+        stroke: #fff;
+      }
+
+      .cls-6 {
+        stroke-width: 2px;
+      }
+
+      .cls-7 {
+        clip-path: url(#clip-path-5);
+      }
+
+      .cls-8 {
+        fill: rgba(0,0,0,0);
+      }
+    </style>
+    <clipPath id="clip-path">
+      <path id="路径_30" data-name="路径 30" class="cls-1" d="M21-9.5H12.5V-1L12-.5H10L9.5-1V-9.5H1L.5-10v-2l.5-.5H9.5V-21l.5-.5h2l.5.5v8.5H21l.5.5v2Z" transform="translate(-0.5 21.5)"/>
+    </clipPath>
+    <clipPath id="clip-path-2">
+      <path id="路径_29" data-name="路径 29" class="cls-2" d="M-590,387H1330V-693H-590Z" transform="translate(590 693)"/>
+    </clipPath>
+    <clipPath id="clip-path-3">
+      <path id="路径_33" data-name="路径 33" class="cls-1" d="M-9-31H31V9H-9ZM12-21v9h9v2H12v9H10v-9H1v-2h9v-9Z" transform="translate(9 31)"/>
+    </clipPath>
+    <clipPath id="clip-path-5">
+      <path id="路径_614" data-name="路径 614" class="cls-2" d="M0,0H16V-16H0Z"/>
+    </clipPath>
+  </defs>
+  <g id="组_28" data-name="组 28" class="cls-3" transform="translate(9.5 9.5)">
+    <g id="组_27" data-name="组 27" class="cls-4" transform="translate(-590.5 -671.5)">
+      <path id="路径_28" data-name="路径 28" d="M-4-26H26V4H-4Z" transform="translate(590 693)"/>
+    </g>
+  </g>
+  <g id="组_31" data-name="组 31" class="cls-5">
+    <g id="组_30" data-name="组 30" class="cls-4" transform="translate(-581 -662)">
+      <g id="组_29" data-name="组 29" transform="translate(591 672)">
+        <path id="路径_31" data-name="路径 31" class="cls-6" d="M11,0V9h9v2H11v9H9V11H0V9H9V0Z"/>
+      </g>
+    </g>
+  </g>
+  <g id="组_1048" data-name="组 1048" transform="translate(24.4 35.8)">
+    <g id="组_1046" data-name="组 1046" class="cls-7">
+      <path id="路径_613" data-name="路径 613" class="cls-8" d="M-5-21H21V5H-5Z"/>
+    </g>
+    <path id="路径_616" data-name="路径 616" class="cls-9" d="M3.621-3.008l2.628-.461a.153.153,0,0,0,.083-.044l6.623-6.623a.156.156,0,0,0,0-.22l-2.6-2.6A.155.155,0,0,0,10.247-13a.155.155,0,0,0-.111.045L3.513-6.331a.159.159,0,0,0-.044.083L3.008-3.62a.524.524,0,0,0,.147.466A.529.529,0,0,0,3.527-3,.632.632,0,0,0,3.621-3.008Z"/>
+  </g>
+</svg>

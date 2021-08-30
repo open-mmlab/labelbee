@@ -1,0 +1,46 @@
+<svg id="icon_mouse_left_kj" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" width="16" height="16" viewBox="0 0 16 16">
+  <defs>
+    <style>
+      .cls-1 {
+        fill: none;
+      }
+
+      .cls-2 {
+        fill: #ccc;
+      }
+
+      .cls-3 {
+        clip-path: url(#clip-path);
+      }
+
+      .cls-4 {
+        clip-path: url(#clip-path-2);
+      }
+
+      .cls-5 {
+        fill: #ff5770;
+      }
+
+      .cls-6 {
+        fill: #fff;
+      }
+    </style>
+    <clipPath id="clip-path">
+      <rect id="蒙版" class="cls-1" width="16" height="16"/>
+    </clipPath>
+    <clipPath id="clip-path-2">
+      <path id="蒙版-2" data-name="蒙版" class="cls-2" d="M5.345,15.68H4.637A4.809,4.809,0,0,1,0,10.726v-3.8H9.982v3.8A4.809,4.809,0,0,1,5.345,15.68Zm5.007-9.7H5.331V0A5.758,5.758,0,0,1,8.885,1.267,3.8,3.8,0,0,1,10.352,4.19V5.98Zm-5.821,0H-.481V4.19A3.806,3.806,0,0,1,.983,1.267,5.74,5.74,0,0,1,4.531,0V5.98Z" transform="translate(0 0)"/>
+    </clipPath>
+  </defs>
+  <g id="鼠标滚轮">
+    <g id="矩形">
+      <rect id="蒙版-3" data-name="蒙版" class="cls-1" width="16" height="16"/>
+      <path id="蒙版-4" data-name="蒙版" class="cls-2" d="M5.881,15.68H5.1A5.035,5.035,0,0,1,0,10.726v-3.8H10.982v3.8A5.035,5.035,0,0,1,5.881,15.68Zm4.97-9.7H5.865V0a5.7,5.7,0,0,1,3.53,1.267A3.812,3.812,0,0,1,10.85,4.19V5.98Zm-5.866,0H0V4.19A3.813,3.813,0,0,1,1.456,1.267,5.693,5.693,0,0,1,4.984,0V5.98Z" transform="translate(2.5 0.219)"/>
+      <g id="矩形-3" data-name="矩形" class="cls-4" transform="translate(2.998 0.219)">
+        <rect id="矩形-4" data-name="矩形" class="cls-5" width="5.4" height="6.676" transform="translate(-0.698 -0.234)"/>
+      </g>
+    </g>
+    <path id="路径" class="cls-6" d="M1.925,5h-.1A1.764,1.764,0,0,1,0,3.286V1.714A1.764,1.764,0,0,1,1.823,0h.1A1.764,1.764,0,0,1,3.748,1.714V3.238A1.771,1.771,0,0,1,1.925,5Z" transform="translate(6.125 3.254)"/>
+    <path id="路径-2" data-name="路径" class="cls-2" d="M1.026,3.717H.972A1.15,1.15,0,0,1,0,2.442V1.274A1.15,1.15,0,0,1,.972,0h.054A1.15,1.15,0,0,1,2,1.274V2.407A1.167,1.167,0,0,1,1.026,3.717Z" transform="translate(7 3.919)"/>
+  </g>
+</svg>

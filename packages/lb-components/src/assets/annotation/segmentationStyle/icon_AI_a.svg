@@ -1,0 +1,30 @@
+<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" width="20" height="20" viewBox="0 0 20 20">
+  <defs>
+    <style>
+      .cls-1 {
+        fill: rgba(0,0,0,0);
+      }
+
+      .cls-2 {
+        fill: none;
+      }
+
+      .cls-3 {
+        clip-path: url(#clip-path);
+      }
+
+      .cls-4 {
+        fill: #6c5fff;
+      }
+    </style>
+    <clipPath id="clip-path">
+      <path id="Clip_2" data-name="Clip 2" class="cls-1" d="M0,0H18V18H0Z"/>
+    </clipPath>
+  </defs>
+  <g id="icon_AI_a" transform="translate(0 1)">
+    <rect id="矩形_190" data-name="矩形 190" class="cls-2" width="20" height="20" transform="translate(0 -1)"/>
+    <g id="jiqiren" class="cls-3" transform="translate(1)">
+      <path id="Fill_1" data-name="Fill 1" class="cls-4" d="M14.726,18H3.272a1.562,1.562,0,0,1-1.157-.528,1.877,1.877,0,0,1-.48-1.273v-.9H.82a.819.819,0,0,1-.586-.27A.908.908,0,0,1,0,14.4V11.7a.863.863,0,0,1,.817-.9h.818A6.04,6.04,0,0,1,7.361,4.5h.823V3.356A1.832,1.832,0,0,1,7.366,1.8,1.912,1.912,0,0,1,7.846.526a1.532,1.532,0,0,1,2.312,0,1.908,1.908,0,0,1,.48,1.273,1.833,1.833,0,0,1-.817,1.558V4.5h.817a6.041,6.041,0,0,1,5.727,6.3h.818a.862.862,0,0,1,.817.9v2.7a.917.917,0,0,1-.234.629.819.819,0,0,1-.586.27h-.817v.9a1.875,1.875,0,0,1-.481,1.273A1.572,1.572,0,0,1,14.726,18ZM12.6,10.8a1.8,1.8,0,1,0,1.8,1.8A1.8,1.8,0,0,0,12.6,10.8Zm-7.2,0a1.8,1.8,0,1,0,1.8,1.8A1.8,1.8,0,0,0,5.4,10.8Z"/>
+    </g>
+  </g>
+</svg>

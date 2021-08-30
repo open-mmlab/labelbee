@@ -1,0 +1,39 @@
+<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" width="20" height="20" viewBox="0 0 20 20">
+  <defs>
+    <style>
+      .cls-1 {
+        fill: none;
+      }
+
+      .cls-2 {
+        clip-path: url(#clip-path);
+      }
+
+      .cls-3 {
+        fill: rgba(0,0,0,0);
+      }
+
+      .cls-4 {
+        clip-path: url(#clip-path-2);
+      }
+
+      .cls-5 {
+        fill: #bbb;
+      }
+    </style>
+    <clipPath id="clip-path">
+      <path id="路径_706" data-name="路径 706" class="cls-1" d="M0,4H20V-16H0Z" transform="translate(0 16)"/>
+    </clipPath>
+    <clipPath id="clip-path-2">
+      <path id="路径_708" data-name="路径 708" class="cls-1" d="M9.019-14.953a6.887,6.887,0,0,1,2.653.525A6.81,6.81,0,0,1,13.843-13a6.656,6.656,0,0,1,1.467,2.125,6.522,6.522,0,0,1,.54,2.608,8.608,8.608,0,0,1-.924,3.831,12.094,12.094,0,0,1-2.038,2.9,16.4,16.4,0,0,1-3.46,2.81.811.811,0,0,1-.823,0,16.4,16.4,0,0,1-3.46-2.81,12.13,12.13,0,0,1-2.038-2.9,8.672,8.672,0,0,1-.92-3.832,6.522,6.522,0,0,1,.54-2.608A6.677,6.677,0,0,1,4.195-13,6.84,6.84,0,0,1,6.365-14.43,6.92,6.92,0,0,1,9.019-14.953Zm0,4.646a2.35,2.35,0,0,0-2.35,2.35,2.35,2.35,0,0,0,2.35,2.35,2.35,2.35,0,0,0,2.35-2.35A2.35,2.35,0,0,0,9.019-10.307Z" transform="translate(-2.188 14.953)"/>
+    </clipPath>
+  </defs>
+  <g id="icon_timePoint" transform="translate(0 16)">
+    <g id="组_1284" data-name="组 1284" class="cls-2" transform="translate(0 -16)">
+      <path id="路径_705" data-name="路径 705" class="cls-3" d="M-5-21H27.5V11.5H-5Z" transform="translate(-1.25 14.75)"/>
+    </g>
+    <g id="组_1285" data-name="组 1285" class="cls-4" transform="translate(3.169 -14.172)">
+      <path id="路径_707" data-name="路径 707" class="cls-5" d="M-2.812-19.953H22.6V8.141H-2.812Z" transform="translate(-3.064 14.077)"/>
+    </g>
+  </g>
+</svg>

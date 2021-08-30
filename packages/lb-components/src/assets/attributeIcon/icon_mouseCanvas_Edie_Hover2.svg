@@ -1,0 +1,30 @@
+<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" width="16" height="16" viewBox="0 0 16 16">
+  <defs>
+    <style>
+      .cls-1 {
+        fill: none;
+      }
+
+      .cls-2 {
+        clip-path: url(#clip-path);
+      }
+
+      .cls-3 {
+        fill: rgba(0,0,0,0);
+      }
+
+      .cls-4 {
+        stroke: #fff;
+      }
+    </style>
+    <clipPath id="clip-path">
+      <path id="路径_614" data-name="路径 614" class="cls-1" d="M0,0H16V-16H0Z"/>
+    </clipPath>
+  </defs>
+  <g id="icon_mouseCanvas_Edie_Hover2" transform="translate(0 16)">
+    <g id="组_1046" data-name="组 1046" class="cls-2">
+      <path id="路径_613" data-name="路径 613" class="cls-3" d="M-5-21H21V5H-5Z"/>
+    </g>
+    <path id="路径_616" data-name="路径 616" class="cls-4" d="M3.621-3.008l2.628-.461a.153.153,0,0,0,.083-.044l6.623-6.623a.156.156,0,0,0,0-.22l-2.6-2.6A.155.155,0,0,0,10.247-13a.155.155,0,0,0-.111.045L3.513-6.331a.159.159,0,0,0-.044.083L3.008-3.62a.524.524,0,0,0,.147.466A.529.529,0,0,0,3.527-3,.632.632,0,0,0,3.621-3.008Z"/>
+  </g>
+</svg>

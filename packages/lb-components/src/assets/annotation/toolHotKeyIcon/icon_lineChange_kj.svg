@@ -1,0 +1,40 @@
+<svg id="icon_lineChange_kj" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" width="16" height="16" viewBox="0 0 16 16">
+  <defs>
+    <style>
+      .cls-1, .cls-2 {
+        fill: none;
+      }
+
+      .cls-2 {
+        stroke: #ccc;
+      }
+
+      .cls-3 {
+        fill: #666;
+      }
+
+      .cls-4 {
+        clip-path: url(#clip-path);
+      }
+
+      .cls-5 {
+        fill: #fff;
+        stroke: #707070;
+      }
+    </style>
+    <clipPath id="clip-path">
+      <path id="路径_399" data-name="路径 399" class="cls-1" d="M2.139-17.789H7.33L8-17.12H3.813l1.172,1.34h-1ZM7.5-18.627H2.306l-.67-.669H5.823l-1.172-1.34h1L7.5-18.627Z" transform="translate(-1.636 20.636)"/>
+    </clipPath>
+  </defs>
+  <path id="路径_599" data-name="路径 599" class="cls-2" d="M9.937,14.746h-7.9V1.654" transform="translate(-0.316)"/>
+  <rect id="矩形备份_10" data-name="矩形备份 10" class="cls-1" width="16" height="16"/>
+  <rect id="矩形备份" class="cls-3" width="1.5" height="10.5" transform="translate(5.04 12.465) rotate(-135)"/>
+  <path id="路径_598" data-name="路径 598" class="cls-2" d="M2.035,1.654H15.557V9.5" transform="translate(-0.815)"/>
+  <g id="组_965" data-name="组 965" transform="translate(8 31)">
+    <g id="组_646" data-name="组 646" class="cls-4" transform="translate(1.636 -20.636)">
+      <path id="路径_398" data-name="路径 398" class="cls-3" d="M-3.364-25.636H6.07v7.927H-3.364Z" transform="translate(1.829 24.101)"/>
+    </g>
+  </g>
+  <rect id="矩形" class="cls-5" width="3" height="3" transform="translate(14.222 5.222) rotate(180)"/>
+  <rect id="矩形备份_14" data-name="矩形备份 14" class="cls-5" width="3" height="3" transform="translate(5.222 14.222) rotate(180)"/>
+</svg>

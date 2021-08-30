@@ -1,0 +1,18 @@
+<svg id="icon_forward_kj" xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 16 16">
+  <defs>
+    <style>
+      .cls-1 {
+        fill: none;
+      }
+
+      .cls-2 {
+        fill: #666;
+      }
+    </style>
+  </defs>
+  <rect id="矩形备份_10" data-name="矩形备份 10" class="cls-1" width="16" height="16"/>
+  <g id="组_1225" data-name="组 1225" transform="translate(-0.347 0.145)">
+    <path id="路径" class="cls-2" d="M6,3.807.505.058A.318.318,0,0,0,0,.27v7.5a.318.318,0,0,0,.505.211L6,4.229A.248.248,0,0,0,6,3.807Z" transform="translate(2.348 3.855)"/>
+    <path id="路径-2" data-name="路径" class="cls-2" d="M6,3.807.505.058A.318.318,0,0,0,0,.27v7.5a.318.318,0,0,0,.505.211L6,4.229A.248.248,0,0,0,6,3.807Z" transform="translate(7.824 3.855)"/>
+  </g>
+</svg>

@@ -1,0 +1,17 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 16 16">
+  <defs>
+    <style>
+      .cls-1 {
+        opacity: 0;
+      }
+
+      .cls-2 {
+        fill: #666;
+      }
+    </style>
+  </defs>
+  <g id="icon_next_kj" transform="translate(0 -0.054)">
+    <rect id="矩形" class="cls-1" width="16" height="16" transform="translate(0 0.054)"/>
+    <path id="路径" class="cls-2" d="M8.268,6.632.7.1A.428.428,0,0,0,0,.47V13.53a.428.428,0,0,0,.7.368l7.572-6.53A.5.5,0,0,0,8.268,6.632Z" transform="translate(1 12.485) rotate(-90)"/>
+  </g>
+</svg>

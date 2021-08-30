@@ -1,0 +1,39 @@
+<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" width="16" height="16" viewBox="0 0 16 16">
+  <defs>
+    <style>
+      .cls-1, .cls-2 {
+        fill: none;
+      }
+
+      .cls-1 {
+        clip-rule: evenodd;
+      }
+
+      .cls-3 {
+        clip-path: url(#clip-path);
+      }
+
+      .cls-4 {
+        clip-path: url(#clip-path-2);
+      }
+
+      .cls-5 {
+        fill: #666;
+      }
+    </style>
+    <clipPath id="clip-path">
+      <path id="路径_274" data-name="路径 274" class="cls-1" d="M1.732-140.268a5.914,5.914,0,0,1,8.364,0,5.916,5.916,0,0,1,.581,7.69L14-129.255,12.745-128l-3.323-3.323a5.916,5.916,0,0,1-7.69-.581A5.914,5.914,0,0,1,1.732-140.268Zm7.528.836a4.732,4.732,0,0,0-6.691,0,4.732,4.732,0,0,0,0,6.691,4.732,4.732,0,0,0,6.691,0A4.732,4.732,0,0,0,9.26-139.431Z" transform="translate(0 142)"/>
+    </clipPath>
+    <clipPath id="clip-path-2">
+      <path id="路径_273" data-name="路径 273" class="cls-2" d="M-29-160.285H-9.285V-180H-29Z" transform="translate(29 180)"/>
+    </clipPath>
+  </defs>
+  <g id="icon_loupe_kj" transform="translate(4 144)">
+    <rect id="矩形_110" data-name="矩形 110" class="cls-2" width="16" height="16" transform="translate(-4 -144)"/>
+    <g id="组_470" data-name="组 470" class="cls-3" transform="translate(-3 -143)">
+      <g id="组_469" data-name="组 469" class="cls-4" transform="translate(-2.859 -3.746)">
+        <path id="路径_272" data-name="路径 272" class="cls-5" d="M-5-147H9.986v14.986H-5Z" transform="translate(7.366 150.253)"/>
+      </g>
+    </g>
+  </g>
+</svg>

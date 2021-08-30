@@ -1,0 +1,20 @@
+<svg id="icon_speed_kj" xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 16 16">
+  <defs>
+    <style>
+      .cls-1 {
+        fill: none;
+      }
+
+      .cls-2 {
+        fill: #666;
+      }
+    </style>
+  </defs>
+  <rect id="矩形备份_10" data-name="矩形备份 10" class="cls-1" width="16" height="16"/>
+  <g id="组_1223" data-name="组 1223" transform="translate(-0.118 0.286)">
+    <rect id="矩形_402" data-name="矩形 402" class="cls-2" width="1.5" height="6" rx="0.75" transform="translate(8.118 12.043) rotate(90)"/>
+    <rect id="矩形_403" data-name="矩形 403" class="cls-2" width="1.5" height="4" rx="0.75" transform="translate(6.118 9.043) rotate(90)"/>
+    <rect id="矩形_404" data-name="矩形 404" class="cls-2" width="1.5" height="3" rx="0.75" transform="translate(5.118 6.043) rotate(90)"/>
+    <path id="倍速" class="cls-2" d="M219.687,4.153H217.4L218.806.2a.267.267,0,0,0,.017-.084.278.278,0,0,0-.289-.269h-2.872a.28.28,0,0,0-.269.186l-2.312,6.454a.267.267,0,0,0-.017.084.278.278,0,0,0,.289.269h2.552l-.541,4.539c0,.008-.008.02-.008.029a.278.278,0,0,0,.289.269.285.285,0,0,0,.253-.157l4.042-6.986a.248.248,0,0,0,.029-.111.272.272,0,0,0-.281-.273Z" transform="translate(-206.065 1.862)"/>
+  </g>
+</svg>

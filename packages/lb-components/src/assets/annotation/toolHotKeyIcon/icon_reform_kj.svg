@@ -1,0 +1,15 @@
+<svg id="icon_reform_kj" xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 16 16">
+  <defs>
+    <style>
+      .cls-1 {
+        opacity: 0;
+      }
+
+      .cls-2 {
+        fill: #666;
+      }
+    </style>
+  </defs>
+  <rect id="矩形" class="cls-1" width="16" height="15.963"/>
+  <path id="路径" class="cls-2" d="M12.057,3.148C8.654-.415,4.678-.96.279,1.546A.544.544,0,0,0,0,2.027a.578.578,0,0,0,.283.493.548.548,0,0,0,.557.005C4.822.257,8.263.733,11.318,3.967l-2.4,2.657,5.072.065-.072-5.6Z" transform="translate(0.094 11.029) rotate(-42)"/>
+</svg>

@@ -1,0 +1,28 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 16 16">
+  <defs>
+    <style>
+      .cls-1 {
+        opacity: 0;
+      }
+
+      .cls-2, .cls-4 {
+        fill: none;
+      }
+
+      .cls-2 {
+        stroke: #707070;
+      }
+
+      .cls-3 {
+        stroke: none;
+      }
+    </style>
+  </defs>
+  <g id="icon_circular_kj" transform="translate(-1 -2.005)">
+    <rect id="矩形" class="cls-1" width="16" height="16" transform="translate(1 2.005)"/>
+    <g id="椭圆_6" data-name="椭圆 6" class="cls-2" transform="translate(2 3.021)">
+      <circle class="cls-3" cx="7" cy="7" r="7"/>
+      <circle class="cls-4" cx="7" cy="7" r="6.5"/>
+    </g>
+  </g>
+</svg>

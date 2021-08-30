@@ -1,0 +1,22 @@
+<svg id="icon_pointActive_kj" xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 16 16">
+  <defs>
+    <style>
+      .cls-1 {
+        opacity: 0;
+      }
+
+      .cls-2 {
+        fill: #666;
+      }
+    </style>
+  </defs>
+  <rect id="icon_point_active" class="cls-1" width="16" height="16"/>
+  <g id="编组_14" data-name="编组 14" transform="translate(0.797 0.797)">
+    <rect id="矩形" class="cls-2" width="1.794" height="3.588" transform="translate(6.306)"/>
+    <rect id="矩形备份" class="cls-2" width="1.794" height="3.588" transform="translate(6.306 10.818)"/>
+    <rect id="矩形备份_12" data-name="矩形备份 12" class="cls-2" width="1.794" height="3.588" transform="translate(10.818 8.173) rotate(-90)"/>
+    <rect id="矩形备份_13" data-name="矩形备份 13" class="cls-2" width="1.794" height="3.588" transform="translate(0 8.173) rotate(-90)"/>
+    <path id="减去_3" data-name="减去 3" class="cls-2" d="M1506.068,9508.987a2.393,2.393,0,1,1,2.391-2.394l-1.919,0v2.345A2.436,2.436,0,0,1,1506.068,9508.987Z" transform="translate(-1498.865 -9499.393)"/>
+  </g>
+  <path id="三角形备份_4" data-name="三角形备份 4" class="cls-2" d="M2.628,0,5.256,5.256,2.632,4.129,0,5.256Z" transform="translate(7.139 9.595) rotate(-30)"/>
+</svg>

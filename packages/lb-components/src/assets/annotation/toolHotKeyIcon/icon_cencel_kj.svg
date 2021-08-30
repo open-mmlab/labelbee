@@ -1,0 +1,17 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 16 16">
+  <defs>
+    <style>
+      .cls-1 {
+        opacity: 0;
+      }
+
+      .cls-2 {
+        fill: #666;
+      }
+    </style>
+  </defs>
+  <g id="icon_cencel_kj" transform="translate(0.494)">
+    <rect id="矩形" class="cls-1" width="16" height="15.963" transform="translate(-0.494)"/>
+    <path id="路径" class="cls-2" d="M12.057,3.54C8.654,7.1,4.678,7.648.279,5.143A.544.544,0,0,1,0,4.662a.578.578,0,0,1,.283-.493A.548.548,0,0,1,.84,4.163C4.822,6.431,8.263,5.956,11.318,2.722L8.918.065,13.99,0l-.072,5.6Z" transform="translate(10.937 16) rotate(-138)"/>
+  </g>
+</svg>

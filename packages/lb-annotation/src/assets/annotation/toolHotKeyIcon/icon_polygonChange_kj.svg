@@ -1,0 +1,33 @@
+<svg id="icon_polygonChange_kj" xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 16 16">
+  <defs>
+    <style>
+      .cls-1 {
+        fill: #ccc;
+      }
+
+      .cls-2 {
+        fill: none;
+      }
+
+      .cls-3 {
+        fill: #fff;
+        stroke: #666;
+        stroke-miterlimit: 10;
+      }
+
+      .cls-4, .cls-5 {
+        fill: #666;
+      }
+
+      .cls-4 {
+        stroke: rgba(0,0,0,0);
+      }
+    </style>
+  </defs>
+  <path id="减去_12" data-name="减去 12" class="cls-1" d="M18493,2716.574l0,0,8.451-8.572.242,4.933h-3.889v3.513l-4.8.129Z" transform="translate(-18489.408 -2704.132)"/>
+  <rect id="矩形备份_10" data-name="矩形备份 10" class="cls-2" width="16" height="16"/>
+  <rect id="矩形备份_14" data-name="矩形备份 14" class="cls-3" width="3" height="3" transform="translate(5.222 14.222) rotate(180)"/>
+  <rect id="矩形备份_14-2" data-name="矩形备份 14" class="cls-3" width="3" height="3" transform="translate(14.222 5.222) rotate(180)"/>
+  <path id="矩形备份" class="cls-4" d="M-.011-.213h1.5L1.5,8.8H0Z" transform="translate(5.747 11.758) rotate(-135)"/>
+  <path id="减去_11" data-name="减去 11" class="cls-5" d="M18496.65,2716.5H18493V2715h3.65v1.5Zm5.1-4.7h-1.5V2708h1.5v3.8Z" transform="translate(-18488.25 -2703)"/>
+</svg>

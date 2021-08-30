@@ -1,0 +1,19 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 16 16">
+  <defs>
+    <style>
+      .cls-1 {
+        fill: #666;
+      }
+
+      .cls-2 {
+        fill: none;
+      }
+    </style>
+  </defs>
+  <g id="icon_frameActive_kj" transform="translate(1 17)">
+    <rect id="矩形_120" data-name="矩形 120" class="cls-2" width="16" height="16" transform="translate(-1 -17)"/>
+    <rect id="矩形_93" data-name="矩形 93" class="cls-2" width="14" height="14" transform="translate(0 -16)"/>
+    <path id="减去_2" data-name="减去 2" class="cls-1" d="M1768.5,9503H1765v-3.5h.875v-7H1765V9489h3.5v.873l7,0V9489h3.5v3.5h-.875v4.5h-1.75v-4.5h-.873v-.873l-7,0v.875h-.873v7h.873v.873h4.5v1.751h-4.5V9503Z" transform="translate(-1765 -9505)"/>
+    <path id="三角形备份_4" data-name="三角形备份 4" class="cls-1" d="M2.628,0,5.256,5.256,2.632,4.129,0,5.256Z" transform="translate(7.667 -6.406) rotate(-30)"/>
+  </g>
+</svg>

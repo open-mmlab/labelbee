@@ -1,0 +1,21 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 16 16">
+  <defs>
+    <style>
+      .cls-1 {
+        fill: none;
+      }
+
+      .cls-2 {
+        fill: #fff;
+      }
+    </style>
+  </defs>
+  <g id="icon_adapt" transform="translate(-1021.825 -996)">
+    <rect id="矩形_200" data-name="矩形 200" class="cls-1" width="16" height="16" transform="translate(1021.825 996)"/>
+    <rect id="矩形_191" data-name="矩形 191" class="cls-2" width="8" height="7" transform="translate(1025.825 1000.167)"/>
+    <path id="联合_5" data-name="联合 5" class="cls-2" d="M3,4V1H0V0H4V4Z" transform="translate(1033.825 997)"/>
+    <path id="联合_7" data-name="联合 7" class="cls-2" d="M0,4V3H3V0H4V4Z" transform="translate(1025.825 1001.001) rotate(180)"/>
+    <path id="联合_8" data-name="联合 8" class="cls-2" d="M3,4V1H0V0H4V4Z" transform="translate(1025.825 1010.335) rotate(180)"/>
+    <path id="联合_6" data-name="联合 6" class="cls-2" d="M0,4V0H4V1H1V4Z" transform="translate(1037.824 1010.335) rotate(180)"/>
+  </g>
+</svg>

@@ -1,0 +1,36 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="16.707" height="16" viewBox="0 0 16.707 16">
+  <defs>
+    <style>
+      .cls-1, .cls-3, .cls-4 {
+        fill: #666;
+      }
+
+      .cls-1, .cls-4 {
+        stroke: rgba(0,0,0,0);
+      }
+
+      .cls-1, .cls-3 {
+        stroke-miterlimit: 10;
+      }
+
+      .cls-2 {
+        fill: none;
+      }
+
+      .cls-3 {
+        stroke: #666;
+      }
+    </style>
+  </defs>
+  <g id="icon_polygonNull_kj" transform="translate(0 -2)">
+    <g id="icon_line" transform="translate(10)">
+      <rect id="矩形备份" class="cls-1" width="1.499" height="15.5" transform="translate(-6.021 6.04) rotate(-45)"/>
+    </g>
+    <g id="icon_polygonNull_kj-2" data-name="icon_polygonNull_kj" transform="translate(0 2)">
+      <rect id="矩形备份_10" data-name="矩形备份 10" class="cls-2" width="16" height="16"/>
+      <rect id="矩形备份_14" data-name="矩形备份 14" class="cls-3" width="3" height="3" transform="translate(5.222 14.222) rotate(180)"/>
+      <rect id="矩形备份_14-2" data-name="矩形备份 14" class="cls-3" width="3" height="3" transform="translate(14.222 5.222) rotate(180)"/>
+      <path id="减去_10" data-name="减去 10" class="cls-4" d="M18500.451,2801h-6v-1.5h4.514l1.488,1.487,0,.012Zm-5.148-1.584h0l-1.059-1.058,1.783-1.789,1.061,1.059-1.785,1.788Zm7.895-2.75,0,0-1.5-1.5V2792.5h1.5v4.166Zm-2.578-2.579h0l-1.061-1.06,1.047-1.051,1.064,1.059-1.051,1.052Z" transform="translate(-18489.699 -2787.496)"/>
+    </g>
+  </g>
+</svg>

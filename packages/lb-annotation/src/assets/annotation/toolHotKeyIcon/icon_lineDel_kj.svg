@@ -1,0 +1,42 @@
+<svg id="icon_lineDel_kj" xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 16 16">
+  <defs>
+    <style>
+      .cls-1, .cls-2 {
+        fill: none;
+      }
+
+      .cls-1 {
+        stroke: #ccc;
+      }
+
+      .cls-3 {
+        fill: #fff;
+      }
+
+      .cls-3, .cls-4 {
+        stroke: #666;
+        stroke-miterlimit: 10;
+      }
+
+      .cls-4, .cls-5 {
+        fill: #666;
+      }
+
+      .cls-5 {
+        stroke: rgba(0,0,0,0);
+      }
+
+      .cls-6 {
+        stroke: none;
+      }
+    </style>
+  </defs>
+  <g id="矩形_273" data-name="矩形 273" class="cls-1" transform="translate(1.221 1.22)">
+    <rect class="cls-6" width="14" height="14"/>
+    <rect class="cls-2" x="0.5" y="0.5" width="13" height="13"/>
+  </g>
+  <rect id="矩形备份_10" data-name="矩形备份 10" class="cls-2" width="16" height="16"/>
+  <rect id="矩形备份_14" data-name="矩形备份 14" class="cls-3" width="3" height="3" transform="translate(5.222 14.222) rotate(180)"/>
+  <rect id="矩形备份_14-2" data-name="矩形备份 14" class="cls-4" width="3" height="3" transform="translate(14.222 5.222) rotate(180)"/>
+  <path id="矩形备份" class="cls-5" d="M-.011-.213h1.5L1.5,8.8H0Z" transform="translate(5.747 11.758) rotate(-135)"/>
+</svg>

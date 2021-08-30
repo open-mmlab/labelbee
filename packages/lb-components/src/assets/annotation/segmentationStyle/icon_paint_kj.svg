@@ -1,0 +1,25 @@
+<svg id="icon_paint_kj" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" width="16" height="16" viewBox="0 0 16 16">
+  <defs>
+    <style>
+      .cls-1 {
+        fill: none;
+      }
+
+      .cls-2 {
+        clip-path: url(#clip-path);
+      }
+
+      .cls-3 {
+        fill: #666;
+      }
+    </style>
+    <clipPath id="clip-path">
+      <path id="Clip_2" data-name="Clip 2" class="cls-1" d="M0,0H15.928V13.367H0Z" transform="translate(0)"/>
+    </clipPath>
+  </defs>
+  <rect id="矩形_94" data-name="矩形 94" class="cls-1" width="16" height="16"/>
+  <path id="Clip_2-2" data-name="Clip 2" class="cls-1" d="M0,0H15.928V13.367H0Z" transform="translate(0 2.241)"/>
+  <g id="dianzibiaoge-youqitonggongju" class="cls-2" transform="translate(0 1.12)">
+    <path id="Fill_1" data-name="Fill 1" class="cls-3" d="M6.089,13.365h0L0,7.224,7.167,0l6.087,6.14L6.089,13.364ZM7.165,2.144,2.434,6.916a3.526,3.526,0,0,0,2.218.749A4.66,4.66,0,0,0,5.3,7.618a3.789,3.789,0,0,0,1.9-.793,4.216,4.216,0,0,1,1.745-.8,4.132,4.132,0,0,1,2.163.091Zm6.167,10.921a1.58,1.58,0,0,1-1.517-1.632,5.783,5.783,0,0,1,1.517-2.824,5.79,5.79,0,0,1,1.517,2.824A1.579,1.579,0,0,1,13.333,13.064Z" transform="translate(0 0.002)"/>
+  </g>
+</svg>

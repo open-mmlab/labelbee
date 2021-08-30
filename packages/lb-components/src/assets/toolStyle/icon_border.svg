@@ -1,0 +1,31 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="10" height="10" viewBox="0 0 10 10">
+  <defs>
+    <style>
+      .cls-1, .cls-2, .cls-4 {
+        fill: none;
+      }
+
+      .cls-1 {
+        stroke: #707070;
+      }
+
+      .cls-3, .cls-5 {
+        stroke: none;
+      }
+
+      .cls-5 {
+        fill: #ccc;
+      }
+    </style>
+  </defs>
+  <g id="icon_border" transform="translate(0 -1.609)">
+    <g id="矩形_162" data-name="矩形 162" class="cls-1" transform="translate(0 1.609)">
+      <rect class="cls-3" width="10" height="10"/>
+      <rect class="cls-4" x="0.5" y="0.5" width="9" height="9"/>
+    </g>
+    <g id="联合_2" data-name="联合 2" class="cls-2" transform="translate(10987 5359.61)">
+      <path class="cls-3" d="M-10982.4-5349v-3.6h-3.6v-.8h3.6v-3.6h.8v3.6h3.6v.8h-3.6v3.6Z"/>
+      <path class="cls-5" d="M -10981.6005859375 -5349 L -10982.3994140625 -5349 L -10982.3994140625 -5352.6005859375 L -10986.0009765625 -5352.6005859375 L -10986.0009765625 -5353.400390625 L -10982.3994140625 -5353.400390625 L -10982.3994140625 -5357.0009765625 L -10981.6005859375 -5357.0009765625 L -10981.6005859375 -5353.400390625 L -10977.9990234375 -5353.400390625 L -10977.9990234375 -5352.6005859375 L -10981.6005859375 -5352.6005859375 L -10981.6005859375 -5349 Z"/>
+    </g>
+  </g>
+</svg>

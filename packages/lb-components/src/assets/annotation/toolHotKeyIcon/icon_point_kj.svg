@@ -1,0 +1,21 @@
+<svg id="icon_point_kj" xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 16 16">
+  <defs>
+    <style>
+      .cls-1 {
+        opacity: 0;
+      }
+
+      .cls-2 {
+        fill: #666;
+      }
+    </style>
+  </defs>
+  <rect id="icon_point_active" class="cls-1" width="16" height="16"/>
+  <g id="编组_14" data-name="编组 14" transform="translate(0.797 0.797)">
+    <rect id="矩形" class="cls-2" width="1.794" height="3.588" transform="translate(6.306)"/>
+    <rect id="矩形备份" class="cls-2" width="1.794" height="3.588" transform="translate(6.306 10.818)"/>
+    <rect id="矩形备份_12" data-name="矩形备份 12" class="cls-2" width="1.794" height="3.588" transform="translate(10.818 8.173) rotate(-90)"/>
+    <rect id="矩形备份_13" data-name="矩形备份 13" class="cls-2" width="1.794" height="3.588" transform="translate(0 8.173) rotate(-90)"/>
+    <circle id="椭圆形" class="cls-2" cx="2.392" cy="2.392" r="2.392" transform="translate(4.811 4.811)"/>
+  </g>
+</svg>

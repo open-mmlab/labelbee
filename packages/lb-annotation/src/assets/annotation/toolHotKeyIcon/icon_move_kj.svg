@@ -1,0 +1,38 @@
+<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" width="16" height="16" viewBox="0 0 16 16">
+  <defs>
+    <style>
+      .cls-1, .cls-2 {
+        fill: none;
+      }
+
+      .cls-1 {
+        clip-rule: evenodd;
+      }
+
+      .cls-3 {
+        clip-path: url(#clip-path);
+      }
+
+      .cls-4 {
+        clip-path: url(#clip-path-2);
+      }
+
+      .cls-5 {
+        fill: #666;
+      }
+    </style>
+    <clipPath id="clip-path">
+      <path id="路径_277" data-name="路径 277" class="cls-1" d="M6.857-116.857h-3.3v1.4L0-118l3.556-2.54v1.4h3.3v-3.3H9.143v3.3h3.3v-1.4L16-118l-3.556,2.54v-1.4h-3.3v3.3h1.4L8-110l-2.54-3.556h1.4ZM8-126l2.54,3.556H5.46Z" transform="translate(0 126)"/>
+    </clipPath>
+    <clipPath id="clip-path-2">
+      <path id="路径_276" data-name="路径 276" class="cls-2" d="M-37-137.6h25.4V-163H-37Z" transform="translate(37 163)"/>
+    </clipPath>
+  </defs>
+  <g id="icon_move_kj" transform="translate(1 128)">
+    <g id="组_475" data-name="组 475" class="cls-3" transform="translate(-1 -128)">
+      <g id="组_474" data-name="组 474" class="cls-4" transform="translate(-4.698 -4.698)">
+        <path id="路径_275" data-name="路径 275" class="cls-5" d="M-5-131H12.27v17.27H-5Z" transform="translate(9.063 135.064)"/>
+      </g>
+    </g>
+  </g>
+</svg>

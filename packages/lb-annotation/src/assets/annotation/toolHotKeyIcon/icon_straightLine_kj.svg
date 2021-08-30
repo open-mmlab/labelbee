@@ -1,0 +1,21 @@
+<svg id="icon_straightLine_kj" xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 16 16">
+  <defs>
+    <style>
+      .cls-1 {
+        fill: none;
+      }
+
+      .cls-2 {
+        fill: #666;
+        stroke: rgba(0,0,0,0);
+        stroke-miterlimit: 10;
+      }
+    </style>
+  </defs>
+  <rect id="矩形备份_10" data-name="矩形备份 10" class="cls-1" width="16" height="16"/>
+  <g id="组_955" data-name="组 955" transform="translate(-0.721)">
+    <rect id="矩形" class="cls-2" width="3" height="3" transform="translate(12.721 9.721) rotate(-90)"/>
+    <rect id="矩形备份_14" data-name="矩形备份 14" class="cls-2" width="3" height="3" transform="translate(1.721 9.723) rotate(-90)"/>
+    <rect id="矩形备份" class="cls-2" width="1.5" height="10.5" transform="translate(3.471 9.002) rotate(-90)"/>
+  </g>
+</svg>

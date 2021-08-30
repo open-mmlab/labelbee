@@ -1,0 +1,20 @@
+<svg id="icon_lineNull_kj" xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 16 16">
+  <defs>
+    <style>
+      .cls-1 {
+        fill: none;
+      }
+
+      .cls-2 {
+        fill: #666;
+        stroke: rgba(0,0,0,0);
+        stroke-miterlimit: 10;
+      }
+    </style>
+  </defs>
+  <rect id="矩形备份_10" data-name="矩形备份 10" class="cls-1" width="16" height="16"/>
+  <rect id="矩形" class="cls-2" width="3" height="3" transform="translate(14.222 5.222) rotate(180)"/>
+  <rect id="矩形备份_14" data-name="矩形备份 14" class="cls-2" width="3" height="3" transform="translate(5.222 14.222) rotate(180)"/>
+  <path id="减去_6" data-name="减去 6" class="cls-2" d="M14710.063,1373.254h0l-1.063-1.059,2.184-2.182,1.062,1.061-2.18,2.181Zm5.009-5.009h0l-1.061-1.06,2.417-2.415,1.06,1.06-2.414,2.415Z" transform="translate(-14705.021 -1360.788)"/>
+  <rect id="矩形备份" class="cls-2" width="1.499" height="7.5" transform="translate(4.979 6.04) rotate(-45)"/>
+</svg>

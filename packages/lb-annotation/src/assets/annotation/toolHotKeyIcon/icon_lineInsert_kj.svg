@@ -1,0 +1,27 @@
+<svg id="icon_lineInsert_kj" xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 16 16">
+  <defs>
+    <style>
+      .cls-1, .cls-2 {
+        fill: none;
+      }
+
+      .cls-2 {
+        stroke: #666;
+        stroke-miterlimit: 10;
+      }
+
+      .cls-3, .cls-4 {
+        fill: #666;
+      }
+
+      .cls-4 {
+        stroke: rgba(0,0,0,0);
+      }
+    </style>
+  </defs>
+  <rect id="矩形备份_10" data-name="矩形备份 10" class="cls-1" width="16" height="16"/>
+  <rect id="矩形" class="cls-2" width="3" height="3" transform="translate(14.222 5.222) rotate(180)"/>
+  <rect id="矩形备份_14" data-name="矩形备份 14" class="cls-2" width="3" height="3" transform="translate(5.222 14.222) rotate(180)"/>
+  <rect id="矩形备份_14-2" data-name="矩形备份 14" class="cls-3" width="4" height="4" transform="translate(10.222 10.222) rotate(180)"/>
+  <path id="矩形备份" class="cls-4" d="M-.011-.213h1.5L1.5,8.8H0Z" transform="translate(5.747 11.758) rotate(-135)"/>
+</svg>
