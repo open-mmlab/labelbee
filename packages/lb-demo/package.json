@@ -1,6 +1,7 @@
 {
   "name": "lb-demo",
   "version": "1.0.0",
+  "private": true,
   "dependencies": {
     "@sensetime/label-bee": "^1.1.0-alpha.0",
     "@testing-library/jest-dom": "^5.11.4",
