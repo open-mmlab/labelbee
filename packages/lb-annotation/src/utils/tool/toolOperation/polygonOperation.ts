@@ -486,7 +486,7 @@ class PolygonOperation extends BasicToolOperation {
       return;
     }
 
-    let lowerLimitPointNum = this.config.lowerLimitPointNum;
+    let { lowerLimitPointNum } = this.config;
 
     if (lowerLimitPointNum < 3) {
       lowerLimitPointNum = 3;
@@ -945,7 +945,7 @@ class PolygonOperation extends BasicToolOperation {
       }
 
       case 2: {
-        this.rightMouseUp(e);
+        this.rightMouseUp();
 
         break;
       }

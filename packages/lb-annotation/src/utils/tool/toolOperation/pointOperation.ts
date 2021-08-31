@@ -254,7 +254,7 @@ class PointOperation extends BasicToolOperation {
       return true;
     }
     if (e.button === 2) {
-      this.rightMouseUp(e);
+      this.rightMouseUp();
     }
     // 拖拽停止
     if (this.dragStatus === EDragStatus.Move) {
