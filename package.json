@@ -3,9 +3,9 @@
   "private": true,
   "version": "1.0.0",
   "scripts": {
+    "start": "lerna run --parallel --stream start",
     "dev": "lerna run --parallel --stream dev",
     "bootstrap": "lerna bootstrap",
-    "start:demo": "node packages/bee-sdk-demo/scripts/start.js",
     "clean": "lerna clean && rm -rf ./node_modules/ && rm -rf ./packages/**/node_modules"
   },
   "description": "",
