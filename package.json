@@ -1,6 +1,9 @@
 {
   "name": "beehive",
   "private": true,
+  "workspaces": [
+    "packages/*"
+  ],
   "version": "1.0.0",
   "scripts": {
     "start": "lerna run --parallel --stream start",

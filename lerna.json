@@ -1,9 +1,14 @@
 {
-  "packages": [
-    "packages/*"
-  ],
+  "packages": ["packages/*"],
   "version": "independent",
   "publishConfig": {
     "access": "public"
-  }
+  },
+  "useWorkspaces": true,
+  "publish": {
+    "ignoreChanges": ["ignored-file", "*.md"],
+    "message": "chore(release): publish %s",
+    "registry": "https://npm-registry.sensetime.com"
+  },
+  "npmClient": "yarn"
 }

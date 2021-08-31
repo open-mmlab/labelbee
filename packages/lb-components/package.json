@@ -18,7 +18,8 @@
     "commit": "git-cz",
     "lint": "eslint 'src/**/*.{ts,tsx,js,jsx}'",
     "lint:fix": "eslint 'src/**/*.{ts,tsx,js,jsx}' --fix",
-    "commitmsg": "commitlint -e $GIT_PARAMS"
+    "commitmsg": "commitlint -e $GIT_PARAMS",
+    "prepublishOnly": "npm run build"
   },
   "author": "luozefeng",
   "contributors": [
@@ -27,12 +28,15 @@
     "chenlu",
     "lihuaqi"
   ],
-  "keywords": ["annotation", "canvas"],
+  "keywords": [
+    "annotation",
+    "canvas"
+  ],
   "license": "Apache-2.0",
   "homepage": "https://gitlab.bj.sensetime.com/fdc/frontend/label-bee",
   "bugs": {
-    "url" : "https://gitlab.bj.sensetime.com/fdc/frontend/label-bee/issues",
-    "email" : "luozefeng@sensetime.com"
+    "url": "https://gitlab.bj.sensetime.com/fdc/frontend/label-bee/issues",
+    "email": "luozefeng@sensetime.com"
   },
   "dependencies": {
     "@ant-design/icons": "^4.6.2",
@@ -78,7 +82,6 @@
     "husky": "^7.0.1",
     "node-sass": "^5.0.0",
     "prettier": "^2.3.2",
-
     "typescript": "^4.2.3"
   },
   "config": {
