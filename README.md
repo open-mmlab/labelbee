@@ -24,6 +24,7 @@ Label-Bee 前端技术才有 Typescript 为基础的，基础组件基于 [antd]
 
 ```bash
 git clone git@gitlab.bj.sensetime.com:label-bee/beehive.git # 拉取项目
+cd beehive
 npm i && npm run bootstrap
 npm run start
 ```
