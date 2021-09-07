@@ -3,12 +3,12 @@
  * @author lijingchi <lijingchi1@sensetime.com>
  */
 
+import _ from 'lodash';
 import { ELineColor, EDependPattern, ELineTypes, ETextType } from '@/constant/tool';
 import ActionsHistory from '@/utils/ActionsHistory';
 import uuid from '@/utils/uuid';
 import { isInRange } from '@/utils/math';
 import EKeyCode from '@/constant/keyCode';
-import _ from 'lodash';
 import { BasicToolOperation, IBasicToolOperationProps } from './basicToolOperation';
 import LineToolUtils from '../LineToolUtils';
 import { getTextAttribute, textAttributeValidate } from '../attribute';

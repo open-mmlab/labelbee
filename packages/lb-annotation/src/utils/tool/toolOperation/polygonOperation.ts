@@ -1063,7 +1063,7 @@ class PolygonOperation extends BasicToolOperation {
           return;
         }
         const { textAttribute, attribute } = polygon;
-        const toolColor = this.getColor(polygon.attribute);
+        const toolColor = this.getColor(attribute);
         const toolData = StyleUtil.getStrokeAndFill(toolColor, polygon.valid);
         const transformPointList = AxisUtils.changePointListByZoom(polygon.pointList || [], this.zoom, this.currentPos);
 
@@ -1077,7 +1077,7 @@ class PolygonOperation extends BasicToolOperation {
           lineType: this.config?.lineType,
         });
 
-        let showText = `${AttributeUtil.getAttributeShowText(polygon.attribute, this.config.attributeList) ?? ''}`;
+        let showText = `${AttributeUtil.getAttributeShowText(attribute, this.config.attributeList) ?? ''}`;
         if (this.config?.isShowOrder && polygon?.order > 0) {
           showText = `${polygon.order} ${showText}`;
         }
