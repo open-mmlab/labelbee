@@ -5,7 +5,7 @@ const ZOOM_LEVEL: number[] = [1, 5, 10, 20, 30, 50, 80, 100].concat(
   Array.from({ length: 9 }).map((i, index) => (index + 2) * 100),
 );
 
-export default class ZoomUtil {
+export default class ZoomUtils {
   // 阶级缩放
   public static zoomChanged = (zoom: number, isZoomIn: boolean, growthMode = EGrowthMode.Linear) => {
     switch (growthMode) {

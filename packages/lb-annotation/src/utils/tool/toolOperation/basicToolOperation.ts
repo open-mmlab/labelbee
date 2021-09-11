@@ -8,8 +8,8 @@ import { calcViewportBoundaries, getRotate, jsonParser } from '../common';
 import DblClickEventListener from '../DblClickEventListener';
 import DrawUtils from '../DrawUtils';
 import { getBasicRecPos, getInitImgPos } from '../imgPos';
-import RenderDomUtil from '../RenderDomUtil';
-import ZoomUtil from '../ZoomUtil';
+import RenderDomUtils from '../RenderDomUtils';
+import ZoomUtils from '../ZoomUtils';
 import EventListener from './eventListener';
 import locale from '../../../locales';
 import { EMessage } from '../../../locales/constants';
@@ -709,7 +709,7 @@ class BasicToolOperation extends EventListener {
       return;
     }
 
-    const pos = ZoomUtil.wheelChangePos(imgNode, coord, operator, currentPos, {
+    const pos = ZoomUtils.wheelChangePos(imgNode, coord, operator, currentPos, {
       zoom: newZoom || this.zoom,
       innerZoom: this.innerZoom,
       basicZoom: this.basicZoom,
@@ -736,7 +736,7 @@ class BasicToolOperation extends EventListener {
    * @param isZoomIn 是否为放大
    */
   public zoomChanged = (isZoomIn: boolean, growthMode = EGrowthMode.Linear) => {
-    const newZoom = ZoomUtil.zoomChanged(this.zoom, isZoomIn, growthMode);
+    const newZoom = ZoomUtils.zoomChanged(this.zoom, isZoomIn, growthMode);
     this.wheelChangePos(this.getGetCenterCoordinate(), newZoom > this.zoom ? 1 : -1, newZoom);
     this.render();
   };
@@ -874,7 +874,7 @@ class BasicToolOperation extends EventListener {
       return;
     }
 
-    this._invalidDOM = RenderDomUtil.renderInvalidPage(this.canvas, this.container, this.lang);
+    this._invalidDOM = RenderDomUtils.renderInvalidPage(this.canvas, this.container, this.lang);
   }
 
   public render() {

@@ -16,11 +16,11 @@ import { isInPolygon, createSmoothCurvePoints, createSmoothCurvePointsFromPointL
 import { calcViewportBoundaries } from '../common';
 import CommonToolUtils from '../CommonToolUtils';
 import { getFootOfPerpendicular } from '../math';
-import CanvasUtil from '../CanvasUtil';
+import CanvasUtils from '../CanvasUtils';
 import DrawUtils from '../DrawUtils';
 import Dependency from '../Dependency';
-import StyleUtil from '../StyleUtil';
-import AttributeUtil from '../AttributeUtil';
+import StyleUtils from '../StyleUtils';
+import AttributeUtils from '../AttributeUtils';
 import TextAttributeClass from './textAttributeClass';
 
 enum EStatus {
@@ -287,12 +287,12 @@ class LineToolOperation extends BasicToolOperation {
    * 视野内的线条
    */
   get viewPortLines() {
-    const viewPort = CanvasUtil.getViewPort(this.canvas, this.currentPos, this.zoom);
+    const viewPort = CanvasUtils.getViewPort(this.canvas, this.currentPos, this.zoom);
     if (this.isHidden) {
       return [];
     }
     return this.attributeFilteredLines.filter((i: any) =>
-      i?.pointList?.some((p: ICoordinate) => CanvasUtil.inViewPort(p, viewPort)),
+      i?.pointList?.some((p: ICoordinate) => CanvasUtils.inViewPort(p, viewPort)),
     );
   }
 
@@ -595,7 +595,7 @@ class LineToolOperation extends BasicToolOperation {
   };
 
   public getLineColorByAttribute(line: { attribute: string; valid: boolean } | ILine, isSelected: boolean = false) {
-    return StyleUtil.getStrokeAndFill(this.getColor(line.attribute), line.valid, { isSelected }).stroke;
+    return StyleUtils.getStrokeAndFill(this.getColor(line.attribute), line.valid, { isSelected }).stroke;
   }
 
   public drawLines = () => {
@@ -1851,7 +1851,7 @@ class LineToolOperation extends BasicToolOperation {
   }
 
   public getTextIconSvg(attribute = '') {
-    return AttributeUtil.getTextIconSvg(
+    return AttributeUtils.getTextIconSvg(
       attribute,
       this.config.attributeList,
       this.config.attributeConfigurable,
@@ -1863,8 +1863,8 @@ class LineToolOperation extends BasicToolOperation {
   public updateSelectedTextAttribute(newTextAttribute?: string) {
     if (this._textAttributeInstance && newTextAttribute && this.selectedID) {
       let textAttribute = newTextAttribute;
-      if (AttributeUtil.textAttributeValidate(this.config.textCheckType, '', textAttribute) === false) {
-        this.emit('messageError', AttributeUtil.getErrorNotice(this.config.textCheckType, this.lang));
+      if (AttributeUtils.textAttributeValidate(this.config.textCheckType, '', textAttribute) === false) {
+        this.emit('messageError', AttributeUtils.getErrorNotice(this.config.textCheckType, this.lang));
         textAttribute = '';
       }
 

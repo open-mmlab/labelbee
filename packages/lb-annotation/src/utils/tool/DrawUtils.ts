@@ -1,7 +1,7 @@
 import { ELineTypes, SEGMENT_NUMBER } from '../../constant/tool';
 import { IPolygonPoint } from '../../types/tool/polygon';
 import PolygonUtils from './PolygonUtils';
-import UnitUtil from './UnitUtil';
+import UnitUtils from './UnitUtils';
 
 const DEFAULT_ZOOM = 1;
 const DEFAULT_CURRENT_POS = {
@@ -224,8 +224,8 @@ export default class DrawUtils {
       fill = DEFAULT_COLOR,
     } = options;
 
-    const startAngleRad = UnitUtil.deg2rad(startAngleDeg);
-    const endAngleRad = UnitUtil.deg2rad(endAngleDeg);
+    const startAngleRad = UnitUtils.deg2rad(startAngleDeg);
+    const endAngleRad = UnitUtils.deg2rad(endAngleDeg);
     ctx.save();
     ctx.beginPath();
     ctx.strokeStyle = color;
@@ -250,8 +250,8 @@ export default class DrawUtils {
     const { color = DEFAULT_COLOR } = options;
 
     ctx.save();
-    const startAngleRad = UnitUtil.deg2rad(0);
-    const endAngleRad = UnitUtil.deg2rad(360);
+    const startAngleRad = UnitUtils.deg2rad(0);
+    const endAngleRad = UnitUtils.deg2rad(360);
     ctx.fillStyle = color;
     ctx.beginPath();
     ctx.arc(anchorPoint.x, anchorPoint.y, radius, startAngleRad, endAngleRad, false);

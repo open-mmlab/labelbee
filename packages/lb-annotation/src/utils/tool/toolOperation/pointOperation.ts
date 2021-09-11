@@ -1,12 +1,12 @@
 import { DEFAULT_TEXT_OFFSET, EDragStatus, ESortDirection } from '../../../constant/annotation';
 import EKeyCode from '../../../constant/keyCode';
 import uuid from '../../uuid';
-import AttributeUtil from '../AttributeUtil';
+import AttributeUtils from '../AttributeUtils';
 import { changeDrawOutsideTarget, getMaxOrder, getOffsetCoordinate, hotkeyFilter, jsonParser } from '../common';
 import { BasicToolOperation, IBasicToolOperationProps } from './basicToolOperation';
 import TextAttributeClass from './textAttributeClass';
 import DrawUtils from '../DrawUtils';
-import StyleUtil from '../StyleUtil';
+import StyleUtils from '../StyleUtils';
 import AxisUtils from '../AxisUtils';
 import locale from '../../../locales';
 import { EMessage } from '../../../locales/constants';
@@ -148,7 +148,7 @@ class PointOperation extends BasicToolOperation {
       return;
     }
 
-    this.setPointList(AttributeUtil.textChange(v, this.selectedID, this.pointList));
+    this.setPointList(AttributeUtils.textChange(v, this.selectedID, this.pointList));
     this.emit('selectedChange'); // 触发外层的更新
     this.render();
   };
@@ -189,7 +189,7 @@ class PointOperation extends BasicToolOperation {
    * @param attribute
    */
   public getTextIconSvg(attribute = '') {
-    return AttributeUtil.getTextIconSvg(
+    return AttributeUtils.getTextIconSvg(
       attribute,
       this.config.attributeList,
       this.config.attributeConfigurable,
@@ -381,7 +381,7 @@ class PointOperation extends BasicToolOperation {
 
     if (this.config.textConfigurable) {
       let textAttribute = '';
-      textAttribute = AttributeUtil.getTextAttribute(
+      textAttribute = AttributeUtils.getTextAttribute(
         this.pointList.filter((point) => point.sourceID === basicSourceID),
         this.config.textCheckType,
       );
@@ -532,12 +532,12 @@ class PointOperation extends BasicToolOperation {
   public updateSelectedTextAttribute(newTextAttribute?: string) {
     if (this._textAttributInstance && newTextAttribute && this.selectedID) {
       let textAttribute = newTextAttribute;
-      if (AttributeUtil.textAttributeValidate(this.config.textCheckType, '', textAttribute) === false) {
-        this.emit('messageError', AttributeUtil.getErrorNotice(this.config.textCheckType, this.lang));
+      if (AttributeUtils.textAttributeValidate(this.config.textCheckType, '', textAttribute) === false) {
+        this.emit('messageError', AttributeUtils.getErrorNotice(this.config.textCheckType, this.lang));
         textAttribute = '';
       }
 
-      this.setPointList(AttributeUtil.textChange(textAttribute, this.selectedID, this.pointList));
+      this.setPointList(AttributeUtils.textChange(textAttribute, this.selectedID, this.pointList));
 
       this.emit('updateTextAttribute');
       this.render();
@@ -594,7 +594,7 @@ class PointOperation extends BasicToolOperation {
       const transformPoint = AxisUtils.changePointByZoom(point, this.zoom, this.currentPos);
       const { width = 2 } = this.style;
 
-      const toolData = StyleUtil.getStrokeAndFill(toolColor, point.valid, {
+      const toolData = StyleUtils.getStrokeAndFill(toolColor, point.valid, {
         isSelected: selected || point.id === this.hoverID,
       });
 
@@ -606,7 +606,7 @@ class PointOperation extends BasicToolOperation {
         color: toolData.stroke,
         fill: toolData.fill,
       });
-      let showText = `${AttributeUtil.getAttributeShowText(point.attribute, this.config.attributeList) ?? ''}`;
+      let showText = `${AttributeUtils.getAttributeShowText(point.attribute, this.config.attributeList) ?? ''}`;
       if (this.config?.isShowOrder && point.order > 0) {
         showText = `${point.order} ${showText}`;
       }

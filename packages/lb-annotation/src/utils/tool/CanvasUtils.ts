@@ -1,6 +1,6 @@
 import { isInRange } from '../math';
 
-export default class CanvasUtil {
+export default class CanvasUtils {
   public static getMousePositionOnCanvasFromEvent(event: MouseEvent, canvas: HTMLCanvasElement) {
     if (canvas && event) {
       const canvasRect: ClientRect | DOMRect = canvas.getBoundingClientRect();

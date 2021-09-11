@@ -3,11 +3,11 @@ import { DEFAULT_TEXT_OFFSET } from '../../../constant/annotation';
 import { EToolName } from '../../../constant/tool';
 import { IPolygonData } from '../../../types/tool/polygon';
 import { getAttributeColor } from '../attribute';
-import AttributeUtil from '../AttributeUtil';
+import AttributeUtils from '../AttributeUtils';
 import AxisUtils from '../AxisUtils';
 import { jsonParser } from '../common';
 import DrawUtils from '../DrawUtils';
-import StyleUtil from '../StyleUtil';
+import StyleUtils from '../StyleUtils';
 import { getTagNameList, getTagnameListWithoutConfig } from '../tagTool';
 import { BasicToolOperation, IBasicToolOperationProps } from './basicToolOperation';
 
@@ -46,7 +46,7 @@ class CheckOperation extends BasicToolOperation {
   public drawPolygon(polygonList: IPolygonData[], config: any) {
     polygonList?.forEach((polygon) => {
       const toolColor = this.getColor(polygon.attribute, config);
-      const toolData = StyleUtil.getStrokeAndFill(toolColor, polygon.valid);
+      const toolData = StyleUtils.getStrokeAndFill(toolColor, polygon.valid);
       let thickness = this.style?.width ?? 2;
       if (this.hoverID.includes(polygon.id)) {
         thickness = 4;
@@ -78,7 +78,7 @@ class CheckOperation extends BasicToolOperation {
       DrawUtils.drawText(
         this.canvas,
         AxisUtils.changePointByZoom(polygon.pointList[0], this.zoom, this.currentPos),
-        AttributeUtil.getAttributeShowText(polygon.attribute, config?.attributeList ?? []) ?? '',
+        AttributeUtils.getAttributeShowText(polygon.attribute, config?.attributeList ?? []) ?? '',
         {
           color: toolData.stroke,
           ...DEFAULT_TEXT_OFFSET,

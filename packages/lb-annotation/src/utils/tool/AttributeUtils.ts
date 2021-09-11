@@ -11,7 +11,7 @@ export const ATTRIBUTE_COLORS = [NULL_COLOR].concat(COLORS_ARRAY);
 export const REGEXP_NUMBER = '^[0-9]+$';
 export const REGEXP_ENGLISH = '^[A-Za-z]+$';
 
-export default class AttributeUtil {
+export default class AttributeUtils {
   /**
    * 获取属性icon
    * @param attribute

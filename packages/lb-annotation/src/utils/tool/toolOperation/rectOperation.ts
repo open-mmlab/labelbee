@@ -5,8 +5,8 @@ import locale from '../../../locales';
 import { EMessage } from '../../../locales/constants';
 import { isInRange } from '../../math';
 import uuid from '../../uuid';
-import AttributeUtil from '../AttributeUtil';
-import CanvasUtil from '../CanvasUtil';
+import AttributeUtils from '../AttributeUtils';
+import CanvasUtils from '../CanvasUtils';
 import { changeDrawOutsideTarget, getMaxOrder, getOffsetCoordinate, hotkeyFilter, jsonParser } from '../common';
 import CommonToolUtils from '../CommonToolUtils';
 import MarkerUtils from '../MarkerUtils';
@@ -272,8 +272,8 @@ class RectOperation extends BasicToolOperation {
       // 切换的时候如果存在
 
       let textAttribute = newTextAttribute;
-      if (AttributeUtil.textAttributeValidate(this.config.textCheckType, '', textAttribute) === false) {
-        this.emit('messageError', AttributeUtil.getErrorNotice(this.config.textCheckType, this.lang));
+      if (AttributeUtils.textAttributeValidate(this.config.textCheckType, '', textAttribute) === false) {
+        this.emit('messageError', AttributeUtils.getErrorNotice(this.config.textCheckType, this.lang));
         textAttribute = '';
       }
 
@@ -376,7 +376,7 @@ class RectOperation extends BasicToolOperation {
    * @param attribute
    */
   public getTextIconSvg(attribute = '') {
-    return AttributeUtil.getTextIconSvg(
+    return AttributeUtils.getTextIconSvg(
       attribute,
       this.config.attributeList,
       this.config.attributeConfigurable,
@@ -902,7 +902,7 @@ class RectOperation extends BasicToolOperation {
 
     if (this.config.textConfigurable) {
       let textAttribute = '';
-      textAttribute = AttributeUtil.getTextAttribute(
+      textAttribute = AttributeUtils.getTextAttribute(
         this.rectList.filter((rect) => rect.sourceID === basicSourceID),
         this.config.textCheckType,
       );
@@ -1168,8 +1168,8 @@ class RectOperation extends BasicToolOperation {
           rectList = [...rectList, selectedRect];
         }
 
-        const viewPort = CanvasUtil.getViewPort(this.canvas, this.currentPos, this.zoom);
-        rectList = rectList.filter((rect) => CanvasUtil.inViewPort({ x: rect.x, y: rect.y }, viewPort));
+        const viewPort = CanvasUtils.getViewPort(this.canvas, this.currentPos, this.zoom);
+        rectList = rectList.filter((rect) => CanvasUtils.inViewPort({ x: rect.x, y: rect.y }, viewPort));
 
         const nextSelectedRect = CommonToolUtils.getNextSelectedRectID(rectList, sort, this.selectedRectID) as IRect;
         if (nextSelectedRect) {
@@ -1257,7 +1257,7 @@ class RectOperation extends BasicToolOperation {
       return;
     }
 
-    this.setRectList(AttributeUtil.textChange(v, this.selectedRectID, this.rectList), true);
+    this.setRectList(AttributeUtils.textChange(v, this.selectedRectID, this.rectList), true);
 
     this.emit('selectedChange');
     this.render();
@@ -1419,7 +1419,7 @@ class RectOperation extends BasicToolOperation {
       }
 
       if (rect.attribute) {
-        showText = `${showText}  ${AttributeUtil.getAttributeShowText(rect.attribute, this.config?.attributeList)}`;
+        showText = `${showText}  ${AttributeUtils.getAttributeShowText(rect.attribute, this.config?.attributeList)}`;
       }
 
       if (!hiddenText) {

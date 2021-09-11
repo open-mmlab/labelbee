@@ -1,4 +1,4 @@
-import AttributeUtils from './AttributeUtil';
+import AttributeUtils from './AttributeUtils';
 
 export default class MarkerUtils {
   /**
