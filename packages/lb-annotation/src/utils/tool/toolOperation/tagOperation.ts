@@ -1,8 +1,8 @@
 import TagUtils from '../TagUtils';
 import uuid from '../../uuid';
-import { hotkeyFilter, jsonParser } from '../common';
 import { getTagNameList } from '../tagTool';
 import { BasicToolOperation, IBasicToolOperationProps } from './basicToolOperation';
+import { CommonToolUtils } from '@/';
 
 interface ITagOperationProps extends IBasicToolOperationProps {
   config: string;
@@ -19,7 +19,7 @@ class TagOperation extends BasicToolOperation {
 
   constructor(props: ITagOperationProps) {
     super(props);
-    this.config = jsonParser(props.config);
+    this.config = CommonToolUtils.jsonParser(props.config);
     this.tagResult = [];
     this.labelSelectedList = [];
     this.sourceID = '';
@@ -46,7 +46,7 @@ class TagOperation extends BasicToolOperation {
   }
 
   public onKeyDown(e: KeyboardEvent) {
-    if (!hotkeyFilter(e)) {
+    if (!CommonToolUtils.hotkeyFilter(e)) {
       return;
     }
 

@@ -1,11 +1,11 @@
 import { cloneDeep } from 'lodash';
+import { CommonToolUtils } from '@/';
 import { DEFAULT_TEXT_OFFSET } from '../../../constant/annotation';
 import { EToolName } from '../../../constant/tool';
 import { IPolygonData } from '../../../types/tool/polygon';
 import { getAttributeColor } from '../attribute';
 import AttributeUtils from '../AttributeUtils';
 import AxisUtils from '../AxisUtils';
-import { jsonParser } from '../common';
 import DrawUtils from '../DrawUtils';
 import StyleUtils from '../StyleUtils';
 import { getTagNameList, getTagnameListWithoutConfig } from '../tagTool';
@@ -122,13 +122,13 @@ class CheckOperation extends BasicToolOperation {
     this.resultList?.forEach((item: any) => {
       switch (item?.toolName) {
         case EToolName.Rect:
-          this.drawRect(item.result, jsonParser(item.config));
+          this.drawRect(item.result, CommonToolUtils.jsonParser(item.config));
           break;
         case EToolName.Polygon:
-          this.drawPolygon(item.result, jsonParser(item.config));
+          this.drawPolygon(item.result, CommonToolUtils.jsonParser(item.config));
           break;
         case EToolName.Tag:
-          this.drawTag(item.result, jsonParser(item.config));
+          this.drawTag(item.result, CommonToolUtils.jsonParser(item.config));
           break;
         default:
           break;

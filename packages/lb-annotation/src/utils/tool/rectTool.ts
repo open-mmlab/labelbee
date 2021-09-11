@@ -1,8 +1,7 @@
 import { IPolygonPoint } from '../../types/tool/polygon';
 import { EDependPattern } from '../../constant/tool';
-// import { message } from 'antd';
-import { getCurrentStepInfo, jsonParser } from './common';
 import { isInPolygon } from './polygonTool';
+import CommonToolUtils from '@/utils/tool/CommonToolUtils';
 /**
  *
  * @param result 原结果集合
@@ -19,7 +18,7 @@ export function composeResult(
 ) {
   try {
     const data = JSON.parse(result);
-    const currentStepInfo = getCurrentStepInfo(currentStep, stepList);
+    const currentStepInfo = CommonToolUtils.getCurrentStepInfo(currentStep, stepList);
     const { dataSourceStep } = currentStepInfo;
     const stepName = `step_${currentStepInfo.step}`;
 
@@ -66,10 +65,10 @@ export function composeResult(
  */
 export function parseResult(result: string, step: number, stepList: any[]) {
   try {
-    const data = jsonParser(result);
+    const data = CommonToolUtils.jsonParser(result);
 
     // 获取当前步骤信息
-    const currentStepInfo = getCurrentStepInfo(step, stepList);
+    const currentStepInfo = CommonToolUtils.getCurrentStepInfo(step, stepList);
     if (!currentStepInfo) {
       return [[], [], 0];
     }

@@ -1,6 +1,50 @@
-import AxisUtils from './AxisUtils';
+import { CommonToolUtils } from '@/';
 
 export default class RectUtils {
+  public static composeResult(
+    result: string,
+    currentStep: number,
+    resultList: any[],
+    stepList: any[],
+    basicImgInfo: any,
+  ) {
+    try {
+      const data = JSON.parse(result);
+      const currentStepInfo = CommonToolUtils.getCurrentStepInfo(currentStep, stepList);
+      const { dataSourceStep } = currentStepInfo;
+      const stepName = `step_${currentStepInfo.step}`;
+
+      Object.assign(data, basicImgInfo);
+
+      if (data[stepName]) {
+        // 这层可能还要处理 dataSource 依赖问题
+        const info = data[stepName];
+        if (info.result) {
+          info.result = resultList;
+          return JSON.stringify(data);
+        }
+        return JSON.stringify({
+          ...data,
+          [stepName]: {
+            ...data[stepName],
+            result: resultList,
+          },
+        });
+      }
+      // 初始化结果
+      return JSON.stringify({
+        ...data,
+        [stepName]: {
+          dataSourceStep,
+          toolName: currentStepInfo.tool,
+          result: resultList,
+        },
+      });
+    } catch {
+      return result;
+    }
+  }
+
   public static changeCoordinateByRotate(rect: IRect, rotate: number, imgSize: ISize) {
     const { x, y, width, height } = rect;
 

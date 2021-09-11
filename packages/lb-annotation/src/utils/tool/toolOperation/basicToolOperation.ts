@@ -4,7 +4,6 @@ import EKeyCode from '../../../constant/keyCode';
 import { BASE_ICON, COLORS_ARRAY } from '../../../constant/style';
 import ActionsHistory from '../../ActionsHistory';
 import { getAttributeIndex } from '../attribute';
-import { calcViewportBoundaries, getRotate, jsonParser } from '../common';
 import DblClickEventListener from '../DblClickEventListener';
 import DrawUtils from '../DrawUtils';
 import { getBasicRecPos, getInitImgPos } from '../imgPos';
@@ -13,6 +12,7 @@ import ZoomUtils from '../ZoomUtils';
 import EventListener from './eventListener';
 import locale from '../../../locales';
 import { EMessage } from '../../../locales/constants';
+import { CommonToolUtils } from '@/';
 
 interface IBasicToolOperationProps {
   container: HTMLDivElement;
@@ -395,7 +395,7 @@ class BasicToolOperation extends EventListener {
         // 依赖检测
         if (basicResult.pointList) {
           // 多边形检测
-          const basicZone = calcViewportBoundaries(basicResult.pointList);
+          const basicZone = CommonToolUtils.calcViewportBoundaries(basicResult.pointList);
           newBoundry = {
             x: basicZone.left,
             y: basicZone.top,
@@ -822,7 +822,7 @@ class BasicToolOperation extends EventListener {
   }
 
   public setConfig(config: string) {
-    this.config = jsonParser(config);
+    this.config = CommonToolUtils.jsonParser(config);
   }
 
   public updateRotate() {
@@ -832,7 +832,7 @@ class BasicToolOperation extends EventListener {
     }
 
     // 更改当前图片的旋转方式
-    const rotate = getRotate(this.basicImgInfo.rotate);
+    const rotate = CommonToolUtils.getRotate(this.basicImgInfo.rotate);
     this.basicImgInfo.rotate = rotate;
     this.initImgPos();
 

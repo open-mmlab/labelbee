@@ -7,7 +7,6 @@ import { isInRange } from '../../math';
 import uuid from '../../uuid';
 import AttributeUtils from '../AttributeUtils';
 import CanvasUtils from '../CanvasUtils';
-import { changeDrawOutsideTarget, getMaxOrder, getOffsetCoordinate, hotkeyFilter, jsonParser } from '../common';
 import CommonToolUtils from '../CommonToolUtils';
 import MarkerUtils from '../MarkerUtils';
 import { getFootOfPerpendicular, returnClosePointIndex } from '../math';
@@ -23,6 +22,7 @@ import {
 import { BasicToolOperation, IBasicToolOperationProps } from './basicToolOperation';
 import TextAttributeClass from './textAttributeClass';
 import DrawUtils from '../DrawUtils';
+import { AxisUtils } from '@/';
 
 interface IRectOperationProps extends IBasicToolOperationProps {
   drawOutSideTarget: boolean; // 是否可以在边界外进行标注
@@ -72,7 +72,7 @@ class RectOperation extends BasicToolOperation {
     this.drawOutSideTarget = props.drawOutSideTarget || false;
     this.rectList = [];
     this.isFlow = true;
-    this.config = jsonParser(props.config);
+    this.config = CommonToolUtils.jsonParser(props.config);
     this.hoverRectEdgeIndex = -1;
     this.hoverRectPointIndex = -1;
     this.markerIndex = 0;
@@ -116,7 +116,7 @@ class RectOperation extends BasicToolOperation {
   }
 
   public setConfig(config: string, isClear = false) {
-    this.config = jsonParser(config);
+    this.config = CommonToolUtils.jsonParser(config);
     if (isClear === true) {
       this.clearResult(false);
     }
@@ -702,7 +702,7 @@ class RectOperation extends BasicToolOperation {
 
     const coordinateZoom = this.getCoordinateUnderZoom(e);
 
-    const coordinate = changeDrawOutsideTarget(
+    const coordinate = AxisUtils.changeDrawOutsideTarget(
       coordinateZoom,
       { x: 0, y: 0 },
       this.imgInfo,
@@ -850,7 +850,7 @@ class RectOperation extends BasicToolOperation {
     }
 
     const coordinateZoom = this.getCoordinateUnderZoom(e);
-    const coordinate = changeDrawOutsideTarget(
+    const coordinate = AxisUtils.changeDrawOutsideTarget(
       coordinateZoom,
       { x: 0, y: 0 },
       this.imgInfo,
@@ -914,7 +914,7 @@ class RectOperation extends BasicToolOperation {
 
     // 标注序号添加
     Object.assign(this.drawingRect, {
-      order: getMaxOrder(this.rectList.filter((v) => v.sourceID === basicSourceID)) + 1,
+      order: AxisUtils.getMaxOrder(this.rectList.filter((v) => v.sourceID === basicSourceID)) + 1,
     });
 
     this.firstClickCoord = {
@@ -1106,7 +1106,7 @@ class RectOperation extends BasicToolOperation {
   }
 
   public onKeyDown(e: KeyboardEvent) {
-    if (!hotkeyFilter(e)) {
+    if (!CommonToolUtils.hotkeyFilter(e)) {
       // 如果为输入框则进行过滤
       return;
     }
@@ -1287,7 +1287,7 @@ class RectOperation extends BasicToolOperation {
     const { x, y, width, height, attribute, valid } = selectedRect;
 
     const newWidth = width * this.zoom * 0.6;
-    const coordinate = getOffsetCoordinate({ x, y: y + height }, this.currentPos, this.zoom);
+    const coordinate = AxisUtils.getOffsetCoordinate({ x, y: y + height }, this.currentPos, this.zoom);
     const toolColor = this.getColor(attribute);
     const color = valid ? toolColor?.valid.stroke : toolColor?.invalid.stroke;
     const distance = 4;

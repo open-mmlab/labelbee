@@ -1,3 +1,4 @@
+import MathUtils from '@/utils/MathUtils';
 import { DEFAULT_TEXT_OFFSET, EDragStatus, EDragTarget, ESortDirection } from '../../../constant/annotation';
 import EKeyCode from '../../../constant/keyCode';
 import { edgeAdsorptionScope } from '../../../constant/tool';
@@ -10,14 +11,6 @@ import uuid from '../../uuid';
 import AttributeUtils from '../AttributeUtils';
 import AxisUtils from '../AxisUtils';
 import CanvasUtils from '../CanvasUtils';
-import {
-  calcViewportBoundaries,
-  changeDrawOutsideTarget,
-  getMaxOrder,
-  getOffsetCoordinate,
-  hotkeyFilter,
-  jsonParser,
-} from '../common';
 import CommonToolUtils from '../CommonToolUtils';
 import DrawUtils from '../DrawUtils';
 import PolygonUtils from '../PolygonUtils';
@@ -70,7 +63,7 @@ class PolygonOperation extends BasicToolOperation {
 
   constructor(props: IPolygonOperationProps) {
     super(props);
-    this.config = jsonParser(props.config);
+    this.config = CommonToolUtils.jsonParser(props.config);
     this.drawingPointList = [];
     this.polygonList = [];
     this.hoverPointIndex = -1;
@@ -208,7 +201,7 @@ class PolygonOperation extends BasicToolOperation {
 
     this.setSelectedID('');
     const coordinateZoom = this.getCoordinateUnderZoom(e);
-    const coordinate = changeDrawOutsideTarget(
+    const coordinate = AxisUtils.changeDrawOutsideTarget(
       coordinateZoom,
       { x: 0, y: 0 },
       this.imgInfo,
@@ -398,7 +391,7 @@ class PolygonOperation extends BasicToolOperation {
         textAttribute: '',
         pointList: this.drawingPointList,
         attribute: this.defaultAttribute,
-        order: getMaxOrder(polygonList.filter((v) => v.sourceID === basicSourceID)) + 1,
+        order: CommonToolUtils.getMaxOrder(polygonList.filter((v) => v.sourceID === basicSourceID)) + 1,
       };
 
       if (this.config.textConfigurable) {
@@ -567,7 +560,7 @@ class PolygonOperation extends BasicToolOperation {
   }
 
   public onKeyDown(e: KeyboardEvent) {
-    if (!hotkeyFilter(e)) {
+    if (!CommonToolUtils.hotkeyFilter(e)) {
       // 如果为输入框则进行过滤
       return;
     }
@@ -842,7 +835,7 @@ class PolygonOperation extends BasicToolOperation {
 
     // 边缘判断 - 仅限支持图片下范围下
     if (this.config.drawOutsideTarget === false && this.imgInfo) {
-      const { left, top, right, bottom } = calcViewportBoundaries(
+      const { left, top, right, bottom } = MathUtils.calcViewportBoundaries(
         AxisUtils.changePointListByZoom(selectedPointList, this.zoom),
       );
 
@@ -1026,7 +1019,7 @@ class PolygonOperation extends BasicToolOperation {
     const { x, y } = pointList[pointList.length - 1];
 
     const newWidth = TEXT_MAX_WIDTH;
-    const coordinate = getOffsetCoordinate({ x, y }, this.currentPos, this.zoom);
+    const coordinate = AxisUtils.getOffsetCoordinate({ x, y }, this.currentPos, this.zoom);
     const toolColor = this.getColor(attribute);
     const color = valid ? toolColor?.valid.stroke : toolColor?.invalid.stroke;
     if (!this._textAttributInstance) {

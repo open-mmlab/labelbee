@@ -2,7 +2,6 @@ import { DEFAULT_TEXT_OFFSET, EDragStatus, ESortDirection } from '../../../const
 import EKeyCode from '../../../constant/keyCode';
 import uuid from '../../uuid';
 import AttributeUtils from '../AttributeUtils';
-import { changeDrawOutsideTarget, getMaxOrder, getOffsetCoordinate, hotkeyFilter, jsonParser } from '../common';
 import { BasicToolOperation, IBasicToolOperationProps } from './basicToolOperation';
 import TextAttributeClass from './textAttributeClass';
 import DrawUtils from '../DrawUtils';
@@ -35,7 +34,7 @@ class PointOperation extends BasicToolOperation {
 
   constructor(props: IPointOperationProps) {
     super(props);
-    this.config = jsonParser(props.config);
+    this.config = CommonToolUtils.jsonParser(props.config);
     this.pointList = [];
 
     this.setStyle(props.style);
@@ -89,7 +88,7 @@ class PointOperation extends BasicToolOperation {
   }
 
   public setConfig(config: string, isClear = false) {
-    this.config = jsonParser(config);
+    this.config = CommonToolUtils.jsonParser(config);
     if (isClear === true) {
       this.clearResult();
     }
@@ -269,7 +268,7 @@ class PointOperation extends BasicToolOperation {
     this.dragStatus = EDragStatus.Move;
     const coordinateZoom = this.getCoordinateUnderZoom(e);
     // 缩放后的坐标
-    const zoomCoordinate = changeDrawOutsideTarget(
+    const zoomCoordinate = AxisUtils.changeDrawOutsideTarget(
       coordinateZoom,
       { x: 0, y: 0 },
       this.imgInfo,
@@ -291,7 +290,7 @@ class PointOperation extends BasicToolOperation {
   }
 
   public onKeyDown(e: KeyboardEvent) {
-    if (!hotkeyFilter(e)) {
+    if (!CommonToolUtils.hotkeyFilter(e)) {
       // 如果为输入框则进行过滤
       return;
     }
@@ -376,7 +375,7 @@ class PointOperation extends BasicToolOperation {
       id: uuid(8, 62),
       sourceID: basicSourceID,
       textAttribute: '',
-      order: getMaxOrder(this.pointList.filter((v) => v.sourceID === basicSourceID)) + 1,
+      order: CommonToolUtils.getMaxOrder(this.pointList.filter((v) => v.sourceID === basicSourceID)) + 1,
     } as IPointUnit;
 
     if (this.config.textConfigurable) {
@@ -552,7 +551,7 @@ class PointOperation extends BasicToolOperation {
     const { x, y, attribute, valid } = point;
 
     const newWidth = TEXTAREA_WIDTH * this.zoom * 0.6;
-    const coordinate = getOffsetCoordinate({ x, y }, this.currentPos, this.zoom);
+    const coordinate = AxisUtils.getOffsetCoordinate({ x, y }, this.currentPos, this.zoom);
     const toolColor = this.getColor(attribute);
     const color = valid ? toolColor?.valid.stroke : toolColor?.invalid.stroke;
     const distance = 4;

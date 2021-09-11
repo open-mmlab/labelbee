@@ -13,7 +13,6 @@ import * as cTool from './constant/tool';
 // Utils
 import * as rectUtils from './utils/tool/rectTool';
 import TagUtils from './utils/tool/TagUtils';
-import * as toolUtils from './utils/tool/common';
 import * as uuid from './utils/uuid';
 import CommonToolUtils from './utils/tool/CommonToolUtils';
 // TODO 后续将 Util 后缀 => Utils
@@ -26,6 +25,8 @@ import DrawUtils from './utils/tool/DrawUtils';
 import DblClickEventListener from './utils/tool/DblClickEventListener';
 
 const RectOperation = RectOperationAsNewName;
+
+const toolUtils = CommonToolUtils; // 暂时这样支持外部工具的使用
 
 export {
   RectOperation,

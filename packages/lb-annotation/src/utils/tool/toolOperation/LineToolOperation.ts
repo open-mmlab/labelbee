@@ -13,7 +13,6 @@ import { BasicToolOperation, IBasicToolOperationProps } from './basicToolOperati
 import LineToolUtils from '../LineToolUtils';
 import { getTextAttribute, textAttributeValidate } from '../attribute';
 import { isInPolygon, createSmoothCurvePoints, createSmoothCurvePointsFromPointList } from '../polygonTool';
-import { calcViewportBoundaries } from '../common';
 import CommonToolUtils from '../CommonToolUtils';
 import { getFootOfPerpendicular } from '../math';
 import CanvasUtils from '../CanvasUtils';
@@ -22,6 +21,7 @@ import Dependency from '../Dependency';
 import StyleUtils from '../StyleUtils';
 import AttributeUtils from '../AttributeUtils';
 import TextAttributeClass from './textAttributeClass';
+import MathUtils from '@/utils/MathUtils';
 
 enum EStatus {
   Create = 0,
@@ -650,7 +650,7 @@ class LineToolOperation extends BasicToolOperation {
 
   public getActiveArea() {
     return this.activeLine && this.activeLine.length > 0
-      ? calcViewportBoundaries(this.activeLine, this.isCurve, SEGMENT_NUMBER, this.zoom)
+      ? MathUtils.calcViewportBoundaries(this.activeLine, this.isCurve, SEGMENT_NUMBER, this.zoom)
       : undefined;
   }
 
@@ -1061,7 +1061,12 @@ class LineToolOperation extends BasicToolOperation {
     const activeLine = this.findHoverLine(coord);
     if (activeLine) {
       const index = this.lineList.findIndex((i) => i.id === activeLine?.id);
-      const area = calcViewportBoundaries(activeLine?.pointList || [], this.isCurve, SEGMENT_NUMBER, this.zoom);
+      const area = MathUtils.calcViewportBoundaries(
+        activeLine?.pointList || [],
+        this.isCurve,
+        SEGMENT_NUMBER,
+        this.zoom,
+      );
       const line = this.lineList[index];
       this.updateStatus(EStatus.Active);
       this.setActiveLine(line.pointList);
@@ -1082,7 +1087,7 @@ class LineToolOperation extends BasicToolOperation {
   public setActiveLineByID(id: string) {
     const line = this.lineList.find((i) => i.id === id);
     if (line) {
-      const area = calcViewportBoundaries(line?.pointList || [], this.isCurve, SEGMENT_NUMBER, this.zoom);
+      const area = MathUtils.calcViewportBoundaries(line?.pointList || [], this.isCurve, SEGMENT_NUMBER, this.zoom);
       this.updateStatus(EStatus.Active);
       this.setActiveLine(line.pointList);
       this.setSelectedLineID(line.id);
@@ -1607,7 +1612,7 @@ class LineToolOperation extends BasicToolOperation {
       }
 
       /** 删除线 */
-      const area = calcViewportBoundaries(this.activeLine, this.isCurve, SEGMENT_NUMBER, this.zoom);
+      const area = MathUtils.calcViewportBoundaries(this.activeLine, this.isCurve, SEGMENT_NUMBER, this.zoom);
       const axisOnArea = LineToolUtils.inArea(area, this.getAbsAxis(coord));
       if (axisOnArea) {
         this.deleteLine();
