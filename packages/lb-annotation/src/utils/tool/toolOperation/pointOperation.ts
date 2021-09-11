@@ -11,7 +11,7 @@ import locale from '../../../locales';
 import { EMessage } from '../../../locales/constants';
 import CommonToolUtils from '../CommonToolUtils';
 import { IPolygonData } from '../../../types/tool/polygon';
-import { isInRange } from '../../math';
+import MathUtils from '@/utils/MathUtils';
 
 const TEXTAREA_WIDTH = 200;
 
@@ -315,11 +315,11 @@ class PointOperation extends BasicToolOperation {
       default: {
         if (this.config.attributeConfigurable) {
           let num = -1;
-          if (isInRange(keyCode, [48, 57])) {
+          if (MathUtils.isInRange(keyCode, [48, 57])) {
             num = keyCode - 48;
           }
 
-          if (isInRange(keyCode, [96, 105])) {
+          if (MathUtils.isInRange(keyCode, [96, 105])) {
             num = keyCode - 96;
           }
 

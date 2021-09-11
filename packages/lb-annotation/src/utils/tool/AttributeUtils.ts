@@ -131,7 +131,7 @@ export default class AttributeUtils {
    * @param toolResultList 工具的结果集
    * @param textCheckType
    */
-  public static getTextAttribute(toolResultList: IRect[] | IPolygonData[] | IPoint[], textCheckType: number) {
+  public static getTextAttribute(toolResultList: IRect[] | IPolygonData[] | IPoint[] | ILine[], textCheckType: number) {
     try {
       if (textCheckType === ETextType.Order) {
         const textAttributeList = toolResultList

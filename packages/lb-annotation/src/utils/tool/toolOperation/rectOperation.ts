@@ -3,13 +3,11 @@ import EKeyCode from '../../../constant/keyCode';
 import { EDragTarget } from '../../../constant/tool';
 import locale from '../../../locales';
 import { EMessage } from '../../../locales/constants';
-import { isInRange } from '../../math';
 import uuid from '../../uuid';
 import AttributeUtils from '../AttributeUtils';
 import CanvasUtils from '../CanvasUtils';
 import CommonToolUtils from '../CommonToolUtils';
 import MarkerUtils from '../MarkerUtils';
-import { getFootOfPerpendicular, returnClosePointIndex } from '../math';
 import { getPolygonPointUnderZoom } from '../polygonTool';
 import {
   getCoordinateUnderZoom,
@@ -23,6 +21,7 @@ import { BasicToolOperation, IBasicToolOperationProps } from './basicToolOperati
 import TextAttributeClass from './textAttributeClass';
 import DrawUtils from '../DrawUtils';
 import { AxisUtils } from '@/';
+import MathUtils from '@/utils/MathUtils';
 
 interface IRectOperationProps extends IBasicToolOperationProps {
   drawOutSideTarget: boolean; // 是否可以在边界外进行标注
@@ -342,7 +341,7 @@ class RectOperation extends BasicToolOperation {
       return -1;
     }
 
-    return returnClosePointIndex(
+    return AxisUtils.returnClosePointIndex(
       this.getCoordinateUnderZoom(e),
       getRectPointList(this.selectedRect, this.zoom),
       scope + 2,
@@ -361,7 +360,7 @@ class RectOperation extends BasicToolOperation {
 
     for (let i = 0; i < edgeList.length; i++) {
       const edge = edgeList[i];
-      const { length } = getFootOfPerpendicular(coordinate, edge.begin, edge.end);
+      const { length } = MathUtils.getFootOfPerpendicular(coordinate, edge.begin, edge.end);
 
       if (length < scope + 10) {
         edgeIndex = i;
@@ -914,7 +913,7 @@ class RectOperation extends BasicToolOperation {
 
     // 标注序号添加
     Object.assign(this.drawingRect, {
-      order: AxisUtils.getMaxOrder(this.rectList.filter((v) => v.sourceID === basicSourceID)) + 1,
+      order: CommonToolUtils.getMaxOrder(this.rectList.filter((v) => v.sourceID === basicSourceID)) + 1,
     });
 
     this.firstClickCoord = {
@@ -1185,11 +1184,11 @@ class RectOperation extends BasicToolOperation {
       default: {
         if (this.config.attributeConfigurable) {
           let num = -1;
-          if (isInRange(keyCode, [48, 57])) {
+          if (MathUtils.isInRange(keyCode, [48, 57])) {
             num = keyCode - 48;
           }
 
-          if (isInRange(keyCode, [96, 105])) {
+          if (MathUtils.isInRange(keyCode, [96, 105])) {
             num = keyCode - 96;
           }
 

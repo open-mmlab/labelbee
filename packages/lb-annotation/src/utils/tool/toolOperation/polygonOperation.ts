@@ -6,7 +6,6 @@ import locale from '../../../locales';
 import { EMessage } from '../../../locales/constants';
 import { IPolygonConfig, IPolygonData, IPolygonPoint } from '../../../types/tool/polygon';
 import ActionsHistory from '../../ActionsHistory';
-import { isInRange } from '../../math';
 import uuid from '../../uuid';
 import AttributeUtils from '../AttributeUtils';
 import AxisUtils from '../AxisUtils';
@@ -619,11 +618,11 @@ class PolygonOperation extends BasicToolOperation {
       default: {
         if (this.config.attributeConfigurable) {
           let num = -1;
-          if (isInRange(keyCode, [48, 57])) {
+          if (MathUtils.isInRange(keyCode, [48, 57])) {
             num = keyCode - 48;
           }
 
-          if (isInRange(keyCode, [96, 105])) {
+          if (MathUtils.isInRange(keyCode, [96, 105])) {
             num = keyCode - 96;
           }
 

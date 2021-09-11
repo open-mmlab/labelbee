@@ -3,10 +3,10 @@ import { EDragStatus, EGrowthMode, ELang } from '../../../constant/annotation';
 import EKeyCode from '../../../constant/keyCode';
 import { BASE_ICON, COLORS_ARRAY } from '../../../constant/style';
 import ActionsHistory from '../../ActionsHistory';
-import { getAttributeIndex } from '../attribute';
+import AttributeUtils from '../AttributeUtils';
 import DblClickEventListener from '../DblClickEventListener';
 import DrawUtils from '../DrawUtils';
-import { getBasicRecPos, getInitImgPos } from '../imgPos';
+import ImgPosUtils from '../ImgPosUtils';
 import RenderDomUtils from '../RenderDomUtils';
 import ZoomUtils from '../ZoomUtils';
 import EventListener from './eventListener';
@@ -363,7 +363,7 @@ class BasicToolOperation extends EventListener {
     }
     const zoomRatio = this._imgAttribute?.zoomRatio;
     const isOriginalSize = this._imgAttribute?.isOriginalSize;
-    const { currentPos, imgInfo, zoom } = getInitImgPos(
+    const { currentPos, imgInfo, zoom } = ImgPosUtils.getInitImgPos(
       this.size,
       { width: this.imgNode.width, height: this.imgNode.height },
       this.rotate,
@@ -404,7 +404,7 @@ class BasicToolOperation extends EventListener {
           };
         }
 
-        const pos = getBasicRecPos(
+        const pos = ImgPosUtils.getBasicRecPos(
           imgNode,
           newBoundry,
           size,
@@ -843,7 +843,7 @@ class BasicToolOperation extends EventListener {
   /** 获取当前属性颜色 */
   public getColor(attribute = '', config = this.config) {
     if (config?.attributeConfigurable === true) {
-      const attributeIndex = getAttributeIndex(attribute, config.attributeList ?? []) + 1;
+      const attributeIndex = AttributeUtils.getAttributeIndex(attribute, config.attributeList ?? []) + 1;
       return this.style.attributeColor[attributeIndex];
     }
     const { color, toolColor } = this.style;
@@ -852,7 +852,7 @@ class BasicToolOperation extends EventListener {
 
   public getLineColor(attribute = '') {
     if (this.config?.attributeConfigurable === true) {
-      const attributeIndex = getAttributeIndex(attribute, this.config?.attributeList ?? []) + 1;
+      const attributeIndex = AttributeUtils.getAttributeIndex(attribute, this.config?.attributeList ?? []) + 1;
       return this.style?.attributeLineColor[attributeIndex] ?? '';
     }
     const { color, lineColor } = this.style;

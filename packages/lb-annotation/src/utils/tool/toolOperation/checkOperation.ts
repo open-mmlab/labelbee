@@ -3,7 +3,6 @@ import { CommonToolUtils } from '@/';
 import { DEFAULT_TEXT_OFFSET } from '../../../constant/annotation';
 import { EToolName } from '../../../constant/tool';
 import { IPolygonData } from '../../../types/tool/polygon';
-import { getAttributeColor } from '../attribute';
 import AttributeUtils from '../AttributeUtils';
 import AxisUtils from '../AxisUtils';
 import DrawUtils from '../DrawUtils';
@@ -95,7 +94,7 @@ class CheckOperation extends BasicToolOperation {
       }
       DrawUtils.drawRect(this.canvas, AxisUtils.changeRectByZoom(rect, this.zoom, this.currentPos), {
         color: rect?.valid
-          ? getAttributeColor(rect.attribute, config?.attributeList ?? [])
+          ? AttributeUtils.getAttributeColor(rect.attribute, config?.attributeList ?? [])
           : this.getColor(rect.attribute)?.invalid.stroke,
         thickness,
       });

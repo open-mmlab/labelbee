@@ -7,17 +7,14 @@ import _ from 'lodash';
 import { ELineColor, EDependPattern, ELineTypes, ETextType } from '@/constant/tool';
 import ActionsHistory from '@/utils/ActionsHistory';
 import uuid from '@/utils/uuid';
-import { isInRange } from '@/utils/math';
 import EKeyCode from '@/constant/keyCode';
 import { BasicToolOperation, IBasicToolOperationProps } from './basicToolOperation';
 import LineToolUtils from '../LineToolUtils';
-import { getTextAttribute, textAttributeValidate } from '../attribute';
 import { isInPolygon, createSmoothCurvePoints, createSmoothCurvePointsFromPointList } from '../polygonTool';
 import CommonToolUtils from '../CommonToolUtils';
-import { getFootOfPerpendicular } from '../math';
 import CanvasUtils from '../CanvasUtils';
 import DrawUtils from '../DrawUtils';
-import Dependency from '../Dependency';
+import DependencyUtils from '../DependencyUtils';
 import StyleUtils from '../StyleUtils';
 import AttributeUtils from '../AttributeUtils';
 import TextAttributeClass from './textAttributeClass';
@@ -228,11 +225,11 @@ class LineToolOperation extends BasicToolOperation {
   }
 
   get isDependPolygon() {
-    return Dependency.isDependPolygon(this.dependPattern);
+    return DependencyUtils.isDependPolygon(this.dependPattern);
   }
 
   get isDependRect() {
-    return Dependency.isDependRect(this.dependPattern);
+    return DependencyUtils.isDependRect(this.dependPattern);
   }
 
   get isCurrentAttributeLocked() {
@@ -312,7 +309,7 @@ class LineToolOperation extends BasicToolOperation {
     if (resetText) {
       let defaultText = '';
       if (this.textCheckType === ETextType.Order && this.isTextConfigurable) {
-        defaultText = getTextAttribute(this.lineList, this.textCheckType);
+        defaultText = AttributeUtils.getTextAttribute(this.lineList, this.textCheckType);
       }
 
       this.emit('updateText', defaultText);
@@ -824,7 +821,7 @@ class LineToolOperation extends BasicToolOperation {
     for (let i = 1; i <= pointList.length - 1; i++) {
       const point1 = this.getRenderAxis(pointList[i]);
       const point2 = this.getRenderAxis(pointList[i - 1]);
-      const { length, footPoint } = getFootOfPerpendicular(coord, point1, point2);
+      const { length, footPoint } = MathUtils.getFootOfPerpendicular(coord, point1, point2);
       const twoPointDistance1 = LineToolUtils.calcTwoPointDistance(point1, coord);
       const twoPointDistance2 = LineToolUtils.calcTwoPointDistance(point2, coord);
 
@@ -891,8 +888,8 @@ class LineToolOperation extends BasicToolOperation {
     const { top, left, right, bottom } = this.activeArea;
     const hBoundaries = [left, right].map((i) => (_.isNumber(i) ? i + offsetX : 0));
     const vBoundaries = [top, bottom].map((i) => (_.isNumber(i) ? i + offsetY : 0));
-    const horizontalInRange = left >= 0 && right && isInRange(hBoundaries, rectHorizontalRange);
-    const verticalInRange = top >= 0 && bottom && isInRange(vBoundaries, rectVerticalRange);
+    const horizontalInRange = left >= 0 && right && MathUtils.isInRange(hBoundaries, rectHorizontalRange);
+    const verticalInRange = top >= 0 && bottom && MathUtils.isInRange(vBoundaries, rectVerticalRange);
     const calcOffsetX = horizontalInRange ? offsetX : 0;
     const calcOffsetY = verticalInRange ? offsetY : 0;
 
@@ -1201,10 +1198,13 @@ class LineToolOperation extends BasicToolOperation {
       const { x, y, width, height } = this.dependData;
       const rectHorizontalRange = [x, x + width];
       const rectVerticalRange = [y, y + height];
-      return isInRange(coord.x, rectHorizontalRange) && isInRange(coord.y, rectVerticalRange);
+      return MathUtils.isInRange(coord.x, rectHorizontalRange) && MathUtils.isInRange(coord.y, rectVerticalRange);
     }
 
-    return isInRange(coord.x, [0, this.imageSize.width]) && isInRange(coord.y, [0, this.imageSize.height]);
+    return (
+      MathUtils.isInRange(coord.x, [0, this.imageSize.width]) &&
+      MathUtils.isInRange(coord.y, [0, this.imageSize.height])
+    );
   }
 
   /**
@@ -1390,7 +1390,7 @@ class LineToolOperation extends BasicToolOperation {
   public onDblclick = () => {};
 
   public isTextValid(text: string) {
-    return textAttributeValidate(this.textCheckType, this.customFormat, text);
+    return AttributeUtils.textAttributeValidate(this.textCheckType, this.customFormat, text);
   }
 
   public createLineData() {

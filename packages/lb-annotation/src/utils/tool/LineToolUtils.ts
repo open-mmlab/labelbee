@@ -1,9 +1,8 @@
 import { EDependPattern, ELineTypes } from '@/constant/tool';
-import { withinRange } from '@/utils/math';
 import { createSmoothCurvePointsFromPointList } from './polygonTool';
 import PolygonUtils from './PolygonUtils';
-import Dependency from './Dependency';
-import { getFootOfPerpendicular } from './math';
+import DependencyUtils from './DependencyUtils';
+import MathUtils from '../MathUtils';
 
 export enum EStatus {
   /** 正在创建 */
@@ -115,7 +114,7 @@ class LineToolUtils {
           /** 交点和直线的起始点为一致 */
           if (intersectionDistance < pointRadius / zoom) {
             const cPoint = matchLine.pointB;
-            const { footPoint, length } = getFootOfPerpendicular(cPoint, line2.pointA, line2.pointB, true);
+            const { footPoint, length } = MathUtils.getFootOfPerpendicular(cPoint, line2.pointA, line2.pointB, true);
             if (length !== undefined) {
               const distPointA = LineToolUtils.calcDistance(line2.pointA, footPoint);
               const distPointB = LineToolUtils.calcDistance(line2.pointB, footPoint);
@@ -279,7 +278,7 @@ class LineToolUtils {
       return axis;
     }
 
-    if (Dependency.isDependPolygon(dependPattern)) {
+    if (DependencyUtils.isDependPolygon(dependPattern)) {
       const polygonPointList = LineToolUtils.getPolygonPointList(dependData, dependConfig);
       if (polygonPointList.length === 0) {
         return absAxis;
@@ -309,15 +308,15 @@ class LineToolUtils {
       return absAxis;
     }
 
-    if (Dependency.isDependRect(dependPattern)) {
+    if (DependencyUtils.isDependRect(dependPattern)) {
       const { x, y, width, height } = dependData;
-      absAxis.x = withinRange(absAxis.x, [x, x + width]);
-      absAxis.y = withinRange(absAxis.y, [y, y + height]);
+      absAxis.x = MathUtils.withinRange(absAxis.x, [x, x + width]);
+      absAxis.y = MathUtils.withinRange(absAxis.y, [y, y + height]);
       return absAxis;
     }
 
-    absAxis.x = withinRange(absAxis.x, [0, imageSize.width]);
-    absAxis.y = withinRange(absAxis.y, [0, imageSize.height]);
+    absAxis.x = MathUtils.withinRange(absAxis.x, [0, imageSize.width]);
+    absAxis.y = MathUtils.withinRange(absAxis.y, [0, imageSize.height]);
     return absAxis;
   };
 
@@ -342,7 +341,7 @@ class LineToolUtils {
   };
 
   public static isInLine(checkPoint: ICoordinate, point1: IPoint, point2: IPoint, scope: number = 3) {
-    const { length } = getFootOfPerpendicular(checkPoint, point1, point2);
+    const { length } = MathUtils.getFootOfPerpendicular(checkPoint, point1, point2);
     if (length < scope) {
       return true;
     }
