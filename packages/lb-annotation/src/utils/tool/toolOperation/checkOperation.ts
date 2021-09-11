@@ -1,5 +1,5 @@
 import { cloneDeep } from 'lodash';
-import { CommonToolUtils } from '@/';
+import { CommonToolUtils, TagUtils } from '@/';
 import { DEFAULT_TEXT_OFFSET } from '../../../constant/annotation';
 import { EToolName } from '../../../constant/tool';
 import { IPolygonData } from '../../../types/tool/polygon';
@@ -7,7 +7,6 @@ import AttributeUtils from '../AttributeUtils';
 import AxisUtils from '../AxisUtils';
 import DrawUtils from '../DrawUtils';
 import StyleUtils from '../StyleUtils';
-import { getTagNameList, getTagnameListWithoutConfig } from '../tagTool';
 import { BasicToolOperation, IBasicToolOperationProps } from './basicToolOperation';
 
 interface ICheckResult {
@@ -105,7 +104,9 @@ class CheckOperation extends BasicToolOperation {
     const tagInfoList = tagList.reduce((acc: any[], cur: any) => {
       return [
         ...acc,
-        ...(config?.inputList ? getTagNameList(cur.result, config.inputList) : getTagnameListWithoutConfig(cur.result)),
+        ...(config?.inputList
+          ? TagUtils.getTagNameList(cur.result, config.inputList)
+          : TagUtils.getTagnameListWithoutConfig(cur.result)),
       ];
     }, []);
     DrawUtils.drawTag(this.canvas, tagInfoList);

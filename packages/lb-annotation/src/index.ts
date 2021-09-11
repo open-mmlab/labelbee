@@ -11,7 +11,6 @@ import * as cStyle from './constant/style';
 import * as cTool from './constant/tool';
 
 // Utils
-import * as rectUtils from './utils/tool/rectTool';
 import TagUtils from './utils/tool/TagUtils';
 import * as uuid from './utils/uuid';
 import CommonToolUtils from './utils/tool/CommonToolUtils';
@@ -38,7 +37,6 @@ export {
   cKeyCode,
   cStyle,
   cTool,
-  rectUtils,
   toolUtils,
   uuid,
   DblClickEventListener,

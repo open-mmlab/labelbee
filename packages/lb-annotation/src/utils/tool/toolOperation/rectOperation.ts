@@ -9,18 +9,10 @@ import CanvasUtils from '../CanvasUtils';
 import CommonToolUtils from '../CommonToolUtils';
 import MarkerUtils from '../MarkerUtils';
 import { getPolygonPointUnderZoom } from '../polygonTool';
-import {
-  getCoordinateUnderZoom,
-  getRectEdgeList,
-  getRectPointList,
-  getRectUnderZoom,
-  isInRect,
-  isRectNotInPolygon,
-} from '../rectTool';
 import { BasicToolOperation, IBasicToolOperationProps } from './basicToolOperation';
 import TextAttributeClass from './textAttributeClass';
 import DrawUtils from '../DrawUtils';
-import { AxisUtils } from '@/';
+import { AxisUtils, RectUtils } from '@/';
 import MathUtils from '@/utils/MathUtils';
 
 interface IRectOperationProps extends IBasicToolOperationProps {
@@ -303,13 +295,13 @@ class RectOperation extends BasicToolOperation {
       if (this.selectedRectID) {
         const { selectedRect } = this;
         if (selectedRect) {
-          if (isInRect(coordinate, selectedRect, newScope, this.zoom)) {
+          if (RectUtils.isInRect(coordinate, selectedRect, newScope, this.zoom)) {
             return selectedRect.id;
           }
         }
       }
 
-      const hoverList = currentShowList.filter((rect) => isInRect(coordinate, rect, newScope, this.zoom));
+      const hoverList = currentShowList.filter((rect) => RectUtils.isInRect(coordinate, rect, newScope, this.zoom));
 
       if (hoverList.length === 0) {
         return '';
@@ -343,7 +335,7 @@ class RectOperation extends BasicToolOperation {
 
     return AxisUtils.returnClosePointIndex(
       this.getCoordinateUnderZoom(e),
-      getRectPointList(this.selectedRect, this.zoom),
+      RectUtils.getRectPointList(this.selectedRect, this.zoom),
       scope + 2,
     );
   }
@@ -355,7 +347,7 @@ class RectOperation extends BasicToolOperation {
 
     let edgeIndex = -1;
     const { selectedRect } = this;
-    const edgeList = getRectEdgeList(selectedRect, this.zoom);
+    const edgeList = RectUtils.getRectEdgeList(selectedRect, this.zoom);
     const coordinate = this.getCoordinateUnderZoom(e);
 
     for (let i = 0; i < edgeList.length; i++) {
@@ -450,7 +442,7 @@ class RectOperation extends BasicToolOperation {
     this.dragStatus = EDragStatus.Move;
 
     // 选中后的操作
-    const dragRect = getRectUnderZoom(this.dragInfo.firstRect, this.zoom);
+    const dragRect = RectUtils.getRectUnderZoom(this.dragInfo.firstRect, this.zoom);
     const { x, y, width, height } = dragRect;
     const offset = {
       x: coordinate.x - this.dragInfo.dragStartCoord.x,
@@ -587,7 +579,9 @@ class RectOperation extends BasicToolOperation {
       if (this.basicResult) {
         if (this.basicResult?.pointList?.length > 0) {
           // 多变形判断
-          if (isRectNotInPolygon(selectedRect, getPolygonPointUnderZoom(this.basicResult.pointList, this.zoom))) {
+          if (
+            RectUtils.isRectNotInPolygon(selectedRect, getPolygonPointUnderZoom(this.basicResult.pointList, this.zoom))
+          ) {
             return;
           }
         }
@@ -685,7 +679,7 @@ class RectOperation extends BasicToolOperation {
     this.setRectList(
       this.rectList.map((v) => {
         if (v.id === selectedRect.id) {
-          return getRectUnderZoom(selectedRect, 1 / this.zoom);
+          return RectUtils.getRectUnderZoom(selectedRect, 1 / this.zoom);
         }
         return v;
       }),
@@ -761,7 +755,7 @@ class RectOperation extends BasicToolOperation {
         if (this.basicResult?.pointList?.length > 0) {
           // changeDrawOutsideTarget 最好还是在这里下功夫这里暂时进行多边形的判断
           if (
-            isRectNotInPolygon(
+            RectUtils.isRectNotInPolygon(
               {
                 ...this.drawingRect,
                 x,
@@ -1239,14 +1233,14 @@ class RectOperation extends BasicToolOperation {
     let newFirsClickCoord;
 
     if (this.drawingRect && this.firstClickCoord) {
-      newDrawingRect = getRectUnderZoom(this.drawingRect, 1 / oldZoom);
-      newFirsClickCoord = getCoordinateUnderZoom(this.firstClickCoord, 1 / oldZoom);
+      newDrawingRect = RectUtils.getRectUnderZoom(this.drawingRect, 1 / oldZoom);
+      newFirsClickCoord = AxisUtils.changePointByZoom(this.firstClickCoord, 1 / oldZoom);
     }
 
     super.onWheel(e, false);
     if (newDrawingRect && newFirsClickCoord) {
-      this.drawingRect = getRectUnderZoom(newDrawingRect, this.zoom);
-      this.firstClickCoord = getCoordinateUnderZoom(newFirsClickCoord, this.zoom);
+      this.drawingRect = RectUtils.getRectUnderZoom(newDrawingRect, this.zoom);
+      this.firstClickCoord = AxisUtils.changePointByZoom(newFirsClickCoord, this.zoom);
     }
     this.render();
   }
@@ -1323,7 +1317,7 @@ class RectOperation extends BasicToolOperation {
 
     const { ctx } = this;
     let radius = 10;
-    const pointList = getRectPointList(selectedRect);
+    const pointList = RectUtils.getRectPointList(selectedRect);
     const len = pointList.length;
     const toolColor = this.getColor(rect.attribute);
 

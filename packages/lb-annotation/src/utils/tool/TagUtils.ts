@@ -2,6 +2,98 @@ import uuid from '../uuid';
 
 export default class TagUtil {
   /**
+   * 获取 tag key 的中文名
+   *
+   * @export
+   * @param {string} key
+   * @param {IInputList[]} labelInfoSet
+   * @returns
+   */
+  public static getTagKeyName(key: string, labelInfoSet: IInputList[]) {
+    if (!labelInfoSet) {
+      return;
+    }
+
+    return labelInfoSet.find((v) => v.value === key)?.key ?? '';
+  }
+
+  // 获取 TagName
+  // 获取当前标签名
+  public static getTagName([key = '', value = ''], labelInfoSet: IInputList[]) {
+    if (!labelInfoSet) {
+      return;
+    }
+
+    for (const i of labelInfoSet) {
+      if (i.value === key) {
+        if (!i.subSelected) {
+          console.error('标签解析错误', key, value);
+          return '';
+        }
+
+        for (const j of i.subSelected) {
+          if (j.value === value) {
+            return j.key;
+          }
+        }
+      }
+    }
+  }
+
+  /**
+   * 获取标签结果中的标签名
+   *
+   * @export
+   * @param {Object} result
+   * @param {IInputList[]} labelInfoSet
+   * @returns
+   */
+  public static getTagNameList(result: Object, labelInfoSet: IInputList[]) {
+    // 获取当前的标签结果的所有结果
+    if (Object.keys(result).length <= 0) {
+      return [];
+    }
+
+    return Object.entries(result)
+      .reduce((acc: any[], cur: any) => {
+        const [key, value] = cur;
+        if (value && value.length > 0) {
+          const valueList = value.split(';');
+          const nameList = {
+            keyName: this.getTagKeyName(key, labelInfoSet),
+            value: valueList.map((v: string) => this.getTagName([key, v], labelInfoSet)),
+          };
+          return [...acc, nameList];
+        }
+        return acc;
+      }, [])
+      .filter((v: any) => v);
+  }
+
+  /**
+   * 没有配置 获取标签结果中的标签名
+   * @param result
+   * @returns
+   */
+  public static getTagnameListWithoutConfig(result: Object) {
+    if (Object.keys(result).length <= 0) {
+      return [];
+    }
+
+    return Object.entries(result)
+      .reduce((acc: any[], cur: any): any[] => {
+        const [key, value] = cur;
+        const valueList = value.split(';');
+        const nameList = {
+          keyName: key,
+          value: valueList,
+        };
+        return [...acc, nameList];
+      }, [])
+      .filter((v: any) => v);
+  }
+
+  /**
    * 判断当前的 key value 是否在 inputList 里面
    * @param key
    * @param value

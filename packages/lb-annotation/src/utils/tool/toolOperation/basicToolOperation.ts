@@ -13,6 +13,7 @@ import EventListener from './eventListener';
 import locale from '../../../locales';
 import { EMessage } from '../../../locales/constants';
 import { CommonToolUtils } from '@/';
+import MathUtils from '@/utils/MathUtils';
 
 interface IBasicToolOperationProps {
   container: HTMLDivElement;
@@ -832,7 +833,7 @@ class BasicToolOperation extends EventListener {
     }
 
     // 更改当前图片的旋转方式
-    const rotate = CommonToolUtils.getRotate(this.basicImgInfo.rotate);
+    const rotate = MathUtils.getRotate(this.basicImgInfo.rotate);
     this.basicImgInfo.rotate = rotate;
     this.initImgPos();
 
