@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useCallback, useState } from 'react';
 import { LeftOutlined } from '@ant-design/icons';
 // import styles from './index.scss';
 import { connect } from 'react-redux';
@@ -10,17 +10,26 @@ import classNames from 'classnames';
 import { ESubmitType, prefix } from '@/constant';
 import ExportData from './ExportData';
 import HeaderOption from './headerOption';
+import { EToolName } from '@/data/enums/ToolType';
+import { AnnotationEngine } from '@sensetime/annotation';
 
 interface IProps {
   goBack?: (imgList?: IFileItem[]) => void;
   exportData?: (data: any[]) => void;
   headerName?: string;
   imgList: IFileItem[];
+  annotationEngine: AnnotationEngine;
 }
 
 const ToolHeader: React.FC<IProps> = ({
-  goBack, exportData, headerName, imgList,
+  goBack,
+  exportData,
+  headerName,
+  imgList,
+  annotationEngine,
 }) => {
+  const [, forceRender] = useState(0);
+
   // render 数据展示
   const currentOption = <ExportData exportData={exportData} />;
 
@@ -36,11 +45,28 @@ const ToolHeader: React.FC<IProps> = ({
     }
   };
 
+  const transformToolname = useCallback(() => {
+    let newToolName = EToolName.Polygon;
+
+    if (annotationEngine.toolName === EToolName.Polygon) {
+      newToolName = EToolName.Rect;
+    }
+
+    annotationEngine.setToolName(newToolName);
+    forceRender((s) => s + 1);
+  }, [annotationEngine]);
+
   return (
     <div className={classNames(`${prefix}-header`)}>
       <div className={`${prefix}-header__title`}>
         <LeftOutlined className={`${prefix}-header__icon`} onClick={closeAnnotation} />
         {headerName ? <span className={`${prefix}-header__name`}>{headerName}</span> : ''}
+        {annotationEngine && (
+          <>
+            <span style={{ margin: 10 }}>{annotationEngine.toolName}</span>
+            <button onClick={transformToolname}>切换当前工具(临时）</button>
+          </>
+        )}
         {currentOption}
         <div
           id='operationNode'
@@ -56,6 +82,7 @@ const ToolHeader: React.FC<IProps> = ({
 
 const mapStateToProps = (state: AppState) => ({
   imgList: state.annotation.imgList,
+  annotationEngine: state.annotation.annotationEngine,
 });
 
 export default connect(mapStateToProps)(ToolHeader);

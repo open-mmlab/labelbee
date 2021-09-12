@@ -10,6 +10,7 @@ import useSize from '@/hooks/useSize';
 import { IFileItem } from '@/types/data';
 import { IStepInfo } from '@/types/step';
 import { InitToolStyleConfig } from '@/store/toolStyle/actionCreators';
+import { AnnotationEngine } from '@sensetime/annotation';
 
 interface IProps extends AppState {
   imgAttribute: ImgAttributeState;
@@ -19,10 +20,11 @@ interface IProps extends AppState {
   stepList: IStepInfo[];
   step: number;
   imgIndex: number;
+  annotationEngine: AnnotationEngine;
 }
 
 const AnnotationOperation: React.FC<IProps> = (props: IProps) => {
-  const { imgAttribute, toolStyle, toolInstance } = props;
+  const { imgAttribute, toolStyle, toolInstance, annotationEngine } = props;
   const annotationRef = useRef<HTMLDivElement>(null);
   const containerRef = useRef<HTMLDivElement>(null);
   // const windowSize = useContext(viewportContext);
@@ -56,12 +58,19 @@ const AnnotationOperation: React.FC<IProps> = (props: IProps) => {
     if (toolInstance) {
       toolInstance.setStyle(toolStyle);
     }
+    if (annotationEngine) {
+      annotationEngine.setStyle(toolStyle);
+    }
   }, [toolStyle]);
 
   /** 窗口大小监听 */
   useEffect(() => {
     if (toolInstance?.setSize) {
       toolInstance.setSize(size);
+    }
+
+    if (annotationEngine) {
+      annotationEngine.setSize(size);
     }
   }, [size]);
 
@@ -76,7 +85,7 @@ const AnnotationOperation: React.FC<IProps> = (props: IProps) => {
 
 const mapStateToProps = (state: AppState) => {
   const annotationState = _.pickBy(state.annotation, (v, k) =>
-    ['imgList', 'imgIndex', 'stepList', 'step', 'toolInstance'].includes(k),
+    ['imgList', 'imgIndex', 'stepList', 'step', 'toolInstance', 'annotationEngine'].includes(k),
   );
   return {
     imgAttribute: state.imgAttribute,

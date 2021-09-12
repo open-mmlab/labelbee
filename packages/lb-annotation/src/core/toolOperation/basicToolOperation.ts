@@ -14,7 +14,7 @@ import locale from '../../locales';
 import { EMessage } from '../../locales/constants';
 import { CommonToolUtils } from '@/';
 import MathUtils from '@/utils/MathUtils';
-import { styleDefaultConfig } from '@/constant/toolConfig';
+import { styleDefaultConfig } from '@/constant/defaultConfig';
 
 interface IBasicToolOperationProps {
   container: HTMLDivElement;

@@ -1,4 +1,4 @@
-import RectOperationAsNewName from './core/toolOperation/rectOperation';
+import { RectOperation } from './core/toolOperation/rectOperation';
 import TagOperation from './core/toolOperation/tagOperation';
 import MeasureOperation from './core/toolOperation/measureOperation';
 import { BasicToolOperation } from './core/toolOperation/basicToolOperation';
@@ -24,8 +24,6 @@ import DrawUtils from './utils/tool/DrawUtils';
 import DblClickEventListener from './utils/tool/DblClickEventListener'; // 暂时这样支持外部工具的使用
 
 import AnnotationEngine from './core';
-
-const RectOperation = RectOperationAsNewName;
 
 const toolUtils = CommonToolUtils;
 
