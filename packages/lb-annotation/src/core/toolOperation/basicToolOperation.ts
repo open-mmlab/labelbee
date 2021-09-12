@@ -1,19 +1,20 @@
 import { isNumber } from 'lodash';
-import { EDragStatus, EGrowthMode, ELang } from '../../../constant/annotation';
-import EKeyCode from '../../../constant/keyCode';
-import { BASE_ICON, COLORS_ARRAY } from '../../../constant/style';
-import ActionsHistory from '../../ActionsHistory';
-import AttributeUtils from '../AttributeUtils';
-import DblClickEventListener from '../DblClickEventListener';
-import DrawUtils from '../DrawUtils';
-import ImgPosUtils from '../ImgPosUtils';
-import RenderDomUtils from '../RenderDomUtils';
-import ZoomUtils from '../ZoomUtils';
+import { EDragStatus, EGrowthMode, ELang } from '../../constant/annotation';
+import EKeyCode from '../../constant/keyCode';
+import { BASE_ICON, COLORS_ARRAY } from '../../constant/style';
+import ActionsHistory from '../../utils/ActionsHistory';
+import AttributeUtils from '../../utils/tool/AttributeUtils';
+import DblClickEventListener from '../../utils/tool/DblClickEventListener';
+import DrawUtils from '../../utils/tool/DrawUtils';
+import ImgPosUtils from '../../utils/tool/ImgPosUtils';
+import RenderDomUtils from '../../utils/tool/RenderDomUtils';
+import ZoomUtils from '../../utils/tool/ZoomUtils';
 import EventListener from './eventListener';
-import locale from '../../../locales';
-import { EMessage } from '../../../locales/constants';
+import locale from '../../locales';
+import { EMessage } from '../../locales/constants';
 import { CommonToolUtils } from '@/';
 import MathUtils from '@/utils/MathUtils';
+import { styleDefaultConfig } from '@/constant/toolConfig';
 
 interface IBasicToolOperationProps {
   container: HTMLDivElement;
@@ -843,18 +844,21 @@ class BasicToolOperation extends EventListener {
 
   /** 获取当前属性颜色 */
   public getColor(attribute = '', config = this.config) {
-    if (config?.attributeConfigurable === true) {
+    if (config?.attributeConfigurable === true && this.style.attributeColor) {
       const attributeIndex = AttributeUtils.getAttributeIndex(attribute, config.attributeList ?? []) + 1;
       return this.style.attributeColor[attributeIndex];
     }
     const { color, toolColor } = this.style;
-    return toolColor[color];
+    if (toolColor) {
+      return toolColor[color];
+    }
+    return styleDefaultConfig.toolColor['1'];
   }
 
   public getLineColor(attribute = '') {
     if (this.config?.attributeConfigurable === true) {
       const attributeIndex = AttributeUtils.getAttributeIndex(attribute, this.config?.attributeList ?? []) + 1;
-      return this.style?.attributeLineColor[attributeIndex] ?? '';
+      return this.style.attributeLineColor ? this.style.attributeLineColor[attributeIndex] : '';
     }
     const { color, lineColor } = this.style;
     if (color && lineColor) {

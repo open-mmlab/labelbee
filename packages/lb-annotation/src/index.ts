@@ -1,7 +1,7 @@
-import RectOperationAsNewName from './utils/tool/toolOperation/rectOperation';
-import TagOperation from './utils/tool/toolOperation/tagOperation';
-import MeasureOperation from './utils/tool/toolOperation/measureOperation';
-import { BasicToolOperation } from './utils/tool/toolOperation/basicToolOperation';
+import RectOperationAsNewName from './core/toolOperation/rectOperation';
+import TagOperation from './core/toolOperation/tagOperation';
+import MeasureOperation from './core/toolOperation/measureOperation';
+import { BasicToolOperation } from './core/toolOperation/basicToolOperation';
 
 // Constant
 import * as cAnnotation from './constant/annotation';
@@ -21,11 +21,13 @@ import AxisUtils from './utils/tool/AxisUtils';
 import DrawUtils from './utils/tool/DrawUtils';
 
 // ToolListener
-import DblClickEventListener from './utils/tool/DblClickEventListener';
+import DblClickEventListener from './utils/tool/DblClickEventListener'; // 暂时这样支持外部工具的使用
+
+import AnnotationEngine from './core';
 
 const RectOperation = RectOperationAsNewName;
 
-const toolUtils = CommonToolUtils; // 暂时这样支持外部工具的使用
+const toolUtils = CommonToolUtils;
 
 export {
   RectOperation,
@@ -46,4 +48,5 @@ export {
   AxisUtils,
   TagUtils,
   DrawUtils,
+  AnnotationEngine,
 };

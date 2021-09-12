@@ -1,12 +1,12 @@
 import { cloneDeep } from 'lodash';
 import { CommonToolUtils, TagUtils } from '@/';
-import { DEFAULT_TEXT_OFFSET } from '../../../constant/annotation';
-import { EToolName } from '../../../constant/tool';
-import { IPolygonData } from '../../../types/tool/polygon';
-import AttributeUtils from '../AttributeUtils';
-import AxisUtils from '../AxisUtils';
-import DrawUtils from '../DrawUtils';
-import StyleUtils from '../StyleUtils';
+import { DEFAULT_TEXT_OFFSET } from '../../constant/annotation';
+import { EToolName } from '../../constant/tool';
+import { IPolygonData } from '../../types/tool/polygon';
+import AttributeUtils from '../../utils/tool/AttributeUtils';
+import AxisUtils from '../../utils/tool/AxisUtils';
+import DrawUtils from '../../utils/tool/DrawUtils';
+import StyleUtils from '../../utils/tool/StyleUtils';
 import { BasicToolOperation, IBasicToolOperationProps } from './basicToolOperation';
 
 interface ICheckResult {

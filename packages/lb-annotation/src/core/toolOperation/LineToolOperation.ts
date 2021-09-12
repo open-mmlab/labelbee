@@ -9,14 +9,18 @@ import ActionsHistory from '@/utils/ActionsHistory';
 import uuid from '@/utils/uuid';
 import EKeyCode from '@/constant/keyCode';
 import { BasicToolOperation, IBasicToolOperationProps } from './basicToolOperation';
-import LineToolUtils from '../LineToolUtils';
-import { isInPolygon, createSmoothCurvePoints, createSmoothCurvePointsFromPointList } from '../polygonTool';
-import CommonToolUtils from '../CommonToolUtils';
-import CanvasUtils from '../CanvasUtils';
-import DrawUtils from '../DrawUtils';
-import DependencyUtils from '../DependencyUtils';
-import StyleUtils from '../StyleUtils';
-import AttributeUtils from '../AttributeUtils';
+import LineToolUtils from '../../utils/tool/LineToolUtils';
+import {
+  isInPolygon,
+  createSmoothCurvePoints,
+  createSmoothCurvePointsFromPointList,
+} from '../../utils/tool/polygonTool';
+import CommonToolUtils from '../../utils/tool/CommonToolUtils';
+import CanvasUtils from '../../utils/tool/CanvasUtils';
+import DrawUtils from '../../utils/tool/DrawUtils';
+import DependencyUtils from '../../utils/tool/DependencyUtils';
+import StyleUtils from '../../utils/tool/StyleUtils';
+import AttributeUtils from '../../utils/tool/AttributeUtils';
 import TextAttributeClass from './textAttributeClass';
 import MathUtils from '@/utils/MathUtils';
 

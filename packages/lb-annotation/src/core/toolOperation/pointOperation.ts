@@ -1,16 +1,16 @@
-import { DEFAULT_TEXT_OFFSET, EDragStatus, ESortDirection } from '../../../constant/annotation';
-import EKeyCode from '../../../constant/keyCode';
-import uuid from '../../uuid';
-import AttributeUtils from '../AttributeUtils';
+import { DEFAULT_TEXT_OFFSET, EDragStatus, ESortDirection } from '../../constant/annotation';
+import EKeyCode from '../../constant/keyCode';
+import uuid from '../../utils/uuid';
+import AttributeUtils from '../../utils/tool/AttributeUtils';
 import { BasicToolOperation, IBasicToolOperationProps } from './basicToolOperation';
 import TextAttributeClass from './textAttributeClass';
-import DrawUtils from '../DrawUtils';
-import StyleUtils from '../StyleUtils';
-import AxisUtils from '../AxisUtils';
-import locale from '../../../locales';
-import { EMessage } from '../../../locales/constants';
-import CommonToolUtils from '../CommonToolUtils';
-import { IPolygonData } from '../../../types/tool/polygon';
+import DrawUtils from '../../utils/tool/DrawUtils';
+import StyleUtils from '../../utils/tool/StyleUtils';
+import AxisUtils from '../../utils/tool/AxisUtils';
+import locale from '../../locales';
+import { EMessage } from '../../locales/constants';
+import CommonToolUtils from '../../utils/tool/CommonToolUtils';
+import { IPolygonData } from '../../types/tool/polygon';
 import MathUtils from '@/utils/MathUtils';
 
 const TEXTAREA_WIDTH = 200;

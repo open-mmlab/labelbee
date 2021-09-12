@@ -1,6 +1,5 @@
-import TagUtils from '../TagUtils';
-import uuid from '../../uuid';
-import { getTagNameList } from '../tagTool';
+import TagUtils from '../../utils/tool/TagUtils';
+import uuid from '../../utils/uuid';
 import { BasicToolOperation, IBasicToolOperationProps } from './basicToolOperation';
 import { CommonToolUtils } from '@/';
 
@@ -219,7 +218,7 @@ class TagOperation extends BasicToolOperation {
     }
 
     const dom = document.createElement('div');
-    const tagInfoList = getTagNameList(this.currentTagResult.result, this.config.inputList);
+    const tagInfoList = TagUtils.getTagNameList(this.currentTagResult.result, this.config.inputList);
 
     dom.innerHTML =
       tagInfoList.reduce((acc: string, cur: { keyName: string; value: string[] }) => {

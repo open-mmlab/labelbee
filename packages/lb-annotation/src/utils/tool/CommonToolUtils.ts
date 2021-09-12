@@ -2,13 +2,13 @@ import { isObject } from 'lodash';
 import { IPolygonPoint } from '../../types/tool/polygon';
 import { ESortDirection, EStepType } from '../../constant/annotation';
 import { ECheckModel, EToolName } from '@/constant/tool';
-import CheckOperation from './toolOperation/checkOperation';
-import PolygonOperation from './toolOperation/polygonOperation';
-import RectOperationAsNewName from './toolOperation/rectOperation';
-import TagOperation from './toolOperation/tagOperation';
-import LineToolOperation from './toolOperation/LineToolOperation';
-import PointOperation from './toolOperation/pointOperation';
-import TextToolOperation from './toolOperation/TextToolOperation';
+import CheckOperation from '../../core/toolOperation/checkOperation';
+import PolygonOperation from '../../core/toolOperation/polygonOperation';
+import RectOperationAsNewName from '../../core/toolOperation/rectOperation';
+import TagOperation from '../../core/toolOperation/tagOperation';
+import LineToolOperation from '../../core/toolOperation/LineToolOperation';
+import PointOperation from '../../core/toolOperation/pointOperation';
+import TextToolOperation from '../../core/toolOperation/TextToolOperation';
 
 type point = {
   id: string;

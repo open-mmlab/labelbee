@@ -1,4 +1,4 @@
-import { CommonToolUtils } from '@/';
+import { AxisUtils, CommonToolUtils } from '@/';
 import { IPolygonPoint } from '../../types/tool/polygon';
 import { isInPolygon } from './polygonTool';
 
