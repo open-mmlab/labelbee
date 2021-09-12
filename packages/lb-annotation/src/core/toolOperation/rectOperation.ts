@@ -908,10 +908,12 @@ class RectOperation extends BasicToolOperation {
         this.rectList.filter((rect) => rect.sourceID === basicSourceID),
         this.config.textCheckType,
       );
-      this.drawingRect = {
-        ...this.drawingRect,
-        textAttribute,
-      };
+      if (this.drawingRect) {
+        this.drawingRect = {
+          ...this.drawingRect,
+          textAttribute,
+        };
+      }
     }
 
     // 标注序号添加

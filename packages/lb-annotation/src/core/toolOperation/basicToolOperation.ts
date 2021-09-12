@@ -15,6 +15,8 @@ import { EMessage } from '../../locales/constants';
 import { CommonToolUtils } from '@/';
 import MathUtils from '@/utils/MathUtils';
 import { styleDefaultConfig } from '@/constant/defaultConfig';
+import AxisUtils from '@/utils/tool/AxisUtils';
+import { EToolName } from '@/constant/tool';
 
 interface IBasicToolOperationProps {
   container: HTMLDivElement;
@@ -45,6 +47,8 @@ class BasicToolOperation extends EventListener {
 
   public canvas!: HTMLCanvasElement;
 
+  public basicCanvas!: HTMLCanvasElement;
+
   public imgNode?: HTMLImageElement;
 
   public basicImgInfo: any; // 用于存储当前图片的信息
@@ -53,6 +57,8 @@ class BasicToolOperation extends EventListener {
 
   // 数据依赖
   public basicResult?: any;
+
+  public dependToolName?: EToolName;
 
   // 工具记录
   public history: ActionsHistory; // 存储当前任务下的所有记录
@@ -195,6 +201,10 @@ class BasicToolOperation extends EventListener {
     return this._ctx || this.canvas?.getContext('2d');
   }
 
+  get basicCtx() {
+    return this.basicCanvas?.getContext('2d');
+  }
+
   get rotate() {
     return this.basicImgInfo?.rotate ?? 0;
   }
@@ -236,6 +246,7 @@ class BasicToolOperation extends EventListener {
     this.initPosition();
     this.eventBinding();
     this.render();
+    this.renderBasicCanvas();
   }
 
   public destroy() {
@@ -244,9 +255,25 @@ class BasicToolOperation extends EventListener {
   }
 
   public createCanvas(size: ISize) {
+    // TODO 后续需要将 canvas 抽离出来，迭代器叠加
+    const basicCanvas = document.createElement('canvas');
+    basicCanvas.setAttribute('width', `${size.width}`);
+    basicCanvas.setAttribute('height', `${size.height}`);
+    basicCanvas.style.position = 'absolute';
+    basicCanvas.style.left = '0';
+    basicCanvas.style.top = '0';
+    basicCanvas.style.zIndex = '0';
+    this.container.appendChild(basicCanvas);
+    this.basicCanvas = basicCanvas;
+
     const canvas = document.createElement('canvas');
     canvas.setAttribute('width', `${size.width}`);
     canvas.setAttribute('height', `${size.height}`);
+    canvas.style.position = 'absolute';
+    canvas.style.left = '0';
+    canvas.style.top = '0';
+    canvas.style.zIndex = '10';
+
     this.container.appendChild(canvas);
     this.canvas = canvas;
     this.container.style.cursor = this.defaultCursor;
@@ -256,6 +283,10 @@ class BasicToolOperation extends EventListener {
     if (this.canvas && this.container.contains(this.canvas)) {
       // container 内可能包含其他元素，故需单独清楚
       this.container.removeChild(this.canvas);
+    }
+
+    if (this.basicCanvas && this.container.contains(this.basicCanvas)) {
+      this.container.removeChild(this.basicCanvas);
     }
   }
 
@@ -290,6 +321,7 @@ class BasicToolOperation extends EventListener {
 
     this.initImgPos();
     this.render();
+    this.renderBasicCanvas();
   }
 
   public setErrorImg() {
@@ -379,6 +411,7 @@ class BasicToolOperation extends EventListener {
     this.zoom = zoom;
     this.innerZoom = zoom;
     this.render();
+    this.renderBasicCanvas();
 
     this.emit('dependRender');
     this.emit('renderZoom');
@@ -388,22 +421,31 @@ class BasicToolOperation extends EventListener {
    * 用于依赖情况下的图片初始化
    */
   public initPosition() {
-    if (this.basicResult && this.imgInfo && this._imgAttribute) {
+    if (this.basicResult && this.imgInfo) {
       // 目的： 初始化有依赖情况下的多框展示
-      const { basicResult, size, imgNode, _imgAttribute, imgInfo } = this;
-      if (basicResult && imgNode) {
+      const { basicResult, size, imgNode, _imgAttribute, imgInfo, dependToolName } = this;
+      if (basicResult && imgNode && dependToolName) {
         let newBoundry = basicResult;
 
-        // 依赖检测
-        if (basicResult.pointList) {
-          // 多边形检测
-          const basicZone = CommonToolUtils.calcViewportBoundaries(basicResult.pointList);
-          newBoundry = {
-            x: basicZone.left,
-            y: basicZone.top,
-            width: basicZone.right - basicZone.left,
-            height: basicZone.bottom - basicZone.top,
-          };
+        switch (dependToolName) {
+          case EToolName.Polygon: {
+            // 依赖检测
+            if (basicResult.pointList) {
+              // 多边形检测
+              const basicZone = MathUtils.calcViewportBoundaries(basicResult.pointList);
+              newBoundry = {
+                x: basicZone.left,
+                y: basicZone.top,
+                width: basicZone.right - basicZone.left,
+                height: basicZone.bottom - basicZone.top,
+              };
+            }
+            break;
+          }
+
+          default: {
+            //
+          }
         }
 
         const pos = ImgPosUtils.getBasicRecPos(
@@ -427,6 +469,7 @@ class BasicToolOperation extends EventListener {
           // 需要加载下更改当前的 imgInfo
           this.zoom = pos.innerZoom;
           this.render();
+          this.renderBasicCanvas();
         }
       }
     } else {
@@ -471,6 +514,10 @@ class BasicToolOperation extends EventListener {
 
   public clearCanvas() {
     this.ctx?.clearRect(0, 0, this.size.width, this.size.height);
+  }
+
+  public clearBasicCanvas() {
+    this.basicCtx?.clearRect(0, 0, this.size.width, this.size.height);
   }
 
   /** 事件绑定 */
@@ -567,6 +614,7 @@ class BasicToolOperation extends EventListener {
       }
 
       this.render();
+      this.renderBasicCanvas();
     } catch (error) {
       console.error(error);
     }
@@ -698,6 +746,7 @@ class BasicToolOperation extends EventListener {
     if (isRender) {
       this.render();
     }
+    this.renderBasicCanvas();
   }
 
   public wheelChangePos = (coord: ICoordinate, operator: 1 | -1 | 0, newZoom?: number) => {
@@ -757,7 +806,7 @@ class BasicToolOperation extends EventListener {
   public drawImg = () => {
     if (!this.imgNode) return;
 
-    DrawUtils.drawImg(this.canvas, this.imgNode, {
+    DrawUtils.drawImg(this.basicCanvas, this.imgNode, {
       zoom: this.zoom,
       currentPos: this.currentPos,
       rotate: this.rotate,
@@ -772,7 +821,7 @@ class BasicToolOperation extends EventListener {
   public setSize(size: ISize) {
     this.size = size;
     if (this.container.contains(this.canvas)) {
-      this.container.removeChild(this.canvas);
+      this.destroyCanvas();
       this.createCanvas(size);
       this.eventUnbinding();
       this.init();
@@ -816,6 +865,10 @@ class BasicToolOperation extends EventListener {
     this.basicResult = basicResult;
     this.initPosition();
     this.emit('dependRender');
+  }
+
+  public setDependName(dependToolName: EToolName) {
+    this.dependToolName = dependToolName;
   }
 
   public setAttributeLockList(attributeLockList: string[]) {
@@ -882,13 +935,51 @@ class BasicToolOperation extends EventListener {
     this._invalidDOM = RenderDomUtils.renderInvalidPage(this.canvas, this.container, this.lang);
   }
 
+  public renderBasicCanvas() {
+    if (!this.basicCanvas) {
+      return;
+    }
+
+    this.clearBasicCanvas();
+    this.drawImg();
+    if (this.basicResult && this.dependToolName) {
+      switch (this.dependToolName) {
+        case EToolName.Rect: {
+          DrawUtils.drawRect(
+            this.basicCanvas,
+            AxisUtils.changeRectByZoom(this.basicResult, this.zoom, this.currentPos),
+            {
+              color: 'rgba(204,204,204,1.00)',
+            },
+          );
+          break;
+        }
+
+        case EToolName.Polygon: {
+          DrawUtils.drawPolygonWithFillAndLine(
+            this.basicCanvas,
+            AxisUtils.changePointListByZoom(this.basicResult.pointList, this.zoom, this.currentPos),
+            {
+              fillColor: 'transparent',
+              strokeColor: 'rgba(204,204,204,1.00)',
+              isClose: true,
+            },
+          );
+
+          break;
+        }
+        default: {
+          //
+        }
+      }
+    }
+  }
+
   public render() {
     if (!this.canvas || !this.ctx || !this.imgNode) {
       return;
     }
-
     this.clearCanvas();
-    this.drawImg();
   }
 
   // 触发外界 style 的样式

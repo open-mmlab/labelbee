@@ -206,6 +206,19 @@ export const annotationReducer = (
       annotationEngine.setImgNode(imgNode);
       const result = stepResult?.result || [];
       toolInstance.setResult(result, isInitData);
+
+      // 拉框工具
+      annotationEngine.setBasicInfo(EToolName.Rect,{ width: 100, height: 100, x: 10, y: 10} )
+
+      // 多边形工具
+      // annotationEngine.setBasicInfo(EToolName.Polygon, {
+      //   pointList: [
+      //     { x: 123, y: 123 },
+      //     { x: 523, y: 423 },
+      //     { x: 233, y: 443 },
+      //   ],
+      // });
+
       toolInstance.history.initRecord(result, true);
 
       return {

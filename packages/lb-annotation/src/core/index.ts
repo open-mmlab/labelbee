@@ -6,6 +6,7 @@ import { EToolName } from '@/constant/tool';
 import { getConfig } from '@/constant/defaultConfig';
 import CommonToolUtils from '@/utils/tool/CommonToolUtils';
 import { IBasicToolOperationProps } from './toolOperation/basicToolOperation';
+import { IPolygonData } from '@/types/tool/polygon';
 
 interface IProps extends IBasicToolOperationProps {
   toolName: EToolName;
@@ -25,6 +26,11 @@ export default class AnnotationEngine {
   private style: any; // 定义 TODO！！
 
   private imgNode?: HTMLImageElement;
+
+  // 工具内依赖的记录
+  private basicResult?: IRect | IPolygonData; // 用于存储当前的标注结果的依赖物体结果状态
+
+  private dependToolName?: EToolName;
 
   constructor(props: IProps) {
     this.container = props.container;
@@ -103,5 +109,19 @@ export default class AnnotationEngine {
 
     this.toolInstance = new ToolOperation(defaultData);
     this.toolInstance.init();
+  }
+
+  /**
+   * 设置当前依赖物体渲染
+   * @param dependToolName
+   * @param basicResult
+   */
+  public setBasicInfo(dependToolName: EToolName, basicResult: IRect | IPolygonData) {
+    this.dependToolName = dependToolName;
+    this.basicResult = basicResult;
+
+    this.toolInstance.setDependName(dependToolName);
+    this.toolInstance.setBasicResult(basicResult);
+    this.toolInstance.renderBasicCanvas();
   }
 }
