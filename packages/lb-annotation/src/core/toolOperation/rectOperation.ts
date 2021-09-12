@@ -106,6 +106,13 @@ class RectOperation extends BasicToolOperation {
     window.parent.document.addEventListener('contextmenu', this.onContextmenu, false);
   }
 
+  public destroy() {
+    super.destroy();
+    if (this._textAttributInstance) {
+      this._textAttributInstance.clearTextAttribute();
+    }
+  }
+
   public setConfig(config: string, isClear = false) {
     this.config = CommonToolUtils.jsonParser(config);
     if (isClear === true) {
@@ -879,10 +886,12 @@ class RectOperation extends BasicToolOperation {
       const nextMarkInfo = CommonToolUtils.getNextMarker(this.rectList, this.config.markerList, this.markerIndex);
 
       if (nextMarkInfo) {
-        this.drawingRect = {
-          ...this.drawingRect,
-          label: nextMarkInfo.label,
-        };
+        if (this.drawingRect) {
+          this.drawingRect = {
+            ...this.drawingRect,
+            label: nextMarkInfo.label,
+          };
+        }
         this.markerIndex = nextMarkInfo.index;
         this.emit('markIndexChange');
       } else {
@@ -1321,7 +1330,7 @@ class RectOperation extends BasicToolOperation {
     const len = pointList.length;
     const toolColor = this.getColor(rect.attribute);
 
-    pointList.forEach((v, i) => {
+    pointList.forEach((v: ICoordinate, i: number) => {
       ctx.save();
       ctx.moveTo(v.x, v.y);
       ctx.beginPath();

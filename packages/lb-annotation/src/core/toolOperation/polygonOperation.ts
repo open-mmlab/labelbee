@@ -86,6 +86,13 @@ class PolygonOperation extends BasicToolOperation {
     this.container.removeEventListener('mouseup', this.dragMouseUp);
   }
 
+  public destroy() {
+    super.destroy();
+    if (this._textAttributInstance) {
+      this._textAttributInstance.clearTextAttribute();
+    }
+  }
+
   public get selectedPolygon() {
     return PolygonUtils.getPolygonByID(this.polygonList, this.selectedID);
   }
