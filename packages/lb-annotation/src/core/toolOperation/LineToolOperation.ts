@@ -1044,7 +1044,7 @@ class LineToolOperation extends BasicToolOperation {
   }
 
   public onMouseMove(e: MouseEvent) {
-    if (super.onMouseDown(e) || this.forbidMouseOperation || !this.imgInfo) {
+    if (super.onMouseMove(e) || this.forbidMouseOperation || !this.imgInfo) {
       return;
     }
     const coord = this.getAxis(e);
