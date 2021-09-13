@@ -1,6 +1,64 @@
 import { IPolygonPoint } from '../../types/tool/polygon';
 
 export default class AxisUtils {
+  /**
+   * 获取原图坐标下，相对当前图片的偏移值
+   * @param coordinate
+   * @param currentPos
+   * @param zoom
+   */
+  public static getOffsetCoordinate(coordinate: ICoordinate, currentPos: ICoordinate, zoom: number) {
+    return {
+      x: coordinate.x * zoom + currentPos.x,
+      y: coordinate.y * zoom + currentPos.y,
+    };
+  }
+
+  // 通过当前的坐标、currentPos、drawOutsideTarget 来判断当前最新的坐标
+  public static changeDrawOutsideTarget(
+    coord: ICoordinate,
+    currentPos: ICoordinate,
+    imgInfo: ISize,
+    drawOutsideTarget?: boolean,
+    basicResult?: IRect,
+    zoom?: number,
+  ) {
+    if (typeof drawOutsideTarget === 'boolean' && !drawOutsideTarget) {
+      if (basicResult && zoom) {
+        // 存在 basicRect ，则需要在其范围内进行操作
+        if (coord.x - currentPos.x > (basicResult.x + basicResult.width) * zoom) {
+          coord.x = (basicResult.x + basicResult.width) * zoom + currentPos.x;
+        }
+        if (coord.x - currentPos.x < basicResult.x * zoom) {
+          coord.x = basicResult.x * zoom + currentPos.x;
+        }
+
+        if (coord.y - currentPos.y > (basicResult.y + basicResult.height) * zoom) {
+          coord.y = (basicResult.y + basicResult.height) * zoom + currentPos.y;
+        }
+        if (coord.y - currentPos.y < basicResult.y * zoom) {
+          coord.y = basicResult.y * zoom + currentPos.y;
+        }
+      } else {
+        // 不可在图片外进行标注， 进行限制。
+        if (coord.x - currentPos.x > imgInfo.width) {
+          coord.x = imgInfo.width + currentPos.x;
+        }
+        if (coord.x - currentPos.x < 0) {
+          coord.x = currentPos.x;
+        }
+
+        if (coord.y - currentPos.y > imgInfo.height) {
+          coord.y = imgInfo.height + currentPos.y;
+        }
+        if (coord.y - currentPos.y < 0) {
+          coord.y = currentPos.y;
+        }
+      }
+    }
+    return coord;
+  }
+
   public static changeCoordinateByRotate(coordinate: ICoordinate, rotate: number, imgSize: ISize) {
     const { width, height } = imgSize;
     const { x, y } = coordinate;

@@ -1,28 +1,19 @@
-import { DEFAULT_TEXT_SHADOW, EDragStatus, ESortDirection } from '../../../constant/annotation';
-import EKeyCode from '../../../constant/keyCode';
-import { EDragTarget } from '../../../constant/tool';
-import locale from '../../../locales';
-import { EMessage } from '../../../locales/constants';
-import { isInRange } from '../../math';
-import uuid from '../../uuid';
-import AttributeUtil from '../AttributeUtil';
-import CanvasUtil from '../CanvasUtil';
-import { changeDrawOutsideTarget, getMaxOrder, getOffsetCoordinate, hotkeyFilter, jsonParser } from '../common';
-import CommonToolUtils from '../CommonToolUtils';
-import MarkerUtils from '../MarkerUtils';
-import { getFootOfPerpendicular, returnClosePointIndex } from '../math';
-import { getPolygonPointUnderZoom } from '../polygonTool';
-import {
-  getCoordinateUnderZoom,
-  getRectEdgeList,
-  getRectPointList,
-  getRectUnderZoom,
-  isInRect,
-  isRectNotInPolygon,
-} from '../rectTool';
+import { DEFAULT_TEXT_SHADOW, EDragStatus, ESortDirection } from '../../constant/annotation';
+import EKeyCode from '../../constant/keyCode';
+import { EDragTarget } from '../../constant/tool';
+import locale from '../../locales';
+import { EMessage } from '../../locales/constants';
+import uuid from '../../utils/uuid';
+import AttributeUtils from '../../utils/tool/AttributeUtils';
+import CanvasUtils from '../../utils/tool/CanvasUtils';
+import CommonToolUtils from '../../utils/tool/CommonToolUtils';
+import MarkerUtils from '../../utils/tool/MarkerUtils';
+import { getPolygonPointUnderZoom } from '../../utils/tool/polygonTool';
 import { BasicToolOperation, IBasicToolOperationProps } from './basicToolOperation';
 import TextAttributeClass from './textAttributeClass';
-import DrawUtils from '../DrawUtils';
+import DrawUtils from '../../utils/tool/DrawUtils';
+import { AxisUtils, RectUtils } from '@/';
+import MathUtils from '@/utils/MathUtils';
 
 interface IRectOperationProps extends IBasicToolOperationProps {
   drawOutSideTarget: boolean; // 是否可以在边界外进行标注
@@ -72,7 +63,7 @@ class RectOperation extends BasicToolOperation {
     this.drawOutSideTarget = props.drawOutSideTarget || false;
     this.rectList = [];
     this.isFlow = true;
-    this.config = jsonParser(props.config);
+    this.config = CommonToolUtils.jsonParser(props.config);
     this.hoverRectEdgeIndex = -1;
     this.hoverRectPointIndex = -1;
     this.markerIndex = 0;
@@ -115,8 +106,15 @@ class RectOperation extends BasicToolOperation {
     window.parent.document.addEventListener('contextmenu', this.onContextmenu, false);
   }
 
+  public destroy() {
+    super.destroy();
+    if (this._textAttributInstance) {
+      this._textAttributInstance.clearTextAttribute();
+    }
+  }
+
   public setConfig(config: string, isClear = false) {
-    this.config = jsonParser(config);
+    this.config = CommonToolUtils.jsonParser(config);
     if (isClear === true) {
       this.clearResult(false);
     }
@@ -272,8 +270,8 @@ class RectOperation extends BasicToolOperation {
       // 切换的时候如果存在
 
       let textAttribute = newTextAttribute;
-      if (AttributeUtil.textAttributeValidate(this.config.textCheckType, '', textAttribute) === false) {
-        this.emit('messageError', AttributeUtil.getErrorNotice(this.config.textCheckType, this.lang));
+      if (AttributeUtils.textAttributeValidate(this.config.textCheckType, '', textAttribute) === false) {
+        this.emit('messageError', AttributeUtils.getErrorNotice(this.config.textCheckType, this.lang));
         textAttribute = '';
       }
 
@@ -304,13 +302,13 @@ class RectOperation extends BasicToolOperation {
       if (this.selectedRectID) {
         const { selectedRect } = this;
         if (selectedRect) {
-          if (isInRect(coordinate, selectedRect, newScope, this.zoom)) {
+          if (RectUtils.isInRect(coordinate, selectedRect, newScope, this.zoom)) {
             return selectedRect.id;
           }
         }
       }
 
-      const hoverList = currentShowList.filter((rect) => isInRect(coordinate, rect, newScope, this.zoom));
+      const hoverList = currentShowList.filter((rect) => RectUtils.isInRect(coordinate, rect, newScope, this.zoom));
 
       if (hoverList.length === 0) {
         return '';
@@ -342,9 +340,9 @@ class RectOperation extends BasicToolOperation {
       return -1;
     }
 
-    return returnClosePointIndex(
+    return AxisUtils.returnClosePointIndex(
       this.getCoordinateUnderZoom(e),
-      getRectPointList(this.selectedRect, this.zoom),
+      RectUtils.getRectPointList(this.selectedRect, this.zoom),
       scope + 2,
     );
   }
@@ -356,12 +354,12 @@ class RectOperation extends BasicToolOperation {
 
     let edgeIndex = -1;
     const { selectedRect } = this;
-    const edgeList = getRectEdgeList(selectedRect, this.zoom);
+    const edgeList = RectUtils.getRectEdgeList(selectedRect, this.zoom);
     const coordinate = this.getCoordinateUnderZoom(e);
 
     for (let i = 0; i < edgeList.length; i++) {
       const edge = edgeList[i];
-      const { length } = getFootOfPerpendicular(coordinate, edge.begin, edge.end);
+      const { length } = MathUtils.getFootOfPerpendicular(coordinate, edge.begin, edge.end);
 
       if (length < scope + 10) {
         edgeIndex = i;
@@ -376,7 +374,7 @@ class RectOperation extends BasicToolOperation {
    * @param attribute
    */
   public getTextIconSvg(attribute = '') {
-    return AttributeUtil.getTextIconSvg(
+    return AttributeUtils.getTextIconSvg(
       attribute,
       this.config.attributeList,
       this.config.attributeConfigurable,
@@ -451,7 +449,7 @@ class RectOperation extends BasicToolOperation {
     this.dragStatus = EDragStatus.Move;
 
     // 选中后的操作
-    const dragRect = getRectUnderZoom(this.dragInfo.firstRect, this.zoom);
+    const dragRect = RectUtils.getRectUnderZoom(this.dragInfo.firstRect, this.zoom);
     const { x, y, width, height } = dragRect;
     const offset = {
       x: coordinate.x - this.dragInfo.dragStartCoord.x,
@@ -588,7 +586,9 @@ class RectOperation extends BasicToolOperation {
       if (this.basicResult) {
         if (this.basicResult?.pointList?.length > 0) {
           // 多变形判断
-          if (isRectNotInPolygon(selectedRect, getPolygonPointUnderZoom(this.basicResult.pointList, this.zoom))) {
+          if (
+            RectUtils.isRectNotInPolygon(selectedRect, getPolygonPointUnderZoom(this.basicResult.pointList, this.zoom))
+          ) {
             return;
           }
         }
@@ -686,7 +686,7 @@ class RectOperation extends BasicToolOperation {
     this.setRectList(
       this.rectList.map((v) => {
         if (v.id === selectedRect.id) {
-          return getRectUnderZoom(selectedRect, 1 / this.zoom);
+          return RectUtils.getRectUnderZoom(selectedRect, 1 / this.zoom);
         }
         return v;
       }),
@@ -702,7 +702,7 @@ class RectOperation extends BasicToolOperation {
 
     const coordinateZoom = this.getCoordinateUnderZoom(e);
 
-    const coordinate = changeDrawOutsideTarget(
+    const coordinate = AxisUtils.changeDrawOutsideTarget(
       coordinateZoom,
       { x: 0, y: 0 },
       this.imgInfo,
@@ -762,7 +762,7 @@ class RectOperation extends BasicToolOperation {
         if (this.basicResult?.pointList?.length > 0) {
           // changeDrawOutsideTarget 最好还是在这里下功夫这里暂时进行多边形的判断
           if (
-            isRectNotInPolygon(
+            RectUtils.isRectNotInPolygon(
               {
                 ...this.drawingRect,
                 x,
@@ -850,7 +850,7 @@ class RectOperation extends BasicToolOperation {
     }
 
     const coordinateZoom = this.getCoordinateUnderZoom(e);
-    const coordinate = changeDrawOutsideTarget(
+    const coordinate = AxisUtils.changeDrawOutsideTarget(
       coordinateZoom,
       { x: 0, y: 0 },
       this.imgInfo,
@@ -886,10 +886,12 @@ class RectOperation extends BasicToolOperation {
       const nextMarkInfo = CommonToolUtils.getNextMarker(this.rectList, this.config.markerList, this.markerIndex);
 
       if (nextMarkInfo) {
-        this.drawingRect = {
-          ...this.drawingRect,
-          label: nextMarkInfo.label,
-        };
+        if (this.drawingRect) {
+          this.drawingRect = {
+            ...this.drawingRect,
+            label: nextMarkInfo.label,
+          };
+        }
         this.markerIndex = nextMarkInfo.index;
         this.emit('markIndexChange');
       } else {
@@ -902,19 +904,21 @@ class RectOperation extends BasicToolOperation {
 
     if (this.config.textConfigurable) {
       let textAttribute = '';
-      textAttribute = AttributeUtil.getTextAttribute(
+      textAttribute = AttributeUtils.getTextAttribute(
         this.rectList.filter((rect) => rect.sourceID === basicSourceID),
         this.config.textCheckType,
       );
-      this.drawingRect = {
-        ...this.drawingRect,
-        textAttribute,
-      };
+      if (this.drawingRect) {
+        this.drawingRect = {
+          ...this.drawingRect,
+          textAttribute,
+        };
+      }
     }
 
     // 标注序号添加
     Object.assign(this.drawingRect, {
-      order: getMaxOrder(this.rectList.filter((v) => v.sourceID === basicSourceID)) + 1,
+      order: CommonToolUtils.getMaxOrder(this.rectList.filter((v) => v.sourceID === basicSourceID)) + 1,
     });
 
     this.firstClickCoord = {
@@ -1106,7 +1110,7 @@ class RectOperation extends BasicToolOperation {
   }
 
   public onKeyDown(e: KeyboardEvent) {
-    if (!hotkeyFilter(e)) {
+    if (!CommonToolUtils.hotkeyFilter(e)) {
       // 如果为输入框则进行过滤
       return;
     }
@@ -1168,8 +1172,8 @@ class RectOperation extends BasicToolOperation {
           rectList = [...rectList, selectedRect];
         }
 
-        const viewPort = CanvasUtil.getViewPort(this.canvas, this.currentPos, this.zoom);
-        rectList = rectList.filter((rect) => CanvasUtil.inViewPort({ x: rect.x, y: rect.y }, viewPort));
+        const viewPort = CanvasUtils.getViewPort(this.canvas, this.currentPos, this.zoom);
+        rectList = rectList.filter((rect) => CanvasUtils.inViewPort({ x: rect.x, y: rect.y }, viewPort));
 
         const nextSelectedRect = CommonToolUtils.getNextSelectedRectID(rectList, sort, this.selectedRectID) as IRect;
         if (nextSelectedRect) {
@@ -1185,11 +1189,11 @@ class RectOperation extends BasicToolOperation {
       default: {
         if (this.config.attributeConfigurable) {
           let num = -1;
-          if (isInRange(keyCode, [48, 57])) {
+          if (MathUtils.isInRange(keyCode, [48, 57])) {
             num = keyCode - 48;
           }
 
-          if (isInRange(keyCode, [96, 105])) {
+          if (MathUtils.isInRange(keyCode, [96, 105])) {
             num = keyCode - 96;
           }
 
@@ -1240,14 +1244,14 @@ class RectOperation extends BasicToolOperation {
     let newFirsClickCoord;
 
     if (this.drawingRect && this.firstClickCoord) {
-      newDrawingRect = getRectUnderZoom(this.drawingRect, 1 / oldZoom);
-      newFirsClickCoord = getCoordinateUnderZoom(this.firstClickCoord, 1 / oldZoom);
+      newDrawingRect = RectUtils.getRectUnderZoom(this.drawingRect, 1 / oldZoom);
+      newFirsClickCoord = AxisUtils.changePointByZoom(this.firstClickCoord, 1 / oldZoom);
     }
 
     super.onWheel(e, false);
     if (newDrawingRect && newFirsClickCoord) {
-      this.drawingRect = getRectUnderZoom(newDrawingRect, this.zoom);
-      this.firstClickCoord = getCoordinateUnderZoom(newFirsClickCoord, this.zoom);
+      this.drawingRect = RectUtils.getRectUnderZoom(newDrawingRect, this.zoom);
+      this.firstClickCoord = AxisUtils.changePointByZoom(newFirsClickCoord, this.zoom);
     }
     this.render();
   }
@@ -1257,7 +1261,7 @@ class RectOperation extends BasicToolOperation {
       return;
     }
 
-    this.setRectList(AttributeUtil.textChange(v, this.selectedRectID, this.rectList), true);
+    this.setRectList(AttributeUtils.textChange(v, this.selectedRectID, this.rectList), true);
 
     this.emit('selectedChange');
     this.render();
@@ -1287,7 +1291,7 @@ class RectOperation extends BasicToolOperation {
     const { x, y, width, height, attribute, valid } = selectedRect;
 
     const newWidth = width * this.zoom * 0.6;
-    const coordinate = getOffsetCoordinate({ x, y: y + height }, this.currentPos, this.zoom);
+    const coordinate = AxisUtils.getOffsetCoordinate({ x, y: y + height }, this.currentPos, this.zoom);
     const toolColor = this.getColor(attribute);
     const color = valid ? toolColor?.valid.stroke : toolColor?.invalid.stroke;
     const distance = 4;
@@ -1324,11 +1328,11 @@ class RectOperation extends BasicToolOperation {
 
     const { ctx } = this;
     let radius = 10;
-    const pointList = getRectPointList(selectedRect);
+    const pointList = RectUtils.getRectPointList(selectedRect);
     const len = pointList.length;
     const toolColor = this.getColor(rect.attribute);
 
-    pointList.forEach((v, i) => {
+    pointList.forEach((v: ICoordinate, i: number) => {
       ctx.save();
       ctx.moveTo(v.x, v.y);
       ctx.beginPath();
@@ -1419,7 +1423,7 @@ class RectOperation extends BasicToolOperation {
       }
 
       if (rect.attribute) {
-        showText = `${showText}  ${AttributeUtil.getAttributeShowText(rect.attribute, this.config?.attributeList)}`;
+        showText = `${showText}  ${AttributeUtils.getAttributeShowText(rect.attribute, this.config?.attributeList)}`;
       }
 
       if (!hiddenText) {

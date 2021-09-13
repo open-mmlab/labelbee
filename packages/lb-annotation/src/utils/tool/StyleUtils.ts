@@ -1,4 +1,4 @@
-export default class StyleUtil {
+export default class StyleUtils {
   public static getStrokeAndFill(
     toolStyle: IToolColorStyle,
     valid = true,

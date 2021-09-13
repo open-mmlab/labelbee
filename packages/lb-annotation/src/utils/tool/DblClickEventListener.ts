@@ -1,4 +1,4 @@
-import { getIsInScope } from './math';
+import { AxisUtils } from '@/';
 
 class DblClickEventListener {
   private dom: HTMLElement; // 点击时间绑定的对象
@@ -122,7 +122,7 @@ class DblClickEventListener {
       const currentCoord = this.getCoord(e);
 
       // 如果超出一定的范围，则判断为单击事件
-      if (this.clickCoord && !getIsInScope(currentCoord, this.clickCoord, 10)) {
+      if (this.clickCoord && !AxisUtils.getIsInScope(currentCoord, this.clickCoord, 10)) {
         if (this.cacheFunction) {
           this.cacheFunction();
         }

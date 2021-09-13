@@ -1,27 +1,19 @@
-import { DEFAULT_TEXT_OFFSET, EDragStatus, EDragTarget, ESortDirection } from '../../../constant/annotation';
-import EKeyCode from '../../../constant/keyCode';
-import { edgeAdsorptionScope } from '../../../constant/tool';
-import locale from '../../../locales';
-import { EMessage } from '../../../locales/constants';
-import { IPolygonConfig, IPolygonData, IPolygonPoint } from '../../../types/tool/polygon';
-import ActionsHistory from '../../ActionsHistory';
-import { isInRange } from '../../math';
-import uuid from '../../uuid';
-import AttributeUtil from '../AttributeUtil';
-import AxisUtils from '../AxisUtils';
-import CanvasUtil from '../CanvasUtil';
-import {
-  calcViewportBoundaries,
-  changeDrawOutsideTarget,
-  getMaxOrder,
-  getOffsetCoordinate,
-  hotkeyFilter,
-  jsonParser,
-} from '../common';
-import CommonToolUtils from '../CommonToolUtils';
-import DrawUtils from '../DrawUtils';
-import PolygonUtils from '../PolygonUtils';
-import StyleUtil from '../StyleUtil';
+import MathUtils from '@/utils/MathUtils';
+import { DEFAULT_TEXT_OFFSET, EDragStatus, EDragTarget, ESortDirection } from '../../constant/annotation';
+import EKeyCode from '../../constant/keyCode';
+import { edgeAdsorptionScope } from '../../constant/tool';
+import locale from '../../locales';
+import { EMessage } from '../../locales/constants';
+import { IPolygonConfig, IPolygonData, IPolygonPoint } from '../../types/tool/polygon';
+import ActionsHistory from '../../utils/ActionsHistory';
+import uuid from '../../utils/uuid';
+import AttributeUtils from '../../utils/tool/AttributeUtils';
+import AxisUtils from '../../utils/tool/AxisUtils';
+import CanvasUtils from '../../utils/tool/CanvasUtils';
+import CommonToolUtils from '../../utils/tool/CommonToolUtils';
+import DrawUtils from '../../utils/tool/DrawUtils';
+import PolygonUtils from '../../utils/tool/PolygonUtils';
+import StyleUtils from '../../utils/tool/StyleUtils';
 import { BasicToolOperation, IBasicToolOperationProps } from './basicToolOperation';
 import TextAttributeClass from './textAttributeClass';
 
@@ -70,7 +62,7 @@ class PolygonOperation extends BasicToolOperation {
 
   constructor(props: IPolygonOperationProps) {
     super(props);
-    this.config = jsonParser(props.config);
+    this.config = CommonToolUtils.jsonParser(props.config);
     this.drawingPointList = [];
     this.polygonList = [];
     this.hoverPointIndex = -1;
@@ -92,6 +84,13 @@ class PolygonOperation extends BasicToolOperation {
   public eventUnbinding() {
     super.eventUnbinding();
     this.container.removeEventListener('mouseup', this.dragMouseUp);
+  }
+
+  public destroy() {
+    super.destroy();
+    if (this._textAttributInstance) {
+      this._textAttributInstance.clearTextAttribute();
+    }
   }
 
   public get selectedPolygon() {
@@ -166,7 +165,7 @@ class PolygonOperation extends BasicToolOperation {
     if (this.config.textConfigurable === false || !this.selectedID) {
       return;
     }
-    this.setPolygonList(AttributeUtil.textChange(v, this.selectedID, this.polygonList));
+    this.setPolygonList(AttributeUtils.textChange(v, this.selectedID, this.polygonList));
     this.emit('selectedChange'); // 触发外层的更新
     this.render();
   };
@@ -208,7 +207,7 @@ class PolygonOperation extends BasicToolOperation {
 
     this.setSelectedID('');
     const coordinateZoom = this.getCoordinateUnderZoom(e);
-    const coordinate = changeDrawOutsideTarget(
+    const coordinate = AxisUtils.changeDrawOutsideTarget(
       coordinateZoom,
       { x: 0, y: 0 },
       this.imgInfo,
@@ -398,12 +397,12 @@ class PolygonOperation extends BasicToolOperation {
         textAttribute: '',
         pointList: this.drawingPointList,
         attribute: this.defaultAttribute,
-        order: getMaxOrder(polygonList.filter((v) => v.sourceID === basicSourceID)) + 1,
+        order: CommonToolUtils.getMaxOrder(polygonList.filter((v) => v.sourceID === basicSourceID)) + 1,
       };
 
       if (this.config.textConfigurable) {
         let textAttribute = '';
-        textAttribute = AttributeUtil.getTextAttribute(
+        textAttribute = AttributeUtils.getTextAttribute(
           this.polygonList.filter((polygon) => polygon.sourceID === basicSourceID),
           this.config.textCheckType,
         );
@@ -486,7 +485,7 @@ class PolygonOperation extends BasicToolOperation {
       return;
     }
 
-    let lowerLimitPointNum = this.config.lowerLimitPointNum;
+    let { lowerLimitPointNum } = this.config;
 
     if (lowerLimitPointNum < 3) {
       lowerLimitPointNum = 3;
@@ -545,7 +544,7 @@ class PolygonOperation extends BasicToolOperation {
       polygonList = [...polygonList, selectedResult];
     }
 
-    const viewPort = CanvasUtil.getViewPort(this.canvas, this.currentPos, this.zoom);
+    const viewPort = CanvasUtils.getViewPort(this.canvas, this.currentPos, this.zoom);
 
     const sortList = polygonList
       .map((v) => ({
@@ -553,7 +552,7 @@ class PolygonOperation extends BasicToolOperation {
         x: v.pointList[0]?.x ?? 0,
         y: v.pointList[0]?.y ?? 0,
       }))
-      .filter((polygon) => CanvasUtil.inViewPort({ x: polygon.x, y: polygon.y }, viewPort));
+      .filter((polygon) => CanvasUtils.inViewPort({ x: polygon.x, y: polygon.y }, viewPort));
 
     const nextSelectedResult = CommonToolUtils.getNextSelectedRectID(sortList, sort, this.selectedID);
     if (nextSelectedResult) {
@@ -567,7 +566,7 @@ class PolygonOperation extends BasicToolOperation {
   }
 
   public onKeyDown(e: KeyboardEvent) {
-    if (!hotkeyFilter(e)) {
+    if (!CommonToolUtils.hotkeyFilter(e)) {
       // 如果为输入框则进行过滤
       return;
     }
@@ -626,11 +625,11 @@ class PolygonOperation extends BasicToolOperation {
       default: {
         if (this.config.attributeConfigurable) {
           let num = -1;
-          if (isInRange(keyCode, [48, 57])) {
+          if (MathUtils.isInRange(keyCode, [48, 57])) {
             num = keyCode - 48;
           }
 
-          if (isInRange(keyCode, [96, 105])) {
+          if (MathUtils.isInRange(keyCode, [96, 105])) {
             num = keyCode - 96;
           }
 
@@ -842,7 +841,7 @@ class PolygonOperation extends BasicToolOperation {
 
     // 边缘判断 - 仅限支持图片下范围下
     if (this.config.drawOutsideTarget === false && this.imgInfo) {
-      const { left, top, right, bottom } = calcViewportBoundaries(
+      const { left, top, right, bottom } = MathUtils.calcViewportBoundaries(
         AxisUtils.changePointListByZoom(selectedPointList, this.zoom),
       );
 
@@ -945,7 +944,7 @@ class PolygonOperation extends BasicToolOperation {
       }
 
       case 2: {
-        this.rightMouseUp(e);
+        this.rightMouseUp();
 
         break;
       }
@@ -975,7 +974,7 @@ class PolygonOperation extends BasicToolOperation {
    * @param attribute
    */
   public getTextIconSvg(attribute = '') {
-    return AttributeUtil.getTextIconSvg(
+    return AttributeUtils.getTextIconSvg(
       attribute,
       this.config.attributeList,
       this.config.attributeConfigurable,
@@ -1004,12 +1003,12 @@ class PolygonOperation extends BasicToolOperation {
       // 切换的时候如果存在
 
       let textAttribute = newTextAttribute;
-      if (AttributeUtil.textAttributeValidate(this.config.textCheckType, '', textAttribute) === false) {
-        this.emit('messageError', AttributeUtil.getErrorNotice(this.config.textCheckType, this.lang));
+      if (AttributeUtils.textAttributeValidate(this.config.textCheckType, '', textAttribute) === false) {
+        this.emit('messageError', AttributeUtils.getErrorNotice(this.config.textCheckType, this.lang));
         textAttribute = '';
       }
 
-      this.setPolygonList(AttributeUtil.textChange(textAttribute, this.selectedID, this.polygonList));
+      this.setPolygonList(AttributeUtils.textChange(textAttribute, this.selectedID, this.polygonList));
       this.emit('updateTextAttribute');
       this.render();
     }
@@ -1026,7 +1025,7 @@ class PolygonOperation extends BasicToolOperation {
     const { x, y } = pointList[pointList.length - 1];
 
     const newWidth = TEXT_MAX_WIDTH;
-    const coordinate = getOffsetCoordinate({ x, y }, this.currentPos, this.zoom);
+    const coordinate = AxisUtils.getOffsetCoordinate({ x, y }, this.currentPos, this.zoom);
     const toolColor = this.getColor(attribute);
     const color = valid ? toolColor?.valid.stroke : toolColor?.invalid.stroke;
     if (!this._textAttributInstance) {
@@ -1063,8 +1062,8 @@ class PolygonOperation extends BasicToolOperation {
           return;
         }
         const { textAttribute, attribute } = polygon;
-        const toolColor = this.getColor(polygon.attribute);
-        const toolData = StyleUtil.getStrokeAndFill(toolColor, polygon.valid);
+        const toolColor = this.getColor(attribute);
+        const toolData = StyleUtils.getStrokeAndFill(toolColor, polygon.valid);
         const transformPointList = AxisUtils.changePointListByZoom(polygon.pointList || [], this.zoom, this.currentPos);
 
         DrawUtils.drawPolygonWithFillAndLine(this.canvas, transformPointList, {
@@ -1077,7 +1076,7 @@ class PolygonOperation extends BasicToolOperation {
           lineType: this.config?.lineType,
         });
 
-        let showText = `${AttributeUtil.getAttributeShowText(polygon.attribute, this.config.attributeList) ?? ''}`;
+        let showText = `${AttributeUtils.getAttributeShowText(attribute, this.config.attributeList) ?? ''}`;
         if (this.config?.isShowOrder && polygon?.order > 0) {
           showText = `${polygon.order} ${showText}`;
         }
@@ -1110,7 +1109,7 @@ class PolygonOperation extends BasicToolOperation {
         if (hoverPolygon.valid) {
           color = toolColor.validHover.fill;
         } else {
-          color = StyleUtil.getStrokeAndFill(toolColor, false, { isHover: true }).fill;
+          color = StyleUtils.getStrokeAndFill(toolColor, false, { isHover: true }).fill;
         }
 
         DrawUtils.drawPolygonWithFill(
@@ -1130,7 +1129,7 @@ class PolygonOperation extends BasicToolOperation {
 
       if (selectdPolygon) {
         const toolColor = this.getColor(selectdPolygon.attribute);
-        const toolData = StyleUtil.getStrokeAndFill(toolColor, selectdPolygon.valid, { isSelected: true });
+        const toolData = StyleUtils.getStrokeAndFill(toolColor, selectdPolygon.valid, { isSelected: true });
 
         DrawUtils.drawSelectedPolygonWithFillAndLine(
           this.canvas,
@@ -1147,7 +1146,7 @@ class PolygonOperation extends BasicToolOperation {
         );
 
         let showText = `${
-          AttributeUtil.getAttributeShowText(selectdPolygon.attribute, this.config.attributeList) ?? ''
+          AttributeUtils.getAttributeShowText(selectdPolygon.attribute, this.config.attributeList) ?? ''
         }`;
         if (this.config?.isShowOrder && selectdPolygon?.order > 0) {
           showText = `${selectdPolygon.order} ${showText}`;
@@ -1168,7 +1167,7 @@ class PolygonOperation extends BasicToolOperation {
     }
 
     const defaultColor = this.getColor(this.defaultAttribute);
-    const toolData = StyleUtil.getStrokeAndFill(defaultColor, !this.isCtrl);
+    const toolData = StyleUtils.getStrokeAndFill(defaultColor, !this.isCtrl);
     // 4. 编辑中的多边形
     if (this.drawingPointList?.length > 0) {
       // 渲染绘制中的多边形
@@ -1209,7 +1208,7 @@ class PolygonOperation extends BasicToolOperation {
       if (!selectdPolygon) {
         return;
       }
-      const hoverColor = StyleUtil.getStrokeAndFill(defaultColor, selectdPolygon.valid, { isSelected: true });
+      const hoverColor = StyleUtils.getStrokeAndFill(defaultColor, selectdPolygon.valid, { isSelected: true });
 
       const point = selectdPolygon?.pointList[this.hoverPointIndex];
       if (point) {
@@ -1226,7 +1225,7 @@ class PolygonOperation extends BasicToolOperation {
       if (!selectdPolygon) {
         return;
       }
-      const selectedColor = StyleUtil.getStrokeAndFill(defaultColor, selectdPolygon.valid, { isSelected: true });
+      const selectedColor = StyleUtils.getStrokeAndFill(defaultColor, selectdPolygon.valid, { isSelected: true });
 
       DrawUtils.drawLineWithPointList(
         this.canvas,

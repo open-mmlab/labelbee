@@ -1,5 +1,14 @@
+import { isObject } from 'lodash';
 import { IPolygonPoint } from '../../types/tool/polygon';
-import { ESortDirection } from '../../constant/annotation';
+import { ESortDirection, EStepType } from '../../constant/annotation';
+import { ECheckModel, EToolName } from '@/constant/tool';
+import CheckOperation from '../../core/toolOperation/checkOperation';
+import PolygonOperation from '../../core/toolOperation/polygonOperation';
+import RectOperationAsNewName from '../../core/toolOperation/rectOperation';
+import TagOperation from '../../core/toolOperation/tagOperation';
+import LineToolOperation from '../../core/toolOperation/LineToolOperation';
+import PointOperation from '../../core/toolOperation/pointOperation';
+import TextToolOperation from '../../core/toolOperation/TextToolOperation';
 
 type point = {
   id: string;
@@ -8,6 +17,124 @@ type point = {
 };
 
 export default class CommonToolUtils {
+  /**
+   * 找到指定步骤的数据
+   * @param step 获取的步骤
+   * @param stepList 步骤列表
+   * @returns 步骤配置
+   */
+  public static getStepInfo(step: number, stepList: IStepInfo[]) {
+    return stepList?.filter((info) => info.step === step)[0];
+  }
+
+  /**
+   * 获取当前步骤的步骤配置信息，用于当前标注配置的获取
+   * 注意： 需要与 getStepInfo 区分，因为 getStepInfo 拿取的是直接的步骤信息
+   * @export
+   * @param {number} currentStep
+   * @param {IStepInfo[]} stepList
+   * @returns {*}
+   */
+  public static getCurrentStepInfo(currentStep: number, stepList: IStepInfo[]): any {
+    const currentStepInfo = this.getStepInfo(currentStep, stepList);
+    if (currentStepInfo) {
+      if (
+        currentStepInfo.type === EStepType.QUALITY_INSPECTION ||
+        currentStepInfo.type === EStepType.MANUAL_CORRECTION
+      ) {
+        // 判断是否是质检
+        return this.getCurrentStepInfo(currentStepInfo.dataSourceStep, stepList);
+      }
+
+      // 后续要判断预标注的情况
+    }
+    return currentStepInfo;
+  }
+
+  public static jsonParser = (content: any, defaultValue: any = {}) => {
+    try {
+      if (typeof content === 'string') {
+        return JSON.parse(content);
+      }
+      return isObject(content) ? content : defaultValue;
+    } catch (e) {
+      return defaultValue;
+    }
+  };
+
+  /**
+   * 获取结果中最大的order
+   *
+   * @export
+   * @param {any[]} result
+   * @returns {number}
+   */
+  public static getMaxOrder(result: any[]): number {
+    let order = 0;
+    result.forEach((v) => {
+      if (v.order && v.order > order) {
+        order = v.order;
+      }
+    });
+    return order;
+  }
+
+  /**
+   * 表单控件控件判断 返回 Boolean
+   * hotkey is effective only whene filter return true
+   * @param event
+   * @returns {boolean}
+   */
+  public static hotkeyFilter(event: any) {
+    const target = event.target || event.srcElement;
+    if (!target) {
+      return true;
+    }
+
+    const { tagName, type } = target;
+
+    if (!tagName || !type) {
+      return true;
+    }
+
+    let flag = true;
+    // ignore: isContentEditable === 'true', <input> and <textarea> whene readOnly state is false, <select>
+    if (
+      target.isContentEditable ||
+      tagName === 'TEXTAREA' ||
+      (((tagName === 'INPUT' && type !== 'radio') || tagName === 'TEXTAREA') && !target.readOnly)
+    ) {
+      flag = false;
+    }
+    return flag;
+  }
+
+  /**
+   * 筛选当前的步骤配置
+   * @param toolName
+   */
+  public static getCurrentOperation(toolName: EToolName | ECheckModel) {
+    switch (toolName) {
+      case EToolName.Rect:
+      case EToolName.RectTrack:
+        return RectOperationAsNewName;
+      case EToolName.Tag:
+        return TagOperation;
+      case EToolName.Polygon:
+        return PolygonOperation;
+      case ECheckModel.Check:
+        return CheckOperation;
+      case EToolName.Line:
+        return LineToolOperation;
+      case EToolName.Point:
+        return PointOperation;
+      case EToolName.Text:
+        return TextToolOperation;
+      default:
+        throw new Error('not match tool');
+    }
+  }
+
   public static getNextSelectedRectID(
     rectList: point[],
     sort: ESortDirection = ESortDirection.ascend,

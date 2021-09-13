@@ -9,7 +9,7 @@ import { EToolName } from '@/data/enums/ToolType';
 import { ConfigUtils } from '@/utils/ConfigUtils';
 import styleString from '@/constant/styleString';
 import { getFormatSize } from '@/components/customResizeHook';
-import { toolUtils } from '@sensetime/annotation';
+import { toolUtils, AnnotationEngine } from '@sensetime/annotation';
 import { ESubmitType } from '@/constant';
 import { AnnotationState, AnnotationActionTypes, ToolInstance } from './types';
 
@@ -87,11 +87,6 @@ export const pageJumpActions = (nIndex: number) => (dispatch: any, getState: any
   return pageChanged(dispatch, nextIndex, ESubmitType.Jump);
 };
 
-const getToolInstance = (tool: EToolName, config) => {
-  const ToolOperation = getCurrentOperation(tool);
-
-  return new ToolOperation(config);
-};
 
 const updateToolInstance = (annotation: AnnotationState, imgNode: HTMLImageElement) => {
   const { step, stepList } = annotation;
@@ -100,21 +95,21 @@ const updateToolInstance = (annotation: AnnotationState, imgNode: HTMLImageEleme
 
   const container = document.getElementById('toolContainer');
 
-  // const canvasSize = getFormatSize({ width: window.innerWidth, height: window.innerHeight });
+  if (!container) {
+    throw `Not exist dom named id-toolContainer`;
+  }
 
-  const toolInstance = getToolInstance(stepConfig.tool, {
+  const canvasSize = getFormatSize({ width: window.innerWidth, height: window.innerHeight });
+  const annotationEngine = new AnnotationEngine({
     container,
-    size: {width: 0, height: 0},
+    toolName: stepConfig.tool,
+    size: canvasSize,
     imgNode,
     config,
     style: JSON.parse(styleString),
   });
 
-  if (toolInstance?.init) {
-    toolInstance.init();
-  }
-
-  return toolInstance;
+  return { toolInstance: annotationEngine.toolInstance, annotationEngine };
 };
 
 export const loadFileData = (nextIndex: number) => async (dispatch: any, getState: any) => {
@@ -192,11 +187,11 @@ export const annotationReducer = (
     }
 
     case ANNOTATION_ACTIONS.LOAD_FILE_DATA: {
-      const { imgList, step, toolInstance } = state;
+      const { imgList, step, toolInstance, annotationEngine } = state;
       if (!toolInstance) {
         return state;
       }
-      
+
       const { nextIndex, imgNode } = action.payload;
       const fileResult = jsonParser(imgList[nextIndex]?.result);
       const stepResult = fileResult[`step_${step}`];
@@ -206,11 +201,24 @@ export const annotationReducer = (
         rotate: fileResult.rotate ?? 0,
         valid: fileResult.valid ?? true,
       };
-            
-      
+
       toolInstance.setImgNode(imgNode, basicImgInfo);
+      annotationEngine.setImgNode(imgNode);
       const result = stepResult?.result || [];
       toolInstance.setResult(result, isInitData);
+
+      // 拉框工具
+      annotationEngine.setBasicInfo(EToolName.Rect,{ width: 100, height: 100, x: 10, y: 10} )
+
+      // 多边形工具
+      // annotationEngine.setBasicInfo(EToolName.Polygon, {
+      //   pointList: [
+      //     { x: 123, y: 123 },
+      //     { x: 523, y: 423 },
+      //     { x: 233, y: 443 },
+      //   ],
+      // });
+
       toolInstance.history.initRecord(result, true);
 
       return {
@@ -263,10 +271,11 @@ export const annotationReducer = (
 
     case ANNOTATION_ACTIONS.INIT_TOOL: {
       const { imgNode } = state;
-      const toolInstance = updateToolInstance(state, imgNode);
+      const { toolInstance, annotationEngine } = updateToolInstance(state, imgNode);
       return {
         ...state,
         toolInstance,
+        annotationEngine,
       };
     }
 

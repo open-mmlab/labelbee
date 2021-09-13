@@ -1,6 +1,6 @@
 {
   "name": "@sensetime/label-bee",
-  "version": "1.0.3",
+  "version": "1.1.0-alpha.0",
   "description": "Provide a complete library of annotation components",
   "main": "./dist/index.js",
   "types": "types/index.d.ts",
@@ -18,7 +18,8 @@
     "commit": "git-cz",
     "lint": "eslint 'src/**/*.{ts,tsx,js,jsx}'",
     "lint:fix": "eslint 'src/**/*.{ts,tsx,js,jsx}' --fix",
-    "commitmsg": "commitlint -e $GIT_PARAMS"
+    "commitmsg": "commitlint -e $GIT_PARAMS",
+    "prepublishOnly": "npm run build"
   },
   "author": "luozefeng",
   "contributors": [
@@ -27,16 +28,19 @@
     "chenlu",
     "lihuaqi"
   ],
-  "keywords": ["annotation", "canvas"],
+  "keywords": [
+    "annotation",
+    "canvas"
+  ],
   "license": "Apache-2.0",
   "homepage": "https://gitlab.bj.sensetime.com/fdc/frontend/label-bee",
   "bugs": {
-    "url" : "https://gitlab.bj.sensetime.com/fdc/frontend/label-bee/issues",
-    "email" : "luozefeng@sensetime.com"
+    "url": "https://gitlab.bj.sensetime.com/fdc/frontend/label-bee/issues",
+    "email": "luozefeng@sensetime.com"
   },
   "dependencies": {
     "@ant-design/icons": "^4.6.2",
-    "@sensetime/annotation": "^1.3.1-alpha-4",
+    "@sensetime/annotation": "^1.4.0-alpha-4.0",
     "antd": "^4.15.0",
     "classnames": "^2.3.0",
     "lodash": "^4.17.21",
@@ -57,8 +61,6 @@
     "@rollup/plugin-eslint": "^8.0.1",
     "@rollup/plugin-image": "^2.0.6",
     "@rollup/plugin-node-resolve": "^11.2.1",
-    "rollup": "^2.43.1",
-    "rollup-plugin-esbuild": "^3.0.2",
     "@types/lodash": "^4.14.168",
     "@types/react": "^16.13.1",
     "@types/react-redux": "^7.1.16",
@@ -78,7 +80,8 @@
     "husky": "^7.0.1",
     "node-sass": "^5.0.0",
     "prettier": "^2.3.2",
-
+    "rollup": "^2.43.1",
+    "rollup-plugin-esbuild": "^3.0.2",
     "typescript": "^4.2.3"
   },
   "config": {

@@ -1,4 +1,4 @@
-export default class UnitUtil {
+export default class UnitUtils {
   public static deg2rad(angleDeg: number) {
     return (angleDeg * Math.PI) / 180;
   }

@@ -1,14 +1,12 @@
 import { cloneDeep } from 'lodash';
-import { DEFAULT_TEXT_OFFSET } from '../../../constant/annotation';
-import { EToolName } from '../../../constant/tool';
-import { IPolygonData } from '../../../types/tool/polygon';
-import { getAttributeColor } from '../attribute';
-import AttributeUtil from '../AttributeUtil';
-import AxisUtils from '../AxisUtils';
-import { jsonParser } from '../common';
-import DrawUtils from '../DrawUtils';
-import StyleUtil from '../StyleUtil';
-import { getTagNameList, getTagnameListWithoutConfig } from '../tagTool';
+import { CommonToolUtils, TagUtils } from '@/';
+import { DEFAULT_TEXT_OFFSET } from '../../constant/annotation';
+import { EToolName } from '../../constant/tool';
+import { IPolygonData } from '../../types/tool/polygon';
+import AttributeUtils from '../../utils/tool/AttributeUtils';
+import AxisUtils from '../../utils/tool/AxisUtils';
+import DrawUtils from '../../utils/tool/DrawUtils';
+import StyleUtils from '../../utils/tool/StyleUtils';
 import { BasicToolOperation, IBasicToolOperationProps } from './basicToolOperation';
 
 interface ICheckResult {
@@ -46,7 +44,7 @@ class CheckOperation extends BasicToolOperation {
   public drawPolygon(polygonList: IPolygonData[], config: any) {
     polygonList?.forEach((polygon) => {
       const toolColor = this.getColor(polygon.attribute, config);
-      const toolData = StyleUtil.getStrokeAndFill(toolColor, polygon.valid);
+      const toolData = StyleUtils.getStrokeAndFill(toolColor, polygon.valid);
       let thickness = this.style?.width ?? 2;
       if (this.hoverID.includes(polygon.id)) {
         thickness = 4;
@@ -78,7 +76,7 @@ class CheckOperation extends BasicToolOperation {
       DrawUtils.drawText(
         this.canvas,
         AxisUtils.changePointByZoom(polygon.pointList[0], this.zoom, this.currentPos),
-        AttributeUtil.getAttributeShowText(polygon.attribute, config?.attributeList ?? []) ?? '',
+        AttributeUtils.getAttributeShowText(polygon.attribute, config?.attributeList ?? []) ?? '',
         {
           color: toolData.stroke,
           ...DEFAULT_TEXT_OFFSET,
@@ -95,7 +93,7 @@ class CheckOperation extends BasicToolOperation {
       }
       DrawUtils.drawRect(this.canvas, AxisUtils.changeRectByZoom(rect, this.zoom, this.currentPos), {
         color: rect?.valid
-          ? getAttributeColor(rect.attribute, config?.attributeList ?? [])
+          ? AttributeUtils.getAttributeColor(rect.attribute, config?.attributeList ?? [])
           : this.getColor(rect.attribute)?.invalid.stroke,
         thickness,
       });
@@ -106,7 +104,9 @@ class CheckOperation extends BasicToolOperation {
     const tagInfoList = tagList.reduce((acc: any[], cur: any) => {
       return [
         ...acc,
-        ...(config?.inputList ? getTagNameList(cur.result, config.inputList) : getTagnameListWithoutConfig(cur.result)),
+        ...(config?.inputList
+          ? TagUtils.getTagNameList(cur.result, config.inputList)
+          : TagUtils.getTagnameListWithoutConfig(cur.result)),
       ];
     }, []);
     DrawUtils.drawTag(this.canvas, tagInfoList);
@@ -122,13 +122,13 @@ class CheckOperation extends BasicToolOperation {
     this.resultList?.forEach((item: any) => {
       switch (item?.toolName) {
         case EToolName.Rect:
-          this.drawRect(item.result, jsonParser(item.config));
+          this.drawRect(item.result, CommonToolUtils.jsonParser(item.config));
           break;
         case EToolName.Polygon:
-          this.drawPolygon(item.result, jsonParser(item.config));
+          this.drawPolygon(item.result, CommonToolUtils.jsonParser(item.config));
           break;
         case EToolName.Tag:
-          this.drawTag(item.result, jsonParser(item.config));
+          this.drawTag(item.result, CommonToolUtils.jsonParser(item.config));
           break;
         default:
           break;

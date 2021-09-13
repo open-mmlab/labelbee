@@ -1,11 +1,15 @@
 {
   "name": "beehive",
   "private": true,
+  "workspaces": [
+    "packages/*"
+  ],
   "version": "1.0.0",
   "scripts": {
     "start": "lerna run --parallel --stream start",
     "dev": "lerna run --parallel --stream dev",
     "bootstrap": "lerna bootstrap",
+    "lint": "lerna run --parallel --stream lint",
     "clean": "lerna clean && rm -rf ./node_modules/ && rm -rf ./packages/**/node_modules"
   },
   "description": "",

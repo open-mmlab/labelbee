@@ -1,7 +1,7 @@
 import locale from '../../locales';
 import { EMessage } from '../../locales/constants';
 
-export default class RenderDomUtil {
+export default class RenderDomUtils {
   public static renderInvalidPage(canvas: HTMLCanvasElement, container: HTMLElement, lang: string) {
     const invalidDOM = document.createElement('div');
     invalidDOM.setAttribute(

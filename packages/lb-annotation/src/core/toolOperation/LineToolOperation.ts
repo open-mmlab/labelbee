@@ -3,25 +3,26 @@
  * @author lijingchi <lijingchi1@sensetime.com>
  */
 
+import _ from 'lodash';
 import { ELineColor, EDependPattern, ELineTypes, ETextType } from '@/constant/tool';
 import ActionsHistory from '@/utils/ActionsHistory';
 import uuid from '@/utils/uuid';
-import { isInRange } from '@/utils/math';
 import EKeyCode from '@/constant/keyCode';
-import _ from 'lodash';
 import { BasicToolOperation, IBasicToolOperationProps } from './basicToolOperation';
-import LineToolUtils from '../LineToolUtils';
-import { getTextAttribute, textAttributeValidate } from '../attribute';
-import { isInPolygon, createSmoothCurvePoints, createSmoothCurvePointsFromPointList } from '../polygonTool';
-import { calcViewportBoundaries } from '../common';
-import CommonToolUtils from '../CommonToolUtils';
-import { getFootOfPerpendicular } from '../math';
-import CanvasUtil from '../CanvasUtil';
-import DrawUtils from '../DrawUtils';
-import Dependency from '../Dependency';
-import StyleUtil from '../StyleUtil';
-import AttributeUtil from '../AttributeUtil';
+import LineToolUtils from '../../utils/tool/LineToolUtils';
+import {
+  isInPolygon,
+  createSmoothCurvePoints,
+  createSmoothCurvePointsFromPointList,
+} from '../../utils/tool/polygonTool';
+import CommonToolUtils from '../../utils/tool/CommonToolUtils';
+import CanvasUtils from '../../utils/tool/CanvasUtils';
+import DrawUtils from '../../utils/tool/DrawUtils';
+import DependencyUtils from '../../utils/tool/DependencyUtils';
+import StyleUtils from '../../utils/tool/StyleUtils';
+import AttributeUtils from '../../utils/tool/AttributeUtils';
 import TextAttributeClass from './textAttributeClass';
+import MathUtils from '@/utils/MathUtils';
 
 enum EStatus {
   Create = 0,
@@ -228,11 +229,11 @@ class LineToolOperation extends BasicToolOperation {
   }
 
   get isDependPolygon() {
-    return Dependency.isDependPolygon(this.dependPattern);
+    return DependencyUtils.isDependPolygon(this.dependPattern);
   }
 
   get isDependRect() {
-    return Dependency.isDependRect(this.dependPattern);
+    return DependencyUtils.isDependRect(this.dependPattern);
   }
 
   get isCurrentAttributeLocked() {
@@ -287,12 +288,12 @@ class LineToolOperation extends BasicToolOperation {
    * 视野内的线条
    */
   get viewPortLines() {
-    const viewPort = CanvasUtil.getViewPort(this.canvas, this.currentPos, this.zoom);
+    const viewPort = CanvasUtils.getViewPort(this.canvas, this.currentPos, this.zoom);
     if (this.isHidden) {
       return [];
     }
     return this.attributeFilteredLines.filter((i: any) =>
-      i?.pointList?.some((p: ICoordinate) => CanvasUtil.inViewPort(p, viewPort)),
+      i?.pointList?.some((p: ICoordinate) => CanvasUtils.inViewPort(p, viewPort)),
     );
   }
 
@@ -312,7 +313,7 @@ class LineToolOperation extends BasicToolOperation {
     if (resetText) {
       let defaultText = '';
       if (this.textCheckType === ETextType.Order && this.isTextConfigurable) {
-        defaultText = getTextAttribute(this.lineList, this.textCheckType);
+        defaultText = AttributeUtils.getTextAttribute(this.lineList, this.textCheckType);
       }
 
       this.emit('updateText', defaultText);
@@ -595,7 +596,7 @@ class LineToolOperation extends BasicToolOperation {
   };
 
   public getLineColorByAttribute(line: { attribute: string; valid: boolean } | ILine, isSelected: boolean = false) {
-    return StyleUtil.getStrokeAndFill(this.getColor(line.attribute), line.valid, { isSelected }).stroke;
+    return StyleUtils.getStrokeAndFill(this.getColor(line.attribute), line.valid, { isSelected }).stroke;
   }
 
   public drawLines = () => {
@@ -650,7 +651,7 @@ class LineToolOperation extends BasicToolOperation {
 
   public getActiveArea() {
     return this.activeLine && this.activeLine.length > 0
-      ? calcViewportBoundaries(this.activeLine, this.isCurve, SEGMENT_NUMBER, this.zoom)
+      ? MathUtils.calcViewportBoundaries(this.activeLine, this.isCurve, SEGMENT_NUMBER, this.zoom)
       : undefined;
   }
 
@@ -824,7 +825,7 @@ class LineToolOperation extends BasicToolOperation {
     for (let i = 1; i <= pointList.length - 1; i++) {
       const point1 = this.getRenderAxis(pointList[i]);
       const point2 = this.getRenderAxis(pointList[i - 1]);
-      const { length, footPoint } = getFootOfPerpendicular(coord, point1, point2);
+      const { length, footPoint } = MathUtils.getFootOfPerpendicular(coord, point1, point2);
       const twoPointDistance1 = LineToolUtils.calcTwoPointDistance(point1, coord);
       const twoPointDistance2 = LineToolUtils.calcTwoPointDistance(point2, coord);
 
@@ -891,8 +892,8 @@ class LineToolOperation extends BasicToolOperation {
     const { top, left, right, bottom } = this.activeArea;
     const hBoundaries = [left, right].map((i) => (_.isNumber(i) ? i + offsetX : 0));
     const vBoundaries = [top, bottom].map((i) => (_.isNumber(i) ? i + offsetY : 0));
-    const horizontalInRange = left >= 0 && right && isInRange(hBoundaries, rectHorizontalRange);
-    const verticalInRange = top >= 0 && bottom && isInRange(vBoundaries, rectVerticalRange);
+    const horizontalInRange = left >= 0 && right && MathUtils.isInRange(hBoundaries, rectHorizontalRange);
+    const verticalInRange = top >= 0 && bottom && MathUtils.isInRange(vBoundaries, rectVerticalRange);
     const calcOffsetX = horizontalInRange ? offsetX : 0;
     const calcOffsetY = verticalInRange ? offsetY : 0;
 
@@ -1061,7 +1062,12 @@ class LineToolOperation extends BasicToolOperation {
     const activeLine = this.findHoverLine(coord);
     if (activeLine) {
       const index = this.lineList.findIndex((i) => i.id === activeLine?.id);
-      const area = calcViewportBoundaries(activeLine?.pointList || [], this.isCurve, SEGMENT_NUMBER, this.zoom);
+      const area = MathUtils.calcViewportBoundaries(
+        activeLine?.pointList || [],
+        this.isCurve,
+        SEGMENT_NUMBER,
+        this.zoom,
+      );
       const line = this.lineList[index];
       this.updateStatus(EStatus.Active);
       this.setActiveLine(line.pointList);
@@ -1082,7 +1088,7 @@ class LineToolOperation extends BasicToolOperation {
   public setActiveLineByID(id: string) {
     const line = this.lineList.find((i) => i.id === id);
     if (line) {
-      const area = calcViewportBoundaries(line?.pointList || [], this.isCurve, SEGMENT_NUMBER, this.zoom);
+      const area = MathUtils.calcViewportBoundaries(line?.pointList || [], this.isCurve, SEGMENT_NUMBER, this.zoom);
       this.updateStatus(EStatus.Active);
       this.setActiveLine(line.pointList);
       this.setSelectedLineID(line.id);
@@ -1196,10 +1202,13 @@ class LineToolOperation extends BasicToolOperation {
       const { x, y, width, height } = this.dependData;
       const rectHorizontalRange = [x, x + width];
       const rectVerticalRange = [y, y + height];
-      return isInRange(coord.x, rectHorizontalRange) && isInRange(coord.y, rectVerticalRange);
+      return MathUtils.isInRange(coord.x, rectHorizontalRange) && MathUtils.isInRange(coord.y, rectVerticalRange);
     }
 
-    return isInRange(coord.x, [0, this.imageSize.width]) && isInRange(coord.y, [0, this.imageSize.height]);
+    return (
+      MathUtils.isInRange(coord.x, [0, this.imageSize.width]) &&
+      MathUtils.isInRange(coord.y, [0, this.imageSize.height])
+    );
   }
 
   /**
@@ -1385,7 +1394,7 @@ class LineToolOperation extends BasicToolOperation {
   public onDblclick = () => {};
 
   public isTextValid(text: string) {
-    return textAttributeValidate(this.textCheckType, this.customFormat, text);
+    return AttributeUtils.textAttributeValidate(this.textCheckType, this.customFormat, text);
   }
 
   public createLineData() {
@@ -1607,7 +1616,7 @@ class LineToolOperation extends BasicToolOperation {
       }
 
       /** 删除线 */
-      const area = calcViewportBoundaries(this.activeLine, this.isCurve, SEGMENT_NUMBER, this.zoom);
+      const area = MathUtils.calcViewportBoundaries(this.activeLine, this.isCurve, SEGMENT_NUMBER, this.zoom);
       const axisOnArea = LineToolUtils.inArea(area, this.getAbsAxis(coord));
       if (axisOnArea) {
         this.deleteLine();
@@ -1851,7 +1860,7 @@ class LineToolOperation extends BasicToolOperation {
   }
 
   public getTextIconSvg(attribute = '') {
-    return AttributeUtil.getTextIconSvg(
+    return AttributeUtils.getTextIconSvg(
       attribute,
       this.config.attributeList,
       this.config.attributeConfigurable,
@@ -1863,8 +1872,8 @@ class LineToolOperation extends BasicToolOperation {
   public updateSelectedTextAttribute(newTextAttribute?: string) {
     if (this._textAttributeInstance && newTextAttribute && this.selectedID) {
       let textAttribute = newTextAttribute;
-      if (AttributeUtil.textAttributeValidate(this.config.textCheckType, '', textAttribute) === false) {
-        this.emit('messageError', AttributeUtil.getErrorNotice(this.config.textCheckType, this.lang));
+      if (AttributeUtils.textAttributeValidate(this.config.textCheckType, '', textAttribute) === false) {
+        this.emit('messageError', AttributeUtils.getErrorNotice(this.config.textCheckType, this.lang));
         textAttribute = '';
       }
 

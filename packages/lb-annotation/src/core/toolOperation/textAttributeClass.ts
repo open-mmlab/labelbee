@@ -1,5 +1,5 @@
-import EKeyCode from '../../../constant/keyCode';
-import { TEXT_ATTRIBUTE_LINE_HEIGHT, TEXT_ATTRIBUTE_MAX_LENGTH } from '../../../constant/tool';
+import EKeyCode from '../../constant/keyCode';
+import { TEXT_ATTRIBUTE_LINE_HEIGHT, TEXT_ATTRIBUTE_MAX_LENGTH } from '../../constant/tool';
 
 const defaultWidth = 30;
 

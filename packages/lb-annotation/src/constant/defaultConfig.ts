@@ -1,85 +1,170 @@
-# Sense-Annotation
+import { EToolName } from './tool';
 
-Sense-Annotation 是 SenseBee 数据服务平台内部自研的标注绘图框架，能快速提供检测、分割、分类等标注操作。
-
-## 📦 Install
-
-```bash
-# NPM
-$ npm install @sensetime/annotation --registry=https://npm-registry.sensetime.com
-
-# YARN
-$ yarn add label-bee --registry=https://npm-registry.sensetime.com
-
-# .npmrc
-@sensetime:registry=https://npm-registry.sensetime.com
-```
-
-## Usage
-
-```ts
-import React, { useEffect } from 'react';
-import { AnnotationEngine } from '@sensetime/annotation';
-
-interface IImageAttribute {
-  contrast: number;
-  saturation: number;
-  brightness: number;
-  zoomRatio: number;
-  isOriginalSize: boolean;
-}
-
-interface IRect {
-  x: number;
-  y: number;
-  width: number;
-  height: number;
-  id: string;
-  sourceID: string;
-  valid: boolean;
-  order: number;
-  attribute: string;
-  textAttribute: string;
-  disableDelete?: boolean; // 是否允许被删除
-  label?: string; // 列表标签
-}
-
-interface IPolygonData {
-  sourceID: string;
-  id: string;
-  pointList: IPolygonPoint[];
-  valid: boolean;
-  order: number;
-  textAttribute: string;
-  attribute: string;
-}
-
-const imgSrc =
-  'https://upload.wikimedia.org/wikipedia/commons/thumb/6/6e/Andre_Iguodala_2016.jpg/1200px-Andre_Iguodala_2016.jpg';
-
-const rectConfigString = JSON.stringify({
+const rectToolConfig = {
+  showConfirm: false,
+  skipWhileNoDependencies: false,
+  drawOutsideTarget: false,
+  copyBackwardResult: true,
   minWidth: 1,
   minHeight: 1,
   isShowOrder: true,
+  filterData: ['valid', 'invalid'],
   attributeConfigurable: true,
   attributeList: [
-    { key: '类别x1', value: 'class-x1' },
-    { key: '类别Hl', value: 'class-Hl' },
-    { key: '类别J5', value: 'class-J5' },
-    { key: '类别ve', value: 'class-ve' },
-    { key: '类别oJ', value: 'class-oJ' },
-    { key: '类别qz', value: 'class-qz' },
-    { key: '类别0x', value: 'class-0x' },
-    { key: '类别Hv', value: 'class-Hv' },
+    { key: '玩偶', value: 'doll' },
+    { key: '喷壶', value: 'wateringCan' },
+    { key: '脸盆', value: 'washbasin' },
+    { key: '保温杯', value: 'vacuumCup' },
+    { key: '纸巾', value: 'tissue' },
+    { key: '水壶', value: 'kettle' },
   ],
   textConfigurable: true,
   textCheckType: 0,
   customFormat: '',
+};
+
+const tagToolConfig = {
+  showConfirm: true,
+  skipWhileNoDependencies: false,
+  inputList: [
+    {
+      key: '类别1',
+      value: 'class1',
+      isMulti: false,
+      subSelected: [
+        { key: '选项1', value: 'option1', isDefault: false },
+        { key: '选项2', value: 'option1-2', isDefault: false },
+      ],
+    },
+    {
+      key: '类别2',
+      value: 'class-AH',
+      isMulti: true,
+      subSelected: [
+        { key: '选项2-1', value: 'option2-1', isMulti: false },
+        { key: '选项2-2', value: 'option2-2', isDefault: false },
+        { key: '选项2-3', value: 'option2-3', isDefault: false },
+      ],
+    },
+    {
+      key: '类别3',
+      value: 'class-0P',
+      isMulti: false,
+      subSelected: [
+        { key: '选项3-1', value: 'option3-1', isMulti: false },
+        { key: '选项3-2', value: 'option3-2', isDefault: false },
+        { key: '选项3-3', value: 'option3-3', isDefault: false },
+      ],
+    },
+  ],
+};
+
+const lineToolConfig = {
+  lineType: 0,
+  lineColor: 0,
+  edgeAdsorption: true,
+  outOfTarget: true,
+  copyBackwardResult: true,
+  isShowOrder: true,
+  attributeConfigurable: true,
+  attributeList: [
+    { key: '类别1', value: '类别1' },
+    { key: '类别ao', value: 'class-ao' },
+    { key: '类别M1', value: 'class-M1' },
+    { key: '类别Cm', value: 'class-Cm' },
+    { key: '类别c3', value: 'class-c3' },
+    { key: '类别a0', value: 'class-a0' },
+    { key: '类别u7', value: 'class-u7' },
+    { key: '类别Zb', value: 'class-Zb' },
+    { key: '类别zi', value: 'class-zi' },
+  ],
+  textConfigurable: true,
+  textCheckType: 2,
+  customFormat: '',
+  showConfirm: true,
+  lowerLimitPointNum: 2,
+  upperLimitPointNum: '',
+  preReferenceStep: 0,
+  skipWhileNoDependencies: false,
+  filterData: ['valid', 'invalid'],
+};
+
+const textToolConfig = {
+  showConfirm: false,
+  skipWhileNoDependencies: false,
+  enableTextRecognition: false,
+  recognitionMode: 'general',
+  configList: [
+    { label: '文本', key: 'text', required: false, default: '从现在', maxLength: 1000 },
+    { label: '文本2', key: 'text2', required: true, default: '多少啊', maxLength: 1000 },
+    { label: '文本3', key: 'text3', required: true, default: '2431阿斯顿23', maxLength: 1000 },
+  ],
+  filterData: ['valid', 'invalid'],
+};
+
+const polygonConfig = {
+  lineType: 0,
+  lineColor: 0,
+  lowerLimitPointNum: 3,
+  upperLimitPointNum: 20,
+  edgeAdsorption: true,
   drawOutsideTarget: false,
   copyBackwardResult: false,
-});
+  isShowOrder: false,
+  attributeConfigurable: true,
+  attributeList: [
+    { key: '类别1', value: '类别1' },
+    { key: '类别tT', value: 'class-tT' },
+    { key: '类别FM', value: 'class-FM' },
+    { key: '类别r6', value: 'class-r6' },
+    { key: '类别Rs22222类别Rs22222', value: 'class-Rs' },
+    { key: '类别rp', value: 'class-rp' },
+    { key: '类别rp2', value: 'class-rp2' },
+    { key: '类别rp3', value: 'class-rp3' },
+    { key: '类别Rs4', value: 'class-Rs4' },
+    { key: '类别rp5', value: 'class-rp5' },
+  ],
+  textConfigurable: true,
+  textCheckType: 0,
+  customFormat: '',
+};
 
-const styleConfig = {
+export const getConfig = (tool: EToolName) => {
+  if (tool === 'lineTool') {
+    return lineToolConfig;
+  }
+
+  if (tool === 'rectTool') {
+    return rectToolConfig;
+  }
+
+  if (tool === 'tagTool') {
+    return tagToolConfig;
+  }
+
+  if (tool === 'textTool') {
+    return textToolConfig;
+  }
+
+  if (tool === 'polygonTool') {
+    return polygonConfig;
+  }
+
+  return rectToolConfig;
+};
+
+export const getStepList = (tool: EToolName) => {
+  return [
+    {
+      step: 1,
+      dataSourceStep: 0,
+      tool: tool ?? 'rectTool',
+      config: JSON.stringify(getConfig(tool)),
+    },
+  ];
+};
+
+export const styleDefaultConfig = {
   toolColor: {
     1: {
       valid: { stroke: 'rgba(0,0,255,0.50)', fill: 'rgba(0,0,255,0.40)' },
@@ -218,90 +303,3 @@ const styleConfig = {
   width: 2,
   opacity: 9,
 };
-
-const App = () => {
-  const ref = React.useRef(null);
-
-  useEffect(() => {
-    if (ref.current) {
-      const imgNode = new Image();
-      imgNode.src = imgSrc;
-      imgNode.onload = () => {
-        // 获取当前工具的类
-        const annotationEngine = new AnnotationEngine({
-          container: ref.current,
-          size: {
-            width: 1000,
-            height: 600,
-          },
-          toolName: 'rectTool',
-          imgNode,
-          config: rectConfigString,
-          style: styleConfig,
-        });
-
-        // 控制工具实例
-        const toolInstance = annotationEngine.toolInstance;
-
-        // 常见用法
-        // 1. 设置当前渲染的 setImgNode，设置之后会主动初始化图片大小
-        toolInstance.setImgNode(imgNode);
-
-        // 2. 设置当前的标注工具的结果 IRect[] | IPolygonData[]
-        const result = [];
-        toolInstance.setResult(result);
-
-        // 3. 初始化当前历史结果
-        toolInstance.history.initRecord(result, true);
-
-        // 4. 设置当前图片的是否渲染
-        toolInstance.setRotate(fileResult.rotate ?? 0);
-
-        // 5. 更改上述配置的样式
-        toolInstance.setStyle(styleConfig);
-
-        // 6. 更改当前的窗口的大小
-        toolInstance.setSize(canvasSize);
-
-        // 7. 初始化图片的大小
-        toolInstance.initImgPos();
-
-        // 8. 按比例方法放大 / 缩小
-        toolInstance.zoomChanged(true);
-        toolInstance.zoomChanged(false);
-
-        // 9. 设置选中指定框体
-        const selectedID = undefined;
-        toolInstance.setSelectedID(selectedID);
-
-        // 10. 数据暴露， exportResult 为当前结果数组的，basicImgInfo 为当前图片的宽、高、旋转角度、有无效性
-        const [exportResult, basicImgInfo] = toolInstance.exportData();
-
-        // 11. 设置当前是否可以操作
-        const forbidOperation = false;
-        toolInstance.setForbidOperation(forbidOperation);
-
-        // 12. 设置当前依赖框体
-        
-        // 矩形框依赖
-        annotationEngine.setBasicInfo(EToolName.Rect, {
-          x: 200.91597,
-          y: 157.15384,
-          width: 174.88402,
-          height: 227.26863,
-          order: 1,
-          valid: true,
-          id: 'omd8QAY7',
-          sourceID: '0',
-          attribute: 'attribute_1',
-          textAttribute: '我是文本',
-        });
-      };
-    }
-  }, []);
-
-  return <div ref={ref} />;
-};
-
-export default App;
-```

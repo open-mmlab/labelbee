@@ -1,7 +1,7 @@
-import RectOperationAsNewName from './utils/tool/toolOperation/rectOperation';
-import TagOperation from './utils/tool/toolOperation/tagOperation';
-import MeasureOperation from './utils/tool/toolOperation/measureOperation';
-import { BasicToolOperation } from './utils/tool/toolOperation/basicToolOperation';
+import { RectOperation } from './core/toolOperation/rectOperation';
+import TagOperation from './core/toolOperation/tagOperation';
+import MeasureOperation from './core/toolOperation/measureOperation';
+import { BasicToolOperation } from './core/toolOperation/basicToolOperation';
 
 // Constant
 import * as cAnnotation from './constant/annotation';
@@ -11,9 +11,7 @@ import * as cStyle from './constant/style';
 import * as cTool from './constant/tool';
 
 // Utils
-import * as rectUtils from './utils/tool/rectTool';
 import TagUtils from './utils/tool/TagUtils';
-import * as toolUtils from './utils/tool/common';
 import * as uuid from './utils/uuid';
 import CommonToolUtils from './utils/tool/CommonToolUtils';
 // TODO 后续将 Util 后缀 => Utils
@@ -23,9 +21,11 @@ import AxisUtils from './utils/tool/AxisUtils';
 import DrawUtils from './utils/tool/DrawUtils';
 
 // ToolListener
-import DblClickEventListener from './utils/tool/DblClickEventListener';
+import DblClickEventListener from './utils/tool/DblClickEventListener'; // 暂时这样支持外部工具的使用
 
-const RectOperation = RectOperationAsNewName;
+import AnnotationEngine from './core';
+
+const toolUtils = CommonToolUtils;
 
 export {
   RectOperation,
@@ -37,7 +37,6 @@ export {
   cKeyCode,
   cStyle,
   cTool,
-  rectUtils,
   toolUtils,
   uuid,
   DblClickEventListener,
@@ -47,4 +46,5 @@ export {
   AxisUtils,
   TagUtils,
   DrawUtils,
+  AnnotationEngine,
 };

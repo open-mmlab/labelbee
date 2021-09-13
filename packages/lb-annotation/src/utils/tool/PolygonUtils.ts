@@ -2,7 +2,7 @@ import CommonToolUtils from './CommonToolUtils';
 import { IPolygonData, IPolygonPoint } from '../../types/tool/polygon';
 import { ELineTypes, SEGMENT_NUMBER } from '../../constant/tool';
 import AxisUtils from './AxisUtils';
-import { getFootOfPerpendicular } from './math';
+import MathUtils from '../MathUtils';
 
 export default class PolygonUtils {
   static getHoverPolygonID(
@@ -243,7 +243,7 @@ export default class PolygonUtils {
     let minLength = scope;
 
     for (let i = 0; i < points.length - 1; i++) {
-      const { length } = getFootOfPerpendicular(checkPoint, points[i], points[i + 1]);
+      const { length } = MathUtils.getFootOfPerpendicular(checkPoint, points[i], points[i + 1]);
       if (length < minLength) {
         edgeIndex = i;
         minLength = length;
@@ -294,7 +294,7 @@ export default class PolygonUtils {
           {
             const allLine = CommonToolUtils.findAllLine(v.pointList);
             allLine.forEach((line, lineIndex) => {
-              const { length, footPoint } = getFootOfPerpendicular(coordinate, line.point1, line.point2);
+              const { length, footPoint } = MathUtils.getFootOfPerpendicular(coordinate, line.point1, line.point2);
               if (length < min && length < range) {
                 // 说明是存在最小路径
                 closestPolygonID = v.id;
@@ -318,7 +318,7 @@ export default class PolygonUtils {
             );
 
             for (let i = 0; i < points.length - 1; i++) {
-              const { length, footPoint } = getFootOfPerpendicular(coordinate, points[i], points[i + 1]);
+              const { length, footPoint } = MathUtils.getFootOfPerpendicular(coordinate, points[i], points[i + 1]);
               if (length < min && length < range) {
                 closestPolygonID = v.id;
                 closestEdgeIndex = Math.floor(i / (numberOfSegments + 1));

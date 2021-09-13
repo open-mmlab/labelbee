@@ -1,8 +1,7 @@
-import TagUtils from '../TagUtils';
-import uuid from '../../uuid';
-import { hotkeyFilter, jsonParser } from '../common';
-import { getTagNameList } from '../tagTool';
+import TagUtils from '../../utils/tool/TagUtils';
+import uuid from '../../utils/uuid';
 import { BasicToolOperation, IBasicToolOperationProps } from './basicToolOperation';
+import { CommonToolUtils } from '@/';
 
 interface ITagOperationProps extends IBasicToolOperationProps {
   config: string;
@@ -19,7 +18,7 @@ class TagOperation extends BasicToolOperation {
 
   constructor(props: ITagOperationProps) {
     super(props);
-    this.config = jsonParser(props.config);
+    this.config = CommonToolUtils.jsonParser(props.config);
     this.tagResult = [];
     this.labelSelectedList = [];
     this.sourceID = '';
@@ -46,7 +45,7 @@ class TagOperation extends BasicToolOperation {
   }
 
   public onKeyDown(e: KeyboardEvent) {
-    if (!hotkeyFilter(e)) {
+    if (!CommonToolUtils.hotkeyFilter(e)) {
       return;
     }
 
@@ -219,7 +218,7 @@ class TagOperation extends BasicToolOperation {
     }
 
     const dom = document.createElement('div');
-    const tagInfoList = getTagNameList(this.currentTagResult.result, this.config.inputList);
+    const tagInfoList = TagUtils.getTagNameList(this.currentTagResult.result, this.config.inputList);
 
     dom.innerHTML =
       tagInfoList.reduce((acc: string, cur: { keyName: string; value: string[] }) => {

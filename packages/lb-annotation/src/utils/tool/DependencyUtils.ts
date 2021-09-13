@@ -1,6 +1,6 @@
 import { EDependPattern } from '@/constant/tool';
 
-export default class Dependency {
+export default class DependencyUtils {
   public static isDependPolygon(dependPattern: EDependPattern) {
     return [EDependPattern.dependPolygon, EDependPattern.dependPrePolygon].includes(dependPattern);
   }

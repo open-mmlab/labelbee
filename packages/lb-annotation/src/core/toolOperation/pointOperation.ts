@@ -1,18 +1,17 @@
-import { DEFAULT_TEXT_OFFSET, EDragStatus, ESortDirection } from '../../../constant/annotation';
-import EKeyCode from '../../../constant/keyCode';
-import uuid from '../../uuid';
-import AttributeUtil from '../AttributeUtil';
-import { changeDrawOutsideTarget, getMaxOrder, getOffsetCoordinate, hotkeyFilter, jsonParser } from '../common';
+import { DEFAULT_TEXT_OFFSET, EDragStatus, ESortDirection } from '../../constant/annotation';
+import EKeyCode from '../../constant/keyCode';
+import uuid from '../../utils/uuid';
+import AttributeUtils from '../../utils/tool/AttributeUtils';
 import { BasicToolOperation, IBasicToolOperationProps } from './basicToolOperation';
 import TextAttributeClass from './textAttributeClass';
-import DrawUtils from '../DrawUtils';
-import StyleUtil from '../StyleUtil';
-import AxisUtils from '../AxisUtils';
-import locale from '../../../locales';
-import { EMessage } from '../../../locales/constants';
-import CommonToolUtils from '../CommonToolUtils';
-import { IPolygonData } from '../../../types/tool/polygon';
-import { isInRange } from '../../math';
+import DrawUtils from '../../utils/tool/DrawUtils';
+import StyleUtils from '../../utils/tool/StyleUtils';
+import AxisUtils from '../../utils/tool/AxisUtils';
+import locale from '../../locales';
+import { EMessage } from '../../locales/constants';
+import CommonToolUtils from '../../utils/tool/CommonToolUtils';
+import { IPolygonData } from '../../types/tool/polygon';
+import MathUtils from '@/utils/MathUtils';
 
 const TEXTAREA_WIDTH = 200;
 
@@ -35,7 +34,7 @@ class PointOperation extends BasicToolOperation {
 
   constructor(props: IPointOperationProps) {
     super(props);
-    this.config = jsonParser(props.config);
+    this.config = CommonToolUtils.jsonParser(props.config);
     this.pointList = [];
 
     this.setStyle(props.style);
@@ -89,7 +88,7 @@ class PointOperation extends BasicToolOperation {
   }
 
   public setConfig(config: string, isClear = false) {
-    this.config = jsonParser(config);
+    this.config = CommonToolUtils.jsonParser(config);
     if (isClear === true) {
       this.clearResult();
     }
@@ -148,7 +147,7 @@ class PointOperation extends BasicToolOperation {
       return;
     }
 
-    this.setPointList(AttributeUtil.textChange(v, this.selectedID, this.pointList));
+    this.setPointList(AttributeUtils.textChange(v, this.selectedID, this.pointList));
     this.emit('selectedChange'); // 触发外层的更新
     this.render();
   };
@@ -189,7 +188,7 @@ class PointOperation extends BasicToolOperation {
    * @param attribute
    */
   public getTextIconSvg(attribute = '') {
-    return AttributeUtil.getTextIconSvg(
+    return AttributeUtils.getTextIconSvg(
       attribute,
       this.config.attributeList,
       this.config.attributeConfigurable,
@@ -254,7 +253,7 @@ class PointOperation extends BasicToolOperation {
       return true;
     }
     if (e.button === 2) {
-      this.rightMouseUp(e);
+      this.rightMouseUp();
     }
     // 拖拽停止
     if (this.dragStatus === EDragStatus.Move) {
@@ -269,7 +268,7 @@ class PointOperation extends BasicToolOperation {
     this.dragStatus = EDragStatus.Move;
     const coordinateZoom = this.getCoordinateUnderZoom(e);
     // 缩放后的坐标
-    const zoomCoordinate = changeDrawOutsideTarget(
+    const zoomCoordinate = AxisUtils.changeDrawOutsideTarget(
       coordinateZoom,
       { x: 0, y: 0 },
       this.imgInfo,
@@ -291,7 +290,7 @@ class PointOperation extends BasicToolOperation {
   }
 
   public onKeyDown(e: KeyboardEvent) {
-    if (!hotkeyFilter(e)) {
+    if (!CommonToolUtils.hotkeyFilter(e)) {
       // 如果为输入框则进行过滤
       return;
     }
@@ -316,11 +315,11 @@ class PointOperation extends BasicToolOperation {
       default: {
         if (this.config.attributeConfigurable) {
           let num = -1;
-          if (isInRange(keyCode, [48, 57])) {
+          if (MathUtils.isInRange(keyCode, [48, 57])) {
             num = keyCode - 48;
           }
 
-          if (isInRange(keyCode, [96, 105])) {
+          if (MathUtils.isInRange(keyCode, [96, 105])) {
             num = keyCode - 96;
           }
 
@@ -376,12 +375,12 @@ class PointOperation extends BasicToolOperation {
       id: uuid(8, 62),
       sourceID: basicSourceID,
       textAttribute: '',
-      order: getMaxOrder(this.pointList.filter((v) => v.sourceID === basicSourceID)) + 1,
+      order: CommonToolUtils.getMaxOrder(this.pointList.filter((v) => v.sourceID === basicSourceID)) + 1,
     } as IPointUnit;
 
     if (this.config.textConfigurable) {
       let textAttribute = '';
-      textAttribute = AttributeUtil.getTextAttribute(
+      textAttribute = AttributeUtils.getTextAttribute(
         this.pointList.filter((point) => point.sourceID === basicSourceID),
         this.config.textCheckType,
       );
@@ -532,12 +531,12 @@ class PointOperation extends BasicToolOperation {
   public updateSelectedTextAttribute(newTextAttribute?: string) {
     if (this._textAttributInstance && newTextAttribute && this.selectedID) {
       let textAttribute = newTextAttribute;
-      if (AttributeUtil.textAttributeValidate(this.config.textCheckType, '', textAttribute) === false) {
-        this.emit('messageError', AttributeUtil.getErrorNotice(this.config.textCheckType, this.lang));
+      if (AttributeUtils.textAttributeValidate(this.config.textCheckType, '', textAttribute) === false) {
+        this.emit('messageError', AttributeUtils.getErrorNotice(this.config.textCheckType, this.lang));
         textAttribute = '';
       }
 
-      this.setPointList(AttributeUtil.textChange(textAttribute, this.selectedID, this.pointList));
+      this.setPointList(AttributeUtils.textChange(textAttribute, this.selectedID, this.pointList));
 
       this.emit('updateTextAttribute');
       this.render();
@@ -552,7 +551,7 @@ class PointOperation extends BasicToolOperation {
     const { x, y, attribute, valid } = point;
 
     const newWidth = TEXTAREA_WIDTH * this.zoom * 0.6;
-    const coordinate = getOffsetCoordinate({ x, y }, this.currentPos, this.zoom);
+    const coordinate = AxisUtils.getOffsetCoordinate({ x, y }, this.currentPos, this.zoom);
     const toolColor = this.getColor(attribute);
     const color = valid ? toolColor?.valid.stroke : toolColor?.invalid.stroke;
     const distance = 4;
@@ -594,7 +593,7 @@ class PointOperation extends BasicToolOperation {
       const transformPoint = AxisUtils.changePointByZoom(point, this.zoom, this.currentPos);
       const { width = 2 } = this.style;
 
-      const toolData = StyleUtil.getStrokeAndFill(toolColor, point.valid, {
+      const toolData = StyleUtils.getStrokeAndFill(toolColor, point.valid, {
         isSelected: selected || point.id === this.hoverID,
       });
 
@@ -606,7 +605,7 @@ class PointOperation extends BasicToolOperation {
         color: toolData.stroke,
         fill: toolData.fill,
       });
-      let showText = `${AttributeUtil.getAttributeShowText(point.attribute, this.config.attributeList) ?? ''}`;
+      let showText = `${AttributeUtils.getAttributeShowText(point.attribute, this.config.attributeList) ?? ''}`;
       if (this.config?.isShowOrder && point.order > 0) {
         showText = `${point.order} ${showText}`;
       }

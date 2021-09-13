@@ -23,6 +23,7 @@ const shortCutTable: any = {
   [EToolName.Point]: pointToolShortcutTable,
   [EToolName.Polygon]: polygonToolShortcutTable,
   [EToolName.Line]: polygonToolShortcutTable,
+  [EToolName.Text]: polygonToolShortcutTable,
 };
 
 export interface IShortcuts {

@@ -1,10 +1,10 @@
-import { RectOperation, TagOperation } from '@sensetime/annotation';
+import { AnnotationEngine, RectOperation, TagOperation } from '@sensetime/annotation';
 import { ANNOTATION_ACTIONS } from '@/store/Actions';
 import { IStepInfo } from '@/types/step';
 import { OnSubmit, IFileItem, GetFileData } from '@/types/data';
 import { ESubmitType } from '@/constant';
 
-export type ToolInstance = typeof RectOperation | typeof TagOperation;
+export type ToolInstance = RectOperation | TagOperation;
 
 interface CommonActions {
   type: string;
@@ -13,6 +13,7 @@ interface CommonActions {
 
 export interface AnnotationState {
   toolInstance: ToolInstance | null;
+  annotationEngine: AnnotationEngine;
   imgList: IFileItem[];
   config: string;
   imgIndex: number;
@@ -28,6 +29,7 @@ interface UpdateToolInstance {
   type: typeof ANNOTATION_ACTIONS.UPDATE_TOOL_INSTANCE;
   payload: {
     toolInstance: ToolInstance;
+    annotationEngine: AnnotationEngine;
   };
 }
 

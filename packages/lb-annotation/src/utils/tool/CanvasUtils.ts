@@ -1,6 +1,6 @@
-import { isInRange } from '../math';
+import MathUtils from '../MathUtils';
 
-export default class CanvasUtil {
+export default class CanvasUtils {
   public static getMousePositionOnCanvasFromEvent(event: MouseEvent, canvas: HTMLCanvasElement) {
     if (canvas && event) {
       const canvasRect: ClientRect | DOMRect = canvas.getBoundingClientRect();
@@ -49,7 +49,10 @@ export default class CanvasUtil {
       return false;
     }
 
-    return isInRange(coord.x, [viewPort.left, viewPort.right]) && isInRange(coord.y, [viewPort.top, viewPort.bottom]);
+    return (
+      MathUtils.isInRange(coord.x, [viewPort.left, viewPort.right]) &&
+      MathUtils.isInRange(coord.y, [viewPort.top, viewPort.bottom])
+    );
   }
 
   /**

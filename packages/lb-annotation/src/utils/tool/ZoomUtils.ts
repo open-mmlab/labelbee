@@ -1,11 +1,11 @@
 import { EGrowthMode } from '../../constant/annotation';
-import { withinRange } from '../math';
+import MathUtils from '../MathUtils';
 
 const ZOOM_LEVEL: number[] = [1, 5, 10, 20, 30, 50, 80, 100].concat(
   Array.from({ length: 9 }).map((i, index) => (index + 2) * 100),
 );
 
-export default class ZoomUtil {
+export default class ZoomUtils {
   // 阶级缩放
   public static zoomChanged = (zoom: number, isZoomIn: boolean, growthMode = EGrowthMode.Linear) => {
     switch (growthMode) {
@@ -28,7 +28,7 @@ export default class ZoomUtil {
         } else {
           // 根据当前缩放落在范围，计算出一下个缩放值
           const newZoomIndex = isZoomIn ? zoomIndex + 1 : zoomIndex - (ZOOM_LEVEL.includes(zoom) ? 1 : 0);
-          newZoom = ZOOM_LEVEL[withinRange(newZoomIndex, [0, ZOOM_LEVEL.length - 1])];
+          newZoom = ZOOM_LEVEL[MathUtils.withinRange(newZoomIndex, [0, ZOOM_LEVEL.length - 1])];
         }
 
         return newZoom;
@@ -80,7 +80,7 @@ export default class ZoomUtil {
       let currentZoom = zoom + operator * ratio;
 
       // 限制缩放范围
-      currentZoom = withinRange(currentZoom, [basicZoom, zoomMax]);
+      currentZoom = MathUtils.withinRange(currentZoom, [basicZoom, zoomMax]);
 
       const changeX = width * currentZoom * ratioX;
       const changeY = height * currentZoom * ratioY;
