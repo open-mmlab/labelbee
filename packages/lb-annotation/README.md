@@ -19,7 +19,7 @@ $ yarn add label-bee --registry=https://npm-registry.sensetime.com
 
 ```ts
 import React, { useEffect } from 'react';
-import { toolUtils } from '@sensetime/annotation';
+import { AnnotationEngine } from '@sensetime/annotation';
 
 interface IImageAttribute {
   contrast: number;
@@ -228,26 +228,22 @@ const App = () => {
       imgNode.src = imgSrc;
       imgNode.onload = () => {
         // 获取当前工具的类
-        const ToolOperation = toolUtils.getCurrentOperation('rectTool');
-
-        const toolInstance = new ToolOperation({
+        const annotationEngine = new AnnotationEngine({
           container: ref.current,
           size: {
             width: 1000,
             height: 600,
           },
+          toolName: 'rectTool',
           imgNode,
           config: rectConfigString,
           style: styleConfig,
         });
 
-        // 初始化当前的工具
-        if (toolInstance?.init) {
-          toolInstance.init();
-        }
+        // 控制工具实例
+        const toolInstance = annotationEngine.toolInstance;
 
         // 常见用法
-
         // 1. 设置当前渲染的 setImgNode，设置之后会主动初始化图片大小
         toolInstance.setImgNode(imgNode);
 
@@ -284,6 +280,22 @@ const App = () => {
         // 11. 设置当前是否可以操作
         const forbidOperation = false;
         toolInstance.setForbidOperation(forbidOperation);
+
+        // 12. 设置当前依赖框体
+        
+        // 矩形框依赖
+        annotationEngine.setBasicInfo(EToolName.Rect, {
+          x: 200.91597,
+          y: 157.15384,
+          width: 174.88402,
+          height: 227.26863,
+          order: 1,
+          valid: true,
+          id: 'omd8QAY7',
+          sourceID: '0',
+          attribute: 'attribute_1',
+          textAttribute: '我是文本',
+        });
       };
     }
   }, []);
