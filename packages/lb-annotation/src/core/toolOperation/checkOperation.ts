@@ -1,5 +1,5 @@
-import { cloneDeep } from 'lodash';
 import { CommonToolUtils, TagUtils } from '@/';
+import { cloneDeep } from 'lodash';
 import { DEFAULT_TEXT_OFFSET } from '../../constant/annotation';
 import { EToolName } from '../../constant/tool';
 import { IPolygonData } from '../../types/tool/polygon';
@@ -8,7 +8,10 @@ import AxisUtils from '../../utils/tool/AxisUtils';
 import DrawUtils from '../../utils/tool/DrawUtils';
 import StyleUtils from '../../utils/tool/StyleUtils';
 import { BasicToolOperation, IBasicToolOperationProps } from './basicToolOperation';
-
+const TEXT_ATTRIBUTE_OFFSET = {
+  x: 8,
+  y: 26,
+};
 interface ICheckResult {
   result: Array<IPolygonData | IRect | ITagResult>;
   toolName: EToolName;
@@ -77,6 +80,17 @@ class CheckOperation extends BasicToolOperation {
         this.canvas,
         AxisUtils.changePointByZoom(polygon.pointList[0], this.zoom, this.currentPos),
         AttributeUtils.getAttributeShowText(polygon.attribute, config?.attributeList ?? []) ?? '',
+        {
+          color: toolData.stroke,
+          ...DEFAULT_TEXT_OFFSET,
+        },
+      );
+      const transformPointList = AxisUtils.changePointListByZoom(polygon.pointList || [], this.zoom, this.currentPos);
+      const endPoint = transformPointList[transformPointList.length - 1];
+      DrawUtils.drawText(
+        this.canvas,
+        { x: endPoint.x + TEXT_ATTRIBUTE_OFFSET.x, y: endPoint.y + TEXT_ATTRIBUTE_OFFSET.y },
+        polygon?.textAttribute,
         {
           color: toolData.stroke,
           ...DEFAULT_TEXT_OFFSET,
