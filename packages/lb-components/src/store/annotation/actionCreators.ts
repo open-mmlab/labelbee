@@ -30,15 +30,6 @@ export function UpdateAnnotationConfig(config: string): AnnotationActionTypes {
   };
 }
 
-export function PageJump(imgIndex: number): AnnotationActionTypes {
-  return {
-    type: ANNOTATION_ACTIONS.PAGE_JUMP,
-    payload: {
-      imgIndex,
-    },
-  };
-}
-
 export function SetTaskConfig({
   stepList,
   step,

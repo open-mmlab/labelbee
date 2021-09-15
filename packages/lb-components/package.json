@@ -9,7 +9,7 @@
     "lib"
   ],
   "scripts": {
-    "dev": "npm run build && cross-env NODE_ENV=developemnt rollup -c rollup.config.js -w",
+    "dev": "npm run build && cross-env NODE_ENV=developemnt rollup -m -c rollup.config.js -w ",
     "start": "npm run dev",
     "dev:style": "node-sass src/index.scss dist/index.css -w",
     "build:style": "node-sass src/index.scss dist/index.css && cp -R ./src/assets/cssIcon/.  ./dist/assets/cssIcon",

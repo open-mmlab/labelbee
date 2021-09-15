@@ -19,12 +19,12 @@ export const composeResult = (
   result: string,
   pos: {
     step: number;
-    stepList: any[]
+    stepList: any[];
   },
   newData: {
     rect: any[];
     basicRectID?: string;
-  }
+  },
 ) => {
   const { step, stepList } = pos;
   const { rect, basicRectID } = newData;
