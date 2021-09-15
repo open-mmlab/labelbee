@@ -25,6 +25,7 @@ deploy-dev:
     - dev
   script:
     - *install
+    - npm config set registry https://npm-registry.sensetime.com/
     - npx lerna publish from-package --legacy-auth $TNPM_USERPASSWORD_BASE64 --yes
 
 deploy-build:
