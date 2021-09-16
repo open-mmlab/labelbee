@@ -1,7 +1,7 @@
 import MathUtils from '@/utils/MathUtils';
 import { DEFAULT_TEXT_OFFSET, EDragStatus, EDragTarget, ESortDirection } from '../../constant/annotation';
 import EKeyCode from '../../constant/keyCode';
-import { edgeAdsorptionScope } from '../../constant/tool';
+import { edgeAdsorptionScope, EToolName } from '../../constant/tool';
 import locale from '../../locales';
 import { EMessage } from '../../locales/constants';
 import { IPolygonConfig, IPolygonData, IPolygonPoint } from '../../types/tool/polygon';
@@ -16,6 +16,7 @@ import PolygonUtils from '../../utils/tool/PolygonUtils';
 import StyleUtils from '../../utils/tool/StyleUtils';
 import { BasicToolOperation, IBasicToolOperationProps } from './basicToolOperation';
 import TextAttributeClass from './textAttributeClass';
+import RectUtils from '@/utils/tool/RectUtils';
 
 const TEXT_MAX_WIDTH = 164;
 
@@ -841,6 +842,34 @@ class PolygonOperation extends BasicToolOperation {
 
     // 边缘判断 - 仅限支持图片下范围下
     if (this.config.drawOutsideTarget === false && this.imgInfo) {
+      if (this.dependToolName && this.basicCanvas) {
+        let isOutSide = false;
+        switch (this.dependToolName) {
+          case EToolName.Rect: {
+            // 依赖拉框
+            isOutSide = selectedPointList.filter((v) => !RectUtils.isInRect(v, this.basicResult)).length > 0;
+
+            break;
+          }
+          case EToolName.Polygon: {
+            isOutSide = PolygonUtils.isPointListOutSidePolygon(
+              selectedPointList,
+              this.basicResult.pointList,
+              this.config.lineType,
+            );
+            break;
+          }
+          default: {
+            //
+          }
+        }
+
+        if (isOutSide) {
+          // 在边界外直接跳出
+          return;
+        }
+      }
+
       const { left, top, right, bottom } = MathUtils.calcViewportBoundaries(
         AxisUtils.changePointListByZoom(selectedPointList, this.zoom),
       );

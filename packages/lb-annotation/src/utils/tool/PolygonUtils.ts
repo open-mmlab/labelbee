@@ -338,4 +338,29 @@ export default class PolygonUtils {
 
     return { dropFoot, closestEdgeIndex, closestPolygonID };
   }
+
+  /**
+   * 点集是否在多边形内
+   * @param pointList
+   * @param polygonPoints
+   * @param lineType
+   */
+  public static isPointListInPolygon(
+    pointList: IPolygonPoint[],
+    polygonPoints: IPolygonPoint[],
+    lineType: ELineTypes = ELineTypes.Line,
+  ): boolean {
+    return pointList.every((v) => this.isInPolygon(v, polygonPoints, lineType));
+  }
+
+  /**
+   * 点集是否在多边形外
+   */
+  public static isPointListOutSidePolygon(
+    pointList: IPolygonPoint[],
+    polygonPoints: IPolygonPoint[],
+    lineType: ELineTypes = ELineTypes.Line,
+  ): boolean {
+    return pointList.some((v) => !this.isInPolygon(v, polygonPoints, lineType));
+  }
 }

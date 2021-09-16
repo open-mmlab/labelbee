@@ -4,7 +4,7 @@
  */
 
 import _ from 'lodash';
-import { ELineColor, EDependPattern, ELineTypes, ETextType } from '@/constant/tool';
+import { ELineColor, EDependPattern, ELineTypes, ETextType, EToolName } from '@/constant/tool';
 import ActionsHistory from '@/utils/ActionsHistory';
 import uuid from '@/utils/uuid';
 import EKeyCode from '@/constant/keyCode';
@@ -157,8 +157,6 @@ class LineToolOperation extends BasicToolOperation {
 
   private hoverID?: string;
 
-  private dependData?: any;
-
   constructor(props: ILineOperationProps) {
     super(props);
     this.status = EStatus.None;
@@ -174,6 +172,10 @@ class LineToolOperation extends BasicToolOperation {
     this.textEditingID = '';
     this.updateSelectedTextAttribute = this.updateSelectedTextAttribute.bind(this);
     this.actionsHistory = new ActionsHistory();
+
+    this.dependConfig = {
+      lineType: ELineTypes.Line,
+    };
   }
 
   /** 创建状态 */
@@ -229,11 +231,11 @@ class LineToolOperation extends BasicToolOperation {
   }
 
   get isDependPolygon() {
-    return DependencyUtils.isDependPolygon(this.dependPattern);
+    return this.dependToolName === EToolName.Polygon;
   }
 
   get isDependRect() {
-    return DependencyUtils.isDependRect(this.dependPattern);
+    return this.dependToolName === EToolName.Rect;
   }
 
   get isCurrentAttributeLocked() {
@@ -323,25 +325,25 @@ class LineToolOperation extends BasicToolOperation {
   }
 
   public isInPolygon(coord: ICoordinate) {
-    return isInPolygon(coord, this.dependData?.pointList || [], this.dependConfig.lineType);
+    return isInPolygon(coord, this.basicResult?.pointList || [], this.dependConfig?.lineType);
   }
 
   public getPolygonPointList() {
-    if (!this.dependData) {
+    if (!this.basicResult) {
       return [];
     }
-    const { pointList } = this.dependData;
+    const { pointList } = this.basicResult;
     const { lineType } = this.dependConfig;
-    return lineType === ELineTypes.Line
-      ? pointList
-      : createSmoothCurvePoints(
+    return lineType === ELineTypes.Curve
+      ? createSmoothCurvePoints(
           pointList.reduce((acc: any[], cur: any) => {
             return [...acc, cur.x, cur.y];
           }, []),
           0.5,
           true,
           20,
-        );
+        )
+      : pointList;
   }
 
   /**
@@ -356,7 +358,7 @@ class LineToolOperation extends BasicToolOperation {
         coord,
         preAxis,
         this.dependPattern,
-        this.dependData,
+        this.basicResult,
         this.dependConfig,
         this.imageSize,
         POINT_RADIUS,
@@ -929,7 +931,7 @@ class LineToolOperation extends BasicToolOperation {
     let rectVerticalRange = [0, this.imageSize.height];
 
     if (this.isDependRect) {
-      const { x, y, width, height } = this.dependData;
+      const { x, y, width, height } = this.basicResult;
       rectHorizontalRange = [x, x + width];
       rectVerticalRange = [y, y + height];
     }
@@ -1044,7 +1046,7 @@ class LineToolOperation extends BasicToolOperation {
   }
 
   public onMouseMove(e: MouseEvent) {
-    if (super.onMouseDown(e) || this.forbidMouseOperation || !this.imgInfo) {
+    if (super.onMouseMove(e) || this.forbidMouseOperation || !this.imgInfo) {
       return;
     }
     const coord = this.getAxis(e);
@@ -1199,7 +1201,7 @@ class LineToolOperation extends BasicToolOperation {
       return this.isInPolygon(coord);
     }
     if (this.isDependRect) {
-      const { x, y, width, height } = this.dependData;
+      const { x, y, width, height } = this.basicResult;
       const rectHorizontalRange = [x, x + width];
       const rectVerticalRange = [y, y + height];
       return MathUtils.isInRange(coord.x, rectHorizontalRange) && MathUtils.isInRange(coord.y, rectVerticalRange);
