@@ -24,14 +24,14 @@ deploy-dev:
   only:
     - dev
   script:
-    - *install
     - npm config set registry https://npm-registry.sensetime.com/
-    - npx lerna publish from-package --legacy-auth $TNPM_USERPASSWORD_BASE64 --yes
+    - echo "//https://npm-registry.sensetime.com/:_authToken=$NPM_TOKEN" > .npmrc
+    - npx lerna publish -y --canary --preid \"beta.$(git rev-parse --short HEAD)\" --pre-dist-tag=beta --legacy-auth $TNPM_USERPASSWORD_BASE64
 
 deploy-build:
   stage: deploy
   only:
     - master
   script:
-    - *install
     - npx lerna version --conventional-graduate --yes
+    - npx lerna publish from-package --legacy-auth $TNPM_USERPASSWORD_BASE64 --yes
