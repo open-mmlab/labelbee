@@ -1,24 +1,16 @@
-import React, {
-  useState, useRef, useEffect, useContext,
-} from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import { Divider, Input } from 'antd';
 import { LeftOutlined, RightOutlined } from '@ant-design/icons';
-import { EToolName } from '@/data/enums/ToolType';
-import { getFormatSize, viewportContext } from '@/components/customResizeHook';
 import { store } from 'src';
 import { AppState } from '@/store';
 import { connect } from 'react-redux';
-import {
-  getTotalPage,
-  pageBackwardActions,
-  pageJumpActions,
-  pageForwardActions,
-} from '@/store/annotation/reducer';
+import { getTotalPage } from '@/store/annotation/reducer';
 import HiddenTips from './HiddenTips';
 import PageNumber from './PageNumber';
 import ZoomController from './ZoomController';
 import FooterTips from './FooterTips';
 import { prefix } from '@/constant';
+import { PageBackward, PageForward, PageJump } from '@/store/annotation/actionCreators';
 
 interface IPageProps {
   jumpSkip: (e: KeyboardEvent) => void;
@@ -50,7 +42,7 @@ export const PageInput = (props: IPageProps) => {
 
   return (
     <Input
-      className="pageInput"
+      className='pageInput'
       ref={inputEl}
       onChange={newHandleJump}
       value={newIndex}
@@ -64,28 +56,28 @@ interface IProps {
   imgIndex: number;
 }
 
-export const footerCls = `${prefix}-footer`
+export const footerCls = `${prefix}-footer`;
 
 const ToolFooter: React.FC<IProps> = (props: IProps) => {
   // const windowSize = useContext(viewportContext);
   // const canvasSize = getFormatSize(windowSize);
   const renderDivider = () => (
-    <Divider type="vertical" style={{ background: 'rgba(153, 153, 153, 1)', height: '16px' }} />
+    <Divider type='vertical' style={{ background: 'rgba(153, 153, 153, 1)', height: '16px' }} />
   );
 
   // const width = canvasSize.width;
 
   const pageBackward = () => {
-    store.dispatch(pageBackwardActions());
+    store.dispatch(PageBackward());
   };
 
   const pageForward = () => {
-    store.dispatch(pageForwardActions());
+    store.dispatch(PageForward());
   };
 
   const pageJump = (page: string) => {
     const imgIndex = ~~page - 1;
-    store.dispatch(pageJumpActions(imgIndex));
+    store.dispatch(PageJump(imgIndex));
   };
 
   return (

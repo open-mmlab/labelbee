@@ -1,55 +1,31 @@
 import { ANNOTATION_ACTIONS } from '@/store/Actions';
 import _ from 'lodash';
-import { EPageTurningOperation } from '@/data/enums/AnnotationSize';
 import { composeResultWithBasicImgInfo, composeResult } from '@/utils/data';
 import { jsonParser } from '@/utils';
 import StepUtils from '@/utils/StepUtils';
 import AnnotationDataUtils from '@/utils/AnnotationDataUtils';
-import { EToolName } from '@/data/enums/ToolType';
 import { ConfigUtils } from '@/utils/ConfigUtils';
 import styleString from '@/constant/styleString';
 import { getFormatSize } from '@/components/customResizeHook';
-import { toolUtils, AnnotationEngine } from '@sensetime/annotation';
-import { ESubmitType } from '@/constant';
-import { AnnotationState, AnnotationActionTypes, ToolInstance } from './types';
+import { AnnotationEngine } from '@sensetime/annotation';
+import { AnnotationState, AnnotationActionTypes } from './types';
+import { message } from 'antd';
 
-const { getCurrentOperation } = toolUtils;
+const getStepConfig = (stepList: any[], step: number) => stepList.find((i) => i.step === step);
 
 const initialState: AnnotationState = {
   toolInstance: null,
   imgList: [],
   config: '{}',
   imgIndex: -1,
+  basicIndex: 0,
   imgPageSize: 1,
   step: 1,
   stepList: [],
   imgNode: new Image(),
-};
-
-const getNewImgIndex = (
-  state: AnnotationState,
-  pageTurningOperation: EPageTurningOperation,
-  index?: number,
-) => {
-  const { imgIndex } = state;
-  const totalPage = getTotalPage(state);
-  let newIndex = index !== undefined ? index : imgIndex;
-  switch (pageTurningOperation) {
-    case EPageTurningOperation.Forward:
-      newIndex = imgIndex + 1;
-      break;
-    case EPageTurningOperation.Backward:
-      newIndex = imgIndex - 1;
-      break;
-    case EPageTurningOperation.Jump:
-      break;
-  }
-
-  if (_.inRange(newIndex, 0, totalPage)) {
-    return newIndex;
-  }
-
-  return imgIndex;
+  basicResultList: [],
+  resultList: [],
+  stepProgress: 0,
 };
 
 /**
@@ -61,31 +37,16 @@ export const getTotalPage = (state: AnnotationState) => {
   return Math.ceil(imgList.length / imgPageSize);
 };
 
-const pageChanged = (dispatch: any, nextIndex: number, submitType: ESubmitType) => [
-  dispatch({ type: ANNOTATION_ACTIONS.SUBMIT_FILE_DATA, payload: { submitType } }),
-  dispatch(loadFileData(nextIndex)),
-];
+const calcStepProgress = (fileList: any[], step: number) =>
+  fileList.reduce((pre, i) => {
+    const resultStr = i.result;
+    const resultObject = jsonParser(resultStr);
+    if (resultObject[`step_${step}`]) {
+      return pre + 1;
+    }
+    return pre;
+  }, 0) / fileList.length;
 
-export const pageBackwardActions = () => (dispatch: any, getState: any) => {
-  const nextIndex = getNewImgIndex(getState().annotation, EPageTurningOperation.Backward);
-  return pageChanged(dispatch, nextIndex, ESubmitType.Backward);
-};
-
-export const pageForwardActions = () => (dispatch: any, getState: any) => {
-  const nextIndex = getNewImgIndex(getState().annotation, EPageTurningOperation.Forward);
-  return pageChanged(dispatch, nextIndex, ESubmitType.Forward);
-};
-
-export const pageJumpActions = (nIndex: number) => (dispatch: any, getState: any) => {
-  const { annotation } = getState();
-
-  if (nIndex === annotation.imgIndex) {
-    return;
-  }
-
-  const nextIndex = getNewImgIndex(annotation, EPageTurningOperation.Jump, nIndex);
-  return pageChanged(dispatch, nextIndex, ESubmitType.Jump);
-};
 
 
 const updateToolInstance = (annotation: AnnotationState, imgNode: HTMLImageElement) => {
@@ -112,39 +73,40 @@ const updateToolInstance = (annotation: AnnotationState, imgNode: HTMLImageEleme
   return { toolInstance: annotationEngine.toolInstance, annotationEngine };
 };
 
-export const loadFileData = (nextIndex: number) => async (dispatch: any, getState: any) => {
-  const { getFileData, imgList } = getState().annotation;
-  /** 支持外部传入获取文件接口 */
-  if (getFileData) {
-    const fileData = await getFileData(imgList[nextIndex], nextIndex);
+export const loadFileData =
+  (nextIndex: number, nextBasicIndex?: number) => async (dispatch: any, getState: any) => {
+    const { getFileData, imgList } = getState().annotation;
+    /** 支持外部传入获取文件接口 */
+    if (getFileData) {
+      const fileData = await getFileData(imgList[nextIndex], nextIndex);
+      dispatch({
+        type: ANNOTATION_ACTIONS.SET_FILE_DATA,
+        payload: {
+          fileData,
+          index: nextIndex,
+        },
+      });
+    }
 
-    dispatch({
-      type: ANNOTATION_ACTIONS.SET_FILE_DATA,
-      payload: {
-        fileData,
-        index: nextIndex,
-      },
+    const { url } = imgList[nextIndex];
+
+    return new Promise((reslove) => {
+      const imgNode = new Image();
+      imgNode.src = url;
+      imgNode.onload = () => {
+        reslove(imgNode);
+      };
+    }).then((imgNode) => {
+      dispatch({
+        type: ANNOTATION_ACTIONS.LOAD_FILE_DATA,
+        payload: {
+          imgNode,
+          nextIndex,
+          nextBasicIndex,
+        },
+      });
     });
-  }
-
-  const { url } = imgList[nextIndex];
-
-  return new Promise((reslove, reject) => {
-    const imgNode = new Image();
-    imgNode.src = url;
-    imgNode.onload = () => {
-      reslove(imgNode);
-    };
-  }).then((imgNode) => {
-    dispatch({
-      type: ANNOTATION_ACTIONS.LOAD_FILE_DATA,
-      payload: {
-        imgNode,
-        nextIndex,
-      },
-    });
-  });
-};
+  };
 
 export const annotationReducer = (
   state = initialState,
@@ -165,15 +127,30 @@ export const annotationReducer = (
       };
     }
 
+    case ANNOTATION_ACTIONS.CALC_STEP_PROGRESS: {
+      const { imgList, step } = state;
+
+      const stepProgress = calcStepProgress(imgList, step);
+
+      return {
+        ...state,
+        stepProgress,
+      };
+    }
+
     case ANNOTATION_ACTIONS.SUBMIT_FILE_DATA: {
-      const { imgList, imgIndex, step, stepList, toolInstance, onSubmit } = state;
+      const { imgList, imgIndex, step, stepList, toolInstance, onSubmit, resultList } = state;
       const resultString = imgList[imgIndex]?.result || '';
-      const [exportResult, basicImgInfo] = toolInstance.exportData();
+      const [basicImgInfo] = toolInstance.exportData();
+
       const resultWithBasicInfo = composeResultWithBasicImgInfo(resultString, basicImgInfo);
+
+      const stepProgress = calcStepProgress(imgList, step);
+
       imgList[imgIndex].result = composeResult(
         resultWithBasicInfo,
         { step, stepList },
-        { rect: exportResult },
+        { rect: resultList },
       );
 
       if (onSubmit) {
@@ -182,19 +159,88 @@ export const annotationReducer = (
 
       return {
         ...state,
+        stepProgress,
         imgList,
       };
     }
 
+    case ANNOTATION_ACTIONS.SUBMIT_RESULT: {
+      const { imgList, basicIndex, resultList, annotationEngine, basicResultList } = state;
+      const [exportResult] = annotationEngine.toolInstance.exportData();
+
+      let previousResultList = exportResult;
+
+      if (basicResultList.length > 0) {
+        const sourceID = basicResultList[basicIndex]?.id;
+        const newResultData = exportResult.map((i: any) => ({ ...i, i, sourceID }));
+        previousResultList = _.cloneDeep(resultList).filter((i: any) => i.sourceID !== sourceID);
+        previousResultList.push(...newResultData);
+      }
+
+      return {
+        ...state,
+        resultList: previousResultList,
+        imgList,
+      };
+    }
+
+    case ANNOTATION_ACTIONS.SET_BASIC_INDEX: {
+      const {
+        toolInstance,
+        step,
+        imgList,
+        imgIndex,
+        stepList,
+        annotationEngine,
+        resultList,
+        basicResultList,
+      } = state;
+      const nextBasicIndex = action.payload.basicIndex;
+      const sourceID = basicResultList[nextBasicIndex]?.id;
+
+      const fileResult = jsonParser(imgList[imgIndex]?.result);
+      const result = (resultList || []).filter((i) => i.sourceID === sourceID);
+
+      const stepConfig = getStepConfig(stepList, step);
+
+      const { dataSourceStep, tool } = stepConfig;
+      const dependStepConfig = getStepConfig(stepList, dataSourceStep);
+      let stepBasicResultList = [];
+
+      if (dataSourceStep && tool) {
+        stepBasicResultList = fileResult[`step_${dataSourceStep}`].result;
+
+        if (stepBasicResultList.length > 0) {
+          annotationEngine.setBasicInfo(dependStepConfig.tool, stepBasicResultList[nextBasicIndex]);
+        } else {
+          annotationEngine.setBasicInfo();
+          message.info('当前文件不存在依赖数据');
+        }
+      }
+
+      toolInstance.setResult(result);
+
+      toolInstance.history.initRecord(result, true);
+
+      return {
+        ...state,
+        basicIndex: nextBasicIndex,
+      };
+    }
+
     case ANNOTATION_ACTIONS.LOAD_FILE_DATA: {
-      const { imgList, step, toolInstance, annotationEngine } = state;
+      const { imgList, step, toolInstance, annotationEngine, stepList } = state;
       if (!toolInstance) {
         return state;
       }
 
-      const { nextIndex, imgNode } = action.payload;
+      const { nextIndex, imgNode, nextBasicIndex } = action.payload;
+      const basicIndex = nextBasicIndex ?? 0;
+
       const fileResult = jsonParser(imgList[nextIndex]?.result);
+
       const stepResult = fileResult[`step_${step}`];
+
       const isInitData = !stepResult; // 是否为初始化数据
 
       const basicImgInfo = {
@@ -204,52 +250,36 @@ export const annotationReducer = (
 
       toolInstance.setImgNode(imgNode, basicImgInfo);
       annotationEngine.setImgNode(imgNode);
-      const result = stepResult?.result || [];
+      let result = stepResult?.result || [];
+      const stepConfig = getStepConfig(stepList, step);
+
+      const { dataSourceStep, tool } = stepConfig;
+      const dependStepConfig = getStepConfig(stepList, dataSourceStep);
+      let stepBasicResultList = [];
+
+      if (dataSourceStep && tool) {
+        stepBasicResultList = fileResult[`step_${dataSourceStep}`].result;
+
+        if (stepBasicResultList.length > 0) {
+          annotationEngine.setBasicInfo(dependStepConfig.tool, stepBasicResultList[basicIndex]);
+          const sourceID = stepBasicResultList[basicIndex].id;
+
+          result = result.filter((i) => i.sourceID === sourceID);
+        } else {
+          // TODO: 禁用绘制交互
+          message.info('当前文件不存在依赖数据');
+        }
+      }
+
       toolInstance.setResult(result, isInitData);
-
-      // 拉框工具
-      annotationEngine.setBasicInfo(EToolName.Rect,{ width: 100, height: 100, x: 10, y: 10} )
-
-      // 多边形工具
-      // annotationEngine.setBasicInfo(EToolName.Polygon, {
-      //   pointList: [
-      //     { x: 123, y: 123 },
-      //     { x: 523, y: 423 },
-      //     { x: 233, y: 443 },
-      //   ],
-      // });
-
       toolInstance.history.initRecord(result, true);
 
       return {
         ...state,
         imgIndex: nextIndex,
-      };
-    }
-
-    case ANNOTATION_ACTIONS.PAGE_FORWARD: {
-      return {
-        ...state,
-        imgIndex: getNewImgIndex(state, EPageTurningOperation.Forward),
-      };
-    }
-
-    case ANNOTATION_ACTIONS.PAGE_BACKWARD: {
-      return {
-        ...state,
-        imgIndex: getNewImgIndex(state, EPageTurningOperation.Backward),
-      };
-    }
-
-    case ANNOTATION_ACTIONS.PAGE_JUMP: {
-      const { imgIndex } = action.payload;
-      if (imgIndex === state.imgIndex) {
-        return state;
-      }
-
-      return {
-        ...state,
-        imgIndex: getNewImgIndex(state, EPageTurningOperation.Jump, imgIndex),
+        basicIndex,
+        basicResultList: stepBasicResultList,
+        resultList: stepResult?.result || [],
       };
     }
 
@@ -341,6 +371,22 @@ export const annotationReducer = (
         ...state,
         imgList: [...imgList],
       };
+    }
+
+    case ANNOTATION_ACTIONS.SET_STEP: {
+      const { stepList, annotationEngine } = state;
+      const { toStep } = action.payload;
+
+      if (toStep <= stepList.length) {
+        const stepConfig = getStepConfig(stepList, toStep);
+        annotationEngine.setToolName(stepConfig.tool, stepConfig.config);
+
+        return {
+          ...state,
+          step: toStep,
+          toolInstance: annotationEngine.toolInstance,
+        };
+      }
     }
 
     default:

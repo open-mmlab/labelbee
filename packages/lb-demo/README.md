@@ -1,11 +1,14 @@
-# 标注工具 sdk - Demo
+# 标注工具 label-bee-demo
 
-在线试用：
-拉框工具 - http://bee-sdk-demo.sensebee.xyz/
-标签工具 - http://bee-sdk-demo.sensebee.xyz/?tool=tagTool
-多边形工具 - http://bee-sdk-demo.sensebee.xyz/?tool=polygonTool
-线条工具 - http://bee-sdk-demo.sensebee.xyz/?tool=lineTool
-文本工具 - http://bee-sdk-demo.sensebee.xyz/tool=textTool
+## 在线试用：
+|  工具   | 链接  |
+|  ----  | ----  |
+| 拉框  | http://bee-sdk-demo.sensebee.xyz/ |
+| 标签  | http://bee-sdk-demo.sensebee.xyz/?tool=tagTool |
+| 线条  | http://bee-sdk-demo.sensebee.xyz/?tool=lineTool |
+| 文本  | http://bee-sdk-demo.sensebee.xyz/?tool=textTool |
+| 多边形  | http://bee-sdk-demo.sensebee.xyz/?tool=polygonTool |
+
 
 ## 快速使用
 

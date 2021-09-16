@@ -1,7 +1,7 @@
 import { uuid } from '@sensetime/annotation';
 import { jsonParser } from '.';
 
-export default class AnnotaionDataUtils {
+export default class AnnotationDataUtils {
   /**
    * 复制上一张图片结果
    * @param copyResult 复制的结果

@@ -3,15 +3,10 @@ import { connect } from 'react-redux';
 import { store } from '.';
 import { AppState } from './store';
 import {
-  UpdateImgList,
-  SetTaskConfig,
-  UpdateOnSubmit,
-  UpdateGetFileData,
+  InitTaskData,
 } from './store/annotation/actionCreators';
 import MainView from '@/views/MainView';
 import { IStepInfo } from './types/step';
-import { ANNOTATION_ACTIONS } from './store/Actions';
-import { loadFileData } from './store/annotation/reducer';
 import { OnSubmit, GetFileData } from './types/data';
 import { ToolInstance } from './store/annotation/types';
 
@@ -31,31 +26,26 @@ export interface AppProps {
   header?: React.ReactNode;
   footer?: React.ReactNode;
   sider?: React.ReactNode;
-  setToolInstance?: (tool: ToolInstance) => void
+  setToolInstance?: (tool: ToolInstance) => void;
 }
 
 const App: React.FC<AppProps> = (props) => {
-  const { imgList, step, stepList, onSubmit, getFileData, initialIndex = 0, toolInstance, setToolInstance } = props;
+  const {
+    imgList,
+    step,
+    stepList,
+    onSubmit,
+    initialIndex = 0,
+    toolInstance,
+    setToolInstance,
+  } = props;
   useEffect(() => {
-    if (onSubmit) {
-      store.dispatch(UpdateOnSubmit(onSubmit));
-    }
-
-    if (getFileData) {
-      store.dispatch(UpdateGetFileData(getFileData));
-    }
-
-    store.dispatch(UpdateImgList(imgList));
-    store.dispatch(SetTaskConfig({ stepList, step }));
-    store.dispatch({
-      type: ANNOTATION_ACTIONS.INIT_TOOL,
-    });
-    store.dispatch(loadFileData(initialIndex));
+    store.dispatch(InitTaskData({ imgList, onSubmit, stepList, step, initialIndex }));
   }, []);
 
   useEffect(() => {
-    setToolInstance?.(toolInstance)
-  }, [toolInstance])
+    setToolInstance?.(toolInstance);
+  }, [toolInstance]);
 
   return (
     <div>

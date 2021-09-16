@@ -151,13 +151,20 @@ export const getConfig = (tool) => {
   return rectToolConfig;
 };
 
-export const getStepList = (tool) => {
-  return [
-    {
-      step: 1,
-      dataSourceStep: 0,
-      tool: tool ?? 'rectTool',
-      config: JSON.stringify(getConfig(tool)),
-    },
-  ];
+export const getStepList = (tool, sourceStep, step) => {
+  return [getStepConfig()];
 };
+
+const getStepConfig = (step, sourceStep, tool) => {
+  return {
+    step: step ?? 1,
+    dataSourceStep: sourceStep || 0,
+    tool: tool ?? 'rectTool',
+    config: JSON.stringify(getConfig(tool)),
+  };
+};
+
+export const getDependStepList = () =>
+  ['rectTool', 'polygonTool', 'lineTool'].map((tool, index) =>
+    getStepConfig(index + 1, index, tool),
+  );

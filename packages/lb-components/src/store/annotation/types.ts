@@ -23,6 +23,10 @@ export interface AnnotationState {
   imgNode: HTMLImageElement;
   onSubmit?: OnSubmit;
   getFileData?: GetFileData;
+  basicIndex: number;
+  basicResultList: any[];
+  resultList: any[];
+  stepProgress: number;
 }
 
 interface UpdateToolInstance {
@@ -47,40 +51,11 @@ interface UpdateAnnotationConfig {
   };
 }
 
-interface PageForward extends CommonActions {
-  type: typeof ANNOTATION_ACTIONS.PAGE_FORWARD;
-}
-
-interface PageBackward extends CommonActions {
-  type: typeof ANNOTATION_ACTIONS.PAGE_BACKWARD;
-}
-
-interface PageJump {
-  type: typeof ANNOTATION_ACTIONS.PAGE_JUMP;
-  payload: {
-    imgIndex: number;
-  };
-}
-
-interface PageJump {
-  type: typeof ANNOTATION_ACTIONS.PAGE_JUMP;
-  payload: {
-    imgIndex: number;
-  };
-}
-
-interface PageJump {
-  type: typeof ANNOTATION_ACTIONS.PAGE_JUMP;
-  payload: {
-    imgIndex: number;
-  };
-}
-
 interface SubmitFileData extends CommonActions {
   type: typeof ANNOTATION_ACTIONS.SUBMIT_FILE_DATA;
   payload: {
     submitType: ESubmitType;
-  }
+  };
 }
 
 interface LoadFileData extends CommonActions {
@@ -120,7 +95,7 @@ interface UpdateGetFileData {
 }
 
 interface CopyBackWordResult {
-  type: typeof ANNOTATION_ACTIONS.COPY_BACKWARD_RESULT,
+  type: typeof ANNOTATION_ACTIONS.COPY_BACKWARD_RESULT;
 }
 
 export type AnnotationActionTypes =

@@ -37,7 +37,6 @@ export default {
       // All options are optional
       include: /\.[jt]s?x?$/, // default, inferred from `loaders` option
       exclude: /node_modules/, // default
-      sourceMap: true, // default
       minify: isProd,
       target: 'es2015', // default, or 'es20XX', 'esnext'
       define: {
