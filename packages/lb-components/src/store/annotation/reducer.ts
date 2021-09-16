@@ -1,6 +1,5 @@
 import { ANNOTATION_ACTIONS } from '@/store/Actions';
 import _ from 'lodash';
-import { EPageTurningOperation } from '@/data/enums/AnnotationSize';
 import { composeResultWithBasicImgInfo, composeResult } from '@/utils/data';
 import { jsonParser } from '@/utils';
 import StepUtils from '@/utils/StepUtils';
@@ -9,10 +8,8 @@ import { ConfigUtils } from '@/utils/ConfigUtils';
 import styleString from '@/constant/styleString';
 import { getFormatSize } from '@/components/customResizeHook';
 import { AnnotationEngine } from '@sensetime/annotation';
-import { ESubmitType } from '@/constant';
 import { AnnotationState, AnnotationActionTypes } from './types';
 import { message } from 'antd';
-import PageOperator from '@/utils/PageOperator.ts';
 
 const getStepConfig = (stepList: any[], step: number) => stepList.find((i) => i.step === step);
 
@@ -28,38 +25,7 @@ const initialState: AnnotationState = {
   imgNode: new Image(),
   basicResultList: [],
   resultList: [],
-};
-
-/**
- * 计算下一个文件的索引
- * @param state
- * @param pageTurningOperation
- * @param index
- */
-const getNewImgIndex = (
-  state: AnnotationState,
-  pageTurningOperation: EPageTurningOperation,
-  index?: number,
-) => {
-  const { imgIndex } = state;
-  const totalPage = getTotalPage(state);
-  let newIndex = index !== undefined ? index : imgIndex;
-  switch (pageTurningOperation) {
-    case EPageTurningOperation.Forward:
-      newIndex = imgIndex + 1;
-      break;
-    case EPageTurningOperation.Backward:
-      newIndex = imgIndex - 1;
-      break;
-    case EPageTurningOperation.Jump:
-      break;
-  }
-
-  if (_.inRange(newIndex, 0, totalPage)) {
-    return newIndex;
-  }
-
-  return imgIndex;
+  stepProgress: 0,
 };
 
 /**
@@ -71,74 +37,17 @@ export const getTotalPage = (state: AnnotationState) => {
   return Math.ceil(imgList.length / imgPageSize);
 };
 
-const changeFileIndex = (
-  dispatch: any,
-  nextIndex: number,
-  submitType: ESubmitType,
-  nextBasicIndex?: number,
-) => [
-  dispatch({ type: ANNOTATION_ACTIONS.SUBMIT_RESULT }),
-  dispatch({ type: ANNOTATION_ACTIONS.SUBMIT_FILE_DATA, payload: { submitType } }),
-  dispatch(loadFileData(nextIndex, nextBasicIndex)),
-];
+const calcStepProgress = (fileList: any[], step: number) =>
+  fileList.reduce((pre, i) => {
+    const resultStr = i.result;
+    const resultObject = jsonParser(resultStr);
+    if (resultObject[`step_${step}`]) {
+      return pre + 1;
+    }
+    return pre;
+  }, 0) / fileList.length;
 
-const changeBasicIndex = (dispatch: any, nextBasicIndex: number, submitType: ESubmitType) => [
-  dispatch({ type: ANNOTATION_ACTIONS.SUBMIT_RESULT }),
-  dispatch({ type: ANNOTATION_ACTIONS.SET_BASIC_INDEX, payload: { basicIndex: nextBasicIndex } }),
-];
 
-const getSubmitByPageOperation = (pageTurningOperation: EPageTurningOperation) => {
-  if (pageTurningOperation === EPageTurningOperation.Forward) {
-    return ESubmitType.Forward;
-  }
-
-  if (pageTurningOperation === EPageTurningOperation.Backward) {
-    return ESubmitType.Backward;
-  }
-
-  if (pageTurningOperation === EPageTurningOperation.Jump) {
-    return ESubmitType.Jump;
-  }
-
-  return ESubmitType.Forward;
-};
-
-const changePage = (
-  dispatch: any,
-  getState: any,
-  pageTurningOperation: EPageTurningOperation,
-  toIndex?: number,
-) => {
-  const { fileIndexChanged, fileIndex, basicIndexChanged, basicIndex } =
-    PageOperator.getNextPageInfo(pageTurningOperation, getState().annotation, toIndex);
-
-  const submitType: ESubmitType = getSubmitByPageOperation(pageTurningOperation);
-
-  if (fileIndexChanged) {
-    return changeFileIndex(dispatch, fileIndex, submitType, basicIndex);
-  }
-
-  if (basicIndexChanged) {
-    return changeBasicIndex(dispatch, basicIndex, submitType);
-  }
-};
-
-export const pageBackwardActions = () => (dispatch: any, getState: any) =>
-  changePage(dispatch, getState, EPageTurningOperation.Backward);
-
-export const pageForwardActions = () => (dispatch: any, getState: any) =>
-  changePage(dispatch, getState, EPageTurningOperation.Forward);
-
-export const pageJumpActions = (toIndex: number) => (dispatch: any, getState: any) => {
-  if (toIndex === getState().imgIndex) {
-    return;
-  }
-
-  return changePage(dispatch, getState, EPageTurningOperation.Jump, toIndex);
-};
-
-export const setNextStep = () => (dispatch: any) =>
-  [dispatch({ type: ANNOTATION_ACTIONS.SET_NEXT_STEP }), dispatch(loadFileData(0))];
 
 const updateToolInstance = (annotation: AnnotationState, imgNode: HTMLImageElement) => {
   const { step, stepList } = annotation;
@@ -218,12 +127,25 @@ export const annotationReducer = (
       };
     }
 
+    case ANNOTATION_ACTIONS.CALC_STEP_PROGRESS: {
+      const { imgList, step } = state;
+
+      const stepProgress = calcStepProgress(imgList, step);
+
+      return {
+        ...state,
+        stepProgress,
+      };
+    }
+
     case ANNOTATION_ACTIONS.SUBMIT_FILE_DATA: {
       const { imgList, imgIndex, step, stepList, toolInstance, onSubmit, resultList } = state;
       const resultString = imgList[imgIndex]?.result || '';
-      const [exportData, basicImgInfo] = toolInstance.exportData();
+      const [basicImgInfo] = toolInstance.exportData();
 
       const resultWithBasicInfo = composeResultWithBasicImgInfo(resultString, basicImgInfo);
+
+      const stepProgress = calcStepProgress(imgList, step);
 
       imgList[imgIndex].result = composeResult(
         resultWithBasicInfo,
@@ -237,6 +159,7 @@ export const annotationReducer = (
 
       return {
         ...state,
+        stepProgress,
         imgList,
       };
     }
@@ -343,7 +266,7 @@ export const annotationReducer = (
 
           result = result.filter((i) => i.sourceID === sourceID);
         } else {
-          // todo: 禁用绘制交互
+          // TODO: 禁用绘制交互
           message.info('当前文件不存在依赖数据');
         }
       }
@@ -450,16 +373,17 @@ export const annotationReducer = (
       };
     }
 
-    case ANNOTATION_ACTIONS.SET_NEXT_STEP: {
-      const { stepList, step, annotationEngine } = state;
+    case ANNOTATION_ACTIONS.SET_STEP: {
+      const { stepList, annotationEngine } = state;
+      const { toStep } = action.payload;
 
-      if (step < stepList.length) {
-        const stepConfig = getStepConfig(stepList, step + 1);
+      if (toStep <= stepList.length) {
+        const stepConfig = getStepConfig(stepList, toStep);
         annotationEngine.setToolName(stepConfig.tool, stepConfig.config);
 
         return {
           ...state,
-          step: step + 1,
+          step: toStep,
           toolInstance: annotationEngine.toolInstance,
         };
       }

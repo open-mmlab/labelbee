@@ -8,9 +8,8 @@ import { cKeyCode, toolUtils } from '@sensetime/annotation';
 
 import React, { useContext, useEffect, useMemo, useState } from 'react';
 import { connect } from 'react-redux';
-import { pageForwardActions, pageBackwardActions } from '@/store/annotation/reducer';
 import { AppState } from '@/store';
-import { UpdateRotate } from '@/store/annotation/actionCreators';
+import { UpdateRotate, PageBackward, PageForward } from '@/store/annotation/actionCreators';
 import { ISize } from '@/types/main';
 
 const EKeyCode = cKeyCode.default;
@@ -38,11 +37,11 @@ export const ViewportProviderComponent = (props: any) => {
       return;
     }
     if (e.keyCode === EKeyCode.A) {
-      dispatch(pageBackwardActions());
+      dispatch(PageBackward());
     }
 
     if (e.keyCode === EKeyCode.D) {
-      dispatch(pageForwardActions());
+      dispatch(PageForward());
     }
     if (e.keyCode === EKeyCode.R) {
       dispatch(UpdateRotate());

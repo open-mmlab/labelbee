@@ -6,7 +6,7 @@ import { cloneDeep } from 'lodash';
 import { classnames } from '@/utils';
 import { Input } from 'antd';
 import { cKeyCode } from '@sensetime/annotation';
-import { pageForwardActions } from '@/store/annotation/reducer';
+import { PageForward } from '@/store/annotation/actionCreators';
 
 const EKeyCode = cKeyCode.default;
 
@@ -215,7 +215,7 @@ const TextToolSidebar: React.FC<IProps> = ({ toolInstance, imgIndex, dispatch })
   const result = toolInstance.textList[0]?.value ?? {};
 
   const onNext = () => {
-    dispatch(pageForwardActions());
+    dispatch(PageForward());
   };
 
   return (

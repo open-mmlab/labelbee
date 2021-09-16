@@ -26,6 +26,7 @@ export interface AnnotationState {
   basicIndex: number;
   basicResultList: any[];
   resultList: any[];
+  stepProgress: number;
 }
 
 interface UpdateToolInstance {

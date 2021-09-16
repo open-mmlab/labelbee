@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React from 'react';
 import { LeftOutlined } from '@ant-design/icons';
 // import styles from './index.scss';
 import { connect } from 'react-redux';
@@ -12,17 +12,13 @@ import ExportData from './ExportData';
 import HeaderOption from './headerOption';
 import { AnnotationEngine } from '@sensetime/annotation';
 import { Button } from 'antd';
-import { setNextStep } from '@/store/annotation/reducer';
+import { ToNextStep } from '@/store/annotation/actionCreators';
 
-interface IProps {
-  goBack?: (imgList?: IFileItem[]) => void;
-  exportData?: (data: any[]) => void;
-  headerName?: string;
-  imgList: IFileItem[];
-  annotationEngine: AnnotationEngine;
+interface INextStep {
+  stepProgress: number;
 }
 
-const NextStep = () => {
+const NextStep: React.FC<INextStep> = ({ stepProgress }) => {
   return (
     <Button
       type='primary'
@@ -30,15 +26,31 @@ const NextStep = () => {
         marginLeft: 10,
       }}
       onClick={() => {
-        store.dispatch(setNextStep());
+        store.dispatch(ToNextStep());
       }}
+      disabled={stepProgress < 1}
     >
       下一步
     </Button>
   );
 };
 
-const ToolHeader: React.FC<IProps> = ({ goBack, exportData, headerName, imgList }) => {
+interface IToolHeaderProps {
+  goBack?: (imgList?: IFileItem[]) => void;
+  exportData?: (data: any[]) => void;
+  headerName?: string;
+  imgList: IFileItem[];
+  annotationEngine: AnnotationEngine;
+  stepProgress: number;
+}
+
+const ToolHeader: React.FC<IToolHeaderProps> = ({
+  goBack,
+  exportData,
+  headerName,
+  imgList,
+  stepProgress,
+}) => {
   // render 数据展示
   const currentOption = <ExportData exportData={exportData} />;
 
@@ -60,7 +72,7 @@ const ToolHeader: React.FC<IProps> = ({ goBack, exportData, headerName, imgList 
         <LeftOutlined className={`${prefix}-header__icon`} onClick={closeAnnotation} />
         {headerName ? <span className={`${prefix}-header__name`}>{headerName}</span> : ''}
 
-        <NextStep />
+        <NextStep stepProgress={stepProgress} />
 
         {currentOption}
         <div
@@ -78,6 +90,7 @@ const ToolHeader: React.FC<IProps> = ({ goBack, exportData, headerName, imgList 
 const mapStateToProps = (state: AppState) => ({
   imgList: state.annotation.imgList,
   annotationEngine: state.annotation.annotationEngine,
+  stepProgress: state.annotation.stepProgress,
 });
 
 export default connect(mapStateToProps)(ToolHeader);

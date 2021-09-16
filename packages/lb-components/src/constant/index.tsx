@@ -12,6 +12,7 @@ export enum ESubmitType {
   Jump = 3, // 分页器的跳页翻页
   Quit = 4, // 左上角后退触发
   Export = 5, // 数据导出时
+  StepChanged = 6, // 切换步骤
 }
 // css 命名前缀
-export const prefix = 'bee'
+export const prefix = 'bee';
