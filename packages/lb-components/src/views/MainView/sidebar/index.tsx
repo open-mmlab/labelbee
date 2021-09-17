@@ -3,6 +3,8 @@ import { Row, Collapse } from 'antd';
 import iconRectPatternSvg from '@/assets/annotation/rectTool/icon_rectPattern.svg';
 import iconRectPatternASvg from '@/assets/annotation/rectTool/icon_rectPatternA.svg';
 import iconPolygonPatternASvg from '@/assets/annotation/polygonTool/icon_polygon_a.svg';
+import pointASvg from '@/assets/annotation/pointTool/icon_point_a.svg';
+import lineASvg from '@/assets/annotation/lineTool/icon_line_a.svg';
 import { AppState } from '@/store';
 import StepUtils from '@/utils/StepUtils';
 import { connect } from 'react-redux';
@@ -34,6 +36,18 @@ const toolList = [
     toolName: EToolName.Polygon,
     commonSvg: iconPolygonPatternASvg,
     selectedSvg: iconPolygonPatternASvg,
+  },
+  {
+    toolName: EToolName.Line,
+    commonSvg: lineASvg,
+    selectedSvg: lineASvg,
+    pattern: EToolName.Line,
+  },
+  {
+    toolName: EToolName.Point,
+    commonSvg: pointASvg,
+    selectedSvg: pointASvg,
+    pattern: 'drawPoint',
   },
 ];
 const sidebarCls = `${prefix}-sidebar`;
@@ -114,7 +128,7 @@ const Sidebar: React.FC<IProps> = ({ toolName }) => {
 
   if (toolName === EToolName.Text) {
     return (
-      <div className='sidebar'>
+      <div className={`${sidebarCls}`}>
         <TextToolSidebar />
       </div>
     );

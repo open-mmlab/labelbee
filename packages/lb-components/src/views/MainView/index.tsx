@@ -9,7 +9,7 @@ import { prefix } from '@/constant'
 import { getNewNode } from '@/utils';
 import { Layout } from 'antd';
 
-const { Header, Footer, Sider, Content } = Layout;
+const { Header, Sider, Content } = Layout;
 
 const layoutCls = `${prefix}-layout`;
 const MainView: React.FC<AppProps> = (props) => {
@@ -22,8 +22,11 @@ const MainView: React.FC<AppProps> = (props) => {
           }
         </Header>
         <Layout>
-          <Content>
+          <Content className={`${layoutCls}__content`}>
             <AnnotationOperation {...props} />
+              {
+                getNewNode(props.footer, <ToolFooter />)
+              }
           </Content>
           <Sider className={`${layoutCls}__side`} width='auto'>
             {
@@ -31,11 +34,6 @@ const MainView: React.FC<AppProps> = (props) => {
             }
           </Sider>
         </Layout>
-        <Footer className={`${layoutCls}__footer`}>
-          {
-            getNewNode(props.footer, <ToolFooter />)
-          }
-        </Footer>
       </Layout>
     </ViewportProvider>
   );

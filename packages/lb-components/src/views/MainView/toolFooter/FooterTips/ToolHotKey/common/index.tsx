@@ -13,6 +13,11 @@ import DragWithLeftClickSvg from '@/assets/annotation/toolHotKeyIcon/icon_mouse_
 import CopyBackwardResultSvg from '@/assets/annotation/toolHotKeyIcon/icon_copyBackwardResult.svg';
 import TabChangeSelectedSvg from '@/assets/annotation/toolHotKeyIcon/icon_tab_kj.svg';
 import TabReverseChangeSelectedSVG from '@/assets/annotation/toolHotKeyIcon/icon_alttab_kj.svg';
+import IconSaveKj from '@/assets/annotation/toolHotKeyIcon/icon_save_kj.svg';
+import IconLineSpecialKj from '@/assets/annotation/toolHotKeyIcon/icon_lineSpecial_kj.svg';
+import IconNoDisplay from '@/assets/annotation/toolHotKeyIcon/icon_noDisplay.svg';
+import IconEyeLockKj from '@/assets/annotation/toolHotKeyIcon/icon_eyeLock_kj.svg';
+
 
 export const revoke = {
   name: '撤销',
@@ -191,6 +196,18 @@ export const copyBackwardResult = {
 //   shortCut: ['E'],
 // };
 
+export const attributeLock = {
+  name: '仅看指定属性',
+  icon: IconEyeLockKj,
+  shortCut: ['Shift', '数字'],
+};
+
+export const attributeClickLock = {
+  name: '仅看指定属性',
+  icon: IconEyeLockKj,
+  shortCut: ['Shift', DragWithLeftClickSvg],
+};
+
 export const tabChangeSelected = {
   name: '切换选中',
   icon: TabChangeSelectedSvg,
@@ -201,4 +218,24 @@ export const tabReverseChangeSelected = {
   name: '逆序切换选中',
   icon: TabReverseChangeSelectedSVG,
   shortCut: ['Shift', 'Tab'],
+};
+
+export const hidden = {
+  name: '隐藏图形',
+  icon: IconNoDisplay,
+  noticeInfo: '',
+  shortCut: ['Z'],
+};
+
+export const changeSpecialLine = {
+  name: '换特殊边',
+  icon: IconLineSpecialKj,
+  noticeInfo: '对边',
+  shortCut: ['Shift', DragWithLeftClickSvg],
+};
+
+export const saveResult = {
+  name: '保存',
+  icon: IconSaveKj,
+  shortCut: ['Ctrl', 'S'],
 };
