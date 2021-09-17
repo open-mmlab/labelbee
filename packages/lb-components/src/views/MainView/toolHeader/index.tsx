@@ -13,10 +13,13 @@ import HeaderOption from './headerOption';
 import { AnnotationEngine } from '@sensetime/annotation';
 import { Button } from 'antd';
 import { ToNextStep } from '@/store/annotation/actionCreators';
+import StepSwitch from './StepSwitch';
+
 
 interface INextStep {
   stepProgress: number;
 }
+
 
 const NextStep: React.FC<INextStep> = ({ stepProgress }) => {
   return (
@@ -71,6 +74,7 @@ const ToolHeader: React.FC<IToolHeaderProps> = ({
       <div className={`${prefix}-header__title`}>
         <LeftOutlined className={`${prefix}-header__icon`} onClick={closeAnnotation} />
         {headerName ? <span className={`${prefix}-header__name`}>{headerName}</span> : ''}
+        <StepSwitch stepProgress={stepProgress} />        
 
         <NextStep stepProgress={stepProgress} />
 

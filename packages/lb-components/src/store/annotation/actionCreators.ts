@@ -150,7 +150,12 @@ export const ToNextStep = () => (dispatch: any, getState: any) => {
  */
 export const UpdateProcessingStep = (toStep: number) => (dispatch: any) =>
   [
-    ToSubmitFileData(ESubmitType.StepChanged),
+    dispatch({ type: ANNOTATION_ACTIONS.SUBMIT_RESULT }),
+    dispatch({
+      type: ANNOTATION_ACTIONS.SUBMIT_FILE_DATA,
+      payload: { submitType: ESubmitType.StepChanged },
+    }),
+    // ToSubmitFileData(ESubmitType.StepChanged),
     dispatch({ type: ANNOTATION_ACTIONS.SET_STEP, payload: { toStep } }),
     dispatch({ type: ANNOTATION_ACTIONS.CALC_STEP_PROGRESS }),
     dispatch(loadFileData(0)),
