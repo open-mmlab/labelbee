@@ -1,19 +1,19 @@
+import { AxisUtils, RectUtils } from '@/';
+import MathUtils from '@/utils/MathUtils';
 import { DEFAULT_TEXT_SHADOW, EDragStatus, ESortDirection } from '../../constant/annotation';
 import EKeyCode from '../../constant/keyCode';
 import { EDragTarget } from '../../constant/tool';
 import locale from '../../locales';
 import { EMessage } from '../../locales/constants';
-import uuid from '../../utils/uuid';
 import AttributeUtils from '../../utils/tool/AttributeUtils';
 import CanvasUtils from '../../utils/tool/CanvasUtils';
 import CommonToolUtils from '../../utils/tool/CommonToolUtils';
+import DrawUtils from '../../utils/tool/DrawUtils';
 import MarkerUtils from '../../utils/tool/MarkerUtils';
 import { getPolygonPointUnderZoom } from '../../utils/tool/polygonTool';
+import uuid from '../../utils/uuid';
 import { BasicToolOperation, IBasicToolOperationProps } from './basicToolOperation';
 import TextAttributeClass from './textAttributeClass';
-import DrawUtils from '../../utils/tool/DrawUtils';
-import { AxisUtils, RectUtils } from '@/';
-import MathUtils from '@/utils/MathUtils';
 
 interface IRectOperationProps extends IBasicToolOperationProps {
   drawOutSideTarget: boolean; // 是否可以在边界外进行标注
@@ -905,7 +905,7 @@ class RectOperation extends BasicToolOperation {
     if (this.config.textConfigurable) {
       let textAttribute = '';
       textAttribute = AttributeUtils.getTextAttribute(
-        this.rectList.filter((rect) => rect.sourceID === basicSourceID),
+        this.rectList.filter((rect) => CommonToolUtils.isSameSourceID(rect.sourceID,basicSourceID) ),
         this.config.textCheckType,
       );
       if (this.drawingRect) {
@@ -918,7 +918,7 @@ class RectOperation extends BasicToolOperation {
 
     // 标注序号添加
     Object.assign(this.drawingRect, {
-      order: CommonToolUtils.getMaxOrder(this.rectList.filter((v) => v.sourceID === basicSourceID)) + 1,
+      order: CommonToolUtils.getMaxOrder(this.rectList.filter((v) => CommonToolUtils.isSameSourceID(v.sourceID,basicSourceID))) + 1,
     });
 
     this.firstClickCoord = {
