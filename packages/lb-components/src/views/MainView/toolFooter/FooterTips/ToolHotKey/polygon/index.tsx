@@ -36,19 +36,19 @@ import {
 } from '../common';
 
 export const polygon = {
-  name: '标多变形',
+  name: '标多边形',
   icon: DrawPolygonSvg,
   shortCut: [MouseLeftSvg],
 };
 
 export const invalidPolygon = {
-  name: '标无效多变形',
+  name: '标无效多边形',
   icon: DrawInvalidPolygonSvg,
   shortCut: ['Ctrl', MouseLeftSvg],
 };
 
 export const selectedPolygon = {
-  name: '选中多变形',
+  name: '选中多边形',
   icon: SelectedPolygonSvg,
   shortCut: [MouseRightSvg],
   noticeInfo: '右击',
