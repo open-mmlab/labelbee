@@ -6,7 +6,6 @@ import locale from '../../locales';
 import { EMessage } from '../../locales/constants';
 import { IPolygonConfig, IPolygonData, IPolygonPoint } from '../../types/tool/polygon';
 import ActionsHistory from '../../utils/ActionsHistory';
-import uuid from '../../utils/uuid';
 import AttributeUtils from '../../utils/tool/AttributeUtils';
 import AxisUtils from '../../utils/tool/AxisUtils';
 import CanvasUtils from '../../utils/tool/CanvasUtils';
@@ -14,6 +13,7 @@ import CommonToolUtils from '../../utils/tool/CommonToolUtils';
 import DrawUtils from '../../utils/tool/DrawUtils';
 import PolygonUtils from '../../utils/tool/PolygonUtils';
 import StyleUtils from '../../utils/tool/StyleUtils';
+import uuid from '../../utils/uuid';
 import { BasicToolOperation, IBasicToolOperationProps } from './basicToolOperation';
 import TextAttributeClass from './textAttributeClass';
 import RectUtils from '@/utils/tool/RectUtils';
@@ -398,13 +398,16 @@ class PolygonOperation extends BasicToolOperation {
         textAttribute: '',
         pointList: this.drawingPointList,
         attribute: this.defaultAttribute,
-        order: CommonToolUtils.getMaxOrder(polygonList.filter((v) => v.sourceID === basicSourceID)) + 1,
+        order:
+          CommonToolUtils.getMaxOrder(
+            polygonList.filter((v) => CommonToolUtils.isSameSourceID(v.sourceID, basicSourceID)),
+          ) + 1,
       };
 
       if (this.config.textConfigurable) {
         let textAttribute = '';
         textAttribute = AttributeUtils.getTextAttribute(
-          this.polygonList.filter((polygon) => polygon.sourceID === basicSourceID),
+          this.polygonList.filter((polygon) => CommonToolUtils.isSameSourceID(polygon.sourceID, basicSourceID)),
           this.config.textCheckType,
         );
         newPolygon = {

@@ -1,17 +1,17 @@
+import MathUtils from '@/utils/MathUtils';
 import { DEFAULT_TEXT_OFFSET, EDragStatus, ESortDirection } from '../../constant/annotation';
 import EKeyCode from '../../constant/keyCode';
-import uuid from '../../utils/uuid';
-import AttributeUtils from '../../utils/tool/AttributeUtils';
-import { BasicToolOperation, IBasicToolOperationProps } from './basicToolOperation';
-import TextAttributeClass from './textAttributeClass';
-import DrawUtils from '../../utils/tool/DrawUtils';
-import StyleUtils from '../../utils/tool/StyleUtils';
-import AxisUtils from '../../utils/tool/AxisUtils';
 import locale from '../../locales';
 import { EMessage } from '../../locales/constants';
-import CommonToolUtils from '../../utils/tool/CommonToolUtils';
 import { IPolygonData } from '../../types/tool/polygon';
-import MathUtils from '@/utils/MathUtils';
+import AttributeUtils from '../../utils/tool/AttributeUtils';
+import AxisUtils from '../../utils/tool/AxisUtils';
+import CommonToolUtils from '../../utils/tool/CommonToolUtils';
+import DrawUtils from '../../utils/tool/DrawUtils';
+import StyleUtils from '../../utils/tool/StyleUtils';
+import uuid from '../../utils/uuid';
+import { BasicToolOperation, IBasicToolOperationProps } from './basicToolOperation';
+import TextAttributeClass from './textAttributeClass';
 
 const TEXTAREA_WIDTH = 200;
 
@@ -375,13 +375,16 @@ class PointOperation extends BasicToolOperation {
       id: uuid(8, 62),
       sourceID: basicSourceID,
       textAttribute: '',
-      order: CommonToolUtils.getMaxOrder(this.pointList.filter((v) => v.sourceID === basicSourceID)) + 1,
+      order:
+        CommonToolUtils.getMaxOrder(
+          this.pointList.filter((v) => CommonToolUtils.isSameSourceID(v.sourceID, basicSourceID)),
+        ) + 1,
     } as IPointUnit;
 
     if (this.config.textConfigurable) {
       let textAttribute = '';
       textAttribute = AttributeUtils.getTextAttribute(
-        this.pointList.filter((point) => point.sourceID === basicSourceID),
+        this.pointList.filter((point) => CommonToolUtils.isSameSourceID(point.sourceID, basicSourceID)),
         this.config.textCheckType,
       );
       // const { x, y } = AxisUtils.changePointByZoom(newDrawingPoint, 1 / this.zoom);
