@@ -1,6 +1,6 @@
 import { Popover } from 'antd';
 import _ from 'lodash';
-import React, { useEffect, useState } from 'react';
+import React, { useState } from 'react';
 import { useSelector } from 'react-redux';
 // import styles from './index.less';
 
@@ -10,6 +10,9 @@ import { EToolName } from '@/data/enums/ToolType';
 import rectToolShortcutTable from './rectToolShortCutTable';
 import pointToolShortcutTable from './point';
 import polygonToolShortcutTable from './polygon';
+import lineToolShortCutTable from './line';
+import tagToolSingleShortCutTable from './tag';
+import textToolShortCutTable from './text';
 import StepUtils from '@/utils/StepUtils';
 
 interface IProps {
@@ -19,11 +22,11 @@ interface IProps {
 
 const shortCutTable: any = {
   [EToolName.Rect]: rectToolShortcutTable,
-  [EToolName.Tag]: rectToolShortcutTable,
+  [EToolName.Tag]: tagToolSingleShortCutTable,
   [EToolName.Point]: pointToolShortcutTable,
   [EToolName.Polygon]: polygonToolShortcutTable,
-  [EToolName.Line]: polygonToolShortcutTable,
-  [EToolName.Text]: polygonToolShortcutTable,
+  [EToolName.Line]: lineToolShortCutTable,
+  [EToolName.Text]: textToolShortCutTable,
 };
 
 export interface IShortcuts {

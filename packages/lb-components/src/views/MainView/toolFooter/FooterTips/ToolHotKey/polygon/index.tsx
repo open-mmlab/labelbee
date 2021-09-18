@@ -6,6 +6,14 @@ import DeletePolygonSvg from '@/assets/annotation/toolHotKeyIcon/icon_polygonDel
 import MouseLeftSvg from '@/assets/annotation/toolHotKeyIcon/icon_mouse_left_kj.svg'
 import MouseRightSvg from '@/assets/annotation/toolHotKeyIcon/icon_mouse_right_kj.svg';
 
+import IconLineContKj from '@/assets/annotation/toolHotKeyIcon/icon_lineCont_kj.svg';
+import IconPolygonInsertKj from '@/assets/annotation/toolHotKeyIcon/icon_polygonInsert_kj.svg';
+import IconUnGripKj from '@/assets/annotation/toolHotKeyIcon/icon_unGrip_kj.svg';
+import IconPointSpecialKj from '@/assets/annotation/toolHotKeyIcon/icon_pointSpecial_kj.svg';
+import IconSegment from '@/assets/annotation/toolHotKeyIcon/icon_segment.svg';
+import IconAI from '@/assets/annotation/toolHotKeyIcon/icon_AI.svg';
+import IconSwapOutlined from '@/assets/annotation/toolHotKeyIcon/icon_swap_outlined.svg';
+
 import {
   backward,
   dargWithRightClick,
@@ -14,25 +22,33 @@ import {
   restore,
   revoke,
   rotate,
+  setValid,
   scale,
   tabChangeSelected,
   tabReverseChangeSelected,
+  attributeClickLock,
+  attributeLock,
+  copyBackwardResult,
+  hidden,
+  changeSpecialLine,
+  saveResult,
+  dargWithLeftClick
 } from '../common';
 
-export const drawPolygon = {
-  name: '标点',
+export const polygon = {
+  name: '标多变形',
   icon: DrawPolygonSvg,
   shortCut: [MouseLeftSvg],
 };
 
-export const drawInvalidPolygon = {
-  name: '标无效点',
+export const invalidPolygon = {
+  name: '标无效多变形',
   icon: DrawInvalidPolygonSvg,
   shortCut: ['Ctrl', MouseLeftSvg],
 };
 
-export const selectPolygon = {
-  name: '选中点',
+export const selectedPolygon = {
+  name: '选中多变形',
   icon: SelectedPolygonSvg,
   shortCut: [MouseRightSvg],
   noticeInfo: '右击',
@@ -45,18 +61,84 @@ export const changePolygonAttribute = {
 };
 
 export const deletePolygon = {
-  name: '删除点',
+  name: '删除多边形',
   icon: DeletePolygonSvg,
   shortCut: ['Del'],
 };
 
+export const keepLine = {
+  name: '续标',
+  icon: IconLineContKj,
+  shortCut: ['Space'],
+};
+
+export const insertPolygonPoint = {
+  name: '插入点',
+  icon: IconPolygonInsertKj,
+  noticeInfo: '移中双击',
+  shortCut: [MouseLeftSvg],
+};
+
+export const deletePolygonPoint = {
+  name: '删除点',
+  icon: DeletePolygonSvg,
+  noticeInfo: '移中双击',
+  shortCut: [MouseRightSvg],
+};
+
+export const changeSpecialPoint = {
+  name: '换特殊点',
+  icon: IconPointSpecialKj,
+  noticeInfo: '对点',
+  shortCut: ['Shift', MouseLeftSvg],
+};
+
+export const suspendAbsorption = {
+  name: '暂停吸附',
+  icon: IconUnGripKj,
+  noticeInfo: '按住',
+  shortCut: ['Alt'],
+};
+
+export const segment = {
+  name: '裁剪重叠区域',
+  icon: IconSegment,
+  noticeInfo: '',
+  shortCut: ['ALT', 'X'],
+};
+
+export const segmentByAlgorithm = {
+  name: '分割辅助',
+  icon: IconAI,
+  noticeInfo: '',
+  shortCut: ['Q'],
+};
+
+export const changeRenderPattern = {
+  name: '切换绘制形式',
+  icon: IconSwapOutlined,
+  noticeInfo: '',
+  shortCut: ['U'],
+};
+
 const pointToolShortCutTable = [
-  drawPolygon,
-  drawInvalidPolygon,
-  selectPolygon,
+  saveResult,
+  polygon,
+  invalidPolygon,
+  selectedPolygon,
   changePolygonAttribute,
   deletePolygon,
-
+  keepLine,
+  insertPolygonPoint,
+  deletePolygonPoint,
+  changeSpecialPoint,
+  changeSpecialLine,
+  suspendAbsorption,
+  hidden,
+  segment,
+  segmentByAlgorithm,
+  attributeLock,
+  attributeClickLock,
   revoke,
   restore,
   rotate,
@@ -64,8 +146,12 @@ const pointToolShortCutTable = [
   fullScreen,
   backward,
   forward,
+  setValid,
+  copyBackwardResult,
   dargWithRightClick,
+  dargWithLeftClick,
   tabChangeSelected,
   tabReverseChangeSelected,
+  changeRenderPattern,
 ];
 export default pointToolShortCutTable;

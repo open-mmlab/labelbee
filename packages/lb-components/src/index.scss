@@ -23,10 +23,16 @@ $prefix: bee;
     background: transparent;
     overflow: hidden;
   }
+
+  &__content {
+    display: flex;
+    flex-direction: column;
+  }
 }
 
 .#{$prefix}-footer {
   height: 40px;
+  flex-shrink: 0;
   display: flex;
   align-items: center;
   position: relative;
@@ -314,8 +320,7 @@ $prefix: bee;
 
 //
 .annotationOperation {
-  height: 100%;
-  width: 100%;
+  flex: 1;
   overflow: hidden;
 
   .canvas {
@@ -329,6 +334,7 @@ $prefix: bee;
 
 // components
 .textInputContainer {
+  background: red;
   padding: 20px;
 
   .textareaContainer {
