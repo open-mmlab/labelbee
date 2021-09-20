@@ -528,10 +528,10 @@ class BasicToolOperation extends EventListener {
 
   /** 事件绑定 */
   public eventBinding() {
-    this.dblClickListener.addEvent(this.onMouseUp, this.onLeftDblClick, this.onRightDblClick);
+    this.dblClickListener.addEvent(() => {}, this.onLeftDblClick, this.onRightDblClick);
     this.container.addEventListener('mousedown', this.onMouseDown);
     this.container.addEventListener('mousemove', this.onMouseMove);
-    // this.container.addEventListener('mouseup', this.onMouseUp);
+    this.container.addEventListener('mouseup', this.onMouseUp);
     this.container.addEventListener('mouseleave', this.onMouseLeave);
     this.container.addEventListener('click', this.onClick);
     this.container.addEventListener('wheel', this.onWheel);

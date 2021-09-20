@@ -74,6 +74,7 @@ class DblClickEventListener {
       return;
     }
 
+    this.removeEvent();
     this.mouseUp = (e: MouseEvent) => {
       const cTime = new Date().getTime();
 

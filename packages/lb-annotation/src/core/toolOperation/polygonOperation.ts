@@ -79,7 +79,11 @@ class PolygonOperation extends BasicToolOperation {
 
   public eventBinding() {
     super.eventBinding();
+    // 解绑原本的 onMouseUp，将 onMoueUp 用于 dblClickListener ß进行绑定
+    this.container.removeEventListener('mouseup', this.onMouseUp);
+    
     this.container.addEventListener('mouseup', this.dragMouseUp);
+    this.dblClickListener.addEvent(this.onMouseUp, this.onLeftDblClick, this.onRightDblClick);
   }
 
   public eventUnbinding() {

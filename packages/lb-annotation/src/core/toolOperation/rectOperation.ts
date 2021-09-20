@@ -91,21 +91,6 @@ class RectOperation extends BasicToolOperation {
     this.render();
   }
 
-  /**
-   * 事件绑定：与基础的不同是单击无需延缓 300ms 再去的执行
-   */
-  public eventBinding() {
-    this.dblClickListener.addEvent(() => {}, this.onLeftDblClick, this.onRightDblClick);
-    this.container.addEventListener('mousedown', this.onMouseDown);
-    this.container.addEventListener('mousemove', this.onMouseMove);
-    this.container.addEventListener('mouseup', this.onMouseUp);
-    this.container.addEventListener('mouseleave', this.onMouseLeave);
-    this.container.addEventListener('wheel', this.onWheel);
-    document.addEventListener('keydown', this.onKeyDown);
-    document.addEventListener('keyup', this.onKeyUp);
-    window.parent.document.addEventListener('contextmenu', this.onContextmenu, false);
-  }
-
   public destroy() {
     super.destroy();
     if (this._textAttributInstance) {
