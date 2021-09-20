@@ -20,7 +20,7 @@ import { EToolName } from '@/constant/tool';
 import LineToolUtils from '@/utils/tool/LineToolUtils';
 
 interface IBasicToolOperationProps {
-  container: HTMLDivElement;
+  container: HTMLElement;
   size: ISize;
   imgNode?: HTMLImageElement; // 展示图片的内容
   style?: any; // 后期一定要补上!!
@@ -348,6 +348,11 @@ class BasicToolOperation extends EventListener {
 
   public setForbidOperation(forbidOperation: boolean) {
     this.forbidOperation = forbidOperation;
+    this.render();
+  }
+
+  public setForbidCursorLine(forbidCursorLine: boolean) {
+    this.forbidCursorLine = forbidCursorLine;
     this.render();
   }
 

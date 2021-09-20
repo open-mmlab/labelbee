@@ -47,8 +47,7 @@ const calcStepProgress = (fileList: any[], step: number) =>
     return pre;
   }, 0) / fileList.length;
 
-
-
+  
 const updateToolInstance = (annotation: AnnotationState, imgNode: HTMLImageElement) => {
   const { step, stepList } = annotation;
   const stepConfig = StepUtils.getCurrentStepInfo(step, stepList);
@@ -170,7 +169,7 @@ export const annotationReducer = (
 
       let previousResultList = exportResult;
 
-      if (basicResultList.length > 0) {
+      if (basicResultList?.length > 0) {
         const sourceID = basicResultList[basicIndex]?.id;
         const newResultData = exportResult.map((i: any) => ({ ...i, i, sourceID }));
         previousResultList = _.cloneDeep(resultList).filter((i: any) => i.sourceID !== sourceID);
@@ -208,12 +207,14 @@ export const annotationReducer = (
       let stepBasicResultList = [];
 
       if (dataSourceStep && tool) {
-        stepBasicResultList = fileResult[`step_${dataSourceStep}`].result;
+        stepBasicResultList = fileResult[`step_${dataSourceStep}`]?.result;
 
-        if (stepBasicResultList.length > 0) {
+        if (stepBasicResultList?.length > 0) {
           annotationEngine.setBasicInfo(dependStepConfig.tool, stepBasicResultList[nextBasicIndex]);
+          annotationEngine.launchOperation();
         } else {
           annotationEngine.setBasicInfo();
+          annotationEngine.forbidOperation();
           message.info('当前文件不存在依赖数据');
         }
       }
@@ -257,16 +258,19 @@ export const annotationReducer = (
       const dependStepConfig = getStepConfig(stepList, dataSourceStep);
       let stepBasicResultList = [];
 
+      annotationEngine.launchOperation();
       if (dataSourceStep && tool) {
-        stepBasicResultList = fileResult[`step_${dataSourceStep}`].result;
+        stepBasicResultList = fileResult[`step_${dataSourceStep}`]?.result;
 
-        if (stepBasicResultList.length > 0) {
+        if (stepBasicResultList?.length > 0) {
           annotationEngine.setBasicInfo(dependStepConfig.tool, stepBasicResultList[basicIndex]);
           const sourceID = stepBasicResultList[basicIndex].id;
 
           result = result.filter((i: { sourceID: string|number; }) => i.sourceID === sourceID);
         } else {
-          // TODO: 禁用绘制交互
+          // TODO: 禁用绘制交互，有无依赖之间的操作切换
+          annotationEngine.setBasicInfo();
+          annotationEngine.forbidOperation();
           message.info('当前文件不存在依赖数据');
         }
       }
