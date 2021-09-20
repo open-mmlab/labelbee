@@ -585,7 +585,7 @@ class RectOperation extends BasicToolOperation {
     if (this.config.drawOutsideTarget === false) {
       if (this.basicResult) {
         if (this.basicResult?.pointList?.length > 0) {
-          // 多变形判断
+          // 多边形判断
           if (
             RectUtils.isRectNotInPolygon(selectedRect, getPolygonPointUnderZoom(this.basicResult.pointList, this.zoom))
           ) {
