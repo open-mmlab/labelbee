@@ -47,7 +47,6 @@ const calcStepProgress = (fileList: any[], step: number) =>
     return pre;
   }, 0) / fileList.length;
 
-  
 const updateToolInstance = (annotation: AnnotationState, imgNode: HTMLImageElement) => {
   const { step, stepList } = annotation;
   const stepConfig = StepUtils.getCurrentStepInfo(step, stepList);
@@ -206,6 +205,10 @@ export const annotationReducer = (
       const dependStepConfig = getStepConfig(stepList, dataSourceStep);
       let stepBasicResultList = [];
 
+      // 当前步骤结果
+      const stepResult = fileResult[`step_${step}`];
+      const isInitData = !stepResult; // 是否为初始化数据
+
       if (dataSourceStep && tool) {
         stepBasicResultList = fileResult[`step_${dataSourceStep}`]?.result;
 
@@ -219,8 +222,7 @@ export const annotationReducer = (
         }
       }
 
-      toolInstance.setResult(result);
-
+      toolInstance.setResult(result, isInitData);
       toolInstance.history.initRecord(result, true);
 
       return {
@@ -366,9 +368,10 @@ export const annotationReducer = (
       // 更新当前的结果
       const fileResult = jsonParser(newResult);
       const stepResult = fileResult[`step_${step}`];
+      const isInitData = !stepResult;
       const result = stepResult?.result || [];
 
-      toolInstance.setResult(result);
+      toolInstance.setResult(result, isInitData);
       toolInstance.history.pushHistory(result);
 
       return {

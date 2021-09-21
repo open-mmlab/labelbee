@@ -28,7 +28,7 @@ class TagOperation extends BasicToolOperation {
   }
 
   public setResult(tagResult: any[], isInitData = false) {
-    if (isInitData === true) {
+    if (isInitData === true && tagResult.length === 0) {
       // 注意，该获取方式是需要拉取所有的 basicResultList
       tagResult = TagUtils.getDefaultTagResult(this.config.inputList, []);
     }
@@ -37,11 +37,14 @@ class TagOperation extends BasicToolOperation {
     this.render();
   }
 
+  /**
+   * 当前页面的标注结果
+   */
   public get currentTagResult() {
     return this.tagResult.filter((v) => {
       const basicSourceID = `${v.sourceID}`;
       return basicSourceID === this.sourceID;
-    })[0];
+    })[0] || {};
   }
 
   public onKeyDown(e: KeyboardEvent) {
@@ -93,6 +96,11 @@ class TagOperation extends BasicToolOperation {
   // 注意： 单图模式（无框）下，selectedList 就为 [0]
   public setLabel = (i: number, j: number) => {
     if (this.isImgError) {
+      return;
+    }
+
+    if (!this.basicResult && this.dependToolName) {
+      // 有依赖情况下无依赖结果则不允许进行标注
       return;
     }
 
@@ -218,7 +226,7 @@ class TagOperation extends BasicToolOperation {
     }
 
     const dom = document.createElement('div');
-    const tagInfoList = TagUtils.getTagNameList(this.currentTagResult.result, this.config.inputList);
+    const tagInfoList = TagUtils.getTagNameList(this.currentTagResult.result || {}, this.config.inputList);
 
     dom.innerHTML =
       tagInfoList.reduce((acc: string, cur: { keyName: string; value: string[] }) => {
