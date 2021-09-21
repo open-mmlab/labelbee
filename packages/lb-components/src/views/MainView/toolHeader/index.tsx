@@ -14,6 +14,7 @@ import { AnnotationEngine } from '@sensetime/annotation';
 import { Button } from 'antd';
 import { ToNextStep } from '@/store/annotation/actionCreators';
 import StepSwitch from './StepSwitch';
+import { EToolName } from '@/data/enums/ToolType';
 
 
 interface INextStep {
@@ -45,6 +46,7 @@ interface IToolHeaderProps {
   imgList: IFileItem[];
   annotationEngine: AnnotationEngine;
   stepProgress: number;
+  toolName: EToolName;
 }
 
 const ToolHeader: React.FC<IToolHeaderProps> = ({
@@ -53,6 +55,7 @@ const ToolHeader: React.FC<IToolHeaderProps> = ({
   headerName,
   imgList,
   stepProgress,
+  toolName,
 }) => {
   // render 数据展示
   const currentOption = <ExportData exportData={exportData} />;
@@ -84,7 +87,7 @@ const ToolHeader: React.FC<IToolHeaderProps> = ({
           className={`${prefix}-header__operationNode`}
           style={{ left: window.innerWidth / 2 - 174 / 2 }}
         >
-          <HeaderOption />
+          <HeaderOption toolName={toolName} />
         </div>
       </div>
     </div>
@@ -95,6 +98,7 @@ const mapStateToProps = (state: AppState) => ({
   imgList: state.annotation.imgList,
   annotationEngine: state.annotation.annotationEngine,
   stepProgress: state.annotation.stepProgress,
+  toolName: state.annotation.stepList[state.annotation.step - 1]?.tool
 });
 
 export default connect(mapStateToProps)(ToolHeader);

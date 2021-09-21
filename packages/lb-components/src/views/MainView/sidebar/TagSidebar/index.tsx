@@ -184,7 +184,7 @@ const TagSidebar: React.FC<IProps> = ({ toolInstance, imgIndex }) => {
 
       if (inputList?.[basicIndex]?.isMulti === true) {
         return (
-          <div className='singleBar'>
+          <div className='singleBar' key={`${key}_${basicIndex}_${index}`}>
             <CheckBoxList
               attributeChanged={() => setLabel(basicIndex, index)}
               selectedAttribute={[selectedAttribute]}
@@ -195,7 +195,7 @@ const TagSidebar: React.FC<IProps> = ({ toolInstance, imgIndex }) => {
         );
       }
       return (
-        <div className='singleBar' key={key}>
+        <div className='singleBar' key={`${key}_${basicIndex}_${index}`}>
           <RadioList
             forbidColor
             attributeChanged={() => setLabel(basicIndex, index)}

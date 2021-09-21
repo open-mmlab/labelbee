@@ -10,12 +10,14 @@ import restoreHighlightSvg from '@/assets/annotation/common/icon_nextA.svg';
 import revocationHighlightSvg from '@/assets/annotation/common/icon_backA.svg';
 import { ToolInstance } from 'src/store/annotation/types';
 import { prefix } from '@/constant';
+import { EToolName } from '@/data/enums/ToolType';
 
 interface IProps {
   // toolName: EToolName;
   isBegin?: boolean;
   bindKeydownEvents?: boolean;
   toolInstance: ToolInstance
+  toolName: EToolName;
 }
 
 enum EColor {
@@ -26,9 +28,11 @@ enum EColor {
 const HeaderOption: React.FC<IProps> = (props) => {
   const [toolHover, setToolHover] = useState('');
   const {
-    isBegin,
     toolInstance,
+    toolName
   } = props;
+
+  const isBegin = props.isBegin || toolName === EToolName.Tag;
 
   const updateRotate = () => {
     // 需要判断
