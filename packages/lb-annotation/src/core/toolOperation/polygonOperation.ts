@@ -81,7 +81,7 @@ class PolygonOperation extends BasicToolOperation {
     super.eventBinding();
     // 解绑原本的 onMouseUp，将 onMoueUp 用于 dblClickListener ß进行绑定
     this.container.removeEventListener('mouseup', this.onMouseUp);
-    
+
     this.container.addEventListener('mouseup', this.dragMouseUp);
     this.dblClickListener.addEvent(this.onMouseUp, this.onLeftDblClick, this.onRightDblClick);
   }
@@ -199,7 +199,6 @@ class PolygonOperation extends BasicToolOperation {
     }
 
     const { upperLimitPointNum, edgeAdsorption } = this.config;
-
     if (upperLimitPointNum && this.drawingPointList.length >= upperLimitPointNum) {
       // 小于对应的下限点, 大于上限点无法添加
       this.emit(
@@ -259,13 +258,23 @@ class PolygonOperation extends BasicToolOperation {
   }
 
   /**
-   *  清楚所有的中间状态
+   *  清除多边形拖拽的中间状态
    */
-  public clearActiveStatus() {
+  public clearPolygonDrag() {
     this.drawingPointList = [];
     this.dragInfo = undefined;
     this.dragInfo = undefined;
     this.dragStatus = EDragStatus.Wait;
+    this.hoverEdgeIndex = -1;
+    this.hoverPointIndex = -1;
+    this.hoverID = '';
+  }
+
+  /**
+   *  清楚所有的中间状态
+   */
+  public clearActiveStatus() {
+    this.clearPolygonDrag();
     this.setSelectedID(undefined);
   }
 
@@ -688,7 +697,7 @@ class PolygonOperation extends BasicToolOperation {
         return;
       }
 
-      const { dropFoot } = PolygonUtils.getClosestPoint(
+      let { dropFoot } = PolygonUtils.getClosestPoint(
         currentCoord,
         this.polygonListUnderZoom,
         this.config.lineType,
@@ -696,6 +705,17 @@ class PolygonOperation extends BasicToolOperation {
       );
 
       if (!dropFoot) {
+        return;
+      }
+
+      const { upperLimitPointNum } = this.config;
+      if (upperLimitPointNum && selectedPolygon.pointList.length >= upperLimitPointNum) {
+        // 小于对应的下限点, 大于上限点无法添加
+        this.emit(
+          'messageInfo',
+          `${locale.getMessagesByLocale(EMessage.UpperLimitErrorNotice, this.lang)}${upperLimitPointNum}`,
+        );
+        this.clearPolygonDrag();
         return;
       }
 
