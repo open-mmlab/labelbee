@@ -139,7 +139,7 @@ export const annotationReducer = (
     case ANNOTATION_ACTIONS.SUBMIT_FILE_DATA: {
       const { imgList, imgIndex, step, stepList, toolInstance, onSubmit, resultList } = state;
       const resultString = imgList[imgIndex]?.result || '';
-      const [basicImgInfo] = toolInstance.exportData();
+      const [, basicImgInfo] = toolInstance.exportData();
 
       const resultWithBasicInfo = composeResultWithBasicImgInfo(resultString, basicImgInfo);
 
