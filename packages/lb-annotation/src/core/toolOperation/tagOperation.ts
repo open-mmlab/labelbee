@@ -1,7 +1,7 @@
 import TagUtils from '../../utils/tool/TagUtils';
 import uuid from '../../utils/uuid';
 import { BasicToolOperation, IBasicToolOperationProps } from './basicToolOperation';
-import { CommonToolUtils } from '@/';
+import CommonToolUtils from '@/utils/tool/CommonToolUtils';
 
 interface ITagOperationProps extends IBasicToolOperationProps {
   config: string;
@@ -41,10 +41,12 @@ class TagOperation extends BasicToolOperation {
    * 当前页面的标注结果
    */
   public get currentTagResult() {
-    return this.tagResult.filter((v) => {
-      const basicSourceID = `${v.sourceID}`;
-      return basicSourceID === this.sourceID;
-    })[0] || {};
+    return (
+      this.tagResult.filter((v) => {
+        const basicSourceID = `${v.sourceID}`;
+        return basicSourceID === this.sourceID;
+      })[0] || {}
+    );
   }
 
   public onKeyDown(e: KeyboardEvent) {

@@ -1,4 +1,5 @@
-import { CommonToolUtils, TagUtils } from '@/';
+import CommonToolUtils from '@/utils/tool/CommonToolUtils';
+import TagUtils from '@/utils/tool/TagUtils';
 import { cloneDeep } from 'lodash';
 import { DEFAULT_TEXT_OFFSET } from '../../constant/annotation';
 import { EToolName } from '../../constant/tool';

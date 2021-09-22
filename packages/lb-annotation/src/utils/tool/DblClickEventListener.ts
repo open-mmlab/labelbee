@@ -1,4 +1,4 @@
-import { AxisUtils } from '@/';
+import AxisUtils from '@/utils/tool/AxisUtils';
 
 class DblClickEventListener {
   private dom: HTMLElement; // 点击时间绑定的对象

@@ -1,4 +1,5 @@
-import { AxisUtils, RectUtils } from '@/';
+import AxisUtils from '@/utils/tool/AxisUtils';
+import RectUtils from '@/utils/tool/RectUtils';
 import MathUtils from '@/utils/MathUtils';
 import { DEFAULT_TEXT_SHADOW, EDragStatus, ESortDirection } from '../../constant/annotation';
 import EKeyCode from '../../constant/keyCode';

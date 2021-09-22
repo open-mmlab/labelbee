@@ -12,7 +12,7 @@ import ZoomUtils from '../../utils/tool/ZoomUtils';
 import EventListener from './eventListener';
 import locale from '../../locales';
 import { EMessage } from '../../locales/constants';
-import { CommonToolUtils } from '@/';
+import CommonToolUtils from '@/utils/tool/CommonToolUtils';
 import MathUtils from '@/utils/MathUtils';
 import { styleDefaultConfig } from '@/constant/defaultConfig';
 import AxisUtils from '@/utils/tool/AxisUtils';
