@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React from 'react';
 import adaptIcon from '@/assets/annotation/common/icon_adapt.svg';
 import {
   MinusOutlined,
@@ -18,8 +18,6 @@ const ZoomController: React.FC<IProps> = ({ toolInstance }) => {
   const initialPosition = () => {
     toolInstance.initImgPos();
   };
-
-  const zoom = toolInstance?.zoom ?? 1;
 
   return <div>
     <span className={`${footerCls}__zoomController`}>

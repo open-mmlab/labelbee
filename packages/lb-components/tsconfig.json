@@ -17,6 +17,7 @@
     "declaration": true, // 生成定义文件
     "declarationMap": false, // 生成定义sourceMap
     "declarationDir": "./dist/types", // 定义文件输出目录
+    "skipLibCheck": true, // 忽略所有的声明文件（ *.d.ts）的类型检查。
     "lib": [
       "esnext",
       "dom"
@@ -31,6 +32,6 @@
     },
   },
   "include": [
-    "src/*" // 导入目录  
+    "src/*" // 导入目录
   ]
 }

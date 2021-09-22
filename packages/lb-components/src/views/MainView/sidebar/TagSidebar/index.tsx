@@ -13,6 +13,7 @@ import { AppState } from '@/store';
 import { IInputList } from '@/types/main';
 
 interface IProps {
+  imgIndex: number;
   toolInstance: ToolInstance;
 }
 
@@ -23,7 +24,7 @@ export const expandIconFuc = ({ isActive }: any) => (
 );
 
 const TagSidebar: React.FC<IProps> = ({ toolInstance, imgIndex }) => {
-  const [expandKeyList, setExpandKeyList] = useState([]);
+  const [expandKeyList, setExpandKeyList] = useState<string[]>([]);
 
   const sidebarRef = useRef<HTMLDivElement>(null);
   const [, forceRender] = useState<number>(0);
@@ -32,7 +33,7 @@ const TagSidebar: React.FC<IProps> = ({ toolInstance, imgIndex }) => {
   useEffect(() => {
     if (toolInstance) {
       // 用于配置的初始化
-      setExpandKeyList(toolInstance.config.inputList.map((v) => v.value));
+      setExpandKeyList(toolInstance.config.inputList.map((v: IInputList) => v.value));
 
       // 进行实时渲染
       toolInstance.on('render', () => {
@@ -71,7 +72,7 @@ const TagSidebar: React.FC<IProps> = ({ toolInstance, imgIndex }) => {
 
   const expendRender = () => {
     const index = toolInstance.labelSelectedList[0];
-    const value = inputList.filter((v, i) => i === index)[0]?.value;
+    const value = inputList.filter((v: IInputList, i: number) => i === index)[0]?.value;
     setExpendKeyList(index, value, true);
   };
 

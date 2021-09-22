@@ -27,11 +27,11 @@ export class ToolStyleUtils {
   }
 
   public static computeOpacity(opacity: number, color: string) {
-    const firstOpacity = color
+    const s = color
       .split(' ')
       .join('')
-      .match(/,[0-9]+([.]{1}[0-9]+){0,1}\)/)[0]
-      .match(/[0-9]+([.]{1}[0-9]+){0,1}/)[0];
+      .match(/,[0-9]+([.]{1}[0-9]+){0,1}\)/)?.[0] || '';
+    let firstOpacity = s.match(/[0-9]+([.]{1}[0-9]+){0,1}/)?.[0]
     return opacity * Number(firstOpacity);
   }
 

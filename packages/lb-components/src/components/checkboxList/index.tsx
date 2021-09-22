@@ -2,7 +2,7 @@ import { Checkbox } from 'antd';
 import React from 'react';
 
 interface IProps {
-  selectedAttribute: string;
+  selectedAttribute: string[];
   attributeChanged: () => void;
   num?: any;
   list?: any[];
@@ -20,10 +20,8 @@ const CheckboxList = (props: IProps) => {
         onChange={() => props.attributeChanged()}
       >
         {list.map((i: any, index: number) => (
-          <Checkbox
-            value={i.value}
-            ref={checkboxRef}
-            onFocus={() => {
+          // @ts-ignore
+          <Checkbox value={i.value} ref={checkboxRef} onFocus={() => {
               checkboxRef?.current?.blur();
             }}
             key={index}

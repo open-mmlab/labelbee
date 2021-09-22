@@ -4,6 +4,7 @@ import { ToolStyleActionTypes, ToolStyleState } from './types';
 export function InitToolStyleConfig(): ToolStyleActionTypes {
   return {
     type: TOOL_STYLE_ACTIONS.INIT_TOOL_STYLE_CONFIG,
+    payload: undefined
   };
 }
 

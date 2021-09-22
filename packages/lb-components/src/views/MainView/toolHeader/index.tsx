@@ -26,7 +26,7 @@ const NextStep: React.FC<INextStep> = ({ stepProgress }) => {
         marginLeft: 10,
       }}
       onClick={() => {
-        store.dispatch(ToNextStep());
+        store.dispatch(ToNextStep() as any);
       }}
       disabled={stepProgress < 1}
     >

@@ -8,8 +8,7 @@ import { PageBackward, PageForward, PageJump } from './store/annotation/actionCr
 export const store = configureStore();
 
 const OutputApp = (props: any, ref: any) => {
-  const [toolInstance, setToolInstance] = useState<ToolInstance>(null);
-
+  const [toolInstance, setToolInstance] = useState<ToolInstance>();
   // 暴露给 ref 的一些方法
   useImperativeHandle(
     ref,

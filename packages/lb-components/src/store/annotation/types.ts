@@ -3,6 +3,9 @@ import { ANNOTATION_ACTIONS } from '@/store/Actions';
 import { IStepInfo } from '@/types/step';
 import { OnSubmit, IFileItem, GetFileData } from '@/types/data';
 import { ESubmitType } from '@/constant';
+import { DispatcherTurning } from "./actionCreators";
+
+type Aaa = typeof DispatcherTurning;
 
 export type ToolInstance = RectOperation | TagOperation;
 

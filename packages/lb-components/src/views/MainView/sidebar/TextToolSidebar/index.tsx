@@ -1,4 +1,4 @@
-import React, { useEffect, useState, useRef } from 'react';
+import React, {useEffect, useState, useRef, FocusEvent} from 'react';
 import { connect } from 'react-redux';
 import { ToolInstance } from '@/store/annotation/types';
 import { AppState } from '@/store';
@@ -45,6 +45,7 @@ export const TextareaWithFooter = (props: ITextareaWithFooterProps) => {
 };
 
 interface IProps {
+  dispatch: Function;
   toolInstance: ToolInstance;
   imgIndex: number;
 }
@@ -87,14 +88,14 @@ export const SingleTextInput = (props: any) => {
     value,
     maxLength,
     autoSize: { minRows: 2, maxRows: 6 },
-    onChange: (e) => {
+    onChange: (e: FocusEvent<HTMLTextAreaElement>) => {
       const value = e.target.value;
       updateTextWithKey(value);
     },
     onFocus: () => {
       setTextAreaFocus(true);
     },
-    onBlur: (e) => {
+    onBlur: (e: FocusEvent<HTMLTextAreaElement>) => {
       setTextAreaFocus(false);
       if (config.required) {
         setInvalid(!e.target.value);

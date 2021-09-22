@@ -15,6 +15,7 @@ interface IProps {
   toolStyle: ToolStyleState;
   config: string;
 }
+type ToolStyleKey = keyof ToolStyleState;
 
 const getMarks = (type: string) => {
   const lineMarks = [
@@ -142,25 +143,28 @@ const ToolStyle = (props: IProps) => {
 
   return (
     <div className="toolStyle">
-      {Object.entries(styleConfig).map((item: any[]) => (
-        <div id={`style-${item[0]}`} className="styleSlider" key={item[0]}>
+      {Object.entries(styleConfig).map((item: any[]) => {
+        const key: ToolStyleKey = item[0];
+        return (
+          <div id={`style-${item[0]}`} className="styleSlider" key={item[0]}>
           <span className="title">
             <img src={getImage(item[0])} className="icon" />
             {getTitle(item[0])}
           </span>
-          <span className="slider">
+            <span className="slider">
             <Slider
               tipFormatter={null}
-              max={getStyleType(item[0]) ? 5 : 10}
-              min={getStyleType(item[0]) ? 1 : 0}
-              step={getStyleType(item[0]) ? 1 : null}
-              value={toolStyle[item[0]] ?? getDefaultValue(item[0])}
+              max={getStyleType(key) ? 5 : 10}
+              min={getStyleType(key) ? 1 : 0}
+              step={getStyleType(key) ? 1 : null}
+              value={(toolStyle[key] ?? getDefaultValue(item[0])) as number}
               marks={getMarks(item[0])}
               onChange={(e: any) => changeToolStyle({ [item[0]]: e })}
             />
           </span>
-        </div>
-      ))}
+          </div>
+        )
+      })}
     </div>
   );
 };

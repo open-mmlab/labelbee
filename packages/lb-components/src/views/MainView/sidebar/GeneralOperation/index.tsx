@@ -14,7 +14,7 @@ import StepUtils from '@/utils/StepUtils';
 import { IStepInfo } from '@/types/step';
 import { jsonParser } from '@/utils';
 import { AnnotationFileList } from '@/types/data';
-import { CopyBackWordResult, UpdateImgList } from '@/store/annotation/actionCreators';
+import { CopyBackWordResult } from '@/store/annotation/actionCreators';
 
 const makeSure = (info: string, key: string) => <div key={key}>{`确认${info.slice(0)}？`}</div>;
 

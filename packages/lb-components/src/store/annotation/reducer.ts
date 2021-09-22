@@ -54,7 +54,7 @@ const updateToolInstance = (annotation: AnnotationState, imgNode: HTMLImageEleme
   const stepConfig = StepUtils.getCurrentStepInfo(step, stepList);
   const config = ConfigUtils.jsonParser(stepConfig.config);
 
-  const container = document.getElementById('toolContainer');
+  const container = document.getElementById('toolContainer') as HTMLDivElement;
 
   if (!container) {
     throw `Not exist dom named id-toolContainer`;
@@ -264,7 +264,7 @@ export const annotationReducer = (
           annotationEngine.setBasicInfo(dependStepConfig.tool, stepBasicResultList[basicIndex]);
           const sourceID = stepBasicResultList[basicIndex].id;
 
-          result = result.filter((i) => i.sourceID === sourceID);
+          result = result.filter((i: { sourceID: string|number; }) => i.sourceID === sourceID);
         } else {
           // TODO: 禁用绘制交互
           message.info('当前文件不存在依赖数据');
@@ -389,6 +389,7 @@ export const annotationReducer = (
       }
     }
 
+    // eslint-disable-next-line no-fallthrough
     default:
       return state;
   }

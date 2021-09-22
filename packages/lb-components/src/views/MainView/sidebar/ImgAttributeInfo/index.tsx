@@ -30,8 +30,8 @@ const ImgAttributeInfo = (props: IProps) => {
   } = props;
 
   const imgAttributeChange = throttle(
-    (payload: ImgAttributeState) => {
-      store.dispatch(ImgAttribute.UpdateImgAttribute(payload));
+    (payload: Partial<ImgAttributeState>) => {
+      store.dispatch(ImgAttribute.UpdateImgAttribute(payload as ImgAttributeState));
     },
     60,
     { trailing: true },

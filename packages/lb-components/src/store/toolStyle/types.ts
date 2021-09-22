@@ -5,7 +5,7 @@ export interface ToolStyleState {
   width: number;
   borderOpacity: number; // 边框透明度
   fillOpacity: number; // 填充透明度
-  
+
   toolColor: {
     [color: number]: any;
   };
@@ -21,6 +21,7 @@ interface UpdateToolStyleConfig {
 
 interface InitToolStyleConfig {
   type: typeof TOOL_STYLE_ACTIONS.INIT_TOOL_STYLE_CONFIG;
+  payload: undefined;
 }
 
 

@@ -43,7 +43,7 @@ class PageOperator {
     nextIndex?: number,
   ) {
     const pageInfo: IPageInfo = PageOperator.getPageInfo(annotationStore);
-    const { fileIndex: currentFileIndex, basicIndex: currentBasicIndex } =
+    const { fileIndex: currentFileIndex } =
       PageOperator.getPageInfo(annotationStore);
 
     const nextFileIndex = PageOperator.getNextFileIndex(pageTurningOperation, pageInfo, nextIndex);

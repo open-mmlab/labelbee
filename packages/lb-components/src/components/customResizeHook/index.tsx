@@ -24,13 +24,13 @@ export const viewportContext = React.createContext<{
 
 export const ViewportProviderComponent = (props: any) => {
   const { children, dispatch } = props;
-  const [width, setWidth] = useState(window.innerWidth);
-  const [height, setHeight] = useState(window.innerHeight);
+  const [width] = useState(window.innerWidth);
+  const [height] = useState(window.innerHeight);
 
-  const handleWindowResize = () => {
-    setWidth(window.innerWidth);
-    setHeight(window.innerHeight);
-  };
+  // const handleWindowResize = () => {
+  //   setWidth(window.innerWidth);
+  //   setHeight(window.innerHeight);
+  // };
 
   const keydown = (e: KeyboardEvent) => {
     if (!toolUtils.hotkeyFilter(e)) {

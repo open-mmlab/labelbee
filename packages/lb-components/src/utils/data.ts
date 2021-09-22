@@ -44,7 +44,7 @@ export const composeResult = (
         }
         if (basicRectID) {
           info.result = [
-            ...info.result.filter((v) => !(v.sourceID && v.sourceID === basicRectID)),
+            ...info.result.filter((v: { sourceID: string; }) => !(v.sourceID && v.sourceID === basicRectID)),
             ...rect.filter((v) => v.sourceID && v.sourceID === basicRectID),
           ];
         } else {

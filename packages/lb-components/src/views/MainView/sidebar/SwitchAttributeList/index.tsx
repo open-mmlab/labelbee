@@ -7,8 +7,9 @@ import StepUtils from '@/utils/StepUtils';
 import { IStepInfo } from '@/types/step';
 import { jsonParser } from '@/utils';
 
+type IToolInstance = ToolInstance & { setDefaultAttribute: Function }
 interface IProps {
-  toolInstance: ToolInstance;
+  toolInstance: IToolInstance;
   stepInfo: IStepInfo;
 }
 
@@ -43,7 +44,7 @@ const SwitchAttributeList: React.FC<IProps> = (props) => {
   if (toolInstance?.config?.attributeList) {
     const list = toolInstance.config.attributeList.map((i: any) => ({ label: i.key, value: i.value }));
     list.unshift({ label: '无属性', value: '' });
-    const attributeChanged = (v) => {
+    const attributeChanged = (v: string) => {
       toolInstance.setDefaultAttribute(v);
       forceRender((s) => s + 1);
     };
