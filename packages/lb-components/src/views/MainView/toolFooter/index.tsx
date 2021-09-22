@@ -13,7 +13,7 @@ import { prefix } from '@/constant';
 import { PageBackward, PageForward, PageJump } from '@/store/annotation/actionCreators';
 
 interface IPageProps {
-  jumpSkip: (e: KeyboardEvent) => void;
+  jumpSkip: Function;
   imgIndex: number;
 }
 

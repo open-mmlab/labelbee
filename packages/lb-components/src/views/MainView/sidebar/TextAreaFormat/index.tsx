@@ -1,7 +1,7 @@
 import { TEXT_ATTRIBUTE_MAX_LENGTH } from '@/data/enums/ToolType';
 import { TextUtils } from '@/utils/TextUtils';
 import { Input, message, Tooltip } from 'antd';
-import React, { useEffect, useState } from 'react';
+import React, {FocusEvent, useEffect, useState} from 'react';
 import IconClearSmallA from '@/assets/annotation/common/icon_clearSmall_a.svg';
 import IconClearSmall from '@/assets/annotation/common/icon_clearSmall.svg';
 import { classnames } from '@/utils';
@@ -68,7 +68,7 @@ const TextAreaFormat = (props: IProps) => {
     setTextLength(textValue?.length ?? 0);
   }, [textValue]);
 
-  const checkText = (e) => {
+  const checkText = (e: FocusEvent<HTMLTextAreaElement>) => {
     if (error) {
       onChange('');
       message.error(TextUtils.getErrorNotice(textCheckType));

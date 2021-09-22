@@ -19,7 +19,7 @@ interface IProps {
 }
 
 const AttributeList = React.forwardRef((props: IProps, ref) => {
-  const radioRef = React.useRef<any>(null);
+  const radioRef = React.useRef<any>();
 
   const list = props.list || [];
 
@@ -42,7 +42,7 @@ const AttributeList = React.forwardRef((props: IProps, ref) => {
         defaultValue={props?.selectedAttribute}
         value={props?.selectedAttribute}
         onChange={(e) => props.attributeChanged(e.target.value)}
-        ref={ref}
+        ref={ref as any}
       >
         {list.map((i: any, index: number) => {
           let hotKey: number | string = props?.num ?? index;
@@ -61,9 +61,6 @@ const AttributeList = React.forwardRef((props: IProps, ref) => {
             <Radio
               value={i.value}
               ref={radioRef}
-              onFocus={() => {
-                radioRef?.current?.blur();
-              }}
               key={index}
             >
               <span className="sensebee-radio-label" title={i.label}>

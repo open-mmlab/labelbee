@@ -7,7 +7,7 @@ export default class AnnotationDataUtils {
    * @param copyResult 复制的结果
    * @param step 复制的步骤
    * @param currentResult 当前的步骤
-   * @returns 
+   * @returns
    */
   public static copyResultChange(copyResult: string, step: number, currentResult: string) {
     // 其实其限定的范围一般都在单图的情况
@@ -19,8 +19,9 @@ export default class AnnotationDataUtils {
         // 这层可能还要处理 dataSource 依赖问题
         const info = copyData[stepName];
         if (info.result) {
-          info.result = info.result.map(info => ({
+          info.result = info.result.map((info: any) => ({
             ...info,
+            // @ts-ignore
             id: uuid(8, 62),
           }));
           currentData[stepName] = info;

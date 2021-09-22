@@ -7,8 +7,6 @@ import ChangeValidSvg from '@/assets/annotation/toolHotKeyIcon/icon_frameChange_
 import DeleteRectSvg from '@/assets/annotation/toolHotKeyIcon/icon_del_kj.svg';
 import {
   backward,
-  copyBackwardResult,
-  dargWithLeftClick,
   dargWithRightClick,
   forward,
   fullScreen,
@@ -16,7 +14,6 @@ import {
   revoke,
   rotate,
   scale,
-  setValid,
   tabChangeSelected,
   tabReverseChangeSelected,
 } from '../common';

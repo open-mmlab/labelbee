@@ -7,7 +7,7 @@ import pointASvg from '@/assets/annotation/pointTool/icon_point_a.svg';
 import lineASvg from '@/assets/annotation/lineTool/icon_line_a.svg';
 import { AppState } from '@/store';
 import StepUtils from '@/utils/StepUtils';
-import { connect } from 'react-redux';
+import { useSelector } from 'react-redux';
 import { EToolName } from '@/data/enums/ToolType';
 import ImgAttributeInfo from './ImgAttributeInfo';
 import SwitchAttributeList from './SwitchAttributeList';
@@ -51,7 +51,9 @@ const toolList = [
   },
 ];
 const sidebarCls = `${prefix}-sidebar`;
-const Sidebar: React.FC<IProps> = ({ toolName }) => {
+const Sidebar: React.FC<IProps> = () => {
+  const stepInfo = useSelector((state: AppState) => StepUtils.getCurrentStepInfo(state.annotation.step, state.annotation.stepList))
+  const toolName = stepInfo?.tool as EToolName;
   if (!toolName) {
     return null;
   }
@@ -137,12 +139,4 @@ const Sidebar: React.FC<IProps> = ({ toolName }) => {
   return null;
 };
 
-const mapStateToProps = (state: AppState) => {
-  const stepInfo = StepUtils.getCurrentStepInfo(state.annotation.step, state.annotation.stepList);
-
-  return {
-    toolName: stepInfo?.tool,
-  };
-};
-
-export default connect(mapStateToProps)(Sidebar);
+export default Sidebar;

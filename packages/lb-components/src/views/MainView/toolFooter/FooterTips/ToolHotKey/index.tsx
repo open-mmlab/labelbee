@@ -159,10 +159,8 @@ const ToolHotKey: React.FC<IProps> = ({ isSingleImg, style }) => {
   const containerStyle = style || {};
 
   return (
-    <Popover
-      placement="topLeft"
-      content={content}
-      onMouseMove={() => setFlag(true)}
+    // @ts-ignore
+    <Popover placement="topLeft" content={content} onMouseMove={() => setFlag(true)}
       onMouseLeave={() => setFlag(false)}
       overlayClassName="tool-hotkeys-popover"
     >
