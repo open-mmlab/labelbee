@@ -54,7 +54,7 @@ const updateToolInstance = (annotation: AnnotationState, imgNode: HTMLImageEleme
   const stepConfig = StepUtils.getCurrentStepInfo(step, stepList);
   const config = ConfigUtils.jsonParser(stepConfig.config);
 
-  const container = document.getElementById('toolContainer') as HTMLDivElement;
+  const container = document.getElementById('toolContainer');
 
   if (!container) {
     throw `Not exist dom named id-toolContainer`;

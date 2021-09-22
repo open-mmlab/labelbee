@@ -27,11 +27,6 @@ export const ViewportProviderComponent = (props: any) => {
   const [width] = useState(window.innerWidth);
   const [height] = useState(window.innerHeight);
 
-  // const handleWindowResize = () => {
-  //   setWidth(window.innerWidth);
-  //   setHeight(window.innerHeight);
-  // };
-
   const keydown = (e: KeyboardEvent) => {
     if (!toolUtils.hotkeyFilter(e)) {
       return;
@@ -49,11 +44,9 @@ export const ViewportProviderComponent = (props: any) => {
   };
 
   useEffect(() => {
-    // window.addEventListener('resize', handleWindowResize);
     window.addEventListener('keydown', keydown);
 
     return () => {
-      // window.removeEventListener('resize', handleWindowResize);
       window.removeEventListener('keydown', keydown);
     };
   }, []);

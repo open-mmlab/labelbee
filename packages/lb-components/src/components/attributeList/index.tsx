@@ -61,9 +61,6 @@ const AttributeList = React.forwardRef((props: IProps, ref) => {
             <Radio
               value={i.value}
               ref={radioRef}
-              // onFocus={() => {
-              //   radioRef?.current?.blur();
-              // }}
               key={index}
             >
               <span className="sensebee-radio-label" title={i.label}>
