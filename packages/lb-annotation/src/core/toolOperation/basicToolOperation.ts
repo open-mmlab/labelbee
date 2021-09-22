@@ -44,7 +44,7 @@ const zoomInfo = {
 };
 
 class BasicToolOperation extends EventListener {
-  public container: HTMLDivElement; // 当前结构绑定 container
+  public container: HTMLElement; // 当前结构绑定 container
 
   public canvas!: HTMLCanvasElement;
 
@@ -126,7 +126,7 @@ class BasicToolOperation extends EventListener {
 
   private _imgAttribute?: IImageAttribute;
 
-  private _invalidDOM?: HTMLDivElement;
+  private _invalidDOM?: HTMLElement;
 
   private showDefaultCursor: boolean; // 是否展示默认的 cursor
 

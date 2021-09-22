@@ -32,7 +32,7 @@ export default class AnnotationEngine {
 
   public toolName: EToolName;
 
-  private container: HTMLDivElement; // 当前结构绑定 container
+  private container: HTMLElement; // 当前结构绑定 container
 
   private size: ISize;
 

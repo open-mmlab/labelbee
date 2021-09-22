@@ -26,7 +26,7 @@ export const expandIconFuc = ({ isActive }: any) => (
 const TagSidebar: React.FC<IProps> = ({ toolInstance, imgIndex }) => {
   const [expandKeyList, setExpandKeyList] = useState<string[]>([]);
 
-  const sidebarRef = useRef<HTMLDivElement>(null);
+  const sidebarRef = useRef<HTMLElement>(null);
   const [, forceRender] = useState<number>(0);
   const [hoverDeleteIndex, setHoverDeleteIndex] = useState(-1);
 

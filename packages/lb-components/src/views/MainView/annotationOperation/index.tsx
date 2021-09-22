@@ -25,8 +25,8 @@ interface IProps extends AppState {
 
 const AnnotationOperation: React.FC<IProps> = (props: IProps) => {
   const { imgAttribute, toolStyle, toolInstance, annotationEngine } = props;
-  const annotationRef = useRef<HTMLDivElement>(null);
-  const containerRef = useRef<HTMLDivElement>(null);
+  const annotationRef = useRef<HTMLElement>(null);
+  const containerRef = useRef<HTMLElement>(null);
   // const windowSize = useContext(viewportContext);
   // const canvasSize = getFormatSize(windowSize);
   const size = useSize(annotationRef);

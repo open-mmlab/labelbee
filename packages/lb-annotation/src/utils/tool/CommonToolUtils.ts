@@ -241,7 +241,7 @@ export default class CommonToolUtils {
    * @param sourceID
    * @returns
    */
-  public static translateSourceID(sourceID: string | number) {
+  public static translateSourceID(sourceID: string | number | undefined) {
     if (sourceID === undefined || sourceID === 0 || sourceID === '0') {
       /**
        * 现在敲定都以空字符串来表示依赖原图，后续需要慢慢同步
@@ -272,7 +272,7 @@ export default class CommonToolUtils {
    * @param sourceIDB
    * @returns
    */
-  public static isSameSourceID(sourceIDA: string | number, sourceIDB: string | number) {
+  public static isSameSourceID(sourceIDA: string | number | undefined, sourceIDB: string | number | undefined) {
     sourceIDA = this.translateSourceID(sourceIDA);
     sourceIDB = this.translateSourceID(sourceIDB);
 
