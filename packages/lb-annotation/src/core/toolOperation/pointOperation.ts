@@ -313,29 +313,10 @@ class PointOperation extends BasicToolOperation {
         this.render();
         break;
       default: {
-        if (this.config.attributeConfigurable) {
-          let num = -1;
-          if (MathUtils.isInRange(keyCode, [48, 57])) {
-            num = keyCode - 48;
-          }
+        const keyCode2Attribute = AttributeUtils.getAttributeByKeycode(keyCode, this.config.attributeList);
 
-          if (MathUtils.isInRange(keyCode, [96, 105])) {
-            num = keyCode - 96;
-          }
-
-          if (num >= 0) {
-            let attribute = this.config.attributeList[num - 1]?.value;
-            if (num === 0) {
-              attribute = '';
-            }
-
-            if (attribute === undefined) {
-              // 如果不存在的话就弹出
-              return;
-            }
-
-            this.setDefaultAttribute(attribute);
-          }
+        if (keyCode2Attribute !== undefined) {
+          this.setDefaultAttribute(keyCode2Attribute);
         }
         break;
       }

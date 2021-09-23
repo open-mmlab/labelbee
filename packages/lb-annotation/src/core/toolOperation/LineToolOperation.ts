@@ -1552,6 +1552,14 @@ class LineToolOperation extends BasicToolOperation {
     if (this.isCreate) {
       this.renderNextPointByKeyboardEvent(e);
     }
+
+    if (this.isActive) {
+      const keyCode2Attribute = AttributeUtils.getAttributeByKeycode(e.keyCode, this.config.attributeList);
+
+      if (keyCode2Attribute !== undefined) {
+        this.setDefaultAttribute(keyCode2Attribute);
+      }
+    }
   }
 
   private selectToNextLine(e: KeyboardEvent) {
@@ -1859,6 +1867,7 @@ class LineToolOperation extends BasicToolOperation {
       top: coordinate.y,
       color,
     });
+    this._textAttributeInstance.updateIcon(this.getTextIconSvg(attribute));
   }
 
   public getTextIconSvg(attribute = '') {

@@ -4,11 +4,11 @@ import 'antd/dist/antd.css';
 import Annotation from './components/Annotation';
 import { mockFileList, getMockResult } from './mock/index';
 import { getStepList, getDependStepList } from './mock/taskConfig';
-
-const getTool = () => new URLSearchParams(window.location.search).get('tool');
+import qs from 'qs';
 
 const App = () => {
-  const stepList = getDependStepList();
+  const tools = qs.parse(window.location.search, { ignoreQueryPrefix: true, comma: true }).tool;
+  const stepList = Array.isArray(tools) ? getDependStepList(tools) : getStepList(tools);
 
   const [fileList] = useState(mockFileList);
 
