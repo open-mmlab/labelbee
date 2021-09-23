@@ -38,6 +38,17 @@ class TagOperation extends BasicToolOperation {
   }
 
   /**
+   * 当前依赖状态下的结果集合
+   * 主要是跟其他工具同步，正常情况为 1
+   *
+   * @readonly
+   * @memberof RectOperation
+   */
+  public get currentPageResult() {
+    return [this.currentTagResult];
+  }
+
+  /**
    * 当前页面的标注结果
    */
   public get currentTagResult() {
@@ -201,7 +212,7 @@ class TagOperation extends BasicToolOperation {
   };
 
   // 清空当前页面的标注结果
-  public clearResult = (value?: string) => {
+  public clearResult = (sendMessage = true, value?: string) => {
     // 依赖原图
     if (value) {
       this.tagResult = this.tagResult.map((v) => {

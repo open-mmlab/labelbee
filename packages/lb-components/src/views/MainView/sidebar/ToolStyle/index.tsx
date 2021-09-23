@@ -130,43 +130,47 @@ const ToolStyle = (props: IProps) => {
     fillOpacity,
   };
 
-  const annotationConfig = props.config;
+  // TODO - 样式标准的定义
+  const annotationConfig: any = props.config;
 
-  // 判断是否需要 color 的使用，现在暂时默认不需要
-  if (annotationConfig?.attributeConfigurable === true) {
-    delete styleConfig.color;
-  }
 
   const changeToolStyle = (obj: { [key: string]: number }) => {
     store.dispatch(UpdateToolStyleConfig(obj));
   };
 
   return (
-    <div className="toolStyle">
+    <div className='toolStyle'>
       {Object.entries(styleConfig).map((item: any[]) => {
         const key: ToolStyleKey = item[0];
+          // 判断是否需要 color 的使用，现在暂时默认不需要
+        if (annotationConfig?.attributeConfigurable === true && key === 'color') {
+          return null;
+        }
         return (
-          <div id={`style-${item[0]}`} className="styleSlider" key={item[0]}>
-          <span className="title">
-            <img src={getImage(item[0])} className="icon" />
-            {getTitle(item[0])}
-          </span>
-            <span className="slider">
-            <Slider
-              tipFormatter={null}
-              max={getStyleType(key) ? 5 : 10}
-              min={getStyleType(key) ? 1 : 0}
-              step={getStyleType(key) ? 1 : null}
-              value={(toolStyle[key] ?? getDefaultValue(item[0])) as number}
-              marks={getMarks(item[0])}
-              onChange={(e: any) => changeToolStyle({ [item[0]]: e })}
-            />
-          </span>
+          <div id={`style-${key}`} className='styleSlider' key={key}>
+            <span className='title'>
+              <img src={getImage(key)} className='icon' />
+              {getTitle(key)}
+            </span>
+            <span className='slider'>
+              <Slider
+                tipFormatter={null}
+                max={getStyleType(key) ? 5 : 10}
+                min={getStyleType(key) ? 1 : 0}
+                step={getStyleType(key) ? 1 : null}
+                value={(toolStyle[key] ?? getDefaultValue(key)) as number}
+                marks={getMarks(key)}
+                onChange={(e: any) => changeToolStyle({ [key]: e })}
+              />
+            </span>
           </div>
-        )
+        );
       })}
     </div>
   );
 };
-const mapStateToProps = ({ toolStyle, annotation }: AppState) => ({ toolStyle, config: annotation.toolInstance.config });
+const mapStateToProps = ({ toolStyle, annotation }: AppState) => ({
+  toolStyle,
+  config: annotation.toolInstance.config,
+});
 export default connect(mapStateToProps)(ToolStyle);

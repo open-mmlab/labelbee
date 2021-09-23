@@ -31,7 +31,6 @@ const StepSwitch: React.FC<IProps> = ({ stepProgress, step, stepList }) => {
         overlay={
           <AnnotationStepPopover
             stepList={stepList}
-            baseStep={step}
             updateStep={updateStep}
             currentStep={step}
           />

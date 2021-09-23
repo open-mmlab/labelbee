@@ -14,6 +14,7 @@ import { message } from 'antd';
 const getStepConfig = (stepList: any[], step: number) => stepList.find((i) => i.step === step);
 
 const initialState: AnnotationState = {
+  annotationEngine: null,
   toolInstance: null,
   imgList: [],
   config: '{}',
@@ -138,6 +139,10 @@ export const annotationReducer = (
 
     case ANNOTATION_ACTIONS.SUBMIT_FILE_DATA: {
       const { imgList, imgIndex, step, stepList, toolInstance, onSubmit, resultList } = state;
+      if (!toolInstance) {
+        return state;
+      }
+
       const resultString = imgList[imgIndex]?.result || '';
       const [, basicImgInfo] = toolInstance.exportData();
 
@@ -164,6 +169,10 @@ export const annotationReducer = (
 
     case ANNOTATION_ACTIONS.SUBMIT_RESULT: {
       const { imgList, basicIndex, resultList, annotationEngine, basicResultList } = state;
+      if (!annotationEngine) {
+        return state;
+      }
+
       const [exportResult] = annotationEngine.toolInstance.exportData();
 
       let previousResultList = exportResult;
@@ -193,6 +202,11 @@ export const annotationReducer = (
         resultList,
         basicResultList,
       } = state;
+
+      if (!toolInstance || !annotationEngine) {
+        return state;
+      }
+
       const nextBasicIndex = action.payload.basicIndex;
       const sourceID = basicResultList[nextBasicIndex]?.id;
 
@@ -233,7 +247,7 @@ export const annotationReducer = (
 
     case ANNOTATION_ACTIONS.LOAD_FILE_DATA: {
       const { imgList, step, toolInstance, annotationEngine, stepList } = state;
-      if (!toolInstance) {
+      if (!toolInstance || !annotationEngine) {
         return state;
       }
 
@@ -268,7 +282,7 @@ export const annotationReducer = (
           annotationEngine.setBasicInfo(dependStepConfig.tool, stepBasicResultList[basicIndex]);
           const sourceID = stepBasicResultList[basicIndex].id;
 
-          result = result.filter((i: { sourceID: string|number; }) => i.sourceID === sourceID);
+          result = result.filter((i: { sourceID: string | number }) => i.sourceID === sourceID);
         } else {
           // TODO: 禁用绘制交互，有无依赖之间的操作切换
           annotationEngine.setBasicInfo();
@@ -349,6 +363,10 @@ export const annotationReducer = (
 
     case ANNOTATION_ACTIONS.COPY_BACKWARD_RESULT: {
       const { toolInstance, imgIndex, imgList, step } = state;
+      if (!toolInstance) {
+        return state;
+      }
+
       if (imgIndex === 0 || imgIndex >= imgList.length) {
         console.error('无法复制边界外的内容');
         return state;
@@ -383,6 +401,10 @@ export const annotationReducer = (
     case ANNOTATION_ACTIONS.SET_STEP: {
       const { stepList, annotationEngine } = state;
       const { toStep } = action.payload;
+
+      if (!annotationEngine) {
+        return state;
+      }
 
       if (toStep <= stepList.length) {
         const stepConfig = getStepConfig(stepList, toStep);

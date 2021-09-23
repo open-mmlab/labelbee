@@ -5,7 +5,7 @@ import ToolHeader from './toolHeader';
 import AnnotationOperation from './annotationOperation';
 import Sidebar from './sidebar';
 import ToolFooter from './toolFooter';
-import { prefix } from '@/constant'
+import { prefix } from '@/constant';
 import { getNewNode } from '@/utils';
 import { Layout } from 'antd';
 
@@ -17,21 +17,22 @@ const MainView: React.FC<AppProps> = (props) => {
     <ViewportProvider>
       <Layout className={`${layoutCls} ${props.className}`}>
         <Header className={`${layoutCls}__header`}>
-          {
-            getNewNode(props.header, <ToolHeader headerName={props.headerName} goBack={props.goBack} exportData={props.exportData} />)
-          }
+          {getNewNode(
+            props.header,
+            <ToolHeader
+              headerName={props.headerName}
+              goBack={props.goBack}
+              exportData={props.exportData}
+            />,
+          )}
         </Header>
         <Layout>
           <Content className={`${layoutCls}__content`}>
             <AnnotationOperation {...props} />
-              {
-                getNewNode(props.footer, <ToolFooter />)
-              }
+            {getNewNode(props.footer, <ToolFooter />)}
           </Content>
           <Sider className={`${layoutCls}__side`} width='auto'>
-            {
-              getNewNode(props.sider, <Sidebar />)
-            }
+            {getNewNode(props.sider, <Sidebar />)}
           </Sider>
         </Layout>
       </Layout>
