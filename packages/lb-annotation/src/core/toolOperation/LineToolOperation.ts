@@ -1883,7 +1883,8 @@ class LineToolOperation extends BasicToolOperation {
   public updateSelectedTextAttribute(newTextAttribute?: string) {
     if (this._textAttributeInstance && newTextAttribute && this.selectedID) {
       let textAttribute = newTextAttribute;
-      if (AttributeUtils.textAttributeValidate(this.config.textCheckType, '', textAttribute) === false) {
+      const textAttributeInvalid = !AttributeUtils.textAttributeValidate(this.config.textCheckType, '', textAttribute);
+      if (textAttributeInvalid) {
         this.emit('messageError', AttributeUtils.getErrorNotice(this.config.textCheckType, this.lang));
         textAttribute = '';
       }
@@ -1898,10 +1899,8 @@ class LineToolOperation extends BasicToolOperation {
     if (this.config.textConfigurable === false || !this.selectedID) {
       return;
     }
-
-    this.setTextAttribute(v);
+    this.updateSelectedTextAttribute(v);
     this.emit('selectedChange'); // 触发外层的更新
-    this.render();
   };
 }
 
