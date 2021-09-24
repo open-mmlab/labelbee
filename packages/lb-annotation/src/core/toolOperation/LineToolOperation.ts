@@ -357,7 +357,7 @@ class LineToolOperation extends BasicToolOperation {
       return LineToolUtils.pointOverTarget(
         coord,
         preAxis,
-        this.dependPattern,
+        this.dependToolName,
         this.basicResult,
         this.dependConfig,
         this.imageSize,

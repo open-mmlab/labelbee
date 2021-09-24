@@ -262,6 +262,12 @@ export default class AttributeUtils {
     return baseIcon;
   }
 
+  /**
+   * 根据keycode返回attribute, 没有匹配到时为undefined
+   * @param keyCode
+   * @param attributeList
+   * @returns {undefined|string} 没有匹配到时为undefined
+   */
   public static getAttributeByKeycode(keyCode: number, attributeList: IInputList[]) {
     let num;
     if (MathUtils.isInRange(keyCode, [48, 57])) {
@@ -276,6 +282,6 @@ export default class AttributeUtils {
       return '';
     }
 
-    return attributeList[num - 1]?.value;
+    return num ? attributeList[num - 1]?.value : undefined;
   }
 }
