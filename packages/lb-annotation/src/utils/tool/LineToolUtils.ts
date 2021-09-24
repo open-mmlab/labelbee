@@ -1,7 +1,6 @@
-import { EDependPattern, ELineTypes, EToolName } from '@/constant/tool';
+import { ELineTypes, EToolName } from '@/constant/tool';
 import { createSmoothCurvePointsFromPointList } from './polygonTool';
 import PolygonUtils from './PolygonUtils';
-import DependencyUtils from './DependencyUtils';
 import MathUtils from '../MathUtils';
 
 export enum EStatus {

@@ -4,7 +4,7 @@
  */
 
 import _ from 'lodash';
-import { ELineColor, EDependPattern, ELineTypes, ETextType, EToolName } from '@/constant/tool';
+import { ELineColor, ELineTypes, ETextType, EToolName } from '@/constant/tool';
 import ActionsHistory from '@/utils/ActionsHistory';
 import uuid from '@/utils/uuid';
 import EKeyCode from '@/constant/keyCode';
@@ -18,7 +18,6 @@ import {
 import CommonToolUtils from '../../utils/tool/CommonToolUtils';
 import CanvasUtils from '../../utils/tool/CanvasUtils';
 import DrawUtils from '../../utils/tool/DrawUtils';
-import DependencyUtils from '../../utils/tool/DependencyUtils';
 import StyleUtils from '../../utils/tool/StyleUtils';
 import AttributeUtils from '../../utils/tool/AttributeUtils';
 import TextAttributeClass from './textAttributeClass';
@@ -135,15 +134,9 @@ class LineToolOperation extends BasicToolOperation {
   /** 临时点锁定，避免由于点击延迟造成的坐标偏移 */
   private isShift: boolean = false;
 
-  private isCtrl: boolean = false;
-
-  private isAlt: boolean = false;
-
   private hoverPointID?: string;
 
   private lineMoved: boolean;
-
-  private dependPattern: EDependPattern;
 
   private dependConfig?: any;
 
@@ -155,13 +148,10 @@ class LineToolOperation extends BasicToolOperation {
 
   private isLineValid: boolean;
 
-  private hoverID?: string;
-
   constructor(props: ILineOperationProps) {
     super(props);
     this.status = EStatus.None;
     this.isMousedown = false;
-    this.dependPattern = EDependPattern.dependOrigin;
     this.lineMoved = false;
     this.isLineValid = true;
     this.setConfig(props.config);
@@ -993,8 +983,6 @@ class LineToolOperation extends BasicToolOperation {
 
   // TODO: 渲染hover样式
   public lineHover(coord: ICoordinate) {
-    const hitLine = this.findHoverLine(coord);
-    this.hoverID = hitLine?.id;
     this.render();
   }
 
@@ -1475,8 +1463,6 @@ class LineToolOperation extends BasicToolOperation {
 
   public setKeyDownStatus(e: KeyboardEvent, value?: boolean) {
     this.isShift = value ?? e.keyCode === EKeyCode.Shift;
-    this.isCtrl = value ?? e.keyCode === EKeyCode.Ctrl;
-    this.isAlt = value ?? e.keyCode === EKeyCode.Alt;
   }
 
   public onKeyUp = (e: KeyboardEvent) => {
