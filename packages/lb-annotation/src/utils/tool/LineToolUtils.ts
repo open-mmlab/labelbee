@@ -263,7 +263,7 @@ class LineToolUtils {
   public static pointOverTarget = (
     axis: ICoordinate,
     preAxis: ICoordinate,
-    dependToolName: EToolName,
+    dependToolName: EToolName | undefined,
     dependData: any,
     dependConfig: any,
     imageSize: ISize,
