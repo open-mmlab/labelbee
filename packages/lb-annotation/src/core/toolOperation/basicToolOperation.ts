@@ -12,7 +12,7 @@ import ZoomUtils from '../../utils/tool/ZoomUtils';
 import EventListener from './eventListener';
 import locale from '../../locales';
 import { EMessage } from '../../locales/constants';
-import { CommonToolUtils } from '@/';
+import CommonToolUtils from '@/utils/tool/CommonToolUtils';
 import MathUtils from '@/utils/MathUtils';
 import { styleDefaultConfig } from '@/constant/defaultConfig';
 import AxisUtils from '@/utils/tool/AxisUtils';
@@ -20,7 +20,7 @@ import { EToolName } from '@/constant/tool';
 import LineToolUtils from '@/utils/tool/LineToolUtils';
 
 interface IBasicToolOperationProps {
-  container: HTMLDivElement;
+  container: HTMLElement;
   size: ISize;
   imgNode?: HTMLImageElement; // 展示图片的内容
   style?: any; // 后期一定要补上!!
@@ -44,7 +44,7 @@ const zoomInfo = {
 };
 
 class BasicToolOperation extends EventListener {
-  public container: HTMLDivElement; // 当前结构绑定 container
+  public container: HTMLElement; // 当前结构绑定 container
 
   public canvas!: HTMLCanvasElement;
 
@@ -126,7 +126,7 @@ class BasicToolOperation extends EventListener {
 
   private _imgAttribute?: IImageAttribute;
 
-  private _invalidDOM?: HTMLDivElement;
+  private _invalidDOM?: HTMLElement;
 
   private showDefaultCursor: boolean; // 是否展示默认的 cursor
 
@@ -351,6 +351,11 @@ class BasicToolOperation extends EventListener {
     this.render();
   }
 
+  public setForbidCursorLine(forbidCursorLine: boolean) {
+    this.forbidCursorLine = forbidCursorLine;
+    this.render();
+  }
+
   public setIsHidden(isHidden: boolean) {
     this.isHidden = isHidden;
 
@@ -523,10 +528,10 @@ class BasicToolOperation extends EventListener {
 
   /** 事件绑定 */
   public eventBinding() {
-    this.dblClickListener.addEvent(this.onMouseUp, this.onLeftDblClick, this.onRightDblClick);
+    this.dblClickListener.addEvent(() => {}, this.onLeftDblClick, this.onRightDblClick);
     this.container.addEventListener('mousedown', this.onMouseDown);
     this.container.addEventListener('mousemove', this.onMouseMove);
-    // this.container.addEventListener('mouseup', this.onMouseUp);
+    this.container.addEventListener('mouseup', this.onMouseUp);
     this.container.addEventListener('mouseleave', this.onMouseLeave);
     this.container.addEventListener('click', this.onClick);
     this.container.addEventListener('wheel', this.onWheel);

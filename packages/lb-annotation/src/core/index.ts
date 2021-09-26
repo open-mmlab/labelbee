@@ -12,12 +12,27 @@ interface IProps extends IBasicToolOperationProps {
   toolName: EToolName;
 }
 
+const loadImage = (imgSrc: string) => {
+  return new Promise((resolve, reject) => {
+    const img = document.createElement('img');
+    img.crossOrigin = 'Anonymous';
+    img.onerror = (e) => {
+      console.error(e);
+      reject(img);
+    };
+    img.src = imgSrc;
+    img.onload = () => {
+      resolve(img);
+    };
+  });
+};
+
 export default class AnnotationEngine {
   public toolInstance: any; // 用于存储当前工具实例
 
   public toolName: EToolName;
 
-  private container: HTMLDivElement; // 当前结构绑定 container
+  private container: HTMLElement; // 当前结构绑定 container
 
   private size: ISize;
 
@@ -57,10 +72,19 @@ export default class AnnotationEngine {
    */
   public setToolName(toolName: EToolName, config?: string) {
     this.toolName = toolName;
-    const defaultConfig = config || getConfig(toolName); // 防止用户没有注入配置
-    this.config = JSON.stringify(defaultConfig);
+    const defaultConfig = config || JSON.stringify(getConfig(toolName)); // 防止用户没有注入配置
+    this.config = defaultConfig;
     this._initToolOperation();
   }
+
+  public setImgSrc = async (imgSrc: string) => {
+    const imgNode = await loadImage(imgSrc);
+    if (!imgNode) {
+      return;
+    }
+
+    this.setImgNode(imgNode as HTMLImageElement);
+  };
 
   public setImgNode(imgNode: HTMLImageElement) {
     if (!this.toolInstance) {
@@ -116,12 +140,33 @@ export default class AnnotationEngine {
    * @param dependToolName
    * @param basicResult
    */
-  public setBasicInfo(dependToolName: EToolName, basicResult: IRect | IPolygonData) {
+  public setBasicInfo(dependToolName?: EToolName, basicResult?: IRect | IPolygonData) {
     this.dependToolName = dependToolName;
     this.basicResult = basicResult;
 
     this.toolInstance.setDependName(dependToolName);
     this.toolInstance.setBasicResult(basicResult);
     this.toolInstance.renderBasicCanvas();
+  }
+
+  /**
+   * 清空当前依赖
+   */
+  public clearBasicResult() {
+    this.setBasicInfo();
+  }
+
+  /**
+   * 禁止操作
+   */
+  public forbidOperation() {
+    this.toolInstance.setForbidOperation(true);
+  }
+
+  /**
+   * 触发操作
+   */
+  public launchOperation() {
+    this.toolInstance.setForbidOperation(false);
   }
 }

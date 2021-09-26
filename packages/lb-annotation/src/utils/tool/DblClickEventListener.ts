@@ -1,4 +1,4 @@
-import { AxisUtils } from '@/';
+import AxisUtils from '@/utils/tool/AxisUtils';
 
 class DblClickEventListener {
   private dom: HTMLElement; // 点击时间绑定的对象
@@ -74,6 +74,7 @@ class DblClickEventListener {
       return;
     }
 
+    this.removeEvent();
     this.mouseUp = (e: MouseEvent) => {
       const cTime = new Date().getTime();
 

@@ -1,7 +1,7 @@
 import TagUtils from '../../utils/tool/TagUtils';
 import uuid from '../../utils/uuid';
 import { BasicToolOperation, IBasicToolOperationProps } from './basicToolOperation';
-import { CommonToolUtils } from '@/';
+import CommonToolUtils from '@/utils/tool/CommonToolUtils';
 
 interface ITagOperationProps extends IBasicToolOperationProps {
   config: string;
@@ -28,7 +28,7 @@ class TagOperation extends BasicToolOperation {
   }
 
   public setResult(tagResult: any[], isInitData = false) {
-    if (isInitData === true) {
+    if (isInitData === true && tagResult.length === 0) {
       // 注意，该获取方式是需要拉取所有的 basicResultList
       tagResult = TagUtils.getDefaultTagResult(this.config.inputList, []);
     }
@@ -37,11 +37,27 @@ class TagOperation extends BasicToolOperation {
     this.render();
   }
 
+  /**
+   * 当前依赖状态下的结果集合
+   * 主要是跟其他工具同步，正常情况为 1
+   *
+   * @readonly
+   * @memberof RectOperation
+   */
+  public get currentPageResult() {
+    return [this.currentTagResult];
+  }
+
+  /**
+   * 当前页面的标注结果
+   */
   public get currentTagResult() {
-    return this.tagResult.filter((v) => {
-      const basicSourceID = `${v.sourceID}`;
-      return basicSourceID === this.sourceID;
-    })[0];
+    return (
+      this.tagResult.filter((v) => {
+        const basicSourceID = `${v.sourceID}`;
+        return basicSourceID === this.sourceID;
+      })[0] || {}
+    );
   }
 
   public onKeyDown(e: KeyboardEvent) {
@@ -93,6 +109,11 @@ class TagOperation extends BasicToolOperation {
   // 注意： 单图模式（无框）下，selectedList 就为 [0]
   public setLabel = (i: number, j: number) => {
     if (this.isImgError) {
+      return;
+    }
+
+    if (!this.basicResult && this.dependToolName) {
+      // 有依赖情况下无依赖结果则不允许进行标注
       return;
     }
 
@@ -191,7 +212,7 @@ class TagOperation extends BasicToolOperation {
   };
 
   // 清空当前页面的标注结果
-  public clearResult = (value?: string) => {
+  public clearResult = (sendMessage = true, value?: string) => {
     // 依赖原图
     if (value) {
       this.tagResult = this.tagResult.map((v) => {
@@ -218,7 +239,7 @@ class TagOperation extends BasicToolOperation {
     }
 
     const dom = document.createElement('div');
-    const tagInfoList = TagUtils.getTagNameList(this.currentTagResult.result, this.config.inputList);
+    const tagInfoList = TagUtils.getTagNameList(this.currentTagResult.result || {}, this.config.inputList);
 
     dom.innerHTML =
       tagInfoList.reduce((acc: string, cur: { keyName: string; value: string[] }) => {

@@ -14,6 +14,7 @@ import { message } from 'antd';
 const getStepConfig = (stepList: any[], step: number) => stepList.find((i) => i.step === step);
 
 const initialState: AnnotationState = {
+  annotationEngine: null,
   toolInstance: null,
   imgList: [],
   config: '{}',
@@ -46,8 +47,6 @@ const calcStepProgress = (fileList: any[], step: number) =>
     }
     return pre;
   }, 0) / fileList.length;
-
-
 
 const updateToolInstance = (annotation: AnnotationState, imgNode: HTMLImageElement) => {
   const { step, stepList } = annotation;
@@ -140,8 +139,12 @@ export const annotationReducer = (
 
     case ANNOTATION_ACTIONS.SUBMIT_FILE_DATA: {
       const { imgList, imgIndex, step, stepList, toolInstance, onSubmit, resultList } = state;
+      if (!toolInstance) {
+        return state;
+      }
+
       const resultString = imgList[imgIndex]?.result || '';
-      const [basicImgInfo] = toolInstance.exportData();
+      const [, basicImgInfo] = toolInstance.exportData();
 
       const resultWithBasicInfo = composeResultWithBasicImgInfo(resultString, basicImgInfo);
 
@@ -166,11 +169,15 @@ export const annotationReducer = (
 
     case ANNOTATION_ACTIONS.SUBMIT_RESULT: {
       const { imgList, basicIndex, resultList, annotationEngine, basicResultList } = state;
+      if (!annotationEngine) {
+        return state;
+      }
+
       const [exportResult] = annotationEngine.toolInstance.exportData();
 
       let previousResultList = exportResult;
 
-      if (basicResultList.length > 0) {
+      if (basicResultList?.length > 0) {
         const sourceID = basicResultList[basicIndex]?.id;
         const newResultData = exportResult.map((i: any) => ({ ...i, i, sourceID }));
         previousResultList = _.cloneDeep(resultList).filter((i: any) => i.sourceID !== sourceID);
@@ -195,6 +202,11 @@ export const annotationReducer = (
         resultList,
         basicResultList,
       } = state;
+
+      if (!toolInstance || !annotationEngine) {
+        return state;
+      }
+
       const nextBasicIndex = action.payload.basicIndex;
       const sourceID = basicResultList[nextBasicIndex]?.id;
 
@@ -207,19 +219,24 @@ export const annotationReducer = (
       const dependStepConfig = getStepConfig(stepList, dataSourceStep);
       let stepBasicResultList = [];
 
-      if (dataSourceStep && tool) {
-        stepBasicResultList = fileResult[`step_${dataSourceStep}`].result;
+      // 当前步骤结果
+      const stepResult = fileResult[`step_${step}`];
+      const isInitData = !stepResult; // 是否为初始化数据
 
-        if (stepBasicResultList.length > 0) {
+      if (dataSourceStep && tool) {
+        stepBasicResultList = fileResult[`step_${dataSourceStep}`]?.result;
+
+        if (stepBasicResultList?.length > 0) {
           annotationEngine.setBasicInfo(dependStepConfig.tool, stepBasicResultList[nextBasicIndex]);
+          annotationEngine.launchOperation();
         } else {
           annotationEngine.setBasicInfo();
+          annotationEngine.forbidOperation();
           message.info('当前文件不存在依赖数据');
         }
       }
 
-      toolInstance.setResult(result);
-
+      toolInstance.setResult(result, isInitData);
       toolInstance.history.initRecord(result, true);
 
       return {
@@ -230,7 +247,7 @@ export const annotationReducer = (
 
     case ANNOTATION_ACTIONS.LOAD_FILE_DATA: {
       const { imgList, step, toolInstance, annotationEngine, stepList } = state;
-      if (!toolInstance) {
+      if (!toolInstance || !annotationEngine) {
         return state;
       }
 
@@ -257,16 +274,19 @@ export const annotationReducer = (
       const dependStepConfig = getStepConfig(stepList, dataSourceStep);
       let stepBasicResultList = [];
 
+      annotationEngine.launchOperation();
       if (dataSourceStep && tool) {
-        stepBasicResultList = fileResult[`step_${dataSourceStep}`].result;
+        stepBasicResultList = fileResult[`step_${dataSourceStep}`]?.result;
 
-        if (stepBasicResultList.length > 0) {
+        if (stepBasicResultList?.length > 0) {
           annotationEngine.setBasicInfo(dependStepConfig.tool, stepBasicResultList[basicIndex]);
           const sourceID = stepBasicResultList[basicIndex].id;
 
-          result = result.filter((i: { sourceID: string|number; }) => i.sourceID === sourceID);
+          result = result.filter((i: { sourceID: string | number }) => i.sourceID === sourceID);
         } else {
-          // TODO: 禁用绘制交互
+          // TODO: 禁用绘制交互，有无依赖之间的操作切换
+          annotationEngine.setBasicInfo();
+          annotationEngine.forbidOperation();
           message.info('当前文件不存在依赖数据');
         }
       }
@@ -343,6 +363,10 @@ export const annotationReducer = (
 
     case ANNOTATION_ACTIONS.COPY_BACKWARD_RESULT: {
       const { toolInstance, imgIndex, imgList, step } = state;
+      if (!toolInstance) {
+        return state;
+      }
+
       if (imgIndex === 0 || imgIndex >= imgList.length) {
         console.error('无法复制边界外的内容');
         return state;
@@ -362,9 +386,10 @@ export const annotationReducer = (
       // 更新当前的结果
       const fileResult = jsonParser(newResult);
       const stepResult = fileResult[`step_${step}`];
+      const isInitData = !stepResult;
       const result = stepResult?.result || [];
 
-      toolInstance.setResult(result);
+      toolInstance.setResult(result, isInitData);
       toolInstance.history.pushHistory(result);
 
       return {
@@ -376,6 +401,10 @@ export const annotationReducer = (
     case ANNOTATION_ACTIONS.SET_STEP: {
       const { stepList, annotationEngine } = state;
       const { toStep } = action.payload;
+
+      if (!annotationEngine) {
+        return state;
+      }
 
       if (toStep <= stepList.length) {
         const stepConfig = getStepConfig(stepList, toStep);

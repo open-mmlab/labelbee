@@ -48,18 +48,6 @@ class PointOperation extends BasicToolOperation {
     return this.pointList;
   }
 
-  public eventBinding() {
-    super.eventBinding();
-    // this.container.addEventListener('mousedown', this.onMouseDown);
-    this.container.addEventListener('mouseup', this.onMouseUp);
-  }
-
-  public eventUnbinding() {
-    super.eventUnbinding();
-    // this.container.addEventListener('mousedown', this.onMouseDown);
-    this.container.removeEventListener('mouseup', this.onMouseUp);
-  }
-
   public setResult(pointList: IPointUnit[]) {
     this.clearActiveStatus();
     this.setPointList(pointList);

@@ -15,7 +15,7 @@ interface IBaseInfo {
 }
 
 interface ITextAttributeProps {
-  container: HTMLDivElement;
+  container: HTMLElement;
   width?: number;
   icon: HTMLImageElement;
   color: string;
@@ -25,15 +25,15 @@ interface ITextAttributeProps {
 const DEFAULT_TEXT_WIDTH = 164;
 
 export default class TextAttributeClass {
-  private container: HTMLDivElement; // 挂载位置
+  private container: HTMLElement; // 挂载位置
 
   private _textareaDOM?: HTMLTextAreaElement; // 修改的文本的 textarea
 
-  private _textAttributeDOM?: HTMLDivElement; // 顶层定位存储
+  private _textAttributeDOM?: HTMLElement; // 顶层定位存储
 
   private _textDOM?: HTMLSpanElement; // 文本
 
-  private _iconDOM?: HTMLDivElement; // icon
+  private _iconDOM?: HTMLElement; // icon
 
   private getCurrentSelectedData: () => ITextareaData | undefined;
 

@@ -115,7 +115,11 @@ class PageOperator {
 
     if (dataSourceStep) {
       const fileResult = jsonParser(fileList[fileIndex].result);
-      return fileResult[`step_${dataSourceStep}`].result?.length - 1;
+      if (!fileResult?.result || fileResult?.result?.length === 0) {
+        return 0
+      }
+
+      return fileResult[`step_${dataSourceStep}`].result.length - 1;
     }
 
     return 0;

@@ -30,7 +30,7 @@ const tagToolConfig = {
       value: 'class1',
       isMulti: false,
       subSelected: [
-        { key: '选项1', value: 'option1', isDefault: false },
+        { key: '选项1', value: 'option1', isDefault: true },
         { key: '选项2', value: 'option1-2', isDefault: false },
       ],
     },
@@ -39,8 +39,8 @@ const tagToolConfig = {
       value: 'class-AH',
       isMulti: true,
       subSelected: [
-        { key: '选项2-1', value: 'option2-1', isMulti: false },
-        { key: '选项2-2', value: 'option2-2', isDefault: false },
+        { key: '选项2-1', value: 'option2-1', isDefault: true },
+        { key: '选项2-2', value: 'option2-2', isDefault: true },
         { key: '选项2-3', value: 'option2-3', isDefault: false },
       ],
     },
@@ -49,9 +49,19 @@ const tagToolConfig = {
       value: 'class-0P',
       isMulti: false,
       subSelected: [
-        { key: '选项3-1', value: 'option3-1', isMulti: false },
+        { key: '选项3-1', value: 'option3-1', isDefault: false },
         { key: '选项3-2', value: 'option3-2', isDefault: false },
         { key: '选项3-3', value: 'option3-3', isDefault: false },
+      ],
+    },
+    {
+      key: '类别4',
+      value: 'class-4',
+      isMulti: true,
+      subSelected: [
+        { key: '选项2-1', value: 'option2-1', isDefault: false },
+        { key: '选项2-2', value: 'option2-2', isDefault: false },
+        { key: '选项2-3', value: 'option2-3', isDefault: false },
       ],
     },
   ],
@@ -103,8 +113,8 @@ const textToolConfig = {
 const polygonConfig = {
   lineType: 0,
   lineColor: 0,
-  lowerLimitPointNum: 3,
-  upperLimitPointNum: 20,
+  // lowerLimitPointNum: 3,
+  upperLimitPointNum: 5,
   edgeAdsorption: true,
   drawOutsideTarget: false,
   copyBackwardResult: false,

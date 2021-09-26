@@ -13,7 +13,7 @@ interface CommonActions {
 
 export interface AnnotationState {
   toolInstance: ToolInstance | null;
-  annotationEngine: AnnotationEngine;
+  annotationEngine: AnnotationEngine | null;
   imgList: IFileItem[];
   config: string;
   imgIndex: number;

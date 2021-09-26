@@ -2,16 +2,14 @@ import React, { useEffect } from 'react';
 import { connect } from 'react-redux';
 import { store } from '.';
 import { AppState } from './store';
-import {
-  InitTaskData,
-} from './store/annotation/actionCreators';
+import { InitTaskData } from './store/annotation/actionCreators';
 import MainView from '@/views/MainView';
 import { IStepInfo } from './types/step';
 import { OnSubmit, GetFileData } from './types/data';
 import { ToolInstance } from './store/annotation/types';
 
 export interface AppProps {
-  exportData: (data: string) => void;
+  exportData?: (data: any[]) => void;
   goBack?: () => void;
   imgList: string[];
   config: string;

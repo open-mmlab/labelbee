@@ -15,7 +15,7 @@ interface IProps {
 
 const SwitchAttributeList: React.FC<IProps> = (props) => {
   const [_, forceRender] = useState(0);
-  const listRef = useRef<HTMLDivElement>(null);
+  const listRef = useRef<HTMLElement>(null);
   const { toolInstance } = props;
 
   useEffect(() => {
