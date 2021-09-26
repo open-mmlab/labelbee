@@ -5,6 +5,7 @@ import { COLORS_ARRAY, ICON_ARRAY, INVALID_ICON, NULL_COLOR, NULL_ICON } from '.
 import { ETextType } from '../../constant/tool';
 import locale from '../../locales';
 import { EMessage } from '../../locales/constants';
+import MathUtils from '../MathUtils';
 
 export const ATTRIBUTE_COLORS = [NULL_COLOR].concat(COLORS_ARRAY);
 
@@ -259,5 +260,28 @@ export default class AttributeUtils {
     }
 
     return baseIcon;
+  }
+
+  /**
+   * 根据keycode返回attribute, 没有匹配到时为undefined
+   * @param keyCode
+   * @param attributeList
+   * @returns {undefined|string} 没有匹配到时为undefined
+   */
+  public static getAttributeByKeycode(keyCode: number, attributeList: IInputList[]) {
+    let num;
+    if (MathUtils.isInRange(keyCode, [48, 57])) {
+      num = keyCode - 48;
+    }
+
+    if (MathUtils.isInRange(keyCode, [96, 105])) {
+      num = keyCode - 96;
+    }
+
+    if (num === 0) {
+      return '';
+    }
+
+    return num ? attributeList[num - 1]?.value : undefined;
   }
 }

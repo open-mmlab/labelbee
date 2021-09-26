@@ -1,4 +1,4 @@
-import { EDependPattern, ELineTypes } from '@/constant/tool';
+import { EDependPattern, ELineTypes, EToolName } from '@/constant/tool';
 import { createSmoothCurvePointsFromPointList } from './polygonTool';
 import PolygonUtils from './PolygonUtils';
 import DependencyUtils from './DependencyUtils';
@@ -263,7 +263,7 @@ class LineToolUtils {
   public static pointOverTarget = (
     axis: ICoordinate,
     preAxis: ICoordinate,
-    dependPattern: EDependPattern,
+    dependToolName: EToolName,
     dependData: any,
     dependConfig: any,
     imageSize: ISize,
@@ -278,7 +278,7 @@ class LineToolUtils {
       return axis;
     }
 
-    if (DependencyUtils.isDependPolygon(dependPattern)) {
+    if (dependToolName === EToolName.Polygon) {
       const polygonPointList = LineToolUtils.getPolygonPointList(dependData, dependConfig);
       if (polygonPointList.length === 0) {
         return absAxis;
@@ -308,7 +308,7 @@ class LineToolUtils {
       return absAxis;
     }
 
-    if (DependencyUtils.isDependRect(dependPattern)) {
+    if (dependToolName === EToolName.Rect) {
       const { x, y, width, height } = dependData;
       absAxis.x = MathUtils.withinRange(absAxis.x, [x, x + width]);
       absAxis.y = MathUtils.withinRange(absAxis.y, [y, y + height]);
