@@ -17,6 +17,7 @@ import MathUtils from '@/utils/MathUtils';
 import { styleDefaultConfig } from '@/constant/defaultConfig';
 import AxisUtils from '@/utils/tool/AxisUtils';
 import { EToolName } from '@/constant/tool';
+import LineToolUtils from '@/utils/tool/LineToolUtils';
 
 interface IBasicToolOperationProps {
   container: HTMLDivElement;
@@ -631,10 +632,21 @@ class BasicToolOperation extends EventListener {
     this.isDragStart = false;
     this.isSpaceClick = false;
 
-    if (this.startTime !== 0) {
+    if (this.startTime !== 0 && this._firstClickCoordinate) {
       const time = new Date().getTime();
+      const currentCoord = this.getCoordinate(e);
 
-      if (time - this.startTime > 300 || this.isSpaceKey === true) {
+      /**
+       * 图片拖拽判断
+       * 1. 拖拽时间超过 1 秒则为拖拽
+       * 2. 开启了 space 键为拖拽
+       * 3. 鼠标移动 10 像素
+       */
+      if (
+        time - this.startTime > 1000 ||
+        this.isSpaceKey === true ||
+        LineToolUtils.calcTwoPointDistance(currentCoord, this._firstClickCoordinate) > 10
+      ) {
         e.stopPropagation();
         this.startTime = 0;
         this.render();
