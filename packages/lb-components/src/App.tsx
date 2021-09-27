@@ -39,9 +39,10 @@ const App: React.FC<AppProps> = (props) => {
     initialIndex = 0,
     toolInstance,
     setToolInstance,
+    getFileData
   } = props;
   useEffect(() => {
-    store.dispatch(InitTaskData({ imgList, onSubmit, stepList, step, initialIndex }));
+    store.dispatch(InitTaskData({ imgList, onSubmit, stepList, step, initialIndex, getFileData }));
   }, []);
 
   useEffect(() => {
