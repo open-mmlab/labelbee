@@ -21,10 +21,11 @@ interface IProps extends AppState {
   step: number;
   imgIndex: number;
   annotationEngine: AnnotationEngine;
+  loading: boolean;
 }
 
 const AnnotationOperation: React.FC<IProps> = (props: IProps) => {
-  const { imgAttribute, toolStyle, toolInstance, annotationEngine } = props;
+  const { imgAttribute, toolStyle, toolInstance, annotationEngine, loading } = props;
   const annotationRef = useRef<HTMLDivElement>(null);
   const containerRef = useRef<HTMLDivElement>(null);
   // const windowSize = useContext(viewportContext);
@@ -33,7 +34,7 @@ const AnnotationOperation: React.FC<IProps> = (props: IProps) => {
 
   useEffect(() => {
     store.dispatch(InitToolStyleConfig());
-  }, [])
+  }, []);
 
   useEffect(() => {
     if (toolInstance) {
@@ -76,7 +77,7 @@ const AnnotationOperation: React.FC<IProps> = (props: IProps) => {
 
   return (
     <div ref={annotationRef} className='annotationOperation'>
-      <Spin spinning={false}>
+      <Spin spinning={loading} delay={500}>
         <div className='canvas' ref={containerRef} style={size} id='toolContainer' />
       </Spin>
     </div>
@@ -85,7 +86,15 @@ const AnnotationOperation: React.FC<IProps> = (props: IProps) => {
 
 const mapStateToProps = (state: AppState) => {
   const annotationState = _.pickBy(state.annotation, (v, k) =>
-    ['imgList', 'imgIndex', 'stepList', 'step', 'toolInstance', 'annotationEngine'].includes(k),
+    [
+      'imgList',
+      'imgIndex',
+      'stepList',
+      'step',
+      'toolInstance',
+      'annotationEngine',
+      'loading',
+    ].includes(k),
   );
   return {
     imgAttribute: state.imgAttribute,

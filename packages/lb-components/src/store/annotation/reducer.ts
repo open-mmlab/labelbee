@@ -27,6 +27,7 @@ const initialState: AnnotationState = {
   basicResultList: [],
   resultList: [],
   stepProgress: 0,
+  loading: false,
 };
 
 /**
@@ -75,6 +76,13 @@ const updateToolInstance = (annotation: AnnotationState, imgNode: HTMLImageEleme
 export const loadFileData =
   (nextIndex: number, nextBasicIndex?: number) => async (dispatch: any, getState: any) => {
     const { getFileData, imgList } = getState().annotation;
+    dispatch({
+      type: ANNOTATION_ACTIONS.SET_LOADING,
+      payload: {
+        loading: true,
+      }
+    })
+    
     /** 支持外部传入获取文件接口 */
     if (getFileData) {
       const fileData = await getFileData(imgList[nextIndex], nextIndex);
@@ -96,6 +104,13 @@ export const loadFileData =
         reslove(imgNode);
       };
     }).then((imgNode) => {
+      dispatch({
+        type: ANNOTATION_ACTIONS.SET_LOADING,
+        payload: {
+          loading: false,
+        }
+      })
+      
       dispatch({
         type: ANNOTATION_ACTIONS.LOAD_FILE_DATA,
         payload: {
@@ -415,6 +430,16 @@ export const annotationReducer = (
           step: toStep,
           toolInstance: annotationEngine.toolInstance,
         };
+      }
+      break;
+    }
+
+    case ANNOTATION_ACTIONS.SET_LOADING: {
+      const { loading } = action.payload;
+
+      return {
+        ...state,
+        loading: !!loading,
       }
     }
 

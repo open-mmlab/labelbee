@@ -27,6 +27,8 @@ export interface AnnotationState {
   basicResultList: any[];
   resultList: any[];
   stepProgress: number;
+
+  loading: boolean; // 用于图片加载
 }
 
 interface UpdateToolInstance {
