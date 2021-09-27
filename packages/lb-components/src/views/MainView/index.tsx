@@ -15,25 +15,29 @@ const layoutCls = `${prefix}-layout`;
 const MainView: React.FC<AppProps> = (props) => {
   return (
     <ViewportProvider>
-      <Layout className={`${layoutCls} ${props.className}`}>
-        <Header className={`${layoutCls}__header`}>
-          {getNewNode(
-            props.header,
-            <ToolHeader
-              headerName={props.headerName}
-              goBack={props.goBack}
-              exportData={props.exportData}
-            />,
-          )}
-        </Header>
+      <Layout className={`${layoutCls} ${props.className}`} style={props.style}>
+        {
+          getNewNode(props.header,
+            <Header className={`${layoutCls}__header`}>
+              <ToolHeader
+                headerName={props.headerName}
+                goBack={props.goBack}
+                exportData={props.exportData}
+              />
+            </Header>
+          )
+        }
         <Layout>
           <Content className={`${layoutCls}__content`}>
             <AnnotationOperation {...props} />
             {getNewNode(props.footer, <ToolFooter />)}
           </Content>
-          <Sider className={`${layoutCls}__side`} width='auto'>
-            {getNewNode(props.sider, <Sidebar />)}
-          </Sider>
+          {
+            getNewNode(props.sider,
+              <Sider className={`${layoutCls}__side`} width='auto'>
+                <Sidebar/>
+              </Sider>)
+          }
         </Layout>
       </Layout>
     </ViewportProvider>
