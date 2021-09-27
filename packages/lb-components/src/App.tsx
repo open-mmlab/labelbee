@@ -24,6 +24,9 @@ export interface AppProps {
   header?: React.ReactNode;
   footer?: React.ReactNode;
   sider?: React.ReactNode;
+  style?: {
+    [key: string]: any;
+  };
   setToolInstance?: (tool: ToolInstance) => void;
 }
 
