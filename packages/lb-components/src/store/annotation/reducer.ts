@@ -10,6 +10,7 @@ import { getFormatSize } from '@/components/customResizeHook';
 import { AnnotationEngine } from '@sensetime/annotation';
 import { AnnotationState, AnnotationActionTypes } from './types';
 import { message } from 'antd';
+import { EToolName } from '@/data/enums/ToolType';
 
 const getStepConfig = (stepList: any[], step: number) => stepList.find((i) => i.step === step);
 
@@ -80,9 +81,9 @@ export const loadFileData =
       type: ANNOTATION_ACTIONS.SET_LOADING,
       payload: {
         loading: true,
-      }
-    })
-    
+      },
+    });
+
     /** 支持外部传入获取文件接口 */
     if (getFileData) {
       const fileData = await getFileData(imgList[nextIndex], nextIndex);
@@ -108,9 +109,9 @@ export const loadFileData =
         type: ANNOTATION_ACTIONS.SET_LOADING,
         payload: {
           loading: false,
-        }
-      })
-      
+        },
+      });
+
       dispatch({
         type: ANNOTATION_ACTIONS.LOAD_FILE_DATA,
         payload: {
@@ -266,6 +267,8 @@ export const annotationReducer = (
         return state;
       }
 
+      const currentStepInfo = StepUtils.getCurrentStepInfo(step, stepList);
+
       const { nextIndex, imgNode, nextBasicIndex } = action.payload;
       const basicIndex = nextBasicIndex ?? 0;
 
@@ -306,8 +309,11 @@ export const annotationReducer = (
         }
       }
 
-      toolInstance.setResult(result, isInitData);
-      toolInstance.history.initRecord(result, true);
+      // TODO，非查看模式才允许添加数据
+      if (currentStepInfo.tool !== 'check') {
+        toolInstance.setResult(result, isInitData);
+        toolInstance.history.initRecord(result, true);
+      }
 
       return {
         ...state,
@@ -440,7 +446,7 @@ export const annotationReducer = (
       return {
         ...state,
         loading: !!loading,
-      }
+      };
     }
 
     // eslint-disable-next-line no-fallthrough
