@@ -54,6 +54,7 @@ export const PageInput = (props: IPageProps) => {
 interface IProps {
   totalPage: number;
   imgIndex: number;
+  style?: {[key: string]: any}
 }
 
 export const footerCls = `${prefix}-footer`;
@@ -81,7 +82,7 @@ const ToolFooter: React.FC<IProps> = (props: IProps) => {
   };
 
   return (
-    <div className={`${footerCls}`}>
+    <div className={`${footerCls}`} style={props.style}>
       <FooterTips />
 
       <div style={{ flex: 1 }} />

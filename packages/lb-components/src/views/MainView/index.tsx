@@ -9,35 +9,31 @@ import { prefix } from '@/constant';
 import { getNewNode } from '@/utils';
 import { Layout } from 'antd';
 
-const { Header, Sider, Content } = Layout;
+const { Sider, Content } = Layout;
 
 const layoutCls = `${prefix}-layout`;
 const MainView: React.FC<AppProps> = (props) => {
   return (
     <ViewportProvider>
-      <Layout className={`${layoutCls} ${props.className}`} style={props.style}>
-        {
-          getNewNode(props.header,
-            <Header className={`${layoutCls}__header`}>
-              <ToolHeader
-                headerName={props.headerName}
-                goBack={props.goBack}
-                exportData={props.exportData}
-              />
-            </Header>
-          )
-        }
+      <Layout className={`${layoutCls} ${props.className}`} style={props.style?.layout}>
+        <header className={`${layoutCls}__header`} style={props.style?.header}>
+          {getNewNode(
+            props.header,
+            <ToolHeader
+              headerName={props.headerName}
+              goBack={props.goBack}
+              exportData={props.exportData}
+            />,
+          )}
+        </header>
         <Layout>
           <Content className={`${layoutCls}__content`}>
             <AnnotationOperation {...props} />
-            {getNewNode(props.footer, <ToolFooter />)}
+            {getNewNode(props.footer, <ToolFooter style={props.style?.footer} />)}
           </Content>
-          {
-            getNewNode(props.sider,
-              <Sider className={`${layoutCls}__side`} width='auto'>
-                <Sidebar/>
-              </Sider>)
-          }
+          <Sider className={`${layoutCls}__side`} width='auto' style={props.style?.sider}>
+            {getNewNode(props.sider, <Sidebar />)}
+          </Sider>
         </Layout>
       </Layout>
     </ViewportProvider>
