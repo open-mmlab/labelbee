@@ -5,13 +5,15 @@ Label-Bee 是 SenseBee 数据服务平台内部自研的标注 SDK。基于现�
 ## 📦 Install
 
 ```bash
-# NPM 
-$ npm install label-bee --registry=http://maven.opencloud.sensetime.com/repository/npm-group/
+# NPM
+$ npm install label-bee --registry=https://npm-registry.sensetime.com
 
 # YARN
-$ yarn add label-bee --registry=http://maven.opencloud.sensetime.com/repository/npm-group/ 
-```
+$ yarn add label-bee --registry=https://npm-registry.sensetime.com
 
+# .npmrc
+@sensetime:registry=https://npm-registry.sensetime.com
+```
 ## 🔗 Examples
 
 - [bee-sdk-demo](https://gitlab.bj.sensetime.com/luozefeng/bee-sdk-demo)
@@ -19,8 +21,8 @@ $ yarn add label-bee --registry=http://maven.opencloud.sensetime.com/repository/
 ## 🔨 Usage
 
 ```ts
-import AnnotationOperation from 'label-bee'; 
-import 'label-bee/dist/index.css';
+import AnnotationOperation from '@sensetime/label-bee';
+import '@sensetime/label-bee/dist/index.css';
 
 
 // 用于触发 onSubmit 的方向判断
@@ -327,16 +329,6 @@ export declare enum ELineColor {
 * `videoClipTool` 视频截取工具
 * `rectTrackTool` 拉框跟踪工具
 
-## ⌨️ Development
-
-安装依赖需要连入内网，@sensetime/annotation 在内网 npm源 https://npm-registry.sensetime.com
-
-```bash
-$ git clone git@gitlab.bj.sensetime.com:fdc/frontend/label-bee.git
-$ cd label-bee
-$ npm install
-$ npm run dev
-```
 
 
 
