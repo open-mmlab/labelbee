@@ -1,6 +1,6 @@
+import { cloneDeep } from 'lodash';
 import CommonToolUtils from '@/utils/tool/CommonToolUtils';
 import TagUtils from '@/utils/tool/TagUtils';
-import { cloneDeep } from 'lodash';
 import { DEFAULT_TEXT_OFFSET } from '../../constant/annotation';
 import { EToolName } from '../../constant/tool';
 import { IPolygonData } from '../../types/tool/polygon';
@@ -9,6 +9,7 @@ import AxisUtils from '../../utils/tool/AxisUtils';
 import DrawUtils from '../../utils/tool/DrawUtils';
 import StyleUtils from '../../utils/tool/StyleUtils';
 import { BasicToolOperation, IBasicToolOperationProps } from './basicToolOperation';
+
 const TEXT_ATTRIBUTE_OFFSET = {
   x: 8,
   y: 26,
@@ -149,6 +150,13 @@ class CheckOperation extends BasicToolOperation {
           break;
       }
     });
+  }
+
+  /**
+   * 同步操作中的基础信息
+   */
+  public exportData() {
+    return [[], {}];
   }
 }
 

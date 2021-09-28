@@ -154,9 +154,12 @@ const ToolHotKey: React.FC<IProps> = ({ isSingleImg, style }) => {
     );
   };
 
-  const content = stepInfo && shortCutTable[stepInfo?.tool].map((info: any, index: number) => setHotKey(info, index));
-
+  const content = stepInfo && shortCutTable[stepInfo?.tool]?.map((info: any, index: number) => setHotKey(info, index));
   const containerStyle = style || {};
+
+  if (!content) {
+    return null;
+  }
 
   return (
     // @ts-ignore

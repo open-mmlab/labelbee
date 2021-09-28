@@ -42,6 +42,7 @@ $prefix: bee;
   background: rgba(68, 68, 68, 1);
   cursor: default;
   font-size: 14px;
+  overflow: hidden;
 
   &__pagination {
     display: flex;
