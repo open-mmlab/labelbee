@@ -33,9 +33,9 @@
     "canvas"
   ],
   "license": "Apache-2.0",
-  "homepage": "https://gitlab.bj.sensetime.com/fdc/frontend/label-bee",
+  "homepage": "https://gitlab.bj.sensetime.com/label-bee/beehive/tree/master/packages/lb-components",
   "bugs": {
-    "url": "https://gitlab.bj.sensetime.com/fdc/frontend/label-bee/issues",
+    "url": "https://gitlab.bj.sensetime.com/label-bee/beehive/issues",
     "email": "luozefeng@sensetime.com"
   },
   "dependencies": {

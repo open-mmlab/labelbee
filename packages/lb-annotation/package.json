@@ -7,14 +7,14 @@
     "canvas",
     "react"
   ],
-  "homepage": "https://gitlab.bj.sensetime.com/fdc/sense-annotation",
+  "homepage": "https://gitlab.bj.sensetime.com/label-bee/beehive/tree/master/packages/lb-annotation",
   "bugs": {
-    "url": "https://gitlab.bj.sensetime.com/fdc/sense-annotation/issues",
+    "url": "https://gitlab.bj.sensetime.com/label-bee/beehive/issues",
     "email": "luozefeng@sensetime.com"
   },
   "repository": {
     "type": "git",
-    "url": "https://gitlab.bj.sensetime.com/fdc/sense-annotation.git"
+    "url": "git@gitlab.bj.sensetime.com:label-bee/beehive.git"
   },
   "license": "Apache-2.0",
   "files": [
