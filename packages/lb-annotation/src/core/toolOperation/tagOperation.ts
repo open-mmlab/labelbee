@@ -1,8 +1,7 @@
+import CommonToolUtils from '@/utils/tool/CommonToolUtils';
 import TagUtils from '../../utils/tool/TagUtils';
 import uuid from '../../utils/uuid';
 import { BasicToolOperation, IBasicToolOperationProps } from './basicToolOperation';
-import CommonToolUtils from '@/utils/tool/CommonToolUtils';
-
 interface ITagOperationProps extends IBasicToolOperationProps {
   config: string;
 }
@@ -52,12 +51,10 @@ class TagOperation extends BasicToolOperation {
    * 当前页面的标注结果
    */
   public get currentTagResult() {
-    return (
-      this.tagResult.filter((v) => {
-        const basicSourceID = `${v.sourceID}`;
-        return basicSourceID === this.sourceID;
-      })[0] || {}
-    );
+    return this.tagResult.filter((v) => {
+      const basicSourceID = `${v.sourceID}`;
+      return CommonToolUtils.isSameSourceID(basicSourceID, this.sourceID);
+    })[0];
   }
 
   public onKeyDown(e: KeyboardEvent) {
@@ -137,7 +134,7 @@ class TagOperation extends BasicToolOperation {
 
       const basicTagResult = this.tagResult.filter((v) => {
         const basicSourceID = `${v.sourceID}`;
-        return basicSourceID === this.sourceID;
+        return CommonToolUtils.isSameSourceID(basicSourceID, this.sourceID);
       })[0];
 
       // 判断是否有数据， 有则需要检测覆盖
@@ -175,7 +172,7 @@ class TagOperation extends BasicToolOperation {
               if (Object.keys(result).length === 1) {
                 this.tagResult = this.tagResult.filter((v) => {
                   const basicSourceID = `${v.sourceID}`;
-                  return basicSourceID !== this.sourceID;
+                  return CommonToolUtils.isDifferSourceID(basicSourceID, this.sourceID);
                 });
               } else if (Object.keys(result).length > 1) {
                 // 清除当前的标签的 key
