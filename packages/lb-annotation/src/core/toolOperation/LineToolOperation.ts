@@ -72,7 +72,7 @@ class LineToolOperation extends BasicToolOperation {
     }
     const color = this.getLineColorByAttribute({ attribute: this.defaultAttribute, valid: !!isActiveLineValid });
 
-    activeLine.map((point) => Object.assign(point, this.getRenderAxis(point)));
+    activeLine.map((point) => Object.assign(point, this.coordUtils.getRenderCoord(point)));
     this.updateActiveArea();
     this.drawLine(activeLine, coord, color, true, true);
     this.drawLineNumber(activeLine[0], order, color, '', this.defaultAttribute, isActiveLineValid);
@@ -85,25 +85,38 @@ class LineToolOperation extends BasicToolOperation {
     }
   };
 
+  /** 线条是否被选中 */
+  get isLineSelected() {
+    return this.selectedID && this.activeLine;
+  }
+
+  /** 选中点线条的点 */
+  get selectedLinePoints() {
+    return this.activeLine ? this.getPointList(this.activeLine) : [];
+  }
+
   /**
-   * 绘制hover圆点
+   * 绘制hover的点
    * @param coord
    */
-  public drawPointWhenHover = (coord: ICoordinate) => {
-    if (!coord || this.isMousedown || !this.activeLine || this.activeLine?.length < 2) {
+  public drawHoverPoint = (coord: ICoordinate) => {
+    if (this.isMousedown) {
       return;
     }
 
-    const pointList = this.getPointList(this.activeLine);
-    const hoverPoint = this.activeLine.find(
-      (i: ILinePoint) => LineToolUtils.calcDistance(this.getRenderAxis(i), coord) <= POINT_ACTIVE_RADIUS,
-    );
-    let nearestPoint;
-    if (!hoverPoint && this.activeLine) {
-      nearestPoint = this.findNearestPoint(pointList, coord);
+    if (coord && this.isLineSelected) {
+      const pointList = this.getPointList(this.activeLine!);
+
+      const hoverPoint = this.activeLine!.find(
+        (i: ILinePoint) => LineToolUtils.calcDistance(this.coordUtils.getRenderCoord(i), coord) <= POINT_ACTIVE_RADIUS,
+      );
+      let nearestPoint;
+      if (!hoverPoint && this.activeLine) {
+        nearestPoint = this.findNearestPoint(pointList, coord);
+      }
+      this.hoverPointID = hoverPoint ? hoverPoint.id : undefined;
+      this.cursor = hoverPoint ? undefined : nearestPoint?.point;
     }
-    this.hoverPointID = hoverPoint ? hoverPoint.id : undefined;
-    this.cursor = hoverPoint ? undefined : nearestPoint?.point;
   };
 
   private lineList: ILine[] = [];
@@ -138,7 +151,7 @@ class LineToolOperation extends BasicToolOperation {
 
   private lineMoved: boolean;
 
-  private dependConfig?: any;
+  private dependToolConfig?: any;
 
   private isReference: boolean = false;
 
@@ -163,7 +176,7 @@ class LineToolOperation extends BasicToolOperation {
     this.updateSelectedTextAttribute = this.updateSelectedTextAttribute.bind(this);
     this.actionsHistory = new ActionsHistory();
 
-    this.dependConfig = {
+    this.dependToolConfig = {
       lineType: ELineTypes.Line,
     };
   }
@@ -314,8 +327,8 @@ class LineToolOperation extends BasicToolOperation {
     this.lineStatusChanged();
   }
 
-  public isInPolygon(coord: ICoordinate) {
-    return isInPolygon(coord, this.basicResult?.pointList || [], this.dependConfig?.lineType);
+  public isInBasicPolygon(coord: ICoordinate) {
+    return isInPolygon(coord, this.basicResult?.pointList || [], this.dependToolConfig?.lineType);
   }
 
   public getPolygonPointList() {
@@ -323,7 +336,7 @@ class LineToolOperation extends BasicToolOperation {
       return [];
     }
     const { pointList } = this.basicResult;
-    const { lineType } = this.dependConfig;
+    const { lineType } = this.dependToolConfig;
     return lineType === ELineTypes.Curve
       ? createSmoothCurvePoints(
           pointList.reduce((acc: any[], cur: any) => {
@@ -337,38 +350,27 @@ class LineToolOperation extends BasicToolOperation {
   }
 
   /**
-   * 限制点在图上
+   * 渲染坐标计算获取下一个点
    * @param coord
    * @returns 绝对坐标
    */
-  public pointOverImage(coord: ICoordinate) {
-    const preAxis = this.activeLine?.slice(-1)[0];
-    if (preAxis) {
-      return LineToolUtils.pointOverTarget(
-        coord,
-        preAxis,
-        this.dependToolName,
-        this.basicResult,
-        this.dependConfig,
-        this.imageSize,
-        POINT_RADIUS,
-        this.zoom,
-        this.getRenderAxis,
-        this.getAbsAxis,
-      );
-    }
-
-    return coord;
+  public getNextCoordByRenderCoord(renderCoord: ICoordinate) {
+    return this.getNextCoordByAbsCoord(this.coordUtils.getAbsCoord(renderCoord));
   }
 
   /**
-   * 限制点在图上
+   * 绝对坐标计算获取下一个点
    * @param coord
    * @returns 渲染坐标
    */
-  public pointRenderingAxisOverImage(coord: ICoordinate) {
-    const absAxis = this.getAbsAxis(coord);
-    return this.getRenderAxis(this.pointOverImage(absAxis));
+  public getNextCoordByAbsCoord(absCoord: ICoordinate) {
+    const preAxis = this.activeLine?.slice(-1)[0];
+
+    if (preAxis) {
+      return this.coordUtils.getNextCoordByDependTool(absCoord, preAxis);
+    }
+
+    return absCoord;
   }
 
   /**
@@ -385,20 +387,11 @@ class LineToolOperation extends BasicToolOperation {
       if (index === 0) {
         return false;
       }
-      const point1 = this.getRenderAxis(pointList[index - 1]);
-      const point2 = this.getRenderAxis(point);
+      const point1 = this.coordUtils.getRenderCoord(pointList[index - 1]);
+      const point2 = this.coordUtils.getRenderCoord(point);
       return LineToolUtils.isInLine(checkPoint, point1, point2, scope);
     });
   }
-
-  /** 获取坐标值 */
-  public getAxis = (e: MouseEvent) => {
-    const coord = this.canvas.getBoundingClientRect();
-    return {
-      x: e.clientX - coord.left,
-      y: e.clientY - coord.top,
-    };
-  };
 
   /**
    * 根据坐标绘制圆点
@@ -425,7 +418,7 @@ class LineToolOperation extends BasicToolOperation {
   public renderActiveArea() {
     if (this.isActive && this.activeArea && this.ctx) {
       const { top, left, right, bottom } = this.activeArea;
-      const { x, y } = this.getRenderAxis({ x: left, y: top });
+      const { x, y } = this.coordUtils.getRenderCoord({ x: left, y: top });
       this.ctx.save();
       this.ctx.beginPath();
       this.ctx.strokeStyle = '#B3B8FF';
@@ -440,8 +433,7 @@ class LineToolOperation extends BasicToolOperation {
    * @param coord 坐标
    */
   public addPoint(coord: ICoordinate) {
-    const absAxis = this.getAbsAxis(coord);
-    this.activeLine?.push({ ...absAxis, id: uuid() });
+    this.activeLine?.push({ ...coord, id: uuid() });
 
     if (this.activeLine?.length === 1) {
       this.actionsHistory?.initRecord(this.activeLine);
@@ -604,7 +596,7 @@ class LineToolOperation extends BasicToolOperation {
           return;
         }
         if (line.pointList) {
-          line.pointList.map((i) => Object.assign(i, this.getRenderAxis(i)));
+          line.pointList.map((i) => Object.assign(i, this.coordUtils.getRenderCoord(i)));
           const { order, label } = line;
           const displayOrder = order;
           const color = line && this.getLineColorByAttribute(line);
@@ -741,7 +733,7 @@ class LineToolOperation extends BasicToolOperation {
       return;
     }
     return this.activeLine.find((i) => {
-      const iAxis = this.getRenderAxis(i);
+      const iAxis = this.coordUtils.getRenderCoord(i);
       return LineToolUtils.calcDistance(iAxis, coord) <= POINT_ACTIVE_RADIUS;
     });
   }
@@ -757,8 +749,8 @@ class LineToolOperation extends BasicToolOperation {
           if (index === 0) {
             return false;
           }
-          const point1 = this.getRenderAxis(point);
-          const point2 = this.getRenderAxis(list[index - 1]);
+          const point1 = this.coordUtils.getRenderCoord(point);
+          const point2 = this.coordUtils.getRenderCoord(list[index - 1]);
           return LineToolUtils.isInLine(coord, point1, point2, scope);
         });
       });
@@ -815,8 +807,8 @@ class LineToolOperation extends BasicToolOperation {
     let point: ICoordinate | undefined;
     const minDistance: number = minLength;
     for (let i = 1; i <= pointList.length - 1; i++) {
-      const point1 = this.getRenderAxis(pointList[i]);
-      const point2 = this.getRenderAxis(pointList[i - 1]);
+      const point1 = this.coordUtils.getRenderCoord(pointList[i]);
+      const point2 = this.coordUtils.getRenderCoord(pointList[i - 1]);
       const { length, footPoint } = MathUtils.getFootOfPerpendicular(coord, point1, point2);
       const twoPointDistance1 = LineToolUtils.calcTwoPointDistance(point1, coord);
       const twoPointDistance2 = LineToolUtils.calcTwoPointDistance(point2, coord);
@@ -856,7 +848,7 @@ class LineToolOperation extends BasicToolOperation {
     }
 
     const allPointsInRange = this.activeLine?.every((i) => {
-      return this.isInPolygon({ x: i.x + offsetX, y: i.y + offsetY });
+      return this.isInBasicPolygon({ x: i.x + offsetX, y: i.y + offsetY });
     });
 
     if (allPointsInRange) {
@@ -898,10 +890,6 @@ class LineToolOperation extends BasicToolOperation {
    * @param coord
    */
   public moveSelectedLine(coord: ICoordinate) {
-    if (this.activeArea === undefined) {
-      return;
-    }
-
     const offsetX = (coord.x - this.prevAxis.x) / this.zoom;
     const offsetY = (coord.y - this.prevAxis.y) / this.zoom;
 
@@ -942,12 +930,30 @@ class LineToolOperation extends BasicToolOperation {
       y: newY,
     };
 
-    if (this.isDependPolygon && !this.isInPolygon(pointPosition) && !this.enableOutOfTarget) {
-      return;
+    Object.assign(this.selectedPoint, this.getNextCoordByAbsCoord(pointPosition));
+    this.updateLines();
+  }
+
+  public getCursorAxis(e: MouseEvent | KeyboardEvent | { altKey: boolean; shiftKey?: boolean }, coord: ICoordinate) {
+    const isVH = !!e.shiftKey;
+    const disabledAdsorb = e.altKey;
+
+    if (this.activeLine!?.length > 1 && isVH) {
+      const lastPoint = this.activeLine!.slice(-1)[0];
+      return LineToolUtils.newPointPosition(
+        isVH,
+        lastPoint,
+        coord,
+        this.coordUtils.getAbsCoord(coord),
+        this.coordUtils.getRenderCoord(lastPoint),
+      );
     }
 
-    Object.assign(this.selectedPoint, this.pointOverImage(pointPosition));
-    this.updateLines();
+    if (this.edgeAdsorptionEnabled && !disabledAdsorb) {
+      return this.findAdsorptionPoint(coord);
+    }
+
+    return coord;
   }
 
   /**
@@ -956,40 +962,23 @@ class LineToolOperation extends BasicToolOperation {
    * @param nextPoint
    */
   public getNextPoint(e: MouseEvent | KeyboardEvent | { altKey: boolean; shiftKey?: boolean }, nextPoint: ICoordinate) {
-    let newPoint = nextPoint;
-
-    if (this.activeLine && this.activeLine.length > 0) {
-      const lastPoint = this.activeLine.slice(-1)[0];
-      newPoint = LineToolUtils.newPointPosition(
-        !!e.shiftKey,
-        lastPoint,
-        nextPoint,
-        this.getAbsAxis(nextPoint),
-        this.getRenderAxis(lastPoint),
-      );
-    }
-
-    if (this.edgeAdsorptionEnabled && !e.altKey) {
-      const edgeAdsorptionPoint = this.findAdsorptionPoint(newPoint);
-      newPoint = edgeAdsorptionPoint || newPoint;
-    }
-
-    return this.calcNextPointOfTarget(newPoint);
+    return this.calcNextPointOfTarget(this.getCursorAxis(e, nextPoint) || nextPoint);
   }
 
   public calcNextPointOfTarget(newPoint: ICoordinate) {
-    return this.enableOutOfTarget ? newPoint : this.pointRenderingAxisOverImage(newPoint);
+    return this.enableOutOfTarget ? newPoint : this.getNextCoordByRenderCoord(newPoint);
   }
 
   // TODO: 渲染hover样式
-  public lineHover(coord: ICoordinate) {
+  public lineHover() {
     this.render();
   }
 
   /** 鼠标移动事件 */
   public mouseMoveHandler(e: MouseEvent) {
-    const coord = this.getAxis(e);
+    const coord = this.getCoordinate(e);
     const isLeftClick = e.which === 1;
+    
     if (this.isCreate) {
       if (this.activeLine && this.activeLine.length > 0) {
         this.renderNextPoint(e, coord);
@@ -998,7 +987,7 @@ class LineToolOperation extends BasicToolOperation {
     }
 
     if (this.isNone) {
-      this.lineHover(coord);
+      this.lineHover();
       if (this.edgeAdsorptionEnabled && !e.altKey) {
         const edgeAdsorptionPoint = this.findAdsorptionPoint(coord);
         if (edgeAdsorptionPoint) {
@@ -1025,7 +1014,7 @@ class LineToolOperation extends BasicToolOperation {
           const hoverEdgeIndex = this.getPointInsertIndex(coord, 2) - 1;
           this.hoverEdgeIndex = hoverEdgeIndex > -1 ? hoverEdgeIndex : -1;
         } else {
-          this.drawPointWhenHover(coord);
+          this.drawHoverPoint(coord);
         }
 
         this.render();
@@ -1037,7 +1026,7 @@ class LineToolOperation extends BasicToolOperation {
     if (super.onMouseMove(e) || this.forbidMouseOperation || !this.imgInfo) {
       return;
     }
-    const coord = this.getAxis(e);
+    const coord = this.getCoordinate(e);
     this.mouseMoveHandler(e);
     this.prevAxis = coord;
   }
@@ -1113,29 +1102,7 @@ class LineToolOperation extends BasicToolOperation {
       return;
     }
 
-    this.setActiveArea(this.getAxis(e), true);
-  };
-
-  /**
-   * 获取绝对坐标
-   * @param coord
-   */
-  public getAbsAxis = (coord: ICoordinate) => {
-    return {
-      x: (coord.x - this.currentPos.x) / this.zoom,
-      y: (coord.y - this.currentPos.y) / this.zoom,
-    };
-  };
-
-  /**
-   * 获取画布渲染的坐标
-   * @param coord
-   */
-  public getRenderAxis = (coord: ICoordinate) => {
-    return {
-      x: coord.x * this.zoom + this.currentPos.x,
-      y: coord.y * this.zoom + this.currentPos.y,
-    };
+    this.setActiveArea(this.getCoordinate(e), true);
   };
 
   public historyChanged(funcName: 'undo' | 'redo') {
@@ -1184,10 +1151,11 @@ class LineToolOperation extends BasicToolOperation {
   }
 
   /** 坐标是否在图片内 */
-  public axisAtTarget(coord: ICoordinate) {
+  public isCoordInsideTarget(coord: ICoordinate) {
     if (this.isDependPolygon) {
-      return this.isInPolygon(coord);
+      return this.isInBasicPolygon(coord);
     }
+
     if (this.isDependRect) {
       const { x, y, width, height } = this.basicResult;
       const rectHorizontalRange = [x, x + width];
@@ -1231,8 +1199,19 @@ class LineToolOperation extends BasicToolOperation {
     return this.lineStyle.lineWidth;
   }
 
+  public isMouseCoordTriggerCreate() {
+    return this.isActive && !this.coordsClickedActiveArea && !this.selectedPoint;
+  }
+
+  /** 是否超过上限点 */
+  public isLinePointsExceed() {
+    return (
+      this.isCreate && this.activeLine && this.upperLimitPointNum && ~~this.upperLimitPointNum <= this.activeLine.length
+    );
+  }
+
   public onClick = (e: MouseEvent) => {
-    const coord = this.getAxis(e);
+    const coord = this.getCoordinate(e);
     const { lineMoved } = this;
 
     this.lineMoved = false;
@@ -1251,23 +1230,18 @@ class LineToolOperation extends BasicToolOperation {
     }
 
     /** 超过上线点无法继续添加 */
-    if (
-      this.isCreate &&
-      this.activeLine &&
-      this.upperLimitPointNum &&
-      ~~this.upperLimitPointNum <= this.activeLine.length
-    ) {
+    if (this.isLinePointsExceed()) {
       return;
     }
 
-    const clickToNewLine = this.isActive && !this.coordsClickedActiveArea && !this.selectedPoint;
+    const isMouseCoordTriggerCreate = this.isMouseCoordTriggerCreate();
 
-    if (this.isCreate || this.isNone || clickToNewLine) {
+    if (this.isCreate || this.isNone || isMouseCoordTriggerCreate) {
       /** 禁止目标外标注 */
       if (
         !this.enableOutOfTarget &&
-        (clickToNewLine || (this.isNone && this.activeLine?.length === 0)) &&
-        !this.axisAtTarget(this.getAbsAxis(coord))
+        (isMouseCoordTriggerCreate || (this.isNone && this.activeLine?.length === 0)) &&
+        !this.isCoordInsideTarget(this.coordUtils.getAbsCoord(coord))
       ) {
         return;
       }
@@ -1275,7 +1249,7 @@ class LineToolOperation extends BasicToolOperation {
       const nextAxis = this.getNextPoint(e, coord);
 
       /** 激活点击时候重新创建线条 */
-      if (clickToNewLine) {
+      if (isMouseCoordTriggerCreate) {
         this.setNoneStatus(false);
         this.updateStatus(EStatus.Create, true);
       }
@@ -1307,7 +1281,7 @@ class LineToolOperation extends BasicToolOperation {
 
         /** 添加点 */
         if (this.cursor && !this.selectedPoint && insertIndex > -1 && !lineMoved && pointsWithInRange && !e.shiftKey) {
-          this.activeLine.splice(insertIndex, 0, { ...this.getAbsAxis(this.cursor), id: uuid() });
+          this.activeLine.splice(insertIndex, 0, { ...this.coordUtils.getAbsCoord(this.cursor), id: uuid() });
           this.updateLines();
           this.history?.pushHistory(this.lineList);
           this.render();
@@ -1338,7 +1312,7 @@ class LineToolOperation extends BasicToolOperation {
       return;
     }
 
-    const coord = this.getAxis(e);
+    const coord = this.getCoordinate(e);
     this.isMousedown = true;
     this.prevAxis = coord;
     if (e.which === 3) {
@@ -1347,7 +1321,9 @@ class LineToolOperation extends BasicToolOperation {
     }
     this.selectedPoint = this.findHoveredPoint(coord);
     this.coordsClickedActiveArea =
-      this.isActive && this.activeArea ? LineToolUtils.inArea(this.activeArea, this.getAbsAxis(coord)) : false;
+      this.isActive && this.activeArea
+        ? LineToolUtils.inArea(this.activeArea, this.coordUtils.getAbsCoord(coord))
+        : false;
     this.lineMoved = false;
   }
 
@@ -1587,14 +1563,14 @@ class LineToolOperation extends BasicToolOperation {
    * @param coord
    */
   public renderNextPoint(e: MouseEvent | KeyboardEvent | { altKey: boolean }, coord: ICoordinate) {
-    const nextPoint = this.getNextPoint(e, coord);
+    const nextPoint = this.coordUtils.getRenderCoord(this.getNextPoint(e, coord));
     this.render(nextPoint);
   }
 
   public onRightDblClick = (e: MouseEvent) => {
     super.onRightDblClick(e);
 
-    const coord = this.getAxis(e);
+    const coord = this.getCoordinate(e);
     if (this.isActive) {
       const hoverPoint = this.findHoveredPoint(coord);
 
@@ -1613,7 +1589,7 @@ class LineToolOperation extends BasicToolOperation {
 
       /** 删除线 */
       const area = MathUtils.calcViewportBoundaries(this.activeLine, this.isCurve, SEGMENT_NUMBER, this.zoom);
-      const axisOnArea = LineToolUtils.inArea(area, this.getAbsAxis(coord));
+      const axisOnArea = LineToolUtils.inArea(area, this.coordUtils.getAbsCoord(coord));
       if (axisOnArea) {
         this.deleteLine();
       }
@@ -1817,7 +1793,7 @@ class LineToolOperation extends BasicToolOperation {
   }
 
   public renderTextAttribute() {
-    if (!this.ctx || !this.activeLine || this.activeLine?.length < 2) {
+    if (!this.ctx || !this.activeLine || this.activeLine?.length < 2 || this.isCreate) {
       return;
     }
 
@@ -1826,7 +1802,7 @@ class LineToolOperation extends BasicToolOperation {
 
     const { x, y } = this.activeLine[1];
 
-    const coordinate = this.getRenderAxis({ x, y });
+    const coordinate = this.coordUtils.getRenderCoord({ x, y });
     const toolColor = this.getColor(attribute);
     const color = valid ? toolColor?.valid.stroke : toolColor?.invalid.stroke;
     const textAttribute = this.lineList.find((i) => i.id === this.selectedID)?.textAttribute ?? '';
