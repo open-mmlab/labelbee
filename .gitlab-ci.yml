@@ -1,23 +1,15 @@
-image: registry.sensetime.com/fdc/docker-node:20190712
+image: registry.sensetime.com/fdc/docker-node:node14
 
 variables:
   REGISTRY_URL: registry.sensetime.com
 
 stages:
-  - eslint
   - build
   - deploy
 
-.install: &install
-  - npm config set registry https://registry.npm.taobao.org && npm config set sass-binary-site https://npm.taobao.org/mirrors/node-sass
-  - npm install -timeout=1000000
-  - npm run bootstrap
-
-eslint:
-  stage: eslint
-  script:
-    - *install
-    - npm run lint
+before_script:
+  - TAG=$CI_COMMIT_REF_NAME-${CI_COMMIT_SHA:0:8}
+  - IMAGE_REGISTRY_URL=$REGISTRY_URL/label-bee/demo:$TAG
 
 deploy-dev:
   stage: deploy
@@ -35,3 +27,28 @@ deploy-build:
   script:
     - npx lerna version --conventional-graduate --yes
     - npx lerna publish from-package --legacy-auth $TNPM_USERPASSWORD_BASE64 --yes
+
+build-demo:
+  stage: build
+  only:
+    - dev
+  script:
+    - docker login -u $REGISTRY_USERNAME -p $REGISTRY_TOKEN $REGISTRY_URL
+    - cd ./packages/lb-demo
+    - npm install
+    - npm run build
+    - docker build -t $IMAGE_REGISTRY_URL .
+    - docker push $IMAGE_REGISTRY_URL
+
+deploy-demo:
+  stage: deploy
+  only:
+    - dev
+  image:
+    name: registry.sensetime.com/fdc/lachlanevenson/k8s-kubectl:latest
+    entrypoint: ["/bin/sh", "-c"]
+  script:
+    - echo -n $KUBE_CONFIG_BJ_IDC_URP | base64 -d > ./kube.conf
+    - 'echo "Updating: $TAG"'
+    - >
+      kubectl patch --kubeconfig ./kube.conf deployment bee-sdk-demo -n sensebee-test -p "{\"spec\":{\"template\":{\"spec\":{\"containers\":[{\"name\":\"bee-sdk-demo\",\"image\":\"$IMAGE_REGISTRY_URL\"}]}}}}"
