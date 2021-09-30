@@ -304,8 +304,7 @@ export const annotationReducer = (
       };
 
       if (imgNode && imgError !== true) {
-        toolInstance.setImgNode(imgNode, basicImgInfo);
-        annotationEngine.setImgNode(imgNode);
+        annotationEngine.setImgNode(imgNode, basicImgInfo);
       }
 
       let result = stepResult?.result || [];

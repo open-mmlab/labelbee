@@ -86,12 +86,18 @@ export default class AnnotationEngine {
     this.setImgNode(imgNode as HTMLImageElement);
   };
 
-  public setImgNode(imgNode: HTMLImageElement) {
+  public setImgNode(
+    imgNode: HTMLImageElement,
+    basicImgInfo?: Partial<{
+      valid: boolean;
+      rotate: number;
+    }>,
+  ) {
     if (!this.toolInstance) {
       return;
     }
     this.imgNode = imgNode;
-    this.toolInstance.setImgNode(imgNode);
+    this.toolInstance.setImgNode(imgNode, basicImgInfo);
   }
 
   public setSize(size: ISize) {
