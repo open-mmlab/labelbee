@@ -140,16 +140,13 @@ class LineToolOperation extends BasicToolOperation {
 
   private actionsHistory?: ActionsHistory;
 
-  private coordsClickedActiveArea: boolean = false;
+  private coordsInsideActiveArea: boolean = false;
 
-  private hoverEdgeIndex: number = -1;
+  private hoverLineSegmentIndex: number = -1;
 
-  /** 临时点锁定，避免由于点击延迟造成的坐标偏移 */
   private isShift: boolean = false;
 
   private hoverPointID?: string;
-
-  private lineMoved: boolean;
 
   private dependToolConfig?: any;
 
@@ -160,12 +157,13 @@ class LineToolOperation extends BasicToolOperation {
   private textEditingID?: string;
 
   private isLineValid: boolean;
+  private lineDragging: boolean;
 
   constructor(props: ILineOperationProps) {
     super(props);
     this.status = EStatus.None;
     this.isMousedown = false;
-    this.lineMoved = false;
+    this.lineDragging = false;
     this.isLineValid = true;
     this.setConfig(props.config);
     this.prevAxis = {
@@ -287,6 +285,10 @@ class LineToolOperation extends BasicToolOperation {
 
   get dataList() {
     return this.lineList;
+  }
+
+  get hasActiveLine() {
+    return this.activeLine && this.activeLine.length > 0;
   }
 
   /**
@@ -432,7 +434,8 @@ class LineToolOperation extends BasicToolOperation {
    * 添加点
    * @param coord 坐标
    */
-  public addPoint(coord: ICoordinate) {
+  public addLinePoint(coord: ICoordinate) {
+    this.arc(coord);
     this.activeLine?.push({ ...coord, id: uuid() });
 
     if (this.activeLine?.length === 1) {
@@ -440,6 +443,13 @@ class LineToolOperation extends BasicToolOperation {
     } else {
       this.actionsHistory?.pushHistory(this.activeLine);
     }
+
+    this.render();
+  }
+
+  public setCreatStatusAndAddPoint(coord: ICoordinate, isRestText: boolean = false) {
+    this.updateStatus(EStatus.Create, isRestText);
+    this.addLinePoint(coord);
   }
 
   /**
@@ -459,7 +469,7 @@ class LineToolOperation extends BasicToolOperation {
     config: any,
     applyLineWidth: boolean = true,
     isReference: boolean = false,
-    hoverEdgeIndex: number,
+    hoverLineSegmentIndex: number,
   ) => {
     const pointList = createSmoothCurvePointsFromPointList(points, SEGMENT_NUMBER);
     ctx.save();
@@ -481,7 +491,7 @@ class LineToolOperation extends BasicToolOperation {
       ctx.save();
       ctx.beginPath();
 
-      if (hoverEdgeIndex === index) {
+      if (hoverLineSegmentIndex === index) {
         ctx.lineWidth = 4;
       }
 
@@ -523,7 +533,7 @@ class LineToolOperation extends BasicToolOperation {
         lineConfig,
         !showPoint,
         this.isReference,
-        isActive ? this.hoverEdgeIndex : -1,
+        isActive ? this.hoverLineSegmentIndex : -1,
       );
     } else {
       this.drawStraightLine(pointsToDraw, lineConfig, isActive);
@@ -565,7 +575,7 @@ class LineToolOperation extends BasicToolOperation {
             LineToolUtils.setSpecialEdgeStyle(ctx);
           }
 
-          if (isActive && this.hoverEdgeIndex + 1 === index) {
+          if (isActive && this.hoverLineSegmentIndex + 1 === index) {
             ctx.lineWidth = 4;
           }
 
@@ -634,7 +644,7 @@ class LineToolOperation extends BasicToolOperation {
   }
 
   public getActiveArea() {
-    return this.activeLine && this.activeLine.length > 0
+    return this.hasActiveLine
       ? MathUtils.calcViewportBoundaries(this.activeLine, this.isCurve, SEGMENT_NUMBER, this.zoom)
       : undefined;
   }
@@ -762,7 +772,7 @@ class LineToolOperation extends BasicToolOperation {
    * 找到当前点的边缘吸附范围
    * @param coord
    */
-  public findAdsorptionPoint(coord: ICoordinate) {
+  public getAdsorptionPoint(coord: ICoordinate) {
     let point: ICoordinate | undefined;
     let minDistance: number;
     let snappedPoint: ICoordinate | undefined;
@@ -852,7 +862,7 @@ class LineToolOperation extends BasicToolOperation {
     });
 
     if (allPointsInRange) {
-      this.lineMoved = true;
+      this.lineDragging = true;
       this.moveActiveArea(offsetX, offsetY);
     }
   };
@@ -881,7 +891,7 @@ class LineToolOperation extends BasicToolOperation {
     const calcOffsetX = horizontalInRange ? offsetX : 0;
     const calcOffsetY = verticalInRange ? offsetY : 0;
 
-    this.lineMoved = true;
+    this.lineDragging = true;
     this.moveActiveArea(calcOffsetX, calcOffsetY);
   };
 
@@ -895,7 +905,7 @@ class LineToolOperation extends BasicToolOperation {
 
     /** 允许目标外 */
     if (this.enableOutOfTarget) {
-      this.lineMoved = true;
+      this.lineDragging = true;
       this.moveActiveArea(offsetX, offsetY);
       return;
     }
@@ -932,16 +942,22 @@ class LineToolOperation extends BasicToolOperation {
 
     Object.assign(this.selectedPoint, this.getNextCoordByAbsCoord(pointPosition));
     this.updateLines();
+    this.render();
   }
 
-  public getCursorAxis(e: MouseEvent | KeyboardEvent | { altKey: boolean; shiftKey?: boolean }, coord: ICoordinate) {
+  /**
+   * 根据当前键盘事件和配置获取下一个点的坐标
+   * @param e
+   * @param coord
+   */
+  public getCoordByConfig(e: MouseEvent | KeyboardEvent | { altKey: boolean; shiftKey?: boolean }, coord: ICoordinate) {
     const isVH = !!e.shiftKey;
     const disabledAdsorb = e.altKey;
 
-    if (this.activeLine!?.length > 1 && isVH) {
+    /** 获得水平、垂直点 */
+    if (this.activeLine!?.length > 0 && isVH) {
       const lastPoint = this.activeLine!.slice(-1)[0];
-      return LineToolUtils.newPointPosition(
-        isVH,
+      return LineToolUtils.getVHPoint(
         lastPoint,
         coord,
         this.coordUtils.getAbsCoord(coord),
@@ -949,8 +965,9 @@ class LineToolOperation extends BasicToolOperation {
       );
     }
 
+    /** 获取边缘吸附点 */
     if (this.edgeAdsorptionEnabled && !disabledAdsorb) {
-      return this.findAdsorptionPoint(coord);
+      return this.getAdsorptionPoint(coord);
     }
 
     return coord;
@@ -962,10 +979,7 @@ class LineToolOperation extends BasicToolOperation {
    * @param nextPoint
    */
   public getNextPoint(e: MouseEvent | KeyboardEvent | { altKey: boolean; shiftKey?: boolean }, nextPoint: ICoordinate) {
-    return this.calcNextPointOfTarget(this.getCursorAxis(e, nextPoint) || nextPoint);
-  }
-
-  public calcNextPointOfTarget(newPoint: ICoordinate) {
+    const newPoint = this.getCoordByConfig(e, nextPoint) || nextPoint;
     return this.enableOutOfTarget ? newPoint : this.getNextCoordByRenderCoord(newPoint);
   }
 
@@ -978,9 +992,9 @@ class LineToolOperation extends BasicToolOperation {
   public mouseMoveHandler(e: MouseEvent) {
     const coord = this.getCoordinate(e);
     const isLeftClick = e.which === 1;
-    
+
     if (this.isCreate) {
-      if (this.activeLine && this.activeLine.length > 0) {
+      if (this.hasActiveLine) {
         this.renderNextPoint(e, coord);
       }
       return;
@@ -989,7 +1003,7 @@ class LineToolOperation extends BasicToolOperation {
     if (this.isNone) {
       this.lineHover();
       if (this.edgeAdsorptionEnabled && !e.altKey) {
-        const edgeAdsorptionPoint = this.findAdsorptionPoint(coord);
+        const edgeAdsorptionPoint = this.getAdsorptionPoint(coord);
         if (edgeAdsorptionPoint) {
           this.arc(edgeAdsorptionPoint);
         }
@@ -997,28 +1011,21 @@ class LineToolOperation extends BasicToolOperation {
     }
 
     if (this.isActive) {
-      if (this.selectedPoint && isLeftClick) {
-        this.moveSelectPoint(coord);
-        this.render();
-        return;
-      }
-
-      if (isLeftClick && this.isMousedown && this.coordsClickedActiveArea) {
-        this.moveSelectedLine(coord);
-        this.drawActivatedLine(undefined, undefined, true);
-        return;
-      }
-
-      if (!this.isMousedown) {
-        if (this.isShift) {
-          const hoverEdgeIndex = this.getPointInsertIndex(coord, 2) - 1;
-          this.hoverEdgeIndex = hoverEdgeIndex > -1 ? hoverEdgeIndex : -1;
-        } else {
-          this.drawHoverPoint(coord);
+      if (this.isMousedown && isLeftClick) {
+        if (this.selectedPoint) {
+          this.moveSelectPoint(coord);
+          return;
         }
 
-        this.render();
+        if (this.coordsInsideActiveArea) {
+          this.moveSelectedLine(coord);
+          this.drawActivatedLine(undefined, undefined, true);
+          return;
+        }
       }
+
+      this.drawHoverPoint(coord);
+      this.render();
     }
   }
 
@@ -1082,40 +1089,37 @@ class LineToolOperation extends BasicToolOperation {
     this.activeLine = pointList ? _.cloneDeep(pointList) : undefined;
   }
 
-  public onContextmenu = (e: MouseEvent) => {
-    super.onContextmenu(e);
-
-    e.preventDefault();
+  public onRightClick = (e: MouseEvent) => {
     this.cursor = undefined;
 
-    this.emit('contextmenu');
-
     if (this.isCreate) {
-      if (this.activeLine && this.activeLine?.length < this.lowerLimitPointNum) {
+      if (this.isLinePointsNotEnough()) {
         // message.info(`顶点数不能少于${this.lowerLimitPointNum}`);
-        return true;
+        return;
       }
-      /** 新建线条后在文本标注未开启时默认不选中, 续标后默认选中 */
-      const isActiveAfterCreating = this.selectedID ? true : !!this.isTextConfigurable;
-
-      this.stopLine(true, isActiveAfterCreating);
+      this.stopLineCreating(true);
       return;
     }
 
     this.setActiveArea(this.getCoordinate(e), true);
+    this.emit('contextmenu');
   };
 
   public historyChanged(funcName: 'undo' | 'redo') {
+    const enableKeyName = `${funcName}Enabled`;
+
     if (this.isCreate) {
-      const record = this.actionsHistory && this.actionsHistory[funcName]();
-      this.setActiveLine(record);
-      this.render();
+      if (this.actionsHistory && this.actionsHistory[enableKeyName]) {
+        const record = this.actionsHistory && this.actionsHistory[funcName]();
+        this.setActiveLine(record);
+        this.render();
+      }
       return;
     }
 
-    if (this.history) {
+    if (this.history && this.history[enableKeyName]) {
       const currentHistory = this.history[funcName]();
-      const activeLine = currentHistory.find((i: ILine) => i.id === this.selectedID);
+      const activeLine = currentHistory?.find((i: ILine) => i.id === this.selectedID);
       this.lineList = currentHistory;
       if (this.selectedID && activeLine) {
         this.setActiveLine(activeLine?.pointList);
@@ -1199,8 +1203,8 @@ class LineToolOperation extends BasicToolOperation {
     return this.lineStyle.lineWidth;
   }
 
-  public isMouseCoordTriggerCreate() {
-    return this.isActive && !this.coordsClickedActiveArea && !this.selectedPoint;
+  public isMouseCoordOutsideActiveArea() {
+    return !this.coordsInsideActiveArea && !this.selectedPoint;
   }
 
   /** 是否超过上限点 */
@@ -1210,11 +1214,25 @@ class LineToolOperation extends BasicToolOperation {
     );
   }
 
-  public onClick = (e: MouseEvent) => {
-    const coord = this.getCoordinate(e);
-    const { lineMoved } = this;
+  public isLinePointsNotEnough() {
+    return this.activeLine && this.activeLine?.length < this.lowerLimitPointNum;
+  }
 
-    this.lineMoved = false;
+  public updateLineSegmentSpecial(coord: ICoordinate) {
+    const specialEdgeIndex = this.getPointInsertIndex(coord, 2) - 1;
+    if (specialEdgeIndex > -1) {
+      const pointData = this.activeLine![specialEdgeIndex];
+      pointData.specialEdge = !pointData.specialEdge;
+      this.hoverLineSegmentIndex = -1;
+      this.render();
+    }
+  }
+
+  public onLeftClick = (e: MouseEvent) => {
+    const coord = this.getCoordinate(e);
+    const { lineDragging } = this;
+
+    this.lineDragging = false;
 
     /** 空格点击为拖拽事件 */
     if (this.isSpaceKey) {
@@ -1222,9 +1240,9 @@ class LineToolOperation extends BasicToolOperation {
     }
 
     if (this.isNone && e.ctrlKey) {
-      const hitLine = this.findHoverLine(coord);
-      if (hitLine) {
-        this.setInvalidLine(hitLine.id);
+      const hoveredLine = this.findHoverLine(coord);
+      if (hoveredLine) {
+        this.setInvalidLine(hoveredLine.id);
       }
       return;
     }
@@ -1234,78 +1252,56 @@ class LineToolOperation extends BasicToolOperation {
       return;
     }
 
-    const isMouseCoordTriggerCreate = this.isMouseCoordTriggerCreate();
+    const nextAxis = this.getNextPoint(e, coord)!;
 
-    if (this.isCreate || this.isNone || isMouseCoordTriggerCreate) {
-      /** 禁止目标外标注 */
-      if (
-        !this.enableOutOfTarget &&
-        (isMouseCoordTriggerCreate || (this.isNone && this.activeLine?.length === 0)) &&
-        !this.isCoordInsideTarget(this.coordUtils.getAbsCoord(coord))
-      ) {
-        return;
-      }
-
-      const nextAxis = this.getNextPoint(e, coord);
-
-      /** 激活点击时候重新创建线条 */
-      if (isMouseCoordTriggerCreate) {
-        this.setNoneStatus(false);
-        this.updateStatus(EStatus.Create, true);
-      }
-
-      this.arc(nextAxis);
-      this.addPoint(nextAxis);
-      this.updateStatus(EStatus.Create, !this.selectedID);
+    if (this.isCreate || this.isNone) {
+      this.setCreatStatusAndAddPoint(nextAxis);
       return;
     }
 
-    if (this.activeLine && this.activeLine.length > 0) {
-      if (this.isActive) {
-        if (this.selectedPoint) {
-          const prePoint = this.activeLine.find((i: any) => i.id === this.selectedPoint?.id);
-
-          if (prePoint && !_.isEqual(prePoint, this.selectedPoint)) {
-            Object.assign(prePoint, this.selectedPoint);
-            this.updateLines();
-            this.history?.pushHistory(this.lineList);
-          }
-
-          this.selectedPoint = undefined;
-          this.render();
-          return;
-        }
-
-        const insertIndex = this.getPointInsertIndex(this.cursor);
-        const pointsWithInRange = this.pointsWithinRange(this.activeLine?.length + 1);
-
-        /** 添加点 */
-        if (this.cursor && !this.selectedPoint && insertIndex > -1 && !lineMoved && pointsWithInRange && !e.shiftKey) {
-          this.activeLine.splice(insertIndex, 0, { ...this.coordUtils.getAbsCoord(this.cursor), id: uuid() });
-          this.updateLines();
-          this.history?.pushHistory(this.lineList);
-          this.render();
-          this.cursor = undefined;
-          return;
-        }
-
-        const specialEdgeIndex = this.getPointInsertIndex(coord, 2) - 1;
-
-        /** 设置为特殊边 */
-        if (!this.selectedPoint && specialEdgeIndex > -1 && !lineMoved && e.shiftKey) {
-          const pointData = this.activeLine[specialEdgeIndex];
-          pointData.specialEdge = !pointData.specialEdge;
-          this.hoverEdgeIndex = -1;
-          this.render();
-          return;
-        }
-
-        if (this.coordsClickedActiveArea && e.ctrlKey) {
-          this.setInvalidLine(this.selectedID);
-        }
+    if (this.isActive) {
+      if (lineDragging) {
+        return;
       }
+
+      const isMouseCoordOutsideActiveArea = this.isMouseCoordOutsideActiveArea();
+      if (isMouseCoordOutsideActiveArea) {
+        this.setNoneStatus(false);
+        this.setCreatStatusAndAddPoint(nextAxis);
+        return;
+      }
+
+      const isSetSpecialLine = e.shiftKey;
+
+      /** 设置为特殊边 */
+      if (isSetSpecialLine) {
+        this.updateLineSegmentSpecial(coord);
+        return;
+      }
+
+      /** 设置线的有效无效 */
+      if (this.coordsInsideActiveArea && e.ctrlKey) {
+        this.setInvalidLine(this.selectedID);
+        return;
+      }
+
+      this.addLinePointToActiveLine();
     }
   };
+
+  public addLinePointToActiveLine() {
+    const insertIndex = this.getPointInsertIndex(this.cursor);
+    const pointsWithInRange = this.pointsWithinRange(this.activeLine!.length + 1);
+
+    /** 添加点 */
+    if (this.cursor && insertIndex > -1 && pointsWithInRange) {
+      this.activeLine!.splice(insertIndex, 0, { ...this.coordUtils.getAbsCoord(this.cursor), id: uuid() });
+      this.updateLines();
+      this.history?.pushHistory(this.lineList);
+      this.render();
+      this.cursor = undefined;
+    }
+  }
 
   public onMouseDown(e: MouseEvent) {
     if (super.onMouseDown(e) || this.forbidMouseOperation || !this.imgInfo) {
@@ -1320,11 +1316,11 @@ class LineToolOperation extends BasicToolOperation {
       return;
     }
     this.selectedPoint = this.findHoveredPoint(coord);
-    this.coordsClickedActiveArea =
+    this.coordsInsideActiveArea =
       this.isActive && this.activeArea
         ? LineToolUtils.inArea(this.activeArea, this.coordUtils.getAbsCoord(coord))
         : false;
-    this.lineMoved = false;
+    this.lineDragging = false;
   }
 
   public lineHasChanged() {
@@ -1341,20 +1337,37 @@ class LineToolOperation extends BasicToolOperation {
   }
 
   public onMouseUp(e: MouseEvent) {
+    const reset = () => {
+      this.isMousedown = false;
+      this.hoverPointID = undefined;
+      this.cursor = undefined;
+      this.selectedPoint = undefined;
+    };
+
+    this.hoverPointID = undefined;
+
     if (super.onMouseUp(e) || this.forbidMouseOperation || !this.imgInfo) {
-      return undefined;
+      reset();
+      return;
     }
 
-    /** 非创建状态，记录当前被修改的线条 */
-    if (this.isMousedown && !this.isCreate) {
-      const lineChanged = this.lineHasChanged();
-      if (lineChanged) {
-        this.updateLines();
-        this.history?.pushHistory(this.lineList);
-      }
+    // /** 非创建状态，记录当前被修改的线条 */
+    // if (this.isMousedown && !this.isCreate) {
+    //   const lineChanged = this.lineHasChanged();
+    //   if (lineChanged) {
+    //     this.updateLines();
+    //     this.history?.pushHistory(this.lineList);
+    //   }
+    // }
+
+    if (e.which === 1) {
+      this.onLeftClick(e);
     }
 
-    this.isMousedown = false;
+    if (e.which === 3) {
+      this.onRightClick(e);
+    }
+    reset();
   }
 
   public onDblclick = () => {};
@@ -1379,7 +1392,10 @@ class LineToolOperation extends BasicToolOperation {
    * 停止当前的线条绘制
    * @param isAppend
    */
-  public stopLine(isAppend: boolean = true, setActive: boolean = true) {
+  public stopLineCreating(isAppend: boolean = true) {
+    /** 新建线条后在文本标注未开启时默认不选中, 续标后默认选中 */
+    const setActiveAfterCreating = this.selectedID ? true : !!this.isTextConfigurable;
+
     let selectedID;
     if (isAppend) {
       if (this.selectedID) {
@@ -1399,7 +1415,7 @@ class LineToolOperation extends BasicToolOperation {
       }
     }
 
-    if (setActive) {
+    if (setActiveAfterCreating) {
       this.setActiveStatus(selectedID);
     } else {
       this.setNoneStatus();
@@ -1439,43 +1455,46 @@ class LineToolOperation extends BasicToolOperation {
 
   public setKeyDownStatus(e: KeyboardEvent, value?: boolean) {
     this.isShift = value ?? e.keyCode === EKeyCode.Shift;
+    this.isCtrl = value ?? e.keyCode === EKeyCode.Ctrl;
+  }
+
+  /** 续标当前激活的线条 */
+  public continueToEdit() {
+    this.updateStatus(EStatus.Create);
+    this.cursor = undefined;
+    this.actionsHistory?.pushHistory(this.activeLine);
+    this.render();
   }
 
   public onKeyUp = (e: KeyboardEvent) => {
     super.onKeyUp(e);
 
     this.isShift = false;
-    this.hoverEdgeIndex = -1;
+    this.hoverLineSegmentIndex = -1;
 
     if (e.keyCode === EKeyCode.Esc) {
-      this.stopLine(false);
+      this.stopLineCreating(false);
       return;
     }
 
     if (this.isActive) {
       if (e.keyCode === EKeyCode.Delete) {
         this.deleteLine();
-        this.render();
         return;
       }
 
-      if (e.keyCode === EKeyCode.F && this.selectedID) {
+      if (e.keyCode === EKeyCode.F) {
         this.setInvalidLine(this.selectedID);
         return;
       }
 
       if (e.keyCode === EKeyCode.Space) {
-        this.updateStatus(EStatus.Create);
-        this.cursor = undefined;
-        this.actionsHistory?.pushHistory(this.activeLine);
-        this.render();
+        this.continueToEdit();
         return;
       }
     }
 
-    if (this.isCreate) {
-      this.renderNextPointByKeyboardEvent(e);
-    }
+    this.KeyboardEventOnCreatingTriggerRender(e);
   };
 
   /** 创建无效线条，activeLineID存在时为续标（没有按ctrl时不会修改其有无效性），不会设置无效的属性 */
@@ -1484,6 +1503,7 @@ class LineToolOperation extends BasicToolOperation {
       return;
     }
     const valid = !e.ctrlKey;
+
     if (this.selectedID) {
       this.setInvalidLine(this.selectedID, valid, false);
     } else {
@@ -1512,7 +1532,7 @@ class LineToolOperation extends BasicToolOperation {
     }
 
     if (this.isCreate) {
-      this.renderNextPointByKeyboardEvent(e);
+      this.KeyboardEventOnCreatingTriggerRender(e);
     }
 
     if (this.isActive) {
@@ -1524,6 +1544,10 @@ class LineToolOperation extends BasicToolOperation {
     }
   }
 
+  /**
+   * 切换到下一个线条
+   * @param e
+   */
   private selectToNextLine(e: KeyboardEvent) {
     const nextSelectedLine = CommonToolUtils.getNextSelectedRectIDByEvent(
       this.viewPortLines.map((i: any) => ({
@@ -1547,7 +1571,11 @@ class LineToolOperation extends BasicToolOperation {
    *  3.Shift绘制垂直/水平线
    * @param e
    */
-  public renderNextPointByKeyboardEvent(e: KeyboardEvent) {
+  public KeyboardEventOnCreatingTriggerRender(e: KeyboardEvent) {
+    if (!this.isCreate) {
+      return;
+    }
+
     if (e.keyCode === EKeyCode.Ctrl) {
       this.setInvalidLineOnCreating(e);
     }
@@ -1563,36 +1591,53 @@ class LineToolOperation extends BasicToolOperation {
    * @param coord
    */
   public renderNextPoint(e: MouseEvent | KeyboardEvent | { altKey: boolean }, coord: ICoordinate) {
-    const nextPoint = this.coordUtils.getRenderCoord(this.getNextPoint(e, coord));
+    const nextPoint = this.coordUtils.getRenderCoord(this.getNextPoint(e, coord)!);
     this.render(nextPoint);
   }
 
+  public deleteSelectedLine(coord: ICoordinate) {
+    const boundary = MathUtils.calcViewportBoundaries(this.activeLine, this.isCurve, SEGMENT_NUMBER, this.zoom);
+    const axisOnArea = LineToolUtils.inArea(boundary, this.coordUtils.getAbsCoord(coord));
+    if (axisOnArea) {
+      this.deleteLine();
+    }
+  }
+
+  /**
+   * 删除当前选中的点
+   * @param hoverPointID
+   */
+  public deleteSelectedLinePoint(selectedID: string) {
+    const pointsWithinRange = this.pointsWithinRange(this.activeLine!.length - 1);
+    if (pointsWithinRange && selectedID) {
+      this.setActiveLine(this.activeLine!.filter((i) => i.id !== selectedID));
+      this.updateLines();
+      this.history?.pushHistory(this.lineList);
+    }
+    this.cursor = undefined;
+    this.render();
+  }
+
+  /**
+   * 右键双击事件，
+   * 1. 删除线
+   * 2. 删除点
+   * @param e
+   */
   public onRightDblClick = (e: MouseEvent) => {
     super.onRightDblClick(e);
-
     const coord = this.getCoordinate(e);
     if (this.isActive) {
       const hoverPoint = this.findHoveredPoint(coord);
 
       /* 删除点 */
-      if (hoverPoint && this.activeLine) {
-        const pointsWithinRange = this.pointsWithinRange(this.activeLine?.length - 1);
-        if (pointsWithinRange) {
-          this.setActiveLine(this.activeLine.filter((i) => i.id !== hoverPoint.id));
-          this.updateLines();
-          this.history?.pushHistory(this.lineList);
-        }
-        this.cursor = undefined;
-        this.render();
+      if (hoverPoint) {
+        this.deleteSelectedLinePoint(hoverPoint.id);
         return;
       }
 
       /** 删除线 */
-      const area = MathUtils.calcViewportBoundaries(this.activeLine, this.isCurve, SEGMENT_NUMBER, this.zoom);
-      const axisOnArea = LineToolUtils.inArea(area, this.coordUtils.getAbsCoord(coord));
-      if (axisOnArea) {
-        this.deleteLine();
-      }
+      this.deleteSelectedLine(coord);
     }
   };
 
@@ -1616,9 +1661,7 @@ class LineToolOperation extends BasicToolOperation {
     }
   }
 
-  /**
-   * 数据清空
-   */
+  /** 数据清空 */
   public empty() {
     this.lineList = [];
     this.setNoneStatus();
@@ -1703,7 +1746,7 @@ class LineToolOperation extends BasicToolOperation {
 
   /** 保存当前绘制的数据, 避免创建中的数据不会被保存到 */
   public saveData() {
-    this.stopLine();
+    this.stopLineCreating();
     this.setNoneStatus();
     this.render();
   }
@@ -1736,7 +1779,10 @@ class LineToolOperation extends BasicToolOperation {
     this.isReference = isReference;
   };
 
-  /** 线条的点数在限制范围内 */
+  /**
+   * 计算带点数是否超出限制
+   * @param count
+   */
   public pointsWithinRange = (count: number) => {
     if (this.lowerLimitPointNum && count < this.lowerLimitPointNum) {
       return false;
@@ -1757,9 +1803,7 @@ class LineToolOperation extends BasicToolOperation {
 
   public setLineList = (lineList: ILine[]) => {
     const lengthChanged = lineList.length !== this.lineListLen;
-
     this.lineList = lineList;
-
     if (lengthChanged) {
       this.emit('updatePageNumber');
     }
