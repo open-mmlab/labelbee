@@ -1,6 +1,6 @@
 import { ANNOTATION_ACTIONS } from '@/store/Actions';
 import { IStepInfo } from '@/types/step';
-import { IFileItem, OnSubmit, GetFileData } from '@/types/data';
+import { IFileItem, OnSubmit, GetFileData, OnSave } from '@/types/data';
 import { AnnotationActionTypes, ToolInstance } from './types';
 import { loadFileData } from './reducer';
 import { ESubmitType } from '@/constant';
@@ -81,6 +81,15 @@ export function UpdateOnSubmit(onSubmit: OnSubmit): AnnotationActionTypes {
   };
 }
 
+export function UpdateOnSave(onSave: OnSave): AnnotationActionTypes {
+  return {
+    type: ANNOTATION_ACTIONS.UPDATE_ON_SAVE,
+    payload: {
+      onSave,
+    },
+  };
+}
+
 export function UpdateGetFileData(getFileData: GetFileData): AnnotationActionTypes {
   return {
     type: ANNOTATION_ACTIONS.UPDATE_GET_FILE_DATA,
@@ -108,6 +117,7 @@ export function CopyBackWordResult(): AnnotationActionTypes {
  */
 export function InitTaskData({
   onSubmit,
+  onSave,
   getFileData,
   imgList,
   step,
@@ -118,6 +128,9 @@ export function InitTaskData({
 
   if (onSubmit) {
     tasks.push(UpdateOnSubmit(onSubmit));
+  }
+  if(onSave) {
+    tasks.push(UpdateOnSave(onSave))
   }
 
   if (getFileData) {
@@ -238,3 +251,11 @@ export const DispatcherTurning = (
 
   return dispatch(ToSubmitFileData(submitType));
 };
+
+/**
+ * 保存当前页数据
+ * */
+export const ChangeSave = (dispatch: Function) => {
+  dispatch(ToSubmitFileData(ESubmitType.Save))
+  dispatch({ type: ANNOTATION_ACTIONS.SAVE_RESULT })
+}

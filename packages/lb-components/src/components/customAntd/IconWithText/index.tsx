@@ -5,7 +5,7 @@ interface IProps {
   text: string; // icon 文本
   Icon: any;
   iconChildren: React.ReactNode;
-  marginLeft: number;
+  marginLeft?: number;
 }
 
 const IconWithText = (props: IProps) => {

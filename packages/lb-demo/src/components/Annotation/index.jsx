@@ -14,6 +14,10 @@ const Annotation = (props) => {
     console.log('submitData', data);
   }
 
+  const onSave = (data, imgList, index) => {
+    console.log('save', data, imgList, index);
+  }
+
   return (
     <div>
       <AnnotationOperation
@@ -24,6 +28,7 @@ const Annotation = (props) => {
         goBack={goBack}
         stepList={stepList}
         step={step}
+        onSave={onSave}
         // sider={null}
       />
     </div>

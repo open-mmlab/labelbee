@@ -1,9 +1,8 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { Divider, Input } from 'antd';
 import { LeftOutlined, RightOutlined } from '@ant-design/icons';
-import { store } from 'src';
 import { AppState } from '@/store';
-import { connect } from 'react-redux';
+import { connect, useDispatch } from 'react-redux';
 import { getTotalPage } from '@/store/annotation/reducer';
 import HiddenTips from './HiddenTips';
 import PageNumber from './PageNumber';
@@ -60,8 +59,7 @@ interface IProps {
 export const footerCls = `${prefix}-footer`;
 
 const ToolFooter: React.FC<IProps> = (props: IProps) => {
-  // const windowSize = useContext(viewportContext);
-  // const canvasSize = getFormatSize(windowSize);
+  const dispatch = useDispatch();
   const renderDivider = () => (
     <Divider type='vertical' style={{ background: 'rgba(153, 153, 153, 1)', height: '16px' }} />
   );
@@ -69,16 +67,16 @@ const ToolFooter: React.FC<IProps> = (props: IProps) => {
   // const width = canvasSize.width;
 
   const pageBackward = () => {
-    store.dispatch(PageBackward());
+    dispatch(PageBackward());
   };
 
   const pageForward = () => {
-    store.dispatch(PageForward());
+    dispatch(PageForward());
   };
 
   const pageJump = (page: string) => {
     const imgIndex = ~~page - 1;
-    store.dispatch(PageJump(imgIndex));
+    dispatch(PageJump(imgIndex));
   };
 
   return (
