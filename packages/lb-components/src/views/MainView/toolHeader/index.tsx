@@ -19,9 +19,14 @@ import { IStepInfo } from '@/types/step';
 
 interface INextStep {
   stepProgress: number;
+  stepList: IStepInfo[];
 }
 
-const NextStep: React.FC<INextStep> = ({ stepProgress }) => {
+const NextStep: React.FC<INextStep> = ({ stepProgress, stepList }) => {
+  if (stepList.length < 2) {
+    return null;
+  }
+
   return (
     <Button
       type='primary'
@@ -46,8 +51,9 @@ interface IToolHeaderProps {
   annotationEngine: AnnotationEngine;
   stepProgress: number;
   toolName: EToolName;
-  stepList: IStepInfo[];
   stepInfo: IStepInfo;
+  stepList: IStepInfo[];
+  step: number;
 }
 
 const ToolHeader: React.FC<IToolHeaderProps> = ({
@@ -56,9 +62,9 @@ const ToolHeader: React.FC<IToolHeaderProps> = ({
   headerName,
   imgList,
   stepProgress,
-  toolName,
-  stepList,
   stepInfo,
+  stepList,
+  step,
 }) => {
   // render 数据展示
   const currentOption = <ExportData exportData={exportData} />;
