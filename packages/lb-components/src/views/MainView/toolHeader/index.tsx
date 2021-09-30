@@ -15,12 +15,11 @@ import { Button } from 'antd';
 import { ToNextStep } from '@/store/annotation/actionCreators';
 import StepSwitch from './StepSwitch';
 import { EToolName } from '@/data/enums/ToolType';
-
+import { IStepInfo } from '@/types/step';
 
 interface INextStep {
   stepProgress: number;
 }
-
 
 const NextStep: React.FC<INextStep> = ({ stepProgress }) => {
   return (
@@ -47,6 +46,7 @@ interface IToolHeaderProps {
   annotationEngine: AnnotationEngine;
   stepProgress: number;
   toolName: EToolName;
+  stepList: IStepInfo[];
 }
 
 const ToolHeader: React.FC<IToolHeaderProps> = ({
@@ -56,6 +56,7 @@ const ToolHeader: React.FC<IToolHeaderProps> = ({
   imgList,
   stepProgress,
   toolName,
+  stepList,
 }) => {
   // render 数据展示
   const currentOption = <ExportData exportData={exportData} />;
@@ -77,9 +78,12 @@ const ToolHeader: React.FC<IToolHeaderProps> = ({
       <div className={`${prefix}-header__title`}>
         <LeftOutlined className={`${prefix}-header__icon`} onClick={closeAnnotation} />
         {headerName ? <span className={`${prefix}-header__name`}>{headerName}</span> : ''}
-        <StepSwitch stepProgress={stepProgress} />        
-
-        <NextStep stepProgress={stepProgress} />
+        {stepList.length > 1 && (
+          <>
+            <StepSwitch stepProgress={stepProgress} />
+            <NextStep stepProgress={stepProgress} />
+          </>
+        )}
 
         {currentOption}
         <div
@@ -98,7 +102,8 @@ const mapStateToProps = (state: AppState) => ({
   imgList: state.annotation.imgList,
   annotationEngine: state.annotation.annotationEngine,
   stepProgress: state.annotation.stepProgress,
-  toolName: state.annotation.stepList[state.annotation.step - 1]?.tool
+  toolName: state.annotation.stepList[state.annotation.step - 1]?.tool,
+  stepList: state.annotation.stepList,
 });
 
 export default connect(mapStateToProps)(ToolHeader);
