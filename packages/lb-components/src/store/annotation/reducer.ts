@@ -10,6 +10,7 @@ import { getFormatSize } from '@/components/customResizeHook';
 import { AnnotationEngine } from '@sensetime/annotation';
 import { AnnotationState, AnnotationActionTypes } from './types';
 import { message } from 'antd';
+import ImgUtils from '@/utils/ImgUtils';
 
 const getStepConfig = (stepList: any[], step: number) => stepList.find((i) => i.step === step);
 
@@ -75,7 +76,7 @@ const updateToolInstance = (annotation: AnnotationState, imgNode: HTMLImageEleme
 
 export const loadFileData =
   (nextIndex: number, nextBasicIndex?: number) => async (dispatch: any, getState: any) => {
-    const { getFileData, imgList } = getState().annotation;
+    const { getFileData, imgList, toolInstance } = getState().annotation;
     dispatch({
       type: ANNOTATION_ACTIONS.SET_LOADING,
       payload: {
@@ -97,29 +98,41 @@ export const loadFileData =
 
     const { url } = imgList[nextIndex];
 
-    return new Promise((reslove) => {
-      const imgNode = new Image();
-      imgNode.src = url;
-      imgNode.onload = () => {
-        reslove(imgNode);
-      };
-    }).then((imgNode) => {
-      dispatch({
-        type: ANNOTATION_ACTIONS.SET_LOADING,
-        payload: {
-          loading: false,
-        },
-      });
+    return ImgUtils.load(url)
+      .then((imgNode) => {
+        dispatch({
+          type: ANNOTATION_ACTIONS.SET_LOADING,
+          payload: {
+            loading: false,
+          },
+        });
 
-      dispatch({
-        type: ANNOTATION_ACTIONS.LOAD_FILE_DATA,
-        payload: {
-          imgNode,
-          nextIndex,
-          nextBasicIndex,
-        },
+        dispatch({
+          type: ANNOTATION_ACTIONS.LOAD_FILE_DATA,
+          payload: {
+            imgNode,
+            nextIndex,
+            nextBasicIndex,
+          },
+        });
+      })
+      .catch(() => {
+        dispatch({
+          type: ANNOTATION_ACTIONS.SET_LOADING,
+          payload: {
+            loading: false,
+          },
+        });
+
+        toolInstance.setErrorImg();
+        dispatch({
+          type: ANNOTATION_ACTIONS.LOAD_FILE_DATA,
+          payload: {
+            nextIndex,
+            nextBasicIndex,
+          },
+        });
       });
-    });
   };
 
 export const annotationReducer = (
@@ -276,7 +289,7 @@ export const annotationReducer = (
 
       const currentStepInfo = StepUtils.getCurrentStepInfo(step, stepList);
 
-      const { nextIndex, imgNode, nextBasicIndex } = action.payload;
+      const { nextIndex, imgNode, nextBasicIndex, imgError } = action.payload;
       const basicIndex = nextBasicIndex ?? 0;
 
       const fileResult = jsonParser(imgList[nextIndex]?.result);
@@ -290,8 +303,11 @@ export const annotationReducer = (
         valid: fileResult.valid ?? true,
       };
 
-      toolInstance.setImgNode(imgNode, basicImgInfo);
-      annotationEngine.setImgNode(imgNode);
+      if (imgNode && imgError !== true) {
+        toolInstance.setImgNode(imgNode, basicImgInfo);
+        annotationEngine.setImgNode(imgNode);
+      }
+
       let result = stepResult?.result || [];
       const stepConfig = getStepConfig(stepList, step);
 

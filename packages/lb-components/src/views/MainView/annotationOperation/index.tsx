@@ -1,4 +1,4 @@
-import React, { useEffect, useRef } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import { Spin, message } from 'antd';
 import { AppState } from 'src/store';
 import { connect } from 'react-redux';
@@ -11,6 +11,8 @@ import { IFileItem } from '@/types/data';
 import { IStepInfo } from '@/types/step';
 import { InitToolStyleConfig } from '@/store/toolStyle/actionCreators';
 import { AnnotationEngine } from '@sensetime/annotation';
+import ImageError from '@/components/ImageError';
+import ImgUtils from '@/utils/ImgUtils';
 
 interface IProps extends AppState {
   imgAttribute: ImgAttributeState;
@@ -25,7 +27,9 @@ interface IProps extends AppState {
 }
 
 const AnnotationOperation: React.FC<IProps> = (props: IProps) => {
-  const { imgAttribute, toolStyle, toolInstance, annotationEngine, loading } = props;
+  const [, forceRender] = useState<number>(0);
+  
+  const { imgAttribute, toolStyle, toolInstance, annotationEngine, loading, imgList, imgIndex } = props;
   const annotationRef = useRef<HTMLDivElement>(null);
   const containerRef = useRef<HTMLDivElement>(null);
   // const windowSize = useContext(viewportContext);
@@ -44,6 +48,10 @@ const AnnotationOperation: React.FC<IProps> = (props: IProps) => {
 
       toolInstance.on('messageInfo', (info: string) => {
         message.info(info);
+      });
+
+      toolInstance.on('changeAnnotationShow', () => {
+        forceRender(s => s + 1);
       });
     }
   }, [toolInstance]);
@@ -74,12 +82,31 @@ const AnnotationOperation: React.FC<IProps> = (props: IProps) => {
       annotationEngine.setSize(size);
     }
   }, [size]);
+  
+  /**
+   * 重新加载图片，避免网络问题导致的图片无法加载
+   * @returns 
+   */
+  const reloadImg = () => {
+    const imgInfo = imgList[imgIndex];
+    if (!imgInfo.url) {
+      return;
+    }
 
+    ImgUtils.load(imgInfo.url).then((imgNode) => {
+      annotationEngine.setImgNode(imgNode as HTMLImageElement);
+    });
+    
+  }
+  
   return (
     <div ref={annotationRef} className='annotationOperation'>
       <Spin spinning={loading} delay={500}>
         <div className='canvas' ref={containerRef} style={size} id='toolContainer' />
       </Spin>
+      {toolInstance?.isImgError === true && (
+        <ImageError {...size} reloadImage={reloadImg} backgroundColor="#e2e2e2" ignoreOffsetY={true} />
+      )}
     </div>
   );
 };
