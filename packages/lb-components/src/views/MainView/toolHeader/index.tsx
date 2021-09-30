@@ -47,6 +47,7 @@ interface IToolHeaderProps {
   stepProgress: number;
   toolName: EToolName;
   stepList: IStepInfo[];
+  stepInfo: IStepInfo;
 }
 
 const ToolHeader: React.FC<IToolHeaderProps> = ({
@@ -57,6 +58,7 @@ const ToolHeader: React.FC<IToolHeaderProps> = ({
   stepProgress,
   toolName,
   stepList,
+  stepInfo,
 }) => {
   // render 数据展示
   const currentOption = <ExportData exportData={exportData} />;
@@ -91,7 +93,7 @@ const ToolHeader: React.FC<IToolHeaderProps> = ({
           className={`${prefix}-header__operationNode`}
           style={{ left: window.innerWidth / 2 - 174 / 2 }}
         >
-          <HeaderOption toolName={toolName} />
+          <HeaderOption stepInfo={stepInfo} />
         </div>
       </div>
     </div>
@@ -104,6 +106,7 @@ const mapStateToProps = (state: AppState) => ({
   stepProgress: state.annotation.stepProgress,
   toolName: state.annotation.stepList[state.annotation.step - 1]?.tool,
   stepList: state.annotation.stepList,
+  stepInfo: state.annotation.stepList[state.annotation.step - 1],
 });
 
 export default connect(mapStateToProps)(ToolHeader);

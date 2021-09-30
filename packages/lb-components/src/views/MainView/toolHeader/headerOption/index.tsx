@@ -11,13 +11,17 @@ import saveSvg from '@/assets/annotation/common/icon_save.svg';
 import saveLightSvg from '@/assets/annotation/common/icon_saveA.svg';
 import { prefix } from '@/constant';
 import { EToolName } from '@/data/enums/ToolType';
-import {ChangeSave} from "@/store/annotation/actionCreators";
+import { ChangeSave } from '@/store/annotation/actionCreators';
+import { IStepInfo } from '@/types/step';
+import { ToolInstance } from '@/store/annotation/types';
 
 interface IProps {
   // toolName: EToolName;
   isBegin?: boolean;
   bindKeydownEvents?: boolean;
   toolName: EToolName;
+  toolInstance: ToolInstance;
+  stepInfo: IStepInfo;
 }
 
 enum EColor {
@@ -27,19 +31,21 @@ enum EColor {
 
 const HeaderOption: React.FC<IProps> = (props) => {
   const [toolHover, setToolHover] = useState('');
+  const { toolName, stepInfo } = props;
+  const dispatch = useDispatch();
   const {
-    toolName
-  } = props;
-  const dispatch = useDispatch()
-  const { annotation: { toolInstance, onSave } } = useSelector((state: AppState) => ({
+    annotation: { toolInstance, onSave },
+  } = useSelector((state: AppState) => ({
     annotation: state.annotation,
-    imgAttribute: state.imgAttribute
-  }))
+    imgAttribute: state.imgAttribute,
+  }));
 
   const isBegin = props.isBegin || toolName === EToolName.Tag;
 
   const updateRotate = () => {
-    // 需要判断
+    if (stepInfo.dataSourceStep !== 0) {
+      return;
+    }
 
     toolInstance?.updateRotate();
   };
@@ -60,12 +66,11 @@ const HeaderOption: React.FC<IProps> = (props) => {
       commonSvg: saveSvg,
       selectedSvg: saveLightSvg,
       click: () => {
-        dispatch(ChangeSave)
+        dispatch(ChangeSave);
       },
       style: {
         fontSize: '12px',
-        color:
-          !isBegin && toolHover === 'save' ? EColor.Hover : EColor.Normal,
+        color: !isBegin && toolHover === 'save' ? EColor.Hover : EColor.Normal,
       },
     },
     {
@@ -80,8 +85,7 @@ const HeaderOption: React.FC<IProps> = (props) => {
       style: {
         opacity: isBegin === true ? 0.4 : 1,
         fontSize: '12px',
-        color:
-          !isBegin && toolHover === 'revocation' ? EColor.Hover : EColor.Normal,
+        color: !isBegin && toolHover === 'revocation' ? EColor.Hover : EColor.Normal,
       },
     },
     {
@@ -96,8 +100,7 @@ const HeaderOption: React.FC<IProps> = (props) => {
       style: {
         opacity: isBegin === true ? 0.4 : 1,
         fontSize: '12px',
-        color:
-          !isBegin && toolHover === 'restore' ? EColor.Hover : EColor.Normal,
+        color: !isBegin && toolHover === 'restore' ? EColor.Hover : EColor.Normal,
       },
     },
     {
@@ -111,8 +114,7 @@ const HeaderOption: React.FC<IProps> = (props) => {
       },
       style: {
         fontSize: '12px',
-        color:
-          !isBegin && toolHover === 'rotate' ? EColor.Hover : EColor.Normal,
+        color: !isBegin && toolHover === 'rotate' ? EColor.Hover : EColor.Normal,
       },
     },
   ];
@@ -121,24 +123,24 @@ const HeaderOption: React.FC<IProps> = (props) => {
     <div className={`${prefix}-header__hotKey`}>
       {commonOptionList.map((info: any) => {
         return (
-          info.show && <div
-            key={info.toolName}
-            className="item"
-            onMouseEnter={() => setToolHover(info.toolName)}
-            onMouseLeave={() => setToolHover('')}
-          >
-            <a className="item" onClick={info.click}>
-              <img
-                className="singleTool"
-                src={
-                  toolHover === info.toolName ? info.selectedSvg : info.commonSvg
-                }
-                style={info.style}
-              />
-              <div style={info.style}>{info.title}</div>
-            </a>
-          </div>
-        )
+          info.show && (
+            <div
+              key={info.toolName}
+              className='item'
+              onMouseEnter={() => setToolHover(info.toolName)}
+              onMouseLeave={() => setToolHover('')}
+            >
+              <a className='item' onClick={info.click}>
+                <img
+                  className='singleTool'
+                  src={toolHover === info.toolName ? info.selectedSvg : info.commonSvg}
+                  style={info.style}
+                />
+                <div style={info.style}>{info.title}</div>
+              </a>
+            </div>
+          )
+        );
       })}
     </div>
   );
