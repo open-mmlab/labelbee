@@ -10,7 +10,6 @@ import { getFormatSize } from '@/components/customResizeHook';
 import { AnnotationEngine } from '@sensetime/annotation';
 import { AnnotationState, AnnotationActionTypes } from './types';
 import { message } from 'antd';
-import { EToolName } from '@/data/enums/ToolType';
 
 const getStepConfig = (stepList: any[], step: number) => stepList.find((i) => i.step === step);
 
@@ -181,6 +180,14 @@ export const annotationReducer = (
         stepProgress,
         imgList,
       };
+    }
+
+    case ANNOTATION_ACTIONS.SAVE_RESULT: {
+      const { imgList, imgIndex, onSave } = state;
+      onSave?.(imgList[imgIndex], imgIndex, imgList);
+      return {
+        ...state,
+      }
     }
 
     case ANNOTATION_ACTIONS.SUBMIT_RESULT: {
@@ -354,6 +361,13 @@ export const annotationReducer = (
       return {
         ...state,
         onSubmit: action.payload.onSubmit,
+      };
+    }
+
+    case ANNOTATION_ACTIONS.UPDATE_ON_SAVE: {
+      return {
+        ...state,
+        onSave: action.payload.onSave,
       };
     }
 

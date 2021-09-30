@@ -1,7 +1,7 @@
 import { AnnotationEngine, RectOperation, TagOperation } from '@sensetime/annotation';
 import { ANNOTATION_ACTIONS } from '@/store/Actions';
 import { IStepInfo } from '@/types/step';
-import { OnSubmit, IFileItem, GetFileData } from '@/types/data';
+import { OnSubmit, IFileItem, GetFileData, OnSave } from '@/types/data';
 import { ESubmitType } from '@/constant';
 
 export type ToolInstance = RectOperation | TagOperation;
@@ -22,6 +22,7 @@ export interface AnnotationState {
   stepList: IStepInfo[];
   imgNode: HTMLImageElement;
   onSubmit?: OnSubmit;
+  onSave?: OnSave;
   getFileData?: GetFileData;
   basicIndex: number;
   basicResultList: any[];
@@ -89,6 +90,13 @@ interface UpdateOnSubmit {
   };
 }
 
+interface UpdateOnSave {
+  type: typeof ANNOTATION_ACTIONS.UPDATE_ON_SAVE;
+  payload: {
+    onSave: OnSave;
+  };
+}
+
 interface UpdateGetFileData {
   type: typeof ANNOTATION_ACTIONS.UPDATE_GET_FILE_DATA;
   payload: {
@@ -115,4 +123,5 @@ export type AnnotationActionTypes =
   | InitTool
   | UpdateOnSubmit
   | UpdateGetFileData
-  | CopyBackWordResult;
+  | CopyBackWordResult
+  | UpdateOnSave;

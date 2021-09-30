@@ -5,13 +5,12 @@
 import { Dropdown } from 'antd';
 import { CaretDownOutlined, OrderedListOutlined } from '@ant-design/icons';
 import React from 'react';
-import { connect } from 'react-redux';
+import { connect, useDispatch } from 'react-redux';
 import { AppState } from '@/store';
 import IconWithText from '@/components/customAntd/IconWithText';
 import { prefix } from '@/constant';
 import AnnotationStepPopover from '@/components/annotationStepPopover';
 import { IStepInfo } from '@/types/step';
-import { store } from '@/index';
 import { UpdateProcessingStep } from '@/store/annotation/actionCreators';
 
 interface IProps {
@@ -21,10 +20,11 @@ interface IProps {
 }
 
 const StepSwitch: React.FC<IProps> = ({ stepProgress, step, stepList }) => {
+  const dispatch = useDispatch();
   const updateStep = (toStep: number) => {
-    store.dispatch(UpdateProcessingStep(toStep))
+    dispatch(UpdateProcessingStep(toStep))
   }
-  
+
   return (
     <span className={`${prefix}`}>
       <Dropdown

@@ -13,6 +13,7 @@ export enum ESubmitType {
   Quit = 4, // 左上角后退触发
   Export = 5, // 数据导出时
   StepChanged = 6, // 切换步骤
+  Save = 7, // 点击保存
 }
 // css 命名前缀
 export const prefix = 'bee';

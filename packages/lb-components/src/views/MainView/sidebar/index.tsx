@@ -1,7 +1,6 @@
 import React from 'react';
 import { Row, Collapse } from 'antd';
 import iconRectPatternSvg from '@/assets/annotation/rectTool/icon_rectPattern.svg';
-import iconRectPatternASvg from '@/assets/annotation/rectTool/icon_rectPatternA.svg';
 import iconPolygonPatternASvg from '@/assets/annotation/polygonTool/icon_polygon_a.svg';
 import pointASvg from '@/assets/annotation/pointTool/icon_point_a.svg';
 import lineASvg from '@/assets/annotation/lineTool/icon_line_a.svg';
@@ -29,7 +28,7 @@ const toolList = [
   {
     toolName: EToolName.Rect,
     commonSvg: iconRectPatternSvg,
-    selectedSvg: iconRectPatternASvg,
+    selectedSvg: iconRectPatternSvg,
   },
   // 多边形工具
   {

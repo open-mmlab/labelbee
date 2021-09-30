@@ -1,5 +1,6 @@
 import React, { useImperativeHandle, useState } from 'react';
 import { Provider } from 'react-redux';
+import { AnyAction } from 'redux';
 import configureStore from './configureStore';
 import { ToolInstance } from './store/annotation/types';
 import App from './App';
@@ -15,11 +16,11 @@ const OutputApp = (props: any, ref: any) => {
     () => {
       return {
         toolInstance,
-        pageBackwardActions: () => store.dispatch(PageBackward()),
-        pageForwardActions: () => store.dispatch(PageForward()),
+        pageBackwardActions: () => store.dispatch(PageBackward() as unknown as AnyAction),
+        pageForwardActions: () => store.dispatch(PageForward() as unknown as AnyAction),
         pageJump: (page: string) => {
           const imgIndex = ~~page - 1;
-          store.dispatch(PageJump(imgIndex));
+          store.dispatch(PageJump(imgIndex) as unknown as AnyAction);
         },
         hello: () => alert(`hello labelBee!!!`),
       };

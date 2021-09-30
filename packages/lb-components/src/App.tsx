@@ -5,7 +5,7 @@ import { AppState } from './store';
 import { InitTaskData } from './store/annotation/actionCreators';
 import MainView from '@/views/MainView';
 import { IStepInfo } from './types/step';
-import { OnSubmit, GetFileData } from './types/data';
+import { OnSubmit, GetFileData, OnSave } from './types/data';
 import { ToolInstance } from './store/annotation/types';
 
 export interface AppProps {
@@ -16,6 +16,7 @@ export interface AppProps {
   stepList: IStepInfo[];
   step: number;
   onSubmit?: OnSubmit;
+  onSave?: OnSave;
   getFileData?: GetFileData;
   headerName?: string;
   initialIndex?: number;
@@ -39,13 +40,14 @@ const App: React.FC<AppProps> = (props) => {
     step,
     stepList,
     onSubmit,
+    onSave,
     initialIndex = 0,
     toolInstance,
     setToolInstance,
     getFileData
   } = props;
   useEffect(() => {
-    store.dispatch(InitTaskData({ imgList, onSubmit, stepList, step, initialIndex, getFileData }));
+    store.dispatch(InitTaskData({ imgList, onSubmit, stepList, step, initialIndex, getFileData, onSave }));
   }, []);
 
   useEffect(() => {
