@@ -161,8 +161,9 @@ export const ToNextStep = () => (dispatch: any, getState: any) => {
  * 更新当前操作的步骤
  * @param {number} toStep
  */
-export const UpdateProcessingStep = (toStep: number) => (dispatch: any) =>
-  [
+export const UpdateProcessingStep = (toStep: number) => (dispatch: any, state: any) => {
+  const imgIndex = state()?.annotation?.imgIndex ?? 0;
+  return [
     dispatch({ type: ANNOTATION_ACTIONS.SUBMIT_RESULT }),
     dispatch({
       type: ANNOTATION_ACTIONS.SUBMIT_FILE_DATA,
@@ -171,8 +172,10 @@ export const UpdateProcessingStep = (toStep: number) => (dispatch: any) =>
     // ToSubmitFileData(ESubmitType.StepChanged),
     dispatch({ type: ANNOTATION_ACTIONS.SET_STEP, payload: { toStep } }),
     dispatch({ type: ANNOTATION_ACTIONS.CALC_STEP_PROGRESS }),
-    dispatch(loadFileData(0)),
+    // 切换步骤保持图片位置
+    dispatch(loadFileData(imgIndex, 0)),
   ];
+};
 
 /**
  * 提交当前的文件数据

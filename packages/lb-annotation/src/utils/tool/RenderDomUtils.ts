@@ -20,6 +20,7 @@ export default class RenderDomUtils {
         align-items: center;
         font-size: 30px;
         opacity: 0.7;
+        z-index: 30;
       `,
     );
     invalidDOM.innerHTML = locale.getMessagesByLocale(EMessage.InvalidImage, lang);
