@@ -12,7 +12,7 @@ import { IStepInfo } from '@/types/step';
 import { InitToolStyleConfig } from '@/store/toolStyle/actionCreators';
 import { AnnotationEngine } from '@sensetime/annotation';
 import ImageError from '@/components/ImageError';
-import ImgUtils from '@/utils/ImgUtils';
+import { ImgUtils } from '@sensetime/annotation';
 
 interface IProps extends AppState {
   imgAttribute: ImgAttributeState;
@@ -28,8 +28,9 @@ interface IProps extends AppState {
 
 const AnnotationOperation: React.FC<IProps> = (props: IProps) => {
   const [, forceRender] = useState<number>(0);
-  
-  const { imgAttribute, toolStyle, toolInstance, annotationEngine, loading, imgList, imgIndex } = props;
+
+  const { imgAttribute, toolStyle, toolInstance, annotationEngine, loading, imgList, imgIndex } =
+    props;
   const annotationRef = useRef<HTMLDivElement>(null);
   const containerRef = useRef<HTMLDivElement>(null);
   // const windowSize = useContext(viewportContext);
@@ -51,7 +52,7 @@ const AnnotationOperation: React.FC<IProps> = (props: IProps) => {
       });
 
       toolInstance.on('changeAnnotationShow', () => {
-        forceRender(s => s + 1);
+        forceRender((s) => s + 1);
       });
     }
   }, [toolInstance]);
@@ -82,10 +83,10 @@ const AnnotationOperation: React.FC<IProps> = (props: IProps) => {
       annotationEngine.setSize(size);
     }
   }, [size]);
-  
+
   /**
    * 重新加载图片，避免网络问题导致的图片无法加载
-   * @returns 
+   * @returns
    */
   const reloadImg = () => {
     const imgInfo = imgList[imgIndex];
@@ -96,16 +97,20 @@ const AnnotationOperation: React.FC<IProps> = (props: IProps) => {
     ImgUtils.load(imgInfo.url).then((imgNode) => {
       annotationEngine.setImgNode(imgNode as HTMLImageElement);
     });
-    
-  }
-  
+  };
+
   return (
     <div ref={annotationRef} className='annotationOperation'>
       <Spin spinning={loading} delay={500}>
         <div className='canvas' ref={containerRef} style={size} id='toolContainer' />
       </Spin>
       {toolInstance?.isImgError === true && (
-        <ImageError {...size} reloadImage={reloadImg} backgroundColor="#e2e2e2" ignoreOffsetY={true} />
+        <ImageError
+          {...size}
+          reloadImage={reloadImg}
+          backgroundColor='#e2e2e2'
+          ignoreOffsetY={true}
+        />
       )}
     </div>
   );

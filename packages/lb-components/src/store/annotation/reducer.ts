@@ -10,7 +10,7 @@ import { getFormatSize } from '@/components/customResizeHook';
 import { AnnotationEngine } from '@sensetime/annotation';
 import { AnnotationState, AnnotationActionTypes } from './types';
 import { message } from 'antd';
-import ImgUtils from '@/utils/ImgUtils';
+import { ImgUtils } from '@sensetime/annotation';
 
 const getStepConfig = (stepList: any[], step: number) => stepList.find((i) => i.step === step);
 
