@@ -17,6 +17,7 @@ const TEXT_ATTRIBUTE_OFFSET = {
 interface ICheckResult {
   result: Array<IPolygonData | IRect | ITagResult>;
   toolName: EToolName;
+  config: string[];
 }
 
 interface ICheckOperationProps extends IBasicToolOperationProps {
@@ -27,11 +28,13 @@ class CheckOperation extends BasicToolOperation {
   public resultList: ICheckResult[];
 
   public hoverID: string[];
+  public fillID: string[];
 
   constructor(props: ICheckOperationProps) {
     super(props);
     this.resultList = [];
     this.hoverID = [];
+    this.fillID = [];
     this.render = this.render.bind(this);
     this.drawPolygon = this.drawPolygon.bind(this);
     this.drawRect = this.drawRect.bind(this);
@@ -107,12 +110,18 @@ class CheckOperation extends BasicToolOperation {
       if (this.hoverID.includes(rect.id)) {
         thickness = 3;
       }
-      DrawUtils.drawRect(this.canvas, AxisUtils.changeRectByZoom(rect, this.zoom, this.currentPos), {
-        color: rect?.valid
-          ? AttributeUtils.getAttributeColor(rect.attribute, config?.attributeList ?? [])
-          : this.getColor(rect.attribute)?.invalid.stroke,
+      const toolColor = this.getColor(rect.attribute, config);
+      const renderRect = AxisUtils.changeRectByZoom(rect, this.zoom, this.currentPos);
+      DrawUtils.drawRect(this.canvas, renderRect, {
+        color: rect?.valid ? toolColor.valid.stroke : toolColor.invalid.stroke,
         thickness,
       });
+
+      if (this.fillID.includes(rect.id)) {
+        DrawUtils.drawRectWithFill(this.canvas, renderRect, {
+          color: rect?.valid ? toolColor.valid.fill : toolColor.invalid.fill,
+        });
+      }
     });
   }
 
@@ -130,6 +139,11 @@ class CheckOperation extends BasicToolOperation {
 
   public setHoverID(hoverID: string[]) {
     this.hoverID = hoverID;
+    this.render();
+  }
+
+  public setFillID(fillID: string[]) {
+    this.fillID = fillID;
     this.render();
   }
 
