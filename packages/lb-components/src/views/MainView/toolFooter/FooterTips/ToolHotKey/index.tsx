@@ -14,6 +14,7 @@ import lineToolShortCutTable from './line';
 import tagToolSingleShortCutTable from './tag';
 import textToolShortCutTable from './text';
 import StepUtils from '@/utils/StepUtils';
+import { footerCls } from '../../index';
 
 interface IProps {
   isSingleImg?: boolean;
@@ -154,7 +155,7 @@ const ToolHotKey: React.FC<IProps> = ({ isSingleImg, style }) => {
     );
   };
 
-  const content = stepInfo && shortCutTable[stepInfo?.tool]?.map((info: any, index: number) => setHotKey(info, index));
+  const content = <div className={`${footerCls}__hotkey-content`}>{stepInfo && shortCutTable[stepInfo?.tool]?.map((info: any, index: number) => setHotKey(info, index))}</div>;
   const containerStyle = style || {};
 
   if (!content) {
