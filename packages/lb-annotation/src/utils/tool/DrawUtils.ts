@@ -124,6 +124,28 @@ export default class DrawUtils {
     ctx.restore();
   }
 
+  /**
+   * 填充矩形框的绘制
+   * @param canvas
+   * @param rect
+   * @param options
+   */
+  public static drawRectWithFill(
+    canvas: HTMLCanvasElement,
+    rect: IRect,
+    options: Partial<{
+      color: string;
+    }> = {},
+  ): void {
+    const ctx: CanvasRenderingContext2D = canvas.getContext('2d')!;
+    const { color = DEFAULT_COLOR } = options;
+    ctx.save();
+    ctx.beginPath();
+    ctx.fillStyle = color;
+    ctx.fillRect(rect.x, rect.y, rect.width, rect.height);
+    ctx.restore();
+  }
+
   public static drawTag(canvas: HTMLCanvasElement, tagList: { keyName: string; value: string[] }[]) {
     const parentNode = canvas?.parentNode;
     const oldDom = window.self.document.getElementById('tagToolTag');
