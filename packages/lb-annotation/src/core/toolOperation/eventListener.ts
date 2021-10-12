@@ -5,13 +5,13 @@ export default class EventListener {
     this.events = {};
   }
 
-  public on(eventName: string, event: (arg0: any) => void) {
+  public on(eventName: string, event: (...arg0: any[]) => void) {
     this.events[eventName] = event;
   }
 
-  public emit(eventName: string, args?: any) {
+  public emit(eventName: string, ...args: any[]) {
     if (this.events[eventName]) {
-      this.events[eventName](args);
+      this.events[eventName](...args);
     }
   }
 }

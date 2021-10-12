@@ -1,4 +1,5 @@
 import { cloneDeep } from 'lodash';
+import RectUtils from '@/utils/tool/RectUtils';
 import CommonToolUtils from '@/utils/tool/CommonToolUtils';
 import TagUtils from '@/utils/tool/TagUtils';
 import { DEFAULT_TEXT_OFFSET } from '../../constant/annotation';
@@ -24,11 +25,15 @@ interface ICheckOperationProps extends IBasicToolOperationProps {
   resultList: ICheckResult[];
 }
 
+const newScope = 2;
+
 class CheckOperation extends BasicToolOperation {
   public resultList: ICheckResult[];
 
   public hoverID: string[];
   public fillID: string[];
+
+  private mouseHoverID?: string;
 
   constructor(props: ICheckOperationProps) {
     super(props);
@@ -42,7 +47,95 @@ class CheckOperation extends BasicToolOperation {
 
     // 设置默认 cursor
     this.setShowDefaultCursor(true);
+    this.forbidOperation = true; // 默认通过类创建禁止操作，注意： label-bee 的 AnnotationEngine 的 launchOperation 会开启操作
   }
+
+  public onMouseDown(e: MouseEvent) {
+    if (super.onMouseDown(e) || this.forbidMouseOperation || !this.imgInfo) {
+      return true;
+    }
+
+    const newMouseSelectedID = this.mouseHoverID;
+    const currentShowList = (this.resultList.find((v) => v.toolName === EToolName.Rect)?.result ?? []) as Array<
+      IRect & { isSelected: boolean }
+    >;
+
+    if (e.button === 0) {
+      let selectedID = [newMouseSelectedID];
+      let isShow = true; // 用于控制选中开关
+
+      if (newMouseSelectedID && currentShowList.find((rect) => rect.id === newMouseSelectedID && rect?.isSelected)) {
+        // 关闭已经选中的数据
+        isShow = false;
+      }
+
+      if (!newMouseSelectedID) {
+        // 点击空白处，全部清空
+        selectedID = currentShowList.map((rect) => rect.id);
+        isShow = false;
+      }
+
+
+      this.emit('setSelectedID', selectedID, isShow);
+      this.render();
+    }
+  }
+
+  // 禁止旋转操作
+  //@ts-ignore
+  public updateRotate() {
+    return;
+  }
+
+  public onMouseMove(e: MouseEvent) {
+    if (super.onMouseMove(e) || this.forbidMouseOperation || !this.imgInfo) {
+      return;
+    }
+
+    const oldMouseHoverID = this.mouseHoverID;
+    const newMouseHoverID = this.getHoverRectID(e);
+    if (oldMouseHoverID !== newMouseHoverID) {
+      this.mouseHoverID = newMouseHoverID;
+      let hoverID = [newMouseHoverID];
+      // TODO：外层特殊判断，跟 mousedown 操作有区别
+      if (!newMouseHoverID) {
+        hoverID = [];
+      }
+      this.emit('setHoverID', hoverID);
+      this.render();
+    }
+  }
+
+  // 获取当前 hoverID
+  public getHoverRectID = (e: MouseEvent) => {
+    const coordinate = this.getCoordinateUnderZoom(e);
+    const currentShowList = this.resultList.find((v) => v.toolName === EToolName.Rect)?.result ?? [];
+
+    if (currentShowList.length > 0) {
+      const hoverList = currentShowList.filter((rect) =>
+        RectUtils.isInRect(coordinate, rect as IRect, newScope, this.zoom),
+      ) as IRect[];
+
+      if (hoverList.length === 0) {
+        return '';
+      }
+
+      if (hoverList.length === 1) {
+        return hoverList[0].id;
+      }
+
+      if (hoverList.length > 1) {
+        // 判断矩形的大小, 矩形面积小的优先
+        const rectSizeList = hoverList
+          .map((rect) => ({ size: rect.width * rect.height, id: rect.id }))
+          .sort((a, b) => a.size - b.size);
+
+        return rectSizeList[0].id;
+      }
+    }
+
+    return '';
+  };
 
   public setResult(result: ICheckResult[]) {
     this.resultList = cloneDeep(result);
