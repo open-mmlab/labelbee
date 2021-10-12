@@ -327,7 +327,7 @@ export class CoordinateUtils {
     polygonToolConfig: IPolygonConfig,
   ) {
     const { pointList } = polygon;
-    const { lineType } = polygonToolConfig;
+    const lineType = polygonToolConfig?.lineType;
 
     if (pointList.length === 0) {
       return curCoord;

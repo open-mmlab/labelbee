@@ -1494,7 +1494,7 @@ class LineToolOperation extends BasicToolOperation {
       }
     }
 
-    this.KeyboardEventOnCreatingTriggerRender(e);
+    this.keyboardEventWhileLineCreating(e);
   };
 
   /** 创建无效线条，activeLineID存在时为续标（没有按ctrl时不会修改其有无效性），不会设置无效的属性 */
@@ -1532,7 +1532,7 @@ class LineToolOperation extends BasicToolOperation {
     }
 
     if (this.isCreate) {
-      this.KeyboardEventOnCreatingTriggerRender(e);
+      this.keyboardEventWhileLineCreating(e);
     }
 
     if (this.isActive) {
@@ -1565,13 +1565,13 @@ class LineToolOperation extends BasicToolOperation {
   }
 
   /**
-   * 在线条创建时候的键盘事件。
+   * 在线条创建时候的键盘事件, 并触发渲染
    *  1.设为无效。
    *  2.Alt取消边缘吸附。
    *  3.Shift绘制垂直/水平线
    * @param e
    */
-  public KeyboardEventOnCreatingTriggerRender(e: KeyboardEvent) {
+  public keyboardEventWhileLineCreating(e: KeyboardEvent) {
     if (!this.isCreate) {
       return;
     }
