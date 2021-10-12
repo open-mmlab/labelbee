@@ -4,7 +4,7 @@ import {
 } from 'antd';
 import { connect } from 'react-redux';
 import { throttle } from 'lodash';
-import React from 'react';
+import React, {useEffect} from 'react';
 import { ImgAttributeState } from '@/store/imgAttribute/types';
 import ImgAttribute from '@/store/imgAttribute/actionCreators';
 import { store } from '@/index';
@@ -75,6 +75,12 @@ const ImgAttributeInfo = (props: IProps) => {
       svg: ZoomUpSvg,
     },
   ];
+
+  useEffect(() => {
+    return () => {
+      store.dispatch(ImgAttribute.InitImgAttribute());
+    }
+  }, [])
 
   return (
     <div>
