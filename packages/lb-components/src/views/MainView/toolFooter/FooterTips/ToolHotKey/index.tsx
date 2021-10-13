@@ -4,7 +4,7 @@ import React, { useState } from 'react';
 import { useSelector } from 'react-redux';
 // import styles from './index.less';
 
-import hotKeySvg from '@/assets/annotation/toolHotKeyIcon/icon_kj.svg';
+import hotKeySvg from '@/assets/annotation/toolHotKeyIcon/icon_kj1.svg';
 import hotKeyHoverSvg from '@/assets/annotation/toolHotKeyIcon/icon_kj_h.svg';
 import { EToolName } from '@/data/enums/ToolType';
 import rectToolShortcutTable from './rectToolShortCutTable';

@@ -13,6 +13,7 @@ import saturationSvg from '@/assets/annotation/image/saturation.svg';
 import contrastSvg from '@/assets/annotation/image/contrast.svg';
 import brightnessSvg from '@/assets/annotation/image/brightness.svg';
 import ZoomUpSvg from '@/assets/attributeIcon/zoomUp.svg';
+import originalPic from '@/assets/annotation/image/icon_yuantu.svg';
 
 interface IProps {
   imgAttribute: ImgAttributeState;
@@ -105,6 +106,7 @@ const ImgAttributeInfo = (props: IProps) => {
                 step={info.step}
                 value={info.value}
                 onChange={info.onChange}
+                trackStyle={{background: "#666fff"}}
               />
             </Col>
             <Col span={4}>
@@ -129,7 +131,11 @@ const ImgAttributeInfo = (props: IProps) => {
         >
           <Col span={18}>
             <span className="singleTool">
-              <QuestionOutlined rotate={180} />
+              <img
+                src={originalPic}
+                width={16}
+                style={{ marginTop: '-2px' }}
+              />
               <span className="toolName">按原图比例显示</span>
             </span>
           </Col>
