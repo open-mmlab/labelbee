@@ -13,23 +13,20 @@ class TagOperation extends BasicToolOperation {
 
   public labelSelectedList: number[]; // 用于展示侧边栏标签选中高亮状态
 
-  public sourceID: string; // 表示当亲标签工具的依赖
-
   constructor(props: ITagOperationProps) {
     super(props);
     this.config = CommonToolUtils.jsonParser(props.config);
     this.tagResult = [];
     this.labelSelectedList = [];
-    this.sourceID = '';
 
     // 设置默认 cursor
     this.setShowDefaultCursor(true);
   }
 
   public setResult(tagResult: any[], isInitData = false) {
-    if (isInitData === true && tagResult.length === 0) {
+    if (isInitData === true && tagResult.length === 0 && this.basicResult) {
       // 注意，该获取方式是需要拉取所有的 basicResultList
-      tagResult = TagUtils.getDefaultTagResult(this.config.inputList, []);
+      tagResult = TagUtils.getDefaultTagResult(this.config.inputList, [this.basicResult]);
     }
 
     this.tagResult = tagResult;
@@ -54,7 +51,11 @@ class TagOperation extends BasicToolOperation {
     return this.tagResult.filter((v) => {
       const basicSourceID = `${v.sourceID}`;
       return CommonToolUtils.isSameSourceID(basicSourceID, this.sourceID);
-    })[0];
+    })[0] ?? {};
+  }
+
+  public get sourceID() {
+    return CommonToolUtils.getSourceID(this.basicResult)
   }
 
   public onKeyDown(e: KeyboardEvent) {
@@ -236,7 +237,7 @@ class TagOperation extends BasicToolOperation {
     }
 
     const dom = document.createElement('div');
-    const tagInfoList = TagUtils.getTagNameList(this.currentTagResult.result || {}, this.config.inputList);
+    const tagInfoList = TagUtils.getTagNameList(this.currentTagResult?.result ?? {}, this.config.inputList);
 
     dom.innerHTML =
       tagInfoList.reduce((acc: string, cur: { keyName: string; value: string[] }) => {

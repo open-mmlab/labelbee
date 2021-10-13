@@ -16,11 +16,7 @@ import { IStepInfo } from '@/types/step';
 import { ToolInstance } from '@/store/annotation/types';
 
 interface IProps {
-  // toolName: EToolName;
   isBegin?: boolean;
-  bindKeydownEvents?: boolean;
-  toolName: EToolName;
-  toolInstance: ToolInstance;
   stepInfo: IStepInfo;
 }
 
@@ -31,7 +27,7 @@ enum EColor {
 
 const HeaderOption: React.FC<IProps> = (props) => {
   const [toolHover, setToolHover] = useState('');
-  const { toolName, stepInfo } = props;
+  const { stepInfo } = props;
   const dispatch = useDispatch();
   const {
     annotation: { toolInstance, onSave },
@@ -40,7 +36,7 @@ const HeaderOption: React.FC<IProps> = (props) => {
     imgAttribute: state.imgAttribute,
   }));
 
-  const isBegin = props.isBegin || toolName === EToolName.Tag;
+  const isBegin = props.isBegin || stepInfo?.tool === EToolName.Tag;
 
   const updateRotate = () => {
     if (stepInfo.dataSourceStep !== 0) {

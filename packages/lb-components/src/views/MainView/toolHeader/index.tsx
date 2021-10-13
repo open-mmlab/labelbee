@@ -89,7 +89,7 @@ const ToolHeader: React.FC<IToolHeaderProps> = ({
         {stepList.length > 1 && (
           <>
             <StepSwitch stepProgress={stepProgress} />
-            <NextStep stepProgress={stepProgress} />
+            <NextStep stepProgress={stepProgress} stepList={stepList}/>
           </>
         )}
 
