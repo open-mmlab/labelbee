@@ -19,9 +19,14 @@ import { IStepInfo } from '@/types/step';
 
 interface INextStep {
   stepProgress: number;
+  stepList: IStepInfo[];
 }
 
-const NextStep: React.FC<INextStep> = ({ stepProgress }) => {
+const NextStep: React.FC<INextStep> = ({ stepProgress, stepList }) => {
+  if (stepList.length < 2) {
+    return null;
+  }
+
   return (
     <Button
       type='primary'
@@ -46,7 +51,9 @@ interface IToolHeaderProps {
   annotationEngine: AnnotationEngine;
   stepProgress: number;
   toolName: EToolName;
+  stepInfo: IStepInfo;
   stepList: IStepInfo[];
+  step: number;
 }
 
 const ToolHeader: React.FC<IToolHeaderProps> = ({
@@ -55,8 +62,9 @@ const ToolHeader: React.FC<IToolHeaderProps> = ({
   headerName,
   imgList,
   stepProgress,
-  toolName,
+  stepInfo,
   stepList,
+  step,
 }) => {
   // render 数据展示
   const currentOption = <ExportData exportData={exportData} />;
@@ -91,7 +99,7 @@ const ToolHeader: React.FC<IToolHeaderProps> = ({
           className={`${prefix}-header__operationNode`}
           style={{ left: window.innerWidth / 2 - 174 / 2 }}
         >
-          <HeaderOption toolName={toolName} />
+          <HeaderOption stepInfo={stepInfo} />
         </div>
       </div>
     </div>
@@ -104,6 +112,7 @@ const mapStateToProps = (state: AppState) => ({
   stepProgress: state.annotation.stepProgress,
   toolName: state.annotation.stepList[state.annotation.step - 1]?.tool,
   stepList: state.annotation.stepList,
+  stepInfo: state.annotation.stepList[state.annotation.step - 1],
 });
 
 export default connect(mapStateToProps)(ToolHeader);

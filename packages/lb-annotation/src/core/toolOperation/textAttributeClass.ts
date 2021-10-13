@@ -194,6 +194,7 @@ export default class TextAttributeClass {
   }
 
   public textKeyDown = (e: KeyboardEvent) => {
+    e.stopPropagation();
     switch (e.keyCode) {
       case EKeyCode.Enter:
         this.submitTextarea();

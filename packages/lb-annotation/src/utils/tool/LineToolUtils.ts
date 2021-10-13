@@ -1,7 +1,6 @@
-import { EDependPattern, ELineTypes, EToolName } from '@/constant/tool';
+import { ELineTypes, EToolName } from '@/constant/tool';
 import { createSmoothCurvePointsFromPointList } from './polygonTool';
 import PolygonUtils from './PolygonUtils';
-import DependencyUtils from './DependencyUtils';
 import MathUtils from '../MathUtils';
 
 export enum EStatus {
@@ -359,21 +358,25 @@ class LineToolUtils {
   public static inArea = ({ top, left, right, bottom }: IRectArea, { x, y }: IPoint) =>
     y >= top && y <= bottom && x >= left && x <= right;
 
-  public static newPointPosition = (
-    isStraight: boolean,
+  /**
+   * 获取水平、垂直线的坐标点
+   * @param isStraight
+   * @param lastPoint
+   * @param nextPoint
+   * @param absNextPoint
+   * @param renderLastPoint
+   */
+  public static getVHPoint = (
     lastPoint: ICoordinate,
     nextPoint: ICoordinate,
     absNextPoint: ICoordinate,
     renderLastPoint: ICoordinate,
   ) => {
-    if (isStraight) {
-      const angle = LineToolUtils.getAngle(lastPoint, absNextPoint);
-      if (Math.abs(angle) < 45) {
-        return { ...nextPoint, y: renderLastPoint.y };
-      }
-      return { ...nextPoint, x: renderLastPoint.x };
+    const angle = LineToolUtils.getAngle(lastPoint, absNextPoint);
+    if (Math.abs(angle) < 45) {
+      return { ...nextPoint, y: renderLastPoint.y };
     }
-    return nextPoint;
+    return { ...nextPoint, x: renderLastPoint.x };
   };
 
   public static getAngle = (startPoint: ICoordinate, endPoint: ICoordinate) => {

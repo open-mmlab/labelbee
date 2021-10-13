@@ -1,4 +1,9 @@
-import { IPolygonPoint } from '../../types/tool/polygon';
+import { IPolygonPoint, IPolygonData, IPolygonConfig } from '../../types/tool/polygon';
+import { EToolName, ELineTypes } from '@/constant/tool';
+import MathUtils from '../MathUtils';
+import PolygonUtils from './PolygonUtils';
+import LineToolUtils, { POINT_RADIUS } from './LineToolUtils';
+import { isInPolygon } from './polygonTool';
 
 export default class AxisUtils {
   /**
@@ -215,5 +220,209 @@ export default class AxisUtils {
       return true;
     }
     return false;
+  }
+}
+
+export class CoordinateUtils {
+  private currentPos: ICoordinate;
+  private zoom: number;
+  private basicImgInfo: any;
+  private basicResult?: IRect | IPolygonData;
+  private dependToolConfig?: IRectConfig | IPolygonConfig;
+  private dependToolName: EToolName | '';
+
+  constructor(props: any) {
+    this.currentPos = props.currentPos;
+    this.zoom = props.zoom;
+    this.basicImgInfo = props.basicImgInfo;
+    this.dependToolName = '';
+  }
+
+  get isDependPolygon() {
+    return this.dependToolName === EToolName.Polygon;
+  }
+
+  get isDependRect() {
+    return this.dependToolName === EToolName.Rect;
+  }
+
+  get isDependOriginalImage() {
+    return this.dependToolName === '';
+  }
+
+  /**
+   * 渲染坐标 => 绝对坐标
+   * @param renderCoordinate
+   */
+  public getAbsCoord(renderCoord: ICoordinate) {
+    return {
+      x: (renderCoord.x - this.currentPos.x) / this.zoom,
+      y: (renderCoord.y - this.currentPos.y) / this.zoom,
+    };
+  }
+
+  /**
+   * 绝对坐标 => 渲染坐标
+   * @param absoluteCoordinate
+   */
+  public getRenderCoord(absCoord: ICoordinate) {
+    return {
+      x: absCoord.x * this.zoom + this.currentPos.x,
+      y: absCoord.y * this.zoom + this.currentPos.y,
+    };
+  }
+
+  /**
+   * 在矩形内的点
+   * @param absCoord
+   * @param rect
+   */
+  public coordInsideRect(absCoord: ICoordinate, rect: { x: number; y: number; height: number; width: number }) {
+    const { x, y, width, height } = rect;
+    return {
+      x: MathUtils.withinRange(absCoord.x, [x, x + width]),
+      y: MathUtils.withinRange(absCoord.y, [y, y + height]),
+    };
+  }
+
+  public getPolygonPointList(lineType: ELineTypes, pointList: IPoint[]) {
+    return lineType === ELineTypes.Curve ? PolygonUtils.createSmoothCurvePointsFromPointList(pointList) : pointList;
+  }
+
+  /**
+   * 计算线段与线段的交点
+   * @param curCoord
+   * @param preCoord
+   * @param polygonPointListToLineList
+   */
+  public getIntersection(curCoord: ICoordinate, preCoord: ICoordinate, polygonPointListToLineList: IPoint[]) {
+    const pointA = this.getRenderCoord(preCoord);
+    const pointB = this.getRenderCoord(curCoord);
+
+    const drawingLine = {
+      pointA,
+      pointB,
+    };
+
+    const intersection = LineToolUtils.calcOptimalIntersection(
+      polygonPointListToLineList,
+      drawingLine,
+      pointA,
+      POINT_RADIUS,
+      this.zoom,
+    );
+
+    return intersection;
+  }
+
+  /**
+   * 在多边形内的点
+   * @param absCoord
+   * @param rect
+   */
+  public coordInsidePolygon(
+    curCoord: ICoordinate,
+    preCoord: ICoordinate,
+    polygon: IPolygonData,
+    polygonToolConfig: IPolygonConfig,
+  ) {
+    const { pointList } = polygon;
+    const lineType = polygonToolConfig?.lineType;
+
+    if (pointList.length === 0) {
+      return curCoord;
+    }
+
+    const polygonPointList = this.getPolygonPointList(lineType, pointList);
+    const isInPolygon = PolygonUtils.isInPolygon(curCoord, polygonPointList);
+
+    if (isInPolygon) {
+      return curCoord;
+    }
+
+    const polygonPointListToLineList = polygonPointList
+      .concat(polygonPointList[0])
+      .map((i: any) => this.getRenderCoord(i));
+
+    const intersection = this.getIntersection(curCoord, preCoord, polygonPointListToLineList);
+
+    /** 判断交点，如果存在直接返回 */
+    if (intersection) {
+      return this.getAbsCoord(intersection?.point);
+    }
+
+    return curCoord;
+  }
+
+  public coordInsideImage(coord: ICoordinate) {
+    return this.coordInsideRect(coord, { ...this.basicImgInfo, x: 0, y: 0 });
+  }
+
+  /**
+   * 根据依赖工具计算下一个点的绝对坐标
+   * @param curAbsCoord
+   * @param preAbsCoord
+   */
+  public getNextCoordByDependTool(curAbsCoord: ICoordinate, preAbsCoord: ICoordinate) {
+    if (this.isDependRect) {
+      return this.coordInsideRect(curAbsCoord, this.basicResult as IRect);
+    }
+
+    if (this.isDependPolygon) {
+      return this.coordInsidePolygon(
+        curAbsCoord,
+        preAbsCoord,
+        this.basicResult as IPolygonData,
+        this.dependToolConfig as IPolygonConfig,
+      );
+    }
+
+    if (this.isDependOriginalImage) {
+      return this.coordInsideImage(curAbsCoord);
+    }
+  }
+
+  public setDependInfo(dependToolName: EToolName | '', dependToolConfig?: IRectConfig | IPolygonConfig) {
+    this.dependToolName = dependToolName ?? '';
+    this.dependToolConfig = dependToolName ? dependToolConfig : undefined;
+  }
+
+  public setBasicImgInfo(basicImgInfo: any) {
+    this.basicImgInfo = basicImgInfo;
+  }
+
+  public setBasicResult(basicResult: any) {
+    this.basicResult = basicResult;
+  }
+
+  public setZoomAndCurrentPos(zoom: number, currentPos: ICoordinate) {
+    this.zoom = zoom;
+    this.currentPos = currentPos;
+  }
+
+  public isCoordInsideTarget(coord: ICoordinate) {
+    if (this.isDependPolygon) {
+      return this.isInBasicPolygon(coord);
+    }
+
+    if (this.isDependRect) {
+      const { x, y, width, height } = this.basicResult as IRect;
+      const rectHorizontalRange = [x, x + width];
+      const rectVerticalRange = [y, y + height];
+      return MathUtils.isInRange(coord.x, rectHorizontalRange) && MathUtils.isInRange(coord.y, rectVerticalRange);
+    }
+
+    return (
+      MathUtils.isInRange(coord.x, [0, this.basicImgInfo.width]) &&
+      MathUtils.isInRange(coord.y, [0, this.basicImgInfo.height])
+    );
+  }
+
+  public isInBasicPolygon(coord: ICoordinate) {
+    return isInPolygon(
+      coord,
+      (this.basicResult as IPolygonData)?.pointList || [],
+      (this.dependToolConfig as IPolygonConfig)?.lineType,
+    );
   }
 }
