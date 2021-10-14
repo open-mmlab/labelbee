@@ -84,6 +84,13 @@ const stepList = [
    }
 ];
 
+const style = {
+  layout: {},
+  header: {},
+  sider: {},
+  footer: {}
+};
+
 const App = () => {
    /**
     * 监听数据提交操作： 翻页 / 导出所有数据
@@ -91,8 +98,8 @@ const App = () => {
     * @param {ESubmitType} submitType 触发 onSubmit 的方向判断
     * @param {number} imgIndex 提交结果的图片下标
    */
-   const onSubmit = (data: IData[], submitType: ESubmitType, imgIndex: number) => {
-   };
+   const onSubmit = (data: IData[], submitType: ESubmitType, imgIndex: number) => {};
+   const onSave = (data: IData, submitType: ESubmitType, imgIndex: number, datas: Idata[]) => {};
 
    const goBack = (data: IData[]) => {
       // 页面内自带跳转的回调函数, data 表示整个任务的所有标注信息
@@ -133,6 +140,7 @@ const App = () => {
       <AnnotationOperation
          ref={childrenRef}
          onSubmit={onSubmit}
+         onSave={onSave}
          imgList={imgList}
          step={step}
          stepList={stepList}
@@ -145,13 +153,33 @@ const App = () => {
          header = {<Header>};
          footer = {<Footer>};
          sider = {null}; // 传入 null 则隐藏
-          className='layout' 
+         className='layout'
+         style={style}
       />
    );
 }
 
 export default App;
 ```
+
+|  参数             | 说明                                     | 类型 ↑↑↑↑↑↑    |
+|  --------------  | -------------------------------------   |  ----------- |
+|  ref             | 工具类 可以调用工具内部方法                  |             |
+|  onSubmit        | 翻页 保存的时候触发 data 表示当前标注的信息   |  onSubmit    |
+|  onSubmit        | 翻页 保存的时候触发 data 表示当前标注的信息   |  onSave      |
+|  imgList         | 标注文件对象                              |  IFileItem   |
+|  step            | 标注当前的步骤                            |  Number      |
+|  stepList        | 所有步骤和 step 关联                      |  stepList                               |  stepList
+|  goBack          | 页面内自带跳转的回调函数                    |  goBack      |
+|  getFileData     | 支持外部传入获取文件接口                    |  getFileData |
+|  headerName      | 标题                                     | string       |
+|  exportData      | 导出按钮   不写则隐藏导出按钮                | {}          |
+|  initialIndex    | 当前图片列表的 index 初始化时候使用          |  number     |
+|  header          | 顶部菜单                                  |  RectNote    |
+|  footer          | footer                                  |  RectNote    |
+|  sider           | 侧边栏                                   |  RectNote    |
+|  style           | 工具栏样式                                |  Object    |
+|  className       | className                               |  string    |
 
 
 ```ts
