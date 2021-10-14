@@ -7,6 +7,7 @@ $prefix: bee;
 .#{$prefix}-layout {
   position: relative;
   overflow: hidden;
+  height: 100vh;
 
   &__header,
   &__footer {
