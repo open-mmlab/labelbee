@@ -1106,7 +1106,7 @@ class LineToolOperation extends BasicToolOperation {
   };
 
   public historyChanged(funcName: 'undo' | 'redo') {
-    const enableKeyName = `${funcName}Enabled`;
+    const enableKeyName = `${funcName}Enabled` as 'undoEnabled' | 'redoEnabled';
 
     if (this.isCreate) {
       if (this.actionsHistory && this.actionsHistory[enableKeyName]) {
@@ -1455,7 +1455,6 @@ class LineToolOperation extends BasicToolOperation {
 
   public setKeyDownStatus(e: KeyboardEvent, value?: boolean) {
     this.isShift = value ?? e.keyCode === EKeyCode.Shift;
-    this.isCtrl = value ?? e.keyCode === EKeyCode.Ctrl;
   }
 
   /** 续标当前激活的线条 */
