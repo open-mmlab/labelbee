@@ -64,7 +64,7 @@ class LineToolUtils {
    * @param pointRadius 点的半径
    */
   public static calcOptimalIntersection = (
-    pointList: ILinePoint[],
+    pointList: IPoint[] | ILinePoint[],
     matchLine: IBasicLine,
     matchPoint: ICoordinate,
     pointRadius: number,
