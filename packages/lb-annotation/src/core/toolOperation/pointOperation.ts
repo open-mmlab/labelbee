@@ -301,10 +301,12 @@ class PointOperation extends BasicToolOperation {
         this.render();
         break;
       default: {
-        const keyCode2Attribute = AttributeUtils.getAttributeByKeycode(keyCode, this.config.attributeList);
+        if (this.config.attributeConfigurable) {
+          const keyCode2Attribute = AttributeUtils.getAttributeByKeycode(keyCode, this.config.attributeList);
 
-        if (keyCode2Attribute !== undefined) {
-          this.setDefaultAttribute(keyCode2Attribute);
+          if (keyCode2Attribute !== undefined) {
+            this.setDefaultAttribute(keyCode2Attribute);
+          }
         }
         break;
       }

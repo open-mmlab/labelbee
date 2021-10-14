@@ -215,7 +215,7 @@ export const annotationReducer = (
 
       if (basicResultList?.length > 0) {
         const sourceID = basicResultList[basicIndex]?.id;
-        const newResultData = exportResult.map((i: any) => ({ ...i, i, sourceID }));
+        const newResultData = exportResult.map((i: any) => ({ ...i, sourceID }));
         previousResultList = _.cloneDeep(resultList).filter((i: any) => i.sourceID !== sourceID);
         previousResultList.push(...newResultData);
       }
@@ -316,7 +316,7 @@ export const annotationReducer = (
 
       annotationEngine.launchOperation();
       if (dataSourceStep && tool) {
-        stepBasicResultList = fileResult[`step_${dataSourceStep}`]?.result;
+        stepBasicResultList = fileResult[`step_${dataSourceStep}`]?.result ?? [];
 
         if (stepBasicResultList?.length > 0) {
           annotationEngine.setBasicInfo(dependStepConfig.tool, stepBasicResultList[basicIndex]);
