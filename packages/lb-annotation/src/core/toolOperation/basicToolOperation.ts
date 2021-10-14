@@ -828,6 +828,7 @@ class BasicToolOperation extends EventListener {
     const newZoom = ZoomUtils.zoomChanged(this.zoom, isZoomIn, growthMode);
     this.wheelChangePos(this.getGetCenterCoordinate(), newZoom > this.zoom ? 1 : -1, newZoom);
     this.render();
+    this.renderBasicCanvas();
   };
 
   public renderCursorLine(lineColor = this.style.lineColor[0] ?? '') {
@@ -876,6 +877,7 @@ class BasicToolOperation extends EventListener {
       this.initImgPos();
     }
     this.render();
+    this.renderBasicCanvas();
   }
 
   public clearResult(sendMessage?: boolean | string) {
@@ -920,6 +922,10 @@ class BasicToolOperation extends EventListener {
     this.config = CommonToolUtils.jsonParser(config);
   }
 
+  /**
+   * 进行图片旋转操作
+   * @returns 
+   */
   public updateRotate() {
     if (this.dataList.length > 0) {
       this.emit('messageInfo', locale.getMessagesByLocale(EMessage.NoRotateNotice, this.lang));
