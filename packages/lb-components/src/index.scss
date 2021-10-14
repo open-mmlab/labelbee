@@ -7,6 +7,7 @@ $prefix: bee;
 .#{$prefix}-layout {
   position: relative;
   overflow: hidden;
+  height: 100vh;
 
   &__header,
   &__footer {
@@ -22,6 +23,13 @@ $prefix: bee;
     max-width: 440px;
     background: transparent;
     overflow: hidden;
+    position: relative;
+    z-index: 10;
+    border-top: 1px solid #e2e2e2;
+
+    .ant-collapse-borderless > .ant-collapse-item {
+      border-bottom: 1px solid #eee;
+    }
   }
 
   &__content {
@@ -246,6 +254,16 @@ $prefix: bee;
             }
           }
         }
+
+        .ant-slider-handle {
+          border-color: #666fff;
+        }
+        .ant-slider-handle.ant-tooltip-open {
+          border-color: #666fff;
+        }
+        .ant-slider-handle:focus {
+          border-color: #666fff;
+        }
       }
     }
   }
@@ -269,7 +287,8 @@ $prefix: bee;
 
   &__horizontal {
     width: 100%;
-    border: 1px solid #eee;
+    height: 1px;
+    background: #eee;
   }
 
   .dashHorizontal {
@@ -317,7 +336,7 @@ $prefix: bee;
         opacity: 1;
         border-radius: 2px;
         text-align: center;
-        line-height: 20px;
+        line-height: 18px;
       }
 
       .sensebee-radio-label {
@@ -426,6 +445,29 @@ $prefix: bee;
       font-size: 12px;
       color: rgba(204, 204, 204, 1);
     }
+
+    .toolTextAreaBox {
+      position: relative;
+      padding-bottom: 20px;
+      border: 1px solid #d9d9d9;
+      border-radius: 2px;
+
+      &:hover {
+        border-color: #40a9ff;
+      }
+
+      .textAreaFooter {
+        bottom: 0;
+        height: 20px;
+      }
+
+      .ant-input {
+        border: none;
+      }
+    }
+    .toolTextAreaBoxFocus {
+      border-color: #40a9ff;
+    }
   }
 
   // .clearText {
@@ -499,7 +541,6 @@ $hotkey-container-padding: 7px;
 
 // 工具粗细透明度调整
 .toolStyle {
-  padding: 0 10px;
   width: 100%;
   display: flex;
   flex-direction: column;
@@ -745,7 +786,7 @@ $hotkey-container-padding: 7px;
 
     .ant-collapse > .ant-collapse-item > .ant-collapse-header {
       position: relative;
-      padding: 12px 16px 12px 12px;
+      //padding: 12px 16px 12px 12px;
       color: rgba(0, 0, 0, 0.85);
       line-height: 1.5715;
       cursor: pointer;

@@ -89,29 +89,33 @@ const TextAreaFormat = (props: IProps) => {
           focus: onFocus,
         })}
       >
-        <Input.TextArea
-          style={{ resize: 'none', height: 120, wordBreak: 'break-all' }}
-          maxLength={TEXT_ATTRIBUTE_MAX_LENGTH}
-          onKeyDownCapture={(e) => {
-            e.stopPropagation();
-          }}
-          onKeyUpCapture={(e) => {
-            e.stopPropagation();
-          }}
-          onChange={(e) => {
-            onChange(e.target.value);
-            setTextLength(e.target.value.length);
-          }}
-          onFocus={(e) => setOnFocus(true)}
-          onBlur={(e) => {
-            checkText(e);
-            setOnFocus(false);
-          }}
-          value={textValue}
-          onKeyDown={keyDown}
-          className={error ? 'warning' : ''}
-        />
-        <div className="textAreaFooter">
+        <div className={classnames({
+          toolTextAreaBox: true,
+          toolTextAreaBoxFocus: onFocus
+        })}>
+          <Input.TextArea
+            style={{resize: 'none', height: 120, wordBreak: 'break-all'}}
+            maxLength={TEXT_ATTRIBUTE_MAX_LENGTH}
+            onKeyDownCapture={(e) => {
+              e.stopPropagation();
+            }}
+            onKeyUpCapture={(e) => {
+              e.stopPropagation();
+            }}
+            onChange={(e) => {
+              onChange(e.target.value);
+              setTextLength(e.target.value.length);
+            }}
+            onFocus={(e) => setOnFocus(true)}
+            onBlur={(e) => {
+              checkText(e);
+              setOnFocus(false);
+            }}
+            value={textValue}
+            onKeyDown={keyDown}
+            className={error ? 'warning' : ''}
+          />
+          <div className="textAreaFooter">
           <span className="wordCount">
             <span
               className={
@@ -125,6 +129,7 @@ const TextAreaFormat = (props: IProps) => {
             /
             <span>{TEXT_ATTRIBUTE_MAX_LENGTH}</span>
           </span>
+          </div>
         </div>
       </div>
     </div>
