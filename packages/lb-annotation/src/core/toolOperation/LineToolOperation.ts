@@ -4,7 +4,7 @@
  */
 
 import _ from 'lodash';
-import { ELineColor, EDependPattern, ELineTypes, ETextType, EToolName } from '@/constant/tool';
+import { ELineColor, ELineTypes, ETextType, EToolName } from '@/constant/tool';
 import ActionsHistory from '@/utils/ActionsHistory';
 import uuid from '@/utils/uuid';
 import EKeyCode from '@/constant/keyCode';
@@ -18,7 +18,6 @@ import {
 import CommonToolUtils from '../../utils/tool/CommonToolUtils';
 import CanvasUtils from '../../utils/tool/CanvasUtils';
 import DrawUtils from '../../utils/tool/DrawUtils';
-import DependencyUtils from '../../utils/tool/DependencyUtils';
 import StyleUtils from '../../utils/tool/StyleUtils';
 import AttributeUtils from '../../utils/tool/AttributeUtils';
 import TextAttributeClass from './textAttributeClass';
@@ -73,7 +72,7 @@ class LineToolOperation extends BasicToolOperation {
     }
     const color = this.getLineColorByAttribute({ attribute: this.defaultAttribute, valid: !!isActiveLineValid });
 
-    activeLine.map((point) => Object.assign(point, this.getRenderAxis(point)));
+    activeLine.map((point) => Object.assign(point, this.coordUtils.getRenderCoord(point)));
     this.updateActiveArea();
     this.drawLine(activeLine, coord, color, true, true);
     this.drawLineNumber(activeLine[0], order, color, '', this.defaultAttribute, isActiveLineValid);
@@ -86,25 +85,38 @@ class LineToolOperation extends BasicToolOperation {
     }
   };
 
+  /** 线条是否被选中 */
+  get isLineSelected() {
+    return this.selectedID && this.activeLine;
+  }
+
+  /** 选中点线条的点 */
+  get selectedLinePoints() {
+    return this.activeLine ? this.getPointList(this.activeLine) : [];
+  }
+
   /**
-   * 绘制hover圆点
+   * 绘制hover的点
    * @param coord
    */
-  public drawPointWhenHover = (coord: ICoordinate) => {
-    if (!coord || this.isMousedown || !this.activeLine || this.activeLine?.length < 2) {
+  public drawHoverPoint = (coord: ICoordinate) => {
+    if (this.isMousedown) {
       return;
     }
 
-    const pointList = this.getPointList(this.activeLine);
-    const hoverPoint = this.activeLine.find(
-      (i: ILinePoint) => LineToolUtils.calcDistance(this.getRenderAxis(i), coord) <= POINT_ACTIVE_RADIUS,
-    );
-    let nearestPoint;
-    if (!hoverPoint && this.activeLine) {
-      nearestPoint = this.findNearestPoint(pointList, coord);
+    if (coord && this.isLineSelected) {
+      const pointList = this.getPointList(this.activeLine!);
+
+      const hoverPoint = this.activeLine!.find(
+        (i: ILinePoint) => LineToolUtils.calcDistance(this.coordUtils.getRenderCoord(i), coord) <= POINT_ACTIVE_RADIUS,
+      );
+      let nearestPoint;
+      if (!hoverPoint && this.activeLine) {
+        nearestPoint = this.findNearestPoint(pointList, coord);
+      }
+      this.hoverPointID = hoverPoint ? hoverPoint.id : undefined;
+      this.cursor = hoverPoint ? undefined : nearestPoint?.point;
     }
-    this.hoverPointID = hoverPoint ? hoverPoint.id : undefined;
-    this.cursor = hoverPoint ? undefined : nearestPoint?.point;
   };
 
   private lineList: ILine[] = [];
@@ -128,24 +140,15 @@ class LineToolOperation extends BasicToolOperation {
 
   private actionsHistory?: ActionsHistory;
 
-  private coordsClickedActiveArea: boolean = false;
+  private coordsInsideActiveArea: boolean = false;
 
-  private hoverEdgeIndex: number = -1;
+  private hoverLineSegmentIndex: number = -1;
 
-  /** 临时点锁定，避免由于点击延迟造成的坐标偏移 */
   private isShift: boolean = false;
-
-  private isCtrl: boolean = false;
-
-  private isAlt: boolean = false;
 
   private hoverPointID?: string;
 
-  private lineMoved: boolean;
-
-  private dependPattern: EDependPattern;
-
-  private dependConfig?: any;
+  private dependToolConfig?: any;
 
   private isReference: boolean = false;
 
@@ -154,15 +157,13 @@ class LineToolOperation extends BasicToolOperation {
   private textEditingID?: string;
 
   private isLineValid: boolean;
-
-  private hoverID?: string;
+  private lineDragging: boolean;
 
   constructor(props: ILineOperationProps) {
     super(props);
     this.status = EStatus.None;
     this.isMousedown = false;
-    this.dependPattern = EDependPattern.dependOrigin;
-    this.lineMoved = false;
+    this.lineDragging = false;
     this.isLineValid = true;
     this.setConfig(props.config);
     this.prevAxis = {
@@ -173,7 +174,7 @@ class LineToolOperation extends BasicToolOperation {
     this.updateSelectedTextAttribute = this.updateSelectedTextAttribute.bind(this);
     this.actionsHistory = new ActionsHistory();
 
-    this.dependConfig = {
+    this.dependToolConfig = {
       lineType: ELineTypes.Line,
     };
   }
@@ -286,6 +287,10 @@ class LineToolOperation extends BasicToolOperation {
     return this.lineList;
   }
 
+  get hasActiveLine() {
+    return this.activeLine && this.activeLine.length > 0;
+  }
+
   /**
    * 视野内的线条
    */
@@ -324,8 +329,8 @@ class LineToolOperation extends BasicToolOperation {
     this.lineStatusChanged();
   }
 
-  public isInPolygon(coord: ICoordinate) {
-    return isInPolygon(coord, this.basicResult?.pointList || [], this.dependConfig?.lineType);
+  public isInBasicPolygon(coord: ICoordinate) {
+    return isInPolygon(coord, this.basicResult?.pointList || [], this.dependToolConfig?.lineType);
   }
 
   public getPolygonPointList() {
@@ -333,7 +338,7 @@ class LineToolOperation extends BasicToolOperation {
       return [];
     }
     const { pointList } = this.basicResult;
-    const { lineType } = this.dependConfig;
+    const { lineType } = this.dependToolConfig;
     return lineType === ELineTypes.Curve
       ? createSmoothCurvePoints(
           pointList.reduce((acc: any[], cur: any) => {
@@ -347,38 +352,27 @@ class LineToolOperation extends BasicToolOperation {
   }
 
   /**
-   * 限制点在图上
+   * 渲染坐标计算获取下一个点
    * @param coord
    * @returns 绝对坐标
    */
-  public pointOverImage(coord: ICoordinate) {
-    const preAxis = this.activeLine?.slice(-1)[0];
-    if (preAxis) {
-      return LineToolUtils.pointOverTarget(
-        coord,
-        preAxis,
-        this.dependToolName,
-        this.basicResult,
-        this.dependConfig,
-        this.imageSize,
-        POINT_RADIUS,
-        this.zoom,
-        this.getRenderAxis,
-        this.getAbsAxis,
-      );
-    }
-
-    return coord;
+  public getNextCoordByRenderCoord(renderCoord: ICoordinate) {
+    return this.getNextCoordByAbsCoord(this.coordUtils.getAbsCoord(renderCoord));
   }
 
   /**
-   * 限制点在图上
+   * 绝对坐标计算获取下一个点
    * @param coord
    * @returns 渲染坐标
    */
-  public pointRenderingAxisOverImage(coord: ICoordinate) {
-    const absAxis = this.getAbsAxis(coord);
-    return this.getRenderAxis(this.pointOverImage(absAxis));
+  public getNextCoordByAbsCoord(absCoord: ICoordinate) {
+    const preAxis = this.activeLine?.slice(-1)[0];
+
+    if (preAxis) {
+      return this.coordUtils.getNextCoordByDependTool(absCoord, preAxis);
+    }
+
+    return absCoord;
   }
 
   /**
@@ -395,20 +389,11 @@ class LineToolOperation extends BasicToolOperation {
       if (index === 0) {
         return false;
       }
-      const point1 = this.getRenderAxis(pointList[index - 1]);
-      const point2 = this.getRenderAxis(point);
+      const point1 = this.coordUtils.getRenderCoord(pointList[index - 1]);
+      const point2 = this.coordUtils.getRenderCoord(point);
       return LineToolUtils.isInLine(checkPoint, point1, point2, scope);
     });
   }
-
-  /** 获取坐标值 */
-  public getAxis = (e: MouseEvent) => {
-    const coord = this.canvas.getBoundingClientRect();
-    return {
-      x: e.clientX - coord.left,
-      y: e.clientY - coord.top,
-    };
-  };
 
   /**
    * 根据坐标绘制圆点
@@ -435,7 +420,7 @@ class LineToolOperation extends BasicToolOperation {
   public renderActiveArea() {
     if (this.isActive && this.activeArea && this.ctx) {
       const { top, left, right, bottom } = this.activeArea;
-      const { x, y } = this.getRenderAxis({ x: left, y: top });
+      const { x, y } = this.coordUtils.getRenderCoord({ x: left, y: top });
       this.ctx.save();
       this.ctx.beginPath();
       this.ctx.strokeStyle = '#B3B8FF';
@@ -449,15 +434,22 @@ class LineToolOperation extends BasicToolOperation {
    * 添加点
    * @param coord 坐标
    */
-  public addPoint(coord: ICoordinate) {
-    const absAxis = this.getAbsAxis(coord);
-    this.activeLine?.push({ ...absAxis, id: uuid() });
+  public addLinePoint(coord: ICoordinate) {
+    this.arc(coord);
+    this.activeLine?.push({ ...coord, id: uuid() });
 
     if (this.activeLine?.length === 1) {
       this.actionsHistory?.initRecord(this.activeLine);
     } else {
       this.actionsHistory?.pushHistory(this.activeLine);
     }
+
+    this.render();
+  }
+
+  public setCreatStatusAndAddPoint(coord: ICoordinate, isRestText: boolean = false) {
+    this.updateStatus(EStatus.Create, isRestText);
+    this.addLinePoint(coord);
   }
 
   /**
@@ -477,7 +469,7 @@ class LineToolOperation extends BasicToolOperation {
     config: any,
     applyLineWidth: boolean = true,
     isReference: boolean = false,
-    hoverEdgeIndex: number,
+    hoverLineSegmentIndex: number,
   ) => {
     const pointList = createSmoothCurvePointsFromPointList(points, SEGMENT_NUMBER);
     ctx.save();
@@ -499,7 +491,7 @@ class LineToolOperation extends BasicToolOperation {
       ctx.save();
       ctx.beginPath();
 
-      if (hoverEdgeIndex === index) {
+      if (hoverLineSegmentIndex === index) {
         ctx.lineWidth = 4;
       }
 
@@ -541,7 +533,7 @@ class LineToolOperation extends BasicToolOperation {
         lineConfig,
         !showPoint,
         this.isReference,
-        isActive ? this.hoverEdgeIndex : -1,
+        isActive ? this.hoverLineSegmentIndex : -1,
       );
     } else {
       this.drawStraightLine(pointsToDraw, lineConfig, isActive);
@@ -583,7 +575,7 @@ class LineToolOperation extends BasicToolOperation {
             LineToolUtils.setSpecialEdgeStyle(ctx);
           }
 
-          if (isActive && this.hoverEdgeIndex + 1 === index) {
+          if (isActive && this.hoverLineSegmentIndex + 1 === index) {
             ctx.lineWidth = 4;
           }
 
@@ -614,7 +606,7 @@ class LineToolOperation extends BasicToolOperation {
           return;
         }
         if (line.pointList) {
-          line.pointList.map((i) => Object.assign(i, this.getRenderAxis(i)));
+          line.pointList.map((i) => Object.assign(i, this.coordUtils.getRenderCoord(i)));
           const { order, label } = line;
           const displayOrder = order;
           const color = line && this.getLineColorByAttribute(line);
@@ -652,7 +644,7 @@ class LineToolOperation extends BasicToolOperation {
   }
 
   public getActiveArea() {
-    return this.activeLine && this.activeLine.length > 0
+    return this.hasActiveLine
       ? MathUtils.calcViewportBoundaries(this.activeLine, this.isCurve, SEGMENT_NUMBER, this.zoom)
       : undefined;
   }
@@ -751,7 +743,7 @@ class LineToolOperation extends BasicToolOperation {
       return;
     }
     return this.activeLine.find((i) => {
-      const iAxis = this.getRenderAxis(i);
+      const iAxis = this.coordUtils.getRenderCoord(i);
       return LineToolUtils.calcDistance(iAxis, coord) <= POINT_ACTIVE_RADIUS;
     });
   }
@@ -767,8 +759,8 @@ class LineToolOperation extends BasicToolOperation {
           if (index === 0) {
             return false;
           }
-          const point1 = this.getRenderAxis(point);
-          const point2 = this.getRenderAxis(list[index - 1]);
+          const point1 = this.coordUtils.getRenderCoord(point);
+          const point2 = this.coordUtils.getRenderCoord(list[index - 1]);
           return LineToolUtils.isInLine(coord, point1, point2, scope);
         });
       });
@@ -780,7 +772,7 @@ class LineToolOperation extends BasicToolOperation {
    * 找到当前点的边缘吸附范围
    * @param coord
    */
-  public findAdsorptionPoint(coord: ICoordinate) {
+  public getAdsorptionPoint(coord: ICoordinate) {
     let point: ICoordinate | undefined;
     let minDistance: number;
     let snappedPoint: ICoordinate | undefined;
@@ -825,8 +817,8 @@ class LineToolOperation extends BasicToolOperation {
     let point: ICoordinate | undefined;
     const minDistance: number = minLength;
     for (let i = 1; i <= pointList.length - 1; i++) {
-      const point1 = this.getRenderAxis(pointList[i]);
-      const point2 = this.getRenderAxis(pointList[i - 1]);
+      const point1 = this.coordUtils.getRenderCoord(pointList[i]);
+      const point2 = this.coordUtils.getRenderCoord(pointList[i - 1]);
       const { length, footPoint } = MathUtils.getFootOfPerpendicular(coord, point1, point2);
       const twoPointDistance1 = LineToolUtils.calcTwoPointDistance(point1, coord);
       const twoPointDistance2 = LineToolUtils.calcTwoPointDistance(point2, coord);
@@ -866,11 +858,11 @@ class LineToolOperation extends BasicToolOperation {
     }
 
     const allPointsInRange = this.activeLine?.every((i) => {
-      return this.isInPolygon({ x: i.x + offsetX, y: i.y + offsetY });
+      return this.isInBasicPolygon({ x: i.x + offsetX, y: i.y + offsetY });
     });
 
     if (allPointsInRange) {
-      this.lineMoved = true;
+      this.lineDragging = true;
       this.moveActiveArea(offsetX, offsetY);
     }
   };
@@ -899,7 +891,7 @@ class LineToolOperation extends BasicToolOperation {
     const calcOffsetX = horizontalInRange ? offsetX : 0;
     const calcOffsetY = verticalInRange ? offsetY : 0;
 
-    this.lineMoved = true;
+    this.lineDragging = true;
     this.moveActiveArea(calcOffsetX, calcOffsetY);
   };
 
@@ -908,16 +900,12 @@ class LineToolOperation extends BasicToolOperation {
    * @param coord
    */
   public moveSelectedLine(coord: ICoordinate) {
-    if (this.activeArea === undefined) {
-      return;
-    }
-
     const offsetX = (coord.x - this.prevAxis.x) / this.zoom;
     const offsetY = (coord.y - this.prevAxis.y) / this.zoom;
 
     /** 允许目标外 */
     if (this.enableOutOfTarget) {
-      this.lineMoved = true;
+      this.lineDragging = true;
       this.moveActiveArea(offsetX, offsetY);
       return;
     }
@@ -952,12 +940,37 @@ class LineToolOperation extends BasicToolOperation {
       y: newY,
     };
 
-    if (this.isDependPolygon && !this.isInPolygon(pointPosition) && !this.enableOutOfTarget) {
-      return;
+    Object.assign(this.selectedPoint, this.getNextCoordByAbsCoord(pointPosition));
+    this.updateLines();
+    this.render();
+  }
+
+  /**
+   * 根据当前键盘事件和配置获取下一个点的坐标
+   * @param e
+   * @param coord
+   */
+  public getCoordByConfig(e: MouseEvent | KeyboardEvent | { altKey: boolean; shiftKey?: boolean }, coord: ICoordinate) {
+    const isVH = !!e.shiftKey;
+    const disabledAdsorb = e.altKey;
+
+    /** 获得水平、垂直点 */
+    if (this.activeLine!?.length > 0 && isVH) {
+      const lastPoint = this.activeLine!.slice(-1)[0];
+      return LineToolUtils.getVHPoint(
+        lastPoint,
+        coord,
+        this.coordUtils.getAbsCoord(coord),
+        this.coordUtils.getRenderCoord(lastPoint),
+      );
     }
 
-    Object.assign(this.selectedPoint, this.pointOverImage(pointPosition));
-    this.updateLines();
+    /** 获取边缘吸附点 */
+    if (this.edgeAdsorptionEnabled && !disabledAdsorb) {
+      return this.getAdsorptionPoint(coord);
+    }
+
+    return coord;
   }
 
   /**
@@ -966,53 +979,31 @@ class LineToolOperation extends BasicToolOperation {
    * @param nextPoint
    */
   public getNextPoint(e: MouseEvent | KeyboardEvent | { altKey: boolean; shiftKey?: boolean }, nextPoint: ICoordinate) {
-    let newPoint = nextPoint;
-
-    if (this.activeLine && this.activeLine.length > 0) {
-      const lastPoint = this.activeLine.slice(-1)[0];
-      newPoint = LineToolUtils.newPointPosition(
-        !!e.shiftKey,
-        lastPoint,
-        nextPoint,
-        this.getAbsAxis(nextPoint),
-        this.getRenderAxis(lastPoint),
-      );
-    }
-
-    if (this.edgeAdsorptionEnabled && !e.altKey) {
-      const edgeAdsorptionPoint = this.findAdsorptionPoint(newPoint);
-      newPoint = edgeAdsorptionPoint || newPoint;
-    }
-
-    return this.calcNextPointOfTarget(newPoint);
-  }
-
-  public calcNextPointOfTarget(newPoint: ICoordinate) {
-    return this.enableOutOfTarget ? newPoint : this.pointRenderingAxisOverImage(newPoint);
+    const newPoint = this.getCoordByConfig(e, nextPoint) || nextPoint;
+    return this.enableOutOfTarget ? newPoint : this.getNextCoordByRenderCoord(newPoint);
   }
 
   // TODO: 渲染hover样式
-  public lineHover(coord: ICoordinate) {
-    const hitLine = this.findHoverLine(coord);
-    this.hoverID = hitLine?.id;
+  public lineHover() {
     this.render();
   }
 
   /** 鼠标移动事件 */
   public mouseMoveHandler(e: MouseEvent) {
-    const coord = this.getAxis(e);
+    const coord = this.getCoordinate(e);
     const isLeftClick = e.which === 1;
+
     if (this.isCreate) {
-      if (this.activeLine && this.activeLine.length > 0) {
+      if (this.hasActiveLine) {
         this.renderNextPoint(e, coord);
       }
       return;
     }
 
     if (this.isNone) {
-      this.lineHover(coord);
+      this.lineHover();
       if (this.edgeAdsorptionEnabled && !e.altKey) {
-        const edgeAdsorptionPoint = this.findAdsorptionPoint(coord);
+        const edgeAdsorptionPoint = this.getAdsorptionPoint(coord);
         if (edgeAdsorptionPoint) {
           this.arc(edgeAdsorptionPoint);
         }
@@ -1020,28 +1011,21 @@ class LineToolOperation extends BasicToolOperation {
     }
 
     if (this.isActive) {
-      if (this.selectedPoint && isLeftClick) {
-        this.moveSelectPoint(coord);
-        this.render();
-        return;
-      }
-
-      if (isLeftClick && this.isMousedown && this.coordsClickedActiveArea) {
-        this.moveSelectedLine(coord);
-        this.drawActivatedLine(undefined, undefined, true);
-        return;
-      }
-
-      if (!this.isMousedown) {
-        if (this.isShift) {
-          const hoverEdgeIndex = this.getPointInsertIndex(coord, 2) - 1;
-          this.hoverEdgeIndex = hoverEdgeIndex > -1 ? hoverEdgeIndex : -1;
-        } else {
-          this.drawPointWhenHover(coord);
+      if (this.isMousedown && isLeftClick) {
+        if (this.selectedPoint) {
+          this.moveSelectPoint(coord);
+          return;
         }
 
-        this.render();
+        if (this.coordsInsideActiveArea) {
+          this.moveSelectedLine(coord);
+          this.drawActivatedLine(undefined, undefined, true);
+          return;
+        }
       }
+
+      this.drawHoverPoint(coord);
+      this.render();
     }
   }
 
@@ -1049,7 +1033,7 @@ class LineToolOperation extends BasicToolOperation {
     if (super.onMouseMove(e) || this.forbidMouseOperation || !this.imgInfo) {
       return;
     }
-    const coord = this.getAxis(e);
+    const coord = this.getCoordinate(e);
     this.mouseMoveHandler(e);
     this.prevAxis = coord;
   }
@@ -1105,62 +1089,37 @@ class LineToolOperation extends BasicToolOperation {
     this.activeLine = pointList ? _.cloneDeep(pointList) : undefined;
   }
 
-  public onContextmenu = (e: MouseEvent) => {
-    super.onContextmenu(e);
-
-    e.preventDefault();
+  public onRightClick = (e: MouseEvent) => {
     this.cursor = undefined;
 
-    this.emit('contextmenu');
-
     if (this.isCreate) {
-      if (this.activeLine && this.activeLine?.length < this.lowerLimitPointNum) {
+      if (this.isLinePointsNotEnough()) {
         // message.info(`顶点数不能少于${this.lowerLimitPointNum}`);
-        return true;
+        return;
       }
-      /** 新建线条后在文本标注未开启时默认不选中, 续标后默认选中 */
-      const isActiveAfterCreating = this.selectedID ? true : !!this.isTextConfigurable;
-
-      this.stopLine(true, isActiveAfterCreating);
+      this.stopLineCreating(true);
       return;
     }
 
-    this.setActiveArea(this.getAxis(e), true);
-  };
-
-  /**
-   * 获取绝对坐标
-   * @param coord
-   */
-  public getAbsAxis = (coord: ICoordinate) => {
-    return {
-      x: (coord.x - this.currentPos.x) / this.zoom,
-      y: (coord.y - this.currentPos.y) / this.zoom,
-    };
-  };
-
-  /**
-   * 获取画布渲染的坐标
-   * @param coord
-   */
-  public getRenderAxis = (coord: ICoordinate) => {
-    return {
-      x: coord.x * this.zoom + this.currentPos.x,
-      y: coord.y * this.zoom + this.currentPos.y,
-    };
+    this.setActiveArea(this.getCoordinate(e), true);
+    this.emit('contextmenu');
   };
 
   public historyChanged(funcName: 'undo' | 'redo') {
+    const enableKeyName = `${funcName}Enabled`;
+
     if (this.isCreate) {
-      const record = this.actionsHistory && this.actionsHistory[funcName]();
-      this.setActiveLine(record);
-      this.render();
+      if (this.actionsHistory && this.actionsHistory[enableKeyName]) {
+        const record = this.actionsHistory && this.actionsHistory[funcName]();
+        this.setActiveLine(record);
+        this.render();
+      }
       return;
     }
 
-    if (this.history) {
+    if (this.history && this.history[enableKeyName]) {
       const currentHistory = this.history[funcName]();
-      const activeLine = currentHistory.find((i: ILine) => i.id === this.selectedID);
+      const activeLine = currentHistory?.find((i: ILine) => i.id === this.selectedID);
       this.lineList = currentHistory;
       if (this.selectedID && activeLine) {
         this.setActiveLine(activeLine?.pointList);
@@ -1196,10 +1155,11 @@ class LineToolOperation extends BasicToolOperation {
   }
 
   /** 坐标是否在图片内 */
-  public axisAtTarget(coord: ICoordinate) {
+  public isCoordInsideTarget(coord: ICoordinate) {
     if (this.isDependPolygon) {
-      return this.isInPolygon(coord);
+      return this.isInBasicPolygon(coord);
     }
+
     if (this.isDependRect) {
       const { x, y, width, height } = this.basicResult;
       const rectHorizontalRange = [x, x + width];
@@ -1243,11 +1203,36 @@ class LineToolOperation extends BasicToolOperation {
     return this.lineStyle.lineWidth;
   }
 
-  public onClick = (e: MouseEvent) => {
-    const coord = this.getAxis(e);
-    const { lineMoved } = this;
+  public isMouseCoordOutsideActiveArea() {
+    return !this.coordsInsideActiveArea && !this.selectedPoint;
+  }
 
-    this.lineMoved = false;
+  /** 是否超过上限点 */
+  public isLinePointsExceed() {
+    return (
+      this.isCreate && this.activeLine && this.upperLimitPointNum && ~~this.upperLimitPointNum <= this.activeLine.length
+    );
+  }
+
+  public isLinePointsNotEnough() {
+    return this.activeLine && this.activeLine?.length < this.lowerLimitPointNum;
+  }
+
+  public updateLineSegmentSpecial(coord: ICoordinate) {
+    const specialEdgeIndex = this.getPointInsertIndex(coord, 2) - 1;
+    if (specialEdgeIndex > -1) {
+      const pointData = this.activeLine![specialEdgeIndex];
+      pointData.specialEdge = !pointData.specialEdge;
+      this.hoverLineSegmentIndex = -1;
+      this.render();
+    }
+  }
+
+  public onLeftClick = (e: MouseEvent) => {
+    const coord = this.getCoordinate(e);
+    const { lineDragging } = this;
+
+    this.lineDragging = false;
 
     /** 空格点击为拖拽事件 */
     if (this.isSpaceKey) {
@@ -1255,102 +1240,75 @@ class LineToolOperation extends BasicToolOperation {
     }
 
     if (this.isNone && e.ctrlKey) {
-      const hitLine = this.findHoverLine(coord);
-      if (hitLine) {
-        this.setInvalidLine(hitLine.id);
+      const hoveredLine = this.findHoverLine(coord);
+      if (hoveredLine) {
+        this.setInvalidLine(hoveredLine.id);
       }
       return;
     }
 
     /** 超过上线点无法继续添加 */
-    if (
-      this.isCreate &&
-      this.activeLine &&
-      this.upperLimitPointNum &&
-      ~~this.upperLimitPointNum <= this.activeLine.length
-    ) {
+    if (this.isLinePointsExceed()) {
       return;
     }
 
-    const clickToNewLine = this.isActive && !this.coordsClickedActiveArea && !this.selectedPoint;
+    const nextAxis = this.getNextPoint(e, coord)!;
 
-    if (this.isCreate || this.isNone || clickToNewLine) {
-      /** 禁止目标外标注 */
-      if (
-        !this.enableOutOfTarget &&
-        (clickToNewLine || (this.isNone && this.activeLine?.length === 0)) &&
-        !this.axisAtTarget(this.getAbsAxis(coord))
-      ) {
+    if (this.isCreate || this.isNone) {
+      this.setCreatStatusAndAddPoint(nextAxis);
+      return;
+    }
+
+    if (this.isActive) {
+      if (lineDragging) {
         return;
       }
 
-      const nextAxis = this.getNextPoint(e, coord);
-
-      /** 激活点击时候重新创建线条 */
-      if (clickToNewLine) {
+      const isMouseCoordOutsideActiveArea = this.isMouseCoordOutsideActiveArea();
+      if (isMouseCoordOutsideActiveArea) {
         this.setNoneStatus(false);
-        this.updateStatus(EStatus.Create, true);
+        this.setCreatStatusAndAddPoint(nextAxis);
+        return;
       }
 
-      this.arc(nextAxis);
-      this.addPoint(nextAxis);
-      this.updateStatus(EStatus.Create, !this.selectedID);
-      return;
-    }
+      const isSetSpecialLine = e.shiftKey;
 
-    if (this.activeLine && this.activeLine.length > 0) {
-      if (this.isActive) {
-        if (this.selectedPoint) {
-          const prePoint = this.activeLine.find((i: any) => i.id === this.selectedPoint?.id);
-
-          if (prePoint && !_.isEqual(prePoint, this.selectedPoint)) {
-            Object.assign(prePoint, this.selectedPoint);
-            this.updateLines();
-            this.history?.pushHistory(this.lineList);
-          }
-
-          this.selectedPoint = undefined;
-          this.render();
-          return;
-        }
-
-        const insertIndex = this.getPointInsertIndex(this.cursor);
-        const pointsWithInRange = this.pointsWithinRange(this.activeLine?.length + 1);
-
-        /** 添加点 */
-        if (this.cursor && !this.selectedPoint && insertIndex > -1 && !lineMoved && pointsWithInRange && !e.shiftKey) {
-          this.activeLine.splice(insertIndex, 0, { ...this.getAbsAxis(this.cursor), id: uuid() });
-          this.updateLines();
-          this.history?.pushHistory(this.lineList);
-          this.render();
-          this.cursor = undefined;
-          return;
-        }
-
-        const specialEdgeIndex = this.getPointInsertIndex(coord, 2) - 1;
-
-        /** 设置为特殊边 */
-        if (!this.selectedPoint && specialEdgeIndex > -1 && !lineMoved && e.shiftKey) {
-          const pointData = this.activeLine[specialEdgeIndex];
-          pointData.specialEdge = !pointData.specialEdge;
-          this.hoverEdgeIndex = -1;
-          this.render();
-          return;
-        }
-
-        if (this.coordsClickedActiveArea && e.ctrlKey) {
-          this.setInvalidLine(this.selectedID);
-        }
+      /** 设置为特殊边 */
+      if (isSetSpecialLine) {
+        this.updateLineSegmentSpecial(coord);
+        return;
       }
+
+      /** 设置线的有效无效 */
+      if (this.coordsInsideActiveArea && e.ctrlKey) {
+        this.setInvalidLine(this.selectedID);
+        return;
+      }
+
+      this.addLinePointToActiveLine();
     }
   };
+
+  public addLinePointToActiveLine() {
+    const insertIndex = this.getPointInsertIndex(this.cursor);
+    const pointsWithInRange = this.pointsWithinRange(this.activeLine!.length + 1);
+
+    /** 添加点 */
+    if (this.cursor && insertIndex > -1 && pointsWithInRange) {
+      this.activeLine!.splice(insertIndex, 0, { ...this.coordUtils.getAbsCoord(this.cursor), id: uuid() });
+      this.updateLines();
+      this.history?.pushHistory(this.lineList);
+      this.render();
+      this.cursor = undefined;
+    }
+  }
 
   public onMouseDown(e: MouseEvent) {
     if (super.onMouseDown(e) || this.forbidMouseOperation || !this.imgInfo) {
       return;
     }
 
-    const coord = this.getAxis(e);
+    const coord = this.getCoordinate(e);
     this.isMousedown = true;
     this.prevAxis = coord;
     if (e.which === 3) {
@@ -1358,9 +1316,11 @@ class LineToolOperation extends BasicToolOperation {
       return;
     }
     this.selectedPoint = this.findHoveredPoint(coord);
-    this.coordsClickedActiveArea =
-      this.isActive && this.activeArea ? LineToolUtils.inArea(this.activeArea, this.getAbsAxis(coord)) : false;
-    this.lineMoved = false;
+    this.coordsInsideActiveArea =
+      this.isActive && this.activeArea
+        ? LineToolUtils.inArea(this.activeArea, this.coordUtils.getAbsCoord(coord))
+        : false;
+    this.lineDragging = false;
   }
 
   public lineHasChanged() {
@@ -1377,20 +1337,37 @@ class LineToolOperation extends BasicToolOperation {
   }
 
   public onMouseUp(e: MouseEvent) {
+    const reset = () => {
+      this.isMousedown = false;
+      this.hoverPointID = undefined;
+      this.cursor = undefined;
+      this.selectedPoint = undefined;
+    };
+
+    this.hoverPointID = undefined;
+
     if (super.onMouseUp(e) || this.forbidMouseOperation || !this.imgInfo) {
-      return undefined;
+      reset();
+      return;
     }
 
-    /** 非创建状态，记录当前被修改的线条 */
-    if (this.isMousedown && !this.isCreate) {
-      const lineChanged = this.lineHasChanged();
-      if (lineChanged) {
-        this.updateLines();
-        this.history?.pushHistory(this.lineList);
-      }
+    // /** 非创建状态，记录当前被修改的线条 */
+    // if (this.isMousedown && !this.isCreate) {
+    //   const lineChanged = this.lineHasChanged();
+    //   if (lineChanged) {
+    //     this.updateLines();
+    //     this.history?.pushHistory(this.lineList);
+    //   }
+    // }
+
+    if (e.which === 1) {
+      this.onLeftClick(e);
     }
 
-    this.isMousedown = false;
+    if (e.which === 3) {
+      this.onRightClick(e);
+    }
+    reset();
   }
 
   public onDblclick = () => {};
@@ -1415,7 +1392,10 @@ class LineToolOperation extends BasicToolOperation {
    * 停止当前的线条绘制
    * @param isAppend
    */
-  public stopLine(isAppend: boolean = true, setActive: boolean = true) {
+  public stopLineCreating(isAppend: boolean = true) {
+    /** 新建线条后在文本标注未开启时默认不选中, 续标后默认选中 */
+    const setActiveAfterCreating = this.selectedID ? true : !!this.isTextConfigurable;
+
     let selectedID;
     if (isAppend) {
       if (this.selectedID) {
@@ -1435,7 +1415,7 @@ class LineToolOperation extends BasicToolOperation {
       }
     }
 
-    if (setActive) {
+    if (setActiveAfterCreating) {
       this.setActiveStatus(selectedID);
     } else {
       this.setNoneStatus();
@@ -1476,44 +1456,45 @@ class LineToolOperation extends BasicToolOperation {
   public setKeyDownStatus(e: KeyboardEvent, value?: boolean) {
     this.isShift = value ?? e.keyCode === EKeyCode.Shift;
     this.isCtrl = value ?? e.keyCode === EKeyCode.Ctrl;
-    this.isAlt = value ?? e.keyCode === EKeyCode.Alt;
+  }
+
+  /** 续标当前激活的线条 */
+  public continueToEdit() {
+    this.updateStatus(EStatus.Create);
+    this.cursor = undefined;
+    this.actionsHistory?.pushHistory(this.activeLine);
+    this.render();
   }
 
   public onKeyUp = (e: KeyboardEvent) => {
     super.onKeyUp(e);
 
     this.isShift = false;
-    this.hoverEdgeIndex = -1;
+    this.hoverLineSegmentIndex = -1;
 
     if (e.keyCode === EKeyCode.Esc) {
-      this.stopLine(false);
+      this.stopLineCreating(false);
       return;
     }
 
     if (this.isActive) {
       if (e.keyCode === EKeyCode.Delete) {
         this.deleteLine();
-        this.render();
         return;
       }
 
-      if (e.keyCode === EKeyCode.F && this.selectedID) {
+      if (e.keyCode === EKeyCode.F) {
         this.setInvalidLine(this.selectedID);
         return;
       }
 
       if (e.keyCode === EKeyCode.Space) {
-        this.updateStatus(EStatus.Create);
-        this.cursor = undefined;
-        this.actionsHistory?.pushHistory(this.activeLine);
-        this.render();
+        this.continueToEdit();
         return;
       }
     }
 
-    if (this.isCreate) {
-      this.renderNextPointByKeyboardEvent(e);
-    }
+    this.keyboardEventWhileLineCreating(e);
   };
 
   /** 创建无效线条，activeLineID存在时为续标（没有按ctrl时不会修改其有无效性），不会设置无效的属性 */
@@ -1522,6 +1503,7 @@ class LineToolOperation extends BasicToolOperation {
       return;
     }
     const valid = !e.ctrlKey;
+
     if (this.selectedID) {
       this.setInvalidLine(this.selectedID, valid, false);
     } else {
@@ -1550,7 +1532,7 @@ class LineToolOperation extends BasicToolOperation {
     }
 
     if (this.isCreate) {
-      this.renderNextPointByKeyboardEvent(e);
+      this.keyboardEventWhileLineCreating(e);
     }
 
     if (this.isActive) {
@@ -1562,6 +1544,10 @@ class LineToolOperation extends BasicToolOperation {
     }
   }
 
+  /**
+   * 切换到下一个线条
+   * @param e
+   */
   private selectToNextLine(e: KeyboardEvent) {
     const nextSelectedLine = CommonToolUtils.getNextSelectedRectIDByEvent(
       this.viewPortLines.map((i: any) => ({
@@ -1579,13 +1565,17 @@ class LineToolOperation extends BasicToolOperation {
   }
 
   /**
-   * 在线条创建时候的键盘事件。
+   * 在线条创建时候的键盘事件, 并触发渲染
    *  1.设为无效。
    *  2.Alt取消边缘吸附。
    *  3.Shift绘制垂直/水平线
    * @param e
    */
-  public renderNextPointByKeyboardEvent(e: KeyboardEvent) {
+  public keyboardEventWhileLineCreating(e: KeyboardEvent) {
+    if (!this.isCreate) {
+      return;
+    }
+
     if (e.keyCode === EKeyCode.Ctrl) {
       this.setInvalidLineOnCreating(e);
     }
@@ -1601,36 +1591,53 @@ class LineToolOperation extends BasicToolOperation {
    * @param coord
    */
   public renderNextPoint(e: MouseEvent | KeyboardEvent | { altKey: boolean }, coord: ICoordinate) {
-    const nextPoint = this.getNextPoint(e, coord);
+    const nextPoint = this.coordUtils.getRenderCoord(this.getNextPoint(e, coord)!);
     this.render(nextPoint);
   }
 
+  public deleteSelectedLine(coord: ICoordinate) {
+    const boundary = MathUtils.calcViewportBoundaries(this.activeLine, this.isCurve, SEGMENT_NUMBER, this.zoom);
+    const axisOnArea = LineToolUtils.inArea(boundary, this.coordUtils.getAbsCoord(coord));
+    if (axisOnArea) {
+      this.deleteLine();
+    }
+  }
+
+  /**
+   * 删除当前选中的点
+   * @param hoverPointID
+   */
+  public deleteSelectedLinePoint(selectedID: string) {
+    const pointsWithinRange = this.pointsWithinRange(this.activeLine!.length - 1);
+    if (pointsWithinRange && selectedID) {
+      this.setActiveLine(this.activeLine!.filter((i) => i.id !== selectedID));
+      this.updateLines();
+      this.history?.pushHistory(this.lineList);
+    }
+    this.cursor = undefined;
+    this.render();
+  }
+
+  /**
+   * 右键双击事件，
+   * 1. 删除线
+   * 2. 删除点
+   * @param e
+   */
   public onRightDblClick = (e: MouseEvent) => {
     super.onRightDblClick(e);
-
-    const coord = this.getAxis(e);
+    const coord = this.getCoordinate(e);
     if (this.isActive) {
       const hoverPoint = this.findHoveredPoint(coord);
 
       /* 删除点 */
-      if (hoverPoint && this.activeLine) {
-        const pointsWithinRange = this.pointsWithinRange(this.activeLine?.length - 1);
-        if (pointsWithinRange) {
-          this.setActiveLine(this.activeLine.filter((i) => i.id !== hoverPoint.id));
-          this.updateLines();
-          this.history?.pushHistory(this.lineList);
-        }
-        this.cursor = undefined;
-        this.render();
+      if (hoverPoint) {
+        this.deleteSelectedLinePoint(hoverPoint.id);
         return;
       }
 
       /** 删除线 */
-      const area = MathUtils.calcViewportBoundaries(this.activeLine, this.isCurve, SEGMENT_NUMBER, this.zoom);
-      const axisOnArea = LineToolUtils.inArea(area, this.getAbsAxis(coord));
-      if (axisOnArea) {
-        this.deleteLine();
-      }
+      this.deleteSelectedLine(coord);
     }
   };
 
@@ -1654,9 +1661,7 @@ class LineToolOperation extends BasicToolOperation {
     }
   }
 
-  /**
-   * 数据清空
-   */
+  /** 数据清空 */
   public empty() {
     this.lineList = [];
     this.setNoneStatus();
@@ -1741,7 +1746,7 @@ class LineToolOperation extends BasicToolOperation {
 
   /** 保存当前绘制的数据, 避免创建中的数据不会被保存到 */
   public saveData() {
-    this.stopLine();
+    this.stopLineCreating();
     this.setNoneStatus();
     this.render();
   }
@@ -1774,7 +1779,10 @@ class LineToolOperation extends BasicToolOperation {
     this.isReference = isReference;
   };
 
-  /** 线条的点数在限制范围内 */
+  /**
+   * 计算带点数是否超出限制
+   * @param count
+   */
   public pointsWithinRange = (count: number) => {
     if (this.lowerLimitPointNum && count < this.lowerLimitPointNum) {
       return false;
@@ -1795,9 +1803,7 @@ class LineToolOperation extends BasicToolOperation {
 
   public setLineList = (lineList: ILine[]) => {
     const lengthChanged = lineList.length !== this.lineListLen;
-
     this.lineList = lineList;
-
     if (lengthChanged) {
       this.emit('updatePageNumber');
     }
@@ -1831,7 +1837,7 @@ class LineToolOperation extends BasicToolOperation {
   }
 
   public renderTextAttribute() {
-    if (!this.ctx || !this.activeLine || this.activeLine?.length < 2) {
+    if (!this.ctx || !this.activeLine || this.activeLine?.length < 2 || this.isCreate) {
       return;
     }
 
@@ -1840,7 +1846,7 @@ class LineToolOperation extends BasicToolOperation {
 
     const { x, y } = this.activeLine[1];
 
-    const coordinate = this.getRenderAxis({ x, y });
+    const coordinate = this.coordUtils.getRenderCoord({ x, y });
     const toolColor = this.getColor(attribute);
     const color = valid ? toolColor?.valid.stroke : toolColor?.invalid.stroke;
     const textAttribute = this.lineList.find((i) => i.id === this.selectedID)?.textAttribute ?? '';

@@ -21,7 +21,6 @@ const AnnotationStepPopover = (props: IProps) => {
     <div className={`${componentCls}__annotationStepPopover`}>
       {stepList.map((info) => {
         const isSelected = info.step === currentStep;
-        const isClick = true;
 
         return (
           <div
@@ -30,7 +29,9 @@ const AnnotationStepPopover = (props: IProps) => {
               step: true,
             })}
             onClick={() => {
-              isClick && updateStep(info.step);
+              if (currentStep && !isSelected) {
+                updateStep(info.step);
+              }
             }}
           >
             <div
