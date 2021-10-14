@@ -111,7 +111,7 @@ const ToolFooter: React.FC<IProps> = (props: IProps) => {
       {hasSourceStep && basicResultList.length > 0 && (
         <>
           <FooterDivider />
-          <span>{`第${basicIndex}/${basicResultList.length}分页`}</span>
+          <span>{`第${basicIndex + 1}/${basicResultList.length}分页`}</span>
         </>
       )}
 
