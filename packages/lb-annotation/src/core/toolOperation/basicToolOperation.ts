@@ -875,6 +875,7 @@ class BasicToolOperation extends EventListener {
       oldImgAttribute.isOriginalSize !== imgAttribute.isOriginalSize
     ) {
       this.initImgPos();
+      return;
     }
     this.render();
     this.renderBasicCanvas();
