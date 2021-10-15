@@ -67,7 +67,7 @@ const rectToolShortcutTable = [
   restore,
   rotate,
   scale,
-  fullScreen,
+  // fullScreen,
   backward,
   forward,
   // setValid,

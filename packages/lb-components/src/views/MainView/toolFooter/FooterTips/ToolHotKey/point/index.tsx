@@ -53,7 +53,7 @@ const pointToolShortCutTable = [
   restore,
   rotate,
   scale,
-  fullScreen,
+  // fullScreen,
   backward,
   forward,
   dargWithRightClick,

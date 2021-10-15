@@ -32,6 +32,7 @@ export interface AppProps {
     footer?: {[key: string]: any};
   };
   setToolInstance?: (tool: ToolInstance) => void;
+  mode?: 'light' | 'dark' // 临时需求应用于 toolFooter 的操作
 }
 
 const App: React.FC<AppProps> = (props) => {

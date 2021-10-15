@@ -59,6 +59,8 @@ interface IProps {
   step: number;
   basicResultList: any[];
   basicIndex: number;
+  mode?: 'light' | 'dark' // 后面通过 context 的形式进行编写
+
 }
 
 export const footerCls = `${prefix}-footer`;
@@ -68,7 +70,7 @@ const FooterDivider = () => (
 );
 
 const ToolFooter: React.FC<IProps> = (props: IProps) => {
-  const { stepList, step, basicResultList, basicIndex } = props;
+  const { stepList, step, basicResultList, basicIndex, mode } = props;
   const dispatch = useDispatch();
 
   const stepInfo = stepList[step - 1] ?? {};
@@ -111,12 +113,12 @@ const ToolFooter: React.FC<IProps> = (props: IProps) => {
       {hasSourceStep && basicResultList.length > 0 && (
         <>
           <FooterDivider />
-          <span>{`第${basicIndex}/${basicResultList.length}分页`}</span>
+          <span>{`第${basicIndex + 1}/${basicResultList.length}分页`}</span>
         </>
       )}
 
       <FooterDivider />
-      <ZoomController />
+      <ZoomController mode={mode} />
     </div>
   );
 };

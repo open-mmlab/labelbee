@@ -29,7 +29,7 @@ const MainView: React.FC<AppProps> = (props) => {
         <Layout>
           <Content className={`${layoutCls}__content`}>
             <AnnotationOperation {...props} />
-            {getNewNode(props.footer, <ToolFooter style={props.style?.footer} />)}
+            {getNewNode(props.footer, <ToolFooter style={props.style?.footer} mode={props.mode} />)}
           </Content>
           <Sider className={`${layoutCls}__side`} width='auto' style={props.style?.sider}>
             {getNewNode(props.sider, <Sidebar />)}

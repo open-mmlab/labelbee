@@ -257,7 +257,7 @@ export const annotationReducer = (
 
       // 当前步骤结果
       const stepResult = fileResult[`step_${step}`];
-      const isInitData = !stepResult; // 是否为初始化数据
+      const isInitData = !stepResult || result.length === 0; // 是否为初始化数据
 
       if (dataSourceStep && tool) {
         stepBasicResultList = fileResult[`step_${dataSourceStep}`]?.result;

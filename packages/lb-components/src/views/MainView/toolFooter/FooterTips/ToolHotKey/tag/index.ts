@@ -20,12 +20,12 @@ export const tagInSingleImg: any = {
 
 // 单图
 const tagToolSingleShortCutTable = [
-  saveResult,
+  // saveResult,
   tagInSingleImg,
   rotate,
-  fullScreen,
+  // fullScreen,
   scale,
-  setValid,
+  // setValid,
   backward,
   forward,
   dargWithRightClick,
