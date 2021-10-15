@@ -1,5 +1,6 @@
 import React from 'react';
 import adaptIcon from '@/assets/annotation/common/icon_adapt.svg';
+import adaptIconBlack from '@/assets/annotation/common/icon_adapt_black.svg';
 import {
   MinusOutlined,
   PlusOutlined,
@@ -12,12 +13,19 @@ import { footerCls } from '../index';
 
 interface IProps {
   toolInstance: ToolInstance
+  mode?: 'light' | 'dark'
 }
 
-const ZoomController: React.FC<IProps> = ({ toolInstance }) => {
+const ZoomController: React.FC<IProps> = ({ toolInstance, mode }) => {
   const initialPosition = () => {
     toolInstance.initImgPos();
   };
+
+  let defaultIcon = adaptIcon;
+  
+  if (mode === 'light') {
+    defaultIcon = adaptIconBlack;
+  }
 
   return <div>
     <span className={`${footerCls}__zoomController`}>
@@ -28,7 +36,7 @@ const ZoomController: React.FC<IProps> = ({ toolInstance }) => {
         }}
       />
       <span className={`${footerCls}__zoomText`} onClick={initialPosition}>
-        <img src={adaptIcon} className='adaptIcon' />
+        <img src={defaultIcon} className='adaptIcon' />
         <ZoomLevel />
       </span>
       <PlusOutlined
