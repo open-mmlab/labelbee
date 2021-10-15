@@ -1,9 +1,7 @@
 import React from 'react';
 import { LeftOutlined } from '@ant-design/icons';
-// import styles from './index.scss';
-import { connect } from 'react-redux';
+import {connect, useDispatch} from 'react-redux';
 import { store } from 'src';
-import { ANNOTATION_ACTIONS } from '@/store/Actions';
 import { IFileItem } from '@/types/data';
 import { AppState } from '@/store';
 import classNames from 'classnames';
@@ -12,7 +10,7 @@ import ExportData from './ExportData';
 import HeaderOption from './headerOption';
 import { AnnotationEngine } from '@sensetime/annotation';
 import { Button } from 'antd';
-import { ToNextStep } from '@/store/annotation/actionCreators';
+import {ToNextStep, ToSubmitFileData} from '@/store/annotation/actionCreators';
 import StepSwitch from './StepSwitch';
 import { EToolName } from '@/data/enums/ToolType';
 import { IStepInfo } from '@/types/step';
@@ -66,16 +64,14 @@ const ToolHeader: React.FC<IToolHeaderProps> = ({
   stepList,
   step,
 }) => {
+  const dispatch = useDispatch();
   // render 数据展示
-  const currentOption = <ExportData exportData={exportData} />;
+  const currentOption = <ExportData exportData={exportData}/>;
 
   const closeAnnotation = () => {
-    store.dispatch({
-      type: ANNOTATION_ACTIONS.SUBMIT_FILE_DATA,
-      payload: {
-        submitType: ESubmitType.Quit,
-      },
-    });
+
+    dispatch(ToSubmitFileData(ESubmitType.Quit))
+
     if (goBack) {
       goBack(imgList);
     }

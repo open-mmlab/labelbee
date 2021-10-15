@@ -877,6 +877,7 @@ class BasicToolOperation extends EventListener {
       this.initImgPos();
       return;
     }
+    this.renderBasicCanvas();
     this.render();
     this.renderBasicCanvas();
   }
