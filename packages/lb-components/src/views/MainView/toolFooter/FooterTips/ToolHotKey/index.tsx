@@ -158,7 +158,8 @@ const ToolHotKey: React.FC<IProps> = ({ isSingleImg, style }) => {
   const content = <div className={`${footerCls}__hotkey-content`}>{stepInfo && shortCutTable[stepInfo?.tool]?.map((info: any, index: number) => setHotKey(info, index))}</div>;
   const containerStyle = style || {};
 
-  if (!content) {
+  // 不存在对应的工具则不展示的快捷键
+  if (stepInfo && !shortCutTable[stepInfo?.tool]) {
     return null;
   }
 
