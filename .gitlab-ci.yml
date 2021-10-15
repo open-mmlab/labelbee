@@ -11,22 +11,22 @@ before_script:
   - TAG=$CI_COMMIT_REF_NAME-${CI_COMMIT_SHA:0:8}
   - IMAGE_REGISTRY_URL=$REGISTRY_URL/label-bee/demo:$TAG
 
-deploy-dev:
-  stage: deploy
-  only:
-    - dev
-  script:
-    - npm config set registry https://npm-registry.sensetime.com/
-    - echo "//https://npm-registry.sensetime.com/:_authToken=$NPM_TOKEN" > .npmrc
-    - npx lerna publish -y --canary --preid \"beta.$(git rev-parse --short HEAD)\" --pre-dist-tag=beta --legacy-auth $TNPM_USERPASSWORD_BASE64
+# deploy-dev:
+#   stage: deploy
+#   only:
+#     - dev
+#   script:
+#     - npm config set registry https://npm-registry.sensetime.com/
+#     - echo "//https://npm-registry.sensetime.com/:_authToken=$NPM_TOKEN" > .npmrc
+#     - npx lerna publish -y --canary --preid \"beta.$(git rev-parse --short HEAD)\" --pre-dist-tag=beta --legacy-auth $TNPM_USERPASSWORD_BASE64
 
-deploy-build:
-  stage: deploy
-  only:
-    - master
-  script:
-    - npx lerna version --conventional-graduate --yes
-    - npx lerna publish from-package --legacy-auth $TNPM_USERPASSWORD_BASE64 --yes
+# deploy-build:
+#   stage: deploy
+#   only:
+#     - master
+#   script:
+#     - npx lerna version --conventional-graduate --yes
+#     - npx lerna publish from-package --legacy-auth $TNPM_USERPASSWORD_BASE64 --yes
 
 build-demo:
   stage: build
