@@ -312,6 +312,10 @@ export default class DrawUtils {
       lineType: ELineTypes;
     }> = {},
   ): void {
+    if (pointList.length < 2) {
+      return;
+    }
+    
     const ctx: CanvasRenderingContext2D = canvas.getContext('2d')!;
     const { color = DEFAULT_COLOR, lineType = ELineTypes.Line } = options;
 
