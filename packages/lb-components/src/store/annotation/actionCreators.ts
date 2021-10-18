@@ -129,8 +129,8 @@ export function InitTaskData({
   if (onSubmit) {
     tasks.push(UpdateOnSubmit(onSubmit));
   }
-  if(onSave) {
-    tasks.push(UpdateOnSave(onSave))
+  if (onSave) {
+    tasks.push(UpdateOnSave(onSave));
   }
 
   if (getFileData) {
@@ -206,25 +206,61 @@ const ChangeBasicIndex = (dispatch: any, nextBasicIndex: number) => [
   dispatch({ type: ANNOTATION_ACTIONS.SET_BASIC_INDEX, payload: { basicIndex: nextBasicIndex } }),
 ];
 
+const ChangeTriggerEventAfterIndexChanged = (
+  dispatch: any,
+  triggerEventAfterIndexChanged: boolean,
+) => {
+  dispatch({
+    type: ANNOTATION_ACTIONS.SET_TRIGGER_EVENT_AFTER_INDEX_CHANGED,
+    payload: {
+      triggerEventAfterIndexChanged,
+    },
+  });
+};
+
 /** 向前翻页 */
-export const PageBackward = () => (dispatch: any, getState: any) =>
-  DispatcherTurning(dispatch, getState, EPageTurningOperation.Backward);
+export const PageBackward =
+  (triggerEventAfterIndexChanged: boolean = false) =>
+  (dispatch: any, getState: any) => {
+    return DispatcherTurning(
+      dispatch,
+      getState,
+      EPageTurningOperation.Backward,
+      triggerEventAfterIndexChanged,
+    );
+  };
 
 /** 向后翻页 */
-export const PageForward = () => (dispatch: any, getState: any) =>
-  DispatcherTurning(dispatch, getState, EPageTurningOperation.Forward);
+export const PageForward =
+  (triggerEventAfterIndexChanged: boolean = false) =>
+  (dispatch: any, getState: any) => {
+    return DispatcherTurning(
+      dispatch,
+      getState,
+      EPageTurningOperation.Forward,
+      triggerEventAfterIndexChanged,
+    );
+  };
 
 /**
  * 跳到指定文件索引
  * @param toIndex
  */
-export const PageJump = (toIndex: number) => (dispatch: any, getState: any) => {
-  if (toIndex === getState().imgIndex) {
-    return;
-  }
+export const PageJump =
+  (toIndex: number, triggerEventAfterIndexChanged: boolean = false) =>
+  (dispatch: any, getState: any) => {
+    if (toIndex === getState().imgIndex) {
+      return;
+    }
 
-  return DispatcherTurning(dispatch, getState, EPageTurningOperation.Jump, toIndex);
-};
+    return DispatcherTurning(
+      dispatch,
+      getState,
+      EPageTurningOperation.Jump,
+      triggerEventAfterIndexChanged,
+      toIndex,
+    );
+  };
 
 /**
  * 判断翻页还是切换依赖数据
@@ -237,12 +273,15 @@ export const DispatcherTurning = (
   dispatch: any,
   getState: any,
   pageTurningOperation: EPageTurningOperation,
+  triggerEventAfterIndexChanged: boolean = false,
   toIndex?: number,
 ) => {
   const { fileIndexChanged, fileIndex, basicIndexChanged, basicIndex } =
     PageOperator.getNextPageInfo(pageTurningOperation, getState().annotation, toIndex);
 
   const submitType: ESubmitType = getSubmitByPageOperation(pageTurningOperation);
+
+  ChangeTriggerEventAfterIndexChanged(dispatch, triggerEventAfterIndexChanged);
 
   if (fileIndexChanged) {
     return SubmitAndChangeFileIndex(dispatch, fileIndex, submitType, basicIndex);
@@ -259,6 +298,6 @@ export const DispatcherTurning = (
  * 保存当前页数据
  * */
 export const ChangeSave = (dispatch: Function) => {
-  dispatch(ToSubmitFileData(ESubmitType.Save))
-  dispatch({ type: ANNOTATION_ACTIONS.SAVE_RESULT })
-}
+  dispatch(ToSubmitFileData(ESubmitType.Save));
+  dispatch({ type: ANNOTATION_ACTIONS.SAVE_RESULT });
+};

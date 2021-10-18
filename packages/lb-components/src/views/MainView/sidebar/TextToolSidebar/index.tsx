@@ -1,4 +1,4 @@
-import React, {useEffect, useState, useRef, FocusEvent} from 'react';
+import React, { useEffect, useState, useRef, FocusEvent } from 'react';
 import { connect } from 'react-redux';
 import { ToolInstance } from '@/store/annotation/types';
 import { AppState } from '@/store';
@@ -48,6 +48,7 @@ interface IProps {
   dispatch: Function;
   toolInstance: ToolInstance;
   imgIndex: number;
+  triggerEventAfterIndexChanged: boolean;
 }
 
 interface IConfigListItem {
@@ -172,7 +173,12 @@ export const SingleTextInput = (props: any) => {
   );
 };
 
-const TextToolSidebar: React.FC<IProps> = ({ toolInstance, imgIndex, dispatch }) => {
+const TextToolSidebar: React.FC<IProps> = ({
+  toolInstance,
+  imgIndex,
+  dispatch,
+  triggerEventAfterIndexChanged,
+}) => {
   const [configList, setConfigList] = useState<IConfigListItem[]>([]);
   const [focusIndex, setFocusIndex] = useState(0);
   const [, forceRender] = useState(0);
@@ -208,7 +214,7 @@ const TextToolSidebar: React.FC<IProps> = ({ toolInstance, imgIndex, dispatch })
   };
 
   useEffect(() => {
-    if (imgIndex > -1) {
+    if (imgIndex > -1 && triggerEventAfterIndexChanged) {
       textareaFocus(0);
     }
   }, [imgIndex]);
@@ -216,7 +222,7 @@ const TextToolSidebar: React.FC<IProps> = ({ toolInstance, imgIndex, dispatch })
   const result = toolInstance.textList[0]?.value ?? {};
 
   const onNext = () => {
-    dispatch(PageForward());
+    dispatch(PageForward(true));
   };
 
   return (
@@ -239,7 +245,11 @@ const TextToolSidebar: React.FC<IProps> = ({ toolInstance, imgIndex, dispatch })
 };
 
 function mapStateToProps(state: AppState) {
-  return { toolInstance: state.annotation.toolInstance, imgIndex: state.annotation.imgIndex };
+  return {
+    toolInstance: state.annotation.toolInstance,
+    imgIndex: state.annotation.imgIndex,
+    triggerEventAfterIndexChanged: state.annotation.triggerEventAfterIndexChanged,
+  };
 }
 
 export default connect(mapStateToProps)(TextToolSidebar);

@@ -28,8 +28,9 @@ export interface AnnotationState {
   basicResultList: any[];
   resultList: any[];
   stepProgress: number;
-
   loading: boolean; // 用于图片加载
+  /** 阻止文件切换后的事件 */
+  triggerEventAfterIndexChanged: boolean;
 }
 
 interface UpdateToolInstance {
