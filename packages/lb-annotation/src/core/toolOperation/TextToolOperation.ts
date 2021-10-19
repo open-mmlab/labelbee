@@ -34,27 +34,41 @@ class TextToolOperation extends BasicToolOperation {
     return document.getElementById(this.textValueContainerID);
   }
 
-  public setResult(result: ITextResult[]) {
-    this.textList = result.length === 0 ? this.getInitValue() : result;
+  public setResult(textResultList: ITextResult[]) {
+    this.textList = textResultList;
     this.toggleTextContainerVisible(true);
-    Object.keys(this.textList[0].value).forEach((k) => {
-      this.renderText(k, this.textList[0].value[k]);
-    });
+    const values = this.textList[0]?.value;
+
+    if (values) {
+      Object.keys(values).forEach((k) => {
+        this.renderText(k, values[k]);
+      });
+    }
+    this.emit('valueUpdated');
+    this.toggleTextContainerVisible(!!values);
   }
 
-  /**
-   * 获取初始值
-   * @param useDefault
-   */
-  public getInitValue = (useDefault: boolean = true) => {
+  /** 获取单个初始值 */
+  public getSingleResult = (sourceID?: string) => {
     const initValue: any = {};
     if (this.config.configList.length > 0) {
       this.config.configList.forEach((i: { key: string; default: string }) => {
-        initValue[i.key] = useDefault ? i.default ?? '' : '';
+        initValue[i.key] = i.default ?? '';
       });
     }
 
-    return [{ value: initValue, id: uuid(), sourceID: CommonToolUtils.getSourceID() }] as ITextResult[];
+    return { value: initValue, id: uuid(), sourceID: sourceID ?? CommonToolUtils.getSourceID() } as ITextResult;
+  };
+
+  /**
+   * 获取初始值结果列表
+   */
+  public getInitResultList = (dataSourceStep: number, basicResultList: any[]) => {
+    if (dataSourceStep === 0) {
+      return [this.getSingleResult()];
+    }
+
+    return basicResultList.map((i) => this.getSingleResult(i.id));
   };
 
   public updateTextValue(k: string, v: string) {

@@ -7,6 +7,8 @@ import { classnames } from '@/utils';
 import { Input } from 'antd';
 import { cKeyCode } from '@sensetime/annotation';
 import { PageForward } from '@/store/annotation/actionCreators';
+import { ConfigUtils } from '@/utils/ConfigUtils';
+import { IStepInfo } from '@/types/step';
 
 const EKeyCode = cKeyCode.default;
 
@@ -49,6 +51,9 @@ interface IProps {
   toolInstance: ToolInstance;
   imgIndex: number;
   triggerEventAfterIndexChanged: boolean;
+  step: number;
+  stepList: IStepInfo[];
+  basicResultList: any[];
 }
 
 interface IConfigListItem {
@@ -178,6 +183,9 @@ const TextToolSidebar: React.FC<IProps> = ({
   imgIndex,
   dispatch,
   triggerEventAfterIndexChanged,
+  step,
+  stepList,
+  basicResultList,
 }) => {
   const [configList, setConfigList] = useState<IConfigListItem[]>([]);
   const [focusIndex, setFocusIndex] = useState(0);
@@ -225,6 +233,9 @@ const TextToolSidebar: React.FC<IProps> = ({
     dispatch(PageForward(true));
   };
 
+  const stepConfig = ConfigUtils.getStepConfig(stepList, step);
+  const disabled = stepConfig.dataSourceStep > 0 && basicResultList.length === 0;
+
   return (
     <div className='textToolOperationMenu'>
       {configList.map((i, index) => (
@@ -238,6 +249,7 @@ const TextToolSidebar: React.FC<IProps> = ({
           hasMultiple={configList.length > 1}
           focus={focusIndex === index}
           onNext={onNext}
+          disabled={disabled}
         />
       ))}
     </div>
@@ -248,6 +260,9 @@ function mapStateToProps(state: AppState) {
   return {
     toolInstance: state.annotation.toolInstance,
     imgIndex: state.annotation.imgIndex,
+    step: state.annotation.step,
+    basicResultList: state.annotation.basicResultList,
+    stepList: state.annotation.stepList,
     triggerEventAfterIndexChanged: state.annotation.triggerEventAfterIndexChanged,
   };
 }

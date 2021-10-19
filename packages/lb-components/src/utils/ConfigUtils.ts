@@ -11,4 +11,12 @@ export class ConfigUtils {
       return defaultValue;
     }
   }
+
+  /**
+   * 获取对应的步骤配置
+   * @param stepList 
+   * @param step 
+   */
+  public static getStepConfig = (stepList: any[], step: number) =>
+    stepList.find((i) => i.step === step);
 }

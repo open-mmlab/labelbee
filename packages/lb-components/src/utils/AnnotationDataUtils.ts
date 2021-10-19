@@ -1,5 +1,6 @@
 import { uuid } from '@sensetime/annotation';
 import { jsonParser } from '.';
+import { EToolName } from '@/data/enums/ToolType';
 
 export default class AnnotationDataUtils {
   /**
@@ -32,5 +33,25 @@ export default class AnnotationDataUtils {
     } catch {
       return copyResult;
     }
+  }
+
+  /**
+   * 获取初始化数据
+   * @param result
+   * @param toolInstance
+   * @param config
+   * @param dependResult
+   */
+  public static getInitialResult(
+    result: [] | undefined,
+    toolInstance: any,
+    stepConfig: any,
+    basicResultList: any[],
+  ) {
+    if (stepConfig.tool === EToolName.Text && !result) {
+      return toolInstance.getInitResultList(stepConfig.dataSourceStep, basicResultList);
+    }
+
+    return result || [];
   }
 }

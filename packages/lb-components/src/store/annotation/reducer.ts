@@ -316,12 +316,12 @@ export const annotationReducer = (
         annotationEngine.setImgNode(imgNode, basicImgInfo);
       }
 
-      let result = stepResult?.result || [];
       const stepConfig = getStepConfig(stepList, step);
 
       const { dataSourceStep, tool } = stepConfig;
       const dependStepConfig = getStepConfig(stepList, dataSourceStep);
       let stepBasicResultList = [];
+      let result = stepResult?.result;
 
       annotationEngine.launchOperation();
       if (dataSourceStep && tool) {
@@ -331,6 +331,13 @@ export const annotationReducer = (
           annotationEngine.setBasicInfo(dependStepConfig.tool, stepBasicResultList[basicIndex]);
           const sourceID = stepBasicResultList[basicIndex].id;
 
+          result = AnnotationDataUtils.getInitialResult(
+            result,
+            toolInstance,
+            stepConfig,
+            stepBasicResultList,
+          );
+
           result = result.filter((i: { sourceID: string | number }) => i.sourceID === sourceID);
         } else {
           // TODO: 禁用绘制交互，有无依赖之间的操作切换
@@ -339,6 +346,8 @@ export const annotationReducer = (
           message.info('当前文件不存在依赖数据');
         }
       }
+
+      result = result ?? [];
 
       // TODO，非查看模式才允许添加数据
       if (currentStepInfo.tool !== 'check') {
