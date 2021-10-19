@@ -21,6 +21,8 @@ class DblClickEventListener {
 
   private cacheFunction: any; // 用于存储左键的事件的缓存
 
+  private mouseDownTime = 0; // 用于缓解 down 
+
   constructor(dom: HTMLElement, delay: number) {
     this.dom = dom;
     this.isDoubleClick = false;
@@ -58,7 +60,12 @@ class DblClickEventListener {
     this.dom.removeEventListener('mouseup', this.mouseUp);
     this.dom.removeEventListener('mousemove', this.mouseMove);
     this.dom.removeEventListener('dblclick', this.dblclick);
+    this.dom.removeEventListener('mousedown', this.onMouseDown);
   }
+
+  public onMouseDown = () => {
+    this.mouseDownTime = new Date().getTime();
+  };
 
   /**
    * 用于添加鼠标单击事件， 左键双击事件，右键双击事件
@@ -77,6 +84,12 @@ class DblClickEventListener {
     this.removeEvent();
     this.mouseUp = (e: MouseEvent) => {
       const cTime = new Date().getTime();
+
+      // down 和 up 超过 delay 时间直接判断为点击事件
+      if (cTime - this.mouseDownTime > this.delay) {
+        singleClickFun(e);
+        return;
+      }
 
       // 右键双击的判断
       if (e.button === 2) {
@@ -144,6 +157,7 @@ class DblClickEventListener {
     this.dom.addEventListener('mouseup', this.mouseUp);
     this.dom.addEventListener('mousemove', this.mouseMove);
     this.dom.addEventListener('dblclick', this.dblclick);
+    this.dom.addEventListener('mousedown', this.onMouseDown);
   }
 
   public clearRightDblClick() {
