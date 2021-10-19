@@ -12,7 +12,7 @@ import { AnnotationState, AnnotationActionTypes } from './types';
 import { message } from 'antd';
 import { ImgUtils } from '@sensetime/annotation';
 
-const getStepConfig = (stepList: any[], step: number) => stepList.find((i) => i.step === step);
+export const getStepConfig = (stepList: any[], step: number) => stepList.find((i) => i.step === step);
 
 const initialState: AnnotationState = {
   annotationEngine: null,

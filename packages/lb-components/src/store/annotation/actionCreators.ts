@@ -1,11 +1,12 @@
 import { ANNOTATION_ACTIONS } from '@/store/Actions';
 import { IStepInfo } from '@/types/step';
-import { IFileItem, OnSubmit, GetFileData, OnSave } from '@/types/data';
+import { GetFileData, IFileItem, OnSave, OnSubmit } from '@/types/data';
 import { AnnotationActionTypes, ToolInstance } from './types';
-import { loadFileData } from './reducer';
+import { loadFileData, getStepConfig } from './reducer';
 import { ESubmitType } from '@/constant';
 import { EPageTurningOperation } from '@/data/enums/AnnotationSize';
 import PageOperator from '@/utils/PageOperator';
+import { jsonParser } from '@/utils';
 
 const dispatchTasks = (dispatch: any, tasks: any[]) => tasks.map((task) => dispatch(task));
 
@@ -28,6 +29,14 @@ const getSubmitByPageOperation = (pageTurningOperation: EPageTurningOperation) =
 
   return ESubmitType.Forward;
 };
+
+const getBasicIndex = (annotationStore: any, basicIndex: number) => {
+  const {imgList, imgIndex} = annotationStore;
+  const { dataSourceStep } = getStepConfig(annotationStore.stepList, annotationStore.step);
+  let backwardResult = jsonParser(imgList[imgIndex - 1].result)
+  const index = backwardResult[`step_${dataSourceStep}`]?.result?.length - 1
+  return index || basicIndex
+}
 
 export function UpdateToolInstance(toolInstance: ToolInstance): AnnotationActionTypes {
   return {
@@ -152,16 +161,16 @@ export function InitTaskData({
 }
 
 /** 切换到下一步 */
-export const ToNextStep = () => (dispatch: any, getState: any) => {
+export const ToNextStep = (pageNumber?: number) => (dispatch: any, getState: any) => {
   const { step } = getState().annotation;
-  return [dispatch(UpdateProcessingStep(step + 1))];
+  return [dispatch(UpdateProcessingStep(step + 1, pageNumber))];
 };
 
 /**
  * 更新当前操作的步骤
  * @param {number} toStep
  */
-export const UpdateProcessingStep = (toStep: number) => (dispatch: any, state: any) => {
+export const UpdateProcessingStep = (toStep: number, index?: number) => (dispatch: any, state: any) => {
   const imgIndex = state()?.annotation?.imgIndex ?? 0;
   return [
     dispatch({ type: ANNOTATION_ACTIONS.SUBMIT_RESULT }),
@@ -173,7 +182,7 @@ export const UpdateProcessingStep = (toStep: number) => (dispatch: any, state: a
     dispatch({ type: ANNOTATION_ACTIONS.SET_STEP, payload: { toStep } }),
     dispatch({ type: ANNOTATION_ACTIONS.CALC_STEP_PROGRESS }),
     // 切换步骤保持图片位置
-    dispatch(loadFileData(imgIndex, 0)),
+    dispatch(loadFileData(index ?? imgIndex, 0)),
   ];
 };
 
@@ -276,15 +285,17 @@ export const DispatcherTurning = (
   triggerEventAfterIndexChanged: boolean = false,
   toIndex?: number,
 ) => {
+  const annotationStore = getState().annotation;
   const { fileIndexChanged, fileIndex, basicIndexChanged, basicIndex } =
-    PageOperator.getNextPageInfo(pageTurningOperation, getState().annotation, toIndex);
+    PageOperator.getNextPageInfo(pageTurningOperation, annotationStore, toIndex);
 
   const submitType: ESubmitType = getSubmitByPageOperation(pageTurningOperation);
 
   ChangeTriggerEventAfterIndexChanged(dispatch, triggerEventAfterIndexChanged);
 
   if (fileIndexChanged) {
-    return SubmitAndChangeFileIndex(dispatch, fileIndex, submitType, basicIndex);
+    const index = submitType === ESubmitType.Backward ? getBasicIndex(annotationStore, basicIndex) : basicIndex;
+    return SubmitAndChangeFileIndex(dispatch, fileIndex, submitType, index);
   }
 
   if (basicIndexChanged) {

@@ -16,12 +16,13 @@ import { EToolName } from '@/data/enums/ToolType';
 import { IStepInfo } from '@/types/step';
 
 interface INextStep {
+  step: number;
   stepProgress: number;
   stepList: IStepInfo[];
 }
 
-const NextStep: React.FC<INextStep> = ({ stepProgress, stepList }) => {
-  if (stepList.length < 2) {
+const NextStep: React.FC<INextStep> = ({ step, stepProgress, stepList }) => {
+  if (stepList.length < 2 || step === stepList.length) {
     return null;
   }
 
@@ -32,7 +33,7 @@ const NextStep: React.FC<INextStep> = ({ stepProgress, stepList }) => {
         marginLeft: 10,
       }}
       onClick={() => {
-        store.dispatch(ToNextStep() as any);
+        store.dispatch(ToNextStep(0) as any);
       }}
       disabled={stepProgress < 1}
     >
@@ -85,7 +86,7 @@ const ToolHeader: React.FC<IToolHeaderProps> = ({
         {stepList.length > 1 && (
           <>
             <StepSwitch stepProgress={stepProgress} />
-            <NextStep stepProgress={stepProgress} stepList={stepList}/>
+            <NextStep step={step} stepProgress={stepProgress} stepList={stepList}/>
           </>
         )}
 
@@ -109,6 +110,7 @@ const mapStateToProps = (state: AppState) => ({
   toolName: state.annotation.stepList[state.annotation.step - 1]?.tool,
   stepList: state.annotation.stepList,
   stepInfo: state.annotation.stepList[state.annotation.step - 1],
+  step: state.annotation.step
 });
 
 export default connect(mapStateToProps)(ToolHeader);
