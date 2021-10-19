@@ -29,6 +29,7 @@ const initialState: AnnotationState = {
   resultList: [],
   stepProgress: 0,
   loading: false,
+  triggerEventAfterIndexChanged: false,
 };
 
 /**
@@ -200,7 +201,7 @@ export const annotationReducer = (
       onSave?.(imgList[imgIndex], imgIndex, imgList);
       return {
         ...state,
-      }
+      };
     }
 
     case ANNOTATION_ACTIONS.SUBMIT_RESULT: {
@@ -281,6 +282,14 @@ export const annotationReducer = (
       };
     }
 
+    case ANNOTATION_ACTIONS.SET_TRIGGER_EVENT_AFTER_INDEX_CHANGED: {
+      const { triggerEventAfterIndexChanged } = action.payload;
+      return {
+        ...state,
+        triggerEventAfterIndexChanged: !!triggerEventAfterIndexChanged,
+      };
+    }
+
     case ANNOTATION_ACTIONS.LOAD_FILE_DATA: {
       const { imgList, step, toolInstance, annotationEngine, stepList } = state;
       if (!toolInstance || !annotationEngine) {
@@ -339,6 +348,7 @@ export const annotationReducer = (
 
       return {
         ...state,
+
         imgIndex: nextIndex,
         basicIndex,
         basicResultList: stepBasicResultList,

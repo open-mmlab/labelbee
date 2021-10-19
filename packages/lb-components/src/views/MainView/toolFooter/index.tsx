@@ -59,8 +59,7 @@ interface IProps {
   step: number;
   basicResultList: any[];
   basicIndex: number;
-  mode?: 'light' | 'dark' // 后面通过 context 的形式进行编写
-
+  mode?: 'light' | 'dark'; // 后面通过 context 的形式进行编写
 }
 
 export const footerCls = `${prefix}-footer`;
