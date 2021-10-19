@@ -1,6 +1,6 @@
 import React from 'react';
 import { LeftOutlined } from '@ant-design/icons';
-import {connect, useDispatch} from 'react-redux';
+import { connect, useDispatch } from 'react-redux';
 import { store } from 'src';
 import { IFileItem } from '@/types/data';
 import { AppState } from '@/store';
@@ -9,16 +9,16 @@ import { ESubmitType, prefix } from '@/constant';
 import ExportData from './ExportData';
 import HeaderOption from './headerOption';
 import { AnnotationEngine } from '@sensetime/annotation';
-import { Button } from 'antd';
-import {ToNextStep, ToSubmitFileData} from '@/store/annotation/actionCreators';
+import { Button, Tooltip } from 'antd';
+import { ToNextStep, ToSubmitFileData } from '@/store/annotation/actionCreators';
 import StepSwitch from './StepSwitch';
 import { EToolName } from '@/data/enums/ToolType';
 import { IStepInfo } from '@/types/step';
 
 interface INextStep {
-  step: number;
   stepProgress: number;
   stepList: IStepInfo[];
+  step: number; // 当前步骤
 }
 
 const NextStep: React.FC<INextStep> = ({ step, stepProgress, stepList }) => {
@@ -26,7 +26,9 @@ const NextStep: React.FC<INextStep> = ({ step, stepProgress, stepList }) => {
     return null;
   }
 
-  return (
+  const disabled = stepProgress < 1;
+
+  const NextButton = () => (
     <Button
       type='primary'
       style={{
@@ -35,11 +37,23 @@ const NextStep: React.FC<INextStep> = ({ step, stepProgress, stepList }) => {
       onClick={() => {
         store.dispatch(ToNextStep(0) as any);
       }}
-      disabled={stepProgress < 1}
+      disabled={disabled}
     >
       下一步
     </Button>
   );
+
+  if (disabled) {
+    return (
+      <Tooltip title='当前步骤存在为未标注过的图片，请标注完成再点击下一步'>
+        <span>
+          <NextButton />
+        </span>
+      </Tooltip>
+    );
+  }
+
+  return <NextButton />;
 };
 
 interface IToolHeaderProps {
@@ -67,11 +81,10 @@ const ToolHeader: React.FC<IToolHeaderProps> = ({
 }) => {
   const dispatch = useDispatch();
   // render 数据展示
-  const currentOption = <ExportData exportData={exportData}/>;
+  const currentOption = <ExportData exportData={exportData} />;
 
   const closeAnnotation = () => {
-
-    dispatch(ToSubmitFileData(ESubmitType.Quit))
+    dispatch(ToSubmitFileData(ESubmitType.Quit));
 
     if (goBack) {
       goBack(imgList);
@@ -110,7 +123,7 @@ const mapStateToProps = (state: AppState) => ({
   toolName: state.annotation.stepList[state.annotation.step - 1]?.tool,
   stepList: state.annotation.stepList,
   stepInfo: state.annotation.stepList[state.annotation.step - 1],
-  step: state.annotation.step
+  step: state.annotation.step,
 });
 
 export default connect(mapStateToProps)(ToolHeader);
