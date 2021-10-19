@@ -39,7 +39,11 @@ const HeaderOption: React.FC<IProps> = (props) => {
   const isBegin = props.isBegin || stepInfo?.tool === EToolName.Tag;
 
   const updateRotate = () => {
-    if (stepInfo.dataSourceStep !== 0) {
+    /**
+     * 1. 非第一步无法旋转
+     * 2. 单步骤不存在 dataSourceStep
+     */
+    if (stepInfo.dataSourceStep !== 0 && stepInfo.dataSourceStep !== undefined) {
       return;
     }
 
