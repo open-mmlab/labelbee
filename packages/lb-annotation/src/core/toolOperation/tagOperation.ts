@@ -28,6 +28,13 @@ class TagOperation extends BasicToolOperation {
     super.destroy();
   }
 
+  /**
+   * 获取初始值结果列表
+   */
+  public getInitResultList = (dataSourceStep: number, basicResultList: any[]) => {
+    return TagUtils.getDefaultTagResult(this.config.inputList, basicResultList);
+  };
+
   public setResult(tagResult: any[], isInitData = false) {
     if (isInitData === true && tagResult.length === 0 && this.basicResult) {
       // 注意，该获取方式是需要拉取所有的 basicResultList
@@ -53,14 +60,16 @@ class TagOperation extends BasicToolOperation {
    * 当前页面的标注结果
    */
   public get currentTagResult() {
-    return this.tagResult.filter((v) => {
-      const basicSourceID = `${v.sourceID}`;
-      return CommonToolUtils.isSameSourceID(basicSourceID, this.sourceID);
-    })[0] ?? {};
+    return (
+      this.tagResult.filter((v) => {
+        const basicSourceID = `${v.sourceID}`;
+        return CommonToolUtils.isSameSourceID(basicSourceID, this.sourceID);
+      })[0] ?? {}
+    );
   }
 
   public get sourceID() {
-    return CommonToolUtils.getSourceID(this.basicResult)
+    return CommonToolUtils.getSourceID(this.basicResult);
   }
 
   public onKeyDown(e: KeyboardEvent) {

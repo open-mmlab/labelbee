@@ -58,7 +58,7 @@ class BasicToolOperation extends EventListener {
   public isImgError: boolean; // 图片是否错误
 
   // 数据依赖
-  public basicResult?: any;
+  public basicResult?: any; // 可能存在含有 dependToolName 但是不含有 basicResult 的情况
 
   public dependToolName?: EToolName;
 

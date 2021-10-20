@@ -853,7 +853,7 @@ class PolygonOperation extends BasicToolOperation {
 
     // 边缘判断 - 仅限支持图片下范围下
     if (this.config.drawOutsideTarget === false && this.imgInfo) {
-      if (this.dependToolName && this.basicCanvas) {
+      if (this.dependToolName && this.basicCanvas && this.basicResult) {
         let isOutSide = false;
         switch (this.dependToolName) {
           case EToolName.Rect: {
