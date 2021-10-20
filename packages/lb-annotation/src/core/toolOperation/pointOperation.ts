@@ -364,10 +364,9 @@ class PointOperation extends BasicToolOperation {
         textAttribute,
       };
     }
-    this.pointList.push(newDrawingPoint);
     this.setSelectedID(newDrawingPoint.id);
     this.hoverID = newDrawingPoint.id;
-    this.setPointList(this.pointList);
+    this.setPointList([...this.pointList, newDrawingPoint]);
     this.history.pushHistory(this.pointList);
   }
 
