@@ -43,8 +43,7 @@ class PageOperator {
     nextIndex?: number,
   ) {
     const pageInfo: IPageInfo = PageOperator.getPageInfo(annotationStore);
-    const { fileIndex: currentFileIndex } =
-      PageOperator.getPageInfo(annotationStore);
+    const { fileIndex: currentFileIndex } = PageOperator.getPageInfo(annotationStore);
 
     const nextFileIndex = PageOperator.getNextFileIndex(pageTurningOperation, pageInfo, nextIndex);
     const nextBasicIndex = PageOperator.getNextBasicIndex(
@@ -115,11 +114,13 @@ class PageOperator {
 
     if (dataSourceStep) {
       const fileResult = jsonParser(fileList[fileIndex].result);
-      if (!fileResult?.result || fileResult?.result?.length === 0) {
-        return 0
+      const stepResult = fileResult[`step_${dataSourceStep}`]?.result;
+
+      if (!stepResult || !stepResult?.length) {
+        return 0;
       }
 
-      return fileResult[`step_${dataSourceStep}`].result.length - 1;
+      return stepResult?.length - 1;
     }
 
     return 0;
