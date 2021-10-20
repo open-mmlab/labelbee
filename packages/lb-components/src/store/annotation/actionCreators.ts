@@ -2,7 +2,7 @@ import { ANNOTATION_ACTIONS } from '@/store/Actions';
 import { IStepInfo } from '@/types/step';
 import { GetFileData, IFileItem, OnSave, OnSubmit } from '@/types/data';
 import { AnnotationActionTypes, ToolInstance } from './types';
-import { loadFileData, getStepConfig } from './reducer';
+import { LoadImageAndFileData, getStepConfig } from './reducer';
 import { ESubmitType } from '@/constant';
 import { EPageTurningOperation } from '@/data/enums/AnnotationSize';
 import PageOperator from '@/utils/PageOperator';
@@ -155,7 +155,7 @@ export function InitTaskData({
     type: ANNOTATION_ACTIONS.INIT_TOOL,
   });
 
-  tasks.push(loadFileData(initialIndex));
+  tasks.push(LoadImageAndFileData(initialIndex));
 
   return (dispatch: any) => dispatchTasks(dispatch, tasks);
 }
@@ -182,7 +182,7 @@ export const UpdateProcessingStep = (toStep: number, index?: number) => (dispatc
     dispatch({ type: ANNOTATION_ACTIONS.SET_STEP, payload: { toStep } }),
     dispatch({ type: ANNOTATION_ACTIONS.CALC_STEP_PROGRESS }),
     // 切换步骤保持图片位置
-    dispatch(loadFileData(index ?? imgIndex, 0)),
+    dispatch(LoadImageAndFileData(index ?? imgIndex, 0)),
   ];
 };
 
@@ -208,7 +208,10 @@ const SubmitAndChangeFileIndex = (
   nextIndex: number,
   submitType: ESubmitType,
   nextBasicIndex?: number,
-) => [dispatch(ToSubmitFileData(submitType)), dispatch(loadFileData(nextIndex, nextBasicIndex))];
+) => [
+  dispatch(ToSubmitFileData(submitType)),
+  dispatch(LoadImageAndFileData(nextIndex, nextBasicIndex)),
+];
 
 const ChangeBasicIndex = (dispatch: any, nextBasicIndex: number) => [
   dispatch({ type: ANNOTATION_ACTIONS.SUBMIT_RESULT }),
@@ -311,4 +314,13 @@ export const DispatcherTurning = (
 export const ChangeSave = (dispatch: Function) => {
   dispatch(ToSubmitFileData(ESubmitType.Save));
   dispatch({ type: ANNOTATION_ACTIONS.SAVE_RESULT });
+};
+
+export const SetAnnotationLoading = (dispatch: Function, loading: boolean) => {
+  dispatch({
+    type: ANNOTATION_ACTIONS.SET_LOADING,
+    payload: {
+      loading,
+    },
+  });
 };

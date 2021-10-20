@@ -11,6 +11,7 @@ import { AnnotationEngine } from '@sensetime/annotation';
 import { AnnotationState, AnnotationActionTypes } from './types';
 import { message } from 'antd';
 import { ImgUtils } from '@sensetime/annotation';
+import { SetAnnotationLoading } from './actionCreators';
 
 export const getStepConfig = (stepList: any[], step: number) => stepList.find((i) => i.step === step);
 
@@ -75,15 +76,15 @@ const updateToolInstance = (annotation: AnnotationState, imgNode: HTMLImageEleme
   return { toolInstance: annotationEngine.toolInstance, annotationEngine };
 };
 
-export const loadFileData =
+/**
+ * 初始化imgNode并加载数据
+ * @param nextIndex
+ * @param nextBasicIndex
+ */
+export const LoadImageAndFileData =
   (nextIndex: number, nextBasicIndex?: number) => async (dispatch: any, getState: any) => {
     const { getFileData, imgList, toolInstance } = getState().annotation;
-    dispatch({
-      type: ANNOTATION_ACTIONS.SET_LOADING,
-      payload: {
-        loading: true,
-      },
-    });
+    SetAnnotationLoading(dispatch, true);
 
     /** 支持外部传入获取文件接口 */
     if (getFileData) {
@@ -101,12 +102,7 @@ export const loadFileData =
 
     return ImgUtils.load(url)
       .then((imgNode) => {
-        dispatch({
-          type: ANNOTATION_ACTIONS.SET_LOADING,
-          payload: {
-            loading: false,
-          },
-        });
+        SetAnnotationLoading(dispatch, false);
 
         dispatch({
           type: ANNOTATION_ACTIONS.LOAD_FILE_DATA,
@@ -118,13 +114,7 @@ export const loadFileData =
         });
       })
       .catch(() => {
-        dispatch({
-          type: ANNOTATION_ACTIONS.SET_LOADING,
-          payload: {
-            loading: false,
-          },
-        });
-
+        SetAnnotationLoading(dispatch, false);
         toolInstance.setErrorImg();
         dispatch({
           type: ANNOTATION_ACTIONS.LOAD_FILE_DATA,
@@ -320,25 +310,21 @@ export const annotationReducer = (
 
       const { dataSourceStep, tool } = stepConfig;
       const dependStepConfig = getStepConfig(stepList, dataSourceStep);
-      let stepBasicResultList = [];
-      let result = stepResult?.result;
+      const hasDataSourceStep = dataSourceStep && tool;
+      const stepBasicResultList = fileResult[`step_${dataSourceStep}`]?.result ?? [];
+
+      const result = AnnotationDataUtils.getInitialResultList(
+        stepResult?.result,
+        toolInstance,
+        stepConfig,
+        stepBasicResultList,
+      );
 
       annotationEngine.launchOperation();
-      if (dataSourceStep && tool) {
-        stepBasicResultList = fileResult[`step_${dataSourceStep}`]?.result ?? [];
 
+      if (hasDataSourceStep) {
         if (stepBasicResultList?.length > 0) {
           annotationEngine.setBasicInfo(dependStepConfig.tool, stepBasicResultList[basicIndex]);
-          const sourceID = stepBasicResultList[basicIndex].id;
-
-          result = AnnotationDataUtils.getInitialResult(
-            result,
-            toolInstance,
-            stepConfig,
-            stepBasicResultList,
-          );
-
-          result = result.filter((i: { sourceID: string | number }) => i.sourceID === sourceID);
         } else {
           // TODO: 禁用绘制交互，有无依赖之间的操作切换
           annotationEngine.setBasicInfo();
@@ -347,21 +333,22 @@ export const annotationReducer = (
         }
       }
 
-      result = result ?? [];
-
       // TODO，非查看模式才允许添加数据
       if (currentStepInfo.tool !== 'check') {
-        toolInstance.setResult(result, isInitData);
+        const sourceID = stepBasicResultList[basicIndex]?.id;
+        const resultForBasicIndex = hasDataSourceStep
+          ? result.filter((i: { sourceID: string | number }) => i.sourceID === sourceID)
+          : result;
+        toolInstance.setResult(resultForBasicIndex, isInitData);
         toolInstance.history.initRecord(result, true);
       }
 
       return {
         ...state,
-
         imgIndex: nextIndex,
         basicIndex,
         basicResultList: stepBasicResultList,
-        resultList: stepResult?.result || [],
+        resultList: result,
       };
     }
 

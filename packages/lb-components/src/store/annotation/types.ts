@@ -113,9 +113,6 @@ export type AnnotationActionTypes =
   | UpdateToolInstance
   | UpdateImgList
   | UpdateAnnotationConfig
-  | PageForward
-  | PageBackward
-  | PageJump
   | SubmitFileData
   | LoadFileData
   | SetTaskConfig

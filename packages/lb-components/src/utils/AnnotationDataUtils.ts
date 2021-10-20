@@ -1,6 +1,7 @@
 import { uuid } from '@sensetime/annotation';
 import { jsonParser } from '.';
 import { EToolName } from '@/data/enums/ToolType';
+import _ from 'lodash';
 
 export default class AnnotationDataUtils {
   /**
@@ -36,22 +37,49 @@ export default class AnnotationDataUtils {
   }
 
   /**
+   * 判断结果sourceID与依赖数据的id是否能对应
+   * @param result
+   * @param basicResultList
+   */
+  public static isResultSourceMatchedDependence(result: any, basicResultList: any[]) {
+    const sourceIDForCurStep = result?.map((i: { sourceID: string }) => i.sourceID).sort();
+    const sourceIDForDependStep = basicResultList?.map((i) => i.id).sort();
+
+    return _.isEqual(sourceIDForCurStep, sourceIDForDependStep);
+  }
+
+  /**
    * 获取初始化数据
    * @param result
    * @param toolInstance
    * @param config
    * @param dependResult
    */
-  public static getInitialResult(
-    result: [] | undefined,
+  public static getInitialResultList(
+    stepResult: any[] | undefined,
     toolInstance: any,
     stepConfig: any,
     basicResultList: any[],
   ) {
-    if (stepConfig.tool === EToolName.Text && !result) {
+    const resultList = stepResult ?? [];
+
+    if (stepConfig.dataSourceStep === 0) {
+      return resultList;
+    }
+
+    if (stepConfig.tool === EToolName.Text) {
+      const isResultSourceMatchedDependence = AnnotationDataUtils.isResultSourceMatchedDependence(
+        resultList,
+        basicResultList,
+      );
+
+      if (isResultSourceMatchedDependence) {
+        return resultList;
+      }
+
       return toolInstance.getInitResultList(stepConfig.dataSourceStep, basicResultList);
     }
 
-    return result || [];
+    return resultList;
   }
 }
