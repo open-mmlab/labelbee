@@ -23,6 +23,11 @@ class TagOperation extends BasicToolOperation {
     this.setShowDefaultCursor(true);
   }
 
+  public destroy() {
+    this.clearTag();
+    super.destroy();
+  }
+
   public setResult(tagResult: any[], isInitData = false) {
     if (isInitData === true && tagResult.length === 0 && this.basicResult) {
       // 注意，该获取方式是需要拉取所有的 basicResultList
@@ -225,12 +230,19 @@ class TagOperation extends BasicToolOperation {
     this.render();
   };
 
-  public renderTag() {
+  /**
+   * 清除当前渲染的标签
+   */
+  public clearTag() {
     const parentNode = this.canvas?.parentNode;
     const oldDom = window.self.document.getElementById('tagToolTag');
     if (oldDom && parentNode && parentNode.contains(oldDom)) {
       parentNode?.removeChild(oldDom);
     }
+  }
+
+  public renderTag() {
+    this.clearTag();
 
     if (!(this.tagResult?.length > 0)) {
       return;
@@ -266,7 +278,7 @@ class TagOperation extends BasicToolOperation {
         clear: both;
       `,
     );
-    parentNode?.appendChild(dom);
+    this.canvas?.parentNode?.appendChild(dom);
   }
 
   render() {

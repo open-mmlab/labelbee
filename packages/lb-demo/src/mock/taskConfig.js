@@ -114,7 +114,7 @@ const polygonConfig = {
   lineType: 0,
   lineColor: 0,
   // lowerLimitPointNum: 3,
-  upperLimitPointNum: 5,
+  upperLimitPointNum: 20,
   edgeAdsorption: true,
   drawOutsideTarget: false,
   copyBackwardResult: false,

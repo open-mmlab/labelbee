@@ -172,6 +172,7 @@ class LineToolOperation extends BasicToolOperation {
     };
     this.textEditingID = '';
     this.updateSelectedTextAttribute = this.updateSelectedTextAttribute.bind(this);
+    this.getCurrentSelectedData = this.getCurrentSelectedData.bind(this);
     this.actionsHistory = new ActionsHistory();
 
     this.dependToolConfig = {
@@ -310,6 +311,11 @@ class LineToolOperation extends BasicToolOperation {
       color: this.getLineColor(this.defaultAttribute),
       opacity: this.style.opacity,
     };
+  }
+
+  // 当前选中线条的文本
+  get selectedText() {
+    return this.lineList.find((i) => i.id === this.selectedID)?.textAttribute ?? '';
   }
 
   public updateStatus(status: EStatus, resetText: boolean = false) {
@@ -1762,8 +1768,13 @@ class LineToolOperation extends BasicToolOperation {
       return;
     }
 
-    if (!id) {
+    const oldID = this.selectedID;
+    
+    if (id !== oldID && oldID) {
       this._textAttributeInstance?.changeSelected();
+    }
+
+    if (!id) {
       this._textAttributeInstance?.clearTextAttribute();
     }
 
@@ -1823,6 +1834,15 @@ class LineToolOperation extends BasicToolOperation {
     super.clearCanvas();
   }
 
+  /**
+   *  清除当前的所有数据
+   */
+  public clearResult() {
+    this.setResult([]);
+    this.setSelectedLineID(undefined);
+    this.render();
+  }
+
   public exportData() {
     return [this.lineList, this.basicImgInfo];
   }
@@ -1834,8 +1854,27 @@ class LineToolOperation extends BasicToolOperation {
       if (this.selectedID) {
         this.history?.pushHistory(this.lineList);
       }
+      this.emit('changeAttributeSidebar');
     }
   }
+
+  /**
+   * 用于 TextAttributeClass 的数据获取
+   * @returns 
+   */
+  public getCurrentSelectedData() {
+    const valid = this.isActiveLineValid();
+    const attribute = this.defaultAttribute;
+    const toolColor = this.getColor(attribute);
+    const color = valid ? toolColor?.valid.stroke : toolColor?.invalid.stroke;
+    const textAttribute = this.lineList.find((i) => i.id === this.selectedID)?.textAttribute ?? '';
+    
+    return {
+      color,
+      textAttribute
+    }
+  }
+
 
   public renderTextAttribute() {
     if (!this.ctx || !this.activeLine || this.activeLine?.length < 2 || this.isCreate) {
@@ -1857,10 +1896,7 @@ class LineToolOperation extends BasicToolOperation {
         container: this.container,
         icon: this.getTextIconSvg(attribute),
         color,
-        getCurrentSelectedData: () => ({
-          color,
-          textAttribute,
-        }),
+        getCurrentSelectedData: this.getCurrentSelectedData,
         updateSelectedTextAttribute: this.updateSelectedTextAttribute,
       });
     }
