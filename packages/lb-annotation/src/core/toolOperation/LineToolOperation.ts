@@ -1834,6 +1834,15 @@ class LineToolOperation extends BasicToolOperation {
     super.clearCanvas();
   }
 
+  /**
+   *  清除当前的所有数据
+   */
+  public clearResult() {
+    this.setResult([]);
+    this.setSelectedLineID(undefined);
+    this.render();
+  }
+
   public exportData() {
     return [this.lineList, this.basicImgInfo];
   }
