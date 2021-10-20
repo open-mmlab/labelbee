@@ -7,13 +7,14 @@ import AnnotationDataUtils from '@/utils/AnnotationDataUtils';
 import { ConfigUtils } from '@/utils/ConfigUtils';
 import styleString from '@/constant/styleString';
 import { getFormatSize } from '@/components/customResizeHook';
-import { AnnotationEngine } from '@sensetime/annotation';
+import { AnnotationEngine, CommonToolUtils } from '@sensetime/annotation';
 import { AnnotationState, AnnotationActionTypes } from './types';
 import { message } from 'antd';
 import { ImgUtils } from '@sensetime/annotation';
 import { SetAnnotationLoading } from './actionCreators';
 
-export const getStepConfig = (stepList: any[], step: number) => stepList.find((i) => i.step === step);
+export const getStepConfig = (stepList: any[], step: number) =>
+  stepList.find((i) => i.step === step);
 
 const initialState: AnnotationState = {
   annotationEngine: null,
@@ -257,7 +258,7 @@ export const annotationReducer = (
           annotationEngine.setBasicInfo(dependStepConfig.tool, stepBasicResultList[nextBasicIndex]);
           annotationEngine.launchOperation();
         } else {
-          annotationEngine.setBasicInfo();
+          annotationEngine.setBasicInfo(dependStepConfig.tool);
           annotationEngine.forbidOperation();
           message.info('当前文件不存在依赖数据');
         }
@@ -318,6 +319,7 @@ export const annotationReducer = (
         toolInstance,
         stepConfig,
         stepBasicResultList,
+        isInitData,
       );
 
       annotationEngine.launchOperation();
@@ -327,7 +329,7 @@ export const annotationReducer = (
           annotationEngine.setBasicInfo(dependStepConfig.tool, stepBasicResultList[basicIndex]);
         } else {
           // TODO: 禁用绘制交互，有无依赖之间的操作切换
-          annotationEngine.setBasicInfo();
+          annotationEngine.setBasicInfo(dependStepConfig.tool);
           annotationEngine.forbidOperation();
           message.info('当前文件不存在依赖数据');
         }
@@ -335,9 +337,11 @@ export const annotationReducer = (
 
       // TODO，非查看模式才允许添加数据
       if (currentStepInfo.tool !== 'check') {
-        const sourceID = stepBasicResultList[basicIndex]?.id;
+        const sourceID = stepBasicResultList[basicIndex]?.id ?? '';
         const resultForBasicIndex = hasDataSourceStep
-          ? result.filter((i: { sourceID: string | number }) => i.sourceID === sourceID)
+          ? result.filter((i: { sourceID: string | number }) =>
+              CommonToolUtils.isSameSourceID(i.sourceID, sourceID),
+            )
           : result;
         toolInstance.setResult(resultForBasicIndex, isInitData);
         toolInstance.history.initRecord(result, true);

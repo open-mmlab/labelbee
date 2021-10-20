@@ -49,37 +49,61 @@ export default class AnnotationDataUtils {
   }
 
   /**
-   * 获取初始化数据
+   * 获取依赖增量更新的内容
    * @param result
-   * @param toolInstance
-   * @param config
-   * @param dependResult
+   * @param basicResultList
+   * @returns
+   */
+  public static deltaUpdateBasicResultList(result: any, basicResultList: any[]) {
+    const sourceIDForCurStep = result?.map((i: { sourceID: string }) => i.sourceID).sort();
+
+    return basicResultList.filter((v) => !sourceIDForCurStep.includes(v.id));
+  }
+
+  /**
+   * 
+   * @param stepResult 
+   * @param toolInstance 
+   * @param stepConfig 
+   * @param basicResultList 获取初始化数据 该部分默认输入需要为空数组
+   * @param isInitData 
+   * @returns 
    */
   public static getInitialResultList(
     stepResult: any[] | undefined,
     toolInstance: any,
     stepConfig: any,
     basicResultList: any[],
+    isInitData: boolean,
   ) {
     const resultList = stepResult ?? [];
 
-    if (stepConfig.dataSourceStep === 0) {
-      return resultList;
-    }
+    switch (stepConfig.tool) {
+      case EToolName.Tag:
+      case EToolName.Text: {
 
-    if (stepConfig.tool === EToolName.Text) {
-      const isResultSourceMatchedDependence = AnnotationDataUtils.isResultSourceMatchedDependence(
-        resultList,
-        basicResultList,
-      );
+        /**
+         * 在依赖的情况下，检查的是否需要增量更新前面新增的结果
+         */
+        if (stepConfig.dataSourceStep > 0) {
+          const deltaResultList = this.deltaUpdateBasicResultList(resultList, basicResultList);
+          if (deltaResultList.length > 0) {
+            return resultList.concat(
+              toolInstance.getInitResultList(stepConfig.dataSourceStep, deltaResultList),
+            );
+          }
+        }
 
-      if (isResultSourceMatchedDependence) {
-        return resultList;
+        if (isInitData !== true) {
+          return resultList;
+        }
+
+        return toolInstance.getInitResultList(stepConfig.dataSourceStep, basicResultList);
       }
 
-      return toolInstance.getInitResultList(stepConfig.dataSourceStep, basicResultList);
+      default: {
+        return resultList;
+      }
     }
-
-    return resultList;
   }
 }
