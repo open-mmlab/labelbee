@@ -163,23 +163,28 @@ export const annotationReducer = (
         return state;
       }
 
-      const resultString = imgList[imgIndex]?.result || '';
+      const oldResultString = imgList[imgIndex]?.result || '';
       const [, basicImgInfo] = toolInstance.exportData();
 
-      const resultWithBasicInfo = composeResultWithBasicImgInfo(resultString, basicImgInfo);
-
-      const stepProgress = calcStepProgress(imgList, step);
-
-      imgList[imgIndex].result = composeResult(
+      const resultWithBasicInfo = composeResultWithBasicImgInfo(oldResultString, basicImgInfo);
+      const newResultString = composeResult(
         resultWithBasicInfo,
         { step, stepList },
         { rect: resultList },
+      );
+
+      imgList[imgIndex].result = AnnotationDataUtils.dataCorrection(
+        newResultString,
+        oldResultString,
+        step,
+        stepList,
       );
 
       if (onSubmit) {
         onSubmit([imgList[imgIndex]], action.payload?.submitType, imgIndex);
       }
 
+      const stepProgress = calcStepProgress(imgList, step);
       return {
         ...state,
         stepProgress,
