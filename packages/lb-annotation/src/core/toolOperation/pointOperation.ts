@@ -1,4 +1,3 @@
-import MathUtils from '@/utils/MathUtils';
 import { DEFAULT_TEXT_OFFSET, EDragStatus, ESortDirection } from '../../constant/annotation';
 import EKeyCode from '../../constant/keyCode';
 import locale from '../../locales';
@@ -12,6 +11,9 @@ import StyleUtils from '../../utils/tool/StyleUtils';
 import uuid from '../../utils/uuid';
 import { BasicToolOperation, IBasicToolOperationProps } from './basicToolOperation';
 import TextAttributeClass from './textAttributeClass';
+import { EToolName } from '@/constant/tool';
+import RectUtils from '@/utils/tool/RectUtils';
+import PolygonUtils from '@/utils/tool/PolygonUtils';
 
 const TEXTAREA_WIDTH = 200;
 
@@ -324,20 +326,43 @@ class PointOperation extends BasicToolOperation {
 
     const basicSourceID = CommonToolUtils.getSourceID(this.basicResult);
     const coordinateZoom = this.getCoordinateUnderZoom(e);
-    // 边缘判断
-    if (
-      this.config.drawOutsideTarget === false &&
-      (coordinateZoom.x < 0 ||
-        coordinateZoom.y < 0 ||
-        coordinateZoom.x > this.imgInfo.width ||
-        coordinateZoom.y > this.imgInfo.height)
-    ) {
-      return;
-    }
-
     const coordinate = AxisUtils.getOriginCoordinateWithOffsetCoordinate(this.coord, this.zoom, this.currentPos);
 
-    // todo defaultAttribute 逻辑
+    // 边缘判断
+    if (this.config.drawOutsideTarget === false) {
+      if (this.dependToolName && this.basicCanvas) {
+        let isOutSide = false;
+        switch (this.dependToolName) {
+          case EToolName.Rect: {
+            // 依赖拉框
+            isOutSide = !RectUtils.isInRect(coordinate, this.basicResult);
+            break;
+          }
+          // 依赖多边型
+          case EToolName.Polygon: {
+            isOutSide = !PolygonUtils.isInPolygon(coordinate, this.basicResult.pointList);
+            break;
+          }
+          default: {
+            //
+          }
+        }
+
+        if (isOutSide) {
+          // 在边界外直接跳出
+          return;
+        }
+      }
+
+      if (
+        coordinateZoom.x < 0 ||
+        coordinateZoom.y < 0 ||
+        coordinateZoom.x > this.imgInfo.width ||
+        coordinateZoom.y > this.imgInfo.height
+      ) {
+        return;
+      }
+    }
 
     let newDrawingPoint = {
       ...coordinate,
