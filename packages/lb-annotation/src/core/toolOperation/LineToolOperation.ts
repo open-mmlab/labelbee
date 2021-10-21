@@ -1540,13 +1540,11 @@ class LineToolOperation extends BasicToolOperation {
       this.keyboardEventWhileLineCreating(e);
     }
 
-    if (this.isActive) {
-      if (this.config.attributeConfigurable) {
-        const keyCode2Attribute = AttributeUtils.getAttributeByKeycode(e.keyCode, this.config.attributeList);
+    if (this.config.attributeConfigurable) {
+      const keyCode2Attribute = AttributeUtils.getAttributeByKeycode(e.keyCode, this.config.attributeList);
 
-        if (keyCode2Attribute !== undefined) {
-          this.setDefaultAttribute(keyCode2Attribute);
-        }
+      if (keyCode2Attribute !== undefined) {
+        this.setDefaultAttribute(keyCode2Attribute);
       }
     }
   }
@@ -1769,7 +1767,7 @@ class LineToolOperation extends BasicToolOperation {
     }
 
     const oldID = this.selectedID;
-    
+
     if (id !== oldID && oldID) {
       this._textAttributeInstance?.changeSelected();
     }
@@ -1860,7 +1858,7 @@ class LineToolOperation extends BasicToolOperation {
 
   /**
    * 用于 TextAttributeClass 的数据获取
-   * @returns 
+   * @returns
    */
   public getCurrentSelectedData() {
     const valid = this.isActiveLineValid();
@@ -1868,13 +1866,12 @@ class LineToolOperation extends BasicToolOperation {
     const toolColor = this.getColor(attribute);
     const color = valid ? toolColor?.valid.stroke : toolColor?.invalid.stroke;
     const textAttribute = this.lineList.find((i) => i.id === this.selectedID)?.textAttribute ?? '';
-    
+
     return {
       color,
-      textAttribute
-    }
+      textAttribute,
+    };
   }
-
 
   public renderTextAttribute() {
     if (!this.ctx || !this.activeLine || this.activeLine?.length < 2 || this.isCreate) {
