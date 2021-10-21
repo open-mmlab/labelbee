@@ -13,5 +13,6 @@ const message: Record<string, string> = {
   [EMessage.ClearPartialData]: 'Clear partial data',
   [EMessage.MarkerFinish]: 'ListAnnotation is finished',
   [EMessage.LowerLimitPoint]: '已到达标点数量上限', // 缺少国际化
+  [EMessage.NoRotateInDependence]: 'Disallow rotation in dependent cases',
 };
 export default message;

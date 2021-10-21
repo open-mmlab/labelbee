@@ -933,6 +933,13 @@ class BasicToolOperation extends EventListener {
    * @returns 
    */
   public updateRotate() {
+    // 依赖情况下禁止旋转
+    if (this.dependToolName) {
+      this.emit('messageInfo', locale.getMessagesByLocale(EMessage.NoRotateInDependence, this.lang));
+      return false
+    }
+    
+    // 有数据情况下禁止旋转
     if (this.dataList.length > 0) {
       this.emit('messageInfo', locale.getMessagesByLocale(EMessage.NoRotateNotice, this.lang));
       return false;
