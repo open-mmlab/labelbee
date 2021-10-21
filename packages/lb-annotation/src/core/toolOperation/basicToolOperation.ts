@@ -303,6 +303,10 @@ class BasicToolOperation extends EventListener {
     if (this.basicCanvas && this.container.contains(this.basicCanvas)) {
       this.container.removeChild(this.basicCanvas);
     }
+
+    // 恢复初始状态
+    this.clearInvalidPage();
+    this.clearImgDrag();
   }
 
   /**
