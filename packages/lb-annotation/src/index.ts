@@ -12,7 +12,7 @@ import * as cTool from './constant/tool';
 
 // Utils
 import TagUtils from './utils/tool/TagUtils';
-import * as uuid from './utils/uuid';
+import uuid from './utils/uuid';
 import CommonToolUtils from './utils/tool/CommonToolUtils';
 // TODO 后续将 Util 后缀 => Utils
 import MarkerUtils from './utils/tool/MarkerUtils';
