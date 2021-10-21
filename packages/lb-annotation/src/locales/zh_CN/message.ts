@@ -13,5 +13,6 @@ const message: Record<string, string> = {
   [EMessage.ClearPartialData]: '存在部分数据无法清除',
   [EMessage.MarkerFinish]: '列表标注已完成',
   [EMessage.LowerLimitPoint]: '已到达标点数量上限',
+  [EMessage.NoRotateInDependence]: '依赖情况下无法进行旋转',
 };
 export default message;

@@ -303,6 +303,10 @@ class BasicToolOperation extends EventListener {
     if (this.basicCanvas && this.container.contains(this.basicCanvas)) {
       this.container.removeChild(this.basicCanvas);
     }
+
+    // 恢复初始状态
+    this.clearInvalidPage();
+    this.clearImgDrag();
   }
 
   /**
@@ -454,7 +458,8 @@ class BasicToolOperation extends EventListener {
         let newBoundry = basicResult;
 
         switch (dependToolName) {
-          case EToolName.Polygon: {
+          case EToolName.Polygon:
+          case EToolName.Line: {
             // 依赖检测
             if (basicResult.pointList) {
               // 多边形检测
@@ -926,9 +931,16 @@ class BasicToolOperation extends EventListener {
 
   /**
    * 进行图片旋转操作
-   * @returns 
+   * @returns
    */
   public updateRotate() {
+    // 依赖情况下禁止旋转
+    if (this.dependToolName) {
+      this.emit('messageInfo', locale.getMessagesByLocale(EMessage.NoRotateInDependence, this.lang));
+      return false;
+    }
+
+    // 有数据情况下禁止旋转
     if (this.dataList.length > 0) {
       this.emit('messageInfo', locale.getMessagesByLocale(EMessage.NoRotateNotice, this.lang));
       return false;
@@ -990,6 +1002,9 @@ class BasicToolOperation extends EventListener {
 
     this.clearBasicCanvas();
     this.drawImg();
+
+    const thickness = 3;
+
     if (this.basicResult && this.dependToolName) {
       switch (this.dependToolName) {
         case EToolName.Rect: {
@@ -998,6 +1013,7 @@ class BasicToolOperation extends EventListener {
             AxisUtils.changeRectByZoom(this.basicResult, this.zoom, this.currentPos),
             {
               color: 'rgba(204,204,204,1.00)',
+              thickness,
             },
           );
           break;
@@ -1011,11 +1027,26 @@ class BasicToolOperation extends EventListener {
               fillColor: 'transparent',
               strokeColor: 'rgba(204,204,204,1.00)',
               isClose: true,
+              thickness,
             },
           );
 
           break;
         }
+
+        case EToolName.Line: {
+          DrawUtils.drawLineWithPointList(
+            this.basicCanvas,
+            AxisUtils.changePointListByZoom(this.basicResult.pointList, this.zoom, this.currentPos),
+            {
+              color: 'rgba(204,204,204,1.00)',
+              thickness,
+            },
+          );
+
+          break;
+        }
+
         default: {
           //
         }

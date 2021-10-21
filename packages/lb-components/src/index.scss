@@ -63,6 +63,7 @@ $prefix: bee;
   &__zoomController {
     display: flex;
     align-items: center;
+    margin-right: 8px;
   }
 
   &__zoomText {
@@ -238,6 +239,8 @@ $prefix: bee;
           .singleTool {
             color: rgb(153, 153, 153); // 暂时这样设置
             cursor: pointer;
+            display: flex;
+            align-items: center;
 
             .toolName {
               width: 100%;

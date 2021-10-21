@@ -11,4 +11,5 @@ export enum EMessage {
   ClearPartialData = 'ClearPartialData',
   MarkerFinish = 'MarkerFinish',
   LowerLimitPoint = 'LowerLimitPoint',
+  NoRotateInDependence = 'noRotateInDependence'
 }

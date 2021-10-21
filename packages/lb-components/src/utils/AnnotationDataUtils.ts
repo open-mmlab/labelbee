@@ -2,6 +2,8 @@ import { uuid } from '@sensetime/annotation';
 import { jsonParser } from '.';
 import { EToolName } from '@/data/enums/ToolType';
 import _ from 'lodash';
+import StepUtils from './StepUtils';
+import { IStepInfo } from '@/types/step';
 
 export default class AnnotationDataUtils {
   /**
@@ -61,13 +63,13 @@ export default class AnnotationDataUtils {
   }
 
   /**
-   * 
-   * @param stepResult 
-   * @param toolInstance 
-   * @param stepConfig 
+   *
+   * @param stepResult
+   * @param toolInstance
+   * @param stepConfig
    * @param basicResultList 获取初始化数据 该部分默认输入需要为空数组
-   * @param isInitData 
-   * @returns 
+   * @param isInitData
+   * @returns
    */
   public static getInitialResultList(
     stepResult: any[] | undefined,
@@ -81,7 +83,6 @@ export default class AnnotationDataUtils {
     switch (stepConfig.tool) {
       case EToolName.Tag:
       case EToolName.Text: {
-
         /**
          * 在依赖的情况下，检查的是否需要增量更新前面新增的结果
          */
@@ -105,5 +106,156 @@ export default class AnnotationDataUtils {
         return resultList;
       }
     }
+  }
+
+  /**
+   * 修正数据，找到被删除的数据，并将依赖该数据的结果全部删除
+   * @param newResStr 新提交的数据
+   * @param oldResStr 当前的数据
+   * @param step 当前操作的步骤
+   * @param stepList 步骤列表
+   */
+  public static dataCorrection(
+    newResStr: string,
+    oldResStr: string,
+    step: number,
+    stepList: IStepInfo[],
+  ) {
+    try {
+      const curStep = StepUtils.getStepInfo(step, stepList);
+      const stepKey = `step_${curStep.step}`;
+      const newRes = jsonParser(newResStr);
+      const oldRes = jsonParser(oldResStr);
+      const newResForCurStep = newRes[stepKey]?.result;
+      const oldResForCurStep = oldRes[stepKey]?.result;
+
+      /** 没有旧数据时不处理 */
+      if (!oldResForCurStep) {
+        return newResStr;
+      }
+
+      if (_.isEqual(newResForCurStep.sort(this.idCmp), oldResForCurStep.sort(this.idCmp))) {
+        return newResStr;
+      }
+
+      const deletedIds = this.findDeletedIds(newResForCurStep, oldResForCurStep);
+
+      if (deletedIds.length === 0) {
+        return newResStr;
+      }
+
+      const dataSourceStep = step;
+      const stepKeys = this.getStepKeys(newRes).sort();
+      this.deleteRes(newRes, dataSourceStep, deletedIds, stepKeys);
+
+      return JSON.stringify(newRes);
+    } catch (error) {
+      console.error(error);
+      return newResStr;
+    }
+  }
+
+  /**
+   * id sort 规则
+   * @param a
+   * @param b
+   * @returns
+   */
+  public static idCmp(a: any, b: any) {
+    const idA = a.id;
+    const idB = b.id;
+    if (idA < idB) {
+      return -1;
+    }
+    if (idA > idB) {
+      return 1;
+    }
+
+    return 0;
+  }
+
+  /**
+   * 找到结果被删除的id
+   * @param newResForCurStep
+   * @param oldResForCurStep
+   * @returns {Array<string>}
+   */
+  public static findDeletedIds(newResForCurStep: any[], oldResForCurStep: any[]) {
+    return this.findDeletedItems(oldResForCurStep, newResForCurStep).map((i) => i.id);
+  }
+
+  /**
+   * 找到被删除的结果
+   * @param oldResForCurStep
+   * @param newResForCurStep
+   * @returns {Array<any>}
+   */
+  public static findDeletedItems(oldResForCurStep: any[], newResForCurStep: any[]) {
+    const deletedItems: any[] = [];
+    oldResForCurStep.forEach((i: any) => {
+      const isNewResExisted = newResForCurStep.some((r: any) => r.id === i.id);
+      if (!isNewResExisted) {
+        deletedItems.push(i);
+      }
+    });
+    return deletedItems;
+  }
+
+  /**
+   * 根据结果找到所有的步骤
+   * @param res
+   * @returns {Array<number>} 结果步骤列表
+   */
+  public static getStepKeys(res: any) {
+    return Object.keys(res)
+      .map((i) => parseInt(i.replace('step_', ''), 10))
+      .filter((i) => !isNaN(i));
+  }
+
+  /**
+   * 删除依赖数据的结果
+   * @param resData 当前文件的结果
+   * @param dataSourceStep 依赖步骤
+   * @param deletedIds 需要删除的sourceID
+   * @param stepKeys 结果的步骤
+   */
+  public static deleteRes(
+    resData: any,
+    dataSourceStep: number,
+    deletedIds: string[],
+    stepKeys: number[],
+  ) {
+    stepKeys.forEach((s) => {
+      if (s > dataSourceStep) {
+        const stepRes = resData[`step_${s}`];
+        // 文件夹标签, 分割工具 没有依赖, 不进行判断
+        if ([EToolName.FolderTag, EToolName.Segmentation].includes(stepRes.tool)) {
+          return;
+        }
+        if (stepRes.dataSourceStep === dataSourceStep) {
+          const newDeletedIds: string[] = [];
+          stepRes.result = stepRes.result.filter((i: any) => {
+            const exist = deletedIds.includes(i.sourceID);
+            if (exist) {
+              newDeletedIds.push(i.id);
+              return false;
+            }
+
+            return true;
+          });
+          this.deleteRes(resData, s, newDeletedIds, stepKeys);
+        } else {
+          // 非直接依赖关系下，也同样过滤删除了对应框的数据（注意: 该场景不包含 filterData 过滤属性下，更改框的属性来删除对应的框体）
+          stepRes.result = stepRes.result.filter((i: any) => {
+            const exist = deletedIds.includes(i.sourceID);
+            if (exist) {
+              return false;
+            }
+
+            return true;
+          });
+        }
+      }
+    });
   }
 }
