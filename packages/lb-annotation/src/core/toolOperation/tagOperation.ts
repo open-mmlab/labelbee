@@ -32,6 +32,11 @@ class TagOperation extends BasicToolOperation {
    * 获取初始值结果列表
    */
   public getInitResultList = (dataSourceStep: number, basicResultList: any[]) => {
+    // 非依赖原图，并且无依赖数据， 则不进行初始化
+    if (!(dataSourceStep === 0 || dataSourceStep === undefined) && basicResultList.length === 0) {
+      return [];
+    }
+
     return TagUtils.getDefaultTagResult(this.config.inputList, basicResultList);
   };
 
