@@ -8,13 +8,3 @@
 | 线条  | http://bee-sdk-demo.sensebee.xyz/?tool=lineTool |
 | 文本  | http://bee-sdk-demo.sensebee.xyz/?tool=textTool |
 | 多边形  | http://bee-sdk-demo.sensebee.xyz/?tool=polygonTool |
-
-
-## 快速使用
-
-```bash
-$ git clone git@gitlab.bj.sensetime.com:label-bee/bee-sdk-demo.git
-$ cd bee-sdk-demo
-$ npm install
-$ npm run start
-```

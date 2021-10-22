@@ -2,11 +2,11 @@
 
 - author zefeng
 - createTime 2021-08-31
-- updateTime 2021-08-31 10:15:15
+- updateTime 2021-10-22 15:54
 
 ## 项目概述
 
-Label-Bee 前端技术才有 Typescript 为基础的，基础组件基于 [antd](https://ant.design/)、[react](https://reactjs.org/) 进行开发。label-bee 采用 Monorepo 的形式进行组织，项目可以同时
+Label-Bee 前端技术以 Typescript 为基础的，基础组件基于 [antd](https://ant.design/)、[react](https://reactjs.org/) 进行开发。label-bee 采用 Monorepo 的形式进行组织，项目可以同时
 
 | package name  | 功能                 |
 | ------------- | -------------------- |

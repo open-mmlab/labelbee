@@ -6,7 +6,7 @@ Label-Bee 是 SenseBee 数据服务平台内部自研的标注 SDK。基于现�
 
 ```bash
 # NPM
-**$** npm install @sensetime/label-bee --registry=https://npm-registry.sensetime.com
+$ npm install @sensetime/label-bee --registry=https://npm-registry.sensetime.com
 
 # YARN
 $ yarn add @sensetime/label-bee --registry=https://npm-registry.sensetime.com
@@ -17,14 +17,13 @@ $ yarn add @sensetime/label-bee --registry=https://npm-registry.sensetime.com
 
 ## 🔗 Examples
 
-- [bee-sdk-demo](https://gitlab.bj.sensetime.com/luozefeng/bee-sdk-demo)
+- [bee-sdk-demo](https://gitlab.bj.sensetime.com/label-bee/beehive/blob/dev/packages/lb-demo/README.md)
 
 ## 🔨 Usage
 
 ```ts
 import AnnotationOperation from '@sensetime/label-bee';
 import '@sensetime/label-bee/dist/index.css';
-
 
 // 用于触发 onSubmit 的方向判断
 enum ESubmitType {
@@ -100,6 +99,13 @@ const App = () => {
     * @param {number} imgIndex 提交结果的图片下标
    */
    const onSubmit = (data: IData[], submitType: ESubmitType, imgIndex: number) => {};
+
+  /**
+    * 点击保存按钮时触发
+    * @param {IData[]} data 当前提交的数据
+    * @param {ESubmitType} submitType 触发 onSubmit 的方向判断
+    * @param {number} imgIndex 提交结果的图片下标
+   */ 
    const onSave = (data: IData, submitType: ESubmitType, imgIndex: number, datas: Idata[]) => {};
 
    const goBack = (data: IData[]) => {
@@ -345,7 +351,6 @@ export declare enum ELineColor {
 - `lineTool` 线条工具
 
 ### 暂不支持
-
 - `segmentationTool` 前景分割工具
 - `pointMarkerTool`  列表标点工具
 - `filterTool`  筛选工具
