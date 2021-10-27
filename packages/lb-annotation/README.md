@@ -9,7 +9,7 @@ Sense-Annotation 是 SenseBee 数据服务平台内部自研的标注绘图框�
 $ npm install @sensetime/annotation --registry=https://npm-registry.sensetime.com
 
 # YARN
-$ yarn add label-bee --registry=https://npm-registry.sensetime.com
+$ yarn add @sensetime/annotation --registry=https://npm-registry.sensetime.com
 
 # .npmrc
 @sensetime:registry=https://npm-registry.sensetime.com

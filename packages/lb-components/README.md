@@ -18,6 +18,7 @@ $ yarn add @sensetime/label-bee --registry=https://npm-registry.sensetime.com
 ## 🔗 Examples
 
 - [bee-sdk-demo](https://gitlab.bj.sensetime.com/label-bee/beehive/blob/dev/packages/lb-demo/README.md)
+- [客户端下载链接](http://file.intra.sensetime.com/d/cc7d831d9f/)
 
 ## 🔨 Usage
 
