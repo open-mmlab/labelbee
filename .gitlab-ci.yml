@@ -4,6 +4,7 @@ variables:
   REGISTRY_URL: registry.sensetime.com
 
 stages:
+  - lint
   - build
   - deploy
 
@@ -28,15 +29,22 @@ before_script:
 #     - npx lerna version --conventional-graduate --yes
 #     - npx lerna publish from-package --legacy-auth $TNPM_USERPASSWORD_BASE64 --yes
 
+lint:
+  stage: lint
+  script:
+    - npm install
+    - npm run bootstrap:ci
+    - npm run build
+    - npm run lint
+
 build-demo:
   stage: build
   only:
     - dev
   script:
-    - docker login -u $REGISTRY_USERNAME -p $REGISTRY_TOKEN $REGISTRY_URL
     - cd ./packages/lb-demo
-    - npm install
     - npm run build
+    - docker login -u $REGISTRY_USERNAME -p $REGISTRY_TOKEN $REGISTRY_URL
     - docker build -t $IMAGE_REGISTRY_URL .
     - docker push $IMAGE_REGISTRY_URL
 
