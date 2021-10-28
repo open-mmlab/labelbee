@@ -36,7 +36,7 @@
     "build:type": "tsc --emitDeclarationOnly",
     "build": "rm -rf dist && cross-env NODE_ENV=production rollup -c rollup.config.js && npm run build:type",
     "format": "prettier --write \"src/**/*.ts\" \"src/**/*.js\"",
-    "lint": "eslint --cache --ext .js,.jsx,.ts,.tsx  --fix --format=pretty ./src && npm run lint:prettier",
+    "lint": "eslint --cache --ext .js,.jsx,.ts,.tsx  --fix --format=pretty ./src && npm run lint:prettier && npm run build:type",
     "lint:prettier": "npm run prettier && prettier --version && prettier --check \"src/**/*.{js,jsx,ts,tsx,less,md,json}\" --end-of-line auto",
     "prettier": "prettier --write \"**/**.{js,jsx,tsx,ts,less,md,json}\"",
     "prepublishOnly": "npm run build"
