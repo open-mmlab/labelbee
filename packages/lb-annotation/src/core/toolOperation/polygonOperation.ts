@@ -642,11 +642,10 @@ class PolygonOperation extends BasicToolOperation {
       default: {
         if (this.config.attributeConfigurable) {
           const keyCode2Attribute = AttributeUtils.getAttributeByKeycode(keyCode, this.config.attributeList);
-  
+
           if (keyCode2Attribute !== undefined) {
             this.setDefaultAttribute(keyCode2Attribute);
           }
-           
         }
         break;
       }
@@ -700,7 +699,7 @@ class PolygonOperation extends BasicToolOperation {
         return;
       }
 
-      let { dropFoot } = PolygonUtils.getClosestPoint(
+      const { dropFoot } = PolygonUtils.getClosestPoint(
         currentCoord,
         this.polygonListUnderZoom,
         this.config.lineType,

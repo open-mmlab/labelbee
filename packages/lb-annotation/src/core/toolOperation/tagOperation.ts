@@ -2,6 +2,7 @@ import CommonToolUtils from '@/utils/tool/CommonToolUtils';
 import TagUtils from '../../utils/tool/TagUtils';
 import uuid from '../../utils/uuid';
 import { BasicToolOperation, IBasicToolOperationProps } from './basicToolOperation';
+
 interface ITagOperationProps extends IBasicToolOperationProps {
   config: string;
 }
@@ -229,6 +230,7 @@ class TagOperation extends BasicToolOperation {
   };
 
   // 清空当前页面的标注结果
+  // eslint-disable-next-line no-unused-vars
   public clearResult = (sendMessage = true, value?: string) => {
     // 依赖原图
     if (value) {

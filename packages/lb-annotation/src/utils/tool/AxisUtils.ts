@@ -3,7 +3,6 @@ import { EToolName, ELineTypes } from '@/constant/tool';
 import MathUtils from '../MathUtils';
 import PolygonUtils from './PolygonUtils';
 import LineToolUtils, { POINT_RADIUS } from './LineToolUtils';
-import { isInPolygon } from './polygonTool';
 
 export default class AxisUtils {
   /**
@@ -225,10 +224,15 @@ export default class AxisUtils {
 
 export class CoordinateUtils {
   private currentPos: ICoordinate;
+
   private zoom: number;
+
   private basicImgInfo: any;
+
   private basicResult?: IRect | IPolygonData;
+
   private dependToolConfig?: IRectConfig | IPolygonConfig;
+
   private dependToolName: EToolName | '';
 
   constructor(props: any) {
@@ -419,7 +423,7 @@ export class CoordinateUtils {
   }
 
   public isInBasicPolygon(coord: ICoordinate) {
-    return isInPolygon(
+    return PolygonUtils.isInPolygon(
       coord,
       (this.basicResult as IPolygonData)?.pointList || [],
       (this.dependToolConfig as IPolygonConfig)?.lineType,

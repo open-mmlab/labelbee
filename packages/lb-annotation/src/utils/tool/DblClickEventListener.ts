@@ -21,7 +21,7 @@ class DblClickEventListener {
 
   private cacheFunction: any; // 用于存储左键的事件的缓存
 
-  private mouseDownTime = 0; // 用于缓解 down 
+  private mouseDownTime = 0; // 用于缓解 down
 
   constructor(dom: HTMLElement, delay: number) {
     this.dom = dom;

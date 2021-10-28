@@ -157,6 +157,7 @@ class LineToolOperation extends BasicToolOperation {
   private textEditingID?: string;
 
   private isLineValid: boolean;
+
   private lineDragging: boolean;
 
   constructor(props: ILineOperationProps) {

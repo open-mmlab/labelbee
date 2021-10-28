@@ -130,6 +130,7 @@ class BasicToolOperation extends EventListener {
   private _invalidDOM?: HTMLElement;
 
   private showDefaultCursor: boolean; // 是否展示默认的 cursor
+
   public coordUtils: CoordinateUtils;
 
   constructor(props: IBasicToolOperationProps) {
@@ -244,18 +245,18 @@ class BasicToolOperation extends EventListener {
 
   /**
    * 外界直接更改当前渲染位置
-   * @param zoom 
-   * @param currentPos 
+   * @param zoom
+   * @param currentPos
    */
-  public updatePosition(params: { zoom: number, currentPos: ICoordinate }) {
-    const { zoom, currentPos } = params; 
+  public updatePosition(params: { zoom: number; currentPos: ICoordinate }) {
+    const { zoom, currentPos } = params;
 
     // 内部位置初始化
     this.setZoom(zoom);
     this.setCurrentPos(currentPos);
     this.currentPosStorage = currentPos;
     this.innerZoom = zoom;
-    
+
     this.renderBasicCanvas();
     this.render();
   }

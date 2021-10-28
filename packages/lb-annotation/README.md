@@ -282,7 +282,7 @@ const App = () => {
         toolInstance.setForbidOperation(forbidOperation);
 
         // 12. 设置当前依赖框体
-        
+
         // 矩形框依赖
         annotationEngine.setBasicInfo(EToolName.Rect, {
           x: 200.91597,
