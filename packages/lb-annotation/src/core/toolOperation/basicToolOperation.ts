@@ -242,6 +242,24 @@ class BasicToolOperation extends EventListener {
     this.coordUtils.setZoomAndCurrentPos(this.zoom, this.currentPos);
   }
 
+  /**
+   * 外界直接更改当前渲染位置
+   * @param zoom 
+   * @param currentPos 
+   */
+  public updatePosition(params: { zoom: number, currentPos: ICoordinate }) {
+    const { zoom, currentPos } = params; 
+
+    // 内部位置初始化
+    this.setZoom(zoom);
+    this.setCurrentPos(currentPos);
+    this.currentPosStorage = currentPos;
+    this.innerZoom = zoom;
+    
+    this.renderBasicCanvas();
+    this.render();
+  }
+
   public setLang(lang: ELang) {
     this.lang = lang;
   }
