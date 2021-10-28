@@ -13,7 +13,6 @@ import { prefix } from '@/constant';
 import { EToolName } from '@/data/enums/ToolType';
 import { ChangeSave } from '@/store/annotation/actionCreators';
 import { IStepInfo } from '@/types/step';
-import { ToolInstance } from '@/store/annotation/types';
 
 interface IProps {
   isBegin?: boolean;

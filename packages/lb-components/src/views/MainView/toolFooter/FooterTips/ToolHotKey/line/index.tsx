@@ -14,14 +14,14 @@ import Up from '@/assets/annotation/toolHotKeyIcon/icon_up.svg';
 import Down from '@/assets/annotation/toolHotKeyIcon/icon_down.svg';
 
 import {
-  attributeClickLock,
-  attributeLock,
+  // attributeClickLock,
+  // attributeLock,
   backward,
-  copyBackwardResult,
+  // copyBackwardResult,
   dargWithLeftClick,
   dargWithRightClick,
   forward,
-  fullScreen,
+  // fullScreen,
   restore,
   revoke,
   rotate,
@@ -31,7 +31,7 @@ import {
   tabChangeSelected,
   tabReverseChangeSelected,
   changeSpecialLine,
-  saveResult,
+  // saveResult,
 } from '../common';
 
 export const line = {

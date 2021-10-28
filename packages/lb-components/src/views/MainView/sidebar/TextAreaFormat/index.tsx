@@ -7,7 +7,7 @@ import IconClearSmall from '@/assets/annotation/common/icon_clearSmall.svg';
 import { classnames } from '@/utils';
 
 interface IProps {
-  onChange: (value: string | undefined, isSubmit?: boolean) => void;
+  onChange: (value: string, isSubmit?: boolean) => void;
   textValue: string | undefined;
   checkString: string;
   textCheckType: number;

@@ -9,7 +9,7 @@ import {
   backward,
   dargWithRightClick,
   forward,
-  fullScreen,
+  // fullScreen,
   restore,
   revoke,
   rotate,

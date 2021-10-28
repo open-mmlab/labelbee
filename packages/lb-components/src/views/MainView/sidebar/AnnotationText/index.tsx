@@ -3,11 +3,11 @@ import { message } from 'antd';
 import TextAreaFormat from '@/views/MainView/sidebar/TextAreaFormat';
 import { TextUtils } from '@/utils/TextUtils';
 import { AppState } from '@/store';
-import { ToolInstance } from '@/store/annotation/types';
+import { GraphToolInstance } from '@/store/annotation/types';
 import { connect } from 'react-redux';
 
 interface IProps {
-  toolInstance: ToolInstance;
+  toolInstance: GraphToolInstance;
 }
 
 const AnnotationText: React.FC<IProps> = ({ toolInstance }) => {

@@ -1,5 +1,9 @@
 import { RectOperation } from './core/toolOperation/rectOperation';
 import TagOperation from './core/toolOperation/tagOperation';
+import PointOperation from './core/toolOperation/pointOperation';
+import LineToolOperation from './core/toolOperation/LineToolOperation';
+import TextToolOperation from './core/toolOperation/TextToolOperation';
+import PolygonOperation from './core/toolOperation/polygonOperation';
 import MeasureOperation from './core/toolOperation/measureOperation';
 import { BasicToolOperation } from './core/toolOperation/basicToolOperation';
 
@@ -31,6 +35,10 @@ const toolUtils = CommonToolUtils;
 export {
   RectOperation,
   TagOperation,
+  PointOperation,
+  LineToolOperation,
+  PolygonOperation,
+  TextToolOperation,
   BasicToolOperation,
   MeasureOperation,
   cAnnotation,

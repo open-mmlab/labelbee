@@ -2,6 +2,7 @@ import CommonToolUtils from '@/utils/tool/CommonToolUtils';
 import TagUtils from '../../utils/tool/TagUtils';
 import uuid from '../../utils/uuid';
 import { BasicToolOperation, IBasicToolOperationProps } from './basicToolOperation';
+
 interface ITagOperationProps extends IBasicToolOperationProps {
   config: string;
 }
@@ -40,12 +41,7 @@ class TagOperation extends BasicToolOperation {
     return TagUtils.getDefaultTagResult(this.config.inputList, basicResultList);
   };
 
-  public setResult(tagResult: any[], isInitData = false) {
-    if (isInitData === true && tagResult.length === 0 && this.basicResult) {
-      // 注意，该获取方式是需要拉取所有的 basicResultList
-      tagResult = TagUtils.getDefaultTagResult(this.config.inputList, [this.basicResult]);
-    }
-
+  public setResult(tagResult: any[]) {
     this.tagResult = tagResult;
     this.render();
   }
@@ -229,6 +225,7 @@ class TagOperation extends BasicToolOperation {
   };
 
   // 清空当前页面的标注结果
+  // eslint-disable-next-line no-unused-vars
   public clearResult = (sendMessage = true, value?: string) => {
     // 依赖原图
     if (value) {

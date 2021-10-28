@@ -13,7 +13,6 @@ class MeasureOperation extends RectOperation {
     super({ ...props, config: JSON.stringify(config) });
   }
 
-
   public setSelectedIdAfterAddingDrawingRect() {
     if (!this.drawingRect) {
       return;
@@ -21,7 +20,6 @@ class MeasureOperation extends RectOperation {
 
     this.setSelectedRectID(this.drawingRect.id);
   }
-
 }
 
 export default MeasureOperation;

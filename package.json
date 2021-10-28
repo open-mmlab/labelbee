@@ -10,7 +10,9 @@
     "dev": "lerna run --parallel --stream dev",
     "bootstrap": "lerna bootstrap",
     "lint": "lerna run --parallel --stream lint",
-    "clean": "lerna clean && rm -rf ./node_modules/ && rm -rf ./packages/**/node_modules"
+    "clean": "lerna clean && rm -rf ./node_modules/ && rm -rf ./packages/**/node_modules",
+    "commit": "cz",
+    "release": "standard-version"
   },
   "description": "",
   "main": "index.js",
@@ -18,13 +20,22 @@
   "author": "",
   "license": "ISC",
   "devDependencies": {
+    "@commitlint/cli": "8.3.5",
+    "@commitlint/config-conventional": "8.3.4",
+    "commitizen": "^4.2.4",
+    "cz-conventional-changelog": "^3.3.0",
     "husky": "^4.0.3",
     "lerna": "^4.0.0",
     "standard-version": "^9.3.1"
   },
   "husky": {
     "hooks": {
-      "commit-msg": ""
+      "commit-msg": "commitlint -E HUSKY_GIT_PARAMS && npm run lint"
+    }
+  },
+  "config": {
+    "commitizen": {
+      "path": "./node_modules/cz-conventional-changelog"
     }
   }
 }

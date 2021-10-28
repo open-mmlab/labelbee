@@ -1,15 +1,14 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { connect } from 'react-redux';
 import { AppState } from 'src/store';
-import { ToolInstance } from 'src/store/annotation/types';
+import { GraphToolInstance } from 'src/store/annotation/types';
 import AttributeList from '@/components/attributeList';
 import StepUtils from '@/utils/StepUtils';
 import { IStepInfo } from '@/types/step';
 import { jsonParser } from '@/utils';
 
-type IToolInstance = ToolInstance & { setDefaultAttribute: Function }
 interface IProps {
-  toolInstance: IToolInstance;
+  toolInstance: GraphToolInstance;
   stepInfo: IStepInfo;
 }
 

@@ -31,6 +31,7 @@ class CheckOperation extends BasicToolOperation {
   public resultList: ICheckResult[];
 
   public hoverID: string[];
+
   public fillID: string[];
 
   private mouseHoverID?: string;
@@ -75,7 +76,6 @@ class CheckOperation extends BasicToolOperation {
         isShow = false;
       }
 
-
       this.emit('setSelectedID', selectedID, isShow);
       this.render();
     }
@@ -83,9 +83,7 @@ class CheckOperation extends BasicToolOperation {
 
   // 禁止旋转操作
   //@ts-ignore
-  public updateRotate() {
-    return;
-  }
+  public updateRotate() {}
 
   public onMouseMove(e: MouseEvent) {
     if (super.onMouseMove(e) || this.forbidMouseOperation || !this.imgInfo) {
