@@ -1,6 +1,5 @@
 import React, { useEffect, useState, useRef, FocusEvent } from 'react';
 import { connect } from 'react-redux';
-import { ToolInstance } from '@/store/annotation/types';
 import { AppState } from '@/store';
 import { cloneDeep } from 'lodash';
 import { classnames } from '@/utils';
@@ -9,6 +8,7 @@ import { cKeyCode } from '@sensetime/annotation';
 import { PageForward } from '@/store/annotation/actionCreators';
 import { ConfigUtils } from '@/utils/ConfigUtils';
 import { IStepInfo } from '@/types/step';
+import TextToolOperation from '@sensetime/annotation/dist/types/core/toolOperation/TextToolOperation';
 
 const EKeyCode = cKeyCode.default;
 
@@ -48,7 +48,7 @@ export const TextareaWithFooter = (props: ITextareaWithFooterProps) => {
 
 interface IProps {
   dispatch: Function;
-  toolInstance: ToolInstance;
+  toolInstance: TextToolOperation;
   imgIndex: number;
   triggerEventAfterIndexChanged: boolean;
   step: number;

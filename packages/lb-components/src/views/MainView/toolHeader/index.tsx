@@ -21,6 +21,21 @@ interface INextStep {
   step: number; // 当前步骤
 }
 
+const NextButton: React.FC<{ disabled: boolean }> = ({ disabled }) => (
+  <Button
+    type='primary'
+    style={{
+      marginLeft: 10,
+    }}
+    onClick={() => {
+      store.dispatch(ToNextStep(0) as any);
+    }}
+    disabled={disabled}
+  >
+    下一步
+  </Button>
+);
+
 const NextStep: React.FC<INextStep> = ({ step, stepProgress, stepList }) => {
   if (stepList.length < 2 || step === stepList.length) {
     return null;
@@ -28,32 +43,18 @@ const NextStep: React.FC<INextStep> = ({ step, stepProgress, stepList }) => {
 
   const disabled = stepProgress < 1;
 
-  const NextButton = () => (
-    <Button
-      type='primary'
-      style={{
-        marginLeft: 10,
-      }}
-      onClick={() => {
-        store.dispatch(ToNextStep(0) as any);
-      }}
-      disabled={disabled}
-    >
-      下一步
-    </Button>
-  );
 
   if (disabled) {
     return (
       <Tooltip title='当前步骤存在为未标注过的图片，请标注完成再点击下一步'>
         <span>
-          <NextButton />
+          <NextButton disabled={disabled} />
         </span>
       </Tooltip>
     );
   }
 
-  return <NextButton />;
+  return <NextButton  disabled={disabled} />;
 };
 
 interface IToolHeaderProps {

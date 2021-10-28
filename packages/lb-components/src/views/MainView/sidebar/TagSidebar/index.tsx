@@ -6,15 +6,14 @@ import { cloneDeep } from 'lodash';
 import React, { useCallback, useEffect, useRef, useState } from 'react';
 import clearSmall from '@/assets/annotation/common/icon_clearSmall.svg';
 import clearSmallA from '@/assets/annotation/common/icon_clearSmall_a.svg';
-import { TagUtils } from '@sensetime/annotation';
+import { TagOperation, TagUtils } from '@sensetime/annotation';
 import { connect } from 'react-redux';
-import { ToolInstance } from '@/store/annotation/types';
 import { AppState } from '@/store';
 import { IInputList } from '@/types/main';
 
 interface IProps {
   imgIndex: number;
-  toolInstance: ToolInstance;
+  toolInstance: TagOperation;
 }
 
 const { Panel } = Collapse;

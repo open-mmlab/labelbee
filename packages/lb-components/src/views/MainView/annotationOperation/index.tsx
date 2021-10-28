@@ -10,9 +10,8 @@ import useSize from '@/hooks/useSize';
 import { IFileItem } from '@/types/data';
 import { IStepInfo } from '@/types/step';
 import { InitToolStyleConfig } from '@/store/toolStyle/actionCreators';
-import { AnnotationEngine } from '@sensetime/annotation';
+import { AnnotationEngine, ImgUtils } from '@sensetime/annotation';
 import ImageError from '@/components/ImageError';
-import { ImgUtils } from '@sensetime/annotation';
 
 interface IProps extends AppState {
   imgAttribute: ImgAttributeState;

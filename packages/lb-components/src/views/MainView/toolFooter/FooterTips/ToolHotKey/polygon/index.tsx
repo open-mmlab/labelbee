@@ -18,7 +18,7 @@ import {
   backward,
   dargWithRightClick,
   forward,
-  fullScreen,
+  // fullScreen,
   restore,
   revoke,
   rotate,
@@ -26,12 +26,12 @@ import {
   scale,
   tabChangeSelected,
   tabReverseChangeSelected,
-  attributeClickLock,
-  attributeLock,
-  copyBackwardResult,
-  hidden,
-  changeSpecialLine,
-  saveResult,
+  // attributeClickLock,
+  // attributeLock,
+  // copyBackwardResult,
+  // hidden,
+  // changeSpecialLine,
+  // saveResult,
   dargWithLeftClick
 } from '../common';
 

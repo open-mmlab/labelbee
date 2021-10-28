@@ -1,4 +1,3 @@
-import { QuestionOutlined } from '@ant-design/icons';
 import {
   Col, Row, Slider, Switch, Input,
 } from 'antd';

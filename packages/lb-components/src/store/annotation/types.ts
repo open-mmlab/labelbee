@@ -1,10 +1,24 @@
-import { AnnotationEngine, RectOperation, TagOperation } from '@sensetime/annotation';
+import {
+  AnnotationEngine,
+  RectOperation,
+  TagOperation,
+  TextToolOperation,
+  PointOperation,
+  PolygonOperation,
+  LineToolOperation,
+} from '@sensetime/annotation';
 import { ANNOTATION_ACTIONS } from '@/store/Actions';
 import { IStepInfo } from '@/types/step';
 import { OnSubmit, IFileItem, GetFileData, OnSave } from '@/types/data';
 import { ESubmitType } from '@/constant';
 
-export type ToolInstance = RectOperation | TagOperation;
+export type GraphToolInstance =
+  | RectOperation
+  | PointOperation
+  | PolygonOperation
+  | LineToolOperation;
+
+export type ToolInstance = GraphToolInstance | TagOperation | TextToolOperation;
 
 interface CommonActions {
   type: string;
@@ -105,7 +119,7 @@ interface UpdateGetFileData {
   };
 }
 
-interface CopyBackWordResult {
+interface CopyBackWordResult  extends CommonActions{
   type: typeof ANNOTATION_ACTIONS.COPY_BACKWARD_RESULT;
 }
 

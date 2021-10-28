@@ -1,11 +1,11 @@
 import React, { useEffect, useState } from 'react';
 import { AppState } from '@/store';
 import { connect } from 'react-redux';
-import { ToolInstance } from '@/store/annotation/types';
+import { GraphToolInstance } from '@/store/annotation/types';
 import { Divider } from 'antd';
 
 interface IProps {
-  toolInstance: ToolInstance;
+  toolInstance: GraphToolInstance;
 }
 
 const PageNumber = (props: IProps) => {

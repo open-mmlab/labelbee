@@ -41,12 +41,7 @@ class TagOperation extends BasicToolOperation {
     return TagUtils.getDefaultTagResult(this.config.inputList, basicResultList);
   };
 
-  public setResult(tagResult: any[], isInitData = false) {
-    if (isInitData === true && tagResult.length === 0 && this.basicResult) {
-      // 注意，该获取方式是需要拉取所有的 basicResultList
-      tagResult = TagUtils.getDefaultTagResult(this.config.inputList, [this.basicResult]);
-    }
-
+  public setResult(tagResult: any[]) {
     this.tagResult = tagResult;
     this.render();
   }

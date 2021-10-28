@@ -92,7 +92,7 @@ class PointOperation extends BasicToolOperation {
     this.render();
   }
 
-  private setDefaultAttribute(defaultAttribute: string = '') {
+  public setDefaultAttribute(defaultAttribute: string = '') {
     const oldDefault = this.defaultAttribute;
     this.defaultAttribute = defaultAttribute;
 

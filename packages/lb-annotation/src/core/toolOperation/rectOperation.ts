@@ -1501,7 +1501,7 @@ class RectOperation extends BasicToolOperation {
     this.renderCursorLine(this.getLineColor(this.defaultAttribute));
   }
 
-  private setDefaultAttribute(defaultAttribute?: string) {
+  public setDefaultAttribute(defaultAttribute?: string) {
     const oldDefault = this.defaultAttribute;
     this.defaultAttribute = defaultAttribute ?? '';
 

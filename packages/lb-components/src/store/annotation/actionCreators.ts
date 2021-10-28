@@ -232,7 +232,7 @@ const ChangeTriggerEventAfterIndexChanged = (
 
 /** 向前翻页 */
 export const PageBackward =
-  (triggerEventAfterIndexChanged: boolean = false) =>
+  (triggerEventAfterIndexChanged = false) =>
   (dispatch: any, getState: any) => {
     return DispatcherTurning(
       dispatch,
@@ -244,7 +244,7 @@ export const PageBackward =
 
 /** 向后翻页 */
 export const PageForward =
-  (triggerEventAfterIndexChanged: boolean = false) =>
+  (triggerEventAfterIndexChanged = false) =>
   (dispatch: any, getState: any) => {
     return DispatcherTurning(
       dispatch,
@@ -259,7 +259,7 @@ export const PageForward =
  * @param toIndex
  */
 export const PageJump =
-  (toIndex: number, triggerEventAfterIndexChanged: boolean = false) =>
+  (toIndex: number, triggerEventAfterIndexChanged = false) =>
   (dispatch: any, getState: any) => {
     if (toIndex === getState().imgIndex) {
       return;
@@ -285,7 +285,7 @@ export const DispatcherTurning = (
   dispatch: any,
   getState: any,
   pageTurningOperation: EPageTurningOperation,
-  triggerEventAfterIndexChanged: boolean = false,
+  triggerEventAfterIndexChanged = false,
   toIndex?: number,
 ) => {
   const annotationStore = getState().annotation;

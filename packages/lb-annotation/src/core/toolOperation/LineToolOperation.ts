@@ -119,11 +119,11 @@ class LineToolOperation extends BasicToolOperation {
     }
   };
 
+  public selectedID?: string;
+
   private lineList: ILine[] = [];
 
   private activeLine?: ILinePoint[] = [];
-
-  private selectedID?: string;
 
   private status: EStatus;
 
@@ -317,6 +317,13 @@ class LineToolOperation extends BasicToolOperation {
   // 当前选中线条的文本
   get selectedText() {
     return this.lineList.find((i) => i.id === this.selectedID)?.textAttribute ?? '';
+  }
+
+  /**
+   * 获取当前页面标注结果
+   */
+  get currentPageResult() {
+    return this.lineList;
   }
 
   public updateStatus(status: EStatus, resetText: boolean = false) {
@@ -1417,7 +1424,7 @@ class LineToolOperation extends BasicToolOperation {
       } else if (this.isCreate && this.activeLine && this.activeLine.length > 1) {
         const newLine = this.createLineData();
         selectedID = newLine.id;
-        this.lineList.push(newLine);
+        this.setLineList([...this.lineList, newLine]);
         this.history?.pushHistory(this.lineList);
       }
     }

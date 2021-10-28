@@ -7,10 +7,9 @@ import AnnotationDataUtils from '@/utils/AnnotationDataUtils';
 import { ConfigUtils } from '@/utils/ConfigUtils';
 import styleString from '@/constant/styleString';
 import { getFormatSize } from '@/components/customResizeHook';
-import { AnnotationEngine, CommonToolUtils } from '@sensetime/annotation';
+import { AnnotationEngine, CommonToolUtils, ImgUtils } from '@sensetime/annotation';
 import { AnnotationState, AnnotationActionTypes } from './types';
 import { message } from 'antd';
-import { ImgUtils } from '@sensetime/annotation';
 import { SetAnnotationLoading } from './actionCreators';
 
 export const getStepConfig = (stepList: any[], step: number) =>
@@ -252,10 +251,6 @@ export const annotationReducer = (
       const dependStepConfig = getStepConfig(stepList, dataSourceStep);
       let stepBasicResultList = [];
 
-      // 当前步骤结果
-      const stepResult = fileResult[`step_${step}`];
-      const isInitData = !stepResult || result.length === 0; // 是否为初始化数据
-
       if (dataSourceStep && tool) {
         stepBasicResultList = fileResult[`step_${dataSourceStep}`]?.result;
 
@@ -269,7 +264,7 @@ export const annotationReducer = (
         }
       }
 
-      toolInstance.setResult(result, isInitData);
+      toolInstance.setResult(result);
       toolInstance.history.initRecord(result, true);
 
       return {
@@ -348,7 +343,7 @@ export const annotationReducer = (
               CommonToolUtils.isSameSourceID(i.sourceID, sourceID),
             )
           : result;
-        toolInstance.setResult(resultForBasicIndex, isInitData);
+        toolInstance.setResult(resultForBasicIndex);
         toolInstance.history.initRecord(result, true);
       }
 
@@ -451,10 +446,9 @@ export const annotationReducer = (
       // 更新当前的结果
       const fileResult = jsonParser(newResult);
       const stepResult = fileResult[`step_${step}`];
-      const isInitData = !stepResult;
       const result = stepResult?.result || [];
 
-      toolInstance.setResult(result, isInitData);
+      toolInstance.setResult(result);
       toolInstance.history.pushHistory(result);
 
       return {
@@ -497,4 +491,6 @@ export const annotationReducer = (
     default:
       return state;
   }
+
+  return state;
 };

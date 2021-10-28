@@ -12,7 +12,7 @@ interface ITextResult {
 interface ITextToolProps extends IBasicToolOperationProps {}
 
 class TextToolOperation extends BasicToolOperation {
-  private textList: ITextResult[];
+  public textList: ITextResult[];
 
   constructor(props: ITextToolProps) {
     super(props);
@@ -32,6 +32,10 @@ class TextToolOperation extends BasicToolOperation {
 
   get textValueContainer() {
     return document.getElementById(this.textValueContainerID);
+  }
+
+  get currentPageResult() {
+    return this.textList;
   }
 
   public setResult(textResultList: ITextResult[]) {

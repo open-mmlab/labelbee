@@ -5,11 +5,11 @@ import {
   dargWithLeftClick,
   dargWithRightClick,
   forward,
-  fullScreen,
+  // fullScreen,
   rotate,
-  saveResult,
+  // saveResult,
   scale,
-  setValid,
+  // setValid,
 } from '../common';
 
 export const tagInSingleImg: any = {
