@@ -9,6 +9,8 @@
     "start": "lerna run --parallel --stream start",
     "dev": "lerna run --parallel --stream dev",
     "bootstrap": "lerna bootstrap",
+    "bootstrap:ci": "lerna bootstrap --no-ci",
+    "build": "lerna run --parallel --stream build",
     "lint": "lerna run --parallel --stream lint",
     "clean": "lerna clean && rm -rf ./node_modules/ && rm -rf ./packages/**/node_modules",
     "commit": "cz",
@@ -30,7 +32,8 @@
   },
   "husky": {
     "hooks": {
-      "commit-msg": "commitlint -E HUSKY_GIT_PARAMS && npm run lint"
+      "commit-msg": "commitlint -E HUSKY_GIT_PARAMS",
+      "pre-push": "npm run lint"
     }
   },
   "config": {
