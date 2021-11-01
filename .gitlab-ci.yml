@@ -12,28 +12,14 @@ before_script:
   - TAG=$CI_COMMIT_REF_NAME-${CI_COMMIT_SHA:0:8}
   - IMAGE_REGISTRY_URL=$REGISTRY_URL/label-bee/demo:$TAG
 
-# deploy-dev:
-#   stage: deploy
-#   only:
-#     - dev
-#   script:
-#     - npm config set registry https://npm-registry.sensetime.com/
-#     - echo "//https://npm-registry.sensetime.com/:_authToken=$NPM_TOKEN" > .npmrc
-#     - npx lerna publish -y --canary --preid \"beta.$(git rev-parse --short HEAD)\" --pre-dist-tag=beta --legacy-auth $TNPM_USERPASSWORD_BASE64
-
-# deploy-build:
-#   stage: deploy
-#   only:
-#     - master
-#   script:
-#     - npx lerna version --conventional-graduate --yes
-#     - npx lerna publish from-package --legacy-auth $TNPM_USERPASSWORD_BASE64 --yes
+.install: &install
+  - npm install
+  - npm run bootstrap:ci
 
 lint:
   stage: lint
   script:
-    - npm install
-    - npm run bootstrap:ci
+    - *install
     - npm run build
     - npm run lint
 
@@ -43,6 +29,7 @@ build-demo:
     - dev
   script:
     - cd ./packages/lb-demo
+    - npm install
     - npm run build
     - docker login -u $REGISTRY_USERNAME -p $REGISTRY_TOKEN $REGISTRY_URL
     - docker build -t $IMAGE_REGISTRY_URL .
@@ -60,3 +47,26 @@ deploy-demo:
     - 'echo "Updating: $TAG"'
     - >
       kubectl patch --kubeconfig ./kube.conf deployment bee-sdk-demo -n sensebee-test -p "{\"spec\":{\"template\":{\"spec\":{\"containers\":[{\"name\":\"bee-sdk-demo\",\"image\":\"$IMAGE_REGISTRY_URL\"}]}}}}"
+
+deploy-dev:
+  stage: deploy
+  only:
+    - dev
+  script:
+    - npm config set registry https://npm-registry.sensetime.com/
+    - echo "//https://npm-registry.sensetime.com/:_authToken=$NPM_TOKEN" > .npmrc
+    - *install
+    - npm run build
+    - npx lerna publish -y --canary --preid \"beta.$(git rev-parse --short HEAD)\" --pre-dist-tag=beta
+
+deploy-build:
+  stage: deploy
+  only:
+    - master
+  script:
+    - npm config set registry https://npm-registry.sensetime.com/
+    - echo "//https://npm-registry.sensetime.com/:_authToken=$NPM_TOKEN" > .npmrc
+    - *install
+    - npm run build
+    - npx lerna version --conventional-graduate --yes
+    - npx lerna publish from-package --yes
