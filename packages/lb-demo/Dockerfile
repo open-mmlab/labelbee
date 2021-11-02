@@ -1,4 +1,4 @@
-FROM registry.sensetime.com/fdc/nginx:stable
+FROM registry.sensetime.com/label-bee/nginx:stable
 
 COPY nginx/nginx.conf /etc/nginx/
 COPY build /usr/share/nginx/www
