@@ -1,4 +1,4 @@
-image: registry.sensetime.com/fdc/docker-node:node14
+image: registry.sensetime.com/label-bee/docker-node:14
 
 variables:
   REGISTRY_URL: registry.sensetime.com
@@ -40,7 +40,7 @@ deploy-demo:
   only:
     - dev
   image:
-    name: registry.sensetime.com/fdc/lachlanevenson/k8s-kubectl:latest
+    name: registry.sensetime.com/label-bee/lachlanevenson/k8s-kubectl:latest
     entrypoint: ["/bin/sh", "-c"]
   script:
     - echo -n $KUBE_CONFIG_BJ_IDC_URP | base64 -d > ./kube.conf
