@@ -115,7 +115,7 @@ class PolygonOperation extends BasicToolOperation {
 
   // 是否直接执行操作
   public isAllowDouble = (e: MouseEvent) => {
-    const selectedID = this.selectedID;
+    const { selectedID } = this;
 
     const currentSelectedID = this.getHoverID(e);
     // 仅在选中的时候需要 double click

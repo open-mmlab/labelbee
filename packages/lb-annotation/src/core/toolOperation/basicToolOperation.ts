@@ -661,11 +661,11 @@ class BasicToolOperation extends EventListener {
         this.isDrag = true;
         this.container.style.cursor = 'grabbing';
         this.forbidCursorLine = true;
+        this.renderBasicCanvas(); 
         this.emit('dependRender');
       }
 
       this.render();
-      this.renderBasicCanvas();
     } catch (error) {
       console.error(error);
     }
@@ -903,7 +903,6 @@ class BasicToolOperation extends EventListener {
     }
     this.renderBasicCanvas();
     this.render();
-    this.renderBasicCanvas();
   }
 
   public clearResult(sendMessage?: boolean | string) {

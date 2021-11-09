@@ -73,10 +73,9 @@ const AnnotationView = (props: IProps, ref: any) => {
         size,
         style,
         annotations,
-        config: '{}' // TODO，暂时不需要
+        config: '{}', // TODO，暂时不需要
       });
 
-      const toolInstance = viewOperation.current;
       viewOperation.current.init();
     }
 
@@ -108,8 +107,6 @@ const AnnotationView = (props: IProps, ref: any) => {
    */
   useEffect(() => {
     if (viewOperation.current) {
-      console.error(2);
-
       viewOperation.current.updateData(annotations);
     }
   }, [annotations]);
@@ -143,9 +140,11 @@ const AnnotationView = (props: IProps, ref: any) => {
 
   const mainRender = <div ref={annotationRef} style={{ ...size, ...backgroundStyle }} />;
 
-  if (showLoading) {
-  }
-  return <Spin spinning={showLoading || loading} delay={300}>{mainRender}</Spin>;
+  return (
+    <Spin spinning={showLoading || loading} delay={300}>
+      {mainRender}
+    </Spin>
+  );
 
   // return mainRender;
 };

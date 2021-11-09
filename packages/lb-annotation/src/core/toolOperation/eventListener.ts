@@ -1,5 +1,6 @@
 export default class EventListener {
   private _events: Map<string, any[]>;
+
   constructor() {
     this._events = new Map();
   }
@@ -34,10 +35,13 @@ export default class EventListener {
    */
   public emit(eventName: string, ...args: any[]) {
     const listener = this._events.get(eventName);
-    listener &&
+    if (listener) {
       listener.forEach((fn) => {
-        fn && fn(...args);
+        if (fn) {
+          fn(...args);
+        }
       });
+    }
   }
 
   /**
