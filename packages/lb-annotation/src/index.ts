@@ -6,6 +6,7 @@ import TextToolOperation from './core/toolOperation/TextToolOperation';
 import PolygonOperation from './core/toolOperation/polygonOperation';
 import MeasureOperation from './core/toolOperation/measureOperation';
 import { BasicToolOperation } from './core/toolOperation/basicToolOperation';
+import ViewOperation from './core/toolOperation/ViewOperation';
 
 // Constant
 import * as cAnnotation from './constant/annotation';
@@ -33,6 +34,7 @@ import AnnotationEngine from './core';
 const toolUtils = CommonToolUtils;
 
 export {
+  // 各类图形操作
   RectOperation,
   TagOperation,
   PointOperation,
@@ -41,11 +43,14 @@ export {
   TextToolOperation,
   BasicToolOperation,
   MeasureOperation,
+  ViewOperation,
+  // 固定操作
   cAnnotation,
   cAnnotationTask,
   cKeyCode,
   cStyle,
   cTool,
+  // 工具包
   toolUtils,
   uuid,
   DblClickEventListener,

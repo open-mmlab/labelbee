@@ -172,8 +172,8 @@ class BasicToolOperation extends EventListener {
     };
     this.attributeLockList = [];
     this.history = new ActionsHistory();
-    this.setStyle(props.style);
-    this._imgAttribute = props.imgAttribute;
+    this.style = props.style ?? {};
+    this._imgAttribute = props.imgAttribute ?? {};
     this.isHidden = false;
     this.dragStatus = EDragStatus.Wait;
     this.defaultAttribute = props?.defaultAttribute ?? '';
@@ -463,7 +463,7 @@ class BasicToolOperation extends EventListener {
     this.renderBasicCanvas();
 
     this.emit('dependRender');
-    this.emit('renderZoom');
+    this.emit('renderZoom', zoom);
   };
 
   /**
@@ -841,7 +841,7 @@ class BasicToolOperation extends EventListener {
     this.currentPosStorage = newCurrentPos;
     this.imgInfo = imgInfo;
     zoomInfo.ratio = ratio;
-    this.emit('renderZoom');
+    this.emit('renderZoom', zoom);
   };
 
   /**

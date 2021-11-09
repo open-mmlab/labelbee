@@ -73,3 +73,85 @@ export const mockFileList = [
       '{"width":720,"height":1280,"valid":true,"rotate":0,"step_1":{"dataSourceStep":0,"toolName":"rectTool","result":[]}}',
   },
 ];
+
+export const DEFAULT_ANNOTATIONS = [
+  {
+    type: 'rect',
+    annotation: {
+      id: 123123,
+      x: 123,
+      y: 23,
+      width: 100,
+      height: 100,
+      color: 'pink',
+      // thickness: 10,
+    },
+  },
+  {
+    type: 'polygon',
+    annotation: {
+      id: 3,
+      // thickness: 10,
+      color: 'green',
+      pointList: [
+        {
+          x: 12,
+          y: 123,
+        },
+        {
+          x: 122,
+          y: 123,
+        },
+        {
+          x: 2,
+          y: 3,
+        },
+      ],
+    },
+  },
+  {
+    type: 'line',
+    annotation: {
+      color: 'yellow',
+      thickness: 5,
+      id: 4,
+
+      pointList: [
+        {
+          x: 123,
+          y: 12,
+        },
+        {
+          x: 2,
+          y: 12,
+        },
+        {
+          x: 34,
+          y: 132,
+        },
+      ],
+    },
+  },
+  {
+    type: 'point',
+    annotation: {
+      id: 5,
+      x: 10,
+      y: 10,
+      fill: 'green',
+      color: 'blue',
+      thickness: '20',
+      radius: 10,
+    },
+  },
+  {
+    type: 'rect',
+    annotation: {
+      id: 10,
+      x: 13,
+      y: 3,
+      width: 1020,
+      height: 100,
+    },
+  },
+];

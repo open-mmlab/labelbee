@@ -1,3 +1,7 @@
+/**
+ * 查看模式 - 严格配置要求
+ */
+
 import { cloneDeep } from 'lodash';
 import RectUtils from '@/utils/tool/RectUtils';
 import CommonToolUtils from '@/utils/tool/CommonToolUtils';
