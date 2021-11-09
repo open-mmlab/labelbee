@@ -27,7 +27,7 @@ $prefix: bee;
     z-index: 10;
     border-top: 1px solid #e2e2e2;
 
-    .ant-collapse-borderless > .ant-collapse-item {
+    .ant-collapse-borderless>.ant-collapse-item {
       border-bottom: 1px solid #eee;
     }
   }
@@ -158,6 +158,23 @@ $prefix: bee;
     position: absolute;
   }
 
+  &__titlePlacement {
+    flex: 1;
+  }
+
+  &__lang {
+    color: rgba(0, 0, 0, 0.85);
+
+    .#{$prefix}-langCN,
+    .#{$prefix}-langEN {
+      cursor: pointer;
+
+      &.active {
+        font-weight: bold;
+      }
+    }
+  }
+
   &__hotKey {
     display: flex;
     justify-content: space-between;
@@ -260,9 +277,11 @@ $prefix: bee;
         .ant-slider-handle {
           border-color: #666fff;
         }
+
         .ant-slider-handle.ant-tooltip-open {
           border-color: #666fff;
         }
+
         .ant-slider-handle:focus {
           border-color: #666fff;
         }
@@ -323,7 +342,7 @@ $prefix: bee;
         background: #f3f4ff;
       }
 
-      > span:nth-child(2) {
+      >span:nth-child(2) {
         flex: 1;
         justify-content: space-between;
         display: flex;
@@ -348,6 +367,7 @@ $prefix: bee;
       }
     }
   }
+
   //修改ant Slider组件的样式
   #pen-color,
   #paintBucket-color,
@@ -384,7 +404,7 @@ $prefix: bee;
       }
 
       // 新版本的 antd 的错误兼容
-      .ant-collapse > .ant-collapse-item > .ant-collapse-header .ant-collapse-arrow {
+      .ant-collapse>.ant-collapse-item>.ant-collapse-header .ant-collapse-arrow {
         color: inherit;
         font-style: normal;
         line-height: 0;
@@ -402,7 +422,7 @@ $prefix: bee;
         transform: translateY(-50%);
       }
 
-      .ant-collapse > .ant-collapse-item > .ant-collapse-header {
+      .ant-collapse>.ant-collapse-item>.ant-collapse-header {
         position: relative;
         //padding: 12px 16px 12px 12px;
         color: rgba(0, 0, 0, 0.85);
@@ -467,38 +487,34 @@ $prefix: bee;
 
   #style-color {
     .ant-slider-rail {
-      background: linear-gradient(
-        to right,
-        rgb(0, 0, 255) 0%,
-        rgb(0, 0, 255) 20%,
-        rgb(0, 255, 255) 20%,
-        rgb(0, 255, 255) 40%,
-        rgb(0, 255, 0) 40%,
-        rgb(0, 255, 0) 60%,
-        rgb(255, 255, 0) 60%,
-        rgb(255, 255, 0) 80%,
-        rgb(255, 0, 255) 80%,
-        rgb(255, 0, 255) 100%
-      );
+      background: linear-gradient(to right,
+          rgb(0, 0, 255) 0%,
+          rgb(0, 0, 255) 20%,
+          rgb(0, 255, 255) 20%,
+          rgb(0, 255, 255) 40%,
+          rgb(0, 255, 0) 40%,
+          rgb(0, 255, 0) 60%,
+          rgb(255, 255, 0) 60%,
+          rgb(255, 255, 0) 80%,
+          rgb(255, 0, 255) 80%,
+          rgb(255, 0, 255) 100%);
     }
   }
 
   #style-fillOpacity,
   #style-borderOpacity {
     .ant-slider-rail {
-      background: linear-gradient(
-        to right,
-        rgba(0, 0, 0, 0.2) 0%,
-        rgba(0, 0, 0, 0.2) 20%,
-        rgba(0, 0, 0, 0.4) 20%,
-        rgba(0, 0, 0, 0.4) 40%,
-        rgba(0, 0, 0, 0.6) 40%,
-        rgba(0, 0, 0, 0.6) 60%,
-        rgba(0, 0, 0, 0.8) 60%,
-        rgba(0, 0, 0, 0.8) 80%,
-        rgba(0, 0, 0, 1) 80%,
-        rgba(0, 0, 0, 1) 100%
-      );
+      background: linear-gradient(to right,
+          rgba(0, 0, 0, 0.2) 0%,
+          rgba(0, 0, 0, 0.2) 20%,
+          rgba(0, 0, 0, 0.4) 20%,
+          rgba(0, 0, 0, 0.4) 40%,
+          rgba(0, 0, 0, 0.6) 40%,
+          rgba(0, 0, 0, 0.6) 60%,
+          rgba(0, 0, 0, 0.8) 60%,
+          rgba(0, 0, 0, 0.8) 80%,
+          rgba(0, 0, 0, 1) 80%,
+          rgba(0, 0, 0, 1) 100%);
     }
   }
 }
@@ -525,7 +541,7 @@ $prefix: bee;
   .textareaContainer {
     position: relative;
 
-    > textarea {
+    >textarea {
       padding-bottom: 30px;
     }
 
@@ -620,6 +636,7 @@ $prefix: bee;
         border: none;
       }
     }
+
     .toolTextAreaBoxFocus {
       border-color: #40a9ff;
     }
@@ -820,22 +837,19 @@ $hotkey-container-padding: 7px;
     padding: 0 3px 0 8px;
   }
 
-  .ant-collapse-borderless
-    > .ant-collapse-item
-    > .ant-collapse-content
-    > .ant-collapse-content-box {
+  .ant-collapse-borderless>.ant-collapse-item>.ant-collapse-content>.ant-collapse-content-box {
     padding-top: 4px;
   }
 
-  .ant-collapse-content > .ant-collapse-content-box {
+  .ant-collapse-content>.ant-collapse-content-box {
     padding: 0;
   }
 
-  .ant-collapse-icon-position-right > .ant-collapse-item > .ant-collapse-header {
+  .ant-collapse-icon-position-right>.ant-collapse-item>.ant-collapse-header {
     padding-right: 40px;
   }
 
-  .ant-collapse-borderless > .ant-collapse-item {
+  .ant-collapse-borderless>.ant-collapse-item {
     border-bottom: 0px;
   }
 }
@@ -860,7 +874,7 @@ $hotkey-container-padding: 7px;
       background: #f3f4ff;
     }
 
-    > span:nth-child(2) {
+    >span:nth-child(2) {
       flex: 1;
       justify-content: space-between;
       display: flex;
@@ -970,7 +984,7 @@ $hotkey-container-padding: 7px;
     display: flex;
     padding: 0 10px;
 
-    > span {
+    >span {
       line-height: 16px;
     }
 
@@ -1130,6 +1144,7 @@ $hotkey-container-padding: 7px;
 
     .step {
       margin-bottom: 24px;
+
       &:last-child {
         margin-bottom: 0px;
       }
@@ -1144,15 +1159,19 @@ $hotkey-container-padding: 7px;
 
         font-size: 14px;
       }
+
       .progress {
         font-size: 12px;
       }
+
       .highlight {
         color: #666fff;
       }
     }
+
     .isNotStart {
       color: #cccccc;
+
       &:hover {
         color: #cccccc;
       }

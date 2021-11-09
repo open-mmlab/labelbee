@@ -10,6 +10,7 @@ import { UpdateToolStyleConfig } from '@/store/toolStyle/actionCreators';
 import { store } from '@/index';
 import { AppState } from '@/store';
 import { ToolStyleState } from '@/store/toolStyle/types';
+import { useTranslation } from 'react-i18next';
 
 interface IProps {
   toolStyle: ToolStyleState;
@@ -18,6 +19,8 @@ interface IProps {
 type ToolStyleKey = keyof ToolStyleState;
 
 const getMarks = (type: string) => {
+  const { t } = useTranslation();
+
   const lineMarks = [
     { step: 1, value: '1' },
     { step: 2, value: '2' },
@@ -26,11 +29,11 @@ const getMarks = (type: string) => {
     { step: 5, value: '5' },
   ];
   const colorMarks = [
-    { step: 1, value: '蓝' },
-    { step: 3, value: '青' },
-    { step: 5, value: '绿' },
-    { step: 7, value: '黄' },
-    { step: 9, value: '粉' },
+    { step: 1, value: 'Blue' },
+    { step: 3, value: 'Cyan' },
+    { step: 5, value: 'Green' },
+    { step: 7, value: 'Yellow' },
+    { step: 9, value: 'Pink' },
   ];
   const borderOpacityMarks = [
     { step: 1, value: '0.2' },
@@ -71,7 +74,7 @@ const getMarks = (type: string) => {
   list.forEach(({ step, value }) => {
     marks[step] = {
       style: { color: '#999999', fontSize: '12px' },
-      label: <span>{value}</span>,
+      label: <span>{t(value)}</span>,
     };
   });
   return marks;
@@ -80,13 +83,15 @@ const getMarks = (type: string) => {
 const getTitle = (title: string) => {
   switch (title) {
     case 'width':
-      return '边框粗细';
+      return 'BorderThickness';
     case 'color':
-      return '颜色';
+      return 'Color';
     case 'borderOpacity':
-      return '边框透明度';
+      return 'BorderOpacity';
     case 'fillOpacity':
-      return '填充透明度';
+      return 'FillOpacity';
+    default:
+      return '';
   }
 };
 const getImage = (title: string) => {
@@ -129,10 +134,10 @@ const ToolStyle = (props: IProps) => {
     borderOpacity,
     fillOpacity,
   };
+  const { t } = useTranslation();
 
   // TODO - 样式标准的定义
   const annotationConfig: any = props.config;
-
 
   const changeToolStyle = (obj: { [key: string]: number }) => {
     store.dispatch(UpdateToolStyleConfig(obj));
@@ -142,7 +147,7 @@ const ToolStyle = (props: IProps) => {
     <div className='toolStyle'>
       {Object.entries(styleConfig).map((item: any[]) => {
         const key: ToolStyleKey = item[0];
-          // 判断是否需要 color 的使用，现在暂时默认不需要
+        // 判断是否需要 color 的使用，现在暂时默认不需要
         if (annotationConfig?.attributeConfigurable === true && key === 'color') {
           return null;
         }
@@ -150,7 +155,7 @@ const ToolStyle = (props: IProps) => {
           <div id={`style-${key}`} className='styleSlider' key={key}>
             <span className='title'>
               <img src={getImage(key)} className='icon' />
-              {getTitle(key)}
+              {t(getTitle(key))}
             </span>
             <span className='slider'>
               <Slider

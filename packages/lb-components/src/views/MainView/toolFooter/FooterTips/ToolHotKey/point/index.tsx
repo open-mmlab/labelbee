@@ -19,26 +19,26 @@ import {
 } from '../common';
 
 export const drawPoint = {
-  name: '标点',
+  name: 'AnnotatePoint',
   icon: DrawPointSvg,
   shortCut: [MouseLeftSvg],
 };
 
 export const drawInvalidPoint = {
-  name: '标无效点',
+  name: 'AnnotateInvalidPoint',
   icon: DrawInvalidPointSvg,
   shortCut: ['Ctrl', MouseLeftSvg],
 };
 
 export const selectPoint = {
-  name: '选中点',
+  name: 'SelectPoint',
   icon: SelectedPointSvg,
   shortCut: [MouseRightSvg],
-  noticeInfo: '右击',
+  noticeInfo: 'RightClick',
 };
 
 export const deletePoint = {
-  name: '删除点',
+  name: 'DeletePoint',
   icon: DeletePointSvg,
   shortCut: ['Del'],
 };

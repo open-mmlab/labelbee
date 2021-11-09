@@ -17,6 +17,7 @@ import ClearIcon from './ClearIcon';
 import TagSidebar, { expandIconFuc } from './TagSidebar';
 import { prefix } from '@/constant';
 import TextToolSidebar from './TextToolSidebar';
+import { useTranslation } from 'react-i18next';
 
 const { Panel } = Collapse;
 
@@ -51,8 +52,12 @@ const toolList = [
 ];
 const sidebarCls = `${prefix}-sidebar`;
 const Sidebar: React.FC<IProps> = () => {
-  const stepInfo = useSelector((state: AppState) => StepUtils.getCurrentStepInfo(state.annotation.step, state.annotation.stepList))
+  const stepInfo = useSelector((state: AppState) =>
+    StepUtils.getCurrentStepInfo(state.annotation.step, state.annotation.stepList),
+  );
   const toolName = stepInfo?.tool as EToolName;
+  const { t } = useTranslation();
+
   if (!toolName) {
     return null;
   }
@@ -71,7 +76,7 @@ const Sidebar: React.FC<IProps> = () => {
     const renderStylePanel = (key: string) => {
       const ToolStyleComponent = <ToolStyle />;
       return (
-        <Panel header='样式' className='panel' key={key}>
+        <Panel header={t('Style')} className='panel' key={key}>
           {ToolStyleComponent}
         </Panel>
       );
@@ -103,7 +108,8 @@ const Sidebar: React.FC<IProps> = () => {
           <Panel
             header={
               <div>
-                图片调整
+                {t('Adjust')}
+
                 <ClearIcon />
               </div>
             }

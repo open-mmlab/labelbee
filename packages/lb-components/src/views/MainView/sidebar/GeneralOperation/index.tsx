@@ -15,8 +15,12 @@ import { IStepInfo } from '@/types/step';
 import { jsonParser } from '@/utils';
 import { AnnotationFileList } from '@/types/data';
 import { CopyBackWordResult } from '@/store/annotation/actionCreators';
+import { useTranslation } from 'react-i18next';
 
-const makeSure = (info: string, key: string) => <div key={key}>{`确认${info.slice(0)}？`}</div>;
+const makeSure = (info: string, key: string) => {
+  const { t } = useTranslation();
+  return <div key={key}>{`${t('ConfirmTo')}${info.slice(0)}？`}</div>;
+};
 
 const renderImg = (info: Element | string) => {
   if (typeof info === 'string') {
@@ -32,13 +36,12 @@ interface IProps {
   imgIndex: number;
 }
 
-const GenerationOperation: React.FC<IProps> = ({
-  toolInstance, stepInfo, imgList, imgIndex,
-}) => {
+const GenerationOperation: React.FC<IProps> = ({ toolInstance, stepInfo, imgList, imgIndex }) => {
   const [isHover, setHover] = useState<string | null>(null);
+  const { t } = useTranslation();
   const allOperation = [
     {
-      name: '清空标注',
+      name: t('ClearLabel'),
       key: 'sureClear',
       imgSvg: clearResultSvg,
       hoverSvg: clearResultASvg,
@@ -58,7 +61,7 @@ const GenerationOperation: React.FC<IProps> = ({
       alignItems: 'center',
     };
     allOperation.push({
-      name: toolInstance.valid === true ? '标为无效' : '取消无效',
+      name: t(toolInstance.valid === true ? 'SetAsInvalid' : 'SetAsValid'),
       key: 'sureQuestion',
       imgSvg: <StopOutlined style={iconStyle} />,
       hoverSvg: <StopOutlined style={{ color: '#666fff', ...iconStyle }} />,
@@ -70,12 +73,12 @@ const GenerationOperation: React.FC<IProps> = ({
 
   if (config?.copyBackwardResult) {
     allOperation.unshift({
-      name: '复制上张',
+      name: t('CopyThePrevious'),
       key: 'sureCopy',
       imgSvg: copyBackStepSvg,
       hoverSvg: copyBackStepASvg,
       onClick: () => {
-       store.dispatch(CopyBackWordResult())
+        store.dispatch(CopyBackWordResult());
       },
     });
   }
@@ -83,12 +86,12 @@ const GenerationOperation: React.FC<IProps> = ({
   const annotationLength = Math.floor(24 / allOperation.length);
 
   return (
-    <div className="generalOperation">
+    <div className='generalOperation'>
       {allOperation.map((info, index) => (
         <Col span={annotationLength} key={index}>
           <div
             key={info.key}
-            className="item"
+            className='item'
             onMouseEnter={() => {
               setHover(info.key);
             }}
@@ -99,15 +102,15 @@ const GenerationOperation: React.FC<IProps> = ({
             <Popconfirm
               title={info.key.startsWith('sure') ? makeSure(info.name, info.key) : info.name}
               disabled={!info.key.startsWith('sure')}
-              placement="topRight"
-              okText="确认"
-              cancelText="取消"
+              placement='topRight'
+              okText={t('Confirm')}
+              cancelText={t('Cancel')}
               onConfirm={info.onClick}
             >
-              <div className="icon">
+              <div className='icon'>
                 {renderImg(info.key === isHover ? info.hoverSvg : info.imgSvg)}
               </div>
-              <div className="toolName" style={{ color: info.key === isHover ? '#666fff' : '' }}>
+              <div className='toolName' style={{ color: info.key === isHover ? '#666fff' : '' }}>
                 {info.name}
               </div>
             </Popconfirm>
@@ -119,10 +122,7 @@ const GenerationOperation: React.FC<IProps> = ({
 };
 
 const mapStateToProps = (state: AppState) => {
-  const stepInfo = StepUtils.getCurrentStepInfo(
-    state.annotation?.step,
-    state.annotation?.stepList,
-  );
+  const stepInfo = StepUtils.getCurrentStepInfo(state.annotation?.step, state.annotation?.stepList);
 
   return {
     toolInstance: state.annotation.toolInstance,

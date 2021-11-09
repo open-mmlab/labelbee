@@ -36,86 +36,86 @@ import {
 } from '../common';
 
 export const polygon = {
-  name: '标多边形',
+  name: 'AnnotatePolygon',
   icon: DrawPolygonSvg,
   shortCut: [MouseLeftSvg],
 };
 
 export const invalidPolygon = {
-  name: '标无效多边形',
+  name: 'AnnotateInvalidPolygon',
   icon: DrawInvalidPolygonSvg,
   shortCut: ['Ctrl', MouseLeftSvg],
 };
 
 export const selectedPolygon = {
-  name: '选中多边形',
+  name: 'SelectPolygon',
   icon: SelectedPolygonSvg,
   shortCut: [MouseRightSvg],
-  noticeInfo: '右击',
+  noticeInfo: 'RightClick',
 };
 
 export const changePolygonAttribute = {
-  name: '切换多边形性质',
+  name: 'TogglePolygonEffectiveness',
   icon: ChangePolygonAttribute,
   shortCut: ['F'],
 };
 
 export const deletePolygon = {
-  name: '删除多边形',
+  name: 'DeletePolygon',
   icon: DeletePolygonSvg,
   shortCut: ['Del'],
 };
 
 export const keepLine = {
-  name: '续标',
+  name: 'ContinueToLabel',
   icon: IconLineContKj,
   shortCut: ['Space'],
 };
 
 export const insertPolygonPoint = {
-  name: '插入点',
+  name: 'InsertPoint',
   icon: IconPolygonInsertKj,
-  noticeInfo: '移中双击',
+  noticeInfo: 'SelectAndDoubleClick',
   shortCut: [MouseLeftSvg],
 };
 
 export const deletePolygonPoint = {
-  name: '删除点',
+  name: 'DeletePoint',
   icon: DeletePolygonSvg,
-  noticeInfo: '移中双击',
+  noticeInfo: 'SelectAndDoubleClick',
   shortCut: [MouseRightSvg],
 };
 
 export const changeSpecialPoint = {
-  name: '换特殊点',
+  name: 'TogglePointParticularity',
   icon: IconPointSpecialKj,
-  noticeInfo: '对点',
+  noticeInfo: '',
   shortCut: ['Shift', MouseLeftSvg],
 };
 
 export const suspendAbsorption = {
-  name: '暂停吸附',
+  name: 'StopAdsorption',
   icon: IconUnGripKj,
-  noticeInfo: '按住',
+  noticeInfo: 'Press',
   shortCut: ['Alt'],
 };
 
 export const segment = {
-  name: '裁剪重叠区域',
+  name: 'CropOverlapArea',
   icon: IconSegment,
   noticeInfo: '',
   shortCut: ['ALT', 'X'],
 };
 
 export const segmentByAlgorithm = {
-  name: '分割辅助',
+  name: 'SegmentationRecognition',
   icon: IconAI,
   noticeInfo: '',
   shortCut: ['Q'],
 };
 
 export const changeRenderPattern = {
-  name: '切换绘制形式',
+  name: 'SwitchPattern',
   icon: IconSwapOutlined,
   noticeInfo: '',
   shortCut: ['U'],

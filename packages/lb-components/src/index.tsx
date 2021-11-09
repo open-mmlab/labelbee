@@ -5,6 +5,8 @@ import configureStore from './configureStore';
 import { ToolInstance } from './store/annotation/types';
 import App from './App';
 import { PageBackward, PageForward, PageJump } from './store/annotation/actionCreators';
+import i18n from 'lb-utils';
+import { I18nextProvider } from 'react-i18next';
 
 export const store = configureStore();
 
@@ -30,7 +32,9 @@ const OutputApp = (props: any, ref: any) => {
 
   return (
     <Provider store={store}>
-      <App {...props} setToolInstance={setToolInstance} />
+      <I18nextProvider i18n={i18n}>
+        <App {...props} setToolInstance={setToolInstance} />
+      </I18nextProvider>
     </Provider>
   );
 };

@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useReducer } from 'react';
 import { LeftOutlined } from '@ant-design/icons';
 import { connect, useDispatch } from 'react-redux';
 import { store } from 'src';
@@ -14,6 +14,8 @@ import { ToNextStep, ToSubmitFileData } from '@/store/annotation/actionCreators'
 import StepSwitch from './StepSwitch';
 import { EToolName } from '@/data/enums/ToolType';
 import { IStepInfo } from '@/types/step';
+import i18n from 'lb-utils';
+import { useTranslation } from 'react-i18next';
 
 interface INextStep {
   stepProgress: number;
@@ -21,32 +23,36 @@ interface INextStep {
   step: number; // 当前步骤
 }
 
-const NextButton: React.FC<{ disabled: boolean }> = ({ disabled }) => (
-  <Button
-    type='primary'
-    style={{
-      marginLeft: 10,
-    }}
-    onClick={() => {
-      store.dispatch(ToNextStep(0) as any);
-    }}
-    disabled={disabled}
-  >
-    下一步
-  </Button>
-);
+const NextButton: React.FC<{ disabled: boolean }> = ({ disabled }) => {
+  const { t } = useTranslation();
+  return (
+    <Button
+      type='primary'
+      style={{
+        marginLeft: 10,
+      }}
+      onClick={() => {
+        store.dispatch(ToNextStep(0) as any);
+      }}
+      disabled={disabled}
+    >
+      {t('NextStep')}
+    </Button>
+  );
+};
 
 const NextStep: React.FC<INextStep> = ({ step, stepProgress, stepList }) => {
+  const { t } = useTranslation();
+
   if (stepList.length < 2 || step === stepList.length) {
     return null;
   }
 
   const disabled = stepProgress < 1;
 
-
   if (disabled) {
     return (
-      <Tooltip title='当前步骤存在为未标注过的图片，请标注完成再点击下一步'>
+      <Tooltip title={t('StepNotFinishedNotify')}>
         <span>
           <NextButton disabled={disabled} />
         </span>
@@ -54,7 +60,7 @@ const NextStep: React.FC<INextStep> = ({ step, stepProgress, stepList }) => {
     );
   }
 
-  return <NextButton  disabled={disabled} />;
+  return <NextButton disabled={disabled} />;
 };
 
 interface IToolHeaderProps {
@@ -81,6 +87,7 @@ const ToolHeader: React.FC<IToolHeaderProps> = ({
   step,
 }) => {
   const dispatch = useDispatch();
+  const [, forceUpdate] = useReducer((x) => x + 1, 0);
   // render 数据展示
   const currentOption = <ExportData exportData={exportData} />;
 
@@ -92,6 +99,13 @@ const ToolHeader: React.FC<IToolHeaderProps> = ({
     }
   };
 
+  const changeLanguage = (lang: string) => {
+    i18n.changeLanguage(lang);
+    forceUpdate();
+  };
+
+  const curLang = i18n.language;
+
   return (
     <div className={classNames(`${prefix}-header`)}>
       <div className={`${prefix}-header__title`}>
@@ -100,7 +114,7 @@ const ToolHeader: React.FC<IToolHeaderProps> = ({
         {stepList.length > 1 && (
           <>
             <StepSwitch stepProgress={stepProgress} />
-            <NextStep step={step} stepProgress={stepProgress} stepList={stepList}/>
+            <NextStep step={step} stepProgress={stepProgress} stepList={stepList} />
           </>
         )}
 
@@ -111,6 +125,24 @@ const ToolHeader: React.FC<IToolHeaderProps> = ({
           style={{ left: window.innerWidth / 2 - 174 / 2 }}
         >
           <HeaderOption stepInfo={stepInfo} />
+        </div>
+
+        <div className={`${prefix}-header__titlePlacement`} />
+
+        <div className={`${prefix}-header__lang`}>
+          <span
+            className={`${prefix}-langCN ${curLang === 'cn' ? 'active' : ''}`}
+            onClick={() => changeLanguage('cn')}
+          >
+            中文
+          </span>
+          {` / `}
+          <span
+            className={`${prefix}-langEN ${curLang === 'en' ? 'active' : ''}`}
+            onClick={() => changeLanguage('en')}
+          >
+            En
+          </span>
         </div>
       </div>
     </div>

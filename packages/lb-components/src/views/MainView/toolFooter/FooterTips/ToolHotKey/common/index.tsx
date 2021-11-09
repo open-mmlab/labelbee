@@ -18,224 +18,132 @@ import IconLineSpecialKj from '@/assets/annotation/toolHotKeyIcon/icon_lineSpeci
 import IconNoDisplay from '@/assets/annotation/toolHotKeyIcon/icon_noDisplay.svg';
 import IconEyeLockKj from '@/assets/annotation/toolHotKeyIcon/icon_eyeLock_kj.svg';
 
-
 export const revoke = {
-  name: '撤销',
+  name: 'Undo',
   icon: RevokeSvg,
   shortCut: ['Ctrl', 'Z'],
 };
 
 export const restore = {
-  name: '重做',
+  name: 'Redo',
   icon: RestoreSvg,
   shortCut: ['Ctrl', 'Shift', 'Z'],
 };
 
 export const scale = {
-  name: '放大/缩小',
+  name: 'Scale',
   icon: ScaleSvg,
   shortCut: [ScaleShortCutSvg],
 };
 
 export const fullScreen = {
-  name: '全屏',
+  name: 'Fullscreen',
   icon: FullScreenSvg,
   shortCut: ['F11'],
 };
 
 export const rotate = {
-  name: '旋转',
+  name: 'Rotate',
   icon: RotateSvg,
   shortCut: ['R'],
-  noticeInfo: '仅原图',
+  noticeInfo: 'ToOriginalStep',
 };
 
 export const setValid = {
-  name: '是否标为无效',
+  name: 'ToggleEffectiveness',
   icon: SetValidSvg,
   shortCut: ['Y'],
 };
 
 export const backward = {
-  name: '上一张',
+  name: 'Previous',
   icon: BackwardSvg,
   shortCut: ['A'],
 };
 
 export const forward = {
-  name: '下一张',
+  name: 'Next',
   icon: ForwardSvg,
   shortCut: ['D'],
 };
 
 export const backwardPage = {
-  name: '上一文件夹',
+  name: 'PreviousFolder',
   icon: BackwardSvg,
   shortCut: ['Shift', 'A'],
 };
 
 export const forwardPage = {
-  name: '下一文件夹',
+  name: 'NextFolder',
   icon: ForwardSvg,
   shortCut: ['Shift', 'D'],
 };
 
 export const dargWithRightClick = {
-  name: '拖动图片',
+  name: 'Drag',
   icon: DragWithRightClickSvg,
   shortCut: [DragWithRightClickShortCutSvg],
-  noticeInfo: '长按',
+  noticeInfo: 'Press',
 };
 
 export const dargWithLeftClick = {
-  name: '拖动图片',
+  name: 'Drag',
   icon: DragWithRightClickSvg,
   shortCut: ['Space', DragWithLeftClickSvg],
 };
 
 export const forwardWithEnter = {
-  name: '下一张',
+  name: 'Next',
   icon: ForwardSvg,
   shortCut: ['Ctrl', 'Enter'],
 };
 
-// export const chooseImg = {
-//   name: '选图片',
-//   icon: import('@/assets/annotation/toolHotKeyIcon/icon_imgChose_kj.svg'),
-//   shortCut: [import('@/assets/annotation/toolHotKeyIcon/icon_mouse_kj.svg')],
-//   noticeInfo: '移动',
-// };
-
-// export const tag = {
-//   name: '打标签',
-//   icon: import('@/assets/annotation/toolHotKeyIcon/icon_tag_kj.svg'),
-//   shortCut: [import('@/assets/annotation/toolHotKeyIcon/icon_mouse_left_kj.svg')],
-//   noticeInfo: '左击',
-// };
-
-// export const attributed = {
-//   name: '选属性',
-//   icon: import('@/assets/annotation/toolHotKeyIcon/icon_tag_kj.svg'),
-//   shortCut: ['0', '9'],
-//   linkSymbol: '~',
-// };
-
-// export const tagCtrl = {
-//   name: '打标签',
-//   icon: import('@/assets/annotation/toolHotKeyIcon/icon_tag_kj.svg'),
-//   shortCut: ['Ctrl', import('@/assets/annotation/toolHotKeyIcon/icon_mouse_left_kj.svg')],
-// };
-
-// export const tagPage = {
-//   name: '打标签（整页）',
-//   icon: import('@/assets/annotation/toolHotKeyIcon/icon_tag_kj.svg'),
-//   shortCut: ['Ctrl', 'A'],
-// };
-
-// export const forwardByMouse = {
-//   name: '下一张',
-//   icon: import('@/assets/annotation/toolHotKeyIcon/icon_next_kj.svg'),
-//   shortCut: ['Ctrl', 'Enter'],
-// };
-
-// export const preLine = {
-//   name: '上条线',
-//   icon: import('@/assets/annotation/toolHotKeyIcon/icon_up.svg'),
-//   shortCut: ['W'],
-// };
-
-// export const nextLine = {
-//   name: '下条线',
-//   icon: import('@/assets/annotation/toolHotKeyIcon/icon_down.svg'),
-//   shortCut: ['S'],
-// };
-
 export const copyBackwardResult = {
-  name: '复制上张',
+  name: 'CopyThePrevious',
   icon: CopyBackwardResultSvg,
   shortCut: ['ALT', 'C'],
 };
 
-// export const forwardTrack = {
-//   name: '步进',
-//   icon: import('@/assets/annotation/toolHotKeyIcon/icon_forward_kj.svg'),
-//   shortCut: ['&#8594;'],
-//   shortCutUseHtml: true,
-// };
-
-// export const backTrack = {
-//   name: '步退',
-//   icon: import('@/assets/annotation/toolHotKeyIcon/icon_back_kj.svg'),
-//   shortCut: ['&#8592;'],
-//   shortCutUseHtml: true,
-// };
-
-// export const playbackRate = {
-//   name: '倍率',
-//   icon: import('@/assets/annotation/toolHotKeyIcon/icon_speed_kj.svg'),
-//   shortCut: ['&#8593;', '&#8595;'],
-//   shortCutUseHtml: true,
-// };
-
-// export const play = {
-//   name: '播放/暂停',
-//   icon: import('@/assets/annotation/toolHotKeyIcon/icon_playPause.svg'),
-//   shortCut: ['Space'],
-// };
-
-// export const period = {
-//   name: '截取片段',
-//   icon: import('@/assets/annotation/video/icon_clip.svg'),
-//   noticeInfo: '两次',
-//   shortCut: ['X'],
-// };
-
-// export const time = {
-//   name: '标时间点',
-//   icon: import('@/assets/annotation/video/icon_env.svg'),
-//   shortCut: ['E'],
-// };
-
 export const attributeLock = {
-  name: '仅看指定属性',
+  name: 'SpecifiedAttributesOnly',
   icon: IconEyeLockKj,
-  shortCut: ['Shift', '数字'],
+  shortCut: ['Shift', 'Number'],
 };
 
 export const attributeClickLock = {
-  name: '仅看指定属性',
+  name: 'SpecifiedAttributesOnly',
   icon: IconEyeLockKj,
   shortCut: ['Shift', DragWithLeftClickSvg],
 };
 
 export const tabChangeSelected = {
-  name: '切换选中',
+  name: 'ToggleSelected',
   icon: TabChangeSelectedSvg,
   shortCut: ['Tab'],
 };
 
 export const tabReverseChangeSelected = {
-  name: '逆序切换选中',
+  name: 'ToggleSelectedReverse',
   icon: TabReverseChangeSelectedSVG,
   shortCut: ['Shift', 'Tab'],
 };
 
 export const hidden = {
-  name: '隐藏图形',
+  name: 'HideGraphics',
   icon: IconNoDisplay,
   noticeInfo: '',
   shortCut: ['Z'],
 };
 
 export const changeSpecialLine = {
-  name: '换特殊边',
+  name: 'ToggleLineParticularity',
   icon: IconLineSpecialKj,
-  noticeInfo: '对边',
+  noticeInfo: 'ToSide',
   shortCut: ['Shift', DragWithLeftClickSvg],
 };
 
 export const saveResult = {
-  name: '保存',
+  name: 'Save',
   icon: IconSaveKj,
   shortCut: ['Ctrl', 'S'],
 };

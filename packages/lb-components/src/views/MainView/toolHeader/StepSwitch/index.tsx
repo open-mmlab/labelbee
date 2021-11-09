@@ -12,6 +12,7 @@ import { prefix } from '@/constant';
 import AnnotationStepPopover from '@/components/annotationStepPopover';
 import { IStepInfo } from '@/types/step';
 import { UpdateProcessingStep } from '@/store/annotation/actionCreators';
+import { useTranslation } from 'react-i18next';
 
 interface IProps {
   stepProgress: number;
@@ -21,23 +22,20 @@ interface IProps {
 
 const StepSwitch: React.FC<IProps> = ({ stepProgress, step, stepList }) => {
   const dispatch = useDispatch();
+  const { t } = useTranslation();
   const updateStep = (toStep: number) => {
-    dispatch(UpdateProcessingStep(toStep))
-  }
+    dispatch(UpdateProcessingStep(toStep));
+  };
 
   return (
     <span className={`${prefix}`}>
       <Dropdown
         overlay={
-          <AnnotationStepPopover
-            stepList={stepList}
-            updateStep={updateStep}
-            currentStep={step}
-          />
+          <AnnotationStepPopover stepList={stepList} updateStep={updateStep} currentStep={step} />
         }
       >
         <IconWithText
-          text='标注步骤'
+          text={t('Steps')}
           Icon={OrderedListOutlined}
           iconChildren={<CaretDownOutlined style={{ fontSize: 8 }} />}
         />
