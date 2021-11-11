@@ -3,9 +3,10 @@
   "version": "1.0.0",
   "description": "utils for label-bee",
   "author": "lijingchi <lijingchi1@sensetime.com>",
+  "types": "./lib/index.d.ts",
   "homepage": "",
   "license": "ISC",
-  "main": "lib/index.ts",
+  "main": "lib/index.js",
   "files": [
     "lib"
   ],
