@@ -14,7 +14,7 @@ import { ToNextStep, ToSubmitFileData } from '@/store/annotation/actionCreators'
 import StepSwitch from './StepSwitch';
 import { EToolName } from '@/data/enums/ToolType';
 import { IStepInfo } from '@/types/step';
-import i18n from 'lb-utils';
+import { i18n } from 'lb-utils';
 import { useTranslation } from 'react-i18next';
 
 interface INextStep {

@@ -17,7 +17,7 @@ import {
   tabChangeSelected,
   tabReverseChangeSelected,
 } from '../common';
-import i18n from 'lb-utils';
+import { i18n } from 'lb-utils';
 
 export const drawRect = {
   name: i18n.t('AnnotateRect'),

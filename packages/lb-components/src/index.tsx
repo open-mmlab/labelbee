@@ -5,7 +5,7 @@ import configureStore from './configureStore';
 import { ToolInstance } from './store/annotation/types';
 import App from './App';
 import { PageBackward, PageForward, PageJump } from './store/annotation/actionCreators';
-import i18n from 'lb-utils';
+import { i18n } from 'lb-utils';
 import { I18nextProvider } from 'react-i18next';
 
 export const store = configureStore();

@@ -1,7 +1,7 @@
 {
   "name": "lb-utils",
   "version": "1.0.0",
-  "description": "> TODO: description",
+  "description": "utils for label-bee",
   "author": "lijingchi <lijingchi1@sensetime.com>",
   "homepage": "",
   "license": "ISC",
