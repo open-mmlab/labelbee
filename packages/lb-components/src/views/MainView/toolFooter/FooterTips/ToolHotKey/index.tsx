@@ -184,7 +184,7 @@ const ToolHotKey: React.FC<IProps> = ({ isSingleImg, style }) => {
         setFlag(false);
       }}
       overlayClassName='tool-hotkeys-popover'
-      visible={true}
+      visible={svgFlag}
     >
       <div
         className='shortCutTitle'
