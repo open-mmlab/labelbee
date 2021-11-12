@@ -17,43 +17,44 @@ import {
   tabChangeSelected,
   tabReverseChangeSelected,
 } from '../common';
+import { i18n } from 'lb-utils';
 
 export const drawRect = {
-  name: '拉框',
+  name: i18n.t('AnnotateRect'),
   icon: DrawRectSvg,
   shortCut: [MouseLeftSvg, MouseLeftSvg],
 };
 
 export const drawInvalidRect = {
-  name: '拉无效框',
+  name: i18n.t('AnnotateInvalidRect'),
   icon: DrawInvalidRectSvg,
   shortCut: [MouseLeftSvg, 'Ctrl', MouseLeftSvg],
 };
 
 export const selectRect = {
-  name: '选中框',
+  name: i18n.t('SelectRect'),
   icon: SelectedRectSvg,
   shortCut: [MouseRightSvg],
-  noticeInfo: '右击',
+  noticeInfo: i18n.t('RightClick'),
 };
 
 export const changeValid = {
-  name: '切换框性质',
+  name: i18n.t('ToggleRectEffectiveness'),
   icon: ChangeValidSvg,
   shortCut: ['F'],
 };
 
 export const changeValidByClick = {
-  name: '切换框性质',
+  name: i18n.t('ToggleRectEffectiveness'),
   icon: ChangeValidSvg,
   shortCut: ['Ctrl', MouseLeftSvg],
 };
 
 export const deleteRect = {
-  name: '删除框',
+  name: i18n.t('DeleteRect'),
   icon: DeleteRectSvg,
   shortCut: [MouseRightSvg],
-  noticeInfo: '选中双击',
+  noticeInfo: i18n.t('SelectAndDoubleClick'),
 };
 
 const rectToolShortcutTable = [

@@ -13,6 +13,7 @@ import { prefix } from '@/constant';
 import { EToolName } from '@/data/enums/ToolType';
 import { ChangeSave } from '@/store/annotation/actionCreators';
 import { IStepInfo } from '@/types/step';
+import { useTranslation } from 'react-i18next';
 
 interface IProps {
   isBegin?: boolean;
@@ -34,6 +35,7 @@ const HeaderOption: React.FC<IProps> = (props) => {
     annotation: state.annotation,
     imgAttribute: state.imgAttribute,
   }));
+  const { t } = useTranslation();
 
   const isBegin = props.isBegin || stepInfo?.tool === EToolName.Tag;
 
@@ -60,7 +62,7 @@ const HeaderOption: React.FC<IProps> = (props) => {
   const commonOptionList: any = [
     {
       toolName: 'save',
-      title: '保存',
+      title: 'Save',
       show: !!onSave,
       commonSvg: saveSvg,
       selectedSvg: saveLightSvg,
@@ -74,7 +76,7 @@ const HeaderOption: React.FC<IProps> = (props) => {
     },
     {
       toolName: 'revocation',
-      title: '撤销',
+      title: 'Undo',
       show: true,
       commonSvg: revocationSvg,
       selectedSvg: revocationHighlightSvg,
@@ -89,7 +91,7 @@ const HeaderOption: React.FC<IProps> = (props) => {
     },
     {
       toolName: 'restore',
-      title: '重做',
+      title: 'Redo',
       show: true,
       commonSvg: restoreSvg,
       selectedSvg: restoreHighlightSvg,
@@ -104,7 +106,7 @@ const HeaderOption: React.FC<IProps> = (props) => {
     },
     {
       toolName: 'rotate',
-      title: '旋转',
+      title: 'Rotate',
       show: true,
       selectedSvg: rotateHighlightSvg,
       commonSvg: rotateSvg,
@@ -135,7 +137,7 @@ const HeaderOption: React.FC<IProps> = (props) => {
                   src={toolHover === info.toolName ? info.selectedSvg : info.commonSvg}
                   style={info.style}
                 />
-                <div style={info.style}>{info.title}</div>
+                <div style={info.style}>{t(info.title)}</div>
               </a>
             </div>
           )

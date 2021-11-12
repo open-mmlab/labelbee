@@ -1,10 +1,11 @@
 import { TEXT_ATTRIBUTE_MAX_LENGTH } from '@/data/enums/ToolType';
 import { TextUtils } from '@/utils/TextUtils';
 import { Input, message, Tooltip } from 'antd';
-import React, {FocusEvent, useEffect, useState} from 'react';
+import React, { FocusEvent, useEffect, useState } from 'react';
 import IconClearSmallA from '@/assets/annotation/common/icon_clearSmall_a.svg';
 import IconClearSmall from '@/assets/annotation/common/icon_clearSmall.svg';
 import { classnames } from '@/utils';
+import { useTranslation } from 'react-i18next';
 
 interface IProps {
   onChange: (value: string, isSubmit?: boolean) => void;
@@ -14,9 +15,9 @@ interface IProps {
 }
 
 const TextAreaFormat = (props: IProps) => {
-  const {
-    onChange, textValue, checkString, textCheckType,
-  } = props;
+  const { t } = useTranslation();
+
+  const { onChange, textValue, checkString, textCheckType } = props;
   const [textLength, setTextLength] = useState<number>(0);
   const [error, setError] = useState<boolean>(false);
   const [onFocus, setOnFocus] = useState<boolean>(false);
@@ -24,16 +25,12 @@ const TextAreaFormat = (props: IProps) => {
 
   const clearIcon = (
     <a>
-      <Tooltip placement="bottom" title="清空文本输入">
+      <Tooltip placement='bottom' title={t('EmptyTextInput')}>
         <img
           onMouseEnter={() => setHoverDelete(true)}
           onMouseLeave={() => setHoverDelete(false)}
           style={{ marginLeft: 6 }}
-          src={
-            hoverDelete
-              ? IconClearSmallA
-              : IconClearSmall
-          }
+          src={hoverDelete ? IconClearSmallA : IconClearSmall}
           onClick={(e) => {
             e.stopPropagation();
             onChange('');
@@ -62,7 +59,7 @@ const TextAreaFormat = (props: IProps) => {
       } catch (error) {
         setError(true);
         message.destroy();
-        message.error('正则表达式填写错误');
+        message.error(t('RegularExpIncorrectly'));
       }
     }
     setTextLength(textValue?.length ?? 0);
@@ -78,9 +75,9 @@ const TextAreaFormat = (props: IProps) => {
   };
 
   return (
-    <div className="textInputContainer">
-      <div className="label">
-        文本输入
+    <div className='textInputContainer'>
+      <div className='label'>
+        {t('TextInput')}
         {clearIcon}
       </div>
       <div
@@ -89,12 +86,14 @@ const TextAreaFormat = (props: IProps) => {
           focus: onFocus,
         })}
       >
-        <div className={classnames({
-          toolTextAreaBox: true,
-          toolTextAreaBoxFocus: onFocus
-        })}>
+        <div
+          className={classnames({
+            toolTextAreaBox: true,
+            toolTextAreaBoxFocus: onFocus,
+          })}
+        >
           <Input.TextArea
-            style={{resize: 'none', height: 120, wordBreak: 'break-all'}}
+            style={{ resize: 'none', height: 120, wordBreak: 'break-all' }}
             maxLength={TEXT_ATTRIBUTE_MAX_LENGTH}
             onKeyDownCapture={(e) => {
               e.stopPropagation();
@@ -115,20 +114,13 @@ const TextAreaFormat = (props: IProps) => {
             onKeyDown={keyDown}
             className={error ? 'warning' : ''}
           />
-          <div className="textAreaFooter">
-          <span className="wordCount">
-            <span
-              className={
-                textLength > TEXT_ATTRIBUTE_MAX_LENGTH || error
-                  ? 'warning'
-                  : ''
-              }
-            >
-              {textLength}
+          <div className='textAreaFooter'>
+            <span className='wordCount'>
+              <span className={textLength > TEXT_ATTRIBUTE_MAX_LENGTH || error ? 'warning' : ''}>
+                {textLength}
+              </span>
+              /<span>{TEXT_ATTRIBUTE_MAX_LENGTH}</span>
             </span>
-            /
-            <span>{TEXT_ATTRIBUTE_MAX_LENGTH}</span>
-          </span>
           </div>
         </div>
       </div>

@@ -10,6 +10,7 @@ import { TagOperation, TagUtils } from '@sensetime/annotation';
 import { connect } from 'react-redux';
 import { AppState } from '@/store';
 import { IInputList } from '@/types/main';
+import { useTranslation } from 'react-i18next';
 
 interface IProps {
   imgIndex: number;
@@ -28,6 +29,7 @@ const TagSidebar: React.FC<IProps> = ({ toolInstance, imgIndex }) => {
   const sidebarRef = useRef<HTMLDivElement>(null);
   const [, forceRender] = useState<number>(0);
   const [hoverDeleteIndex, setHoverDeleteIndex] = useState(-1);
+  const { t } = useTranslation();
 
   useEffect(() => {
     if (toolInstance) {
@@ -138,7 +140,7 @@ const TagSidebar: React.FC<IProps> = ({ toolInstance, imgIndex }) => {
                 >
                   <span>
                     {info.key}
-                    <Tooltip placement='bottom' title='清空此选项'>
+                    <Tooltip placement='bottom' title={t('ClearThisOption')}>
                       <img
                         style={{ marginLeft: 5, cursor: 'pointer' }}
                         onClick={(e) => {
@@ -211,7 +213,7 @@ const TagSidebar: React.FC<IProps> = ({ toolInstance, imgIndex }) => {
   return (
     <div className='tagOperationMenu' ref={sidebarRef}>
       {inputList?.length === 0 ? (
-        <div style={{ padding: 20, textAlign: 'center' }}>暂无信息配置</div>
+        <div style={{ padding: 20, textAlign: 'center' }}>{t('NoConfiguration')}</div>
       ) : (
         <div className='main' style={{ height }}>
           {labelPanel(inputList)}

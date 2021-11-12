@@ -3,6 +3,7 @@ import { AppState } from '@/store';
 import { connect } from 'react-redux';
 import { GraphToolInstance } from '@/store/annotation/types';
 import { Divider } from 'antd';
+import { useTranslation } from 'react-i18next';
 
 interface IProps {
   toolInstance: GraphToolInstance;
@@ -11,6 +12,7 @@ interface IProps {
 const PageNumber = (props: IProps) => {
   const { toolInstance } = props;
   const [_, forceRender] = useState(0);
+  const { t } = useTranslation();
   useEffect(() => {
     if (toolInstance) {
       toolInstance.on('updatePageNumber', () => {
@@ -25,9 +27,14 @@ const PageNumber = (props: IProps) => {
 
   const count = toolInstance?.currentPageResult?.length;
   if (count >= 0) {
-    return <span>本页件数: {count}<Divider type='vertical' style={{ background: 'rgba(153, 153, 153, 1)', height: '16px' }} /></span>;
+    return (
+      <span>
+        {`${t('ItemsOfThisPage')}: ${count}`}
+        <Divider type='vertical' style={{ background: 'rgba(153, 153, 153, 1)', height: '16px' }} />
+      </span>
+    );
   }
-  
+
   return null;
 };
 

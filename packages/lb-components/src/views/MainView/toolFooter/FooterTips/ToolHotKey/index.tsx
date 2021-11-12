@@ -15,6 +15,7 @@ import tagToolSingleShortCutTable from './tag';
 import textToolShortCutTable from './text';
 import StepUtils from '@/utils/StepUtils';
 import { footerCls } from '../../index';
+import { useTranslation } from 'react-i18next';
 
 interface IProps {
   isSingleImg?: boolean;
@@ -38,9 +39,13 @@ export interface IShortcuts {
 }
 const ToolHotKey: React.FC<IProps> = ({ isSingleImg, style }) => {
   const [svgFlag, setFlag] = useState(false);
+  const { t } = useTranslation();
 
   // @ts-ignore
-  const stepInfo = useSelector(state => StepUtils.getCurrentStepInfo(state?.annotation?.step, state.annotation?.stepList))
+  const stepInfo = useSelector((state) =>
+    // @ts-ignore
+    StepUtils.getCurrentStepInfo(state?.annotation?.step, state.annotation?.stepList),
+  );
 
   const renderImg = (info: Element | string) => {
     if (typeof info === 'string') {
@@ -49,7 +54,7 @@ const ToolHotKey: React.FC<IProps> = ({ isSingleImg, style }) => {
     return info;
   };
   const shortCutStyle = {
-    width: 250,
+    width: 320,
     display: 'flex',
     justifyContent: 'space-between',
     margin: '23px 21px',
@@ -74,11 +79,11 @@ const ToolHotKey: React.FC<IProps> = ({ isSingleImg, style }) => {
     <div style={shortCutStyle} key={index}>
       <span style={{ display: 'flex', alignItems: 'center' }}>
         {renderImg(info.icon)}
-        {info.name}
+        {t(info.name)}
       </span>
       <span style={{ display: 'flex', alignItems: 'center' }}>
         {info.noticeInfo && (
-        <span style={{ marginRight: '5px', color: '#CCCCCC' }}>{info.noticeInfo}</span>
+          <span style={{ marginRight: '5px', color: '#CCCCCC' }}>{t(info.noticeInfo)}</span>
         )}
         {setSVG(info.shortCut, info.shortCutUseHtml, info.linkSymbol)}
       </span>
@@ -108,7 +113,7 @@ const ToolHotKey: React.FC<IProps> = ({ isSingleImg, style }) => {
         if (item?.startsWith('data')) {
           return (
             <span key={index} style={{ display: 'flex' }}>
-              <span className="shortCutButton" style={{ marginRight: '3px' }}>
+              <span className='shortCutButton' style={{ marginRight: '3px' }}>
                 <img width={16} height={23} src={item} />
               </span>
               <span style={{ marginRight: '3px' }}>+</span>
@@ -131,7 +136,7 @@ const ToolHotKey: React.FC<IProps> = ({ isSingleImg, style }) => {
       }
       if (item?.startsWith('data')) {
         return (
-          <span className="shortCutButton" key={index} style={{ marginRight: '3px' }}>
+          <span className='shortCutButton' key={index} style={{ marginRight: '3px' }}>
             <img width={16} height={23} src={item} />
           </span>
         );
@@ -155,8 +160,13 @@ const ToolHotKey: React.FC<IProps> = ({ isSingleImg, style }) => {
     );
   };
 
-  const content = <div className={`${footerCls}__hotkey-content`}>{stepInfo && shortCutTable[stepInfo?.tool]?.map((info: any, index: number) => setHotKey(info, index))}</div>;
-  const containerStyle = style || {};
+  const content = (
+    <div className={`${footerCls}__hotkey-content`}>
+      {stepInfo &&
+        shortCutTable[stepInfo?.tool]?.map((info: any, index: number) => setHotKey(info, index))}
+    </div>
+  );
+  const containerStyle = style || { width: 600 };
 
   // 不存在对应的工具则不展示的快捷键
   if (stepInfo && !shortCutTable[stepInfo?.tool]) {
@@ -165,24 +175,31 @@ const ToolHotKey: React.FC<IProps> = ({ isSingleImg, style }) => {
 
   return (
     // @ts-ignore
-    <Popover placement="topLeft" content={content} onMouseMove={() => setFlag(true)}
-      onMouseLeave={() => setFlag(false)}
-      overlayClassName="tool-hotkeys-popover"
+    <Popover
+      placement='topLeft'
+      content={content}
+      // @ts-ignore
+      onMouseMove={() => setFlag(true)}
+      onMouseLeave={() => {
+        setFlag(false);
+      }}
+      overlayClassName='tool-hotkeys-popover'
+      visible={true}
     >
       <div
-        className="shortCutTitle"
+        className='shortCutTitle'
         onMouseMove={() => setFlag(true)}
         onMouseLeave={() => setFlag(false)}
         style={containerStyle}
       >
-        <a className="svg">
+        <a className='svg'>
           <img
             src={svgFlag ? hotKeyHoverSvg : hotKeySvg}
             width={15}
             height={13}
             style={{ marginRight: '5px' }}
           />
-          快捷键
+          {t('Hotkeys')}
         </a>
       </div>
     </Popover>

@@ -7,18 +7,19 @@ import { IFileItem, OnSubmit } from '@/types/data';
 import { ANNOTATION_ACTIONS } from '@/store/Actions';
 import { ESubmitType } from '@/constant';
 import { Dispatch } from 'redux';
+import { useTranslation } from 'react-i18next';
 
 interface IProps {
   toolInstance: ToolInstance;
   imgList: IFileItem[];
   onSubmit?: OnSubmit;
   exportData?: (imgList: IFileItem[]) => void;
-  dispatch: Dispatch
+  dispatch: Dispatch;
 }
 
-const ExportData: React.FC<IProps> = ({
-  imgList, dispatch, onSubmit, exportData,
-}) => {
+const ExportData: React.FC<IProps> = ({ imgList, dispatch, onSubmit, exportData }) => {
+  const { t } = useTranslation();
+
   if (!exportData) {
     return null;
   }
@@ -38,7 +39,7 @@ const ExportData: React.FC<IProps> = ({
 
   return (
     <Button style={{ marginLeft: 20 }} onClick={exportDataFuc}>
-      导出
+      {t('Export')}
     </Button>
   );
 };

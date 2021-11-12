@@ -1,0 +1,24 @@
+{
+  "name": "lb-utils",
+  "version": "1.0.0",
+  "description": "utils for label-bee",
+  "author": "lijingchi <lijingchi1@sensetime.com>",
+  "types": "./lib/index.d.ts",
+  "homepage": "",
+  "license": "ISC",
+  "main": "lib/index.js",
+  "files": [
+    "lib"
+  ],
+  "repository": {
+    "type": "git",
+    "url": "git@gitlab.bj.sensetime.com:lijingchi1/beehive.git"
+  },
+  "scripts": {
+    "test": "echo \"Error: run tests from root\" && exit 1"
+  },
+  "dependencies": {
+    "i18next": "^21.3.3",
+    "react-i18next": "^11.12.0"
+  }
+}

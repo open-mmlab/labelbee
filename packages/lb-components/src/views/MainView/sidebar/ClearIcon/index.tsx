@@ -7,6 +7,7 @@ import clearSmall from '@/assets/annotation/common/icon_clearSmall.svg';
 import { InitImgAttribute } from '@/store/imgAttribute/actionCreators';
 import { store } from '@/index';
 import clearSmallA from '@//assets/annotation/common/icon_clearSmall_a.svg';
+import { useTranslation } from 'react-i18next';
 
 const clearIcon = () => {
   const [hoverDelete, setHoverDelete] = useState(false);
@@ -14,8 +15,10 @@ const clearIcon = () => {
   const clearAttribute = () => {
     store.dispatch(InitImgAttribute());
   };
+  const { t } = useTranslation();
+
   return (
-    <Tooltip placement="bottom" title="还原图片属性">
+    <Tooltip placement='bottom' title={t('RestoreImageAttributes')}>
       <img
         onMouseEnter={() => setHoverDelete(true)}
         onMouseLeave={() => setHoverDelete(false)}

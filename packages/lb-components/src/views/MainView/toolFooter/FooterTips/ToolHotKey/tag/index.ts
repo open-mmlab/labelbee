@@ -13,7 +13,7 @@ import {
 } from '../common';
 
 export const tagInSingleImg: any = {
-  name: '打标签',
+  name: 'Tagging',
   icon: iconTagKj,
   shortCut: [1, 9],
 };

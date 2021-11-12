@@ -6,6 +6,7 @@ import AttributeList from '@/components/attributeList';
 import StepUtils from '@/utils/StepUtils';
 import { IStepInfo } from '@/types/step';
 import { jsonParser } from '@/utils';
+import { useTranslation } from 'react-i18next';
 
 interface IProps {
   toolInstance: GraphToolInstance;
@@ -16,6 +17,7 @@ const SwitchAttributeList: React.FC<IProps> = (props) => {
   const [_, forceRender] = useState(0);
   const listRef = useRef<HTMLElement>(null);
   const { toolInstance } = props;
+  const { t } = useTranslation();
 
   useEffect(() => {
     if (toolInstance) {
@@ -41,8 +43,11 @@ const SwitchAttributeList: React.FC<IProps> = (props) => {
   }
 
   if (toolInstance?.config?.attributeList) {
-    const list = toolInstance.config.attributeList.map((i: any) => ({ label: i.key, value: i.value }));
-    list.unshift({ label: '无属性', value: '' });
+    const list = toolInstance.config.attributeList.map((i: any) => ({
+      label: i.key,
+      value: i.value,
+    }));
+    list.unshift({ label: t('NoAttribute'), value: '' });
     const attributeChanged = (v: string) => {
       toolInstance.setDefaultAttribute(v);
       forceRender((s) => s + 1);
@@ -64,10 +69,7 @@ const SwitchAttributeList: React.FC<IProps> = (props) => {
 };
 
 const mapStateToProps = (state: AppState) => {
-  const stepInfo = StepUtils.getCurrentStepInfo(
-    state.annotation?.step,
-    state.annotation?.stepList,
-  );
+  const stepInfo = StepUtils.getCurrentStepInfo(state.annotation?.step, state.annotation?.stepList);
 
   return {
     toolInstance: state.annotation.toolInstance,

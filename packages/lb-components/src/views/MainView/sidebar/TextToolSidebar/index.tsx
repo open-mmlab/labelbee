@@ -9,6 +9,7 @@ import { PageForward } from '@/store/annotation/actionCreators';
 import { ConfigUtils } from '@/utils/ConfigUtils';
 import { IStepInfo } from '@/types/step';
 import TextToolOperation from '@sensetime/annotation/dist/types/core/toolOperation/TextToolOperation';
+import { useTranslation } from 'react-i18next';
 
 const EKeyCode = cKeyCode.default;
 
@@ -68,6 +69,7 @@ export const SingleTextInput = (props: any) => {
   const ref = useRef(null);
   const [textAreaFocus, setTextAreaFocus] = useState(false);
   const [invalid, setInvalid] = useState(false);
+  const { t } = useTranslation();
 
   const { disabled, config, result, updateText, index, switchToNextTextarea, hasMultiple, onNext } =
     props;
@@ -132,8 +134,8 @@ export const SingleTextInput = (props: any) => {
   const TextareaFooter = (
     <div className='textAreaFooter'>
       <div className='hotkeyTip'>
-        {tabToSwitchEnabled && <span>[切换]Tab</span>}
-        <span>[翻页]Ctrl+Enter</span>
+        {tabToSwitchEnabled && <span>{`[${t('Switch')}]Tab`}</span>}
+        <span>{`[${t('TurnPage')}]Ctrl+Enter`}</span>
       </div>
       <div className='wordCount'>
         <span className={textLength >= maxLength ? 'warning' : ''}>{textLength}</span>/

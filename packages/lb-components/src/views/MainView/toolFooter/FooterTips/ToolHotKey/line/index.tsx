@@ -35,78 +35,78 @@ import {
 } from '../common';
 
 export const line = {
-  name: '标线',
+  name: 'AnnotateLine',
   icon: DrawPolygonSvg,
   shortCut: [MouseLeftSvg],
 };
 
 export const invalidLine = {
-  name: '标无效线',
+  name: 'AnnotateInvalidLine',
   icon: LineNullKj,
   shortCut: ['Ctrl', MouseLeftSvg],
 };
 
 export const horizontalLine = {
-  name: '标水平/垂直线',
+  name: 'HorizontalOrVertical',
   icon: StraightLineKj,
   shortCut: ['Shift', MouseLeftSvg],
 };
 
 export const selectLine = {
-  name: '选中线',
+  name: 'SelectLine',
   icon: LineActiveKj,
   shortCut: [MouseRightSvg],
 };
 
 export const changeLineAttribute = {
-  name: '切换线性质',
+  name: 'ToggleLineEffectiveness',
   icon: LineChangeKj,
   shortCut: ['F'],
 };
 
 export const deleteLine = {
-  name: '删除线',
+  name: 'DeleteLine',
   icon: DeletePointSvg,
-  noticeInfo: '选中双击',
+  noticeInfo: 'SelectAndDoubleClick',
   shortCut: [MouseRightSvg],
 };
 
 export const keepLine = {
-  name: '续标',
+  name: 'ContinueToLabel',
   icon: IconLineContKj,
-  noticeInfo: '选中',
+  noticeInfo: 'Select',
   shortCut: ['Space'],
 };
 
 export const insertPoint = {
-  name: '插入点',
+  name: 'InsertPoint',
   icon: LineInsertKj,
-  noticeInfo: '对线单击',
+  noticeInfo: 'ClickOnLine',
   shortCut: [MouseLeftSvg],
 };
 
 export const deletePoint = {
-  name: '删除点',
+  name: 'DeletePoint',
   icon: LineDelKj,
-  noticeInfo: '对点双击',
+  noticeInfo: 'DblClickOnPoint',
   shortCut: [MouseRightSvg],
 };
 
 export const suspendAbsorption = {
-  name: '暂停吸附',
+  name: 'StopAdsorption',
   icon: IconUnGripKj,
-  noticeInfo: '按住',
+  noticeInfo: 'Press',
   shortCut: ['Alt'],
 };
 
 export const preLine = {
-  name: '上条线',
+  name: 'PreviousLine',
   icon: Up,
   shortCut: ['W'],
 };
 
 export const nextLine = {
-  name: '下条线',
+  name: 'NextLine',
   icon: Down,
   shortCut: ['S'],
 };
@@ -142,3 +142,4 @@ const lineToolShortCutTable = [
   tabReverseChangeSelected,
 ];
 export default lineToolShortCutTable;
+  

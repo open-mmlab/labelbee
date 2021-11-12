@@ -3,6 +3,7 @@ import { AppState } from '@/store';
 import { connect } from 'react-redux';
 import { ToolInstance } from '@/store/annotation/types';
 import { Divider } from 'antd';
+import { useTranslation } from 'react-i18next';
 
 interface IProps {
   toolInstance: ToolInstance;
@@ -11,6 +12,8 @@ interface IProps {
 const HiddenTips = (props: IProps) => {
   const { toolInstance } = props;
   const [_, forceRender] = useState(0);
+  const { t } = useTranslation();
+
   useEffect(() => {
     if (toolInstance) {
       toolInstance.on('hiddenChange', () => {
@@ -26,9 +29,14 @@ const HiddenTips = (props: IProps) => {
   const isHidden = toolInstance.isHidden;
 
   if (isHidden) {
-    return <span>标注隐藏中<Divider type='vertical' style={{ background: 'rgba(153, 153, 153, 1)', height: '16px' }} /></span>;
+    return (
+      <span>
+        {t('Redrawing')}
+        <Divider type='vertical' style={{ background: 'rgba(153, 153, 153, 1)', height: '16px' }} />
+      </span>
+    );
   }
-  
+
   return null;
 };
 

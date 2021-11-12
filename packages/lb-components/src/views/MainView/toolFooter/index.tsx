@@ -11,6 +11,7 @@ import FooterTips from './FooterTips';
 import { prefix } from '@/constant';
 import { PageBackward, PageForward, PageJump } from '@/store/annotation/actionCreators';
 import { IStepInfo } from '@/types/step';
+import { useTranslation } from 'react-i18next';
 
 interface IPageProps {
   jumpSkip: Function;
@@ -72,6 +73,8 @@ const ToolFooter: React.FC<IProps> = (props: IProps) => {
   const { stepList, step, basicResultList, basicIndex, mode } = props;
   const dispatch = useDispatch();
 
+  const { t } = useTranslation();
+
   const stepInfo = stepList[step - 1] ?? {};
 
   const pageBackward = () => {
@@ -112,7 +115,7 @@ const ToolFooter: React.FC<IProps> = (props: IProps) => {
       {hasSourceStep && basicResultList.length > 0 && (
         <>
           <FooterDivider />
-          <span>{`第${basicIndex + 1}/${basicResultList.length}分页`}</span>
+          <span>{t('curItems', { current: basicIndex + 1, total: basicResultList.length })}</span>
         </>
       )}
 
