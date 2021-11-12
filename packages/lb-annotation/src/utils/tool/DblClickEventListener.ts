@@ -73,10 +73,16 @@ class DblClickEventListener {
    * @param {*} singleClickFun
    * @param {*} leftDblClick
    * @param {*} rightDblClick
+   * @param {*} isAllowDouble 是否允许执行 double click，如果为 true 则进行的延迟，否则将立即执行，增加操作流畅性
    * @returns {void}
    * @memberof DblClickEventListen
    */
-  public addEvent(singleClickFun: any, leftDblClick: any, rightDblClick: any): void {
+  public addEvent(
+    singleClickFun: any,
+    leftDblClick: any,
+    rightDblClick: any,
+    isAllowDouble?: (e: any) => boolean,
+  ): void {
     if (!this.dom) {
       return;
     }
@@ -85,8 +91,10 @@ class DblClickEventListener {
     this.mouseUp = (e: MouseEvent) => {
       const cTime = new Date().getTime();
 
+      const isDoubleClick = isAllowDouble ? isAllowDouble(e) : true;
+
       // down 和 up 超过 delay 时间直接判断为点击事件
-      if (cTime - this.mouseDownTime > this.delay) {
+      if (cTime - this.mouseDownTime > this.delay || isDoubleClick !== true) {
         singleClickFun(e);
         return;
       }

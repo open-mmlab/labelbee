@@ -5,9 +5,12 @@ import Annotation from './components/Annotation';
 import { fileList as mockFileList, getMockResult } from './mock/index';
 import { getStepList, getDependStepList } from './mock/taskConfig';
 import qs from 'qs';
+import { AnnotationView } from '@sensetime/label-bee';
+import { DEFAULT_ANNOTATIONS } from './mock';
 
 const App = () => {
   const tool = qs.parse(window.location.search, { ignoreQueryPrefix: true, comma: true }).tool;
+
   const isSingleTool = !Array.isArray(tool);
   const stepList = isSingleTool ? getStepList(tool) : getDependStepList(tool);
 
@@ -18,6 +21,24 @@ const App = () => {
       result: isSingleTool ? getMockResult(tool) : '',
     })),
   );
+
+  // 参看工具的展示
+  if (tool === 'annotationView') {
+    return (
+      <div>
+        <div style={{ height: 500 }}>
+          <AnnotationView
+            src='https://cdn.nba.com/manage/2020/10/andre-iguodala-iso-smile-0520-784x588.jpg'
+            annotations={DEFAULT_ANNOTATIONS}
+            style={{
+              color: 'blue',
+              thickness: 5,
+            }}
+          />
+        </div>
+      </div>
+    );
+  }
 
   const goBack = (data) => {
     console.log('goBack', data);

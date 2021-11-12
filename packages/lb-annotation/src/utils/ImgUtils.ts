@@ -1,6 +1,6 @@
 export default class ImgUtils {
   public static load(src: string) {
-    return new Promise((resolve, reject) => {
+    return new Promise<HTMLImageElement>((resolve, reject) => {
       const imgNode = new Image();
 
       // 暂时判断 file 协议的路径进行 encode 操作

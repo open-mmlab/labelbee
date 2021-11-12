@@ -10,7 +10,6 @@ import svg from 'rollup-plugin-svg';
 import path from 'path';
 import alias from '@rollup/plugin-alias';
 
-process.env.NODE_ENV = 'production';
 const projectRootDir = path.resolve(__dirname);
 const customResolver = resolve({
   extensions: ['.tsx', '.ts', 'scss'],
@@ -28,6 +27,8 @@ const banner = `
   */
 `;
 
+console.log('beehive- annotation isProd ', isProd);
+
 export default {
   input: ['./src/index.ts'],
   coverageDirectory: './dist/',
@@ -43,6 +44,7 @@ export default {
       exclude: /node_modules/, // default
       sourceMap: true, // default
       minify: isProd,
+      // minify: false,
       target: 'es2015', // default, or 'es20XX', 'esnext'
       define: {
         __VERSION__: '"x.y.z"',

@@ -4,13 +4,13 @@
   "workspaces": [
     "packages/*"
   ],
-  "version": "1.1.1",
+  "version": "1.2.0",
   "scripts": {
     "start": "lerna run --parallel --stream start",
     "dev": "lerna run --parallel --stream dev",
     "bootstrap": "lerna bootstrap",
     "bootstrap:ci": "lerna bootstrap --no-ci",
-    "build": "lerna run --parallel --stream build",
+    "build": "lerna run build",
     "lint": "lerna run --parallel --stream lint",
     "clean": "lerna clean && rm -rf ./node_modules/ && rm -rf ./packages/**/node_modules",
     "commit": "cz",

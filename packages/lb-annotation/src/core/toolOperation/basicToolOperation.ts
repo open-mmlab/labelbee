@@ -172,8 +172,8 @@ class BasicToolOperation extends EventListener {
     };
     this.attributeLockList = [];
     this.history = new ActionsHistory();
-    this.setStyle(props.style);
-    this._imgAttribute = props.imgAttribute;
+    this.style = props.style ?? {};
+    this._imgAttribute = props.imgAttribute ?? {};
     this.isHidden = false;
     this.dragStatus = EDragStatus.Wait;
     this.defaultAttribute = props?.defaultAttribute ?? '';
@@ -463,7 +463,7 @@ class BasicToolOperation extends EventListener {
     this.renderBasicCanvas();
 
     this.emit('dependRender');
-    this.emit('renderZoom');
+    this.emit('renderZoom', zoom);
   };
 
   /**
@@ -661,11 +661,11 @@ class BasicToolOperation extends EventListener {
         this.isDrag = true;
         this.container.style.cursor = 'grabbing';
         this.forbidCursorLine = true;
+        this.renderBasicCanvas();
         this.emit('dependRender');
       }
 
       this.render();
-      this.renderBasicCanvas();
     } catch (error) {
       console.error(error);
     }
@@ -788,6 +788,10 @@ class BasicToolOperation extends EventListener {
     if (!this.imgNode || !this.coord) {
       return;
     }
+
+    // 禁止外层滚轮操作
+    e.preventDefault();
+
     const coord = this.getCoordinate(e);
 
     const delta = e.deltaY || e.wheelDelta;
@@ -841,7 +845,7 @@ class BasicToolOperation extends EventListener {
     this.currentPosStorage = newCurrentPos;
     this.imgInfo = imgInfo;
     zoomInfo.ratio = ratio;
-    this.emit('renderZoom');
+    this.emit('renderZoom', zoom);
   };
 
   /**
@@ -903,7 +907,6 @@ class BasicToolOperation extends EventListener {
     }
     this.renderBasicCanvas();
     this.render();
-    this.renderBasicCanvas();
   }
 
   public clearResult(sendMessage?: boolean | string) {

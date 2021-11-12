@@ -83,7 +83,7 @@ class PolygonOperation extends BasicToolOperation {
     this.container.removeEventListener('mouseup', this.onMouseUp);
 
     this.container.addEventListener('mouseup', this.dragMouseUp);
-    this.dblClickListener.addEvent(this.onMouseUp, this.onLeftDblClick, this.onRightDblClick);
+    this.dblClickListener.addEvent(this.onMouseUp, this.onLeftDblClick, this.onRightDblClick, this.isAllowDouble);
   }
 
   public eventUnbinding() {
@@ -112,6 +112,19 @@ class PolygonOperation extends BasicToolOperation {
   public get selectedText() {
     return this.selectedPolygon?.textAttribute;
   }
+
+  // 是否直接执行操作
+  public isAllowDouble = (e: MouseEvent) => {
+    const { selectedID } = this;
+
+    const currentSelectedID = this.getHoverID(e);
+    // 仅在选中的时候需要 double click
+    if (selectedID && selectedID === currentSelectedID) {
+      return true;
+    }
+
+    return false;
+  };
 
   get dataList() {
     return this.polygonList;
@@ -440,6 +453,11 @@ class PolygonOperation extends BasicToolOperation {
     this.history.pushHistory(polygonList);
   }
 
+  /**
+   * 获取当前 hover 多边形的 ID
+   * @param e
+   * @returns
+   */
   public getHoverID(e: MouseEvent) {
     const coordinate = this.getCoordinateUnderZoom(e);
     const polygonListWithZoom = this.currentShowList.map((polygon) => ({
