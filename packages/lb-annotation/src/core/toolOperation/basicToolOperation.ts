@@ -788,10 +788,10 @@ class BasicToolOperation extends EventListener {
     if (!this.imgNode || !this.coord) {
       return;
     }
-    
+
     // 禁止外层滚轮操作
     e.preventDefault();
-    
+
     const coord = this.getCoordinate(e);
 
     const delta = e.deltaY || e.wheelDelta;

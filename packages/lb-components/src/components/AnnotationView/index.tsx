@@ -8,14 +8,15 @@ import { ViewOperation, ImgUtils } from '@sensetime/annotation';
 import { Spin } from 'antd';
 
 interface IProps {
+  src: string; // 图片路径
   size: {
     width: number;
     height: number;
   };
-  src: string; // 图片路径
   style: {
     color?: string;
     fill?: string;
+    thickness?: number;
   };
   annotations: any[]; // TODO
   zoomChange?: (zoom: number) => void;
@@ -26,8 +27,8 @@ interface IProps {
 }
 
 const DEFAULT_SIZE = {
-  width: 500,
-  height: 400,
+  width: 1280,
+  height: 720,
 };
 
 const AnnotationView = (props: IProps, ref: any) => {
