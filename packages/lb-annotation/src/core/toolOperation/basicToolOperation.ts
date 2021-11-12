@@ -661,7 +661,7 @@ class BasicToolOperation extends EventListener {
         this.isDrag = true;
         this.container.style.cursor = 'grabbing';
         this.forbidCursorLine = true;
-        this.renderBasicCanvas(); 
+        this.renderBasicCanvas();
         this.emit('dependRender');
       }
 
@@ -788,6 +788,10 @@ class BasicToolOperation extends EventListener {
     if (!this.imgNode || !this.coord) {
       return;
     }
+    
+    // 禁止外层滚轮操作
+    e.preventDefault();
+    
     const coord = this.getCoordinate(e);
 
     const delta = e.deltaY || e.wheelDelta;
