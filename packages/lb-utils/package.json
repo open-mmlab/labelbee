@@ -1,5 +1,5 @@
 {
-  "name": "lb-utils",
+  "name": "@sensetime/lb-utils",
   "version": "1.0.0",
   "description": "utils for label-bee",
   "author": "lijingchi <lijingchi1@sensetime.com>",
