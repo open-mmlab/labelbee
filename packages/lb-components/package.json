@@ -1,6 +1,6 @@
 {
   "name": "@sensetime/label-bee",
-  "version": "1.2.0-alpha.4",
+  "version": "1.2.0-alpha.6",
   "description": "Provide a complete library of annotation components",
   "main": "./dist/index.js",
   "types": "./dist/types/index.d.ts",
@@ -68,6 +68,7 @@
     "@types/react-redux": "^7.1.16",
     "@typescript-eslint/eslint-plugin": "^4.15.1",
     "@typescript-eslint/parser": "^4.15.1",
+    "antd": "^4.15.0",
     "commitizen": "^4.2.4",
     "cross-env": "^7.0.3",
     "cz-conventional-changelog": "^3.3.0",
