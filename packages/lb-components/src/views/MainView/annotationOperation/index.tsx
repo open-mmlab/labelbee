@@ -1,5 +1,5 @@
 import React, { useEffect, useRef, useState } from 'react';
-import { Spin, message } from 'antd';
+import { Spin, message } from 'antd/es';
 import { AppState } from 'src/store';
 import { connect } from 'react-redux';
 import { ImgAttributeState } from 'src/store/imgAttribute/types';

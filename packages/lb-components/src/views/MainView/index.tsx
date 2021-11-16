@@ -7,7 +7,7 @@ import Sidebar from './sidebar';
 import ToolFooter from './toolFooter';
 import { prefix } from '@/constant';
 import { getNewNode } from '@/utils';
-import { Layout } from 'antd';
+import { Layout } from 'antd/es';
 
 const { Sider, Content } = Layout;
 

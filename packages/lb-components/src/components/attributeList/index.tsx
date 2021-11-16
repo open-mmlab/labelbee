@@ -1,6 +1,6 @@
 import { COLORS_ARRAY, NULL_COLOR } from '@/data/Style';
 import { ColorTag } from '@/components/colorTag';
-import { Radio } from 'antd';
+import { Radio } from 'antd/es';
 import React from 'react';
 
 export const ATTRIBUTE_COLORS = [NULL_COLOR].concat(COLORS_ARRAY);

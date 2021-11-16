@@ -2,7 +2,7 @@
  * 用于多步骤中的切换
  */
 
-import { Dropdown } from 'antd';
+import { Dropdown } from 'antd/es';
 import { CaretDownOutlined, OrderedListOutlined } from '@ant-design/icons';
 import React from 'react';
 import { connect, useDispatch } from 'react-redux';

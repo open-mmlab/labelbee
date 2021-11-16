@@ -1,5 +1,5 @@
 import React from 'react';
-import { Button } from 'antd';
+import { Button } from 'antd/es';
 import { AppState } from '@/store';
 import { ToolInstance } from '@/store/annotation/types';
 import { connect } from 'react-redux';

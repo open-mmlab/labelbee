@@ -1,5 +1,5 @@
 import React, { useState, useRef, useEffect } from 'react';
-import { Divider, Input } from 'antd';
+import { Divider, Input } from 'antd/es';
 import { LeftOutlined, RightOutlined } from '@ant-design/icons';
 import { AppState } from '@/store';
 import { connect, useDispatch } from 'react-redux';

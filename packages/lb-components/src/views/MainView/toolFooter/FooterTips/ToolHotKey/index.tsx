@@ -1,4 +1,4 @@
-import { Popover } from 'antd';
+import { Popover } from 'antd/es';
 import _ from 'lodash';
 import React, { useState } from 'react';
 import { useSelector } from 'react-redux';

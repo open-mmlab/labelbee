@@ -5,7 +5,7 @@
 
 import React, { useEffect, useRef, useImperativeHandle, useState } from 'react';
 import { ViewOperation, ImgUtils } from '@sensetime/annotation';
-import { Spin } from 'antd';
+import { Spin } from 'antd/es';
 
 interface IProps {
   src: string; // 图片路径

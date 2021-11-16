@@ -2,7 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { AppState } from '@/store';
 import { connect } from 'react-redux';
 import { GraphToolInstance } from '@/store/annotation/types';
-import { Divider } from 'antd';
+import { Divider } from 'antd/es';
 import { useTranslation } from 'react-i18next';
 
 interface IProps {

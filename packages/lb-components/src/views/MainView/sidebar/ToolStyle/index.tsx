@@ -1,4 +1,4 @@
-import { Slider } from 'antd';
+import { Slider } from 'antd/es';
 import React from 'react';
 import widthSvg from '@/assets/toolStyle/icon_border.svg';
 import colorSvg from '@/assets/toolStyle/icon_borderColor.svg';

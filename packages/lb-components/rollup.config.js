@@ -53,5 +53,5 @@ export default {
       },
     }),
   ],
-  external: ['react'],
+  external: ['react', 'antd'],
 };

@@ -1,6 +1,6 @@
 import { TEXT_ATTRIBUTE_MAX_LENGTH } from '@/data/enums/ToolType';
 import { TextUtils } from '@/utils/TextUtils';
-import { Input, message, Tooltip } from 'antd';
+import { Input, message, Tooltip } from 'antd/es';
 import React, { FocusEvent, useEffect, useState } from 'react';
 import IconClearSmallA from '@/assets/annotation/common/icon_clearSmall_a.svg';
 import IconClearSmall from '@/assets/annotation/common/icon_clearSmall.svg';

@@ -9,7 +9,7 @@ import { ESubmitType, prefix } from '@/constant';
 import ExportData from './ExportData';
 import HeaderOption from './headerOption';
 import { AnnotationEngine } from '@sensetime/annotation';
-import { Button, Tooltip } from 'antd';
+import { Button, Tooltip } from 'antd/es';
 import { ToNextStep, ToSubmitFileData } from '@/store/annotation/actionCreators';
 import StepSwitch from './StepSwitch';
 import { EToolName } from '@/data/enums/ToolType';

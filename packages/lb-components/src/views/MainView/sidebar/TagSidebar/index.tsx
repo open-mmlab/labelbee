@@ -1,7 +1,7 @@
 import RadioList from '@/components/attributeList';
 import CheckBoxList from '@/components/checkboxList';
 import { CaretRightOutlined } from '@ant-design/icons';
-import { Badge, Collapse, Tooltip } from 'antd';
+import { Badge, Collapse, Tooltip } from 'antd/es';
 import { cloneDeep } from 'lodash';
 import React, { useCallback, useEffect, useRef, useState } from 'react';
 import clearSmall from '@/assets/annotation/common/icon_clearSmall.svg';

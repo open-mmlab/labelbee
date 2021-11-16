@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { message } from 'antd';
+import { message } from 'antd/es';
 import TextAreaFormat from '@/views/MainView/sidebar/TextAreaFormat';
 import { TextUtils } from '@/utils/TextUtils';
 import { AppState } from '@/store';

@@ -1,5 +1,5 @@
 import { ReloadOutlined } from '@ant-design/icons';
-import { Button } from 'antd';
+import { Button } from 'antd/es';
 import React from 'react';
 
 interface IProps {

@@ -1,5 +1,5 @@
 import React from 'react';
-import { Row, Collapse } from 'antd';
+import { Row, Collapse } from 'antd/es';
 import iconRectPatternSvg from '@/assets/annotation/rectTool/icon_rectPattern.svg';
 import iconPolygonPatternASvg from '@/assets/annotation/polygonTool/icon_polygon_a.svg';
 import pointASvg from '@/assets/annotation/pointTool/icon_point_a.svg';

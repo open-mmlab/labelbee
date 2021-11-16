@@ -9,7 +9,7 @@ import styleString from '@/constant/styleString';
 import { getFormatSize } from '@/components/customResizeHook';
 import { AnnotationEngine, CommonToolUtils, ImgUtils } from '@sensetime/annotation';
 import { AnnotationState, AnnotationActionTypes } from './types';
-import { message } from 'antd';
+import { message } from 'antd/es';
 import { SetAnnotationLoading } from './actionCreators';
 
 export const getStepConfig = (stepList: any[], step: number) =>

@@ -1,4 +1,4 @@
-import { Checkbox } from 'antd';
+import { Checkbox } from 'antd/es';
 import React from 'react';
 
 interface IProps {

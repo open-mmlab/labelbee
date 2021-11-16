@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Col, Popconfirm } from 'antd';
+import { Col, Popconfirm } from 'antd/es';
 import clearResultSvg from '@/assets/annotation/common/icon_clear.svg';
 import clearResultASvg from '@/assets/annotation/common/icon_clear_a.svg';
 import copyBackStepSvg from '@/assets/annotation/common/icon_invalid.svg';

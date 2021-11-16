@@ -1,4 +1,4 @@
-import { Col, Row, Slider, Switch, Input } from 'antd';
+import { Col, Row, Slider, Switch, Input } from 'antd/es';
 import { connect } from 'react-redux';
 import { throttle } from 'lodash';
 import React, { useEffect } from 'react';

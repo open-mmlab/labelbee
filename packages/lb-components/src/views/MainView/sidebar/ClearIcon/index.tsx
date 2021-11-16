@@ -1,4 +1,4 @@
-import { Tooltip } from 'antd';
+import { Tooltip } from 'antd/es';
 import React, { useState } from 'react';
 
 // 图片调整的刷子

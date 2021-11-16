@@ -3,7 +3,7 @@ import { connect } from 'react-redux';
 import { AppState } from '@/store';
 import { cloneDeep } from 'lodash';
 import { classnames } from '@/utils';
-import { Input } from 'antd';
+import { Input } from 'antd/es';
 import { cKeyCode } from '@sensetime/annotation';
 import { PageForward } from '@/store/annotation/actionCreators';
 import { ConfigUtils } from '@/utils/ConfigUtils';
