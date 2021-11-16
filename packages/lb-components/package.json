@@ -1,6 +1,6 @@
 {
   "name": "@sensetime/label-bee",
-  "version": "1.2.0-alpha.6",
+  "version": "1.2.0-alpha.7",
   "description": "Provide a complete library of annotation components",
   "main": "./dist/index.js",
   "types": "./dist/types/index.d.ts",

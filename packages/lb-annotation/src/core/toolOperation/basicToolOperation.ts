@@ -791,6 +791,7 @@ class BasicToolOperation extends EventListener {
 
     // 禁止外层滚轮操作
     e.preventDefault();
+    e.stopPropagation();
 
     const coord = this.getCoordinate(e);
 
