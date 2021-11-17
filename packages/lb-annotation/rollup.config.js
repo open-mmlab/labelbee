@@ -59,8 +59,13 @@ export default {
   ],
   output: [
     {
-      format: 'es',
+      format: 'cjs',
       file: './dist/index.js',
+      banner,
+    },
+    {
+      format: 'es',
+      file: './es/index.js',
       banner,
     },
   ],

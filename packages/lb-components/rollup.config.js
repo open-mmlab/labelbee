@@ -11,7 +11,8 @@ const customResolver = resolve({
 
 const projectRootDir = path.resolve(__dirname);
 
-const OUTPUT_DIR = 'dist';
+const CJS_OUTPUT_DIR = 'dist';
+const ES_OUTPUT_DIR = 'es';
 const isProd = process.env.NODE_ENV === 'production';
 
 export default {
@@ -19,7 +20,13 @@ export default {
   output: [
     {
       format: 'es',
-      dir: OUTPUT_DIR,
+      dir: ES_OUTPUT_DIR,
+      preserveModules: true,
+      preserveModulesRoot: 'src',
+    },
+    {
+      format: 'cjs',
+      dir: CJS_OUTPUT_DIR,
       preserveModules: true,
       preserveModulesRoot: 'src',
     },
