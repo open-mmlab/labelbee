@@ -151,7 +151,7 @@
             "Number": "数字",
             "Press": "长按",
             "ToOriginalStep": "仅原图",
-            "Horizontal/Vertical": "标水平/垂直线",
+            "HorizontalOrVertical": "标水平/垂直线",
             "AnnotateInvalidLine": "标无效线",
             "AnnotateLine": "标线",
             "SelectLine": "选中线",
