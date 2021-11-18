@@ -72,6 +72,12 @@ export default class ViewOperation extends BasicToolOperation {
     this.render();
   }
 
+  public onMouseLeave() {
+    super.onMouseLeave();
+    this.mouseHoverID = undefined;
+    this.emit('onChange', 'hover', []);
+  }
+
   public onMouseDown(e: MouseEvent) {
     if (super.onMouseDown(e) || this.forbidMouseOperation || !this.imgInfo) {
       return true;
