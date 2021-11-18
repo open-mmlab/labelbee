@@ -1,14 +1,16 @@
 {
   "name": "@sensetime/lb-utils",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "utils for label-bee",
   "author": "lijingchi <lijingchi1@sensetime.com>",
   "types": "./lib/index.d.ts",
   "homepage": "",
   "license": "ISC",
   "main": "lib/index.js",
+  "module": "lib/index-module.js",
   "files": [
-    "lib"
+    "lib",
+    "es"
   ],
   "repository": {
     "type": "git",

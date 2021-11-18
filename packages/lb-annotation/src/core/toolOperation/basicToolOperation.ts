@@ -709,9 +709,10 @@ class BasicToolOperation extends EventListener {
   }
 
   // 后续需抽象成 abstract
-  // eslint-disable-next-line no-unused-vars
-  public onMouseLeave(e: MouseEvent) {
+  public onMouseLeave() {
     //  鼠标脱离了屏幕
+    // 清除拖拽状态
+    this.clearImgDrag();
   }
 
   // eslint-disable-next-line no-unused-vars

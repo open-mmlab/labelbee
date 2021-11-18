@@ -363,4 +363,25 @@ export default class PolygonUtils {
   ): boolean {
     return pointList.some((v) => !this.isInPolygon(v, polygonPoints, lineType));
   }
+
+  /**
+   * 获取多边形面积
+   * @param pointList
+   * @returns
+   */
+  public static getPolygonArea(pointList: IPolygonPoint[]) {
+    let total = 0;
+
+    for (let i = 0, l = pointList.length; i < l; i++) {
+      const addX = pointList[i].x;
+      const addY = pointList[i === pointList.length - 1 ? 0 : i + 1].y;
+      const subX = pointList[i === pointList.length - 1 ? 0 : i + 1].x;
+      const subY = pointList[i].y;
+
+      total += addX * addY * 0.5;
+      total -= subX * subY * 0.5;
+    }
+
+    return Math.abs(total);
+  }
 }

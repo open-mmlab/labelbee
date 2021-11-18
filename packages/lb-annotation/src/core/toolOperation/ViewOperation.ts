@@ -72,6 +72,12 @@ export default class ViewOperation extends BasicToolOperation {
     this.render();
   }
 
+  public onMouseLeave() {
+    super.onMouseLeave();
+    this.mouseHoverID = undefined;
+    this.emit('onChange', 'hover', []);
+  }
+
   public onMouseDown(e: MouseEvent) {
     if (super.onMouseDown(e) || this.forbidMouseOperation || !this.imgInfo) {
       return true;
@@ -117,15 +123,22 @@ export default class ViewOperation extends BasicToolOperation {
 
     /**
      * 1. 优先级升序
-     * 2. 面积是否的需要？
+     * 2. 相同级别
      */
-    for (let i = this.annotations.length - 1; i >= 0; i--) {
+    let id = '';
+    let minArea = Number.MAX_SAFE_INTEGER;
+
+    for (let i = 0; i < this.annotations.length; i++) {
       const annotation = this.annotations[i];
       switch (annotation.type) {
         case 'rect': {
           const rect = annotation.annotation;
           if (RectUtils.isInRect(coordinate, rect as any, newScope, this.zoom)) {
-            return rect.id;
+            const area = rect.width * rect.height;
+            if (area < minArea) {
+              id = rect.id;
+              minArea = area;
+            }
           }
           break;
         }
@@ -133,7 +146,11 @@ export default class ViewOperation extends BasicToolOperation {
         case 'polygon': {
           const polygon = annotation.annotation;
           if (PolygonUtils.isInPolygon(originCoordinate, polygon.pointList)) {
-            return polygon.id;
+            const area = PolygonUtils.getPolygonArea(polygon.pointList);
+            if (area < minArea) {
+              id = polygon.id;
+              minArea = area;
+            }
           }
           break;
         }
@@ -143,7 +160,7 @@ export default class ViewOperation extends BasicToolOperation {
       }
     }
 
-    return '';
+    return id;
   };
 
   public updateData(annotations: IAnnotationData[]) {

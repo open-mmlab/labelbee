@@ -1,6 +1,6 @@
 {
   "name": "@sensetime/annotation",
-  "version": "1.5.0-alpha.2",
+  "version": "1.5.0-alpha.4",
   "description": "Annotation tool collection",
   "keywords": [
     "annotation",
@@ -18,9 +18,11 @@
   },
   "license": "Apache-2.0",
   "files": [
-    "dist"
+    "dist",
+    "es"
   ],
   "main": "./dist/index.js",
+  "module": "./es/index.js",
   "types": "./dist/types/index.d.ts",
   "author": "luozefeng",
   "email": "luozefeng@sensetime.com",

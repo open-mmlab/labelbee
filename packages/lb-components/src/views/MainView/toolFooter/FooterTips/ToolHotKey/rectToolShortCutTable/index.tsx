@@ -17,44 +17,43 @@ import {
   tabChangeSelected,
   tabReverseChangeSelected,
 } from '../common';
-import { i18n } from '@sensetime/lb-utils';
 
 export const drawRect = {
-  name: i18n.t('AnnotateRect'),
+  name: 'AnnotateRect',
   icon: DrawRectSvg,
   shortCut: [MouseLeftSvg, MouseLeftSvg],
 };
 
 export const drawInvalidRect = {
-  name: i18n.t('AnnotateInvalidRect'),
+  name: 'AnnotateInvalidRect',
   icon: DrawInvalidRectSvg,
   shortCut: [MouseLeftSvg, 'Ctrl', MouseLeftSvg],
 };
 
 export const selectRect = {
-  name: i18n.t('SelectRect'),
+  name: 'SelectRect',
   icon: SelectedRectSvg,
   shortCut: [MouseRightSvg],
-  noticeInfo: i18n.t('RightClick'),
+  noticeInfo: 'RightClick',
 };
 
 export const changeValid = {
-  name: i18n.t('ToggleRectEffectiveness'),
+  name: 'ToggleRectEffectiveness',
   icon: ChangeValidSvg,
   shortCut: ['F'],
 };
 
 export const changeValidByClick = {
-  name: i18n.t('ToggleRectEffectiveness'),
+  name: 'ToggleRectEffectiveness',
   icon: ChangeValidSvg,
   shortCut: ['Ctrl', MouseLeftSvg],
 };
 
 export const deleteRect = {
-  name: i18n.t('DeleteRect'),
+  name: 'DeleteRect',
   icon: DeleteRectSvg,
   shortCut: [MouseRightSvg],
-  noticeInfo: i18n.t('SelectAndDoubleClick'),
+  noticeInfo: 'SelectAndDoubleClick',
 };
 
 const rectToolShortcutTable = [
