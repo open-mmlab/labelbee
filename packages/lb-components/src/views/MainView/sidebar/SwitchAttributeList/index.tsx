@@ -31,6 +31,9 @@ const SwitchAttributeList: React.FC<IProps> = (props) => {
         listRef.current.children[index]?.scrollIntoView({ block: 'center' });
       });
     }
+    return () => {
+      toolInstance.unbindAll('changeAttributeSidebar');
+    };
   }, [toolInstance, listRef]);
 
   if (!props.stepInfo) {
