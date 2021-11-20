@@ -4,10 +4,7 @@ import { componentCls } from '@/constant';
 import { classnames } from '@/utils';
 import React from 'react';
 import { IStepInfo } from '@/types/step';
-import { cTool } from '@sensetime/annotation';
-
-const { TOOL_NAME } = cTool;
-
+import { useTranslation } from 'react-i18next';
 interface IProps {
   stepList: IStepInfo[];
   currentStep: number;
@@ -15,6 +12,7 @@ interface IProps {
 }
 
 const AnnotationStepPopover = (props: IProps) => {
+  const { t } = useTranslation();
   const { stepList, updateStep, currentStep } = props;
 
   return (
@@ -40,7 +38,7 @@ const AnnotationStepPopover = (props: IProps) => {
                 highlight: isSelected,
               })}
             >
-              {`${info.step} - ${info.name || TOOL_NAME[info.tool]}`}
+              {`${info.step} - ${info.name || t(info.tool)}`}
             </div>
           </div>
         );
