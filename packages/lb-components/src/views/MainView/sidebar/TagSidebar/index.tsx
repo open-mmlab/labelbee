@@ -37,7 +37,7 @@ const TagSidebar: React.FC<IProps> = ({ toolInstance, imgIndex }) => {
       setExpandKeyList(toolInstance.config.inputList.map((v: IInputList) => v.value));
 
       // 进行实时渲染
-      toolInstance.on('render', () => {
+      toolInstance.singleOn('render', () => {
         forceRender((s) => s + 1);
       });
     }
@@ -45,7 +45,8 @@ const TagSidebar: React.FC<IProps> = ({ toolInstance, imgIndex }) => {
 
   useEffect(() => {
     if (toolInstance) {
-      toolInstance?.on('expend', expendRender);
+      // 该写法会不断的重复绑定，后续写法上可以更改（如果将 singleOn 改为 on 会有很大问题）
+      toolInstance.singleOn('expend', expendRender);
 
       if (toolInstance.labelSelectedList.length === 1) {
         let height = 0;

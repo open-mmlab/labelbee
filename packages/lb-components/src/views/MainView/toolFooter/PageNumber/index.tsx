@@ -15,7 +15,7 @@ const PageNumber = (props: IProps) => {
   const { t } = useTranslation();
   useEffect(() => {
     if (toolInstance) {
-      toolInstance.on('updatePageNumber', () => {
+      toolInstance.singleOn('updatePageNumber', () => {
         forceRender((s) => s + 1);
       });
     }

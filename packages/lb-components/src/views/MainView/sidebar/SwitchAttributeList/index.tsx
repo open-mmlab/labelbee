@@ -21,7 +21,7 @@ const SwitchAttributeList: React.FC<IProps> = (props) => {
 
   useEffect(() => {
     if (toolInstance) {
-      toolInstance.on('changeAttributeSidebar', (index: number) => {
+      toolInstance.singleOn('changeAttributeSidebar', (index: number) => {
         forceRender((s) => s + 1);
 
         if (!listRef.current) {

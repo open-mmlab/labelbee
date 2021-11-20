@@ -19,12 +19,10 @@ export default class EventListener {
 
   /**
    * 单独的事件绑定，一个事件仅支持绑定一个函数
-   *
-   * @param {string} eventName
-   * @param {() => void} callback
-   * @memberof EventBus
+   * @param eventName
+   * @param callback
    */
-  public singleOn(eventName: string, callback: () => void) {
+  public singleOn(eventName: string, callback: (params?: any) => void) {
     this._events.set(eventName, [callback]);
   }
 

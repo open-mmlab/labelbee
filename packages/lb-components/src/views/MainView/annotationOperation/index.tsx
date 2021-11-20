@@ -42,15 +42,15 @@ const AnnotationOperation: React.FC<IProps> = (props: IProps) => {
 
   useEffect(() => {
     if (toolInstance) {
-      toolInstance.on('messageError', (error: string) => {
+      toolInstance.singleOn('messageError', (error: string) => {
         message.error(error);
       });
 
-      toolInstance.on('messageInfo', (info: string) => {
+      toolInstance.singleOn('messageInfo', (info: string) => {
         message.info(info);
       });
 
-      toolInstance.on('changeAnnotationShow', () => {
+      toolInstance.singleOn('changeAnnotationShow', () => {
         forceRender((s) => s + 1);
       });
     }
