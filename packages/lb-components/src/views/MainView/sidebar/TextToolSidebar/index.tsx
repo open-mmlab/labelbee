@@ -213,7 +213,7 @@ const TextToolSidebar: React.FC<IProps> = ({
   useEffect(() => {
     if (toolInstance) {
       setConfigList(cloneDeep(toolInstance.config.configList));
-      toolInstance.on('valueUpdated', () => {
+      toolInstance.singleOn('valueUpdated', () => {
         forceRender((s) => s + 1);
       });
     }

@@ -18,9 +18,7 @@ interface IProps {
 }
 type ToolStyleKey = keyof ToolStyleState;
 
-const getMarks = (type: string) => {
-  const { t } = useTranslation();
-
+const getMarks = (type: string, t: any) => {
   const lineMarks = [
     { step: 1, value: '1' },
     { step: 2, value: '2' },
@@ -164,7 +162,7 @@ const ToolStyle = (props: IProps) => {
                 min={getStyleType(key) ? 1 : 0}
                 step={getStyleType(key) ? 1 : null}
                 value={(toolStyle[key] ?? getDefaultValue(key)) as number}
-                marks={getMarks(key)}
+                marks={getMarks(key, t)}
                 onChange={(e: any) => changeToolStyle({ [key]: e })}
               />
             </span>

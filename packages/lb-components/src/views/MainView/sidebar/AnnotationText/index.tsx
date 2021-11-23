@@ -14,16 +14,16 @@ const AnnotationText: React.FC<IProps> = ({ toolInstance }) => {
   const [, forceRender] = useState<number>(0);
   useEffect(() => {
     if (toolInstance) {
-      toolInstance.on('selectedChange', () => {
+      toolInstance.singleOn('selectedChange', () => {
         forceRender((s) => s + 1);
       });
-      toolInstance.on('updateTextAttribute', () => {
+      toolInstance.singleOn('updateTextAttribute', () => {
         // 文本属性的更新
 
         forceRender((s) => s + 1);
       });
 
-      toolInstance.on('messageError', (error: string) => {
+      toolInstance.singleOn('messageError', (error: string) => {
         message.error(error);
       });
     }

@@ -1,6 +1,6 @@
 {
   "name": "@sensetime/lb-utils",
-  "version": "1.0.1",
+  "version": "1.0.2",
   "description": "utils for label-bee",
   "author": "lijingchi <lijingchi1@sensetime.com>",
   "types": "./lib/index.d.ts",

@@ -16,7 +16,7 @@ const HiddenTips = (props: IProps) => {
 
   useEffect(() => {
     if (toolInstance) {
-      toolInstance.on('hiddenChange', () => {
+      toolInstance.singleOn('hiddenChange', () => {
         forceRender((s) => s + 1);
       });
     }
