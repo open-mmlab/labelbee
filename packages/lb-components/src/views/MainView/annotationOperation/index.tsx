@@ -12,6 +12,7 @@ import { IStepInfo } from '@/types/step';
 import { InitToolStyleConfig } from '@/store/toolStyle/actionCreators';
 import { AnnotationEngine, ImgUtils } from '@sensetime/annotation';
 import ImageError from '@/components/ImageError';
+import { i18n } from '@sensetime/lb-utils';
 
 interface IProps extends AppState {
   imgAttribute: ImgAttributeState;
@@ -39,6 +40,24 @@ const AnnotationOperation: React.FC<IProps> = (props: IProps) => {
   useEffect(() => {
     store.dispatch(InitToolStyleConfig());
   }, []);
+
+  useEffect(() => {
+    if (!annotationEngine) {
+      return;
+    }
+
+    // 更改 toolInstance 内部国际化语言
+    switch (i18n.language) {
+      case 'cn':
+      case 'en':
+        annotationEngine.setLang(i18n.language);
+        break;
+      default: {
+        //
+        break;
+      }
+    }
+  }, [annotationEngine]);
 
   useEffect(() => {
     if (toolInstance) {

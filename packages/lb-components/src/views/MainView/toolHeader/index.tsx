@@ -85,6 +85,7 @@ const ToolHeader: React.FC<IToolHeaderProps> = ({
   stepInfo,
   stepList,
   step,
+  annotationEngine,
 }) => {
   const dispatch = useDispatch();
   const [, forceUpdate] = useReducer((x) => x + 1, 0);
@@ -99,8 +100,9 @@ const ToolHeader: React.FC<IToolHeaderProps> = ({
     }
   };
 
-  const changeLanguage = (lang: string) => {
+  const changeLanguage = (lang: 'en' | 'cn') => {
     i18n.changeLanguage(lang);
+    annotationEngine.setLang(lang);
     forceUpdate();
   };
 

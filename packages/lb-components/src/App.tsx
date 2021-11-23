@@ -7,6 +7,7 @@ import MainView from '@/views/MainView';
 import { IStepInfo } from './types/step';
 import { OnSubmit, GetFileData, OnSave } from './types/data';
 import { ToolInstance } from './store/annotation/types';
+import { i18n } from '@sensetime/lb-utils';
 
 export interface AppProps {
   exportData?: (data: any[]) => void;
@@ -26,13 +27,14 @@ export interface AppProps {
   footer?: React.ReactNode;
   sider?: React.ReactNode;
   style?: {
-    layout?: {[key: string]: any};
-    header?: {[key: string]: any};
-    sider?: {[key: string]: any};
-    footer?: {[key: string]: any};
+    layout?: { [key: string]: any };
+    header?: { [key: string]: any };
+    sider?: { [key: string]: any };
+    footer?: { [key: string]: any };
   };
   setToolInstance?: (tool: ToolInstance) => void;
-  mode?: 'light' | 'dark' // 临时需求应用于 toolFooter 的操作
+  mode?: 'light' | 'dark'; // 临时需求应用于 toolFooter 的操作
+  defaultLang: 'en' | 'cn'; // 国际化设置
 }
 
 const App: React.FC<AppProps> = (props) => {
@@ -45,10 +47,16 @@ const App: React.FC<AppProps> = (props) => {
     initialIndex = 0,
     toolInstance,
     setToolInstance,
-    getFileData
+    getFileData,
+    defaultLang = 'cn',
   } = props;
   useEffect(() => {
-    store.dispatch(InitTaskData({ imgList, onSubmit, stepList, step, initialIndex, getFileData, onSave }));
+    store.dispatch(
+      InitTaskData({ imgList, onSubmit, stepList, step, initialIndex, getFileData, onSave }),
+    );
+
+    // 初始化国际化语言
+    i18n.changeLanguage(defaultLang);
   }, []);
 
   useEffect(() => {

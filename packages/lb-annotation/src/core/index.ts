@@ -7,6 +7,7 @@ import { getConfig } from '@/constant/defaultConfig';
 import CommonToolUtils from '@/utils/tool/CommonToolUtils';
 import { IBasicToolOperationProps } from './toolOperation/basicToolOperation';
 import { IPolygonData } from '@/types/tool/polygon';
+import { ELang } from '@/constant/annotation';
 
 interface IProps extends IBasicToolOperationProps {
   toolName: EToolName;
@@ -174,5 +175,26 @@ export default class AnnotationEngine {
    */
   public launchOperation() {
     this.toolInstance.setForbidOperation(false);
+  }
+
+  /**
+   * 快速将 i18n 定义的国际化版本对应到当前渲染实例内
+   * @param i18nLanguage
+   */
+  public setLang(i18nLanguage: 'en' | 'cn') {
+    switch (i18nLanguage) {
+      case 'cn':
+        this.toolInstance.setLang(ELang.Zh);
+        break;
+
+      case 'en':
+        this.toolInstance.setLang(ELang.US);
+        break;
+
+      default: {
+        //
+        break;
+      }
+    }
   }
 }
