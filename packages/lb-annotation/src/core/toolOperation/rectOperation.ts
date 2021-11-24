@@ -378,7 +378,14 @@ class RectOperation extends BasicToolOperation {
     const hoverRectID = this.getHoverRectID(e);
 
     const firstRect = this.currentShowList.find((v) => v.id === this.selectedRectID);
-    if (!firstRect || e.button !== 0) {
+
+    /**
+     * 拖拽基础判断，如果包含以下行为则直接禁止操作
+     * 1. 不存在框体
+     * 2. 拖拽行为下禁止操作 - 右键
+     * 3. 拖拽行为下禁止操作 - 左键 + space
+     */
+    if (!firstRect || e.button === 2 || (e.button === 0 && this.isSpaceKey === true)) {
       return;
     }
 
