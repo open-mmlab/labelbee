@@ -42,4 +42,4 @@ const OutputApp = (props: any, ref: any) => {
 
 export default React.forwardRef(OutputApp);
 
-export { AnnotationView };
+export { AnnotationView, i18n };

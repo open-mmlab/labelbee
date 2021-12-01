@@ -16,10 +16,7 @@
     "commit": "cz",
     "release": "standard-version"
   },
-  "description": "",
   "main": "index.js",
-  "keywords": [],
-  "author": "",
   "license": "ISC",
   "devDependencies": {
     "@commitlint/cli": "8.3.5",

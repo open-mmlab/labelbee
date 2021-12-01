@@ -1,4 +1,4 @@
-import React, { useReducer } from 'react';
+import React, { useReducer, useRef } from 'react';
 import { LeftOutlined } from '@ant-design/icons';
 import { connect, useDispatch } from 'react-redux';
 import { store } from 'src';
@@ -16,6 +16,7 @@ import { EToolName } from '@/data/enums/ToolType';
 import { IStepInfo } from '@/types/step';
 import { i18n } from '@sensetime/lb-utils';
 import { useTranslation } from 'react-i18next';
+import useSize from '@/hooks/useSize';
 
 interface INextStep {
   stepProgress: number;
@@ -85,9 +86,14 @@ const ToolHeader: React.FC<IToolHeaderProps> = ({
   stepInfo,
   stepList,
   step,
+  annotationEngine,
 }) => {
   const dispatch = useDispatch();
   const [, forceUpdate] = useReducer((x) => x + 1, 0);
+  const ref = useRef(null);
+
+  const size = useSize(ref);
+
   // render 数据展示
   const currentOption = <ExportData exportData={exportData} />;
 
@@ -99,15 +105,18 @@ const ToolHeader: React.FC<IToolHeaderProps> = ({
     }
   };
 
-  const changeLanguage = (lang: string) => {
+  const changeLanguage = (lang: 'en' | 'cn') => {
     i18n.changeLanguage(lang);
+    annotationEngine.setLang(lang);
     forceUpdate();
   };
 
   const curLang = i18n.language;
 
+  const width = size?.width ?? window.innerWidth;
+
   return (
-    <div className={classNames(`${prefix}-header`)}>
+    <div className={classNames(`${prefix}-header`)} ref={ref}>
       <div className={`${prefix}-header__title`}>
         <LeftOutlined className={`${prefix}-header__icon`} onClick={closeAnnotation} />
         {headerName ? <span className={`${prefix}-header__name`}>{headerName}</span> : ''}
@@ -122,7 +131,7 @@ const ToolHeader: React.FC<IToolHeaderProps> = ({
         <div
           id='operationNode'
           className={`${prefix}-header__operationNode`}
-          style={{ left: window.innerWidth / 2 - 174 / 2 }}
+          style={{ left: width / 2 - 174 / 2 }}
         >
           <HeaderOption stepInfo={stepInfo} />
         </div>

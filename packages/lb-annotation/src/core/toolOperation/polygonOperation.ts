@@ -443,7 +443,7 @@ class PolygonOperation extends BasicToolOperation {
       }
       polygonList.push(newPolygon);
 
-      this.setSelectedID(id);
+      this.setSelectedIdAfterAddingDrawing(id);
     }
 
     this.setPolygonList(polygonList);
@@ -451,6 +451,18 @@ class PolygonOperation extends BasicToolOperation {
     this.drawingPointList = [];
 
     this.history.pushHistory(polygonList);
+  }
+
+  public setSelectedIdAfterAddingDrawing(newID: string) {
+    if (this.drawingPointList.length === 0) {
+      return;
+    }
+
+    if (this.config.textConfigurable) {
+      this.setSelectedID(newID);
+    } else {
+      this.setSelectedID();
+    }
   }
 
   /**

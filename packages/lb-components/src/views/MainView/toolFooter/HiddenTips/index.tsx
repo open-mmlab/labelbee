@@ -31,7 +31,7 @@ const HiddenTips = (props: IProps) => {
   if (isHidden) {
     return (
       <span>
-        {t('Redrawing')}
+        {t('HideDrawnAnnotation')}
         <Divider type='vertical' style={{ background: 'rgba(153, 153, 153, 1)', height: '16px' }} />
       </span>
     );
