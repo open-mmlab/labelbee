@@ -15,7 +15,7 @@
     "web-vitals": "^1.0.2"
   },
   "scripts": {
-    "start": "PORT=8080 react-scripts start",
+    "start": "react-scripts start",
     "dev": "npm run start",
     "build": "react-scripts build",
     "test": "react-scripts test",

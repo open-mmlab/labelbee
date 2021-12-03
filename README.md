@@ -1,25 +1,61 @@
-# LabelBee
-## 项目概述
+<div align="center">
+<article style="display: flex; flex-direction: column; align-items: center; justify-content: center;">
+    <p align="center"><img width="300" src="./docs/assets/logo.svg" /></p>
+    <h1 style="width: 100%; text-align: center;">LabelBee</h1>
+    <p>为标注而生，专注于标注体验的渲染、组件库。快速搭建标注应用。</p>
+</article>
+</div>
 
-LabelBee 前端技术以 Typescript 为基础的，基础组件基于 [antd](https://ant.design/)、[react](https://reactjs.org/) 进行开发。label-bee 采用 Monorepo 的形式进行组织，项目可以同时
+## 特性
 
-| package name  | 功能                                   |
-| ------------- | -------------------------------------- |
-| lb-annotation | 集成标注的操作和渲染                   |
-| lb-components | 标注组件库                             |
-| lb-demo       | 快速查看的标注组件库                   |
-| lb-utils      | 集成基础工具库（现包含国际化版本信息） |
+- 即拆即用，简单配置即可创建标注应用
+- 渲染分离，可单独使用渲染模块
 
-## 项目研发
-### 研发前 - 项目提交代码规范
 
-项目提交的 git 信息做到规范化，项目采用 husky 插件监听 msg commit。
-
-### 项目初始化
+## 安装
 
 ```bash
-git clone git@gitlab.bj.sensetime.com:label-bee/beehive.git # 拉取项目
-cd beehive
-npm i && npm run bootstrap
-npm run start
+# 使用 npm
+npm install @labelbee/lb-annotation
+npm install @labelbee/lb-components
+
+# 使用 yarn
+yarn add @labelbee/lb-annotation
+yarn add @labelbee/lb-components
 ```
+
+
+## 使用
+
+快速开始例子
+
+```js
+import React from 'react';
+import ReactDOM from 'react-dom';
+import { AnnotationView } from '@labelbee/lb-components';
+
+const src = ''; // 可访问的图片路径
+
+const DefaultComponent = () => {
+  return (
+    <AnnotationView
+     src={src}
+   />
+  )
+}
+
+ReactDOM.render(<App />, document.querySelector('#app'));
+```
+
+## 文档
+
+- [LabelBee 渲染库 - lb-Annotation](./packages/lb-annotation/README.md)
+- [LabelBee 组件库 - lb-components](./packages/lb-components/README.md)
+- [快速 DEMO 展示](./packages/lb-demo/README.md)
+
+
+## 开发文档
+
+- [项目初始化](docs/develop.md)
+## 贡献
+xx
