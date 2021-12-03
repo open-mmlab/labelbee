@@ -1,26 +1,22 @@
-# Sense-Annotation
+# LB-Annotation
 
-Sense-Annotation 是 SenseBee 数据服务平台内部自研的标注绘图框架，能快速提供检测、分割、分类等标注操作。
+标注绘图框架，能快速提供检测、分割、分类等标注操作。
 
 ## 📦 Install
 
 ```bash
 # NPM
-$ npm install @sensetime/annotation --registry=https://npm-registry.sensetime.com
+$ npm install @labelbee/lb-annotation
 
 # YARN
-$ yarn add @sensetime/annotation --registry=https://npm-registry.sensetime.com
-
-# .npmrc
-@sensetime:registry=https://npm-registry.sensetime.com
+$ yarn add @labelbee/lb-annotation
 ```
 
-## Usage
+## Quick Start
 
-```ts
-import React, { useEffect } from 'react';
-import { AnnotationEngine } from '@sensetime/annotation';
+### 接口定义
 
+```js
 interface IImageAttribute {
   contrast: number;
   saturation: number;
@@ -53,6 +49,11 @@ interface IPolygonData {
   textAttribute: string;
   attribute: string;
 }
+```
+
+```ts
+import React, { useEffect } from 'react';
+import { AnnotationEngine } from '@sensetime/annotation';
 
 const imgSrc =
   'https://upload.wikimedia.org/wikipedia/commons/thumb/6/6e/Andre_Iguodala_2016.jpg/1200px-Andre_Iguodala_2016.jpg';
@@ -63,14 +64,8 @@ const rectConfigString = JSON.stringify({
   isShowOrder: true,
   attributeConfigurable: true,
   attributeList: [
-    { key: '类别x1', value: 'class-x1' },
-    { key: '类别Hl', value: 'class-Hl' },
-    { key: '类别J5', value: 'class-J5' },
-    { key: '类别ve', value: 'class-ve' },
-    { key: '类别oJ', value: 'class-oJ' },
-    { key: '类别qz', value: 'class-qz' },
-    { key: '类别0x', value: 'class-0x' },
-    { key: '类别Hv', value: 'class-Hv' },
+    { key: '标注展示类别1', value: 'class-x1' },
+    { key: '标注展示类别2', value: 'class-Hl' },
   ],
   textConfigurable: true,
   textCheckType: 0,

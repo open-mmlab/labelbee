@@ -29,7 +29,6 @@ const Annotation = (props) => {
         stepList={stepList}
         step={step}
         onSave={onSave}
-        // sider={null}
       />
     </div>
   );

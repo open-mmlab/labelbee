@@ -2,10 +2,83 @@
 
 > 包含整个标注流程功能的组件，支持从标注、图片拖拽缩放、图片调整、图片翻页、数据错误检查等一系列基础标注功能
 
+## 类型
 
 ```ts
-import AnnotationOperation from '@sensetime/label-bee';
-import '@sensetime/label-bee/dist/index.css';
+// 用于触发 onSubmit 的方向判断
+enum ESubmitType {
+  Backward = 1, // 向前翻页
+  Forward = 2, // 向后翻页
+  Jump = 3, // 分页器的跳页翻页
+  Quit = 4, // 左上角后退触发
+  Export = 5, // 数据导出时
+}
+
+// 结果类型
+interface IFileItem {
+   id: number;
+   url?: string;
+   result?: string;
+}
+```
+
+## 快速上手
+
+简单注入
+
+```ts
+import AnnotationOperation from '@labelbee/lb-components';
+import '@labelbee/lb-components/dist/index.css';
+
+const imgList = [
+  {
+    id: 1,
+    url: '',
+    result: '{}'
+  }
+]
+
+const step = 1;
+const stepList = [
+   {
+      step: 1, //  当前步骤
+      dataSourceStep: 0, // 当前依赖步骤，若为原图则为 0
+      tool: 'rectTool', // 具体查询下方工具列表指定工具
+      config: '{}', // 暂不设置
+   }
+];
+
+
+const App = () => {
+   /**
+    * 监听数据提交操作： 翻页
+    * @param {IFileItem[]} data 当前提交的数据
+    * @param {ESubmitType} submitType 触发 onSubmit 的方向判断
+    * @param {number} imgIndex 提交结果的图片下标
+   */
+   const onSubmit = (data: IFileItem[], submitType: ESubmitType, imgIndex: number) => {};
+
+   return (
+      <AnnotationOperation
+         imgList={imgList}
+         step={step}
+         stepList={stepList}
+         onSubmit={onSubmit}
+      />
+   );
+}
+
+export default App;
+```
+
+
+## 全配置介绍
+
+
+
+```ts
+import AnnotationOperation from '@labelbee/lb-components';
+import '@labelbee/lb-components/dist/index.css';
 
 // 用于触发 onSubmit 的方向判断
 enum ESubmitType {
@@ -16,7 +89,7 @@ enum ESubmitType {
   Export = 5, // 数据导出时
 }
 
-interface IData {
+interface IFileItem {
    id: number;
    url?: string;
    result?: string;
@@ -27,7 +100,7 @@ interface IData {
  * @property {url} 图片路径;参数可选时，需要传入getFileData
  * @property {result} 标注结果字符串，详情请内网访问:https://resultdoc.sensebee.xyz/;参数可选时,需要传入getFileData
 */
-const fileList: IData[] = [
+const fileList: IFileItem[] = [
    {
       id: 1,
       url: '',
@@ -76,27 +149,27 @@ const style = {
 const App = () => {
    /**
     * 监听数据提交操作： 翻页 / 导出所有数据
-    * @param {IData[]} data 当前提交的数据
+    * @param {IFileItem[]} data 当前提交的数据
     * @param {ESubmitType} submitType 触发 onSubmit 的方向判断
     * @param {number} imgIndex 提交结果的图片下标
    */
-   const onSubmit = (data: IData[], submitType: ESubmitType, imgIndex: number) => {};
+   const onSubmit = (data: IFileItem[], submitType: ESubmitType, imgIndex: number) => {};
 
   /**
     * 点击保存按钮时触发
-    * @param {IData[]} data 当前提交的数据
+    * @param {IFileItem[]} data 当前提交的数据
     * @param {ESubmitType} submitType 触发 onSubmit 的方向判断
     * @param {number} imgIndex 提交结果的图片下标
    */
-   const onSave = (data: IData, submitType: ESubmitType, imgIndex: number, datas: Idata[]) => {};
+   const onSave = (data: IFileItem, submitType: ESubmitType, imgIndex: number, datas: IFileItem[]) => {};
 
-   const goBack = (data: IData[]) => {
+   const goBack = (data: IFileItem[]) => {
       // 页面内自带跳转的回调函数, data 表示整个任务的所有标注信息
    }
 
    /**
     * 在文件切换时触发，将回传的数据写入的到nextIndex
-    * @param {IData} nextFileData 下一个文件的数据 (imgList[index])
+    * @param {IFileItem} nextFileData 下一个文件的数据 (imgList[index])
     * @param {string} nextIndex 下一个文件的索引
     * @returns {PromiseLike<{ result?: string, url: string }>} promise需要返回对应文件数据
     *
@@ -280,7 +353,7 @@ declare interface IPolygonToolConfig {
   textCheckType: ETextType; // 文本检查类型
   customFormat: string; // 文本检查类型: ETextType.CustomFormat 配合使用
   isShowOrder?: boolean; // 是否显示序号，（仅用于显示，默认数据中会携带）
-  lineType: ELineTypes; // 线条类型
+  lineType: ELineTypes; // 线条类型$$
   lineColor: ELineColor; // 线条颜色
 }
 ```
