@@ -23,7 +23,6 @@ import { AnnotationEngine } from '@sensetime/annotation';
 const imgSrc =
   'https://upload.wikimedia.org/wikipedia/commons/thumb/6/6e/Andre_Iguodala_2016.jpg/1200px-Andre_Iguodala_2016.jpg';
 
-
 const App = () => {
   const ref = React.useRef(null);
 
@@ -107,7 +106,6 @@ const App = () => {
 
 export default App;
 ```
-
 
 ```js
 interface IImageAttribute {

@@ -45,7 +45,7 @@ const SwitchAttributeList: React.FC<IProps> = (props) => {
     return null;
   }
 
-  if (toolInstance?.config?.attributeList) {
+  if (toolInstance?.config.attributeConfigurable === true && toolInstance?.config?.attributeList) {
     const list = toolInstance.config.attributeList.map((i: any) => ({
       label: i.key,
       value: i.value,

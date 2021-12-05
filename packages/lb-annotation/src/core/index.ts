@@ -3,14 +3,18 @@
  */
 
 import { EToolName } from '@/constant/tool';
-import { getConfig } from '@/constant/defaultConfig';
+import { getConfig, styleDefaultConfig } from '@/constant/defaultConfig';
 import CommonToolUtils from '@/utils/tool/CommonToolUtils';
-import { IBasicToolOperationProps } from './toolOperation/basicToolOperation';
 import { IPolygonData } from '@/types/tool/polygon';
 import { ELang } from '@/constant/annotation';
 
-interface IProps extends IBasicToolOperationProps {
+interface IProps {
+  container: HTMLElement;
+  size: ISize;
   toolName: EToolName;
+  imgNode?: HTMLImageElement; // 展示图片的内容
+  config?: string; // 任务配置
+  style?: any;
 }
 
 const loadImage = (imgSrc: string) => {
@@ -52,9 +56,9 @@ export default class AnnotationEngine {
     this.container = props.container;
     this.size = props.size;
     this.toolName = props.toolName;
-    this.config = props.config;
     this.imgNode = props.imgNode;
-    this.style = props.style;
+    this.config = props.config ?? JSON.stringify(getConfig(props.toolName)); // 设置默认操作
+    this.style = props.style ?? styleDefaultConfig; // 设置默认操作
     this._initToolOperation();
   }
 
