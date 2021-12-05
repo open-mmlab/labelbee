@@ -1,6 +1,6 @@
 {
-  "name": "@sensetime/label-bee",
-  "version": "1.2.0",
+  "name": "@labelbee/lb-components",
+  "version": "1.2.1",
   "description": "Provide a complete library of annotation components",
   "main": "./dist/index.js",
   "es": "./es/index.js",
@@ -11,7 +11,7 @@
     "es"
   ],
   "scripts": {
-    "dev": "npm run build && cross-env NODE_ENV=developemnt rollup -m -c rollup.config.js -w ",
+    "dev": "npm run build && cross-env NODE_ENV=developemnt rollup -m -c rollup.config.js -w",
     "start": "npm run dev",
     "dev:style": "node-sass src/index.scss dist/index.css -w",
     "build:style": "node-sass src/index.scss dist/index.css && cp -R ./src/assets/cssIcon/.  ./dist/assets/cssIcon && cp -R ./src/assets/cssIcon/.  ./es/assets/cssIcon",
@@ -23,7 +23,7 @@
     "commitmsg": "commitlint -e $GIT_PARAMS",
     "prepublishOnly": "npm run build"
   },
-  "author": "luozefeng",
+  "author": "laoluo",
   "contributors": [
     "lijingchi",
     "tanjunbao",
@@ -32,19 +32,20 @@
   ],
   "keywords": [
     "annotation",
-    "canvas"
+    "canvas",
+    "react"
   ],
   "license": "Apache-2.0",
-  "homepage": "https://gitlab.bj.sensetime.com/label-bee/beehive/tree/master/packages/lb-components",
+  "homepage": "https://github.com/open-mmlab/labelbee/tree/main/packages/lb-components",
   "bugs": {
-    "url": "https://gitlab.bj.sensetime.com/label-bee/beehive/issues",
-    "email": "luozefeng@sensetime.com"
+    "url": "https://github.com/open-mmlab/labelbee/issues",
+    "email": "brady_luo.sz@foxmail.com"
   },
   "dependencies": {
+    "@labelbee/lb-annotation": "1.5.2",
     "@ant-design/icons": "^4.6.2",
-    "@sensetime/annotation": "1.5.1",
     "classnames": "^2.3.0",
-    "@sensetime/lb-utils": "^1.0.3",
+    "@labelbee/lb-utils": "^1.0.3",
     "lodash": "^4.17.21",
     "react-i18next": "^11.12.0",
     "react-redux": "^7.2.3",

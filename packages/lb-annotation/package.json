@@ -1,20 +1,19 @@
 {
-  "name": "@sensetime/annotation",
-  "version": "1.5.1",
+  "name": "@labelbee/lb-annotation",
+  "version": "1.5.2",
   "description": "Annotation tool collection",
   "keywords": [
     "annotation",
-    "canvas",
-    "react"
+    "canvas"
   ],
-  "homepage": "https://gitlab.bj.sensetime.com/label-bee/beehive/tree/master/packages/lb-annotation",
+  "homepage": "https://github.com/open-mmlab/labelbee/tree/main/packages/lb-annotation",
   "bugs": {
-    "url": "https://gitlab.bj.sensetime.com/label-bee/beehive/issues",
-    "email": "luozefeng@sensetime.com"
+    "url": "https://github.com/open-mmlab/labelbee/issues",
+    "email": "brady_luo.sz@foxmail.com"
   },
   "repository": {
     "type": "git",
-    "url": "git@gitlab.bj.sensetime.com:label-bee/beehive.git"
+    "url": "git@github.com:open-mmlab/labelbee.git"
   },
   "license": "Apache-2.0",
   "files": [
@@ -24,8 +23,8 @@
   "main": "./dist/index.js",
   "module": "./es/index.js",
   "types": "./dist/types/index.d.ts",
-  "author": "luozefeng",
-  "email": "luozefeng@sensetime.com",
+  "author": "laoluo",
+  "email": "brady_luo.sz@foxmail.com",
   "contributors": [
     "lijingchi",
     "tanjunbao",

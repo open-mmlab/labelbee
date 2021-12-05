@@ -1,5 +1,5 @@
 {
-  "name": "beehive",
+  "name": "labelbee",
   "private": true,
   "workspaces": [
     "packages/*"
@@ -17,7 +17,7 @@
     "release": "standard-version"
   },
   "main": "index.js",
-  "license": "ISC",
+  "license": "Apache-2.0",
   "devDependencies": {
     "@commitlint/cli": "8.3.5",
     "@commitlint/config-conventional": "8.3.4",
