@@ -1,9 +1,9 @@
 <div align="center">
-<article style="display: flex; flex-direction: column; align-items: center; justify-content: center;">
-    <p align="center"><img width="300" src="./docs/assets/logo.svg" /></p>
-    <h1 style="width: 100%; text-align: center;">LabelBee</h1>
-    <p>为标注而生，专注于标注体验的渲染、组件库。快速搭建标注应用。</p>
-</article>
+  <article style="display: flex; flex-direction: column; align-items: center; justify-content: center;">
+      <p align="center"><img width="300" src="./docs/assets/logo.svg" /></p>
+      <h1 style="width: 100%; text-align: center;">LabelBee</h1>
+      <p>为标注而生，专注于标注体验的渲染、组件库。快速搭建标注应用。</p>
+  </article>
 </div>
 
 ## 特性
@@ -53,9 +53,9 @@ ReactDOM.render(<App />, document.querySelector('#app'));
 - [LabelBee 组件库 - lb-components](./packages/lb-components/README.md)
 - [快速 DEMO 展示](./packages/lb-demo/README.md)
 
-
-## 开发文档
-
-- [项目初始化](docs/develop.md)
 ## 贡献
 xx
+
+## LICENSE
+
+该项目使用 [Apache 2.0 license](./LICENSE).
