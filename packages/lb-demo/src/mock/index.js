@@ -1,5 +1,12 @@
-const MOCK_URL = 'http://bee-sdk-demo.sensebee.xyz/images/';
-export const fileList = ['10', '19', '20', '66'].map((i) => `${MOCK_URL}${i}.jpg`);
+import img1 from './images/10.jpg';
+import img2 from './images/19.jpg';
+import img3 from './images/20.jpg';
+import img4 from './images/66.jpg';
+
+// const MOCK_URL = 'http://bee-sdk-demo.sensebee.xyz/images/';
+// export const fileList = ['10', '19', '20', '66'].map((i) => `${MOCK_URL}${i}.jpg`);
+export const fileList = [img1, img2, img3, img4];
+
 
 export const rectDefaultResult = JSON.stringify({
   height: 200,
