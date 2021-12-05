@@ -53,9 +53,6 @@ ReactDOM.render(<App />, document.querySelector('#app'));
 - [LabelBee 组件库 - lb-components](./packages/lb-components/README.md)
 - [快速 DEMO 展示](./packages/lb-demo/README.md)
 
-## 贡献
-xx
-
 ## LICENSE
 
 该项目使用 [Apache 2.0 license](./LICENSE).
