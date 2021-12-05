@@ -7,7 +7,7 @@ import MainView from '@/views/MainView';
 import { IStepInfo } from './types/step';
 import { OnSubmit, GetFileData, OnSave } from './types/data';
 import { ToolInstance } from './store/annotation/types';
-import { i18n } from '@sensetime/lb-utils';
+import { i18n } from '@labelbee/lb-utils';
 
 export interface AppProps {
   exportData?: (data: any[]) => void;

@@ -1,6 +1,6 @@
 /**
- * 后续下方的定义由 @sensetime/annotation 提供
- */ 
+ * 后续下方的定义由 @labelbee/lb-annotation 提供
+ */
 export interface ISize {
   width: number;
   height: number;
@@ -17,4 +17,3 @@ export interface IInfoList {
   key: string;
   value: string;
 }
-

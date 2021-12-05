@@ -4,7 +4,7 @@ import {
   headerHeight,
   sidebarWidth,
 } from '@/data/enums/AnnotationSize';
-import { cKeyCode, toolUtils } from '@sensetime/annotation';
+import { cKeyCode, toolUtils } from '@labelbee/lb-annotation';
 
 import React, { useContext, useEffect, useMemo, useState } from 'react';
 import { connect } from 'react-redux';

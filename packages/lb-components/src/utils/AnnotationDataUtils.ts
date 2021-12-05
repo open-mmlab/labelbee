@@ -1,4 +1,4 @@
-import { uuid } from '@sensetime/annotation';
+import { uuid } from '@labelbee/lb-annotation';
 import { jsonParser } from '.';
 import { EToolName } from '@/data/enums/ToolType';
 import _ from 'lodash';

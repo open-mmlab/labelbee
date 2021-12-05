@@ -6,7 +6,7 @@ import {
   PointOperation,
   PolygonOperation,
   LineToolOperation,
-} from '@sensetime/annotation';
+} from '@labelbee/lb-annotation';
 import { ANNOTATION_ACTIONS } from '@/store/Actions';
 import { IStepInfo } from '@/types/step';
 import { OnSubmit, IFileItem, GetFileData, OnSave } from '@/types/data';
@@ -119,7 +119,7 @@ interface UpdateGetFileData {
   };
 }
 
-interface CopyBackWordResult  extends CommonActions{
+interface CopyBackWordResult extends CommonActions {
   type: typeof ANNOTATION_ACTIONS.COPY_BACKWARD_RESULT;
 }
 

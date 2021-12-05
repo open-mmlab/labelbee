@@ -4,11 +4,11 @@ import { AppState } from '@/store';
 import { cloneDeep } from 'lodash';
 import { classnames } from '@/utils';
 import { Input } from 'antd/es';
-import { cKeyCode } from '@sensetime/annotation';
+import { cKeyCode } from '@labelbee/lb-annotation';
 import { PageForward } from '@/store/annotation/actionCreators';
 import { ConfigUtils } from '@/utils/ConfigUtils';
 import { IStepInfo } from '@/types/step';
-import TextToolOperation from '@sensetime/annotation/dist/types/core/toolOperation/TextToolOperation';
+import TextToolOperation from '@labelbee/lb-annotation/dist/types/core/toolOperation/TextToolOperation';
 import { useTranslation } from 'react-i18next';
 
 const EKeyCode = cKeyCode.default;

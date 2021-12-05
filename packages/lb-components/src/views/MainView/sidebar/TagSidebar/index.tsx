@@ -6,7 +6,7 @@ import { cloneDeep } from 'lodash';
 import React, { useCallback, useEffect, useRef, useState } from 'react';
 import clearSmall from '@/assets/annotation/common/icon_clearSmall.svg';
 import clearSmallA from '@/assets/annotation/common/icon_clearSmall_a.svg';
-import { TagOperation, TagUtils } from '@sensetime/annotation';
+import { TagOperation, TagUtils } from '@labelbee/lb-annotation';
 import { connect } from 'react-redux';
 import { AppState } from '@/store';
 import { IInputList } from '@/types/main';

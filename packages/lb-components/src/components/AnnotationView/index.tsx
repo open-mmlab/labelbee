@@ -4,7 +4,7 @@
  */
 
 import React, { useEffect, useRef, useImperativeHandle, useState } from 'react';
-import { ViewOperation, ImgUtils } from '@sensetime/annotation';
+import { ViewOperation, ImgUtils } from '@labelbee/lb-annotation';
 import { Spin } from 'antd/es';
 
 interface IProps {

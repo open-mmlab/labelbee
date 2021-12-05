@@ -1,3 +1,3 @@
-declare module "@sensetime/lb-utils" {
+declare module "@labelbee/lb-utils" {
   const i18n: any;
 }

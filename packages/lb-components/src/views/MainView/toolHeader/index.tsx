@@ -8,13 +8,13 @@ import classNames from 'classnames';
 import { ESubmitType, prefix } from '@/constant';
 import ExportData from './ExportData';
 import HeaderOption from './headerOption';
-import { AnnotationEngine } from '@sensetime/annotation';
+import { AnnotationEngine } from '@labelbee/lb-annotation';
 import { Button, Tooltip } from 'antd/es';
 import { ToNextStep, ToSubmitFileData } from '@/store/annotation/actionCreators';
 import StepSwitch from './StepSwitch';
 import { EToolName } from '@/data/enums/ToolType';
 import { IStepInfo } from '@/types/step';
-import { i18n } from '@sensetime/lb-utils';
+import { i18n } from '@labelbee/lb-utils';
 import { useTranslation } from 'react-i18next';
 import useSize from '@/hooks/useSize';
 

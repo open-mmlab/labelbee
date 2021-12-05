@@ -18,7 +18,7 @@ $ yarn add @labelbee/lb-annotation
 
 ```ts
 import React, { useEffect } from 'react';
-import { AnnotationEngine } from '@sensetime/annotation';
+import { AnnotationEngine } from '@labelbee/lb-annotation';
 
 const imgSrc =
   'https://upload.wikimedia.org/wikipedia/commons/thumb/6/6e/Andre_Iguodala_2016.jpg/1200px-Andre_Iguodala_2016.jpg';

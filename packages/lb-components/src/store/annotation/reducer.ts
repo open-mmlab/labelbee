@@ -7,7 +7,7 @@ import AnnotationDataUtils from '@/utils/AnnotationDataUtils';
 import { ConfigUtils } from '@/utils/ConfigUtils';
 import styleString from '@/constant/styleString';
 import { getFormatSize } from '@/components/customResizeHook';
-import { AnnotationEngine, CommonToolUtils, ImgUtils } from '@sensetime/annotation';
+import { AnnotationEngine, CommonToolUtils, ImgUtils } from '@labelbee/lb-annotation';
 import { AnnotationState, AnnotationActionTypes } from './types';
 import { message } from 'antd/es';
 import { SetAnnotationLoading } from './actionCreators';

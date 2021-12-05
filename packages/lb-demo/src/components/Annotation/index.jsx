@@ -1,6 +1,6 @@
 import React from 'react';
-import AnnotationOperation from '@sensetime/label-bee';
-import '@sensetime/label-bee/dist/index.css';
+import AnnotationOperation from '@labelbee/lb-components';
+import '@labelbee/lb-components/dist/index.css';
 
 const Annotation = (props) => {
   const { fileList, goBack, stepList, step } = props;

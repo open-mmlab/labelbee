@@ -1,11 +1,11 @@
-# `@sensetime/lb-utils`
+# `@labelbee/lb-utils`
 
 > TODO: description
 
 ## Usage
 
 ```
-const lbUtils = require('@sensetime/lb-utils');
+const lbUtils = require('@labelbee/lb-utils');
 
 // TODO: DEMONSTRATE API
 ```

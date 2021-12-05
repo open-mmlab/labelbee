@@ -5,7 +5,7 @@
 ## Examples
 
 ```ts
-import { AnnotationView } from '@sensetime/label-bee';
+import { AnnotationView } from '@labelbee/lb-components';
 
 const src = ''; // 可访问的图片路径
 

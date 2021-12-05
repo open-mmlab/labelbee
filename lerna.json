@@ -1,12 +1,16 @@
 {
-  "packages": ["packages/*"],
+  "packages": [
+    "packages/*"
+  ],
   "version": "independent",
   "publishConfig": {
     "access": "public"
   },
   "publish": {
-    "ignoreChanges": ["ignored-file", "*.md"],
-    "message": "chore(release): publish %s",
-    "registry": "https://npm-registry.sensetime.com"
+    "ignoreChanges": [
+      "ignored-file",
+      "*.md"
+    ],
+    "message": "chore(release): publish %s"
   }
 }

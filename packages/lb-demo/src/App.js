@@ -5,7 +5,7 @@ import Annotation from './components/Annotation';
 import { fileList as mockFileList, getMockResult } from './mock/index';
 import { getStepList, getDependStepList } from './mock/taskConfig';
 import qs from 'qs';
-import { AnnotationView } from '@sensetime/label-bee';
+import { AnnotationView } from '@labelbee/lb-components';
 import { DEFAULT_ANNOTATIONS } from './mock';
 
 const App = () => {
