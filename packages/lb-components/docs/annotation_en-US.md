@@ -1,22 +1,20 @@
-[English](./annotation_en-US.md) | 简体中文
+English | [简体中文](./annotation.md)
 
 # AnnotationOperation
 
-包含整个标注流程功能，支持从标注、图片拖拽缩放、图片调整、图片翻页、数据错误检查等一系列基础标注功能
+Contains the entire annotation process, supports a series of basic annotation such as annotation, image drag and drop zoom, image adjustment, page turning, data error checking, etc.
 
-## 类型
+## Type
 
 ```ts
-// 用于触发 onSubmit 的方向判断
 enum ESubmitType {
-  Backward = 1, // 向前翻页
-  Forward = 2, // 向后翻页
-  Jump = 3, // 分页器的跳页翻页
-  Quit = 4, // 左上角后退触发
-  Export = 5, // 数据导出时
+  Backward = 1, 
+  Forward = 2, 
+  Jump = 3, 
+  Quit = 4,
+  Export = 5, 
 }
 
-// 结果类型
 interface IFileItem {
    id: number;
    url?: string;
@@ -24,7 +22,7 @@ interface IFileItem {
 }
 ```
 
-## 快速上手
+## Quick Start
 
 ```ts
 import AnnotationOperation from '@labelbee/lb-components';
@@ -41,19 +39,19 @@ const imgList = [
 const step = 1;
 const stepList = [
    {
-      step: 1, //  当前步骤
-      dataSourceStep: 0, // 当前依赖步骤，若为原图则为 0
-      tool: 'rectTool', // 具体查询下方工具列表指定工具
+      step: 1, //  
+      dataSourceStep: 0,
+      tool: 'rectTool',
+      config: '{}',
    }
 ];
 
 
 const App = () => {
    /**
-    * 监听数据提交操作： 翻页
-    * @param {IFileItem[]} data 当前提交的数据
-    * @param {ESubmitType} submitType 触发 onSubmit 的方向判断
-    * @param {number} imgIndex 提交结果的图片下标
+    * @param {IFileItem[]} data 
+    * @param {ESubmitType} submitType 
+    * @param {number} imgIndex
    */
    const onSubmit = (data: IFileItem[], submitType: ESubmitType, imgIndex: number) => {};
 
@@ -71,9 +69,7 @@ export default App;
 ```
 
 
-## 全配置介绍
-
-
+## Full configuration
 
 ```ts
 import AnnotationOperation from '@labelbee/lb-components';
@@ -223,25 +219,25 @@ const App = () => {
 export default App;
 ```
 
-| 参数         | 说明                                        | 是否必填 | 类型 ↑↑↑↑↑↑  |
-| ------------ | ------------------------------------------- | -------- | ------------ |
-| imgList      | 标注文件对象                                | 是       | IFileItem    |
-| step         | 标注当前的步骤                              | 是       | Number       |
-| stepList     | 所有步骤和 step 关联                        | 是       | stepList     |
-| ref          | 工具类 可以调用工具内部方法                 | 否       |              |
-| onSubmit     | 翻页 保存的时候触发 data 表示当前标注的信息 | 否       | onSubmit     |
-| onSave       | 保存的时候触发 data 表示当前标注的信息      | 否       | onSave       |
-| goBack       | 页面内自带跳转的回调函数                    | 否       | goBack       |
-| getFileData  | 支持外部传入获取文件接口                    | 否       | getFileData  |
-| headerName   | 标题                                        | 否       | string       |
-| exportData   | 导出按钮 不写则隐藏导出按钮                 | 否       | {}           |
-| initialIndex | 当前图片列表的 index 初始化时候使用         | 否       | number       |
-| header       | 顶部菜单                                    | 否       | ReactNode    |
-| footer       | footer                                      | 否       | ReactNode    |
-| sider        | 侧边栏                                      | 否       | ReactNode    |
-| style        | 工具栏样式                                  | 否       | Object       |
-| className    | className                                   | 否       | string       |
-| defaultLang  | 默认语言                                    | 否       | 'en' \| 'cn' |
+| Params       | Description                       | Required | Type         |
+| ------------ | --------------------------------- | -------- | ------------ |
+| imgList      | list of annotation                | 是       | IFileItem    |
+| step         | current step                      | 是       | Number       |
+| stepList     | the config of each step           | 是       | stepList     |
+| ref          | ForwardRef                        | 否       |              |
+| onSubmit     | listen the page turning or submit | 否       | onSubmit     |
+| onSave       | listen the click of save-button   | 否       | onSave       |
+| goBack       | listen the click of 'goBack'      | 否       | goBack       |
+| getFileData  | Support external file data        | 否       | getFileData  |
+| headerName   | headerName                        | 否       | string       |
+| initialIndex | initial Index in imgList          | 否       | number       |
+| exportData   | exportData                        | 否       | ReactNode    |
+| header       | header                            | 否       | ReactNode    |
+| footer       | footer                            | 否       | ReactNode    |
+| sider        | sider                             | 否       | ReactNode    |
+| style        | the style of annotation           | 否       | Object       |
+| className    | className                         | 否       | string       |
+| defaultLang  | default language                  | 否       | 'en' \| 'cn' |
 
 ```ts
 /* 下方为不同工具配置, 为切换不同工具参考 */
@@ -294,6 +290,14 @@ const polygonConfigString = JSON.stringify({
   attributeList: [
     { key: '类别x1', value: 'class-x1' },
     { key: '类别tT', value: 'class-tT' },
+    { key: '类别FM', value: 'class-FM' },
+    { key: '类别r6', value: 'class-r6' },
+    { key: '类别Rs', value: 'class-Rs' },
+    { key: '类别rp', value: 'class-rp' },
+    { key: '类别rp2', value: 'class-rp2' },
+    { key: '类别rp3', value: 'class-rp3' },
+    { key: '类别Rs4', value: 'class-Rs4' },
+    { key: '类别rp5', value: 'class-rp5' },
   ],
   textConfigurable: true,
   textCheckType: 0,
@@ -305,7 +309,7 @@ const polygonConfigString = JSON.stringify({
 });
 ```
 
-## 工具配置详情
+## Tool configuration details
 
 ```ts
 // 拉框工具配置

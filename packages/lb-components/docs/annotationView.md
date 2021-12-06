@@ -1,3 +1,5 @@
+[English](./annotationView_en-US.md) | 简体中文
+
 # AnnotationView 标注查看模式
 
 > 集成基础的标注渲染，仅需简单配置就可以渲染出需要的标注信息。

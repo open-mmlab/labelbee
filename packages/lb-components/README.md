@@ -1,3 +1,5 @@
+[English](./README_en-US.md) | 简体中文
+
 # `LB-Components`
 
 基于 LB-Annotation 开发，即插即用的标注组件库。支持拉框、标签、多边形、线条、点、文本标注工具。开发者可根据需求配置，快速实现多种标注功能。
@@ -19,7 +21,7 @@ $ yarn add @labelbee/lb-components
 ## 🔗 Examples
 
 - [Get Started](../lb-demo/README.md)
-- [客户端下载链接]()
+- [客户端下载链接](https://github.com/open-mmlab/labelbee-client)
 
 ## ToolLists
 

@@ -2,19 +2,18 @@
   <article style="display: flex; flex-direction: column; align-items: center; justify-content: center;">
       <p align="center"><img width="300" src="./docs/assets/logo.svg" /></p>
       <h1 style="width: 100%; text-align: center;">LabelBee</h1>
-      <p>为标注而生，专注于标注体验的渲染、组件库。快速搭建标注应用。</p>
+      <p>Born for annotation, focusing on annotation.</p>
   </article>
-  <a href="./README_en-US.md">English</a> | 简体中文
-
+  English | <a href="./README.md">简体中文</a>
 </div>
 
-## 特性
+## Features
 
-- 即拆即用，简单配置即可创建标注应用
-- 渲染分离，可单独使用渲染模块
+- Quickly build React apps with annotation
+- Render separated, the rendering module can be used separately
 
 
-## 安装
+## Install
 
 ```bash
 # npm
@@ -27,16 +26,16 @@ yarn add @labelbee/lb-components
 ```
 
 
-## 使用
+## Usage
 
-快速开始例子
+Quick Start Example
 
 ```js
 import React from 'react';
 import ReactDOM from 'react-dom';
 import { AnnotationView } from '@labelbee/lb-components';
 
-const src = ''; // 可访问的图片路径
+const src = '';
 
 const DefaultComponent = () => {
   return (
@@ -49,12 +48,12 @@ const DefaultComponent = () => {
 ReactDOM.render(<App />, document.querySelector('#app'));
 ```
 
-## 文档
+## Documents
 
-- [LabelBee 渲染库 - lb-Annotation](./packages/lb-annotation/README.md)
-- [LabelBee 组件库 - lb-components](./packages/lb-components/README.md)
-- [快速 DEMO 展示](./packages/lb-demo/README.md)
+- [JavaScript Canvas Library - LB-Annotation](./packages/lb-annotation/README_en-US.md)
+- [Annotation Components - LB-components](./packages/lb-components/README_en-US.md)
+- [DEMO](./packages/lb-demo/README.md)
 
 ## LICENSE
 
-该项目使用 [Apache 2.0 license](./LICENSE).
+This project is released under the [Apache 2.0 license](./LICENSE).

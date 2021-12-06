@@ -1,8 +1,8 @@
-[English](./README_en-US.md) | 简体中文
+English | [简体中文](./README.md)
 
 # LB-Annotation
 
-标注绘图框架，能快速提供检测、分割、分类等标注操作。
+JavaScript Canvas Library, quickly provide annotation such as detection, segmentation and classification
 
 ## 📦 Install
 
