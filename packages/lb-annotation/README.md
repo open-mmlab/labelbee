@@ -16,8 +16,6 @@ $ yarn add @labelbee/lb-annotation
 
 ## Quick Start
 
-### 接口定义
-
 ```ts
 import React, { useEffect } from 'react';
 import { AnnotationEngine } from '@labelbee/lb-annotation';
@@ -108,6 +106,8 @@ const App = () => {
 
 export default App;
 ```
+
+### 接口定义
 
 ```js
 interface IImageAttribute {

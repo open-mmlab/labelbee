@@ -14,10 +14,12 @@ const src = ''; // 可访问的图片路径
 const DefaultComponent = () => {
   return (
     <AnnotationView
-     src={imgInfo.src}
+     src={src}
    />
   )
 }
+
+export default DefaultComponent;
 ```
 
 

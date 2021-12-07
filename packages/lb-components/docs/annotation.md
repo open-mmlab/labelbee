@@ -28,12 +28,15 @@ interface IFileItem {
 
 ```ts
 import AnnotationOperation from '@labelbee/lb-components';
+import 'antd/dist/antd.css';
 import '@labelbee/lb-components/dist/index.css';
+
+const imgUrl = ''; // 你需要更改当前图片路径 imgUrl
 
 const imgList = [
   {
     id: 1,
-    url: '',
+    url: imgUrl,
     result: '{}'
   }
 ]
@@ -44,9 +47,8 @@ const stepList = [
       step: 1, //  当前步骤
       dataSourceStep: 0, // 当前依赖步骤，若为原图则为 0
       tool: 'rectTool', // 具体查询下方工具列表指定工具
-   }
+   } 
 ];
-
 
 const App = () => {
    /**
@@ -55,7 +57,7 @@ const App = () => {
     * @param {ESubmitType} submitType 触发 onSubmit 的方向判断
     * @param {number} imgIndex 提交结果的图片下标
    */
-   const onSubmit = (data: IFileItem[], submitType: ESubmitType, imgIndex: number) => {};
+   const onSubmit = () => {};
 
    return (
       <AnnotationOperation
@@ -63,6 +65,12 @@ const App = () => {
          step={step}
          stepList={stepList}
          onSubmit={onSubmit}
+         style={{
+          layout: {
+            width: '100vw',
+            height: '100vh'
+          }
+        }}
       />
    );
 }
@@ -77,32 +85,15 @@ export default App;
 
 ```ts
 import AnnotationOperation from '@labelbee/lb-components';
+import 'antd/dist/antd.css';
 import '@labelbee/lb-components/dist/index.css';
 
-// 用于触发 onSubmit 的方向判断
-enum ESubmitType {
-  Backward = 1, // 向前翻页
-  Forward = 2, // 向后翻页
-  Jump = 3, // 分页器的跳页翻页
-  Quit = 4, // 左上角后退触发
-  Export = 5, // 数据导出时
-}
+const imgUrl = ''; // 你需要更改当前图片路径 imgUrl
 
-interface IFileItem {
-   id: number;
-   url?: string;
-   result?: string;
-}
-
-/**
- * @property {number} id
- * @property {url} 图片路径;参数可选时，需要传入getFileData
- * @property {result} 标注结果字符串，详情请内网访问:https://resultdoc.sensebee.xyz/;参数可选时,需要传入getFileData
-*/
-const fileList: IFileItem[] = [
+const imgList = [
    {
       id: 1,
-      url: '',
+      url: imgUrl, 
       result: '',
    }
 ];
@@ -116,12 +107,6 @@ const rectConfigString = JSON.stringify({
    attributeList: [
       { key: '类别x1', value: 'class-x1' },
       { key: '类别Hl', value: 'class-Hl' },
-      { key: '类别J5', value: 'class-J5' },
-      { key: '类别ve', value: 'class-ve' },
-      { key: '类别oJ', value: 'class-oJ' },
-      { key: '类别qz', value: 'class-qz' },
-      { key: '类别0x', value: 'class-0x' },
-      { key: '类别Hv', value: 'class-Hv' },
    ],
    textConfigurable: true,
    textCheckType: 0,
@@ -129,6 +114,7 @@ const rectConfigString = JSON.stringify({
    drawOutsideTarget: false,
    copyBackwardResult: false,
 });
+
 const stepList = [
    {
       step: 1, //  当前步骤
@@ -139,7 +125,10 @@ const stepList = [
 ];
 
 const style = {
-  layout: {},
+  layout: {
+    width: '100vw',
+    height: '100vh'  
+  },
   header: {},
   sider: {},
   footer: {}
@@ -152,7 +141,7 @@ const App = () => {
     * @param {ESubmitType} submitType 触发 onSubmit 的方向判断
     * @param {number} imgIndex 提交结果的图片下标
    */
-   const onSubmit = (data: IFileItem[], submitType: ESubmitType, imgIndex: number) => {};
+   const onSubmit = () => {};
 
   /**
     * 点击保存按钮时触发
@@ -160,9 +149,9 @@ const App = () => {
     * @param {ESubmitType} submitType 触发 onSubmit 的方向判断
     * @param {number} imgIndex 提交结果的图片下标
    */
-   const onSave = (data: IFileItem, submitType: ESubmitType, imgIndex: number, datas: IFileItem[]) => {};
+   const onSave = () => {};
 
-   const goBack = (data: IFileItem[]) => {
+   const goBack = () => {
       // 页面内自带跳转的回调函数, data 表示整个任务的所有标注信息
    }
 
@@ -192,14 +181,17 @@ const App = () => {
     *    pageJump                 (pageNumber: number) => void
     *  }
     *  ref 可以拿到工具的实例 可以在外部调用一些工具方法  比如 旋转 撤销  重做 等
-    *
-    *
-    *
    */
-   const getFileData = (nextFileData: IFileItem, nextIndex: number) => {}
+  
+   /**
+    * 每次页面获取
+    * @param {IFileItem} nextFileData 
+    * @param {number} nextIndex 
+    */
+   const getFileData = () => {}
    return (
       <AnnotationOperation
-         ref={childrenRef}
+        //  ref={childrenRef}
          onSubmit={onSubmit}
          onSave={onSave}
          imgList={imgList}
@@ -208,12 +200,9 @@ const App = () => {
          goBack={goBack}
          getFileData={getFileData}
          headerName="任务标题" // 不写则隐藏标题
-         exportData={} // 不写则隐藏导出按钮
          initialIndex={0} // 仅在初始化时使用，表示当前图片 index，默认为：0.
           // 支持覆盖 侧边栏 传入组件的形式
-         header = {<Header>};
-         footer = {<Footer>};
-         sider = {null}; // 传入 null 则隐藏
+         sider = {null} // 传入 null 则隐藏
          className='layout' // 组件默认宽高为 100vw 100vh，若需修改这通过 className 更改样式 or style 的 layout 进行更改
          style={style}
       />
@@ -384,4 +373,21 @@ export declare enum ELineColor {
   SingleColor = 0, // 单色
   MultiColor = 1, // 多色
 }
+
+
+// 用于触发 onSubmit 的方向判断
+enum ESubmitType {
+  Backward = 1, // 向前翻页
+  Forward = 2, // 向后翻页
+  Jump = 3, // 分页器的跳页翻页
+  Quit = 4, // 左上角后退触发
+  Export = 5, // 数据导出时
+}
+
+interface IFileItem {
+   id: number;
+   url?: string;
+   result?: string;
+}
+
 ```

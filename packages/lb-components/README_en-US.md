@@ -13,6 +13,14 @@ $ npm install @labelbee/lb-components
 # YARN
 $ yarn add @labelbee/lb-components
 ```
+
+## 🪵 Requirements
+
+| PureDependencies | Version  |
+| ---------------- | -------- |
+| react            | >=16.9.0 |
+| antd             | >=4.15.0 |
+
 ## 🔨 Usage
 
 - [AnnotationOperation](./docs/annotation_en-US.md)

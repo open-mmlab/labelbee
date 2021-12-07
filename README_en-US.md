@@ -54,6 +54,10 @@ ReactDOM.render(<App />, document.querySelector('#app'));
 - [Annotation Components - LB-components](./packages/lb-components/README_en-US.md)
 - [DEMO](./packages/lb-demo/README.md)
 
+## Links
+
+- [LabelBee-Client](https://github.com/open-mmlab/labelbee-client)（Powered by LabelBee）
+
 ## LICENSE
 
 This project is released under the [Apache 2.0 license](./LICENSE).
