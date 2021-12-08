@@ -113,7 +113,6 @@ const textToolConfig = {
 const polygonConfig = {
   lineType: 0,
   lineColor: 0,
-  upperLimitPointNum: 100,
   edgeAdsorption: true,
   drawOutsideTarget: false,
   copyBackwardResult: false,
