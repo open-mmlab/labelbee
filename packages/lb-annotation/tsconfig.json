@@ -12,6 +12,7 @@
     "declarationDir": "dist/types",
     "skipLibCheck": true,
     "esModuleInterop": true,
+    "noImplicitAny": false,
     "paths": {
       "@/*": ["src/*"]
     }
