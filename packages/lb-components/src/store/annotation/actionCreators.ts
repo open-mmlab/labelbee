@@ -160,10 +160,18 @@ export function InitTaskData({
   return (dispatch: any) => dispatchTasks(dispatch, tasks);
 }
 
+/** 获取下一步的step */
+const getNextStep = (step: number, stepList: any) => {
+  const currentStepIndex = stepList?.findIndex((element: any) => element?.step === step);
+  return stepList[currentStepIndex + 1]?.step;
+};
+
 /** 切换到下一步 */
 export const ToNextStep = (pageNumber?: number) => (dispatch: any, getState: any) => {
-  const { step } = getState().annotation;
-  return [dispatch(UpdateProcessingStep(step + 1, pageNumber))];
+  const { annotation } = getState();
+  const { step, stepList } = annotation;
+  const nextStep = getNextStep(step, stepList);
+  return [dispatch(UpdateProcessingStep(nextStep, pageNumber))];
 };
 
 /**
