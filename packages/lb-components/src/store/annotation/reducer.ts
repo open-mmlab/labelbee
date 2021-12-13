@@ -465,16 +465,14 @@ export const annotationReducer = (
         return state;
       }
 
-      if (toStep <= stepList.length) {
-        const stepConfig = getStepConfig(stepList, toStep);
-        annotationEngine.setToolName(stepConfig.tool, stepConfig.config);
+      const stepConfig = getStepConfig(stepList, toStep);
+      annotationEngine.setToolName(stepConfig.tool, stepConfig.config);
 
-        return {
-          ...state,
-          step: toStep,
-          toolInstance: annotationEngine.toolInstance,
-        };
-      }
+      return {
+        ...state,
+        step: toStep,
+        toolInstance: annotationEngine.toolInstance,
+      };
       break;
     }
 
