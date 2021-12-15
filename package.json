@@ -6,8 +6,8 @@
   ],
   "version": "1.3.0",
   "scripts": {
-    "start": "lerna run --parallel --stream start",
-    "dev": "lerna run --parallel --stream dev",
+    "start": "lerna run build && lerna run --parallel --stream start",
+    "dev": "lerna run build && lerna run --parallel --stream dev",
     "bootstrap": "lerna bootstrap",
     "bootstrap:ci": "lerna bootstrap --no-ci",
     "build": "lerna run build",

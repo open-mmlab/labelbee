@@ -23,7 +23,7 @@ const banner = `
   /*!
   * sense-annotation v${pkg.version}
   * (c) 2020-${new Date().getFullYear()}
-  * Released under the MIT License.
+  * Released under the Apache-2.0 License.
   */
 `;
 

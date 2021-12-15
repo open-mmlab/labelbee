@@ -32,7 +32,7 @@
     "lihuaqi"
   ],
   "scripts": {
-    "dev": "cross-env NODE_ENV=developemnt rollup -c rollup.config.js -w",
+    "dev": "cross-env NODE_ENV=development rollup -c rollup.config.js -w",
     "start": "npm run dev",
     "build:type": "tsc --emitDeclarationOnly",
     "build": "rm -rf dist && cross-env NODE_ENV=production rollup -c rollup.config.js && npm run build:type",
