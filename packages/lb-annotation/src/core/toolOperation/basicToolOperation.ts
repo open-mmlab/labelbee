@@ -233,6 +233,13 @@ class BasicToolOperation extends EventListener {
     return [];
   }
 
+  /**
+   * 是否含有列表标注
+   */
+  public get hasMarkerConfig() {
+    return this.config.markerConfigurable === true && this.config.markerList && this.config.markerList.length > 0;
+  }
+
   public setZoom(zoom: number) {
     this.zoom = zoom;
     this.coordUtils.setZoomAndCurrentPos(this.zoom, this.currentPos);

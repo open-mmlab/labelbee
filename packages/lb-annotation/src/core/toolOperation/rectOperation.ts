@@ -180,13 +180,6 @@ class RectOperation extends BasicToolOperation {
     return showingRect;
   }
 
-  /**
-   * 是否含有列表标注
-   */
-  public get hasMarkerConfig() {
-    return this.config.markerConfigurable === true && this.config.markerList && this.config.markerList.length > 0;
-  }
-
   public setSelectedID(newID?: string) {
     this.setSelectedRectID(newID);
   }
