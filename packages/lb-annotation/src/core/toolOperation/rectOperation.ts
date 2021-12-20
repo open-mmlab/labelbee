@@ -83,7 +83,7 @@ class RectOperation extends BasicToolOperation {
     this.setRectList(rectList);
 
     if (this.hasMarkerConfig) {
-      const nextMarkerInfo = CommonToolUtils.getNextMarker(rectList, this.config.markerList);
+      const nextMarkerInfo = CommonToolUtils.getNextMarker(this.getCurrentPageResult(rectList), this.config.markerList);
       if (nextMarkerInfo) {
         this.setMarkerIndex(nextMarkerInfo.index);
       }
@@ -180,6 +180,21 @@ class RectOperation extends BasicToolOperation {
     return showingRect;
   }
 
+  /**
+   * 当前依赖状态下本页的所有框
+   *
+   * @readonly
+   * @memberof RectOperation
+   */
+  public getCurrentPageResult(rectList: IRect[]) {
+    const [showingRect] = CommonToolUtils.getRenderResultList<IRect>(
+      rectList,
+      CommonToolUtils.getSourceID(this.basicResult),
+      [],
+    );
+    return showingRect;
+  }
+
   public setSelectedID(newID?: string) {
     this.setSelectedRectID(newID);
   }
@@ -232,7 +247,7 @@ class RectOperation extends BasicToolOperation {
     this.markerIndex = markerIndex;
     const markerValue = this.config.markerList[markerIndex].value;
 
-    const currentRect = this.rectList.find((rect) => rect.label === markerValue);
+    const currentRect = this.currentPageResult.find((rect) => rect.label === markerValue);
 
     if (currentRect) {
       this.setSelectedID(currentRect.id);
@@ -869,7 +884,11 @@ class RectOperation extends BasicToolOperation {
     };
 
     if (this.hasMarkerConfig) {
-      const nextMarkInfo = CommonToolUtils.getNextMarker(this.rectList, this.config.markerList, this.markerIndex);
+      const nextMarkInfo = CommonToolUtils.getNextMarker(
+        this.currentPageResult,
+        this.config.markerList,
+        this.markerIndex,
+      );
 
       if (nextMarkInfo) {
         if (this.drawingRect) {

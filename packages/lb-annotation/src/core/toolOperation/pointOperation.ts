@@ -76,7 +76,7 @@ class PointOperation extends BasicToolOperation {
     this.markerIndex = markerIndex;
     const markerValue = this.config.markerList[markerIndex].value;
 
-    const currentPoint = this.pointList.find((point) => point.label === markerValue);
+    const currentPoint = this.currentPageResult.find((point) => point.label === markerValue);
 
     if (currentPoint) {
       this.setSelectedID(currentPoint.id);
@@ -90,7 +90,15 @@ class PointOperation extends BasicToolOperation {
   public setResult(pointList: IPointUnit[]) {
     this.clearActiveStatus();
     this.setPointList(pointList);
-
+    if (this.hasMarkerConfig) {
+      const nextMarkerInfo = CommonToolUtils.getNextMarker(
+        this.getCurrentPageResult(pointList),
+        this.config.markerList,
+      );
+      if (nextMarkerInfo) {
+        this.setMarkerIndex(nextMarkerInfo.index);
+      }
+    }
     this.render();
   }
 
@@ -429,7 +437,11 @@ class PointOperation extends BasicToolOperation {
     }
 
     if (this.hasMarkerConfig) {
-      const nextMarkInfo = CommonToolUtils.getNextMarker(this.pointList, this.config.markerList, this.markerIndex);
+      const nextMarkInfo = CommonToolUtils.getNextMarker(
+        this.currentPageResult,
+        this.config.markerList,
+        this.markerIndex,
+      );
 
       if (nextMarkInfo) {
         newDrawingPoint = {
@@ -526,12 +538,27 @@ class PointOperation extends BasicToolOperation {
    * @memberof RectOperation
    */
   public get currentPageResult() {
-    const [showingPolygon] = CommonToolUtils.getRenderResultList<IPolygonData>(
+    const [showingPolygon] = CommonToolUtils.getRenderResultList<IPointUnit>(
       this.pointList,
       CommonToolUtils.getSourceID(this.basicResult),
       [],
     );
     return showingPolygon;
+  }
+
+  /**
+   * 当前依赖状态下本页的所有框
+   *
+   * @readonly
+   * @memberof RectOperation
+   */
+  public getCurrentPageResult(pointList: IPointUnit[]) {
+    const [showingRect] = CommonToolUtils.getRenderResultList<IPointUnit>(
+      pointList,
+      CommonToolUtils.getSourceID(this.basicResult),
+      [],
+    );
+    return showingRect;
   }
 
   /**
