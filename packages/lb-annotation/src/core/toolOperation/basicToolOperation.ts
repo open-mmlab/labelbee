@@ -35,6 +35,8 @@ interface IBasicToolOperationProps {
   defaultAttribute?: string;
   forbidCursorLine?: boolean;
   showDefaultCursor?: boolean; // 默认会展示为 none
+
+  forbidBasicResultRender?: boolean;
 }
 
 // zoom 的限制
@@ -70,6 +72,8 @@ class BasicToolOperation extends EventListener {
   public isShowCursor: boolean; // 是否展示十字光标
 
   public forbidOperation: boolean; // 禁止操作
+
+  public forbidBasicResultRender: boolean; // 禁止渲染基础依赖图形
 
   // public style: {
   //   strokeColor: string;
@@ -149,6 +153,8 @@ class BasicToolOperation extends EventListener {
       rotate: 0,
     };
     this.forbidOperation = props.forbidOperation ?? false;
+    this.forbidBasicResultRender = props.forbidBasicResultRender ?? false;
+
     this.size = props.size;
     this.currentPos = {
       x: 0,
@@ -304,7 +310,7 @@ class BasicToolOperation extends EventListener {
     basicCanvas.style.left = '0';
     basicCanvas.style.top = '0';
     basicCanvas.style.zIndex = '0';
-    this.container.appendChild(basicCanvas);
+
     this.basicCanvas = basicCanvas;
 
     const canvas = document.createElement('canvas');
@@ -315,7 +321,14 @@ class BasicToolOperation extends EventListener {
     canvas.style.top = '0';
     canvas.style.zIndex = '10';
 
-    this.container.appendChild(canvas);
+    if (this.container.hasChildNodes()) {
+      this.container.insertBefore(canvas, this.container.childNodes[0]);
+      this.container.insertBefore(basicCanvas, this.container.childNodes[0]);
+    } else {
+      this.container.appendChild(basicCanvas);
+      this.container.appendChild(canvas);
+    }
+
     this.canvas = canvas;
     this.container.style.cursor = this.defaultCursor;
   }
@@ -1035,6 +1048,10 @@ class BasicToolOperation extends EventListener {
     this.drawImg();
 
     const thickness = 3;
+
+    if (this.forbidBasicResultRender) {
+      return;
+    }
 
     if (this.basicResult && this.dependToolName) {
       switch (this.dependToolName) {
