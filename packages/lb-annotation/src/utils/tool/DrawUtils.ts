@@ -1,4 +1,4 @@
-import { ELineTypes, SEGMENT_NUMBER } from '../../constant/tool';
+import { DEFAULT_FONT, ELineTypes, SEGMENT_NUMBER } from '../../constant/tool';
 import { IPolygonPoint } from '../../types/tool/polygon';
 import PolygonUtils from './PolygonUtils';
 import UnitUtils from './UnitUtils';
@@ -401,6 +401,7 @@ export default class DrawUtils {
       offsetX: number;
       offsetY: number;
       textAlign: 'start' | 'center' | 'end' | 'left' | 'right';
+      lineHeight: number;
     }> = {},
   ): void {
     if (!text) {
@@ -410,7 +411,7 @@ export default class DrawUtils {
     const ctx: CanvasRenderingContext2D = canvas.getContext('2d')!;
     const {
       color = DEFAULT_COLOR,
-      font = 'normal normal 500 14px Arial',
+      font = DEFAULT_FONT,
       shadowColor = '',
       shadowBlur = 0,
       shadowOffsetX = 0,
@@ -419,6 +420,7 @@ export default class DrawUtils {
       offsetX = 0,
       offsetY = 0,
       textAlign = 'start',
+      lineHeight,
     } = options;
 
     ctx.save();
@@ -429,7 +431,7 @@ export default class DrawUtils {
     ctx.shadowOffsetX = shadowOffsetX;
     ctx.shadowOffsetY = shadowOffsetY;
     ctx.shadowBlur = shadowBlur;
-    this.wrapText(canvas, `${text}`, startPoint.x + offsetX, startPoint.y + offsetY, textMaxWidth);
+    this.wrapText(canvas, `${text}`, startPoint.x + offsetX, startPoint.y + offsetY, textMaxWidth, lineHeight);
     ctx.restore();
   }
 

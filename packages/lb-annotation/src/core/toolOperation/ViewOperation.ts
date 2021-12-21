@@ -9,6 +9,8 @@ import AxisUtils from '@/utils/tool/AxisUtils';
 import RectUtils from '@/utils/tool/RectUtils';
 import PolygonUtils from '@/utils/tool/PolygonUtils';
 import { BasicToolOperation, IBasicToolOperationProps } from './basicToolOperation';
+import MathUtils from '@/utils/MathUtils';
+import { DEFAULT_FONT } from '@/constant/tool';
 
 const newScope = 3;
 
@@ -19,8 +21,8 @@ interface IBasicStyle {
 }
 
 interface IAnnotationData {
-  type: 'rect' | 'polygon' | 'line' | 'point';
-  annotation: IBasicRect & IBasicPolygon & IBasicLine & IPoint;
+  type: 'rect' | 'polygon' | 'line' | 'point' | 'text';
+  annotation: IBasicRect & IBasicPolygon & IBasicLine & IPoint & IBasicText;
 }
 
 interface IBasicRect extends IBasicStyle {
@@ -37,6 +39,18 @@ interface IBasicPolygon extends IBasicStyle {
 }
 
 type IBasicLine = IBasicPolygon;
+
+interface IBasicText {
+  x: number;
+  y: number;
+  text: string; // Use \n for line feed
+  textMaxWidth?: number;
+
+  color?: string;
+  background?: string;
+  lineHeight?: number;
+  font?: string; // canvas-font https://developer.mozilla.org/en-US/docs/Web/API/CanvasRenderingContext2D/font
+}
 
 interface IPoint extends IBasicStyle {
   x: number;
@@ -235,6 +249,65 @@ export default class ViewOperation extends BasicToolOperation {
           const style = this.getSpecificStyle(point);
 
           DrawUtils.drawCircle(this.canvas, renderPoint, style.radius ?? DEFAULT_RADIUS, style);
+          break;
+        }
+
+        case 'text': {
+          const textAnnotation = annotation.annotation;
+          const {
+            text,
+            x,
+            y,
+            textMaxWidth,
+            color = 'white',
+            background = 'rgba(0, 0, 0, 0.6)',
+            lineHeight = 25,
+            font = DEFAULT_FONT,
+          } = textAnnotation;
+          const renderPoint = AxisUtils.changePointByZoom({ x, y }, this.zoom, this.currentPos);
+
+          const {
+            width,
+            height,
+            fontHeight = 0,
+          } = MathUtils.getTextArea(this.canvas, textAnnotation.text, textMaxWidth, font, lineHeight);
+
+          const paddingTB = 10;
+          const paddingLR = 10;
+
+          // 字体背景
+          DrawUtils.drawRectWithFill(
+            this.canvas,
+            {
+              x: renderPoint.x,
+              y: renderPoint.y,
+              width: width + paddingLR * 2,
+              height: height + paddingTB * 2,
+              id: '',
+              sourceID: '',
+              valid: true,
+              textAttribute: '',
+              attribute: '',
+            },
+            {
+              color: background,
+            },
+          );
+
+          DrawUtils.drawText(
+            this.canvas,
+            {
+              x: renderPoint.x + paddingLR,
+              y: renderPoint.y + fontHeight + paddingTB,
+            },
+            text,
+            {
+              color,
+              lineHeight,
+              font,
+              textMaxWidth,
+            },
+          );
           break;
         }
 
