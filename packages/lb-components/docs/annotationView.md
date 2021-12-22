@@ -77,4 +77,17 @@ interface IPoint extends IBasicStyle {
   y: number;
   radius?: number;
 }
+
+interface IBasicText {
+  x: number;
+  y: number;
+  text: string; // 使用 \n 进行换行
+  textMaxWidth?: number;
+
+  color?: string;
+  background?: string;
+  lineHeight?: number;
+  font?: string; // canvas-font https://developer.mozilla.org/en-US/docs/Web/API/CanvasRenderingContext2D/font
+}
+
 ```

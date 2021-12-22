@@ -85,7 +85,7 @@ export const DEFAULT_ANNOTATIONS = [
   {
     type: 'rect',
     annotation: {
-      id: 123123,
+      id: '123123',
       x: 123,
       y: 23,
       width: 100,
@@ -97,7 +97,7 @@ export const DEFAULT_ANNOTATIONS = [
   {
     type: 'polygon',
     annotation: {
-      id: 3,
+      id: '3',
       // thickness: 10,
       color: 'green',
       pointList: [
@@ -121,7 +121,7 @@ export const DEFAULT_ANNOTATIONS = [
     annotation: {
       color: 'yellow',
       thickness: 5,
-      id: 4,
+      id: '4',
 
       pointList: [
         {
@@ -142,7 +142,7 @@ export const DEFAULT_ANNOTATIONS = [
   {
     type: 'point',
     annotation: {
-      id: 5,
+      id: '5',
       x: 10,
       y: 10,
       fill: 'green',
@@ -154,11 +154,32 @@ export const DEFAULT_ANNOTATIONS = [
   {
     type: 'rect',
     annotation: {
-      id: 10,
+      id: '10',
       x: 13,
       y: 3,
       width: 1020,
       height: 100,
     },
   },
+  {
+    type: 'text',
+    annotation: {
+      id: '11',
+      x: 223,
+      y: 23,
+      textMaxWidth: 300,
+      text: '标签1: 测试1 \n标签2: 测试2'
+    }
+  },
+  {
+    type: 'text',
+    annotation: {
+      id: '12',
+      x: 12,
+      y: 123,
+      textMaxWidth: 500,
+      lineHeight: 25,
+      text: 'Key: Loooooooooooooooooooooooooooooooooog value\nSecond One: short value'
+    }
+  }
 ];

@@ -286,7 +286,11 @@ export default class CommonToolUtils {
    * @param markerIndex
    * @returns
    */
-  public static getNextMarker(resultList: IRect[], markerList: IInputList[] = [], markerIndex?: number) {
+  public static getNextMarker(
+    resultList: Array<IPointUnit | IRect>,
+    markerList: IInputList[] = [],
+    markerIndex?: number,
+  ) {
     if (markerList?.length === 0) {
       return undefined;
     }
