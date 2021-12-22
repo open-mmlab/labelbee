@@ -473,7 +473,6 @@ export const annotationReducer = (
         step: toStep,
         toolInstance: annotationEngine.toolInstance,
       };
-      break;
     }
 
     case ANNOTATION_ACTIONS.SET_LOADING: {
@@ -489,6 +488,4 @@ export const annotationReducer = (
     default:
       return state;
   }
-
-  return state;
 };
