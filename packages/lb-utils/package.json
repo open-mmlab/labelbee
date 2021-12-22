@@ -1,10 +1,10 @@
 {
   "name": "@labelbee/lb-utils",
-  "version": "1.0.3",
+  "version": "1.0.4-alpha.0",
   "description": "utils for label-bee",
   "author": "lijingchi <lijingchi1@sensetime.com>",
   "license": "Apache-2.0",
-  "types": "./dist/types/index.d.ts",
+  "types": "./dist/index.d.ts",
   "homepage": "",
   "main": "dist/index.js",
   "module": "es/index.js",
