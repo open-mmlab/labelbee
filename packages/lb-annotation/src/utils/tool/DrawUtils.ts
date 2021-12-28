@@ -95,10 +95,11 @@ export default class DrawUtils {
       color: string;
       thickness: number;
       lineCap: CanvasLineCap;
+      hiddenText?: boolean;
     }> = {},
   ): void {
     const ctx: CanvasRenderingContext2D = canvas.getContext('2d')!;
-    const { color = DEFAULT_COLOR, thickness = 1, lineCap = 'round' } = options;
+    const { color = DEFAULT_COLOR, thickness = 1, lineCap = 'round', hiddenText = false } = options;
     ctx.save();
     ctx.strokeStyle = color;
     ctx.lineWidth = thickness;
@@ -107,19 +108,22 @@ export default class DrawUtils {
     ctx.fillStyle = color;
 
     ctx.strokeRect(rect.x, rect.y, rect.width, rect.height);
-    let showText = '';
-    if (rect.attribute) {
-      showText = `${showText}  ${rect.attribute}`;
-    }
-    this.drawText(canvas, { x: rect.x, y: rect.y - 5 }, showText);
-    if (rect.textAttribute) {
-      const text = `${~~rect.width} * ${~~rect.height}`;
-      const textSizeWidth = text.length * 7;
-      const marginTop = 0;
-      const textWidth = Math.max(20, rect.width - textSizeWidth);
-      this.drawText(canvas, { x: rect.x, y: rect.y + rect.height + 20 + marginTop }, rect.textAttribute, {
-        textMaxWidth: textWidth,
-      });
+
+    if (hiddenText === false) {
+      let showText = '';
+      if (rect.attribute) {
+        showText = `${showText}  ${rect.attribute}`;
+      }
+      this.drawText(canvas, { x: rect.x, y: rect.y - 5 }, showText);
+      if (rect.textAttribute) {
+        const text = `${~~rect.width} * ${~~rect.height}`;
+        const textSizeWidth = text.length * 7;
+        const marginTop = 0;
+        const textWidth = Math.max(20, rect.width - textSizeWidth);
+        this.drawText(canvas, { x: rect.x, y: rect.y + rect.height + 20 + marginTop }, rect.textAttribute, {
+          textMaxWidth: textWidth,
+        });
+      }
     }
     ctx.restore();
   }
@@ -255,7 +259,9 @@ export default class DrawUtils {
     ctx.lineWidth = thickness;
     ctx.arc(anchorPoint.x, anchorPoint.y, radius, startAngleRad, endAngleRad, false);
     ctx.stroke();
-    ctx.fill();
+    if (fill) {
+      ctx.fill();
+    }
     ctx.closePath();
     ctx.restore();
   }

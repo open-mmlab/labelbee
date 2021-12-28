@@ -1,5 +1,11 @@
 import MathUtils from '@/utils/MathUtils';
-import { DEFAULT_TEXT_OFFSET, EDragStatus, EDragTarget, ESortDirection } from '../../constant/annotation';
+import {
+  DEFAULT_TEXT_OFFSET,
+  EDragStatus,
+  EDragTarget,
+  ESortDirection,
+  TEXT_ATTRIBUTE_OFFSET,
+} from '../../constant/annotation';
 import EKeyCode from '../../constant/keyCode';
 import { edgeAdsorptionScope, EToolName } from '../../constant/tool';
 import locale from '../../locales';
@@ -19,12 +25,6 @@ import TextAttributeClass from './textAttributeClass';
 import RectUtils from '@/utils/tool/RectUtils';
 
 const TEXT_MAX_WIDTH = 164;
-
-// 文本展示的偏移
-const TEXT_ATTRIBUTE_OFFSET = {
-  x: 8,
-  y: 26,
-};
 
 interface IPolygonOperationProps extends IBasicToolOperationProps {}
 
