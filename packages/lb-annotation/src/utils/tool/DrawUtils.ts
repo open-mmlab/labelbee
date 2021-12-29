@@ -509,7 +509,6 @@ export default class DrawUtils {
       lineCap: CanvasLineCap;
       theta: number; // 用于控制箭头的偏移
       headLen: number; // 箭头长度
-      ctx: CanvasRenderingContext2D;
     }> = {},
   ): void {
     const { color = DEFAULT_COLOR, thickness = 1, lineCap = 'round', theta = 30, headLen = 10 } = options;
@@ -533,5 +532,21 @@ export default class DrawUtils {
 
     ctx.stroke();
     ctx.restore();
+  }
+
+  public static drawArrowByCanvas(
+    canvas: HTMLCanvasElement,
+    startPoint: IPoint | IPolygonPoint,
+    endPoint: IPoint | IPolygonPoint,
+    options: Partial<{
+      color: string;
+      thickness: number;
+      lineCap: CanvasLineCap;
+      theta: number; // 用于控制箭头的偏移
+      headLen: number; // 箭头长度
+    }> = {},
+  ): void {
+    const ctx: CanvasRenderingContext2D = canvas.getContext('2d')!;
+    this.drawArrow(ctx, startPoint, endPoint, options);
   }
 }

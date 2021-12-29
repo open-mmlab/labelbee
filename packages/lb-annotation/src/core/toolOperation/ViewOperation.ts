@@ -39,6 +39,7 @@ interface IBasicRect extends IBasicStyle {
 interface IBasicPolygon extends IBasicStyle {
   id: string;
   pointList: IPoint[];
+  showDirection?: boolean;
 }
 
 type IBasicLine = IBasicPolygon;
@@ -308,6 +309,24 @@ export default class ViewOperation extends BasicToolOperation {
             isClose: true,
           });
 
+          const isShowDirection = polygon?.showDirection === true && polygon?.pointList?.length > 2;
+
+          // 是否展示方向
+          if (isShowDirection) {
+            DrawUtils.drawArrowByCanvas(
+              this.canvas,
+              renderPolygon[0],
+              MathUtils.getLineCenterPoint([renderPolygon[0], renderPolygon[1]]),
+              {
+                color: style.color,
+                thickness: style.thickness,
+              },
+            );
+            DrawUtils.drawCircleWithFill(this.canvas, renderPolygon[0], style.thickness + 2, {
+              color: style.color,
+            });
+          }
+
           // 文本渲染
           const { headerText, bottomText } = this.getRenderText(polygon, polygon?.hiddenText);
           if (headerText) {
@@ -329,6 +348,7 @@ export default class ViewOperation extends BasicToolOperation {
               },
             );
           }
+
           break;
         }
 
