@@ -11,6 +11,7 @@ import PolygonUtils from '@/utils/tool/PolygonUtils';
 import { BasicToolOperation, IBasicToolOperationProps } from './basicToolOperation';
 import MathUtils from '@/utils/MathUtils';
 import { DEFAULT_FONT } from '@/constant/tool';
+import { DEFAULT_TEXT_SHADOW, DEFAULT_TEXT_OFFSET, TEXT_ATTRIBUTE_OFFSET } from '@/constant/annotation';
 
 const newScope = 3;
 
@@ -18,6 +19,9 @@ interface IBasicStyle {
   color?: string; // 用于当前图形的颜色的特殊设置
   fill?: string; // 填充颜色
   thickness?: number; // 当前图形宽度
+
+  hiddenText?: boolean; // 是否隐藏文本
+  isReference?: boolean; // 是否进行的参考显示
 }
 
 interface IAnnotationData {
@@ -36,6 +40,9 @@ interface IBasicRect extends IBasicStyle {
 interface IBasicPolygon extends IBasicStyle {
   id: string;
   pointList: IPoint[];
+  showDirection?: boolean;
+  specialPoint?: boolean; // 顶点是否特殊点
+  specialEdge?: boolean; // 顶点与其下一个顶点连成的边是否为特殊边
 }
 
 type IBasicLine = IBasicPolygon;
@@ -195,6 +202,49 @@ export default class ViewOperation extends BasicToolOperation {
     };
   }
 
+  /**
+   * 获取当前展示的文本
+   * @param result
+   * @returns
+   */
+  public getRenderText(result: any, hiddenText = false) {
+    let headerText = '';
+    let bottomText = '';
+
+    if (!result || hiddenText === true) {
+      return { headerText, bottomText };
+    }
+
+    if (result?.order) {
+      headerText = `${result.order}`;
+    }
+
+    if (result?.label) {
+      if (headerText) {
+        headerText = `${headerText}_${result.label}`;
+      } else {
+        headerText = `${result.label}`;
+      }
+    }
+
+    if (result?.attribute) {
+      if (headerText) {
+        headerText = `${headerText}  ${result.attribute}`;
+      } else {
+        headerText = `${result.attribute}`;
+      }
+    }
+
+    if (result?.textAttribute) {
+      bottomText = result?.textAttribute;
+    }
+    return { headerText, bottomText };
+  }
+
+  public getReferenceOptions(isReference?: boolean): { lineCap?: CanvasLineCap; lineDash?: number[] } {
+    return isReference ? { lineCap: 'butt', lineDash: [20, 20] } : {};
+  }
+
   public render() {
     super.render();
     if (this.loading === true) {
@@ -205,7 +255,11 @@ export default class ViewOperation extends BasicToolOperation {
       switch (annotation.type) {
         case 'rect': {
           const rect: any = annotation.annotation;
+          const { hiddenText = false, isReference } = rect;
+          const { zoom } = this;
           const renderRect = AxisUtils.changeRectByZoom(rect, this.zoom, this.currentPos);
+
+          const { x, y, width, height } = renderRect;
           const style = this.getSpecificStyle(rect);
 
           if (rect.id === this.mouseHoverID || style.fill) {
@@ -213,10 +267,49 @@ export default class ViewOperation extends BasicToolOperation {
             const fill = `rgba(${fillArr[0]}, ${fillArr[1]}, ${fillArr[2]},${fillArr[3] * 0.8})`;
             DrawUtils.drawRectWithFill(this.canvas, renderRect, { color: fill }); // color 看后续是否要改 TODO
           }
-          DrawUtils.drawRect(this.canvas, renderRect, style);
+          DrawUtils.drawRect(this.canvas, renderRect, {
+            ...style,
+            hiddenText: true,
+            ...this.getReferenceOptions(isReference),
+          });
+
+          // 文本渲染
+          const { headerText, bottomText } = this.getRenderText(rect, rect?.hiddenText);
+
+          if (headerText) {
+            // 框体上方展示
+            DrawUtils.drawText(this.canvas, { x, y: y - 6 }, headerText, {
+              color: style.color,
+              font: 'normal normal 900 14px SourceHanSansCN-Regular',
+              ...DEFAULT_TEXT_SHADOW,
+              textMaxWidth: 300,
+            });
+          }
+
+          // 框大小数值显示
+          const rectSize = `${Math.round(width / zoom)} * ${Math.round(height / zoom)}`;
+          const textSizeWidth = rectSize.length * 7;
+          if (!hiddenText) {
+            DrawUtils.drawText(this.canvas, { x: x + width - textSizeWidth, y: y + height + 15 }, rectSize, {
+              color: style.color,
+              font: 'normal normal 600 14px Arial',
+              ...DEFAULT_TEXT_SHADOW,
+            });
+          }
+
+          if (bottomText) {
+            const marginTop = 20;
+            const textWidth = Math.max(20, width - textSizeWidth);
+            DrawUtils.drawText(this.canvas, { x, y: y + height + marginTop }, rect.textAttribute, {
+              color: style.color,
+              font: 'italic normal 900 14px Arial',
+              textMaxWidth: textWidth,
+              ...DEFAULT_TEXT_SHADOW,
+            });
+          }
+
           break;
         }
-
         case 'polygon': {
           const polygon = annotation.annotation;
           const renderPolygon = AxisUtils.changePointListByZoom(polygon?.pointList ?? [], this.zoom, this.currentPos);
@@ -229,7 +322,49 @@ export default class ViewOperation extends BasicToolOperation {
           DrawUtils.drawPolygon(this.canvas, renderPolygon, {
             ...style,
             isClose: true,
+            ...this.getReferenceOptions(polygon?.isReference),
           });
+
+          const isShowDirection = polygon?.showDirection === true && polygon?.pointList?.length > 2;
+
+          // 是否展示方向
+          if (isShowDirection) {
+            DrawUtils.drawArrowByCanvas(
+              this.canvas,
+              renderPolygon[0],
+              MathUtils.getLineCenterPoint([renderPolygon[0], renderPolygon[1]]),
+              {
+                color: style.color,
+                thickness: style.thickness,
+              },
+            );
+            DrawUtils.drawCircleWithFill(this.canvas, renderPolygon[0], style.thickness + 2, {
+              color: style.color,
+            });
+          }
+
+          // 文本渲染
+          const { headerText, bottomText } = this.getRenderText(polygon, polygon?.hiddenText);
+          if (headerText) {
+            DrawUtils.drawText(this.canvas, renderPolygon[0], headerText, {
+              color: style.color,
+              ...DEFAULT_TEXT_OFFSET,
+            });
+          }
+          if (bottomText) {
+            const endPoint = renderPolygon[renderPolygon.length - 1];
+
+            DrawUtils.drawText(
+              this.canvas,
+              { x: endPoint.x + TEXT_ATTRIBUTE_OFFSET.x, y: endPoint.y + TEXT_ATTRIBUTE_OFFSET.y },
+              bottomText,
+              {
+                color: style.color,
+                ...DEFAULT_TEXT_OFFSET,
+              },
+            );
+          }
+
           break;
         }
 
@@ -238,7 +373,47 @@ export default class ViewOperation extends BasicToolOperation {
 
           const renderLine = AxisUtils.changePointListByZoom(line.pointList as IPoint[], this.zoom, this.currentPos);
           const style = this.getSpecificStyle(line);
-          DrawUtils.drawPolygon(this.canvas, renderLine, style);
+          DrawUtils.drawPolygon(this.canvas, renderLine, { ...style, ...this.getReferenceOptions(line?.isReference) });
+
+          const isShowDirection = line?.showDirection === true && line?.pointList?.length > 2;
+
+          // 是否展示方向
+          if (isShowDirection) {
+            DrawUtils.drawArrowByCanvas(
+              this.canvas,
+              renderLine[0],
+              MathUtils.getLineCenterPoint([renderLine[0], renderLine[1]]),
+              {
+                color: style.color,
+                thickness: style.thickness,
+              },
+            );
+            DrawUtils.drawCircleWithFill(this.canvas, renderLine[0], style.thickness + 2, {
+              color: style.color,
+            });
+          }
+
+          // 文本渲染
+          const { headerText, bottomText } = this.getRenderText(line, line?.hiddenText);
+          if (headerText) {
+            DrawUtils.drawText(this.canvas, renderLine[0], headerText, {
+              color: style.color,
+              ...DEFAULT_TEXT_OFFSET,
+            });
+          }
+          if (bottomText) {
+            const endPoint = renderLine[renderLine.length - 1];
+
+            DrawUtils.drawText(
+              this.canvas,
+              { x: endPoint.x + TEXT_ATTRIBUTE_OFFSET.x, y: endPoint.y + TEXT_ATTRIBUTE_OFFSET.y },
+              bottomText,
+              {
+                color: style.color,
+                ...DEFAULT_TEXT_OFFSET,
+              },
+            );
+          }
           break;
         }
 
@@ -248,7 +423,28 @@ export default class ViewOperation extends BasicToolOperation {
           const renderPoint = AxisUtils.changePointByZoom(point, this.zoom, this.currentPos);
           const style = this.getSpecificStyle(point);
 
-          DrawUtils.drawCircle(this.canvas, renderPoint, style.radius ?? DEFAULT_RADIUS, style);
+          const radius = style.radius ?? DEFAULT_RADIUS;
+          DrawUtils.drawCircle(this.canvas, renderPoint, radius, style);
+
+          // 文本渲染
+          const { headerText, bottomText } = this.getRenderText(point, point?.hiddenText);
+          if (headerText) {
+            DrawUtils.drawText(
+              this.canvas,
+              { x: renderPoint.x + radius / 2, y: renderPoint.y - radius - 4 },
+              headerText,
+              {
+                textAlign: 'center',
+                color: style.color,
+              },
+            );
+          }
+          if (bottomText) {
+            DrawUtils.drawText(this.canvas, { x: renderPoint.x + radius, y: renderPoint.y + radius + 24 }, bottomText, {
+              color: style.color,
+              ...DEFAULT_TEXT_OFFSET,
+            });
+          }
           break;
         }
 

@@ -95,31 +95,39 @@ export default class DrawUtils {
       color: string;
       thickness: number;
       lineCap: CanvasLineCap;
+      hiddenText: boolean;
+      lineDash: number[];
     }> = {},
   ): void {
     const ctx: CanvasRenderingContext2D = canvas.getContext('2d')!;
-    const { color = DEFAULT_COLOR, thickness = 1, lineCap = 'round' } = options;
+    const { color = DEFAULT_COLOR, thickness = 1, lineCap = 'round', hiddenText = false, lineDash } = options;
     ctx.save();
     ctx.strokeStyle = color;
     ctx.lineWidth = thickness;
     ctx.lineCap = lineCap;
+    if (Array.isArray(lineDash)) {
+      ctx.setLineDash(lineDash);
+    }
     ctx.beginPath();
     ctx.fillStyle = color;
 
     ctx.strokeRect(rect.x, rect.y, rect.width, rect.height);
-    let showText = '';
-    if (rect.attribute) {
-      showText = `${showText}  ${rect.attribute}`;
-    }
-    this.drawText(canvas, { x: rect.x, y: rect.y - 5 }, showText);
-    if (rect.textAttribute) {
-      const text = `${~~rect.width} * ${~~rect.height}`;
-      const textSizeWidth = text.length * 7;
-      const marginTop = 0;
-      const textWidth = Math.max(20, rect.width - textSizeWidth);
-      this.drawText(canvas, { x: rect.x, y: rect.y + rect.height + 20 + marginTop }, rect.textAttribute, {
-        textMaxWidth: textWidth,
-      });
+
+    if (hiddenText === false) {
+      let showText = '';
+      if (rect.attribute) {
+        showText = `${showText}  ${rect.attribute}`;
+      }
+      this.drawText(canvas, { x: rect.x, y: rect.y - 5 }, showText);
+      if (rect.textAttribute) {
+        const text = `${~~rect.width} * ${~~rect.height}`;
+        const textSizeWidth = text.length * 7;
+        const marginTop = 0;
+        const textWidth = Math.max(20, rect.width - textSizeWidth);
+        this.drawText(canvas, { x: rect.x, y: rect.y + rect.height + 20 + marginTop }, rect.textAttribute, {
+          textMaxWidth: textWidth,
+        });
+      }
     }
     ctx.restore();
   }
@@ -180,6 +188,7 @@ export default class DrawUtils {
       lineCap: CanvasLineCap;
       lineType: ELineTypes;
       hoverEdgeIndex: number; //  配合 ELineTypes.Curve
+      lineDash: number[];
     }> = {},
   ) {
     if (pointList.length < 2) {
@@ -193,11 +202,15 @@ export default class DrawUtils {
       lineCap = 'round',
       lineType = ELineTypes.Line,
       hoverEdgeIndex,
+      lineDash,
     } = options;
     ctx.save();
     ctx.strokeStyle = color;
     ctx.lineWidth = thickness;
     ctx.lineCap = lineCap;
+    if (Array.isArray(lineDash)) {
+      ctx.setLineDash(lineDash);
+    }
     ctx.beginPath();
 
     if (lineType === ELineTypes.Curve) {
@@ -255,7 +268,9 @@ export default class DrawUtils {
     ctx.lineWidth = thickness;
     ctx.arc(anchorPoint.x, anchorPoint.y, radius, startAngleRad, endAngleRad, false);
     ctx.stroke();
-    ctx.fill();
+    if (fill) {
+      ctx.fill();
+    }
     ctx.closePath();
     ctx.restore();
   }
@@ -290,6 +305,7 @@ export default class DrawUtils {
       lineCap: CanvasLineCap;
       isClose: boolean; // 是否闭合
       lineType: ELineTypes;
+      lineDash: number[];
     }> = {},
   ): void {
     const { isClose = false, lineType = ELineTypes.Line } = options;
@@ -503,7 +519,6 @@ export default class DrawUtils {
       lineCap: CanvasLineCap;
       theta: number; // 用于控制箭头的偏移
       headLen: number; // 箭头长度
-      ctx: CanvasRenderingContext2D;
     }> = {},
   ): void {
     const { color = DEFAULT_COLOR, thickness = 1, lineCap = 'round', theta = 30, headLen = 10 } = options;
@@ -527,5 +542,21 @@ export default class DrawUtils {
 
     ctx.stroke();
     ctx.restore();
+  }
+
+  public static drawArrowByCanvas(
+    canvas: HTMLCanvasElement,
+    startPoint: IPoint | IPolygonPoint,
+    endPoint: IPoint | IPolygonPoint,
+    options: Partial<{
+      color: string;
+      thickness: number;
+      lineCap: CanvasLineCap;
+      theta: number; // 用于控制箭头的偏移
+      headLen: number; // 箭头长度
+    }> = {},
+  ): void {
+    const ctx: CanvasRenderingContext2D = canvas.getContext('2d')!;
+    this.drawArrow(ctx, startPoint, endPoint, options);
   }
 }

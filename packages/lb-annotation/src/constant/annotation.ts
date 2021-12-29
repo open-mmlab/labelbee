@@ -71,3 +71,9 @@ export const DEFAULT_TEXT_SHADOW = {
   shadowOffsetY: 2,
   shadowBlur: 4,
 };
+
+// 文本展示的偏移
+export const TEXT_ATTRIBUTE_OFFSET = {
+  x: 8,
+  y: 26,
+};

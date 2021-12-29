@@ -4,6 +4,7 @@
 
 import { DEFAULT_FONT, DEFAULT_TEXT_MAX_WIDTH, SEGMENT_NUMBER } from '@/constant/tool';
 import { createSmoothCurvePointsFromPointList } from './tool/polygonTool';
+import Vector from './VectorUtils';
 
 export default class MathUtils {
   /**
@@ -248,6 +249,22 @@ export default class MathUtils {
       height: height + fontHeight,
       lineHeight,
       fontHeight,
+    };
+  }
+
+  /**
+   * 获取线条中心点
+   * @param line
+   * @returns
+   */
+  public static getLineCenterPoint(line: [ICoordinate, ICoordinate]) {
+    const [p1, p2] = line;
+
+    const vector = Vector.getVector(p1, p2);
+
+    return {
+      x: p1.x + vector.x / 2,
+      y: p1.y + vector.y / 2,
     };
   }
 }
