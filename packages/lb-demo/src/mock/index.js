@@ -90,7 +90,7 @@ export const DEFAULT_ANNOTATIONS = [
       y: 23,
       width: 100,
       height: 100,
-      color: 'pink',
+      stroke: 'pink',
       // thickness: 10,
     },
   },
@@ -99,7 +99,7 @@ export const DEFAULT_ANNOTATIONS = [
     annotation: {
       id: '3',
       // thickness: 10,
-      color: 'green',
+      stroke: 'green',
       pointList: [
         {
           x: 12,
@@ -119,10 +119,9 @@ export const DEFAULT_ANNOTATIONS = [
   {
     type: 'line',
     annotation: {
-      color: 'yellow',
+      stroke: 'yellow',
       thickness: 5,
       id: '4',
-
       pointList: [
         {
           x: 123,
@@ -146,7 +145,7 @@ export const DEFAULT_ANNOTATIONS = [
       x: 10,
       y: 10,
       fill: 'green',
-      color: 'blue',
+      stroke: 'blue',
       thickness: '20',
       radius: 10,
     },

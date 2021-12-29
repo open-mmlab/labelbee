@@ -37,8 +37,8 @@ const AnnotationView = (props: IProps, ref: any) => {
     src,
     annotations = [],
     style = {
-      color: 'blue',
-      thickness: 5,
+      stroke: 'blue',
+      thickness: 3,
     },
     zoomChange,
     backgroundStyle = {},

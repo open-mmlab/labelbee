@@ -45,18 +45,22 @@ interface ISize {
 }
 
 interface IBasicStyle {
-  color?: string; 
-  fill?: string; 
+  stroke?: string; // border color
+  fill?: string;  // fill color
   thickness?: number;
 }
 
+interface IGraphicsBasicConfig extends IBasicStyle {
+  hiddenText?: boolean; 
+  isReference?: boolean;
+}
 
 interface IAnnotationData {
   type: 'rect' | 'polygon' | 'line' | 'point';
   annotation: IBasicRect & IBasicPolygon & IBasicLine & IPoint;
 }
 
-interface IBasicRect extends IBasicStyle {
+interface IBasicRect extends IGraphicsBasicConfig {
   id: string;
   x: number;
   y: number;
@@ -64,14 +68,14 @@ interface IBasicRect extends IBasicStyle {
   height: number;
 }
 
-interface IBasicPolygon extends IBasicStyle {
+interface IBasicPolygon extends IGraphicsBasicConfig {
   id: string;
   pointList: IPoint[];
 }
 
 type IBasicLine = IBasicPolygon;
 
-interface IPoint extends IBasicStyle {
+interface IPoint extends IGraphicsBasicConfig {
   x: number;
   y: number;
   radius?: number;
