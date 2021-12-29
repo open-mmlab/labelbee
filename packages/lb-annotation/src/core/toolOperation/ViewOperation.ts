@@ -220,7 +220,11 @@ export default class ViewOperation extends BasicToolOperation {
     }
 
     if (result?.label) {
-      headerText = `${result?.label}`;
+      if (headerText) {
+        headerText = `${headerText}_${result.label}`;
+      } else {
+        headerText = `${result.label}`;
+      }
     }
 
     if (result?.attribute) {
