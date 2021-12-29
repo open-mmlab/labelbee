@@ -163,6 +163,7 @@ export const DEFAULT_ANNOTATIONS = [
   {
     type: 'text',
     annotation: {
+      position: 'rt',
       id: '11',
       x: 223,
       y: 23,
