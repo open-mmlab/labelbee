@@ -95,15 +95,19 @@ export default class DrawUtils {
       color: string;
       thickness: number;
       lineCap: CanvasLineCap;
-      hiddenText?: boolean;
+      hiddenText: boolean;
+      lineDash: number[];
     }> = {},
   ): void {
     const ctx: CanvasRenderingContext2D = canvas.getContext('2d')!;
-    const { color = DEFAULT_COLOR, thickness = 1, lineCap = 'round', hiddenText = false } = options;
+    const { color = DEFAULT_COLOR, thickness = 1, lineCap = 'round', hiddenText = false, lineDash } = options;
     ctx.save();
     ctx.strokeStyle = color;
     ctx.lineWidth = thickness;
     ctx.lineCap = lineCap;
+    if (Array.isArray(lineDash)) {
+      ctx.setLineDash(lineDash);
+    }
     ctx.beginPath();
     ctx.fillStyle = color;
 
@@ -184,6 +188,7 @@ export default class DrawUtils {
       lineCap: CanvasLineCap;
       lineType: ELineTypes;
       hoverEdgeIndex: number; //  配合 ELineTypes.Curve
+      lineDash: number[];
     }> = {},
   ) {
     if (pointList.length < 2) {
@@ -197,11 +202,15 @@ export default class DrawUtils {
       lineCap = 'round',
       lineType = ELineTypes.Line,
       hoverEdgeIndex,
+      lineDash,
     } = options;
     ctx.save();
     ctx.strokeStyle = color;
     ctx.lineWidth = thickness;
     ctx.lineCap = lineCap;
+    if (Array.isArray(lineDash)) {
+      ctx.setLineDash(lineDash);
+    }
     ctx.beginPath();
 
     if (lineType === ELineTypes.Curve) {
@@ -296,6 +305,7 @@ export default class DrawUtils {
       lineCap: CanvasLineCap;
       isClose: boolean; // 是否闭合
       lineType: ELineTypes;
+      lineDash: number[];
     }> = {},
   ): void {
     const { isClose = false, lineType = ELineTypes.Line } = options;

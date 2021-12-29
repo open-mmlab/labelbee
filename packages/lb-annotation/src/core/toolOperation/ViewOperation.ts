@@ -20,7 +20,8 @@ interface IBasicStyle {
   fill?: string; // 填充颜色
   thickness?: number; // 当前图形宽度
 
-  hiddenText?: boolean;
+  hiddenText?: boolean; // 是否隐藏文本
+  isReference?: boolean; // 是否进行的参考显示
 }
 
 interface IAnnotationData {
@@ -40,6 +41,8 @@ interface IBasicPolygon extends IBasicStyle {
   id: string;
   pointList: IPoint[];
   showDirection?: boolean;
+  specialPoint?: boolean; // 顶点是否特殊点
+  specialEdge?: boolean; // 顶点与其下一个顶点连成的边是否为特殊边
 }
 
 type IBasicLine = IBasicPolygon;
@@ -234,6 +237,10 @@ export default class ViewOperation extends BasicToolOperation {
     return { headerText, bottomText };
   }
 
+  public getReferenceOptions(isReference?: boolean): { lineCap?: CanvasLineCap; lineDash?: number[] } {
+    return isReference ? { lineCap: 'butt', lineDash: [20, 20] } : {};
+  }
+
   public render() {
     super.render();
     if (this.loading === true) {
@@ -244,7 +251,7 @@ export default class ViewOperation extends BasicToolOperation {
       switch (annotation.type) {
         case 'rect': {
           const rect: any = annotation.annotation;
-          const { hiddenText = false } = rect;
+          const { hiddenText = false, isReference } = rect;
           const { zoom } = this;
           const renderRect = AxisUtils.changeRectByZoom(rect, this.zoom, this.currentPos);
 
@@ -256,7 +263,11 @@ export default class ViewOperation extends BasicToolOperation {
             const fill = `rgba(${fillArr[0]}, ${fillArr[1]}, ${fillArr[2]},${fillArr[3] * 0.8})`;
             DrawUtils.drawRectWithFill(this.canvas, renderRect, { color: fill }); // color 看后续是否要改 TODO
           }
-          DrawUtils.drawRect(this.canvas, renderRect, { ...style, hiddenText: true });
+          DrawUtils.drawRect(this.canvas, renderRect, {
+            ...style,
+            hiddenText: true,
+            ...this.getReferenceOptions(isReference),
+          });
 
           // 文本渲染
           const { headerText, bottomText } = this.getRenderText(rect, rect?.hiddenText);
@@ -307,6 +318,7 @@ export default class ViewOperation extends BasicToolOperation {
           DrawUtils.drawPolygon(this.canvas, renderPolygon, {
             ...style,
             isClose: true,
+            ...this.getReferenceOptions(polygon?.isReference),
           });
 
           const isShowDirection = polygon?.showDirection === true && polygon?.pointList?.length > 2;
@@ -357,8 +369,7 @@ export default class ViewOperation extends BasicToolOperation {
 
           const renderLine = AxisUtils.changePointListByZoom(line.pointList as IPoint[], this.zoom, this.currentPos);
           const style = this.getSpecificStyle(line);
-          DrawUtils.drawPolygon(this.canvas, renderLine, style);
-
+          DrawUtils.drawPolygon(this.canvas, renderLine, { ...style, ...this.getReferenceOptions(line?.isReference) });
           // 文本渲染
           const { headerText, bottomText } = this.getRenderText(line, line?.hiddenText);
           if (headerText) {
