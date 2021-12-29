@@ -370,6 +370,25 @@ export default class ViewOperation extends BasicToolOperation {
           const renderLine = AxisUtils.changePointListByZoom(line.pointList as IPoint[], this.zoom, this.currentPos);
           const style = this.getSpecificStyle(line);
           DrawUtils.drawPolygon(this.canvas, renderLine, { ...style, ...this.getReferenceOptions(line?.isReference) });
+
+          const isShowDirection = line?.showDirection === true && line?.pointList?.length > 2;
+
+          // 是否展示方向
+          if (isShowDirection) {
+            DrawUtils.drawArrowByCanvas(
+              this.canvas,
+              renderLine[0],
+              MathUtils.getLineCenterPoint([renderLine[0], renderLine[1]]),
+              {
+                color: style.color,
+                thickness: style.thickness,
+              },
+            );
+            DrawUtils.drawCircleWithFill(this.canvas, renderLine[0], style.thickness + 2, {
+              color: style.color,
+            });
+          }
+
           // 文本渲染
           const { headerText, bottomText } = this.getRenderText(line, line?.hiddenText);
           if (headerText) {
