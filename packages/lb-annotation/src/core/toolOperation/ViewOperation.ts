@@ -53,6 +53,7 @@ interface IBasicText {
   x: number;
   y: number;
   text: string; // Use \n for line feed
+  position: 'rt';
   textMaxWidth?: number;
 
   color?: string;
@@ -472,7 +473,11 @@ export default class ViewOperation extends BasicToolOperation {
             background = 'rgba(0, 0, 0, 0.6)',
             lineHeight = 25,
             font = DEFAULT_FONT,
+            position,
           } = textAnnotation;
+          const paddingTB = 10;
+          const paddingLR = 10;
+
           const renderPoint = AxisUtils.changePointByZoom({ x, y }, this.zoom, this.currentPos);
 
           const {
@@ -481,8 +486,13 @@ export default class ViewOperation extends BasicToolOperation {
             fontHeight = 0,
           } = MathUtils.getTextArea(this.canvas, textAnnotation.text, textMaxWidth, font, lineHeight);
 
-          const paddingTB = 10;
-          const paddingLR = 10;
+          // 定位在右上角
+          if (position === 'rt') {
+            Object.assign(renderPoint, {
+              x: this.canvas.width - width - paddingLR * 2,
+              y: 0,
+            });
+          }
 
           // 字体背景
           DrawUtils.drawRectWithFill(
