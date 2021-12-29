@@ -181,7 +181,7 @@ export default class DrawUtils {
    */
   public static drawLineWithPointList(
     canvas: HTMLCanvasElement,
-    pointList: IPoint[] | IPolygonPoint[],
+    pointList: IPolygonPoint[],
     options: Partial<{
       color: string;
       thickness: number;
@@ -229,12 +229,27 @@ export default class DrawUtils {
       pointList = pointList.slice(hoverEdgeIndex, hoverEdgeIndex + 2);
     }
 
-    const [firstPoint, ...nextPointList] = pointList;
-    ctx.moveTo(firstPoint.x, firstPoint.y);
-    nextPointList.forEach((point) => {
-      ctx.lineTo(point.x, point.y);
-    });
-    ctx.stroke();
+    for (let i = 0; i < pointList.length - 1; i++) {
+      ctx.beginPath();
+      ctx.moveTo(pointList[i].x, pointList[i].y);
+
+      ctx.save();
+
+      // 特殊边绘制
+      if (pointList[i].specialEdge) {
+        ctx.lineWidth = thickness * 1.5;
+        ctx.lineCap = 'butt';
+        ctx.setLineDash([10, 10]);
+      }
+
+      ctx.lineTo(pointList[i + 1].x, pointList[i + 1].y);
+      ctx.stroke();
+      ctx.restore();
+      // 特殊点绘制
+      if (pointList[i].specialPoint) {
+        this.drawSpecialPoint(canvas, pointList[i], thickness, 'white');
+      }
+    }
     ctx.restore();
   }
 
@@ -292,6 +307,41 @@ export default class DrawUtils {
     ctx.fillStyle = color;
     ctx.beginPath();
     ctx.arc(anchorPoint.x, anchorPoint.y, radius, startAngleRad, endAngleRad, false);
+    ctx.fill();
+    ctx.restore();
+  }
+
+  /**
+   * 绘制单点
+   *
+   * @export
+   * @param {CanvasRenderingContext2D} ctx
+   * @param {ICoord} point
+   * @param {number} [pointRadius=6]
+   * @param {string} fillStyle
+   * @param {boolean} [specialPoint]
+   */
+  public static drawSpecialPoint(
+    canvas: HTMLCanvasElement,
+    point: ICoordinate,
+    pointRadius: number = 6,
+    fillStyle: string,
+  ) {
+    const ctx: CanvasRenderingContext2D = canvas.getContext('2d')!;
+
+    const { x, y } = point;
+    ctx.save();
+    ctx.beginPath();
+    ctx.fillStyle = fillStyle;
+
+    const newPointRadius = pointRadius * 1.5;
+    const xl = (newPointRadius * Math.sqrt(3)) / 2;
+    const yl = newPointRadius / 2;
+    ctx.moveTo(x, y - newPointRadius);
+    ctx.lineTo(x - xl, y + yl);
+    ctx.lineTo(x + xl, y + yl);
+    ctx.closePath();
+
     ctx.fill();
     ctx.restore();
   }
