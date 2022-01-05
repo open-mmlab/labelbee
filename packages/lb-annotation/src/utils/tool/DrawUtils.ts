@@ -211,6 +211,7 @@ export default class DrawUtils {
       lineCap: CanvasLineCap;
       lineType: ELineTypes;
       lineDash: number[];
+      hoverEdgeIndex: number;
     }> = {},
   ) {
     if (pointList.length < 2) {
@@ -218,7 +219,14 @@ export default class DrawUtils {
     }
 
     const ctx: CanvasRenderingContext2D = canvas.getContext('2d')!;
-    const { color = DEFAULT_COLOR, thickness = 1, lineCap = 'round', lineType = ELineTypes.Line, lineDash } = options;
+    const {
+      color = DEFAULT_COLOR,
+      thickness = 1,
+      lineCap = 'round',
+      lineType = ELineTypes.Line,
+      lineDash,
+      hoverEdgeIndex,
+    } = options;
     ctx.save();
     const setStyle = () => {
       ctx.strokeStyle = color;
@@ -233,7 +241,20 @@ export default class DrawUtils {
     setStyle();
 
     if (lineType === ELineTypes.Curve) {
+      // 适配 HoverEdge 的高亮形式，TODO
+      if (hoverEdgeIndex !== undefined && hoverEdgeIndex > -1) {
+        pointList.push(pointList[0]);
+      }
+
       pointList = PolygonUtils.createSmoothCurvePointsFromPointList([...pointList], SEGMENT_NUMBER);
+
+      if (hoverEdgeIndex !== undefined && hoverEdgeIndex > -1) {
+        // 想要绘制第 hoverEdgeIndex 的边, 注意，现在发现这种闭合的初始化的点并不是从 点 0 开始，而是从  0的后一个点开始
+        pointList = pointList.slice((SEGMENT_NUMBER + 1) * hoverEdgeIndex, (SEGMENT_NUMBER + 1) * (hoverEdgeIndex + 1));
+      }
+    } else if (hoverEdgeIndex !== undefined && hoverEdgeIndex > -1) {
+      pointList = [...pointList, pointList[0]];
+      pointList = pointList.slice(hoverEdgeIndex, hoverEdgeIndex + 2);
     }
 
     ctx.beginPath();
