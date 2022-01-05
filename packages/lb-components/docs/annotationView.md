@@ -72,6 +72,12 @@ interface IBasicRect extends IGraphicsBasicConfig {
 interface IBasicPolygon extends IGraphicsBasicConfig {
   id: string;
   pointList: IPoint[];
+
+  showDirection?: boolean;
+  specialPoint?: boolean; // 顶点是否特殊点
+  specialEdge?: boolean; // 顶点与a其下一个顶点连成的边是否为特殊边
+
+  lineType?: ELineTypes;
 }
 
 type IBasicLine = IBasicPolygon;

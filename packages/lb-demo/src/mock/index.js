@@ -92,6 +92,10 @@ export const DEFAULT_ANNOTATIONS = [
       height: 100,
       stroke: 'pink',
       // thickness: 10,
+      label: 'laoluo',
+      attribute: 'asdasd',
+      order: 1,
+      // hiddenText: true
     },
   },
   {
@@ -100,6 +104,7 @@ export const DEFAULT_ANNOTATIONS = [
       id: '3',
       // thickness: 10,
       stroke: 'green',
+      lineType: 1,
       pointList: [
         {
           x: 12,
@@ -167,8 +172,9 @@ export const DEFAULT_ANNOTATIONS = [
       id: '11',
       x: 223,
       y: 23,
-      textMaxWidth: 300,
-      text: '标签1: 测试1 \n标签2: 测试2'
+      textMaxWidth: 416,
+      color: 'yellow',
+      text: '标签1: 测试1LoooooooooooooooooooooooooooooooooogLoooooooooooooooooooooooooooooooooogLoooooooooooooooooooooooooooooooooogLoooooooooooooooooooooooooooooooooogLoooooooooooooooooooooooooooooooooog\n标签2: 测试2sdasdas\n\n\n标签1: 测试1asdasdasd\n标签2: 测试2标签1: 测试1\n标签2: 测试2sdasdas\n标签1: 测试1asdasdasd\n标签2: 测试2标签1: 测试1\n标签2: 测试2sdasdas\n标签1: 测试1asdasdasd\n标签2: 测试2标签1: 测试1\n标签2: 测试2sdasdas\n标签1: 测试1asdasdasd\n标签2: 测试2标签1: 测试1\n标签2: 测试2sdasdas\n标签1: 测试1asdasdasd\n标签2: 测试2标签1: 测试1\n标签2: 测试2sdasdas\n标签1: 测试1asdasdasd\n标签2: 测试2'
     }
   },
   {

@@ -10,71 +10,18 @@ import RectUtils from '@/utils/tool/RectUtils';
 import PolygonUtils from '@/utils/tool/PolygonUtils';
 import { BasicToolOperation, IBasicToolOperationProps } from './basicToolOperation';
 import MathUtils from '@/utils/MathUtils';
-import { DEFAULT_FONT } from '@/constant/tool';
+import RenderDomClass from '@/utils/tool/RenderDomClass';
+import { DEFAULT_FONT, ELineTypes, SEGMENT_NUMBER } from '@/constant/tool';
 import { DEFAULT_TEXT_SHADOW, DEFAULT_TEXT_OFFSET, TEXT_ATTRIBUTE_OFFSET } from '@/constant/annotation';
 
 const newScope = 3;
-
-interface IBasicStyle {
-  stroke?: string; // 边框颜色
-  fill?: string; // 填充颜色
-  thickness?: number; // 当前图形宽度
-}
-
-interface IGraphicsBasicConfig extends IBasicStyle {
-  hiddenText?: boolean; // 是否隐藏文本
-  isReference?: boolean; // 是否进行的参考显示
-}
-
-interface IAnnotationData {
-  type: 'rect' | 'polygon' | 'line' | 'point' | 'text';
-  annotation: IBasicRect & IBasicPolygon & IBasicLine & IPoint & IBasicText;
-}
-
-interface IBasicRect extends IGraphicsBasicConfig {
-  id: string;
-  x: number;
-  y: number;
-  width: number;
-  height: number;
-}
-
-interface IBasicPolygon extends IGraphicsBasicConfig {
-  id: string;
-  pointList: IPoint[];
-  showDirection?: boolean;
-  specialPoint?: boolean; // 顶点是否特殊点
-  specialEdge?: boolean; // 顶点与其下一个顶点连成的边是否为特殊边
-}
-
-type IBasicLine = IBasicPolygon;
-
-interface IBasicText {
-  x: number;
-  y: number;
-  text: string; // Use \n for line feed
-  position: 'rt';
-  textMaxWidth?: number;
-
-  color?: string;
-  background?: string;
-  lineHeight?: number;
-  font?: string; // canvas-font https://developer.mozilla.org/en-US/docs/Web/API/CanvasRenderingContext2D/font
-}
-
-interface IPoint extends IGraphicsBasicConfig {
-  x: number;
-  y: number;
-  radius?: number;
-}
+const DEFAULT_RADIUS = 3;
+const DEFAULT_STROKE_COLOR = '#6371FF';
 
 type IViewOperationProps = {
   style: IBasicStyle;
   annotations: IAnnotationData[];
 } & IBasicToolOperationProps;
-
-const DEFAULT_RADIUS = 3;
-const DEFAULT_STROKE_COLOR = '#6371FF';
 
 export default class ViewOperation extends BasicToolOperation {
   public style: IBasicStyle = {};
@@ -85,11 +32,17 @@ export default class ViewOperation extends BasicToolOperation {
 
   private loading: boolean; // 加载图片时不渲染图形
 
+  private renderDomInstance: RenderDomClass;
+
   constructor(props: IViewOperationProps) {
     super({ ...props, showDefaultCursor: true });
     this.style = props.style ?? { stroke: DEFAULT_STROKE_COLOR, thickness: 3 };
     this.annotations = props.annotations;
     this.loading = false;
+    this.renderDomInstance = new RenderDomClass({
+      container: this.container,
+      height: this.canvas.height,
+    });
   }
 
   public setLoading(loading: boolean) {
@@ -264,6 +217,9 @@ export default class ViewOperation extends BasicToolOperation {
     if (this.loading === true) {
       return;
     }
+    this.renderDomInstance.render(
+      this.annotations.filter((v) => v.type === 'text' && v.annotation.position === 'rt').map((v) => v.annotation),
+    );
 
     this.annotations.forEach((annotation) => {
       switch (annotation.type) {
@@ -326,32 +282,37 @@ export default class ViewOperation extends BasicToolOperation {
         }
         case 'polygon': {
           const polygon = annotation.annotation;
+          const { lineType = ELineTypes.Line } = polygon;
           const renderPolygon = AxisUtils.changePointListByZoom(polygon?.pointList ?? [], this.zoom, this.currentPos);
           const style = this.getSpecificStyle(polygon);
           if (polygon.id === this.mouseHoverID || style.fill) {
             const fillArr = rgba(style?.fill ?? style?.stroke ?? DEFAULT_STROKE_COLOR);
             const fill = `rgba(${fillArr[0]}, ${fillArr[1]}, ${fillArr[2]},${fillArr[3] * 0.8})`;
-            DrawUtils.drawPolygonWithFill(this.canvas, renderPolygon, { color: fill });
+            DrawUtils.drawPolygonWithFill(this.canvas, renderPolygon, { color: fill, lineType });
           }
-          DrawUtils.drawPolygon(this.canvas, renderPolygon, {
+          const newPointList = DrawUtils.drawPolygon(this.canvas, renderPolygon, {
             ...style,
             isClose: true,
             ...this.getReferenceOptions(polygon?.isReference),
+            lineType,
           });
 
           const isShowDirection = polygon?.showDirection === true && polygon?.pointList?.length > 2;
 
           // 是否展示方向
           if (isShowDirection) {
-            DrawUtils.drawArrowByCanvas(
-              this.canvas,
-              renderPolygon[0],
-              MathUtils.getLineCenterPoint([renderPolygon[0], renderPolygon[1]]),
-              {
-                color: style.stroke,
-                thickness: style.thickness,
-              },
-            );
+            let startPoint = renderPolygon[0];
+            let endPoint = MathUtils.getLineCenterPoint([renderPolygon[0], renderPolygon[1]]);
+
+            if (lineType === ELineTypes.Curve) {
+              const pos = Math.floor(SEGMENT_NUMBER / 2);
+              startPoint = newPointList[pos];
+              endPoint = newPointList[pos + 1];
+            }
+            DrawUtils.drawArrowByCanvas(this.canvas, startPoint, endPoint, {
+              color: style.stroke,
+              thickness: style.thickness,
+            });
             DrawUtils.drawCircleWithFill(this.canvas, renderPolygon[0], style.thickness + 2, {
               color: style.stroke,
             });
@@ -384,24 +345,32 @@ export default class ViewOperation extends BasicToolOperation {
 
         case 'line': {
           const line = annotation.annotation;
+          const { lineType = ELineTypes.Line } = line;
 
           const renderLine = AxisUtils.changePointListByZoom(line.pointList as IPoint[], this.zoom, this.currentPos);
           const style = this.getSpecificStyle(line);
-          DrawUtils.drawPolygon(this.canvas, renderLine, { ...style, ...this.getReferenceOptions(line?.isReference) });
+          const newPointList = DrawUtils.drawPolygon(this.canvas, renderLine, {
+            ...style,
+            ...this.getReferenceOptions(line?.isReference),
+            lineType,
+          });
 
           const isShowDirection = line?.showDirection === true && line?.pointList?.length > 2;
 
           // 是否展示方向
           if (isShowDirection) {
-            DrawUtils.drawArrowByCanvas(
-              this.canvas,
-              renderLine[0],
-              MathUtils.getLineCenterPoint([renderLine[0], renderLine[1]]),
-              {
-                color: style.stroke,
-                thickness: style.thickness,
-              },
-            );
+            let startPoint = renderLine[0];
+            let endPoint = MathUtils.getLineCenterPoint([renderLine[0], renderLine[1]]);
+
+            if (lineType === ELineTypes.Curve) {
+              const pos = Math.floor(SEGMENT_NUMBER / 2);
+              startPoint = newPointList[pos];
+              endPoint = newPointList[pos + 1];
+            }
+            DrawUtils.drawArrowByCanvas(this.canvas, startPoint, endPoint, {
+              color: style.stroke,
+              thickness: style.thickness,
+            });
             DrawUtils.drawCircleWithFill(this.canvas, renderLine[0], style.thickness + 2, {
               color: style.stroke,
             });
@@ -486,12 +455,9 @@ export default class ViewOperation extends BasicToolOperation {
             fontHeight = 0,
           } = MathUtils.getTextArea(this.canvas, textAnnotation.text, textMaxWidth, font, lineHeight);
 
-          // 定位在右上角
+          // 定位在右上角 - 以 dom 元素展现
           if (position === 'rt') {
-            Object.assign(renderPoint, {
-              x: this.canvas.width - width - paddingLR * 2,
-              y: 0,
-            });
+            break;
           }
 
           // 字体背景

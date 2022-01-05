@@ -101,10 +101,10 @@ export default class PolygonUtils {
    * @returns {Array<number>}
    */
   static createSmoothCurvePointsFromPointList(
-    pointList: Array<{ x: number; y: number }>,
+    pointList: Array<{ x: number; y: number; [a: string]: any }>,
     numberOfSegments: number = SEGMENT_NUMBER,
   ) {
-    return this.createSmoothCurvePoints(
+    const newPoints = this.createSmoothCurvePoints(
       pointList.reduce((acc: number[], cur: { x: number; y: number }) => {
         return [...acc, cur.x, cur.y];
       }, []),
@@ -112,6 +112,25 @@ export default class PolygonUtils {
       false,
       numberOfSegments,
     );
+
+    // TODO 该部分后续可以优化，将原有点的信息嵌入
+    return newPoints.map((p, i) => {
+      const pos = i / (SEGMENT_NUMBER + 1);
+      const v = Math.floor(pos);
+      const data = pointList[v] ?? {};
+
+      if (v === pos) {
+        return {
+          ...data,
+          ...p,
+        };
+      }
+
+      return {
+        specialEdge: data.specialEdge,
+        ...p,
+      };
+    });
   }
 
   static createSmoothCurvePoints(

@@ -139,7 +139,9 @@ const AnnotationView = (props: IProps, ref: any) => {
     };
   }, [zoomChange, onChange]);
 
-  const mainRender = <div ref={annotationRef} style={{ ...size, ...backgroundStyle }} />;
+  const mainRender = (
+    <div ref={annotationRef} style={{ position: 'relative', ...size, ...backgroundStyle }} />
+  );
 
   return (
     <Spin spinning={showLoading || loading} delay={300}>
