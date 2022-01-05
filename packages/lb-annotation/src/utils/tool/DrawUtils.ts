@@ -154,6 +154,27 @@ export default class DrawUtils {
     ctx.restore();
   }
 
+  /**
+   * 通过 DOM 形式创建标签
+   * @param parent
+   * @param text
+   * @param id
+   * @returns
+   */
+  public static drawTagByDom(parent: HTMLElement, text: string, id: string) {
+    const parentNode = parent;
+    if (!(text?.length > 0)) {
+      return;
+    }
+
+    const dom = document.createElement('div');
+    dom.innerHTML = text;
+    dom.setAttribute('id', id);
+    parentNode?.appendChild(dom);
+
+    return dom;
+  }
+
   public static drawTag(canvas: HTMLCanvasElement, tagList: { keyName: string; value: string[] }[]) {
     const parentNode = canvas?.parentNode;
     const oldDom = window.self.document.getElementById('tagToolTag');
@@ -170,6 +191,8 @@ export default class DrawUtils {
       }, '') ?? '';
     dom.setAttribute('id', 'tagToolTag');
     parentNode?.appendChild(dom);
+
+    return dom;
   }
 
   /**
@@ -187,7 +210,6 @@ export default class DrawUtils {
       thickness: number;
       lineCap: CanvasLineCap;
       lineType: ELineTypes;
-      hoverEdgeIndex: number; //  配合 ELineTypes.Curve
       lineDash: number[];
     }> = {},
   ) {
@@ -196,61 +218,65 @@ export default class DrawUtils {
     }
 
     const ctx: CanvasRenderingContext2D = canvas.getContext('2d')!;
-    const {
-      color = DEFAULT_COLOR,
-      thickness = 1,
-      lineCap = 'round',
-      lineType = ELineTypes.Line,
-      hoverEdgeIndex,
-      lineDash,
-    } = options;
+    const { color = DEFAULT_COLOR, thickness = 1, lineCap = 'round', lineType = ELineTypes.Line, lineDash } = options;
     ctx.save();
-    ctx.strokeStyle = color;
-    ctx.lineWidth = thickness;
-    ctx.lineCap = lineCap;
-    if (Array.isArray(lineDash)) {
-      ctx.setLineDash(lineDash);
-    }
-    ctx.beginPath();
+    const setStyle = () => {
+      ctx.strokeStyle = color;
+      ctx.lineWidth = thickness;
+      ctx.lineCap = lineCap;
+      if (Array.isArray(lineDash)) {
+        ctx.setLineDash(lineDash);
+      } else {
+        ctx.setLineDash([]);
+      }
+    };
+    setStyle();
 
     if (lineType === ELineTypes.Curve) {
-      if (hoverEdgeIndex !== undefined && hoverEdgeIndex > -1) {
-        pointList.push(pointList[0]);
-      }
-
       pointList = PolygonUtils.createSmoothCurvePointsFromPointList([...pointList], SEGMENT_NUMBER);
-
-      if (hoverEdgeIndex !== undefined && hoverEdgeIndex > -1) {
-        // 想要绘制第 hoverEdgeIndex 的边, 注意，现在发现这种闭合的初始化的点并不是从 点 0 开始，而是从  0的后一个点开始
-        pointList = pointList.slice((SEGMENT_NUMBER + 1) * hoverEdgeIndex, (SEGMENT_NUMBER + 1) * (hoverEdgeIndex + 1));
-      }
-    } else if (hoverEdgeIndex !== undefined && hoverEdgeIndex > -1) {
-      pointList = [...pointList, pointList[0]];
-      pointList = pointList.slice(hoverEdgeIndex, hoverEdgeIndex + 2);
     }
 
+    ctx.beginPath();
     for (let i = 0; i < pointList.length - 1; i++) {
-      ctx.beginPath();
-      ctx.moveTo(pointList[i].x, pointList[i].y);
-
-      ctx.save();
+      if (i === 0) {
+        ctx.moveTo(pointList[i].x, pointList[i].y);
+      }
 
       // 特殊边绘制
       if (pointList[i].specialEdge) {
-        ctx.lineWidth = thickness * 1.5;
-        ctx.lineCap = 'butt';
-        ctx.setLineDash([10, 10]);
-      }
+        // 连续边结束
+        if (!(i > 0 && pointList[i - 1].specialEdge === true)) {
+          ctx.stroke();
+          ctx.beginPath();
+          ctx.moveTo(pointList[i].x, pointList[i].y);
+          ctx.lineWidth = thickness * 0.8;
+          ctx.lineCap = 'butt';
+          ctx.setLineDash([10, 10]);
+        }
 
-      ctx.lineTo(pointList[i + 1].x, pointList[i + 1].y);
-      ctx.stroke();
-      ctx.restore();
-      // 特殊点绘制
-      if (pointList[i].specialPoint) {
-        this.drawSpecialPoint(canvas, pointList[i], thickness, 'white');
+        ctx.lineTo(pointList[i + 1].x, pointList[i + 1].y);
+        continue;
+      } else if (i > 0 && pointList[i - 1].specialEdge) {
+        ctx.stroke();
+        // 前一个点为的特殊点且当前点不为特殊边
+        ctx.beginPath();
+        setStyle();
+        ctx.moveTo(pointList[i].x, pointList[i].y);
       }
+      ctx.lineTo(pointList[i + 1].x, pointList[i + 1].y);
     }
+    ctx.stroke();
     ctx.restore();
+    // 特殊点绘制
+
+    pointList.forEach((p) => {
+      if (p.specialPoint) {
+        this.drawSpecialPoint(canvas, p, thickness, 'white');
+      }
+    });
+
+    // 用于外层获取曲线更新后数据
+    return pointList;
   }
 
   public static drawCircle(
@@ -357,7 +383,7 @@ export default class DrawUtils {
       lineType: ELineTypes;
       lineDash: number[];
     }> = {},
-  ): void {
+  ) {
     const { isClose = false, lineType = ELineTypes.Line } = options;
     if (isClose === true) {
       pointList = [...pointList, pointList[0]];
@@ -367,7 +393,13 @@ export default class DrawUtils {
       pointList = PolygonUtils.createSmoothCurvePointsFromPointList([...pointList]);
     }
 
-    this.drawLineWithPointList(canvas, pointList, options);
+    this.drawLineWithPointList(canvas, pointList, {
+      ...options,
+      lineType: ELineTypes.Line,
+    });
+
+    // 用于外层获取曲线更新后数据
+    return pointList;
   }
 
   public static drawPolygonWithFill(
@@ -377,7 +409,7 @@ export default class DrawUtils {
       color: string;
       lineType: ELineTypes;
     }> = {},
-  ): void {
+  ) {
     if (pointList.length < 2) {
       return;
     }
@@ -401,6 +433,9 @@ export default class DrawUtils {
 
     ctx.fill();
     ctx.restore();
+
+    // 用于外层获取曲线更新后数据
+    return pointList;
   }
 
   public static drawPolygonWithFillAndLine(
