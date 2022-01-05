@@ -133,6 +133,8 @@ class PointOperation extends BasicToolOperation {
   public clearResult() {
     this.setPointList([]);
     this.setSelectedID(undefined);
+    this.history.pushHistory([]);
+
     this.hoverID = '';
     this.render();
   }
@@ -458,8 +460,9 @@ class PointOperation extends BasicToolOperation {
     }
 
     this.hoverID = newDrawingPoint.id;
-    this.history.pushHistory(this.pointList);
-    this.setPointList([...this.pointList, newDrawingPoint]);
+    const newPointList = [...this.pointList, newDrawingPoint];
+    this.setPointList(newPointList);
+    this.history.pushHistory(newPointList);
     this.setSelectedID(newDrawingPoint.id);
   }
 
