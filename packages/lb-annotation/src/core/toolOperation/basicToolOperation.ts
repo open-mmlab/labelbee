@@ -306,7 +306,6 @@ class BasicToolOperation extends EventListener {
     const basicCanvas = document.createElement('canvas');
     basicCanvas.setAttribute('width', `${size.width}`);
     basicCanvas.setAttribute('height', `${size.height}`);
-    basicCanvas.style.position = 'absolute';
     basicCanvas.style.left = '0';
     basicCanvas.style.top = '0';
     basicCanvas.style.zIndex = '0';
