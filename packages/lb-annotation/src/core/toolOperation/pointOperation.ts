@@ -467,9 +467,9 @@ class PointOperation extends BasicToolOperation {
   }
 
   // 判断是是否在标点范围内
-  public isInPoint(pos: ICoordinate, point: ICoordinate) {
+  public isInPoint(pos: ICoordinate, point: ICoordinate, zoom: number = this.zoom) {
     // 加上边框 2px
-    return this.style.width + 2 >= Math.sqrt((pos.x - point.x) ** 2 + (pos.y - point.y) ** 2);
+    return (this.style.width + 2) / zoom >= Math.sqrt((pos.x - point.x) ** 2 + (pos.y - point.y) ** 2);
   }
 
   public getHoverId() {
