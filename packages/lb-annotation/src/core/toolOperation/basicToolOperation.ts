@@ -681,7 +681,12 @@ class BasicToolOperation extends EventListener {
         this.container.style.cursor = 'grabbing';
         this.forbidCursorLine = true;
         this.renderBasicCanvas();
+
+        // 依赖渲染触发
         this.emit('dependRender');
+
+        // 拖拽信息触发
+        this.emit('dragMove', { currentPos, zoom: this.zoom });
       }
 
       this.render();
@@ -866,7 +871,7 @@ class BasicToolOperation extends EventListener {
     this.currentPosStorage = newCurrentPos;
     this.imgInfo = imgInfo;
     zoomInfo.ratio = ratio;
-    this.emit('renderZoom', zoom);
+    this.emit('renderZoom', zoom, currentPos);
   };
 
   /**
