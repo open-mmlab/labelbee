@@ -365,7 +365,7 @@ class PointOperation extends BasicToolOperation {
   public createPoint(e: MouseEvent) {
     if (!this.imgInfo) return;
     const { upperLimit } = this.config;
-    if (upperLimit && this.pointList.length >= upperLimit) {
+    if (upperLimit && this.currentPageResult.length >= upperLimit) {
       // 小于对应的下限点, 大于上限点无法添加
       this.emit('messageInfo', `${locale.getMessagesByLocale(EMessage.LowerLimitPoint, this.lang)}`);
       return;
