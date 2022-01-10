@@ -282,6 +282,10 @@ export default class ViewOperation extends BasicToolOperation {
         }
         case 'polygon': {
           const polygon = annotation.annotation;
+          if (!(polygon?.pointList?.length >= 3)) {
+            return;
+          }
+
           const { lineType = ELineTypes.Line } = polygon;
           const renderPolygon = AxisUtils.changePointListByZoom(polygon?.pointList ?? [], this.zoom, this.currentPos);
           const style = this.getSpecificStyle(polygon);
@@ -345,9 +349,17 @@ export default class ViewOperation extends BasicToolOperation {
 
         case 'line': {
           const line = annotation.annotation;
-          const { lineType = ELineTypes.Line } = line;
+          if (!(line?.pointList?.length >= 2)) {
+            return;
+          }
 
-          const renderLine = AxisUtils.changePointListByZoom(line.pointList as IPoint[], this.zoom, this.currentPos);
+          const { lineType = ELineTypes.Line } = line;
+          const renderLine = AxisUtils.changePointListByZoom(
+            (line?.pointList as IPoint[]) ?? [],
+            this.zoom,
+            this.currentPos,
+          );
+
           const style = this.getSpecificStyle(line);
           const newPointList = DrawUtils.drawPolygon(this.canvas, renderLine, {
             ...style,
