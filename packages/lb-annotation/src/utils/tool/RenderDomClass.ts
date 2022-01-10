@@ -3,6 +3,7 @@
  */
 
 import DrawUtils from '@/utils/tool/DrawUtils';
+import StyleUtils from './StyleUtils';
 
 interface IProps {
   container: HTMLElement; // 当前结构绑定 container
@@ -46,7 +47,7 @@ export default class RenderDomClass {
     const newKeys = annotations.map((v) => v.id);
 
     annotations.forEach((v) => {
-      const { text, textMaxWidth, color = 'white', background = 'rgba(0, 0, 0, 0.6)' } = v;
+      const { text, textMaxWidth, color = 'white', background = 'rgba(0, 0, 0, 0.6)', style } = v;
 
       if (this._domMap.has(v.id)) {
         // 更改当前 dom 的信息
@@ -75,6 +76,7 @@ export default class RenderDomClass {
               max-height: ${this._height * 0.8}px;
               overflow-y: scroll;
               clear: both;
+              ${StyleUtils.getStyle2String(style)}
             `,
           );
           dom.addEventListener('wheel', this.wheelChange);
