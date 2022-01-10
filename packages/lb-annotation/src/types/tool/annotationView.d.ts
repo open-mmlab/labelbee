@@ -53,4 +53,5 @@ declare interface IBasicText {
   background?: string;
   lineHeight?: number;
   font?: string; // canvas-font https://developer.mozilla.org/en-US/docs/Web/API/CanvasRenderingContext2D/font
+  style?: StyleSheetList;
 }
