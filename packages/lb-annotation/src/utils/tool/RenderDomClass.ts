@@ -51,6 +51,11 @@ export default class RenderDomClass {
 
       if (this._domMap.has(v.id)) {
         // 更改当前 dom 的信息
+        const dom = this._domMap.get(v.id);
+
+        if (dom) {
+          dom.innerHTML = text;
+        }
       } else {
         // 创建 DOM 信息
         const dom = DrawUtils.drawTagByDom(this._container, text, v.id);
