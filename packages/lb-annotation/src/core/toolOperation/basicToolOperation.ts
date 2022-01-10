@@ -8,6 +8,7 @@ import DblClickEventListener from '../../utils/tool/DblClickEventListener';
 import DrawUtils from '../../utils/tool/DrawUtils';
 import ImgPosUtils from '../../utils/tool/ImgPosUtils';
 import RenderDomUtils from '../../utils/tool/RenderDomUtils';
+import CanvasUtils from '@/utils/tool/CanvasUtils';
 import ZoomUtils from '../../utils/tool/ZoomUtils';
 import EventListener from './eventListener';
 import locale from '../../locales';
@@ -288,6 +289,10 @@ class BasicToolOperation extends EventListener {
     return this.forbidOperation || this.valid === false;
   }
 
+  public get pixelRatio() {
+    return CanvasUtils.getPixelRatio(this.canvas?.getContext('2d'));
+  }
+
   public init() {
     this.eventUnbinding();
     this.initPosition();
@@ -304,8 +309,12 @@ class BasicToolOperation extends EventListener {
   public createCanvas(size: ISize) {
     // TODO 后续需要将 canvas 抽离出来，迭代器叠加
     const basicCanvas = document.createElement('canvas');
-    basicCanvas.setAttribute('width', `${size.width}`);
-    basicCanvas.setAttribute('height', `${size.height}`);
+    const pixel = this.pixelRatio;
+
+    basicCanvas.width = size.width * pixel;
+    basicCanvas.height = size.height * pixel;
+    basicCanvas.style.width = `${size.width}px`;
+    basicCanvas.style.height = `${size.height}px`;
     basicCanvas.style.left = '0';
     basicCanvas.style.top = '0';
     basicCanvas.style.zIndex = '0';
@@ -313,12 +322,15 @@ class BasicToolOperation extends EventListener {
     this.basicCanvas = basicCanvas;
 
     const canvas = document.createElement('canvas');
-    canvas.setAttribute('width', `${size.width}`);
-    canvas.setAttribute('height', `${size.height}`);
     canvas.style.position = 'absolute';
     canvas.style.left = '0';
     canvas.style.top = '0';
     canvas.style.zIndex = '10';
+    canvas.style.width = `${size.width}px`;
+    canvas.style.height = `${size.height}px`;
+
+    canvas.width = size.width * pixel;
+    canvas.height = size.height * pixel;
 
     if (this.container.hasChildNodes()) {
       this.container.insertBefore(canvas, this.container.childNodes[0]);
@@ -330,6 +342,8 @@ class BasicToolOperation extends EventListener {
 
     this.canvas = canvas;
     this.container.style.cursor = this.defaultCursor;
+    this.ctx?.scale(pixel, pixel);
+    this.basicCtx?.scale(pixel, pixel);
   }
 
   public destroyCanvas() {
