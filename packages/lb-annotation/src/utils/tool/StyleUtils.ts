@@ -39,6 +39,6 @@ export default class StyleUtils {
       return;
     }
 
-    return Object.entries(style).reduce((acc, cur) => `${acc} ${cur[0]}: ${cur[1]}`, '');
+    return Object.entries(style).reduce((acc, cur) => `${acc} ${cur[0]}: ${cur[1]};`, '');
   }
 }
