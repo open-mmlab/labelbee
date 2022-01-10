@@ -72,7 +72,7 @@ class BasicToolOperation extends EventListener {
 
   public isShowCursor: boolean; // 是否展示十字光标
 
-  public forbidOperation: boolean; // 禁止操
+  public forbidOperation: boolean; // 禁止操作
 
   public forbidBasicResultRender: boolean; // 禁止渲染基础依赖图形
 
