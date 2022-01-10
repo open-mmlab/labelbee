@@ -309,8 +309,10 @@ class BasicToolOperation extends EventListener {
   public createCanvas(size: ISize) {
     // TODO 后续需要将 canvas 抽离出来，迭代器叠加
     const basicCanvas = document.createElement('canvas');
-    basicCanvas.width = size.width * this.pixelRatio;
-    basicCanvas.height = size.height * this.pixelRatio;
+    const pixel = this.pixelRatio;
+
+    basicCanvas.width = size.width * pixel;
+    basicCanvas.height = size.height * pixel;
     basicCanvas.style.width = `${size.width}px`;
     basicCanvas.style.height = `${size.height}px`;
     basicCanvas.style.left = '0';
@@ -327,8 +329,8 @@ class BasicToolOperation extends EventListener {
     canvas.style.width = `${size.width}px`;
     canvas.style.height = `${size.height}px`;
 
-    canvas.width = size.width * this.pixelRatio;
-    canvas.height = size.height * this.pixelRatio;
+    canvas.width = size.width * pixel;
+    canvas.height = size.height * pixel;
 
     if (this.container.hasChildNodes()) {
       this.container.insertBefore(canvas, this.container.childNodes[0]);
@@ -340,8 +342,8 @@ class BasicToolOperation extends EventListener {
 
     this.canvas = canvas;
     this.container.style.cursor = this.defaultCursor;
-    this.ctx?.scale(this.pixelRatio, this.pixelRatio);
-    this.basicCtx?.scale(this.pixelRatio, this.pixelRatio);
+    this.ctx?.scale(pixel, pixel);
+    this.basicCtx?.scale(pixel, pixel);
   }
 
   public destroyCanvas() {
