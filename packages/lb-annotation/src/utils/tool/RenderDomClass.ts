@@ -95,6 +95,7 @@ export default class RenderDomClass {
       if (newKeys.indexOf(key) === -1) {
         // 不存在清除
         this.clearTag(key);
+        this._domMap.delete(key);
       }
     });
   }
