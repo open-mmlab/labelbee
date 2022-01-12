@@ -1054,7 +1054,7 @@ class BasicToolOperation extends EventListener {
       return;
     }
 
-    this._invalidDOM = RenderDomUtils.renderInvalidPage(this.canvas, this.container, this.lang);
+    this._invalidDOM = RenderDomUtils.renderInvalidPage(this.container, this.size, this.lang);
   }
 
   public renderBasicCanvas() {

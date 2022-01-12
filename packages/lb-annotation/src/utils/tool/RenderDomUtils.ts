@@ -2,7 +2,7 @@ import locale from '../../locales';
 import { EMessage } from '../../locales/constants';
 
 export default class RenderDomUtils {
-  public static renderInvalidPage(canvas: HTMLCanvasElement, container: HTMLElement, lang: string) {
+  public static renderInvalidPage(container: HTMLElement, size: ISize, lang: string) {
     const invalidDOM = document.createElement('div');
     invalidDOM.setAttribute(
       'style',
@@ -10,8 +10,8 @@ export default class RenderDomUtils {
         position: absolute;
         left: 0px;
         top: 0px;
-        width: ${canvas.width}px;
-        height: ${canvas.height}px;
+        width: ${size.width}px;
+        height: ${size.height}px;
         background: rgba(255, 87, 34, 1);
         overflow: hidden;
         color: white;
