@@ -703,7 +703,10 @@ class PointOperation extends BasicToolOperation {
     });
 
     let showText = '';
-    if (this.config?.isShowOrder && point.order && point?.order > 0) {
+
+    const isShowOrder = this.config?.isShowOrder || this.config?.showOrder; // 兼容 SenseBee 旧配置
+
+    if (isShowOrder && point.order && point?.order > 0) {
       showText = `${point.order}`;
     }
 
