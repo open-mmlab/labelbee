@@ -932,6 +932,10 @@ class BasicToolOperation extends EventListener {
       this.createCanvas(size);
       this.eventUnbinding();
       this.init();
+
+      if (this.basicImgInfo?.valid === false) {
+        this.renderInvalidPage();
+      }
     }
   }
 
