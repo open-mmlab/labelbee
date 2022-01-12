@@ -1,4 +1,5 @@
 import MathUtils from '@/utils/MathUtils';
+import RectUtils from '@/utils/tool/RectUtils';
 import {
   DEFAULT_TEXT_OFFSET,
   EDragStatus,
@@ -22,7 +23,6 @@ import StyleUtils from '../../utils/tool/StyleUtils';
 import uuid from '../../utils/uuid';
 import { BasicToolOperation, IBasicToolOperationProps } from './basicToolOperation';
 import TextAttributeClass from './textAttributeClass';
-import RectUtils from '@/utils/tool/RectUtils';
 
 const TEXT_MAX_WIDTH = 164;
 

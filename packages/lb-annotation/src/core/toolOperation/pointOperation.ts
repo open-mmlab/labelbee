@@ -1,3 +1,7 @@
+import { EToolName } from '@/constant/tool';
+import RectUtils from '@/utils/tool/RectUtils';
+import PolygonUtils from '@/utils/tool/PolygonUtils';
+import MarkerUtils from '@/utils/tool/MarkerUtils';
 import { DEFAULT_TEXT_OFFSET, EDragStatus, ESortDirection } from '../../constant/annotation';
 import EKeyCode from '../../constant/keyCode';
 import locale from '../../locales';
@@ -11,10 +15,6 @@ import StyleUtils from '../../utils/tool/StyleUtils';
 import uuid from '../../utils/uuid';
 import { BasicToolOperation, IBasicToolOperationProps } from './basicToolOperation';
 import TextAttributeClass from './textAttributeClass';
-import { EToolName } from '@/constant/tool';
-import RectUtils from '@/utils/tool/RectUtils';
-import PolygonUtils from '@/utils/tool/PolygonUtils';
-import MarkerUtils from '@/utils/tool/MarkerUtils';
 
 const TEXTAREA_WIDTH = 200;
 
