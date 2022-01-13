@@ -180,7 +180,7 @@ class PointOperation extends BasicToolOperation {
    * @returns
    */
   public textChange = (v: string) => {
-    if (this.config.textConfigurable === false || !this.selectedID) {
+    if (this.config.textConfigurable !== true || !this.selectedID) {
       return;
     }
 
@@ -643,7 +643,7 @@ class PointOperation extends BasicToolOperation {
 
   public renderTextAttribute() {
     const point = this.pointList?.find((item) => item.id === this.selectedID);
-    if (!this.ctx || this.config.textConfigurable === false || !point) {
+    if (!this.ctx || this.config.textConfigurable !== true || !point) {
       return;
     }
     const { x, y, attribute, valid } = point;
