@@ -8,11 +8,11 @@ import DrawUtils from '@/utils/tool/DrawUtils';
 import AxisUtils from '@/utils/tool/AxisUtils';
 import RectUtils from '@/utils/tool/RectUtils';
 import PolygonUtils from '@/utils/tool/PolygonUtils';
-import { BasicToolOperation, IBasicToolOperationProps } from './basicToolOperation';
 import MathUtils from '@/utils/MathUtils';
 import RenderDomClass from '@/utils/tool/RenderDomClass';
 import { DEFAULT_FONT, ELineTypes, SEGMENT_NUMBER } from '@/constant/tool';
 import { DEFAULT_TEXT_SHADOW, DEFAULT_TEXT_OFFSET, TEXT_ATTRIBUTE_OFFSET } from '@/constant/annotation';
+import { BasicToolOperation, IBasicToolOperationProps } from './basicToolOperation';
 
 const newScope = 3;
 const DEFAULT_RADIUS = 3;

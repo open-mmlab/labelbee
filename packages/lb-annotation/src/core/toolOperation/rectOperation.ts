@@ -1249,7 +1249,7 @@ class RectOperation extends BasicToolOperation {
   }
 
   public textChange = (v: string) => {
-    if (this.config.textConfigurable === false || !this.selectedRectID) {
+    if (this.config.textConfigurable !== true || !this.selectedRectID) {
       return;
     }
 
@@ -1276,7 +1276,7 @@ class RectOperation extends BasicToolOperation {
 
   public renderTextAttribute() {
     const { selectedRect } = this;
-    if (!this.ctx || this.config.textConfigurable === false || !selectedRect) {
+    if (!this.ctx || this.config.textConfigurable !== true || !selectedRect) {
       return;
     }
 

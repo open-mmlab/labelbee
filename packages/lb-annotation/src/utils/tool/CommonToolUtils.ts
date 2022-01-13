@@ -1,7 +1,7 @@
 import { isObject } from 'lodash';
+import { ECheckModel, EToolName } from '@/constant/tool';
 import { IPolygonPoint } from '../../types/tool/polygon';
 import { ESortDirection, EStepType } from '../../constant/annotation';
-import { ECheckModel, EToolName } from '@/constant/tool';
 import CheckOperation from '../../core/toolOperation/checkOperation';
 import PolygonOperation from '../../core/toolOperation/polygonOperation';
 import RectOperationAsNewName from '../../core/toolOperation/rectOperation';

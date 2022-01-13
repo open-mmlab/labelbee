@@ -1,3 +1,7 @@
+import { EToolName } from '@/constant/tool';
+import RectUtils from '@/utils/tool/RectUtils';
+import PolygonUtils from '@/utils/tool/PolygonUtils';
+import MarkerUtils from '@/utils/tool/MarkerUtils';
 import { DEFAULT_TEXT_OFFSET, EDragStatus, ESortDirection } from '../../constant/annotation';
 import EKeyCode from '../../constant/keyCode';
 import locale from '../../locales';
@@ -11,10 +15,6 @@ import StyleUtils from '../../utils/tool/StyleUtils';
 import uuid from '../../utils/uuid';
 import { BasicToolOperation, IBasicToolOperationProps } from './basicToolOperation';
 import TextAttributeClass from './textAttributeClass';
-import { EToolName } from '@/constant/tool';
-import RectUtils from '@/utils/tool/RectUtils';
-import PolygonUtils from '@/utils/tool/PolygonUtils';
-import MarkerUtils from '@/utils/tool/MarkerUtils';
 
 const TEXTAREA_WIDTH = 200;
 
@@ -180,7 +180,7 @@ class PointOperation extends BasicToolOperation {
    * @returns
    */
   public textChange = (v: string) => {
-    if (this.config.textConfigurable === false || !this.selectedID) {
+    if (this.config.textConfigurable !== true || !this.selectedID) {
       return;
     }
 
@@ -643,7 +643,7 @@ class PointOperation extends BasicToolOperation {
 
   public renderTextAttribute() {
     const point = this.pointList?.find((item) => item.id === this.selectedID);
-    if (!this.ctx || this.config.textConfigurable === false || !point) {
+    if (!this.ctx || this.config.textConfigurable !== true || !point) {
       return;
     }
     const { x, y, attribute, valid } = point;
@@ -703,7 +703,10 @@ class PointOperation extends BasicToolOperation {
     });
 
     let showText = '';
-    if (this.config?.isShowOrder && point.order && point?.order > 0) {
+
+    const isShowOrder = this.config?.isShowOrder || this.config?.showOrder; // 兼容 SenseBee 旧配置
+
+    if (isShowOrder && point.order && point?.order > 0) {
       showText = `${point.order}`;
     }
 

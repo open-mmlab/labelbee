@@ -1,4 +1,12 @@
 import { isNumber } from 'lodash';
+import CanvasUtils from '@/utils/tool/CanvasUtils';
+import CommonToolUtils from '@/utils/tool/CommonToolUtils';
+import MathUtils from '@/utils/MathUtils';
+import { styleDefaultConfig } from '@/constant/defaultConfig';
+import AxisUtils, { CoordinateUtils } from '@/utils/tool/AxisUtils';
+import { EToolName } from '@/constant/tool';
+import LineToolUtils from '@/utils/tool/LineToolUtils';
+import { IPolygonConfig } from '@/types/tool/polygon';
 import { EDragStatus, EGrowthMode, ELang } from '../../constant/annotation';
 import EKeyCode from '../../constant/keyCode';
 import { BASE_ICON, COLORS_ARRAY } from '../../constant/style';
@@ -8,18 +16,10 @@ import DblClickEventListener from '../../utils/tool/DblClickEventListener';
 import DrawUtils from '../../utils/tool/DrawUtils';
 import ImgPosUtils from '../../utils/tool/ImgPosUtils';
 import RenderDomUtils from '../../utils/tool/RenderDomUtils';
-import CanvasUtils from '@/utils/tool/CanvasUtils';
 import ZoomUtils from '../../utils/tool/ZoomUtils';
 import EventListener from './eventListener';
 import locale from '../../locales';
 import { EMessage } from '../../locales/constants';
-import CommonToolUtils from '@/utils/tool/CommonToolUtils';
-import MathUtils from '@/utils/MathUtils';
-import { styleDefaultConfig } from '@/constant/defaultConfig';
-import AxisUtils, { CoordinateUtils } from '@/utils/tool/AxisUtils';
-import { EToolName } from '@/constant/tool';
-import LineToolUtils from '@/utils/tool/LineToolUtils';
-import { IPolygonConfig } from '@/types/tool/polygon';
 
 interface IBasicToolOperationProps {
   container: HTMLElement;
@@ -932,6 +932,10 @@ class BasicToolOperation extends EventListener {
       this.createCanvas(size);
       this.eventUnbinding();
       this.init();
+
+      if (this.basicImgInfo?.valid === false) {
+        this.renderInvalidPage();
+      }
     }
   }
 
@@ -1054,7 +1058,7 @@ class BasicToolOperation extends EventListener {
       return;
     }
 
-    this._invalidDOM = RenderDomUtils.renderInvalidPage(this.canvas, this.container, this.lang);
+    this._invalidDOM = RenderDomUtils.renderInvalidPage(this.container, this.size, this.lang);
   }
 
   public renderBasicCanvas() {
