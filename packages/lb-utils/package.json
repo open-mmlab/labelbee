@@ -1,13 +1,13 @@
 {
   "name": "@labelbee/lb-utils",
-  "version": "1.0.3",
+  "version": "1.0.4-alpha.0",
   "description": "utils for label-bee",
   "author": "lijingchi <lijingchi1@sensetime.com>",
   "license": "Apache-2.0",
-  "types": "./lib/index.d.ts",
+  "types": "dist/types/index.d.ts",
   "homepage": "",
-  "main": "lib/index.js",
-  "module": "lib/index-module.js",
+  "main": "dist/index.js",
+  "module": "es/index.js",
   "files": [
     "lib",
     "es"
@@ -17,10 +17,22 @@
     "url": "git@github.com:open-mmlab/labelbee.git"
   },
   "scripts": {
-    "test": "echo \"Error: run tests from root\" && exit 1"
+    "test": "echo \"Error: run tests from root\" && exit 1",
+    "dev": "rollup -c rollup.config.js -w ",
+    "build": "rollup -c rollup.config.js && npm run build:type",
+    "build:type": "tsc --emitDeclarationOnly --resolveJsonModule",
+    "prepublishOnly": "npm run build"
   },
   "dependencies": {
     "i18next": "^21.3.3",
     "react-i18next": "^11.12.0"
+  },
+  "devDependencies": {
+    "@rollup/plugin-json": "^4.1.0",
+    "@types/react-i18next": "^8.1.0",
+    "esbuild": "^0.11.0",
+    "rollup": "^2.43.1",
+    "rollup-plugin-esbuild": "^3.0.2",
+    "typescript": "^4.2.3"
   }
 }

@@ -45,18 +45,22 @@ interface ISize {
 }
 
 interface IBasicStyle {
-  color?: string; 
-  fill?: string; 
+  stroke?: string; // border color
+  fill?: string;  // fill color
   thickness?: number;
 }
 
+interface IGraphicsBasicConfig extends IBasicStyle {
+  hiddenText?: boolean; 
+  isReference?: boolean;
+}
 
 interface IAnnotationData {
   type: 'rect' | 'polygon' | 'line' | 'point';
   annotation: IBasicRect & IBasicPolygon & IBasicLine & IPoint;
 }
 
-interface IBasicRect extends IBasicStyle {
+interface IBasicRect extends IGraphicsBasicConfig {
   id: string;
   x: number;
   y: number;
@@ -64,16 +68,37 @@ interface IBasicRect extends IBasicStyle {
   height: number;
 }
 
-interface IBasicPolygon extends IBasicStyle {
+interface IBasicPolygon extends IGraphicsBasicConfig {
   id: string;
   pointList: IPoint[];
+
+  showDirection?: boolean;
+  specialPoint?: boolean; // 顶点是否特殊点
+  specialEdge?: boolean; // 顶点与a其下一个顶点连成的边是否为特殊边
+
+  lineType?: ELineTypes;
 }
 
 type IBasicLine = IBasicPolygon;
 
-interface IPoint extends IBasicStyle {
+interface IPoint extends IGraphicsBasicConfig {
+  id: string;
   x: number;
   y: number;
   radius?: number;
 }
+
+interface IBasicText {
+  id: string;
+  x: number;
+  y: number;
+  text: string; // Use \n for line feed
+  textMaxWidth?: number;
+
+  color?: string;
+  background?: string;
+  lineHeight?: number;
+  font?: string; // canvas-font https://developer.mozilla.org/en-US/docs/Web/API/CanvasRenderingContext2D/font
+}
+
 ```

@@ -2,8 +2,9 @@
  * 各类的数学运算
  */
 
-import { SEGMENT_NUMBER } from '@/constant/tool';
+import { DEFAULT_FONT, DEFAULT_TEXT_MAX_WIDTH, SEGMENT_NUMBER } from '@/constant/tool';
 import { createSmoothCurvePointsFromPointList } from './tool/polygonTool';
+import Vector from './VectorUtils';
 
 export default class MathUtils {
   /**
@@ -172,4 +173,98 @@ export default class MathUtils {
       length,
     };
   };
+
+  /**
+   * 获取当前文本的背景面积
+   * @param canvas
+   * @param text
+   * @param maxWidth
+   * @param lineHeight
+   * @returns
+   */
+  public static getTextArea(
+    canvas: HTMLCanvasElement,
+    text: string,
+    maxWidth: number = DEFAULT_TEXT_MAX_WIDTH,
+    font = DEFAULT_FONT,
+    lineHeight?: number,
+  ) {
+    if (typeof text !== 'string') {
+      return {
+        width: 0,
+        height: 0,
+      };
+    }
+
+    const context: CanvasRenderingContext2D = canvas.getContext('2d')!;
+    context.font = font;
+
+    let height = 0;
+
+    if (typeof lineHeight === 'undefined') {
+      lineHeight =
+        (canvas && parseInt(window.getComputedStyle(canvas).lineHeight, 10)) ||
+        parseInt(window.getComputedStyle(document.body).lineHeight, 10);
+    }
+
+    const fontHeight: number =
+      (canvas && parseInt(window.getComputedStyle(canvas).fontSize, 10)) ||
+      parseInt(window.getComputedStyle(document.body).fontSize, 10) ||
+      0;
+
+    const arrParagraph = text.split('\n');
+
+    let lineWidth = 0; // 最大长度定位
+
+    for (let i = 0; i < arrParagraph.length; i++) {
+      // 字符分隔为数组
+      const arrText = arrParagraph[i].split('');
+      let line = '';
+
+      for (let n = 0; n < arrText.length; n++) {
+        const testLine = line + arrText[n];
+        const metrics = context.measureText(testLine);
+        const textWidth = metrics.width;
+
+        if (textWidth > maxWidth && n > 0) {
+          line = arrText[n];
+          height += lineHeight;
+          lineWidth = maxWidth;
+        } else {
+          line = testLine;
+
+          if (textWidth > lineWidth) {
+            lineWidth = textWidth;
+          }
+        }
+      }
+
+      if (i !== arrParagraph.length - 1) {
+        height += lineHeight;
+      }
+    }
+
+    return {
+      width: lineWidth,
+      height: height + fontHeight,
+      lineHeight,
+      fontHeight,
+    };
+  }
+
+  /**
+   * 获取线条中心点
+   * @param line
+   * @returns
+   */
+  public static getLineCenterPoint(line: [ICoordinate, ICoordinate]) {
+    const [p1, p2] = line;
+
+    const vector = Vector.getVector(p1, p2);
+
+    return {
+      x: p1.x + vector.x / 2,
+      y: p1.y + vector.y / 2,
+    };
+  }
 }

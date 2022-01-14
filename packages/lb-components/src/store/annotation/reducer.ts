@@ -465,17 +465,14 @@ export const annotationReducer = (
         return state;
       }
 
-      if (toStep <= stepList.length) {
-        const stepConfig = getStepConfig(stepList, toStep);
-        annotationEngine.setToolName(stepConfig.tool, stepConfig.config);
+      const stepConfig = getStepConfig(stepList, toStep);
+      annotationEngine.setToolName(stepConfig.tool, stepConfig.config);
 
-        return {
-          ...state,
-          step: toStep,
-          toolInstance: annotationEngine.toolInstance,
-        };
-      }
-      break;
+      return {
+        ...state,
+        step: toStep,
+        toolInstance: annotationEngine.toolInstance,
+      };
     }
 
     case ANNOTATION_ACTIONS.SET_LOADING: {
@@ -491,6 +488,4 @@ export const annotationReducer = (
     default:
       return state;
   }
-
-  return state;
 };

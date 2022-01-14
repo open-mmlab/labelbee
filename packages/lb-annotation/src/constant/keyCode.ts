@@ -28,6 +28,7 @@ enum EKeyCode {
   Alt = 18,
   Shift = 16,
   Tab = 9,
+  BackSpace = 8,
 }
 
 export default EKeyCode;

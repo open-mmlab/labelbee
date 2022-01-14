@@ -1,7 +1,7 @@
 import { isObject } from 'lodash';
+import { ECheckModel, EToolName } from '@/constant/tool';
 import { IPolygonPoint } from '../../types/tool/polygon';
 import { ESortDirection, EStepType } from '../../constant/annotation';
-import { ECheckModel, EToolName } from '@/constant/tool';
 import CheckOperation from '../../core/toolOperation/checkOperation';
 import PolygonOperation from '../../core/toolOperation/polygonOperation';
 import RectOperationAsNewName from '../../core/toolOperation/rectOperation';
@@ -286,7 +286,11 @@ export default class CommonToolUtils {
    * @param markerIndex
    * @returns
    */
-  public static getNextMarker(resultList: IRect[], markerList: IInputList[] = [], markerIndex?: number) {
+  public static getNextMarker(
+    resultList: Array<IPointUnit | IRect>,
+    markerList: IInputList[] = [],
+    markerIndex?: number,
+  ) {
     if (markerList?.length === 0) {
       return undefined;
     }

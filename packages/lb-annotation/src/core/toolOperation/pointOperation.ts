@@ -1,3 +1,7 @@
+import { EToolName } from '@/constant/tool';
+import RectUtils from '@/utils/tool/RectUtils';
+import PolygonUtils from '@/utils/tool/PolygonUtils';
+import MarkerUtils from '@/utils/tool/MarkerUtils';
 import { DEFAULT_TEXT_OFFSET, EDragStatus, ESortDirection } from '../../constant/annotation';
 import EKeyCode from '../../constant/keyCode';
 import locale from '../../locales';
@@ -11,9 +15,6 @@ import StyleUtils from '../../utils/tool/StyleUtils';
 import uuid from '../../utils/uuid';
 import { BasicToolOperation, IBasicToolOperationProps } from './basicToolOperation';
 import TextAttributeClass from './textAttributeClass';
-import { EToolName } from '@/constant/tool';
-import RectUtils from '@/utils/tool/RectUtils';
-import PolygonUtils from '@/utils/tool/PolygonUtils';
 
 const TEXTAREA_WIDTH = 200;
 
@@ -32,28 +33,72 @@ class PointOperation extends BasicToolOperation {
 
   public selectedID?: string;
 
+  public markerIndex: number; // 用于列表标签定位
+
   private _textAttributInstance?: TextAttributeClass;
 
   constructor(props: IPointOperationProps) {
     super(props);
     this.config = CommonToolUtils.jsonParser(props.config);
     this.pointList = [];
+    this.markerIndex = 0;
 
     this.setStyle(props.style);
 
     this.createPoint = this.createPoint.bind(this);
     this.getCurrentSelectedData = this.getCurrentSelectedData.bind(this);
     this.updateSelectedTextAttribute = this.updateSelectedTextAttribute.bind(this);
+    this.setSelectedID = this.setSelectedID.bind(this);
   }
 
   get dataList() {
     return this.pointList;
   }
 
+  /**
+   * 向外部提供标记的更改
+   * @param markerIndex
+   */
+  public setMarkerIndex = (markerIndex: number) => {
+    this.markerIndex = markerIndex;
+  };
+
+  /**
+   * 更改当前列表标注位置，并且设置为选中
+   * @param markerIndex
+   * @returns
+   */
+  public setMarkerIndexAndSelect = (markerIndex: number) => {
+    if (!this.config.markerList) {
+      return;
+    }
+
+    this.markerIndex = markerIndex;
+    const markerValue = this.config.markerList[markerIndex].value;
+
+    const currentPoint = this.currentPageResult.find((point) => point.label === markerValue);
+
+    if (currentPoint) {
+      this.setSelectedID(currentPoint.id);
+      if (this.config.attributeConfigurable === true) {
+        this.setDefaultAttribute(currentPoint.attribute);
+      }
+    }
+    this.emit('markIndexChange');
+  };
+
   public setResult(pointList: IPointUnit[]) {
     this.clearActiveStatus();
     this.setPointList(pointList);
-
+    if (this.hasMarkerConfig) {
+      const nextMarkerInfo = CommonToolUtils.getNextMarker(
+        this.getCurrentPageResult(pointList),
+        this.config.markerList,
+      );
+      if (nextMarkerInfo) {
+        this.setMarkerIndex(nextMarkerInfo.index);
+      }
+    }
     this.render();
   }
 
@@ -88,6 +133,8 @@ class PointOperation extends BasicToolOperation {
   public clearResult() {
     this.setPointList([]);
     this.setSelectedID(undefined);
+    this.history.pushHistory([]);
+
     this.hoverID = '';
     this.render();
   }
@@ -133,7 +180,7 @@ class PointOperation extends BasicToolOperation {
    * @returns
    */
   public textChange = (v: string) => {
-    if (this.config.textConfigurable === false || !this.selectedID) {
+    if (this.config.textConfigurable !== true || !this.selectedID) {
       return;
     }
 
@@ -318,7 +365,7 @@ class PointOperation extends BasicToolOperation {
   public createPoint(e: MouseEvent) {
     if (!this.imgInfo) return;
     const { upperLimit } = this.config;
-    if (upperLimit && this.pointList.length >= upperLimit) {
+    if (upperLimit && this.currentPageResult.length >= upperLimit) {
       // 小于对应的下限点, 大于上限点无法添加
       this.emit('messageInfo', `${locale.getMessagesByLocale(EMessage.LowerLimitPoint, this.lang)}`);
       return;
@@ -377,6 +424,7 @@ class PointOperation extends BasicToolOperation {
         ) + 1,
     } as IPointUnit;
 
+    // 文本注入
     if (this.config.textConfigurable) {
       let textAttribute = '';
       textAttribute = AttributeUtils.getTextAttribute(
@@ -389,16 +437,39 @@ class PointOperation extends BasicToolOperation {
         textAttribute,
       };
     }
-    this.setSelectedID(newDrawingPoint.id);
+
+    if (this.hasMarkerConfig) {
+      const nextMarkInfo = CommonToolUtils.getNextMarker(
+        this.currentPageResult,
+        this.config.markerList,
+        this.markerIndex,
+      );
+
+      if (nextMarkInfo) {
+        newDrawingPoint = {
+          ...newDrawingPoint,
+          label: nextMarkInfo.label,
+        };
+        this.markerIndex = nextMarkInfo.index;
+        this.emit('markIndexChange');
+      } else {
+        // 不存在则不允许创建新的
+        this.emit('messageInfo', locale.getMessagesByLocale(EMessage.MarkerFinish, this.lang));
+        return;
+      }
+    }
+
     this.hoverID = newDrawingPoint.id;
-    this.setPointList([...this.pointList, newDrawingPoint]);
-    this.history.pushHistory(this.pointList);
+    const newPointList = [...this.pointList, newDrawingPoint];
+    this.setPointList(newPointList);
+    this.history.pushHistory(newPointList);
+    this.setSelectedID(newDrawingPoint.id);
   }
 
   // 判断是是否在标点范围内
-  public isInPoint(pos: ICoordinate, point: ICoordinate) {
+  public isInPoint(pos: ICoordinate, point: ICoordinate, zoom: number = this.zoom) {
     // 加上边框 2px
-    return this.style.width + 2 >= Math.sqrt((pos.x - point.x) ** 2 + (pos.y - point.y) ** 2);
+    return (this.style.width + 2) / zoom >= Math.sqrt((pos.x - point.x) ** 2 + (pos.y - point.y) ** 2);
   }
 
   public getHoverId() {
@@ -409,6 +480,7 @@ class PointOperation extends BasicToolOperation {
   }
 
   public rightMouseUp() {
+    // 删除操作
     if (this.selectedID === this.hoverID) {
       const pointList = this.pointList.filter((point) => point.id !== this.selectedID);
       this.setPointList(pointList);
@@ -417,9 +489,18 @@ class PointOperation extends BasicToolOperation {
       return;
     }
 
-    const p = this.pointList.find((point) => point.id === this.hoverID);
+    // 选中操作
+    const hoverPoint = this.pointList.find((point) => point.id === this.hoverID);
     this.setSelectedID(this.hoverID);
-    this.setDefaultAttribute(p?.attribute);
+    this.setDefaultAttribute(hoverPoint?.attribute);
+
+    if (hoverPoint?.label && this.hasMarkerConfig) {
+      const markerIndex = CommonToolUtils.getCurrentMarkerIndex(hoverPoint.label, this.config.markerList);
+      if (markerIndex >= 0) {
+        this.setMarkerIndex(markerIndex);
+        this.emit('markIndexChange');
+      }
+    }
   }
 
   public onTabKeyDown(e: KeyboardEvent) {
@@ -446,6 +527,10 @@ class PointOperation extends BasicToolOperation {
     const nextSelectedRect = CommonToolUtils.getNextSelectedRectID(pointList as any, sort, this.selectedID);
     if (nextSelectedRect) {
       this.setSelectedID(nextSelectedRect.id);
+      // 设置当前属性为默认属性
+      // if (nextSelectedRect.attribute) {
+      //   this.setDefaultAttribute(nextSelectedRect.attribute);
+      // }
     }
   }
 
@@ -456,12 +541,27 @@ class PointOperation extends BasicToolOperation {
    * @memberof RectOperation
    */
   public get currentPageResult() {
-    const [showingPolygon] = CommonToolUtils.getRenderResultList<IPolygonData>(
+    const [showingPolygon] = CommonToolUtils.getRenderResultList<IPointUnit>(
       this.pointList,
       CommonToolUtils.getSourceID(this.basicResult),
       [],
     );
     return showingPolygon;
+  }
+
+  /**
+   * 当前依赖状态下本页的所有框
+   *
+   * @readonly
+   * @memberof RectOperation
+   */
+  public getCurrentPageResult(pointList: IPointUnit[]) {
+    const [showingRect] = CommonToolUtils.getRenderResultList<IPointUnit>(
+      pointList,
+      CommonToolUtils.getSourceID(this.basicResult),
+      [],
+    );
+    return showingRect;
   }
 
   /**
@@ -543,7 +643,7 @@ class PointOperation extends BasicToolOperation {
 
   public renderTextAttribute() {
     const point = this.pointList?.find((item) => item.id === this.selectedID);
-    if (!this.ctx || this.config.textConfigurable === false || !point) {
+    if (!this.ctx || this.config.textConfigurable !== true || !point) {
       return;
     }
     const { x, y, attribute, valid } = point;
@@ -581,60 +681,92 @@ class PointOperation extends BasicToolOperation {
   /**
    * 绘制标点
    */
-  public renderPoint() {
-    const list = !this.isHidden ? this.pointList : this.pointList.filter((point) => point.id === this.selectedID);
-    list?.forEach((point) => {
-      const { textAttribute = '', attribute } = point;
-      const selected = point.id === this.selectedID;
-      const toolColor = this.getColor(attribute);
+  public renderPoint(point: IPointUnit) {
+    const { textAttribute = '', attribute } = point;
+    const selected = point.id === this.selectedID;
+    const toolColor = this.getColor(attribute);
 
-      const transformPoint = AxisUtils.changePointByZoom(point, this.zoom, this.currentPos);
-      const { width = 2 } = this.style;
+    const transformPoint = AxisUtils.changePointByZoom(point, this.zoom, this.currentPos);
+    const { width = 2, hiddenText = false } = this.style;
 
-      const toolData = StyleUtils.getStrokeAndFill(toolColor, point.valid, {
-        isSelected: selected || point.id === this.hoverID,
-      });
+    const toolData = StyleUtils.getStrokeAndFill(toolColor, point.valid, {
+      isSelected: selected || point.id === this.hoverID,
+    });
 
-      // 绘制点
-      DrawUtils.drawCircle(this.canvas, transformPoint, width, {
-        startAngleDeg: 0,
-        endAngleDeg: 360,
-        thickness: 1,
-        color: toolData.stroke,
-        fill: toolData.fill,
-      });
-      let showText = `${AttributeUtils.getAttributeShowText(point.attribute, this.config.attributeList) ?? ''}`;
-      if (this.config?.isShowOrder && point.order > 0) {
-        showText = `${point.order} ${showText}`;
-      }
+    // 绘制点
+    DrawUtils.drawCircle(this.canvas, transformPoint, width, {
+      startAngleDeg: 0,
+      endAngleDeg: 360,
+      thickness: 1,
+      color: toolData.stroke,
+      fill: toolData.fill,
+    });
 
-      // 标点上方的文字
+    let showText = '';
+
+    const isShowOrder = this.config?.isShowOrder || this.config?.showOrder; // 兼容 SenseBee 旧配置
+
+    if (isShowOrder && point.order && point?.order > 0) {
+      showText = `${point.order}`;
+    }
+
+    if (point.label && this.hasMarkerConfig) {
+      const order = CommonToolUtils.getCurrentMarkerIndex(point.label, this.config.markerList) + 1;
+
+      showText = `${order}_${MarkerUtils.getMarkerShowText(point.label, this.config.markerList)}`;
+    }
+
+    if (point.attribute) {
+      showText = `${showText}  ${AttributeUtils.getAttributeShowText(point.attribute, this.config?.attributeList)}`;
+    }
+
+    // 上方属性（列表、序号）
+    if (!hiddenText) {
       DrawUtils.drawText(this.canvas, { x: transformPoint.x + width / 2, y: transformPoint.y - width - 4 }, showText, {
         textAlign: 'center',
         color: toolData.stroke,
       });
+    }
 
-      // 下方的描述
-      // eslint-disable-next-line @typescript-eslint/no-unused-expressions
-      selected
-        ? this.renderTextAttribute()
-        : DrawUtils.drawText(
-            this.canvas,
-            { x: transformPoint.x + width, y: transformPoint.y + width + 24 },
-            textAttribute,
-            {
-              color: toolData.stroke,
-              ...DEFAULT_TEXT_OFFSET,
-            },
-          );
-    });
+    // 文本
+    if (selected) {
+      this.renderTextAttribute();
+    } else if (!hiddenText) {
+      DrawUtils.drawText(
+        this.canvas,
+        { x: transformPoint.x + width, y: transformPoint.y + width + 24 },
+        textAttribute,
+        {
+          color: toolData.stroke,
+          ...DEFAULT_TEXT_OFFSET,
+        },
+      );
+    }
+  }
+
+  public renderPointList() {
+    const [showingPointList, selectedPoint] = CommonToolUtils.getRenderResultList<IPointUnit>(
+      this.pointList,
+      CommonToolUtils.getSourceID(this.basicResult),
+      this.attributeLockList,
+      this.selectedID,
+    );
+
+    if (!this.isHidden) {
+      showingPointList.forEach((point) => {
+        this.renderPoint(point);
+      });
+    }
+    if (selectedPoint) {
+      this.renderPoint(selectedPoint);
+    }
   }
 
   public render() {
     if (!this.ctx) return;
 
     super.render();
-    this.renderPoint();
+    this.renderPointList();
     this.renderCursorLine(this.getLineColor(this.defaultAttribute));
   }
 }
