@@ -1,0 +1,22 @@
+{
+  "compilerOptions": {
+    "target": "es5",
+    "module": "commonjs",
+    "outDir": "./lib",
+    "strict": true,
+    "lib": ["es6", "DOM", "es2017"],
+    "baseUrl": "./",
+    "allowJs": true,
+    "noImplicitThis": false,
+    "declaration": true,
+    "declarationDir": "dist/types",
+    "skipLibCheck": true,
+    "esModuleInterop": true,
+    "paths": {
+      "@/*": ["src/*"]
+    },
+    "resolveJsonModule": true
+  },
+  "include": ["src", "lib/index.d.ts"],
+  "exclude": ["node_modules", "**/__tests__/*", "node_modules/**/*.d.ts"]
+}

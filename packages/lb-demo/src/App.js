@@ -26,13 +26,13 @@ const App = () => {
   if (tool === 'annotationView') {
     return (
       <div>
-        <div style={{ height: 500 }}>
+        <div style={{ height: 1000 }}>
           <AnnotationView
             src='https://cdn.nba.com/manage/2020/10/andre-iguodala-iso-smile-0520-784x588.jpg'
             annotations={DEFAULT_ANNOTATIONS}
             style={{
-              color: 'blue',
-              thickness: 5,
+              stroke: 'blue',
+              thickness: 3,
             }}
           />
         </div>

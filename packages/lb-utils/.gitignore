@@ -5,6 +5,8 @@
 .DS_Store
 .vscode
 /dist
+/es
+/lib
 
 # lock file
 package-lock.json

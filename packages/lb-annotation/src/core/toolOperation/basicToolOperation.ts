@@ -1,4 +1,12 @@
 import { isNumber } from 'lodash';
+import CanvasUtils from '@/utils/tool/CanvasUtils';
+import CommonToolUtils from '@/utils/tool/CommonToolUtils';
+import MathUtils from '@/utils/MathUtils';
+import { styleDefaultConfig } from '@/constant/defaultConfig';
+import AxisUtils, { CoordinateUtils } from '@/utils/tool/AxisUtils';
+import { EToolName } from '@/constant/tool';
+import LineToolUtils from '@/utils/tool/LineToolUtils';
+import { IPolygonConfig } from '@/types/tool/polygon';
 import { EDragStatus, EGrowthMode, ELang } from '../../constant/annotation';
 import EKeyCode from '../../constant/keyCode';
 import { BASE_ICON, COLORS_ARRAY } from '../../constant/style';
@@ -12,13 +20,6 @@ import ZoomUtils from '../../utils/tool/ZoomUtils';
 import EventListener from './eventListener';
 import locale from '../../locales';
 import { EMessage } from '../../locales/constants';
-import CommonToolUtils from '@/utils/tool/CommonToolUtils';
-import MathUtils from '@/utils/MathUtils';
-import { styleDefaultConfig } from '@/constant/defaultConfig';
-import AxisUtils, { CoordinateUtils } from '@/utils/tool/AxisUtils';
-import { EToolName } from '@/constant/tool';
-import LineToolUtils from '@/utils/tool/LineToolUtils';
-import { IPolygonConfig } from '@/types/tool/polygon';
 
 interface IBasicToolOperationProps {
   container: HTMLElement;
@@ -35,6 +36,8 @@ interface IBasicToolOperationProps {
   defaultAttribute?: string;
   forbidCursorLine?: boolean;
   showDefaultCursor?: boolean; // 默认会展示为 none
+
+  forbidBasicResultRender?: boolean;
 }
 
 // zoom 的限制
@@ -70,6 +73,8 @@ class BasicToolOperation extends EventListener {
   public isShowCursor: boolean; // 是否展示十字光标
 
   public forbidOperation: boolean; // 禁止操作
+
+  public forbidBasicResultRender: boolean; // 禁止渲染基础依赖图形
 
   // public style: {
   //   strokeColor: string;
@@ -149,6 +154,8 @@ class BasicToolOperation extends EventListener {
       rotate: 0,
     };
     this.forbidOperation = props.forbidOperation ?? false;
+    this.forbidBasicResultRender = props.forbidBasicResultRender ?? false;
+
     this.size = props.size;
     this.currentPos = {
       x: 0,
@@ -233,6 +240,13 @@ class BasicToolOperation extends EventListener {
     return [];
   }
 
+  /**
+   * 是否含有列表标注
+   */
+  public get hasMarkerConfig() {
+    return this.config.markerConfigurable === true && this.config.markerList && this.config.markerList.length > 0;
+  }
+
   public setZoom(zoom: number) {
     this.zoom = zoom;
     this.coordUtils.setZoomAndCurrentPos(this.zoom, this.currentPos);
@@ -275,6 +289,10 @@ class BasicToolOperation extends EventListener {
     return this.forbidOperation || this.valid === false;
   }
 
+  public get pixelRatio() {
+    return CanvasUtils.getPixelRatio(this.canvas?.getContext('2d'));
+  }
+
   public init() {
     this.eventUnbinding();
     this.initPosition();
@@ -291,26 +309,41 @@ class BasicToolOperation extends EventListener {
   public createCanvas(size: ISize) {
     // TODO 后续需要将 canvas 抽离出来，迭代器叠加
     const basicCanvas = document.createElement('canvas');
-    basicCanvas.setAttribute('width', `${size.width}`);
-    basicCanvas.setAttribute('height', `${size.height}`);
-    basicCanvas.style.position = 'absolute';
+    const pixel = this.pixelRatio;
+
+    basicCanvas.width = size.width * pixel;
+    basicCanvas.height = size.height * pixel;
+    basicCanvas.style.width = `${size.width}px`;
+    basicCanvas.style.height = `${size.height}px`;
     basicCanvas.style.left = '0';
     basicCanvas.style.top = '0';
     basicCanvas.style.zIndex = '0';
-    this.container.appendChild(basicCanvas);
+
     this.basicCanvas = basicCanvas;
 
     const canvas = document.createElement('canvas');
-    canvas.setAttribute('width', `${size.width}`);
-    canvas.setAttribute('height', `${size.height}`);
     canvas.style.position = 'absolute';
     canvas.style.left = '0';
     canvas.style.top = '0';
     canvas.style.zIndex = '10';
+    canvas.style.width = `${size.width}px`;
+    canvas.style.height = `${size.height}px`;
 
-    this.container.appendChild(canvas);
+    canvas.width = size.width * pixel;
+    canvas.height = size.height * pixel;
+
+    if (this.container.hasChildNodes()) {
+      this.container.insertBefore(canvas, this.container.childNodes[0]);
+      this.container.insertBefore(basicCanvas, this.container.childNodes[0]);
+    } else {
+      this.container.appendChild(basicCanvas);
+      this.container.appendChild(canvas);
+    }
+
     this.canvas = canvas;
     this.container.style.cursor = this.defaultCursor;
+    this.ctx?.scale(pixel, pixel);
+    this.basicCtx?.scale(pixel, pixel);
   }
 
   public destroyCanvas() {
@@ -662,7 +695,12 @@ class BasicToolOperation extends EventListener {
         this.container.style.cursor = 'grabbing';
         this.forbidCursorLine = true;
         this.renderBasicCanvas();
+
+        // 依赖渲染触发
         this.emit('dependRender');
+
+        // 拖拽信息触发
+        this.emit('dragMove', { currentPos, zoom: this.zoom });
       }
 
       this.render();
@@ -847,7 +885,7 @@ class BasicToolOperation extends EventListener {
     this.currentPosStorage = newCurrentPos;
     this.imgInfo = imgInfo;
     zoomInfo.ratio = ratio;
-    this.emit('renderZoom', zoom);
+    this.emit('renderZoom', zoom, currentPos);
   };
 
   /**
@@ -894,6 +932,10 @@ class BasicToolOperation extends EventListener {
       this.createCanvas(size);
       this.eventUnbinding();
       this.init();
+
+      if (this.basicImgInfo?.valid === false) {
+        this.renderInvalidPage();
+      }
     }
   }
 
@@ -1016,7 +1058,7 @@ class BasicToolOperation extends EventListener {
       return;
     }
 
-    this._invalidDOM = RenderDomUtils.renderInvalidPage(this.canvas, this.container, this.lang);
+    this._invalidDOM = RenderDomUtils.renderInvalidPage(this.container, this.size, this.lang);
   }
 
   public renderBasicCanvas() {
@@ -1028,6 +1070,10 @@ class BasicToolOperation extends EventListener {
     this.drawImg();
 
     const thickness = 3;
+
+    if (this.forbidBasicResultRender) {
+      return;
+    }
 
     if (this.basicResult && this.dependToolName) {
       switch (this.dependToolName) {

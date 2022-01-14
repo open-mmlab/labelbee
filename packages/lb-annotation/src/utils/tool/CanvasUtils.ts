@@ -74,4 +74,26 @@ export default class CanvasUtils {
 
     return { top, bottom, left, right };
   };
+
+  /**
+   * 获取当前的渲染像素比例
+   * @param context
+   * @returns
+   */
+  public static getPixelRatio = (context: any) => {
+    if (!context || !window) {
+      return 1;
+    }
+
+    const backingStore =
+      context.backingStorePixelRatio ||
+      context.webkitBackingStorePixelRatio ||
+      context.mozBackingStorePixelRatio ||
+      context.msBackingStorePixelRatio ||
+      context.oBackingStorePixelRatio ||
+      context.backingStorePixelRatio ||
+      1;
+
+    return (window.devicePixelRatio || 1) / backingStore;
+  };
 }

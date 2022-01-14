@@ -1,4 +1,4 @@
-import { ELineTypes, SEGMENT_NUMBER } from '../../constant/tool';
+import { DEFAULT_FONT, ELineTypes, SEGMENT_NUMBER } from '../../constant/tool';
 import { IPolygonPoint } from '../../types/tool/polygon';
 import PolygonUtils from './PolygonUtils';
 import UnitUtils from './UnitUtils';
@@ -95,31 +95,39 @@ export default class DrawUtils {
       color: string;
       thickness: number;
       lineCap: CanvasLineCap;
+      hiddenText: boolean;
+      lineDash: number[];
     }> = {},
   ): void {
     const ctx: CanvasRenderingContext2D = canvas.getContext('2d')!;
-    const { color = DEFAULT_COLOR, thickness = 1, lineCap = 'round' } = options;
+    const { color = DEFAULT_COLOR, thickness = 1, lineCap = 'round', hiddenText = false, lineDash } = options;
     ctx.save();
     ctx.strokeStyle = color;
     ctx.lineWidth = thickness;
     ctx.lineCap = lineCap;
+    if (Array.isArray(lineDash)) {
+      ctx.setLineDash(lineDash);
+    }
     ctx.beginPath();
     ctx.fillStyle = color;
 
     ctx.strokeRect(rect.x, rect.y, rect.width, rect.height);
-    let showText = '';
-    if (rect.attribute) {
-      showText = `${showText}  ${rect.attribute}`;
-    }
-    this.drawText(canvas, { x: rect.x, y: rect.y - 5 }, showText);
-    if (rect.textAttribute) {
-      const text = `${~~rect.width} * ${~~rect.height}`;
-      const textSizeWidth = text.length * 7;
-      const marginTop = 0;
-      const textWidth = Math.max(20, rect.width - textSizeWidth);
-      this.drawText(canvas, { x: rect.x, y: rect.y + rect.height + 20 + marginTop }, rect.textAttribute, {
-        textMaxWidth: textWidth,
-      });
+
+    if (hiddenText === false) {
+      let showText = '';
+      if (rect.attribute) {
+        showText = `${showText}  ${rect.attribute}`;
+      }
+      this.drawText(canvas, { x: rect.x, y: rect.y - 5 }, showText);
+      if (rect.textAttribute) {
+        const text = `${~~rect.width} * ${~~rect.height}`;
+        const textSizeWidth = text.length * 7;
+        const marginTop = 0;
+        const textWidth = Math.max(20, rect.width - textSizeWidth);
+        this.drawText(canvas, { x: rect.x, y: rect.y + rect.height + 20 + marginTop }, rect.textAttribute, {
+          textMaxWidth: textWidth,
+        });
+      }
     }
     ctx.restore();
   }
@@ -146,6 +154,27 @@ export default class DrawUtils {
     ctx.restore();
   }
 
+  /**
+   * 通过 DOM 形式创建标签
+   * @param parent
+   * @param text
+   * @param id
+   * @returns
+   */
+  public static drawTagByDom(parent: HTMLElement, text: string, id: string) {
+    const parentNode = parent;
+    if (!(text?.length > 0)) {
+      return;
+    }
+
+    const dom = document.createElement('div');
+    dom.innerHTML = text;
+    dom.setAttribute('id', id);
+    parentNode?.appendChild(dom);
+
+    return dom;
+  }
+
   public static drawTag(canvas: HTMLCanvasElement, tagList: { keyName: string; value: string[] }[]) {
     const parentNode = canvas?.parentNode;
     const oldDom = window.self.document.getElementById('tagToolTag');
@@ -162,6 +191,8 @@ export default class DrawUtils {
       }, '') ?? '';
     dom.setAttribute('id', 'tagToolTag');
     parentNode?.appendChild(dom);
+
+    return dom;
   }
 
   /**
@@ -173,13 +204,14 @@ export default class DrawUtils {
    */
   public static drawLineWithPointList(
     canvas: HTMLCanvasElement,
-    pointList: IPoint[] | IPolygonPoint[],
+    pointList: IPolygonPoint[],
     options: Partial<{
       color: string;
       thickness: number;
       lineCap: CanvasLineCap;
       lineType: ELineTypes;
-      hoverEdgeIndex: number; //  配合 ELineTypes.Curve
+      lineDash: number[];
+      hoverEdgeIndex: number;
     }> = {},
   ) {
     if (pointList.length < 2) {
@@ -192,15 +224,24 @@ export default class DrawUtils {
       thickness = 1,
       lineCap = 'round',
       lineType = ELineTypes.Line,
+      lineDash,
       hoverEdgeIndex,
     } = options;
     ctx.save();
-    ctx.strokeStyle = color;
-    ctx.lineWidth = thickness;
-    ctx.lineCap = lineCap;
-    ctx.beginPath();
+    const setStyle = () => {
+      ctx.strokeStyle = color;
+      ctx.lineWidth = thickness;
+      ctx.lineCap = lineCap;
+      if (Array.isArray(lineDash)) {
+        ctx.setLineDash(lineDash);
+      } else {
+        ctx.setLineDash([]);
+      }
+    };
+    setStyle();
 
     if (lineType === ELineTypes.Curve) {
+      // 适配 HoverEdge 的高亮形式，TODO
       if (hoverEdgeIndex !== undefined && hoverEdgeIndex > -1) {
         pointList.push(pointList[0]);
       }
@@ -216,13 +257,47 @@ export default class DrawUtils {
       pointList = pointList.slice(hoverEdgeIndex, hoverEdgeIndex + 2);
     }
 
-    const [firstPoint, ...nextPointList] = pointList;
-    ctx.moveTo(firstPoint.x, firstPoint.y);
-    nextPointList.forEach((point) => {
-      ctx.lineTo(point.x, point.y);
-    });
+    ctx.beginPath();
+    for (let i = 0; i < pointList.length - 1; i++) {
+      if (i === 0) {
+        ctx.moveTo(pointList[i].x, pointList[i].y);
+      }
+
+      // 特殊边绘制
+      if (pointList[i].specialEdge) {
+        // 连续边结束
+        if (!(i > 0 && pointList[i - 1].specialEdge === true)) {
+          ctx.stroke();
+          ctx.beginPath();
+          ctx.moveTo(pointList[i].x, pointList[i].y);
+          ctx.lineWidth = thickness * 0.8;
+          ctx.lineCap = 'butt';
+          ctx.setLineDash([10, 10]);
+        }
+
+        ctx.lineTo(pointList[i + 1].x, pointList[i + 1].y);
+        continue;
+      } else if (i > 0 && pointList[i - 1].specialEdge) {
+        ctx.stroke();
+        // 前一个点为的特殊点且当前点不为特殊边
+        ctx.beginPath();
+        setStyle();
+        ctx.moveTo(pointList[i].x, pointList[i].y);
+      }
+      ctx.lineTo(pointList[i + 1].x, pointList[i + 1].y);
+    }
     ctx.stroke();
     ctx.restore();
+    // 特殊点绘制
+
+    pointList.forEach((p) => {
+      if (p.specialPoint) {
+        this.drawSpecialPoint(canvas, p, thickness, 'white');
+      }
+    });
+
+    // 用于外层获取曲线更新后数据
+    return pointList;
   }
 
   public static drawCircle(
@@ -255,7 +330,9 @@ export default class DrawUtils {
     ctx.lineWidth = thickness;
     ctx.arc(anchorPoint.x, anchorPoint.y, radius, startAngleRad, endAngleRad, false);
     ctx.stroke();
-    ctx.fill();
+    if (fill) {
+      ctx.fill();
+    }
     ctx.closePath();
     ctx.restore();
   }
@@ -281,6 +358,41 @@ export default class DrawUtils {
     ctx.restore();
   }
 
+  /**
+   * 绘制单点
+   *
+   * @export
+   * @param {CanvasRenderingContext2D} ctx
+   * @param {ICoord} point
+   * @param {number} [pointRadius=6]
+   * @param {string} fillStyle
+   * @param {boolean} [specialPoint]
+   */
+  public static drawSpecialPoint(
+    canvas: HTMLCanvasElement,
+    point: ICoordinate,
+    pointRadius: number = 6,
+    fillStyle: string,
+  ) {
+    const ctx: CanvasRenderingContext2D = canvas.getContext('2d')!;
+
+    const { x, y } = point;
+    ctx.save();
+    ctx.beginPath();
+    ctx.fillStyle = fillStyle;
+
+    const newPointRadius = pointRadius * 1.5;
+    const xl = (newPointRadius * Math.sqrt(3)) / 2;
+    const yl = newPointRadius / 2;
+    ctx.moveTo(x, y - newPointRadius);
+    ctx.lineTo(x - xl, y + yl);
+    ctx.lineTo(x + xl, y + yl);
+    ctx.closePath();
+
+    ctx.fill();
+    ctx.restore();
+  }
+
   public static drawPolygon(
     canvas: HTMLCanvasElement,
     pointList: IPolygonPoint[],
@@ -290,8 +402,9 @@ export default class DrawUtils {
       lineCap: CanvasLineCap;
       isClose: boolean; // 是否闭合
       lineType: ELineTypes;
+      lineDash: number[];
     }> = {},
-  ): void {
+  ) {
     const { isClose = false, lineType = ELineTypes.Line } = options;
     if (isClose === true) {
       pointList = [...pointList, pointList[0]];
@@ -301,7 +414,13 @@ export default class DrawUtils {
       pointList = PolygonUtils.createSmoothCurvePointsFromPointList([...pointList]);
     }
 
-    this.drawLineWithPointList(canvas, pointList, options);
+    this.drawLineWithPointList(canvas, pointList, {
+      ...options,
+      lineType: ELineTypes.Line,
+    });
+
+    // 用于外层获取曲线更新后数据
+    return pointList;
   }
 
   public static drawPolygonWithFill(
@@ -311,7 +430,7 @@ export default class DrawUtils {
       color: string;
       lineType: ELineTypes;
     }> = {},
-  ): void {
+  ) {
     if (pointList.length < 2) {
       return;
     }
@@ -335,6 +454,9 @@ export default class DrawUtils {
 
     ctx.fill();
     ctx.restore();
+
+    // 用于外层获取曲线更新后数据
+    return pointList;
   }
 
   public static drawPolygonWithFillAndLine(
@@ -401,6 +523,7 @@ export default class DrawUtils {
       offsetX: number;
       offsetY: number;
       textAlign: 'start' | 'center' | 'end' | 'left' | 'right';
+      lineHeight: number;
     }> = {},
   ): void {
     if (!text) {
@@ -410,7 +533,7 @@ export default class DrawUtils {
     const ctx: CanvasRenderingContext2D = canvas.getContext('2d')!;
     const {
       color = DEFAULT_COLOR,
-      font = 'normal normal 500 14px Arial',
+      font = DEFAULT_FONT,
       shadowColor = '',
       shadowBlur = 0,
       shadowOffsetX = 0,
@@ -419,6 +542,7 @@ export default class DrawUtils {
       offsetX = 0,
       offsetY = 0,
       textAlign = 'start',
+      lineHeight,
     } = options;
 
     ctx.save();
@@ -429,7 +553,7 @@ export default class DrawUtils {
     ctx.shadowOffsetX = shadowOffsetX;
     ctx.shadowOffsetY = shadowOffsetY;
     ctx.shadowBlur = shadowBlur;
-    this.wrapText(canvas, `${text}`, startPoint.x + offsetX, startPoint.y + offsetY, textMaxWidth);
+    this.wrapText(canvas, `${text}`, startPoint.x + offsetX, startPoint.y + offsetY, textMaxWidth, lineHeight);
     ctx.restore();
   }
 
@@ -501,7 +625,6 @@ export default class DrawUtils {
       lineCap: CanvasLineCap;
       theta: number; // 用于控制箭头的偏移
       headLen: number; // 箭头长度
-      ctx: CanvasRenderingContext2D;
     }> = {},
   ): void {
     const { color = DEFAULT_COLOR, thickness = 1, lineCap = 'round', theta = 30, headLen = 10 } = options;
@@ -525,5 +648,21 @@ export default class DrawUtils {
 
     ctx.stroke();
     ctx.restore();
+  }
+
+  public static drawArrowByCanvas(
+    canvas: HTMLCanvasElement,
+    startPoint: IPoint | IPolygonPoint,
+    endPoint: IPoint | IPolygonPoint,
+    options: Partial<{
+      color: string;
+      thickness: number;
+      lineCap: CanvasLineCap;
+      theta: number; // 用于控制箭头的偏移
+      headLen: number; // 箭头长度
+    }> = {},
+  ): void {
+    const ctx: CanvasRenderingContext2D = canvas.getContext('2d')!;
+    this.drawArrow(ctx, startPoint, endPoint, options);
   }
 }

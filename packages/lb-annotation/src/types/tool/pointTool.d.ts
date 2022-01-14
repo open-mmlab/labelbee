@@ -26,4 +26,8 @@ declare interface IPointToolConfig extends IToolConfig {
   textConfigurable: boolean;
   textCheckType: number;
   customFormat: string;
+  markerConfigurable?: boolean; // 是否开启列表标注
+  markerList: IInputList[];
+
+  showOrder?: boolean; // 兼容旧 order 的配置
 }

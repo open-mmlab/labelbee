@@ -190,6 +190,11 @@ export const TEXT_ATTRIBUTE_MAX_LENGTH = 1000;
 /** 文本标注的文本高度 */
 export const TEXT_ATTRIBUTE_LINE_HEIGHT = 16;
 
+/** 文本默认的最大宽度 */
+export const DEFAULT_TEXT_MAX_WIDTH = 300;
+
+export const DEFAULT_FONT = 'normal normal 500 14px Arial';
+
 /** 缩略图下的模式 */
 export enum EThumbnailOption {
   ImgList = 1000,

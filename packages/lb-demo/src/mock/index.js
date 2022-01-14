@@ -85,21 +85,26 @@ export const DEFAULT_ANNOTATIONS = [
   {
     type: 'rect',
     annotation: {
-      id: 123123,
+      id: '123123',
       x: 123,
       y: 23,
       width: 100,
       height: 100,
-      color: 'pink',
+      stroke: 'pink',
       // thickness: 10,
+      label: 'laoluo',
+      attribute: 'asdasd',
+      order: 1,
+      // hiddenText: true
     },
   },
   {
     type: 'polygon',
     annotation: {
-      id: 3,
+      id: '3',
       // thickness: 10,
-      color: 'green',
+      stroke: 'green',
+      lineType: 1,
       pointList: [
         {
           x: 12,
@@ -119,10 +124,9 @@ export const DEFAULT_ANNOTATIONS = [
   {
     type: 'line',
     annotation: {
-      color: 'yellow',
+      stroke: 'yellow',
       thickness: 5,
-      id: 4,
-
+      id: '4',
       pointList: [
         {
           x: 123,
@@ -142,11 +146,11 @@ export const DEFAULT_ANNOTATIONS = [
   {
     type: 'point',
     annotation: {
-      id: 5,
+      id: '5',
       x: 10,
       y: 10,
       fill: 'green',
-      color: 'blue',
+      stroke: 'blue',
       thickness: '20',
       radius: 10,
     },
@@ -154,11 +158,34 @@ export const DEFAULT_ANNOTATIONS = [
   {
     type: 'rect',
     annotation: {
-      id: 10,
+      id: '10',
       x: 13,
       y: 3,
       width: 1020,
       height: 100,
     },
   },
+  {
+    type: 'text',
+    annotation: {
+      position: 'rt',
+      id: '11',
+      x: 223,
+      y: 23,
+      textMaxWidth: 416,
+      color: 'yellow',
+      text: '标签1: 测试1LoooooooooooooooooooooooooooooooooogLoooooooooooooooooooooooooooooooooogLoooooooooooooooooooooooooooooooooogLoooooooooooooooooooooooooooooooooogLoooooooooooooooooooooooooooooooooog\n标签2: 测试2sdasdas\n\n\n标签1: 测试1asdasdasd\n标签2: 测试2标签1: 测试1\n标签2: 测试2sdasdas\n标签1: 测试1asdasdasd\n标签2: 测试2标签1: 测试1\n标签2: 测试2sdasdas\n标签1: 测试1asdasdasd\n标签2: 测试2标签1: 测试1\n标签2: 测试2sdasdas\n标签1: 测试1asdasdasd\n标签2: 测试2标签1: 测试1\n标签2: 测试2sdasdas\n标签1: 测试1asdasdasd\n标签2: 测试2标签1: 测试1\n标签2: 测试2sdasdas\n标签1: 测试1asdasdasd\n标签2: 测试2'
+    }
+  },
+  {
+    type: 'text',
+    annotation: {
+      id: '12',
+      x: 12,
+      y: 123,
+      textMaxWidth: 500,
+      lineHeight: 25,
+      text: 'Key: Loooooooooooooooooooooooooooooooooog value\nSecond One: short value'
+    }
+  }
 ];

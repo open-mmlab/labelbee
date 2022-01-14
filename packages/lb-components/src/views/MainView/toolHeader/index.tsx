@@ -17,6 +17,7 @@ import { IStepInfo } from '@/types/step';
 import { i18n } from '@labelbee/lb-utils';
 import { useTranslation } from 'react-i18next';
 import useSize from '@/hooks/useSize';
+import { last } from 'lodash';
 
 interface INextStep {
   stepProgress: number;
@@ -44,8 +45,10 @@ const NextButton: React.FC<{ disabled: boolean }> = ({ disabled }) => {
 
 const NextStep: React.FC<INextStep> = ({ step, stepProgress, stepList }) => {
   const { t } = useTranslation();
+  // 最后一步不显示下一步按钮
+  const lastStep = last(stepList)?.step;
 
-  if (stepList.length < 2 || step === stepList.length) {
+  if (stepList.length < 2 || step === lastStep) {
     return null;
   }
 

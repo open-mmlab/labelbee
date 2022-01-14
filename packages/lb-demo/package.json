@@ -3,8 +3,8 @@
   "version": "1.1.1",
   "private": true,
   "dependencies": {
-    "@labelbee/lb-components": "^1.2.2",
-    "@labelbee/lb-utils": "^1.0.3",
+    "@labelbee/lb-components": "^1.2.3-alpha.7",
+    "@labelbee/lb-utils": "^1.0.4-alpha.0",
     "@testing-library/jest-dom": "^5.11.4",
     "@testing-library/react": "^11.1.0",
     "@testing-library/user-event": "^12.1.10",
