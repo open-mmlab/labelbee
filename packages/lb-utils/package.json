@@ -1,6 +1,6 @@
 {
   "name": "@labelbee/lb-utils",
-  "version": "1.0.4-alpha.0",
+  "version": "1.0.4",
   "description": "utils for label-bee",
   "author": "lijingchi <lijingchi1@sensetime.com>",
   "license": "Apache-2.0",
