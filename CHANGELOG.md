@@ -2,6 +2,45 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [1.4.0](https://github.com/open-mmlab/labelbee/compare/v1.3.0...v1.4.0) (2022-01-14)
+
+
+### Features
+
+* Add dragMove event trigger ([e31b578](https://github.com/open-mmlab/labelbee/commit/e31b578ed46940365081ddb112a5faa72f1c53eb))
+* Add tag dom rendering / adapt to Polygonal curve ([ec0bfcc](https://github.com/open-mmlab/labelbee/commit/ec0bfcc27c723955b772f428de85817c79e11fb9))
+* Add ToolStyleConverter in lb-utils ([393e07e](https://github.com/open-mmlab/labelbee/commit/393e07ea81acdc1340f22843519298498880f963))
+* AnnotationView - text rendering added to graphics type ([e673fb8](https://github.com/open-mmlab/labelbee/commit/e673fb8f02cfc4b7cfbed6ed724101d2dd601ad2))
+* AnnotationView add text annotation dispaly ([1c21c06](https://github.com/open-mmlab/labelbee/commit/1c21c061dc165aa95103fcc3cfc1949aae753571))
+* AnnotationView Text support Position ([db6c9b3](https://github.com/open-mmlab/labelbee/commit/db6c9b3e386783e36bb5db8b0de7648041f5aecb))
+* AnnotationView updates Label Render ([484395e](https://github.com/open-mmlab/labelbee/commit/484395e6cc1cc1be142ded965faef1c671f131c9))
+* LineView adds Direction Render ([b2a474e](https://github.com/open-mmlab/labelbee/commit/b2a474e66b64e148e31f5053016fe3c3261f4849))
+* PointTool adds list-annotation feature ([64ed73e](https://github.com/open-mmlab/labelbee/commit/64ed73e37ae95fe41e49a15b76424bed90aae2f1))
+* PolygonView adds Direction Render ([bba3248](https://github.com/open-mmlab/labelbee/commit/bba3248c86931fbebd671b7d4b13b29b08755e19))
+* PolygonView/LineView adds special line/point render ([cad0681](https://github.com/open-mmlab/labelbee/commit/cad0681a4278406d7c50a9c96e5ec9c79130d767))
+* Real-time update of text changes for ViewOperation ([1bd807b](https://github.com/open-mmlab/labelbee/commit/1bd807bc280c61835c12fb06e03b40caec431660))
+* Support Custom text-dom using Style ([ae9031d](https://github.com/open-mmlab/labelbee/commit/ae9031d7a88ca1f734d53c22ac4b6ea4d1213e66))
+* ViewOperation adds reference pattern(lineDash) ([5b2083b](https://github.com/open-mmlab/labelbee/commit/5b2083b060d0d2e46c8f64266167803d7636ae3c))
+
+
+### Bug Fixes
+
+* Adaptation of list annotations in the case of dependencies ([6ea04c6](https://github.com/open-mmlab/labelbee/commit/6ea04c64c0f1b2ce71ee705705bd92ecd392f55a))
+* Adapting to the case where textConfigurable does not exist ([d084e7a](https://github.com/open-mmlab/labelbee/commit/d084e7af995c6181cdbb2da42dd2b8342bb8f380))
+* Add viewOperation render data judgment ([b35a123](https://github.com/open-mmlab/labelbee/commit/b35a12353e002d4100182e8d0ea7f4f4ef60e281))
+* Change canvas Mount Position / Add forbidBasicResultRender ([8020e3b](https://github.com/open-mmlab/labelbee/commit/8020e3b77c24f107449fb26c38c2e2d3f905ae84))
+* Change the param of AnnotationView from color to stroke ([027ced8](https://github.com/open-mmlab/labelbee/commit/027ced8e7b1b1a82c37378119f018b0a258a3bee))
+* Clear domMap in ViewOperation ([643aed1](https://github.com/open-mmlab/labelbee/commit/643aed1333e09166c5d4090051be2ae564c12db3))
+* Compatible with old config of PointOperation ([2f0a4ae](https://github.com/open-mmlab/labelbee/commit/2f0a4aec6ccbf476e01cac433ec4983284413726))
+* Fix getStyle2String function ([33c17b9](https://github.com/open-mmlab/labelbee/commit/33c17b9916786bffb30004d8653ced34ba47ff3a))
+* Fix invalid page size error caused by canvas size change ([c958b71](https://github.com/open-mmlab/labelbee/commit/c958b71bcdf6e0461b0f1321a0a086495bbcbe62))
+* Fix invalid page size error caused by window size change ([07784dd](https://github.com/open-mmlab/labelbee/commit/07784dddeebd03eadf294f7babb7508126bd2221))
+* Fix lint -  Unreachable code  no-unreachable ([59e5bc2](https://github.com/open-mmlab/labelbee/commit/59e5bc2d8df747ad67620920c63b68cab459007b))
+* Fix the accuracy of point-selected ([10fc24c](https://github.com/open-mmlab/labelbee/commit/10fc24c9fe0936f5b2e29d0e2e12cd90a3191b85))
+* Fix the LowerLimitPoint of PointTool ([6976a51](https://github.com/open-mmlab/labelbee/commit/6976a51d0c2c9e1d4dda57f68b97dc09e46f7c32))
+* Solve the problem caused by discontinuous steps in stepList ([007ed21](https://github.com/open-mmlab/labelbee/commit/007ed210a2fac0475b02c1143792212c05be36bd))
+* Update the ActiveHistory of the PointOperation ([bcca28b](https://github.com/open-mmlab/labelbee/commit/bcca28bd84a5e1927f479121a8270f9f9198accb))
+
 ## 1.3.0 (2022-01-14)
 
 
