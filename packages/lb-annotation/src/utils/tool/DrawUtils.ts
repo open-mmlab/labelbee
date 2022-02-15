@@ -257,44 +257,47 @@ export default class DrawUtils {
       pointList = pointList.slice(hoverEdgeIndex, hoverEdgeIndex + 2);
     }
 
+    const specialEdgeList = [];
     ctx.beginPath();
+    ctx.moveTo(pointList[0].x, pointList[0].y);
     for (let i = 0; i < pointList.length - 1; i++) {
-      if (i === 0) {
-        ctx.moveTo(pointList[i].x, pointList[i].y);
-      }
-
-      // 特殊边绘制
       if (pointList[i].specialEdge) {
-        // 连续边结束
-        if (!(i > 0 && pointList[i - 1].specialEdge === true)) {
-          ctx.stroke();
-          ctx.beginPath();
-          ctx.moveTo(pointList[i].x, pointList[i].y);
-          ctx.lineWidth = thickness * 0.8;
-          ctx.lineCap = 'butt';
-          ctx.setLineDash([10, 10]);
-        }
-
-        ctx.lineTo(pointList[i + 1].x, pointList[i + 1].y);
-        continue;
-      } else if (i > 0 && pointList[i - 1].specialEdge) {
-        ctx.stroke();
-        // 前一个点为的特殊点且当前点不为特殊边
-        ctx.beginPath();
-        setStyle();
-        ctx.moveTo(pointList[i].x, pointList[i].y);
+        specialEdgeList.push({
+          i1: i,
+          i2: i + 1,
+        });
       }
+
       ctx.lineTo(pointList[i + 1].x, pointList[i + 1].y);
     }
     ctx.stroke();
-    ctx.restore();
-    // 特殊点绘制
 
+    ctx.save();
+    ctx.lineWidth = thickness * 0.8;
+    ctx.lineCap = 'butt';
+    ctx.strokeStyle = 'white';
+    ctx.setLineDash([3, 3]);
+
+    // 后续可以进行渲染优化
+    specialEdgeList.forEach((v) => {
+      const point1 = pointList[v.i1];
+      const point2 = pointList[v.i2];
+      ctx.beginPath();
+      ctx.moveTo(point1.x, point1.y);
+      ctx.lineTo(point2.x, point2.y);
+      ctx.stroke();
+    });
+
+    ctx.restore();
+
+    const DEFAULT_SPECIAL_POINT_RADIUS = 4;
+    // 特殊点绘制
     pointList.forEach((p) => {
       if (p.specialPoint) {
-        this.drawSpecialPoint(canvas, p, thickness, 'white');
+        this.drawSpecialPoint(canvas, p, DEFAULT_SPECIAL_POINT_RADIUS, 'white');
       }
     });
+    ctx.restore();
 
     // 用于外层获取曲线更新后数据
     return pointList;
@@ -359,7 +362,7 @@ export default class DrawUtils {
   }
 
   /**
-   * 绘制单点
+   * 绘制特殊点 - 三角形
    *
    * @export
    * @param {CanvasRenderingContext2D} ctx
