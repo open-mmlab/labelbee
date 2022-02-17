@@ -291,9 +291,14 @@ export default class DrawUtils {
     ctx.restore();
 
     const DEFAULT_SPECIAL_POINT_RADIUS = 4;
+    const DEFAULT_BORDER = 2;
     // 特殊点绘制
     pointList.forEach((p) => {
       if (p.specialPoint) {
+        // 背景
+        this.drawSpecialPoint(canvas, p, DEFAULT_SPECIAL_POINT_RADIUS + DEFAULT_BORDER, color);
+
+        // 内部白心
         this.drawSpecialPoint(canvas, p, DEFAULT_SPECIAL_POINT_RADIUS, 'white');
       }
     });
