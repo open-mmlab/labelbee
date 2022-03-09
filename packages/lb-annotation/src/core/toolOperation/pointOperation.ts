@@ -87,18 +87,26 @@ class PointOperation extends BasicToolOperation {
     this.emit('markIndexChange');
   };
 
-  public setResult(pointList: IPointUnit[]) {
-    this.clearActiveStatus();
-    this.setPointList(pointList);
+  /**
+   * 设置下一个列表选择器
+   * @param pointList
+   */
+  public setNextMarker(pointList = this.pointList) {
     if (this.hasMarkerConfig) {
       const nextMarkerInfo = CommonToolUtils.getNextMarker(
         this.getCurrentPageResult(pointList),
         this.config.markerList,
       );
       if (nextMarkerInfo) {
-        this.setMarkerIndex(nextMarkerInfo.index);
+        this.setMarkerIndexAndSelect(nextMarkerInfo.index);
       }
     }
+  }
+
+  public setResult(pointList: IPointUnit[]) {
+    this.clearActiveStatus();
+    this.setPointList(pointList);
+    this.setNextMarker(pointList);
     this.render();
   }
 
@@ -244,6 +252,7 @@ class PointOperation extends BasicToolOperation {
 
   public setBasicResult(basicResult: any) {
     super.setBasicResult(basicResult);
+    this.setNextMarker();
 
     this.clearActiveStatus();
   }

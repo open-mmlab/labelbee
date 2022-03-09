@@ -318,8 +318,9 @@ export default class ViewOperation extends BasicToolOperation {
                 color: style.stroke,
                 thickness: style.thickness,
               });
-              DrawUtils.drawCircleWithFill(this.canvas, renderPolygon[0], style.thickness + 2, {
+              DrawUtils.drawCircle(this.canvas, renderPolygon[0], style.thickness + 6, {
                 color: style.stroke,
+                thickness: style.thickness,
               });
             }
 
@@ -384,8 +385,9 @@ export default class ViewOperation extends BasicToolOperation {
                 color: style.stroke,
                 thickness: style.thickness,
               });
-              DrawUtils.drawCircleWithFill(this.canvas, renderLine[0], style.thickness + 2, {
+              DrawUtils.drawCircle(this.canvas, renderLine[0], style.thickness + 6, {
                 color: style.stroke,
+                thickness: style.thickness,
               });
             }
 
