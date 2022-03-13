@@ -3,8 +3,26 @@
  */
 
 import { DEFAULT_FONT, DEFAULT_TEXT_MAX_WIDTH, SEGMENT_NUMBER } from '@/constant/tool';
+import { IPolygonPoint } from '@/types/tool/polygon';
 import { createSmoothCurvePointsFromPointList } from './tool/polygonTool';
 import Vector from './VectorUtils';
+
+/**
+ * 基础的三角运算
+ */
+export class Trigonometric {
+  public static tanAPlusB(tanA: number, tanB: number) {
+    return (tanA + tanB) / (1 - tanA * tanB);
+  }
+
+  public static sinAPlusB(sinA: number, cosA: number, sinB: number, cosB: number) {
+    return cosB * sinA + cosA * sinB;
+  }
+
+  public static cosAPlusB(sinA: number, cosA: number, sinB: number, cosB: number) {
+    return cosA * cosB - sinA * sinB;
+  }
+}
 
 export default class MathUtils {
   /**
@@ -266,5 +284,198 @@ export default class MathUtils {
       x: p1.x + vector.x / 2,
       y: p1.y + vector.y / 2,
     };
+  }
+
+  /**
+   * 获取线条的垂线
+   * @param line
+   * @returns
+   */
+  public static getPerpendicularLine(line: ICoordinate[]) {
+    if (line.length !== 2) {
+      return undefined;
+    }
+
+    const [p1, p2] = line;
+
+    const p3 = {
+      x: p2.x + p2.y - p1.y,
+      y: p2.y - (p2.x - p1.x),
+    };
+
+    return [p2, p3];
+  }
+
+  /**
+   * 获取当前垂直于直线的最后一个点的垂线点
+   * @param line
+   * @param coordinate
+   * @returns
+   */
+  public static getPerpendicularFootOfLine(line: ICoordinate[], coordinate: ICoordinate) {
+    if (line.length !== 2) {
+      return line;
+    }
+
+    const perpendicularLine = this.getPerpendicularLine(line);
+    if (!perpendicularLine) {
+      return line;
+    }
+
+    const [begin, end] = perpendicularLine;
+
+    return this.getFootOfPerpendicular(coordinate, begin, end).footPoint;
+  }
+
+  /**
+   * 从正三角形获取正四边形
+   * @param triangle
+   * @returns
+   */
+  public static getQuadrangleFromTriangle(triangle: ICoordinate[]) {
+    if (triangle.length !== 3) {
+      return triangle;
+    }
+
+    const [p1, p2, p3] = triangle;
+
+    const p4 = {
+      x: p3.x + p1.x - p2.x,
+      y: p3.y + p1.y - p2.y,
+    };
+    return [p1, p2, p3, p4];
+  }
+
+  /**
+   * 矩形拖动线，实现横向的扩大缩小
+   * @param dragStartCoord
+   * @param currentCoord
+   * @param basicLine
+   * @returns
+   */
+  public static getRectPerpendicularOffset(
+    dragStartCoord: ICoordinate,
+    currentCoord: ICoordinate,
+    basicLine: [ICoordinate, ICoordinate],
+  ) {
+    const [p1, p2] = basicLine;
+    const footer1 = this.getFootOfPerpendicular(dragStartCoord, p1, p2).footPoint;
+    const footer2 = this.getFootOfPerpendicular(currentCoord, p1, p2).footPoint;
+
+    // 数值计算
+    const offset = {
+      x: footer1.x - footer2.x,
+      y: footer1.y - footer2.y,
+    };
+
+    const newPoint = Vector.add(currentCoord, offset);
+    const vector3 = Vector.getVector(dragStartCoord, newPoint);
+
+    return vector3;
+  }
+
+  /**
+   * 获取当前真实 Index
+   * @param index
+   * @param len
+   * @returns
+   */
+  public static getArrayIndex(index: number, len: number) {
+    if (index < 0) {
+      return len + index;
+    }
+    if (index >= len) {
+      return index - len;
+    }
+    return index;
+  }
+
+  /**
+   * 在矩形点集拖动一个点时，需要进行一直维持矩形
+   * @param pointList
+   * @param changePointIndex
+   * @param offset
+   * @returns
+   */
+  public static getPointListFromPointOffset(
+    pointList: [ICoordinate, ICoordinate, ICoordinate, ICoordinate],
+    changePointIndex: number,
+    offset: ICoordinate,
+  ) {
+    const prePointIndex = this.getArrayIndex(changePointIndex - 1, pointList.length);
+    const nextPointIndex = this.getArrayIndex(changePointIndex + 1, pointList.length);
+    const originIndex = this.getArrayIndex(changePointIndex - 2, pointList.length);
+
+    const newPointList = [...pointList];
+    newPointList[changePointIndex] = Vector.add(newPointList[changePointIndex], offset);
+
+    const newFooter1 = this.getFootOfPerpendicular(
+      newPointList[changePointIndex],
+      newPointList[originIndex],
+      newPointList[prePointIndex],
+    ).footPoint;
+
+    const newFooter2 = this.getFootOfPerpendicular(
+      newPointList[changePointIndex],
+      newPointList[nextPointIndex],
+      newPointList[originIndex],
+    ).footPoint;
+
+    newPointList[prePointIndex] = newFooter1;
+    newPointList[nextPointIndex] = newFooter2;
+
+    return newPointList;
+  }
+
+  /**
+   * 获取矩形框旋转中心
+   * @param rectPointList
+   * @returns
+   */
+  public static getRectCenterPoint(rectPointList: [ICoordinate, ICoordinate, ICoordinate, ICoordinate]) {
+    const [p1, , p3] = rectPointList;
+
+    return {
+      x: (p1.x + p3.x) / 2,
+      y: (p1.y + p3.y) / 2,
+    };
+  }
+
+  /**
+   * 获取按指定的 angle 旋转的角度后的矩形
+   * @param rotate
+   * @param rectPointList
+   * @returns
+   */
+  public static rotateRectPointList(angle = 5, rectPointList: [ICoordinate, ICoordinate, ICoordinate, ICoordinate]) {
+    const centerPoint = this.getRectCenterPoint(rectPointList);
+    const { PI } = Math;
+    const sinB = Math.sin((angle * PI) / 180);
+    const cosB = Math.cos((angle * PI) / 180);
+    return rectPointList.map((point) => {
+      const vector = Vector.getVector(centerPoint, point);
+      const len = Vector.len(vector);
+      const sinA = vector.y / len;
+      const cosA = vector.x / len;
+
+      return {
+        x: len * Trigonometric.cosAPlusB(sinA, cosA, sinB, cosB) + centerPoint.x,
+        y: len * Trigonometric.sinAPlusB(sinA, cosA, sinB, cosB) + centerPoint.y,
+      };
+    });
+  }
+
+  /**
+   * 通过当前坐标 + 已知两点获取正多边形
+   * @param coordinate
+   * @param pointList
+   * @returns
+   */
+  public static getRectangleByRightAngle(coordinate: ICoordinate, pointList: IPolygonPoint[]) {
+    if (pointList.length !== 2) {
+      return pointList;
+    }
+    const newPoint = MathUtils.getPerpendicularFootOfLine(pointList, coordinate);
+    return MathUtils.getQuadrangleFromTriangle([...pointList, newPoint]);
   }
 }

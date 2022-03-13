@@ -8,6 +8,7 @@ declare interface IPolygonData {
   order: number;
   textAttribute: string;
   attribute: string;
+  isRect?: boolean; // 用于判断当前多边形矩形模式生成
 }
 
 declare interface IPolygonPoint {

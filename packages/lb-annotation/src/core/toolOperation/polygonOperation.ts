@@ -4,11 +4,12 @@ import {
   DEFAULT_TEXT_OFFSET,
   EDragStatus,
   EDragTarget,
+  ERotateDirection,
   ESortDirection,
   TEXT_ATTRIBUTE_OFFSET,
 } from '../../constant/annotation';
 import EKeyCode from '../../constant/keyCode';
-import { edgeAdsorptionScope, EToolName } from '../../constant/tool';
+import { edgeAdsorptionScope, EPolygonPattern, EToolName } from '../../constant/tool';
 import locale from '../../locales';
 import { EMessage } from '../../locales/constants';
 import { IPolygonConfig, IPolygonData, IPolygonPoint } from '../../types/tool/polygon';
@@ -46,6 +47,8 @@ class PolygonOperation extends BasicToolOperation {
 
   public editPolygonID?: string; // 是否进入编辑模式
 
+  public pattern: EPolygonPattern; // 当前多边形标注形式
+
   private dragInfo?: {
     dragStartCoord: ICoordinate;
     initPointList: IPolygonPoint[];
@@ -72,6 +75,7 @@ class PolygonOperation extends BasicToolOperation {
     this.drawingHistory = new ActionsHistory();
     this.isCtrl = false;
     this.isAlt = false;
+    this.pattern = EPolygonPattern.Rect;
 
     this.getCurrentSelectedData = this.getCurrentSelectedData.bind(this);
     this.updateSelectedTextAttribute = this.updateSelectedTextAttribute.bind(this);
@@ -126,8 +130,18 @@ class PolygonOperation extends BasicToolOperation {
     return false;
   };
 
-  get dataList() {
+  public get dataList() {
     return this.polygonList;
+  }
+
+  // 更改当前标注模式
+  public setPattern(pattern: EPolygonPattern) {
+    if (this.drawingPointList?.length > 0) {
+      // 编辑中不允许直接跳出
+      return;
+    }
+
+    this.pattern = pattern;
   }
 
   /**
@@ -206,6 +220,23 @@ class PolygonOperation extends BasicToolOperation {
     });
   }
 
+  public rotatePolygon(angle: number = 1, direction = ERotateDirection.Clockwise, selectedID = this.selectedID) {
+    if (!selectedID) {
+      return;
+    }
+
+    const selectedPolygon = PolygonUtils.getPolygonByID(this.polygonList, selectedID);
+
+    if (!selectedPolygon) {
+      return;
+    }
+
+    const rotatePointList = PolygonUtils.updatePolygonByRotate(direction, angle, selectedPolygon?.pointList);
+
+    this.setPolygonList(this.setPolygonDataByID({ pointList: rotatePointList }, selectedID));
+    this.render();
+  }
+
   public addPointInDrawing(e: MouseEvent) {
     if (!this.imgInfo) {
       return;
@@ -254,6 +285,15 @@ class PolygonOperation extends BasicToolOperation {
       dropFoot && e.altKey === false && edgeAdsorption ? dropFoot : coordinate,
       1 / this.zoom,
     );
+
+    if (this.pattern === EPolygonPattern.Rect && this.drawingPointList.length === 2) {
+      const rect = MathUtils.getRectangleByRightAngle(coordinateWithOrigin, this.drawingPointList);
+      this.drawingPointList = rect;
+
+      // 创建多边形
+      this.addDrawingPointToPolygonList(true);
+      return;
+    }
 
     this.drawingPointList.push(coordinateWithOrigin);
     if (this.drawingPointList.length === 1) {
@@ -390,7 +430,7 @@ class PolygonOperation extends BasicToolOperation {
    * 初始化的添加的数据
    * @returns
    */
-  public addDrawingPointToPolygonList() {
+  public addDrawingPointToPolygonList(isRect?: boolean) {
     let { lowerLimitPointNum = 3 } = this.config;
 
     if (lowerLimitPointNum < 3) {
@@ -441,6 +481,14 @@ class PolygonOperation extends BasicToolOperation {
           textAttribute,
         };
       }
+
+      if (this.pattern === EPolygonPattern.Rect && isRect === true) {
+        newPolygon = {
+          ...newPolygon,
+          isRect: true,
+        };
+      }
+
       polygonList.push(newPolygon);
 
       this.setSelectedIdAfterAddingDrawing(id);
@@ -556,6 +604,12 @@ class PolygonOperation extends BasicToolOperation {
   public spaceKeydown() {
     // 续标检测
     if (this.selectedID) {
+      // 矩形模式无法续标
+      if (this.selectedPolygon?.isRect === true) {
+        this.emit('messageInfo', `${locale.getMessagesByLocale(EMessage.UnableToReannotation, this.lang)}`);
+        return;
+      }
+
       this.editPolygonID = this.selectedID;
       this.drawingPointList = this.selectedPolygon?.pointList ?? [];
       this.drawingHistory.empty();
@@ -836,7 +890,8 @@ class PolygonOperation extends BasicToolOperation {
       return;
     }
 
-    let selectedPointList: IPolygonPoint[] | undefined = this.selectedPolygon?.pointList;
+    const { selectedPolygon } = this;
+    let selectedPointList: IPolygonPoint[] | undefined = selectedPolygon?.pointList;
     if (!selectedPointList) {
       return;
     }
@@ -844,10 +899,29 @@ class PolygonOperation extends BasicToolOperation {
     const { initPointList, dragStartCoord, dragTarget, changePointIndex } = this.dragInfo;
     const coordinate = this.getCoordinateUnderZoom(e);
 
-    const offset = {
+    let offset = {
       x: (coordinate.x - dragStartCoord.x) / this.zoom,
       y: (coordinate.y - dragStartCoord.y) / this.zoom,
     };
+
+    /**
+     * 矩形拖动
+     * 1. 模式匹配
+     * 2. 当前选中多边形是否为矩形
+     * 3. 是否带有拖动
+     *  */
+    if (
+      this.pattern === EPolygonPattern.Rect &&
+      selectedPolygon?.isRect === true &&
+      changePointIndex &&
+      [EDragTarget.Line].includes(dragTarget)
+    ) {
+      const firstPointIndex = MathUtils.getArrayIndex(changePointIndex[0] - 2, 4);
+      const secondPointIndex = MathUtils.getArrayIndex(changePointIndex[0] - 1, 4);
+      const basicLine: [ICoordinate, ICoordinate] = [initPointList[firstPointIndex], initPointList[secondPointIndex]];
+
+      offset = MathUtils.getRectPerpendicularOffset(dragStartCoord, coordinate, basicLine);
+    }
 
     this.dragStatus = EDragStatus.Move;
 
@@ -878,6 +952,21 @@ class PolygonOperation extends BasicToolOperation {
       default: {
         break;
       }
+    }
+
+    if (
+      this.pattern === EPolygonPattern.Rect &&
+      selectedPolygon?.isRect === true &&
+      dragTarget === EDragTarget.Point &&
+      changePointIndex
+    ) {
+      const newPointList = MathUtils.getPointListFromPointOffset(
+        initPointList as [ICoordinate, ICoordinate, ICoordinate, ICoordinate],
+        changePointIndex[0],
+        offset,
+      );
+
+      selectedPointList = newPointList;
     }
 
     // 边缘判断 - 仅限支持图片下范围下
@@ -923,10 +1012,17 @@ class PolygonOperation extends BasicToolOperation {
 
     const newPolygonList = this.polygonList.map((v) => {
       if (v.id === this.selectedID) {
-        return {
+        const newData = {
           ...v,
           pointList: selectedPointList as IPolygonPoint[],
         };
+
+        // 非矩形模式下拖动，矩形模式下生成的框将会转换为非矩形框
+        if (v.isRect === true && this.pattern === EPolygonPattern.Normal) {
+          Object.assign(newData, { isRect: false });
+        }
+
+        return newData;
       }
 
       return v;
@@ -1240,22 +1336,27 @@ class PolygonOperation extends BasicToolOperation {
     // 4. 编辑中的多边形
     if (this.drawingPointList?.length > 0) {
       // 渲染绘制中的多边形
-      const drawingPointList = [...this.drawingPointList];
+      let drawingPointList = [...this.drawingPointList];
       let coordinate = AxisUtils.getOriginCoordinateWithOffsetCoordinate(this.coord, this.zoom, this.currentPos);
 
-      if (this.config?.edgeAdsorption && this.isAlt === false) {
-        const { dropFoot } = PolygonUtils.getClosestPoint(
-          coordinate,
-          this.polygonList,
-          this.config?.lineType,
-          edgeAdsorptionScope / this.zoom,
-        );
-        if (dropFoot) {
-          coordinate = dropFoot;
+      if (this.pattern === EPolygonPattern.Rect && drawingPointList.length === 2) {
+        // 矩形模式特殊绘制
+        drawingPointList = MathUtils.getRectangleByRightAngle(coordinate, drawingPointList);
+      } else {
+        if (this.config?.edgeAdsorption && this.isAlt === false) {
+          const { dropFoot } = PolygonUtils.getClosestPoint(
+            coordinate,
+            this.polygonList,
+            this.config?.lineType,
+            edgeAdsorptionScope / this.zoom,
+          );
+          if (dropFoot) {
+            coordinate = dropFoot;
+          }
         }
+        drawingPointList.push(coordinate);
       }
 
-      drawingPointList.push(coordinate);
       DrawUtils.drawSelectedPolygonWithFillAndLine(
         this.canvas,
         AxisUtils.changePointListByZoom(drawingPointList, this.zoom, this.currentPos),
