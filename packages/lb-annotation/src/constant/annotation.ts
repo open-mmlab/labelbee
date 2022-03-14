@@ -55,6 +55,14 @@ export enum ELang {
 }
 
 /**
+ * 旋转方向
+ */
+export enum ERotateDirection {
+  Clockwise, // 顺时针
+  Anticlockwise, // 逆时针
+}
+
+/**
  * 默认多边形文本偏移量
  */
 export const DEFAULT_TEXT_OFFSET = {

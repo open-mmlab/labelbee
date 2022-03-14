@@ -14,5 +14,6 @@ const message: Record<string, string> = {
   [EMessage.MarkerFinish]: '列表标注已完成',
   [EMessage.LowerLimitPoint]: '已到达标点数量上限',
   [EMessage.NoRotateInDependence]: '依赖情况下无法进行旋转',
+  [EMessage.UnableToReannotation]: '无法进行续标操作',
 };
 export default message;

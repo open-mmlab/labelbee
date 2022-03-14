@@ -221,3 +221,11 @@ export const SEGMENT_NUMBER = 16;
 
 // 边缘吸附的延伸范围
 export const edgeAdsorptionScope = 10;
+
+/**
+ * 多边形的标注模式
+ */
+export enum EPolygonPattern {
+  Normal,
+  Rect,
+}

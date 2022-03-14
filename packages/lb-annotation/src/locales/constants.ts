@@ -12,4 +12,5 @@ export enum EMessage {
   MarkerFinish = 'MarkerFinish',
   LowerLimitPoint = 'LowerLimitPoint',
   NoRotateInDependence = 'noRotateInDependence',
+  UnableToReannotation = 'unableToReannotation',
 }

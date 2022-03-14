@@ -3,6 +3,7 @@ import { IPolygonData, IPolygonPoint } from '../../types/tool/polygon';
 import { ELineTypes, SEGMENT_NUMBER } from '../../constant/tool';
 import AxisUtils from './AxisUtils';
 import MathUtils from '../MathUtils';
+import { ERotateDirection } from '@/constant/annotation';
 
 export default class PolygonUtils {
   static getHoverPolygonID(
@@ -402,5 +403,15 @@ export default class PolygonUtils {
     }
 
     return Math.abs(total);
+  }
+
+  public static updatePolygonByRotate(direction: ERotateDirection, angle = 1, pointList: IPolygonPoint[]) {
+    let rotate = 1;
+    if (direction === ERotateDirection.Anticlockwise) {
+      rotate = -1;
+    }
+    rotate *= angle;
+
+    return MathUtils.rotateRectPointList(rotate, pointList as [ICoordinate, ICoordinate, ICoordinate, ICoordinate]);
   }
 }
