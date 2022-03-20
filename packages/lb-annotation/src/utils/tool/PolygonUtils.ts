@@ -1,9 +1,9 @@
+import { ERotateDirection } from '@/constant/annotation';
 import CommonToolUtils from './CommonToolUtils';
 import { IPolygonData, IPolygonPoint } from '../../types/tool/polygon';
 import { ELineTypes, SEGMENT_NUMBER } from '../../constant/tool';
 import AxisUtils from './AxisUtils';
 import MathUtils from '../MathUtils';
-import { ERotateDirection } from '@/constant/annotation';
 
 export default class PolygonUtils {
   static getHoverPolygonID(
