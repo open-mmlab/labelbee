@@ -75,7 +75,7 @@ class PolygonOperation extends BasicToolOperation {
     this.drawingHistory = new ActionsHistory();
     this.isCtrl = false;
     this.isAlt = false;
-    this.pattern = EPolygonPattern.Rect;
+    this.pattern = EPolygonPattern.Normal;
 
     this.getCurrentSelectedData = this.getCurrentSelectedData.bind(this);
     this.updateSelectedTextAttribute = this.updateSelectedTextAttribute.bind(this);
@@ -289,6 +289,21 @@ class PolygonOperation extends BasicToolOperation {
     if (this.pattern === EPolygonPattern.Rect && this.drawingPointList.length === 2) {
       const rect = MathUtils.getRectangleByRightAngle(coordinateWithOrigin, this.drawingPointList);
       this.drawingPointList = rect;
+
+      // 边缘判断 - 仅限支持图片下范围下
+      if (this.config.drawOutsideTarget === false && this.imgInfo) {
+        const isOutSide = this.isPolygonOutSide(this.drawingPointList);
+        if (isOutSide) {
+          // 边缘外直接跳出
+          this.emit(
+            'messageInfo',
+            `${locale.getMessagesByLocale(EMessage.ForbiddenCreationOutsideBoundary, this.lang)}`,
+          );
+          this.drawingPointList = [];
+
+          return;
+        }
+      }
 
       // 创建多边形
       this.addDrawingPointToPolygonList(true);
@@ -885,6 +900,55 @@ class PolygonOperation extends BasicToolOperation {
     return true;
   }
 
+  /**
+   * 判断是否在边界外
+   * @param selectedPointList
+   * @returns
+   */
+  public isPolygonOutSide(selectedPointList: IPolygonPoint[]) {
+    // 边缘判断 - 仅限支持图片下范围下
+    if (this.dependToolName && this.basicCanvas && this.basicResult) {
+      let isOutSide = false;
+      switch (this.dependToolName) {
+        case EToolName.Rect: {
+          // 依赖拉框
+          isOutSide = selectedPointList.filter((v) => !RectUtils.isInRect(v, this.basicResult)).length > 0;
+
+          break;
+        }
+        case EToolName.Polygon: {
+          isOutSide = PolygonUtils.isPointListOutSidePolygon(
+            selectedPointList,
+            this.basicResult.pointList,
+            this.config.lineType,
+          );
+          break;
+        }
+        default: {
+          //
+        }
+      }
+
+      return isOutSide;
+    }
+
+    if (!this.imgInfo) {
+      return false;
+    }
+
+    const { left, top, right, bottom } = MathUtils.calcViewportBoundaries(
+      AxisUtils.changePointListByZoom(selectedPointList, this.zoom),
+    );
+
+    const scope = 0.00001;
+    if (left < 0 || top < 0 || right > this.imgInfo.width + scope || bottom > this.imgInfo.height + scope) {
+      // 超出范围则不进行编辑
+      return true;
+    }
+
+    return false;
+  }
+
   public onDragMove(e: MouseEvent) {
     if (!this.dragInfo || !this.selectedID) {
       return;
@@ -971,41 +1035,9 @@ class PolygonOperation extends BasicToolOperation {
 
     // 边缘判断 - 仅限支持图片下范围下
     if (this.config.drawOutsideTarget === false && this.imgInfo) {
-      if (this.dependToolName && this.basicCanvas && this.basicResult) {
-        let isOutSide = false;
-        switch (this.dependToolName) {
-          case EToolName.Rect: {
-            // 依赖拉框
-            isOutSide = selectedPointList.filter((v) => !RectUtils.isInRect(v, this.basicResult)).length > 0;
-
-            break;
-          }
-          case EToolName.Polygon: {
-            isOutSide = PolygonUtils.isPointListOutSidePolygon(
-              selectedPointList,
-              this.basicResult.pointList,
-              this.config.lineType,
-            );
-            break;
-          }
-          default: {
-            //
-          }
-        }
-
-        if (isOutSide) {
-          // 在边界外直接跳出
-          return;
-        }
-      }
-
-      const { left, top, right, bottom } = MathUtils.calcViewportBoundaries(
-        AxisUtils.changePointListByZoom(selectedPointList, this.zoom),
-      );
-
-      const scope = 0.00001;
-      if (left < 0 || top < 0 || right > this.imgInfo.width + scope || bottom > this.imgInfo.height + scope) {
-        // 超出范围则不进行编辑
+      const isOutSide = this.isPolygonOutSide(selectedPointList);
+      if (isOutSide) {
+        // 边缘外直接跳出
         return;
       }
     }

@@ -13,4 +13,5 @@ export enum EMessage {
   LowerLimitPoint = 'LowerLimitPoint',
   NoRotateInDependence = 'noRotateInDependence',
   UnableToReannotation = 'unableToReannotation',
+  ForbiddenCreationOutsideBoundary = 'ForbiddenCreationOutsideBoundary',
 }

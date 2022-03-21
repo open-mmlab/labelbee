@@ -15,5 +15,6 @@ const message: Record<string, string> = {
   [EMessage.LowerLimitPoint]: '已到达标点数量上限',
   [EMessage.NoRotateInDependence]: '依赖情况下无法进行旋转',
   [EMessage.UnableToReannotation]: '无法进行续标操作',
+  [EMessage.ForbiddenCreationOutsideBoundary]: '边界外禁止创建',
 };
 export default message;

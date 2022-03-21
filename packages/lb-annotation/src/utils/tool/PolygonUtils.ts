@@ -1,9 +1,9 @@
+import { ERotateDirection } from '@/constant/annotation';
 import CommonToolUtils from './CommonToolUtils';
 import { IPolygonData, IPolygonPoint } from '../../types/tool/polygon';
 import { ELineTypes, SEGMENT_NUMBER } from '../../constant/tool';
 import AxisUtils from './AxisUtils';
 import MathUtils from '../MathUtils';
-import { ERotateDirection } from '@/constant/annotation';
 
 export default class PolygonUtils {
   static getHoverPolygonID(
@@ -294,7 +294,12 @@ export default class PolygonUtils {
     polygonList: IPolygonData[],
     lineType: ELineTypes = ELineTypes.Line,
     range: number = 3,
+    option?: {
+      isClose?: boolean; // 是否闭合
+    },
   ) {
+    const isClose = option?.isClose ?? true;
+
     // 第一步： 寻找所有图形中最新的边
 
     let closestPolygonID = '';
@@ -312,7 +317,7 @@ export default class PolygonUtils {
       switch (lineType) {
         case ELineTypes.Line:
           {
-            const allLine = CommonToolUtils.findAllLine(v.pointList);
+            const allLine = CommonToolUtils.findAllLine(v.pointList, isClose);
             allLine.forEach((line, lineIndex) => {
               const { length, footPoint } = MathUtils.getFootOfPerpendicular(coordinate, line.point1, line.point2);
               if (length < min && length < range) {
@@ -333,7 +338,7 @@ export default class PolygonUtils {
                 return [...acc, cur.x, cur.y];
               }, []),
               0.5,
-              true,
+              isClose,
               numberOfSegments,
             );
 

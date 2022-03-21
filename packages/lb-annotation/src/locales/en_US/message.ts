@@ -15,5 +15,6 @@ const message: Record<string, string> = {
   [EMessage.LowerLimitPoint]: 'The maximum number of points has been reached', // 缺少国际化
   [EMessage.NoRotateInDependence]: 'Disallow rotation in dependent cases',
   [EMessage.UnableToReannotation]: 'Unabled to reannotation',
+  [EMessage.ForbiddenCreationOutsideBoundary]: 'Fobid creation outside boundary',
 };
 export default message;
