@@ -1,4 +1,4 @@
-import { EToolName } from '@/constant/tool';
+import { edgeAdsorptionScope, ELineTypes, EToolName } from '@/constant/tool';
 import RectUtils from '@/utils/tool/RectUtils';
 import PolygonUtils from '@/utils/tool/PolygonUtils';
 import MarkerUtils from '@/utils/tool/MarkerUtils';
@@ -382,7 +382,22 @@ class PointOperation extends BasicToolOperation {
 
     const basicSourceID = CommonToolUtils.getSourceID(this.basicResult);
     const coordinateZoom = this.getCoordinateUnderZoom(e);
-    const coordinate = AxisUtils.getOriginCoordinateWithOffsetCoordinate(this.coord, this.zoom, this.currentPos);
+    let coordinate = AxisUtils.getOriginCoordinateWithOffsetCoordinate(this.coord, this.zoom, this.currentPos);
+
+    if (this.config.edgeAdsorption && this.referenceData) {
+      const isClose = this.referenceData?.toolName === EToolName.Polygon;
+
+      const { dropFoot } = PolygonUtils.getClosestPoint(
+        coordinate,
+        this.referenceData.result as IPolygonData[],
+        this.referenceData.config?.lineType ?? ELineTypes.Line,
+        edgeAdsorptionScope / this.zoom,
+        { isClose },
+      );
+      if (dropFoot) {
+        coordinate = dropFoot;
+      }
+    }
 
     // 边缘判断
     if (this.config.drawOutsideTarget === false) {
@@ -766,8 +781,45 @@ class PointOperation extends BasicToolOperation {
         this.renderPoint(point);
       });
     }
+
     if (selectedPoint) {
       this.renderPoint(selectedPoint);
+    }
+  }
+
+  /**
+   * 顶层渲染图标
+   */
+  public renderTop() {
+    const color = this.getLineColor(this.defaultAttribute);
+    this.renderCursorLine(color);
+
+    if (this.config.edgeAdsorption && this.referenceData) {
+      let coordinate = AxisUtils.getOriginCoordinateWithOffsetCoordinate(this.coord, this.zoom, this.currentPos);
+      const isClose = this.referenceData?.toolName === EToolName.Polygon;
+
+      const { dropFoot } = PolygonUtils.getClosestPoint(
+        coordinate,
+        this.referenceData.result as IPolygonData[],
+        this.referenceData.config?.lineType ?? ELineTypes.Line,
+        edgeAdsorptionScope / this.zoom,
+        {
+          isClose,
+        },
+      );
+      if (dropFoot && coordinate !== dropFoot) {
+        if (coordinate !== dropFoot) {
+          coordinate = dropFoot;
+          DrawUtils.drawCircle(this.canvas, AxisUtils.changePointByZoom(coordinate, this.zoom, this.currentPos), 5, {
+            color: 'white',
+            fill: 'white',
+          });
+          DrawUtils.drawCircle(this.canvas, AxisUtils.changePointByZoom(coordinate, this.zoom, this.currentPos), 3, {
+            fill: color,
+            color,
+          });
+        }
+      }
     }
   }
 
@@ -776,7 +828,7 @@ class PointOperation extends BasicToolOperation {
 
     super.render();
     this.renderPointList();
-    this.renderCursorLine(this.getLineColor(this.defaultAttribute));
+    this.renderTop();
   }
 }
 export default PointOperation;

@@ -217,10 +217,10 @@ export default class CommonToolUtils {
    * @param pointList
    * @returns
    */
-  public static findAllLine(pointList: IPolygonPoint[] | point[]) {
+  public static findAllLine(pointList: IPolygonPoint[] | point[], isClose = true) {
     const arr = [];
     const newPoint = [...pointList];
-    if (newPoint.length >= 3) {
+    if (newPoint.length >= 3 && isClose === true) {
       // 连接头尾
       newPoint.push({ ...newPoint[0] });
     }

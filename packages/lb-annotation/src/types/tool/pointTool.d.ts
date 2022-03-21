@@ -30,4 +30,5 @@ declare interface IPointToolConfig extends IToolConfig {
   markerList: IInputList[];
 
   showOrder?: boolean; // 兼容旧 order 的配置
+  edgeAdsorption?: boolean; // 是否开启边缘吸附
 }

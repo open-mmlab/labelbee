@@ -945,6 +945,8 @@ class PolygonOperation extends BasicToolOperation {
       // 超出范围则不进行编辑
       return true;
     }
+
+    return false;
   }
 
   public onDragMove(e: MouseEvent) {

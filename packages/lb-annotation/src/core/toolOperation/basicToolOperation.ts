@@ -6,7 +6,7 @@ import { styleDefaultConfig } from '@/constant/defaultConfig';
 import AxisUtils, { CoordinateUtils } from '@/utils/tool/AxisUtils';
 import { EToolName } from '@/constant/tool';
 import LineToolUtils from '@/utils/tool/LineToolUtils';
-import { IPolygonConfig } from '@/types/tool/polygon';
+import { IPolygonConfig, IPolygonData } from '@/types/tool/polygon';
 import { EDragStatus, EGrowthMode, ELang } from '../../constant/annotation';
 import EKeyCode from '../../constant/keyCode';
 import { BASE_ICON, COLORS_ARRAY } from '../../constant/style';
@@ -40,6 +40,15 @@ interface IBasicToolOperationProps {
   forbidBasicResultRender?: boolean;
 }
 
+/**
+ * 参考显示数据
+ */
+interface IReferenceData {
+  toolName: EToolName.Polygon | EToolName.Line | EToolName.LineMarker;
+  result: IPolygonData[] | ILinePoint[];
+  config: any;
+}
+
 // zoom 的限制
 const zoomInfo = {
   min: 0.2,
@@ -62,6 +71,8 @@ class BasicToolOperation extends EventListener {
 
   // 数据依赖
   public basicResult?: any; // 可能存在含有 dependToolName 但是不含有 basicResult 的情况
+
+  public referenceData?: IReferenceData;
 
   public dependToolName?: EToolName;
 
@@ -255,6 +266,10 @@ class BasicToolOperation extends EventListener {
   public setCurrentPos(currentPos: ICoordinate) {
     this.currentPos = currentPos;
     this.coordUtils.setZoomAndCurrentPos(this.zoom, this.currentPos);
+  }
+
+  public setReferenceData(referenceData: IReferenceData) {
+    this.referenceData = referenceData;
   }
 
   /**
