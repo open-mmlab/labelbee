@@ -42,7 +42,7 @@
     "email": "brady_luo.sz@foxmail.com"
   },
   "dependencies": {
-    "@labelbee/lb-annotation": "1.5.6",
+    "@labelbee/lb-annotation": "1.5.7",
     "@ant-design/icons": "^4.6.2",
     "classnames": "^2.3.0",
     "@labelbee/lb-utils": "^1.0.4",
