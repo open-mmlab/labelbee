@@ -1,16 +1,16 @@
+import { getFormatSize } from '@/components/customResizeHook';
+import styleString from '@/constant/styleString';
 import { ANNOTATION_ACTIONS } from '@/store/Actions';
-import _ from 'lodash';
-import { composeResultWithBasicImgInfo, composeResult } from '@/utils/data';
 import { jsonParser } from '@/utils';
-import StepUtils from '@/utils/StepUtils';
 import AnnotationDataUtils from '@/utils/AnnotationDataUtils';
 import { ConfigUtils } from '@/utils/ConfigUtils';
-import styleString from '@/constant/styleString';
-import { getFormatSize } from '@/components/customResizeHook';
+import { composeResult, composeResultWithBasicImgInfo } from '@/utils/data';
+import StepUtils from '@/utils/StepUtils';
 import { AnnotationEngine, CommonToolUtils, ImgUtils } from '@labelbee/lb-annotation';
-import { AnnotationState, AnnotationActionTypes } from './types';
 import { message } from 'antd/es';
+import _ from 'lodash';
 import { SetAnnotationLoading } from './actionCreators';
+import { AnnotationActionTypes, AnnotationState } from './types';
 
 export const getStepConfig = (stepList: any[], step: number) =>
   stepList.find((i) => i.step === step);

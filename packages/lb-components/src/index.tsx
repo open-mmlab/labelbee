@@ -1,17 +1,18 @@
+import { AppProps } from '@/App';
+import AnnotationView from '@/components/AnnotationView';
+import { i18n } from '@labelbee/lb-utils';
 import React, { useImperativeHandle, useState } from 'react';
+import { I18nextProvider } from 'react-i18next';
 import { Provider } from 'react-redux';
 import { AnyAction } from 'redux';
-import configureStore from './configureStore';
-import { ToolInstance } from './store/annotation/types';
 import App from './App';
+import configureStore from './configureStore';
 import { PageBackward, PageForward, PageJump } from './store/annotation/actionCreators';
-import { i18n } from '@labelbee/lb-utils';
-import { I18nextProvider } from 'react-i18next';
-import AnnotationView from '@/components/AnnotationView';
+import { ToolInstance } from './store/annotation/types';
 
 export const store = configureStore();
 
-const OutputApp = (props: any, ref: any) => {
+const OutputApp = (props: AppProps, ref: any) => {
   const [toolInstance, setToolInstance] = useState<ToolInstance>();
   // 暴露给 ref 的一些方法
   useImperativeHandle(

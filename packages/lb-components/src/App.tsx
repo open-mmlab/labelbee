@@ -1,13 +1,14 @@
+import MainView from '@/views/MainView';
+import { i18n } from '@labelbee/lb-utils';
 import React, { useEffect } from 'react';
 import { connect } from 'react-redux';
 import { store } from '.';
 import { AppState } from './store';
 import { InitTaskData } from './store/annotation/actionCreators';
-import MainView from '@/views/MainView';
-import { IStepInfo } from './types/step';
-import { OnSubmit, GetFileData, OnSave } from './types/data';
 import { ToolInstance } from './store/annotation/types';
-import { i18n } from '@labelbee/lb-utils';
+import { GetFileData, OnSave, OnSubmit } from './types/data';
+import { Footer, Header, Sider } from './types/main';
+import { IStepInfo } from './types/step';
 
 export interface AppProps {
   exportData?: (data: any[]) => void;
@@ -23,9 +24,9 @@ export interface AppProps {
   initialIndex?: number;
   className?: string;
   toolInstance: ToolInstance;
-  header?: React.ReactNode;
-  footer?: React.ReactNode;
-  sider?: React.ReactNode;
+  header?: Header;
+  footer?: Footer;
+  sider?: Sider;
   style?: {
     layout?: { [key: string]: any };
     header?: { [key: string]: any };
@@ -35,6 +36,7 @@ export interface AppProps {
   setToolInstance?: (tool: ToolInstance) => void;
   mode?: 'light' | 'dark'; // 临时需求应用于 toolFooter 的操作
   defaultLang: 'en' | 'cn'; // 国际化设置
+  leftSider?: () => React.ReactNode | React.ReactNode;
 }
 
 const App: React.FC<AppProps> = (props) => {

@@ -1,28 +1,30 @@
-import React from 'react';
-import { Row, Collapse } from 'antd/es';
-import iconRectPatternSvg from '@/assets/annotation/rectTool/icon_rectPattern.svg';
-import iconPolygonPatternASvg from '@/assets/annotation/polygonTool/icon_polygon_a.svg';
-import pointASvg from '@/assets/annotation/pointTool/icon_point_a.svg';
 import lineASvg from '@/assets/annotation/lineTool/icon_line_a.svg';
-import { AppState } from '@/store';
-import StepUtils from '@/utils/StepUtils';
-import { useSelector } from 'react-redux';
+import pointASvg from '@/assets/annotation/pointTool/icon_point_a.svg';
+import iconPolygonPatternASvg from '@/assets/annotation/polygonTool/icon_polygon_a.svg';
+import iconRectPatternSvg from '@/assets/annotation/rectTool/icon_rectPattern.svg';
+import { prefix } from '@/constant';
 import { EToolName } from '@/data/enums/ToolType';
+import { AppState } from '@/store';
+import { Sider } from '@/types/main';
+import StepUtils from '@/utils/StepUtils';
+import { Collapse, Row } from 'antd/es';
+import React from 'react';
+import { useTranslation } from 'react-i18next';
+import { useSelector } from 'react-redux';
+import AnnotationText from './AnnotationText';
+import ClearIcon from './ClearIcon';
+import GeneralOperation from './GeneralOperation';
 import ImgAttributeInfo from './ImgAttributeInfo';
 import SwitchAttributeList from './SwitchAttributeList';
-import GeneralOperation from './GeneralOperation';
-import AnnotationText from './AnnotationText';
-import ToolStyle from './ToolStyle';
-import ClearIcon from './ClearIcon';
 import TagSidebar, { expandIconFuc } from './TagSidebar';
-import { prefix } from '@/constant';
 import TextToolSidebar from './TextToolSidebar';
-import { useTranslation } from 'react-i18next';
+import ToolStyle from './ToolStyle';
 
 const { Panel } = Collapse;
 
 interface IProps {
   toolName?: EToolName;
+  sider?: Sider;
 }
 
 const toolList = [
@@ -51,7 +53,7 @@ const toolList = [
   },
 ];
 const sidebarCls = `${prefix}-sidebar`;
-const Sidebar: React.FC<IProps> = () => {
+const Sidebar: React.FC<IProps> = ({ sider }) => {
   const stepInfo = useSelector((state: AppState) =>
     StepUtils.getCurrentStepInfo(state.annotation.step, state.annotation.stepList),
   );
@@ -62,65 +64,120 @@ const Sidebar: React.FC<IProps> = () => {
     return null;
   }
 
+  const renderTool = toolList?.find((item) => item?.toolName === toolName);
+
+  /**
+   * 样式面板, 包含透明度、线框、颜色
+   * @param key 虚拟dom的key
+   */
+  const renderStylePanel = (key: string) => {
+    const ToolStyleComponent = <ToolStyle />;
+    return (
+      <Panel header={t('Style')} className='panel' key={key}>
+        {ToolStyleComponent}
+      </Panel>
+    );
+  };
+
+  const toolIcon = (
+    <div className={`${sidebarCls}__level`}>
+      <Row className={`${sidebarCls}__toolsOption`}>
+        {renderTool && (
+          <a>
+            <img className={`${sidebarCls}__singleTool`} src={renderTool?.selectedSvg} />
+          </a>
+        )}
+      </Row>
+    </div>
+  );
+
+  const attributeList = <SwitchAttributeList />;
+
+  const annotationText = <AnnotationText />;
+
+  const toolStyle = (
+    <Collapse
+      defaultActiveKey={['1', 'imgAttribute']}
+      bordered={false}
+      expandIconPosition='right'
+      className={`${sidebarCls}__content`}
+      expandIcon={expandIconFuc}
+    >
+      {renderStylePanel('1')}
+    </Collapse>
+  );
+
+  const imageAttributeInfo = (
+    <Collapse
+      defaultActiveKey={['1', 'imgAttribute']}
+      bordered={false}
+      expandIconPosition='right'
+      className={`${sidebarCls}__content`}
+      expandIcon={expandIconFuc}
+    >
+      <Panel
+        header={
+          <div>
+            {t('Adjust')}
+
+            <ClearIcon />
+          </div>
+        }
+        className='panel'
+        key='imgAttribute'
+      >
+        <ImgAttributeInfo />
+      </Panel>
+    </Collapse>
+  );
+
+  const operation = <GeneralOperation />;
+
+  const tagToolSideBar = <TagSidebar />;
+
+  const textToolSideBar = <TextToolSidebar />;
+
+  const horizontal = <div className={`${sidebarCls}__horizontal`} />;
+
+  if (sider) {
+    if (typeof sider === 'function') {
+      return (
+        <div className={`${sidebarCls}`}>
+          {sider({
+            toolIcon,
+            attributeList,
+            annotationText,
+            toolStyle,
+            imageAttributeInfo,
+            operation,
+            tagToolSideBar,
+            textToolSideBar,
+            horizontal,
+          })}
+        </div>
+      );
+    } else {
+      return sider;
+    }
+  }
+
   if (
     [EToolName.Rect, EToolName.Point, EToolName.Line, EToolName.Rect, EToolName.Polygon].includes(
       toolName,
     )
   ) {
-    const renderTool = toolList?.find((item) => item?.toolName === toolName);
-
-    /**
-     * 样式面板, 包含透明度、线框、颜色
-     * @param key 虚拟dom的key
-     */
-    const renderStylePanel = (key: string) => {
-      const ToolStyleComponent = <ToolStyle />;
-      return (
-        <Panel header={t('Style')} className='panel' key={key}>
-          {ToolStyleComponent}
-        </Panel>
-      );
-    };
-
     return (
       <div className={`${sidebarCls}`}>
-        <div className={`${sidebarCls}__level`}>
-          <Row className={`${sidebarCls}__toolsOption`}>
-            {renderTool && (
-              <a>
-                <img className={`${sidebarCls}__singleTool`} src={renderTool?.selectedSvg} />
-              </a>
-            )}
-          </Row>
+        {toolIcon}
+        {horizontal}
+        {attributeList}
+        {annotationText}
+        {horizontal}
+        <div className={`${sidebarCls}__content`}>
+          {toolStyle}
+          {imageAttributeInfo}
         </div>
-        <div className={`${sidebarCls}__horizontal`} />
-        <SwitchAttributeList />
-        <AnnotationText />
-        <div className={`${sidebarCls}__horizontal`} />
-        <Collapse
-          defaultActiveKey={['1', 'imgAttribute']}
-          bordered={false}
-          expandIconPosition='right'
-          className={`${sidebarCls}__content`}
-          expandIcon={expandIconFuc}
-        >
-          {renderStylePanel('1')}
-          <Panel
-            header={
-              <div>
-                {t('Adjust')}
-
-                <ClearIcon />
-              </div>
-            }
-            className='panel'
-            key='imgAttribute'
-          >
-            <ImgAttributeInfo />
-          </Panel>
-        </Collapse>
-
-        <GeneralOperation />
+        {operation}
       </div>
     );
   }
