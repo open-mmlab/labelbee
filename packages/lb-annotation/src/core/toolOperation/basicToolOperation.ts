@@ -694,7 +694,6 @@ class BasicToolOperation extends EventListener {
     // 是否展示十字光标
     if (this.isShowCursor) {
       this.coord = coord;
-      this.render();
     }
 
     try {
