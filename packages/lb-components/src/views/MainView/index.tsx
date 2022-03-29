@@ -1,13 +1,12 @@
-import React from 'react';
 import { AppProps } from '@/App';
 import { ViewportProvider } from '@/components/customResizeHook';
-import ToolHeader from './toolHeader';
+import { prefix } from '@/constant';
+import { Layout } from 'antd/es';
+import React from 'react';
 import AnnotationOperation from './annotationOperation';
 import Sidebar from './sidebar';
 import ToolFooter from './toolFooter';
-import { prefix } from '@/constant';
-import { getNewNode } from '@/utils';
-import { Layout } from 'antd/es';
+import ToolHeader from './toolHeader';
 
 const { Sider, Content } = Layout;
 
@@ -17,22 +16,22 @@ const MainView: React.FC<AppProps> = (props) => {
     <ViewportProvider>
       <Layout className={`${layoutCls} ${props.className}`} style={props.style?.layout}>
         <header className={`${layoutCls}__header`} style={props.style?.header}>
-          {getNewNode(
-            props.header,
-            <ToolHeader
-              headerName={props.headerName}
-              goBack={props.goBack}
-              exportData={props.exportData}
-            />,
-          )}
+          <ToolHeader
+            header={props?.header}
+            headerName={props.headerName}
+            goBack={props.goBack}
+            exportData={props.exportData}
+          />
+          ,
         </header>
         <Layout>
+          {props?.leftSider}
           <Content className={`${layoutCls}__content`}>
             <AnnotationOperation {...props} />
-            {getNewNode(props.footer, <ToolFooter style={props.style?.footer} mode={props.mode} />)}
+            <ToolFooter style={props.style?.footer} mode={props.mode} footer={props?.footer} />
           </Content>
           <Sider className={`${layoutCls}__side`} width='auto' style={props.style?.sider}>
-            {getNewNode(props.sider, <Sidebar />)}
+            <Sidebar sider={props?.sider} />
           </Sider>
         </Layout>
       </Layout>

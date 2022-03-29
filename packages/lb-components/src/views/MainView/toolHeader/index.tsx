@@ -1,23 +1,24 @@
-import React, { useReducer, useRef } from 'react';
+import { ESubmitType, prefix } from '@/constant';
+import { EToolName } from '@/data/enums/ToolType';
+import useSize from '@/hooks/useSize';
+import { AppState } from '@/store';
+import { ToNextStep, ToSubmitFileData } from '@/store/annotation/actionCreators';
+import { IFileItem } from '@/types/data';
+import { Header } from '@/types/main';
+import { IStepInfo } from '@/types/step';
 import { LeftOutlined } from '@ant-design/icons';
+import { AnnotationEngine } from '@labelbee/lb-annotation';
+import { i18n } from '@labelbee/lb-utils';
+import { Button, Tooltip } from 'antd/es';
+import classNames from 'classnames';
+import { last } from 'lodash';
+import React, { useReducer, useRef } from 'react';
+import { useTranslation } from 'react-i18next';
 import { connect, useDispatch } from 'react-redux';
 import { store } from 'src';
-import { IFileItem } from '@/types/data';
-import { AppState } from '@/store';
-import classNames from 'classnames';
-import { ESubmitType, prefix } from '@/constant';
 import ExportData from './ExportData';
 import HeaderOption from './headerOption';
-import { AnnotationEngine } from '@labelbee/lb-annotation';
-import { Button, Tooltip } from 'antd/es';
-import { ToNextStep, ToSubmitFileData } from '@/store/annotation/actionCreators';
 import StepSwitch from './StepSwitch';
-import { EToolName } from '@/data/enums/ToolType';
-import { IStepInfo } from '@/types/step';
-import { i18n } from '@labelbee/lb-utils';
-import { useTranslation } from 'react-i18next';
-import useSize from '@/hooks/useSize';
-import { last } from 'lodash';
 
 interface INextStep {
   stepProgress: number;
@@ -70,6 +71,7 @@ const NextStep: React.FC<INextStep> = ({ step, stepProgress, stepList }) => {
 interface IToolHeaderProps {
   goBack?: (imgList?: IFileItem[]) => void;
   exportData?: (data: any[]) => void;
+  header?: Header;
   headerName?: string;
   imgList: IFileItem[];
   annotationEngine: AnnotationEngine;
@@ -83,6 +85,7 @@ interface IToolHeaderProps {
 const ToolHeader: React.FC<IToolHeaderProps> = ({
   goBack,
   exportData,
+  header,
   headerName,
   imgList,
   stepProgress,
@@ -118,44 +121,77 @@ const ToolHeader: React.FC<IToolHeaderProps> = ({
 
   const width = size?.width ?? window.innerWidth;
 
+  const backNode = <LeftOutlined className={`${prefix}-header__icon`} onClick={closeAnnotation} />;
+
+  const headerNameNode = headerName ? (
+    <span className={`${prefix}-header__name`}>{headerName}</span>
+  ) : (
+    ''
+  );
+
+  const stepListNode = stepList.length > 1 && (
+    <>
+      <StepSwitch stepProgress={stepProgress} />
+      <NextStep step={step} stepProgress={stepProgress} stepList={stepList} />
+    </>
+  );
+
+  const headerOptionNode = <HeaderOption stepInfo={stepInfo} />;
+
+  const langNode = (
+    <div className={`${prefix}-header__lang`}>
+      <span
+        className={`${prefix}-langCN ${curLang === 'cn' ? 'active' : ''}`}
+        onClick={() => changeLanguage('cn')}
+      >
+        中文
+      </span>
+      {` / `}
+      <span
+        className={`${prefix}-langEN ${curLang === 'en' ? 'active' : ''}`}
+        onClick={() => changeLanguage('en')}
+      >
+        En
+      </span>
+    </div>
+  );
+
+  if (header) {
+    if (typeof header === 'function') {
+      return (
+        <div className={classNames(`${prefix}-header`)} ref={ref}>
+          <div className={`${prefix}-header__title`}>
+            {header({
+              backNode,
+              headerNameNode,
+              stepListNode,
+              headerOptionNode,
+              langNode,
+            })}
+          </div>
+        </div>
+      );
+    } else {
+      return header;
+    }
+  }
+
   return (
     <div className={classNames(`${prefix}-header`)} ref={ref}>
       <div className={`${prefix}-header__title`}>
-        <LeftOutlined className={`${prefix}-header__icon`} onClick={closeAnnotation} />
-        {headerName ? <span className={`${prefix}-header__name`}>{headerName}</span> : ''}
-        {stepList.length > 1 && (
-          <>
-            <StepSwitch stepProgress={stepProgress} />
-            <NextStep step={step} stepProgress={stepProgress} stepList={stepList} />
-          </>
-        )}
-
+        {backNode}
+        {headerNameNode}
+        {stepListNode}
         {currentOption}
         <div
           id='operationNode'
           className={`${prefix}-header__operationNode`}
           style={{ left: width / 2 - 174 / 2 }}
         >
-          <HeaderOption stepInfo={stepInfo} />
+          {headerOptionNode}
         </div>
-
         <div className={`${prefix}-header__titlePlacement`} />
-
-        <div className={`${prefix}-header__lang`}>
-          <span
-            className={`${prefix}-langCN ${curLang === 'cn' ? 'active' : ''}`}
-            onClick={() => changeLanguage('cn')}
-          >
-            中文
-          </span>
-          {` / `}
-          <span
-            className={`${prefix}-langEN ${curLang === 'en' ? 'active' : ''}`}
-            onClick={() => changeLanguage('en')}
-          >
-            En
-          </span>
-        </div>
+        {langNode}
       </div>
     </div>
   );

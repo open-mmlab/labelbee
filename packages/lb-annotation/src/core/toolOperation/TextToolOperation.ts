@@ -68,11 +68,11 @@ class TextToolOperation extends BasicToolOperation {
    * 获取初始值结果列表
    */
   public getInitResultList = (dataSourceStep: number, basicResultList: any[]) => {
-    if (dataSourceStep === 0) {
-      return [this.getSingleResult()];
+    if (dataSourceStep > 0) {
+      return basicResultList.map((i) => this.getSingleResult(i.id));
     }
 
-    return basicResultList.map((i) => this.getSingleResult(i.id));
+    return [this.getSingleResult()];
   };
 
   public updateTextValue(k: string, v: string) {
