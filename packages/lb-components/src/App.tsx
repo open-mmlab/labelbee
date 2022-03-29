@@ -6,14 +6,21 @@ import { store } from '.';
 import { AppState } from './store';
 import { InitTaskData } from './store/annotation/actionCreators';
 import { ToolInstance } from './store/annotation/types';
-import { GetFileData, OnSave, OnSubmit } from './types/data';
+import { GetFileData, OnSave, OnSubmit, IFileItem } from './types/data';
 import { Footer, Header, Sider } from './types/main';
 import { IStepInfo } from './types/step';
+
+interface IAnnotationStyle {
+  strokeColor: string;
+  fillColor: string;
+  textColor: string;
+  toolColor: any;
+}
 
 export interface AppProps {
   exportData?: (data: any[]) => void;
   goBack?: () => void;
-  imgList: string[];
+  imgList: IFileItem[];
   config: string;
   stepList: IStepInfo[];
   step: number;
@@ -37,6 +44,15 @@ export interface AppProps {
   mode?: 'light' | 'dark'; // 临时需求应用于 toolFooter 的操作
   defaultLang: 'en' | 'cn'; // 国际化设置
   leftSider?: () => React.ReactNode | React.ReactNode;
+
+  // 标注信息扩展的功能
+  dataInjectionAtCreation: (annotationData: any) => {};
+  // 渲染增强
+  renderEnhance: {
+    staticRender?: (canvas: HTMLCanvasElement, data: any, style: IAnnotationStyle) => void;
+    selectedRender?: (canvas: HTMLCanvasElement, data: any, style: IAnnotationStyle) => void;
+    creatingRender?: (canvas: HTMLCanvasElement, data: any, style: IAnnotationStyle) => void;
+  };
 }
 
 const App: React.FC<AppProps> = (props) => {
