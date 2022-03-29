@@ -108,7 +108,6 @@ export default class DrawUtils {
     if (Array.isArray(lineDash)) {
       ctx.setLineDash(lineDash);
     }
-    ctx.beginPath();
     ctx.fillStyle = color;
 
     ctx.strokeRect(rect.x, rect.y, rect.width, rect.height);
@@ -148,7 +147,6 @@ export default class DrawUtils {
     const ctx: CanvasRenderingContext2D = canvas.getContext('2d')!;
     const { color = DEFAULT_COLOR } = options;
     ctx.save();
-    ctx.beginPath();
     ctx.fillStyle = color;
     ctx.fillRect(rect.x, rect.y, rect.width, rect.height);
     ctx.restore();

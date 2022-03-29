@@ -1274,6 +1274,32 @@ class RectOperation extends BasicToolOperation {
     };
   }
 
+  /**
+   * 获取当前渲染的样式
+   * @param rect
+   * @returns
+   */
+  public getRenderStyle(rect: IRect) {
+    const toolColor = this.getColor(rect.attribute);
+    let strokeColor;
+    let fillColor;
+
+    // 是否为有效框;
+    if (rect.valid === false) {
+      strokeColor = toolColor?.invalid.stroke;
+      fillColor = toolColor?.invalid.fill;
+    } else {
+      strokeColor = toolColor?.valid.stroke;
+      fillColor = toolColor?.valid.fill;
+    }
+    return {
+      strokeColor,
+      fillColor,
+      textColor: strokeColor,
+      toolColor,
+    };
+  }
+
   public renderTextAttribute() {
     const { selectedRect } = this;
     if (!this.ctx || this.config.textConfigurable !== true || !selectedRect) {
@@ -1380,27 +1406,10 @@ class RectOperation extends BasicToolOperation {
       const { ctx, style } = this;
       // 不看图形信息
       const { hiddenText = false } = style;
-      const toolColor = this.getColor(rect.attribute);
-      let { x, y, width, height } = rect;
-      x *= zoom;
-      y *= zoom;
-      width *= zoom;
-      height *= zoom;
 
       ctx.save();
 
-      let strokeColor;
-
-      // 是否为有效框;
-      if (rect.valid === false) {
-        ctx.strokeStyle = toolColor?.invalid.stroke;
-        ctx.fillStyle = toolColor?.invalid.fill;
-        strokeColor = toolColor?.invalid.stroke;
-      } else {
-        ctx.strokeStyle = toolColor?.valid.stroke;
-        ctx.fillStyle = toolColor?.valid.fill;
-        strokeColor = toolColor?.valid.stroke;
-      }
+      const { strokeColor, fillColor, textColor } = this.getRenderStyle(rect);
 
       ctx.font = 'lighter 14px Arial';
       let showText = '';
@@ -1418,9 +1427,11 @@ class RectOperation extends BasicToolOperation {
         showText = `${showText}  ${AttributeUtils.getAttributeShowText(rect.attribute, this.config?.attributeList)}`;
       }
 
+      const transformRect = AxisUtils.changeRectByZoom(rect, isZoom ? zoom : this.zoom, this.currentPos);
+
       if (!hiddenText) {
         // 框体上方展示
-        DrawUtils.drawText(this.canvas, { x: this.currentPos.x + x, y: this.currentPos.y + y - 6 }, showText, {
+        DrawUtils.drawText(this.canvas, { x: transformRect.x, y: transformRect.y - 6 }, showText, {
           color: strokeColor,
           font: 'normal normal 900 14px SourceHanSansCN-Regular',
           ...DEFAULT_TEXT_SHADOW,
@@ -1428,30 +1439,28 @@ class RectOperation extends BasicToolOperation {
         });
       }
 
-      ctx.lineWidth = this.style?.width ?? 2;
+      const lineWidth = this.style?.width ?? 2;
 
       if (rect.id === this.hoverRectID || rect.id === this.selectedRectID) {
-        ctx.fillRect(this.currentPos.x + x, this.currentPos.y + y, width, height);
+        DrawUtils.drawRectWithFill(this.canvas, transformRect, { color: fillColor });
       }
 
-      ctx.strokeRect(this.currentPos.x + x, this.currentPos.y + y, width, height);
+      DrawUtils.drawRect(this.canvas, transformRect, { color: strokeColor, thickness: lineWidth, hiddenText: true });
       ctx.restore();
 
       // 框大小数值显示
-      let rectSize = `${Math.round(width / zoom)} * ${Math.round(height / zoom)}`;
+      let rectSize = `${Math.round(rect.width)} * ${Math.round(rect.height)}`;
 
       if (isZoom === true) {
         // 说明绘制的是缩放后的比例
-        rectSize = `${Math.round(width / this.zoom)} * ${Math.round(height / this.zoom)}`;
+        rectSize = `${Math.round(rect.width / this.zoom)} * ${Math.round(transformRect.height / this.zoom)}`;
       }
 
       const textSizeWidth = rectSize.length * 7;
-      const textColor = rect.valid ? toolColor?.valid.stroke : toolColor?.invalid.stroke;
-
       if (!hiddenText) {
         DrawUtils.drawText(
           this.canvas,
-          { x: this.currentPos.x + x + width - textSizeWidth, y: this.currentPos.y + y + height + 15 },
+          { x: transformRect.x + transformRect.width - textSizeWidth, y: transformRect.y + transformRect.height + 15 },
           rectSize,
           {
             color: textColor,
@@ -1464,10 +1473,10 @@ class RectOperation extends BasicToolOperation {
       // 文本的输入
       if (!hiddenText && rect.textAttribute && rect.id !== this.selectedRectID) {
         const marginTop = 0;
-        const textWidth = Math.max(20, width - textSizeWidth);
+        const textWidth = Math.max(20, transformRect.width - textSizeWidth);
         DrawUtils.drawText(
           this.canvas,
-          { x: this.currentPos.x + x, y: this.currentPos.y + y + height + 20 + marginTop },
+          { x: transformRect.x, y: transformRect.y + transformRect.height + 20 + marginTop },
           rect.textAttribute,
           {
             color: textColor,
@@ -1481,33 +1490,52 @@ class RectOperation extends BasicToolOperation {
   }
 
   /**
+   * 渲染静态框体
+   */
+  public renderStaticRect() {
+    if (!(this.rectList?.length > 0 && JSON.stringify(this.rectList))) {
+      return;
+    }
+
+    const [showingRect, selectedRect] = CommonToolUtils.getRenderResultList<IRect>(
+      this.rectList,
+      CommonToolUtils.getSourceID(this.basicResult),
+      this.attributeLockList,
+      this.selectedRectID,
+    );
+
+    // 静态矩形
+    if (!this.isHidden) {
+      showingRect?.forEach((rect) => {
+        this.renderDrawingRect(rect);
+      });
+    }
+
+    // 选中矩形熏染
+    if (selectedRect) {
+      this.renderDrawingRect(selectedRect);
+      this.renderSelectedRect(selectedRect);
+    }
+  }
+
+  /**
+   * 创建创建中的框体
+   * @returns
+   */
+  public renderCreatingRect() {
+    if (!this.drawingRect) {
+      return;
+    }
+
+    this.renderDrawingRect(this.drawingRect, 1, true); // 正常框体的创建
+  }
+
+  /**
    * 渲染矩形框体
    */
   public renderRect() {
-    if (this.rectList?.length > 0) {
-      if (JSON.stringify(this.rectList)) {
-        const [showingRect, selectedRect] = CommonToolUtils.getRenderResultList<IRect>(
-          this.rectList,
-          CommonToolUtils.getSourceID(this.basicResult),
-          this.attributeLockList,
-          this.selectedRectID,
-        );
-
-        if (!this.isHidden) {
-          showingRect?.forEach((rect) => this.renderDrawingRect(rect));
-        }
-
-        if (selectedRect) {
-          this.renderDrawingRect(selectedRect);
-          this.renderSelectedRect(selectedRect);
-        }
-      }
-    }
-
-    if (this.drawingRect) {
-      this.renderDrawingRect(this.drawingRect, 1, true); // 正常框体的创建
-      // this.renderFlowRect(this.drawingRect); // 暂不使用
-    }
+    this.renderStaticRect();
+    this.renderCreatingRect();
   }
 
   public render() {
