@@ -124,6 +124,10 @@ class BasicToolOperation extends EventListener {
 
   public lang: ELang;
 
+  public dataInjectionAtCreation?: TDataInjectionAtCreateion;
+
+  public renderEnhance?: IRenderEnhance;
+
   // 拖拽 - 私有变量
   private _firstClickCoordinate?: ICoordinate; // 存储第一次点击的坐标
 
@@ -1007,6 +1011,14 @@ class BasicToolOperation extends EventListener {
 
   public setConfig(config: string) {
     this.config = CommonToolUtils.jsonParser(config);
+  }
+
+  public setDataInjectionAtCreation(dataInjectionAtCreation: TDataInjectionAtCreateion) {
+    this.dataInjectionAtCreation = dataInjectionAtCreation;
+  }
+
+  public setRenderEnhance(renderEnhance: IRenderEnhance) {
+    this.renderEnhance = renderEnhance;
   }
 
   /**

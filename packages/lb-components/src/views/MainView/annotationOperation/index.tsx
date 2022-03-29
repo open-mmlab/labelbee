@@ -7,20 +7,14 @@ import _ from 'lodash';
 import { store } from '@/index';
 
 import useSize from '@/hooks/useSize';
-import { IFileItem } from '@/types/data';
-import { IStepInfo } from '@/types/step';
 import { InitToolStyleConfig } from '@/store/toolStyle/actionCreators';
 import { AnnotationEngine, ImgUtils } from '@labelbee/lb-annotation';
 import ImageError from '@/components/ImageError';
 import { i18n } from '@labelbee/lb-utils';
+import { AppProps } from '@/App';
 
-interface IProps extends AppState {
+interface IProps extends AppState, AppProps {
   imgAttribute: ImgAttributeState;
-  imgList: IFileItem[];
-  exportData: any[];
-  config: string;
-  stepList: IStepInfo[];
-  step: number;
   imgIndex: number;
   annotationEngine: AnnotationEngine;
   loading: boolean;
@@ -29,8 +23,17 @@ interface IProps extends AppState {
 const AnnotationOperation: React.FC<IProps> = (props: IProps) => {
   const [, forceRender] = useState<number>(0);
 
-  const { imgAttribute, toolStyle, toolInstance, annotationEngine, loading, imgList, imgIndex } =
-    props;
+  const {
+    imgAttribute,
+    toolStyle,
+    toolInstance,
+    annotationEngine,
+    loading,
+    imgList,
+    imgIndex,
+    dataInjectionAtCreation,
+    renderEnhance,
+  } = props;
   const annotationRef = useRef<HTMLDivElement>(null);
   const containerRef = useRef<HTMLDivElement>(null);
   // const windowSize = useContext(viewportContext);
@@ -57,7 +60,9 @@ const AnnotationOperation: React.FC<IProps> = (props: IProps) => {
         break;
       }
     }
-  }, [annotationEngine]);
+    annotationEngine?.setDataInjectionAtCreation(dataInjectionAtCreation);
+    annotationEngine?.setRenderEnhance(renderEnhance);
+  }, [annotationEngine, dataInjectionAtCreation, renderEnhance]);
 
   useEffect(() => {
     if (toolInstance) {

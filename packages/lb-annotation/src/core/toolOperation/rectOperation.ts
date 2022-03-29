@@ -936,6 +936,16 @@ class RectOperation extends BasicToolOperation {
     this.firstCurrentPos = {
       ...this.currentPos,
     };
+
+    /**
+     * 数据注入
+     */
+    if (this.dataInjectionAtCreation) {
+      const data = this.dataInjectionAtCreation(this.drawingRect);
+      if (data) {
+        Object.assign(this.drawingRect, data);
+      }
+    }
   }
 
   /**
@@ -1497,17 +1507,27 @@ class RectOperation extends BasicToolOperation {
       return;
     }
 
+    const { renderEnhance = {} } = this;
+
     const [showingRect, selectedRect] = CommonToolUtils.getRenderResultList<IRect>(
       this.rectList,
       CommonToolUtils.getSourceID(this.basicResult),
       this.attributeLockList,
       this.selectedRectID,
     );
-
     // 静态矩形
     if (!this.isHidden) {
       showingRect?.forEach((rect) => {
         this.renderDrawingRect(rect);
+
+        // 静态渲染挣增强渲染
+        if (renderEnhance.staticRender) {
+          renderEnhance.staticRender(
+            this.canvas,
+            AxisUtils.changeRectByZoom(rect, this.zoom, this.currentPos),
+            this.getRenderStyle(rect),
+          );
+        }
       });
     }
 
@@ -1515,6 +1535,14 @@ class RectOperation extends BasicToolOperation {
     if (selectedRect) {
       this.renderDrawingRect(selectedRect);
       this.renderSelectedRect(selectedRect);
+
+      if (renderEnhance.selectedRender) {
+        renderEnhance.selectedRender(
+          this.canvas,
+          AxisUtils.changeRectByZoom(selectedRect, this.zoom, this.currentPos),
+          this.getRenderStyle(selectedRect),
+        );
+      }
     }
   }
 
@@ -1527,7 +1555,17 @@ class RectOperation extends BasicToolOperation {
       return;
     }
 
+    const { renderEnhance = {} } = this;
     this.renderDrawingRect(this.drawingRect, 1, true); // 正常框体的创建
+
+    // 创建时进行渲染
+    if (renderEnhance.creatingRender) {
+      renderEnhance.creatingRender(
+        this.canvas,
+        AxisUtils.changeRectByZoom(this.drawingRect, 1, this.currentPos),
+        this.getRenderStyle(this.drawingRect),
+      );
+    }
   }
 
   /**

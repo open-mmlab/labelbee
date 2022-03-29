@@ -201,4 +201,20 @@ export default class AnnotationEngine {
       }
     }
   }
+
+  /**
+   * 用于创建时的数据时的数据注入
+   * @param dataInjectionAtCreation
+   */
+  public setDataInjectionAtCreation(dataInjectionAtCreation: any) {
+    this.toolInstance.setDataInjectionAtCreation(dataInjectionAtCreation);
+  }
+
+  /**
+   * 数据渲染增强操作
+   * @param renderEnhance
+   */
+  public setRenderEnhance(renderEnhance: IRenderEnhance) {
+    this.toolInstance.setRenderEnhance(renderEnhance);
+  }
 }

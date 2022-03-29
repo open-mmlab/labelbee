@@ -5,14 +5,21 @@ import { AppState } from './store';
 import { InitTaskData } from './store/annotation/actionCreators';
 import MainView from '@/views/MainView';
 import { IStepInfo } from './types/step';
-import { OnSubmit, GetFileData, OnSave } from './types/data';
+import { OnSubmit, GetFileData, OnSave, IFileItem } from './types/data';
 import { ToolInstance } from './store/annotation/types';
 import { i18n } from '@labelbee/lb-utils';
+
+interface IAnnotationStyle {
+  strokeColor: string;
+  fillColor: string;
+  textColor: string;
+  toolColor: any;
+}
 
 export interface AppProps {
   exportData?: (data: any[]) => void;
   goBack?: () => void;
-  imgList: string[];
+  imgList: IFileItem[];
   config: string;
   stepList: IStepInfo[];
   step: number;
@@ -35,6 +42,15 @@ export interface AppProps {
   setToolInstance?: (tool: ToolInstance) => void;
   mode?: 'light' | 'dark'; // 临时需求应用于 toolFooter 的操作
   defaultLang: 'en' | 'cn'; // 国际化设置
+
+  // 标注信息扩展的功能
+  dataInjectionAtCreation: (annotationData: any) => {};
+  // 渲染增强
+  renderEnhance: {
+    staticRender?: (canvas: HTMLCanvasElement, data: any, style: IAnnotationStyle) => void;
+    selectedRender?: (canvas: HTMLCanvasElement, data: any, style: IAnnotationStyle) => void;
+    creatingRender?: (canvas: HTMLCanvasElement, data: any, style: IAnnotationStyle) => void;
+  };
 }
 
 const App: React.FC<AppProps> = (props) => {
