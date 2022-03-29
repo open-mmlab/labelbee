@@ -1,17 +1,18 @@
-import React, { useState, useRef, useEffect } from 'react';
-import { Divider, Input } from 'antd/es';
-import { LeftOutlined, RightOutlined } from '@ant-design/icons';
+import { prefix } from '@/constant';
 import { AppState } from '@/store';
-import { connect, useDispatch } from 'react-redux';
+import { PageBackward, PageForward, PageJump } from '@/store/annotation/actionCreators';
 import { getTotalPage } from '@/store/annotation/reducer';
+import { Footer } from '@/types/main';
+import { IStepInfo } from '@/types/step';
+import { LeftOutlined, RightOutlined } from '@ant-design/icons';
+import { Divider, Input } from 'antd/es';
+import React, { useEffect, useRef, useState } from 'react';
+import { useTranslation } from 'react-i18next';
+import { connect, useDispatch } from 'react-redux';
+import FooterTips from './FooterTips';
 import HiddenTips from './HiddenTips';
 import PageNumber from './PageNumber';
 import ZoomController from './ZoomController';
-import FooterTips from './FooterTips';
-import { prefix } from '@/constant';
-import { PageBackward, PageForward, PageJump } from '@/store/annotation/actionCreators';
-import { IStepInfo } from '@/types/step';
-import { useTranslation } from 'react-i18next';
 
 interface IPageProps {
   jumpSkip: Function;
@@ -61,6 +62,7 @@ interface IProps {
   basicResultList: any[];
   basicIndex: number;
   mode?: 'light' | 'dark'; // 后面通过 context 的形式进行编写
+  footer?: Footer;
 }
 
 export const footerCls = `${prefix}-footer`;
@@ -70,7 +72,7 @@ const FooterDivider = () => (
 );
 
 const ToolFooter: React.FC<IProps> = (props: IProps) => {
-  const { stepList, step, basicResultList, basicIndex, mode } = props;
+  const { stepList, step, basicResultList, basicIndex, mode, footer } = props;
   const dispatch = useDispatch();
 
   const { t } = useTranslation();
@@ -92,35 +94,64 @@ const ToolFooter: React.FC<IProps> = (props: IProps) => {
 
   const hasSourceStep = !!stepInfo.dataSourceStep;
 
+  const footerTips = <FooterTips />;
+
+  const hiddenTips = <HiddenTips />;
+
+  const pageNumber = <PageNumber />;
+
+  const pagination = (
+    <div className={`${footerCls}__pagination`}>
+      <LeftOutlined className={`${footerCls}__highlight`} onClick={pageBackward} />
+      <PageInput imgIndex={props.imgIndex} jumpSkip={pageJump} />/
+      <span className={`${footerCls}__pageAll`}>{props.totalPage}</span>
+      <RightOutlined className={`${footerCls}__highlight`} onClick={pageForward} />
+    </div>
+  );
+
+  const zoomController = <ZoomController mode={mode} />;
+
+  const curItems = (
+    <span>{t('curItems', { current: basicIndex + 1, total: basicResultList.length })}</span>
+  );
+
+  const footerDivider = <FooterDivider />;
+
+  if (footer) {
+    if (typeof footer === 'function') {
+      return (
+        <div className={`${footerCls}`} style={props.style}>
+          {footer({
+            footerTips,
+            hiddenTips,
+            pageNumber,
+            pagination,
+            zoomController,
+            curItems,
+            footerDivider,
+          })}
+        </div>
+      );
+    } else {
+      return footer;
+    }
+  }
+
   return (
     <div className={`${footerCls}`} style={props.style}>
-      <FooterTips />
+      {footerTips}
       <div style={{ flex: 1 }} />
-      <HiddenTips />
-      <PageNumber />
-      {/* {
-        <>
-          <span className='progress'>进度{((1 * 100) / 1).toFixed(2)}%</span>
-          {<FooterDivider />}
-        </>
-      } */}
-
-      <div className={`${footerCls}__pagination`}>
-        <LeftOutlined className={`${footerCls}__highlight`} onClick={pageBackward} />
-        <PageInput imgIndex={props.imgIndex} jumpSkip={pageJump} />/
-        <span className={`${footerCls}__pageAll`}>{props.totalPage}</span>
-        <RightOutlined className={`${footerCls}__highlight`} onClick={pageForward} />
-      </div>
-
+      {hiddenTips}
+      {pageNumber}
+      {pagination}
       {hasSourceStep && basicResultList.length > 0 && (
         <>
-          <FooterDivider />
-          <span>{t('curItems', { current: basicIndex + 1, total: basicResultList.length })}</span>
+          {footerDivider}
+          {curItems}
         </>
       )}
-
-      <FooterDivider />
-      <ZoomController mode={mode} />
+      {footerDivider}
+      {zoomController}
     </div>
   );
 };
