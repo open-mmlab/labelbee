@@ -2,6 +2,21 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [1.5.0](https://github.com/Kerwin-L/labelbee-1/compare/v1.4.0...v1.5.0) (2022-03-30)
+### Features
+
+* API change: header sider footer ([3abaf5e](https://github.com/Kerwin-L/labelbee-1/commit/3abaf5eaa88c86253795143e8ffba87f2c132fb2))
+* PointTool adds edgeAdsorption feature ([73e8d97](https://github.com/Kerwin-L/labelbee-1/commit/73e8d9764b93155091fe855042ebb08ed62eb75d))
+* PolygonTool adds rect pattern ([2b0d0f0](https://github.com/Kerwin-L/labelbee-1/commit/2b0d0f0bfdd64451bbbc264a3b872fe03e76919c))
+* PolygonTool-rect-pattern add drawOutside judgement ([725c231](https://github.com/Kerwin-L/labelbee-1/commit/725c231cb0c2552ce37796942b19549cd7785a30))
+* PolygonView/LineView adds special line/point render ([cad0681](https://github.com/Kerwin-L/labelbee-1/commit/cad0681a4278406d7c50a9c96e5ec9c79130d767))
+* RectOperation adds renderEnhance & dataInjection ([f3a5678](https://github.com/Kerwin-L/labelbee-1/commit/f3a56780088cf24036307d6543a0a4d9c6d70d15))
+
+### Bug Fixes
+
+* Fix PointTool MarkerPoint Opeartion ([52bddc7](https://github.com/Kerwin-L/labelbee-1/commit/52bddc7aa6c403c0b5e546e7cabab20e17bb3820))
+* TextTool initValue fail and make updateTextValue error([#25](https://github.com/Kerwin-L/labelbee-1/issues/25)) ([f5714a1](https://github.com/Kerwin-L/labelbee-1/commit/f5714a160ed8e88618c93d623dd7c8b6cd1b5645))
+
 ## [1.4.0](https://github.com/open-mmlab/labelbee/compare/v1.3.0...v1.4.0) (2022-01-14)
 
 
@@ -17,7 +32,6 @@ All notable changes to this project will be documented in this file. See [standa
 * LineView adds Direction Render ([b2a474e](https://github.com/open-mmlab/labelbee/commit/b2a474e66b64e148e31f5053016fe3c3261f4849))
 * PointTool adds list-annotation feature ([64ed73e](https://github.com/open-mmlab/labelbee/commit/64ed73e37ae95fe41e49a15b76424bed90aae2f1))
 * PolygonView adds Direction Render ([bba3248](https://github.com/open-mmlab/labelbee/commit/bba3248c86931fbebd671b7d4b13b29b08755e19))
-* PolygonView/LineView adds special line/point render ([cad0681](https://github.com/open-mmlab/labelbee/commit/cad0681a4278406d7c50a9c96e5ec9c79130d767))
 * Real-time update of text changes for ViewOperation ([1bd807b](https://github.com/open-mmlab/labelbee/commit/1bd807bc280c61835c12fb06e03b40caec431660))
 * Support Custom text-dom using Style ([ae9031d](https://github.com/open-mmlab/labelbee/commit/ae9031d7a88ca1f734d53c22ac4b6ea4d1213e66))
 * ViewOperation adds reference pattern(lineDash) ([5b2083b](https://github.com/open-mmlab/labelbee/commit/5b2083b060d0d2e46c8f64266167803d7636ae3c))
