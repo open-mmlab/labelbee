@@ -302,25 +302,25 @@ const App = () => {
 export default App;
 ```
 
-| 参数         | 说明                                        | 是否必填 | 类型 ↑↑↑↑↑↑                                             |
-| ------------ | ------------------------------------------- | -------- | ------------------------------------------------------- |
-| imgList      | 标注文件对象                                | 是       | IFileItem                                               |
-| step         | 标注当前的步骤                              | 是       | Number                                                  |
-| stepList     | 所有步骤和 step 关联                        | 是       | stepList                                                |
-| ref          | 工具类 可以调用工具内部方法                 | 否       |                                                         |
-| onSubmit     | 翻页 保存的时候触发 data 表示当前标注的信息 | 否       | onSubmit                                                |
-| onSave       | 保存的时候触发 data 表示当前标注的信息      | 否       | onSave                                                  |
-| goBack       | 页面内自带跳转的回调函数                    | 否       | goBack                                                  |
-| getFileData  | 支持外部传入获取文件接口                    | 否       | getFileData                                             |
-| headerName   | 标题                                        | 否       | string                                                  |
-| exportData   | 导出按钮 不写则隐藏导出按钮                 | 否       | {}                                                      |
-| initialIndex | 当前图片列表的 index 初始化时候使用         | 否       | number                                                  |
-| header       | 顶部菜单                                    | 否       | (headerDomObject) => React.ReactNode ｜ React.ReactNode |
-| footer       | footer                                      | 否       | (footerDomObject) => React.ReactNode ｜ React.ReactNode |
-| sider        | 侧边栏                                      | 否       | (siderDomObject) => React.ReactNode ｜ React.ReactNode  |
-| style        | 工具栏样式                                  | 否       | Object                                                  |
-| className    | className                                   | 否       | string                                                  |
-| defaultLang  | 默认语言                                    | 否       | 'en' \| 'cn'                                            |
+| 参数         | 说明                                        | 是否必填 | 类型 ↑↑↑↑↑↑  |
+| ------------ | ------------------------------------------- | -------- | ------------ |
+| imgList      | 标注文件对象                                | 是       | IFileItem[]  |
+| step         | 标注当前的步骤                              | 是       | Number       |
+| stepList     | 所有步骤和 step 关联                        | 是       | stepList     |
+| ref          | 工具类 可以调用工具内部方法                 | 否       |              |
+| onSubmit     | 翻页 保存的时候触发 data 表示当前标注的信息 | 否       | onSubmit     |
+| onSave       | 保存的时候触发 data 表示当前标注的信息      | 否       | onSave       |
+| goBack       | 页面内自带跳转的回调函数                    | 否       | goBack       |
+| getFileData  | 支持外部传入获取文件接口                    | 否       | getFileData  |
+| headerName   | 标题                                        | 否       | string       |
+| exportData   | 导出按钮 不写则隐藏导出按钮                 | 否       | {}           |
+| initialIndex | 当前图片列表的 index 初始化时候使用         | 否       | number       |
+| header       | 顶部菜单                                    | 否       | ReactNode    |
+| footer       | footer                                      | 否       | ReactNode    |
+| sider        | 侧边栏                                      | 否       | ReactNode    |
+| style        | 工具栏样式                                  | 否       | Object       |
+| className    | className                                   | 否       | string       |
+| defaultLang  | 默认语言                                    | 否       | 'en' \| 'cn' |
 
 ```ts
 /* 下方为不同工具配置, 为切换不同工具参考 */
@@ -479,3 +479,10 @@ interface IFileItem {
   result?: string;
 }
 ```
+## 工具扩展功能
+
+在原有的标注流程的基础上，提供各种扩展
+
+- [dataInjectionAtCreation](./annotation/dataInjectionAtCreation.md)
+- [renderEnhance](./annotation/renderEnhance.md)
+
