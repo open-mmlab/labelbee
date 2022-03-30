@@ -7,6 +7,19 @@ import img4 from './images/66.jpg';
 // export const fileList = ['10', '19', '20', '66'].map((i) => `${MOCK_URL}${i}.jpg`);
 export const fileList = [img1, img2, img3, img4];
 
+const data = Array(100)
+  .fill('')
+  .map((v, i) => ({
+    id: i + 1,
+    sourceID: '',
+    x: Math.random() * 1000,
+    y: Math.random() * 1000,
+    width: 20,
+    height: 20,
+    order: i + 1,
+    attribute: '',
+    valid: true,
+  }));
 
 export const rectDefaultResult = JSON.stringify({
   height: 200,
@@ -15,20 +28,7 @@ export const rectDefaultResult = JSON.stringify({
   step_1: {
     dataSource: 0,
     tool: 'rectTool',
-    result: [
-      {
-        id: 'xs23da23a',
-        sourceID: '0',
-        x: 0,
-        y: 0,
-        width: 100,
-        height: 100,
-        valid: true,
-        order: 1,
-        attribute: '',
-        textAttribute: '',
-      },
-    ],
+    result: data,
   },
 });
 
@@ -174,8 +174,8 @@ export const DEFAULT_ANNOTATIONS = [
       y: 23,
       textMaxWidth: 416,
       color: 'yellow',
-      text: '标签1: 测试1LoooooooooooooooooooooooooooooooooogLoooooooooooooooooooooooooooooooooogLoooooooooooooooooooooooooooooooooogLoooooooooooooooooooooooooooooooooogLoooooooooooooooooooooooooooooooooog\n标签2: 测试2sdasdas\n\n\n标签1: 测试1asdasdasd\n标签2: 测试2标签1: 测试1\n标签2: 测试2sdasdas\n标签1: 测试1asdasdasd\n标签2: 测试2标签1: 测试1\n标签2: 测试2sdasdas\n标签1: 测试1asdasdasd\n标签2: 测试2标签1: 测试1\n标签2: 测试2sdasdas\n标签1: 测试1asdasdasd\n标签2: 测试2标签1: 测试1\n标签2: 测试2sdasdas\n标签1: 测试1asdasdasd\n标签2: 测试2标签1: 测试1\n标签2: 测试2sdasdas\n标签1: 测试1asdasdasd\n标签2: 测试2'
-    }
+      text: '标签1: 测试1LoooooooooooooooooooooooooooooooooogLoooooooooooooooooooooooooooooooooogLoooooooooooooooooooooooooooooooooogLoooooooooooooooooooooooooooooooooogLoooooooooooooooooooooooooooooooooog\n标签2: 测试2sdasdas\n\n\n标签1: 测试1asdasdasd\n标签2: 测试2标签1: 测试1\n标签2: 测试2sdasdas\n标签1: 测试1asdasdasd\n标签2: 测试2标签1: 测试1\n标签2: 测试2sdasdas\n标签1: 测试1asdasdasd\n标签2: 测试2标签1: 测试1\n标签2: 测试2sdasdas\n标签1: 测试1asdasdasd\n标签2: 测试2标签1: 测试1\n标签2: 测试2sdasdas\n标签1: 测试1asdasdasd\n标签2: 测试2标签1: 测试1\n标签2: 测试2sdasdas\n标签1: 测试1asdasdasd\n标签2: 测试2',
+    },
   },
   {
     type: 'text',
@@ -185,7 +185,7 @@ export const DEFAULT_ANNOTATIONS = [
       y: 123,
       textMaxWidth: 500,
       lineHeight: 25,
-      text: 'Key: Loooooooooooooooooooooooooooooooooog value\nSecond One: short value'
-    }
-  }
+      text: 'Key: Loooooooooooooooooooooooooooooooooog value\nSecond One: short value',
+    },
+  },
 ];
