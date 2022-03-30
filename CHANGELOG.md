@@ -2,6 +2,52 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [1.5.0](https://github.com/Kerwin-L/labelbee-1/compare/v1.3.0...v1.5.0) (2022-03-30)
+
+
+### Features
+
+* Add dragMove event trigger ([e31b578](https://github.com/Kerwin-L/labelbee-1/commit/e31b578ed46940365081ddb112a5faa72f1c53eb))
+* Add tag dom rendering / adapt to Polygonal curve ([ec0bfcc](https://github.com/Kerwin-L/labelbee-1/commit/ec0bfcc27c723955b772f428de85817c79e11fb9))
+* Add ToolStyleConverter in lb-utils ([393e07e](https://github.com/Kerwin-L/labelbee-1/commit/393e07ea81acdc1340f22843519298498880f963))
+* AnnotationView - text rendering added to graphics type ([e673fb8](https://github.com/Kerwin-L/labelbee-1/commit/e673fb8f02cfc4b7cfbed6ed724101d2dd601ad2))
+* AnnotationView add text annotation dispaly ([1c21c06](https://github.com/Kerwin-L/labelbee-1/commit/1c21c061dc165aa95103fcc3cfc1949aae753571))
+* AnnotationView Text support Position ([db6c9b3](https://github.com/Kerwin-L/labelbee-1/commit/db6c9b3e386783e36bb5db8b0de7648041f5aecb))
+* AnnotationView updates Label Render ([484395e](https://github.com/Kerwin-L/labelbee-1/commit/484395e6cc1cc1be142ded965faef1c671f131c9))
+* API change: header sider footer ([3abaf5e](https://github.com/Kerwin-L/labelbee-1/commit/3abaf5eaa88c86253795143e8ffba87f2c132fb2))
+* LineView adds Direction Render ([b2a474e](https://github.com/Kerwin-L/labelbee-1/commit/b2a474e66b64e148e31f5053016fe3c3261f4849))
+* PointTool adds edgeAdsorption feature ([73e8d97](https://github.com/Kerwin-L/labelbee-1/commit/73e8d9764b93155091fe855042ebb08ed62eb75d))
+* PointTool adds list-annotation feature ([64ed73e](https://github.com/Kerwin-L/labelbee-1/commit/64ed73e37ae95fe41e49a15b76424bed90aae2f1))
+* PolygonTool adds rect pattern ([2b0d0f0](https://github.com/Kerwin-L/labelbee-1/commit/2b0d0f0bfdd64451bbbc264a3b872fe03e76919c))
+* PolygonTool-rect-pattern add drawOutside judgement ([725c231](https://github.com/Kerwin-L/labelbee-1/commit/725c231cb0c2552ce37796942b19549cd7785a30))
+* PolygonView adds Direction Render ([bba3248](https://github.com/Kerwin-L/labelbee-1/commit/bba3248c86931fbebd671b7d4b13b29b08755e19))
+* PolygonView/LineView adds special line/point render ([cad0681](https://github.com/Kerwin-L/labelbee-1/commit/cad0681a4278406d7c50a9c96e5ec9c79130d767))
+* Real-time update of text changes for ViewOperation ([1bd807b](https://github.com/Kerwin-L/labelbee-1/commit/1bd807bc280c61835c12fb06e03b40caec431660))
+* RectOperation adds renderEnhance & dataInjection ([f3a5678](https://github.com/Kerwin-L/labelbee-1/commit/f3a56780088cf24036307d6543a0a4d9c6d70d15))
+* Support Custom text-dom using Style ([ae9031d](https://github.com/Kerwin-L/labelbee-1/commit/ae9031d7a88ca1f734d53c22ac4b6ea4d1213e66))
+* ViewOperation adds reference pattern(lineDash) ([5b2083b](https://github.com/Kerwin-L/labelbee-1/commit/5b2083b060d0d2e46c8f64266167803d7636ae3c))
+
+
+### Bug Fixes
+
+* Adaptation of list annotations in the case of dependencies ([6ea04c6](https://github.com/Kerwin-L/labelbee-1/commit/6ea04c64c0f1b2ce71ee705705bd92ecd392f55a))
+* Adapting to the case where textConfigurable does not exist ([d084e7a](https://github.com/Kerwin-L/labelbee-1/commit/d084e7af995c6181cdbb2da42dd2b8342bb8f380))
+* Add viewOperation render data judgment ([b35a123](https://github.com/Kerwin-L/labelbee-1/commit/b35a12353e002d4100182e8d0ea7f4f4ef60e281))
+* Change canvas Mount Position / Add forbidBasicResultRender ([8020e3b](https://github.com/Kerwin-L/labelbee-1/commit/8020e3b77c24f107449fb26c38c2e2d3f905ae84))
+* Change the param of AnnotationView from color to stroke ([027ced8](https://github.com/Kerwin-L/labelbee-1/commit/027ced8e7b1b1a82c37378119f018b0a258a3bee))
+* Clear domMap in ViewOperation ([643aed1](https://github.com/Kerwin-L/labelbee-1/commit/643aed1333e09166c5d4090051be2ae564c12db3))
+* Compatible with old config of PointOperation ([2f0a4ae](https://github.com/Kerwin-L/labelbee-1/commit/2f0a4aec6ccbf476e01cac433ec4983284413726))
+* Fix getStyle2String function ([33c17b9](https://github.com/Kerwin-L/labelbee-1/commit/33c17b9916786bffb30004d8653ced34ba47ff3a))
+* Fix invalid page size error caused by canvas size change ([c958b71](https://github.com/Kerwin-L/labelbee-1/commit/c958b71bcdf6e0461b0f1321a0a086495bbcbe62))
+* Fix invalid page size error caused by window size change ([07784dd](https://github.com/Kerwin-L/labelbee-1/commit/07784dddeebd03eadf294f7babb7508126bd2221))
+* Fix lint -  Unreachable code  no-unreachable ([59e5bc2](https://github.com/Kerwin-L/labelbee-1/commit/59e5bc2d8df747ad67620920c63b68cab459007b))
+* Fix PointTool MarkerPoint Opeartion ([52bddc7](https://github.com/Kerwin-L/labelbee-1/commit/52bddc7aa6c403c0b5e546e7cabab20e17bb3820))
+* Fix the accuracy of point-selected ([10fc24c](https://github.com/Kerwin-L/labelbee-1/commit/10fc24c9fe0936f5b2e29d0e2e12cd90a3191b85))
+* Fix the LowerLimitPoint of PointTool ([6976a51](https://github.com/Kerwin-L/labelbee-1/commit/6976a51d0c2c9e1d4dda57f68b97dc09e46f7c32))
+* Solve the problem caused by discontinuous steps in stepList ([007ed21](https://github.com/Kerwin-L/labelbee-1/commit/007ed210a2fac0475b02c1143792212c05be36bd))
+* TextTool initValue fail and make updateTextValue error([#25](https://github.com/Kerwin-L/labelbee-1/issues/25)) ([f5714a1](https://github.com/Kerwin-L/labelbee-1/commit/f5714a160ed8e88618c93d623dd7c8b6cd1b5645))
+* Update the ActiveHistory of the PointOperation ([bcca28b](https://github.com/Kerwin-L/labelbee-1/commit/bcca28bd84a5e1927f479121a8270f9f9198accb))
+
 ## [1.4.0](https://github.com/open-mmlab/labelbee/compare/v1.3.0...v1.4.0) (2022-01-14)
 
 
