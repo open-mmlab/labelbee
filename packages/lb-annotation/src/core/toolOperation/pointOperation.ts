@@ -55,6 +55,11 @@ class PointOperation extends BasicToolOperation {
     return this.pointList;
   }
 
+  get drawOutsideTarget() {
+    // 兼容旧的目标外标注
+    return this.config.drawOutsideTarget ?? this.config.drawPointOut;
+  }
+
   /**
    * 向外部提供标记的更改
    * @param markerIndex
@@ -318,11 +323,11 @@ class PointOperation extends BasicToolOperation {
       coordinateZoom,
       { x: 0, y: 0 },
       this.imgInfo,
-      this.config.drawOutsideTarget,
+      this.drawOutsideTarget,
       this.basicResult,
       this.zoom,
     );
-    const coordinate = this.config.drawOutsideTarget
+    const coordinate = this.drawOutsideTarget
       ? AxisUtils.getOriginCoordinateWithOffsetCoordinate(this.coord, this.zoom, this.currentPos) // 正常的坐标
       : AxisUtils.changePointByZoom(zoomCoordinate, 1 / this.zoom); // 恢复正常的坐标
 
@@ -400,7 +405,7 @@ class PointOperation extends BasicToolOperation {
     }
 
     // 边缘判断
-    if (this.config.drawOutsideTarget === false) {
+    if (this.drawOutsideTarget === false) {
       if (this.dependToolName && this.basicCanvas) {
         let isOutSide = false;
         switch (this.dependToolName) {
