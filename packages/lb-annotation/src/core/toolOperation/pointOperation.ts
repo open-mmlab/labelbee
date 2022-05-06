@@ -13,6 +13,7 @@ import CommonToolUtils from '../../utils/tool/CommonToolUtils';
 import DrawUtils from '../../utils/tool/DrawUtils';
 import StyleUtils from '../../utils/tool/StyleUtils';
 import uuid from '../../utils/uuid';
+import MathUtils from '@/utils/MathUtils';
 import { BasicToolOperation, IBasicToolOperationProps } from './basicToolOperation';
 import TextAttributeClass from './textAttributeClass';
 
@@ -376,6 +377,15 @@ class PointOperation extends BasicToolOperation {
     }
   }
 
+  // 点之间的距离不能小于0.2px
+  public isMinDistance = (coord: ICoordinate) => {
+    const transformCoord = AxisUtils.changePointByZoom(coord, this.zoom);
+    return this.pointList.some((point) => {
+      const transformPoint = AxisUtils.changePointByZoom(point, this.zoom);
+      return MathUtils.getLineLength(transformPoint, transformCoord) < 0.2;
+    });
+  };
+
   public createPoint(e: MouseEvent) {
     if (!this.imgInfo) return;
     const { upperLimit } = this.config;
@@ -438,6 +448,10 @@ class PointOperation extends BasicToolOperation {
       ) {
         return;
       }
+    }
+
+    if (this.isMinDistance(coordinate)) {
+      return;
     }
 
     let newDrawingPoint = {
