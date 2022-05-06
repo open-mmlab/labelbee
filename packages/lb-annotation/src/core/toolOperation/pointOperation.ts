@@ -308,9 +308,9 @@ class PointOperation extends BasicToolOperation {
     }
     // 拖拽停止
     if (this.dragStatus === EDragStatus.Move) {
-      this.dragStatus = EDragStatus.Wait;
       this.history.pushHistory(this.pointList);
     }
+    this.dragStatus = EDragStatus.Wait;
     this.render();
   }
 
@@ -513,6 +513,7 @@ class PointOperation extends BasicToolOperation {
     if (this.selectedID === this.hoverID) {
       const pointList = this.pointList.filter((point) => point.id !== this.selectedID);
       this.setPointList(pointList);
+      this.history.pushHistory(pointList);
       this.setSelectedID('');
       this.hoverID = '';
       return;
