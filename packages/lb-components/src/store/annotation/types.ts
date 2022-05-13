@@ -9,7 +9,7 @@ import {
 } from '@labelbee/lb-annotation';
 import { ANNOTATION_ACTIONS } from '@/store/Actions';
 import { IStepInfo } from '@/types/step';
-import { OnSubmit, IFileItem, GetFileData, OnSave } from '@/types/data';
+import { OnSubmit, IFileItem, GetFileData, OnSave, OnPageChange, OnStepChange } from '@/types/data';
 import { ESubmitType } from '@/constant';
 
 export type GraphToolInstance =
@@ -37,6 +37,8 @@ export interface AnnotationState {
   imgNode: HTMLImageElement;
   onSubmit?: OnSubmit;
   onSave?: OnSave;
+  onPageChange?: OnPageChange;
+  onStepChange?: OnStepChange;
   getFileData?: GetFileData;
   basicIndex: number;
   basicResultList: any[];
