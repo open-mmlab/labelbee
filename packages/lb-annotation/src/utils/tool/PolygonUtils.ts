@@ -308,8 +308,13 @@ export default class PolygonUtils {
     let dropFoot: ICoordinate = coordinate; // 垂足坐标
 
     const numberOfSegments = 20; // 生成曲线后的点数
+    let isCloseNode = false; // 是否直接接近点？
 
     polygonList.forEach((v) => {
+      if (isCloseNode) {
+        return;
+      }
+
       if (!v.pointList) {
         return;
       }
@@ -319,7 +324,29 @@ export default class PolygonUtils {
           {
             const allLine = CommonToolUtils.findAllLine(v.pointList, isClose);
             allLine.forEach((line, lineIndex) => {
-              const { length, footPoint } = MathUtils.getFootOfPerpendicular(coordinate, line.point1, line.point2);
+              if (isCloseNode) {
+                return;
+              }
+
+              let { length, footPoint } = MathUtils.getFootOfPerpendicular(coordinate, line.point1, line.point2);
+
+              // Added node judgement for polygons
+              const twoPointDistance1 = MathUtils.getLineLength(line.point1, coordinate);
+              const twoPointDistance2 = MathUtils.getLineLength(line.point2, coordinate);
+
+              // node judgement is highest priority
+              if (twoPointDistance1 < range * 2) {
+                footPoint = line.point1;
+                length = twoPointDistance1;
+                isCloseNode = true;
+              }
+              if (twoPointDistance2 < range * 2) {
+                footPoint = line.point2;
+                length = twoPointDistance2;
+                isCloseNode = true;
+              }
+
+              // foot point
               if (length < min && length < range) {
                 // 说明是存在最小路径
                 closestPolygonID = v.id;
