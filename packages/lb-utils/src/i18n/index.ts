@@ -1,17 +1,23 @@
 import i18n from "i18next";
 import { initReactI18next } from "react-i18next";
-
 import resources from "./resources.json";
 
-i18n
+/**
+ * 根据是否有language判断为是否初始化
+ */
+if(!i18n.language){
+  i18n
   .use(initReactI18next) // passes i18n down to react-i18next
   .init({
-    resources,
     lng: "en",
     interpolation: {
       escapeValue: false,
     },
   });
+}
+
+i18n.addResourceBundle('en', 'translation', resources.en,true)
+i18n.addResourceBundle('cn', 'translation', resources.cn, true)
 
 export default i18n;
 export { i18n };
