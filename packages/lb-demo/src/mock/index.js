@@ -21,6 +21,23 @@ const data = Array(100)
     valid: true,
   }));
 
+const polygonData = [];
+// Array(1)
+//   .fill('')
+//   .map((v, i) => ({
+//     id: i + 1,
+//     sourceID: '',
+//     pointList: Array(1000)
+//       .fill('')
+//       .map((_) => ({
+//         x: Math.random() * 300,
+//         y: Math.random() * 400,
+//       })),
+//     order: i + 1,
+//     attribute: '',
+//     valid: true,
+//   }));
+
 export const rectDefaultResult = JSON.stringify({
   height: 200,
   width: 100,
@@ -29,6 +46,17 @@ export const rectDefaultResult = JSON.stringify({
     dataSource: 0,
     tool: 'rectTool',
     result: data,
+  },
+});
+
+export const polygonDefaultResult = JSON.stringify({
+  height: 200,
+  width: 100,
+  rotate: 0,
+  step_1: {
+    dataSource: 0,
+    tool: 'polygonTool',
+    result: polygonData,
   },
 });
 
@@ -49,6 +77,10 @@ export const getMockResult = (tool) => {
   }
   if (tool === 'tagTool') {
     return tagDefaultResult;
+  }
+
+  if (tool === 'polygonTool') {
+    return polygonDefaultResult;
   }
 
   return '';
