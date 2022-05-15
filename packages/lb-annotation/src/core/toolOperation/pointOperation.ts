@@ -13,6 +13,7 @@ import CommonToolUtils from '../../utils/tool/CommonToolUtils';
 import DrawUtils from '../../utils/tool/DrawUtils';
 import StyleUtils from '../../utils/tool/StyleUtils';
 import uuid from '../../utils/uuid';
+import MathUtils from '@/utils/MathUtils';
 import { BasicToolOperation, IBasicToolOperationProps } from './basicToolOperation';
 import TextAttributeClass from './textAttributeClass';
 
@@ -53,6 +54,11 @@ class PointOperation extends BasicToolOperation {
 
   get dataList() {
     return this.pointList;
+  }
+
+  get drawOutsideTarget() {
+    // 兼容旧的目标外标注
+    return this.config.drawOutsideTarget ?? this.config.drawPointOut;
   }
 
   /**
@@ -303,9 +309,9 @@ class PointOperation extends BasicToolOperation {
     }
     // 拖拽停止
     if (this.dragStatus === EDragStatus.Move) {
-      this.dragStatus = EDragStatus.Wait;
       this.history.pushHistory(this.pointList);
     }
+    this.dragStatus = EDragStatus.Wait;
     this.render();
   }
 
@@ -318,11 +324,11 @@ class PointOperation extends BasicToolOperation {
       coordinateZoom,
       { x: 0, y: 0 },
       this.imgInfo,
-      this.config.drawOutsideTarget,
+      this.drawOutsideTarget,
       this.basicResult,
       this.zoom,
     );
-    const coordinate = this.config.drawOutsideTarget
+    const coordinate = this.drawOutsideTarget
       ? AxisUtils.getOriginCoordinateWithOffsetCoordinate(this.coord, this.zoom, this.currentPos) // 正常的坐标
       : AxisUtils.changePointByZoom(zoomCoordinate, 1 / this.zoom); // 恢复正常的坐标
 
@@ -371,6 +377,15 @@ class PointOperation extends BasicToolOperation {
     }
   }
 
+  // 点之间的距离不能小于0.2px
+  public isMinDistance = (coord: ICoordinate) => {
+    const transformCoord = AxisUtils.changePointByZoom(coord, this.zoom);
+    return this.pointList.some((point) => {
+      const transformPoint = AxisUtils.changePointByZoom(point, this.zoom);
+      return MathUtils.getLineLength(transformPoint, transformCoord) < 0.2;
+    });
+  };
+
   public createPoint(e: MouseEvent) {
     if (!this.imgInfo) return;
     const { upperLimit } = this.config;
@@ -400,7 +415,7 @@ class PointOperation extends BasicToolOperation {
     }
 
     // 边缘判断
-    if (this.config.drawOutsideTarget === false) {
+    if (this.drawOutsideTarget === false) {
       if (this.dependToolName && this.basicCanvas) {
         let isOutSide = false;
         switch (this.dependToolName) {
@@ -433,6 +448,10 @@ class PointOperation extends BasicToolOperation {
       ) {
         return;
       }
+    }
+
+    if (this.isMinDistance(coordinate)) {
+      return;
     }
 
     let newDrawingPoint = {
@@ -508,6 +527,7 @@ class PointOperation extends BasicToolOperation {
     if (this.selectedID === this.hoverID) {
       const pointList = this.pointList.filter((point) => point.id !== this.selectedID);
       this.setPointList(pointList);
+      this.history.pushHistory(pointList);
       this.setSelectedID('');
       this.hoverID = '';
       return;

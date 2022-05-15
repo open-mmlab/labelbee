@@ -25,6 +25,7 @@ import RectUtils from './utils/tool/RectUtils';
 import AxisUtils from './utils/tool/AxisUtils';
 import DrawUtils from './utils/tool/DrawUtils';
 import ImgUtils from './utils/ImgUtils';
+import MathUtils from './utils/MathUtils';
 
 // ToolListener
 import DblClickEventListener from './utils/tool/DblClickEventListener'; // 暂时这样支持外部工具的使用
@@ -61,5 +62,6 @@ export {
   TagUtils,
   DrawUtils,
   ImgUtils,
+  MathUtils,
   AnnotationEngine,
 };
