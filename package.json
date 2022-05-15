@@ -8,11 +8,11 @@
   "scripts": {
     "start": "lerna run build && lerna run --parallel --stream start",
     "dev": "lerna run build && lerna run --parallel --stream dev",
-    "bootstrap": "lerna bootstrap",
-    "bootstrap:ci": "lerna bootstrap --no-ci",
+    "bootstrap": "lerna bootstrap --no-ci",
     "build": "lerna run build",
     "lint": "lerna run --parallel --stream lint",
     "clean": "lerna clean && rm -rf ./node_modules/ && rm -rf ./packages/**/node_modules && rm -rf ./packages/**/package-lock.json",
+    "publish": "lerna version && npm run build && lerna publish from-git --force-publish",
     "commit": "cz",
     "release": "standard-version"
   },
