@@ -12,7 +12,7 @@
     "build": "lerna run build",
     "lint": "lerna run --parallel --stream lint",
     "clean": "lerna clean && rm -rf ./node_modules/ && rm -rf ./packages/**/node_modules && rm -rf ./packages/**/package-lock.json",
-    "publish": "lerna version && npm run build && lerna publish from-git --force-publish",
+    "publish": "lerna publish from-package",
     "commit": "cz",
     "release": "standard-version"
   },
