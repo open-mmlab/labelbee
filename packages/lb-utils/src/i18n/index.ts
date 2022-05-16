@@ -13,6 +13,9 @@ if(!i18n.language){
     interpolation: {
       escapeValue: false,
     },
+    react: { 
+      useSuspense: false //   <---- this will do the magic
+    }
   });
 }
 

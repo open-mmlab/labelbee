@@ -166,7 +166,7 @@ const ToolHotKey: React.FC<IProps> = ({ isSingleImg, style }) => {
         shortCutTable[stepInfo?.tool]?.map((info: any, index: number) => setHotKey(info, index))}
     </div>
   );
-  const containerStyle = style || { width: 600 };
+  const containerStyle = style || { width: 100 };
 
   // 不存在对应的工具则不展示的快捷键
   if (stepInfo && !shortCutTable[stepInfo?.tool]) {

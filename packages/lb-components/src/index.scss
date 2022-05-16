@@ -519,6 +519,22 @@ $prefix: bee;
   }
 }
 
+.#{$prefix}-tips {
+  display: flex;
+  justify-content: flex-end;
+  background-color: #333;
+  color: rgba(255,255,255,0.4);
+  line-height: 40px;
+  opacity: .8;
+  height: 40px;
+  padding: 0 30px;
+  width: 100%;
+  text-overflow: ellipsis;
+  overflow: hidden;
+  white-space: nowrap;
+  cursor: text;
+}
+
 //
 .annotationOperation {
   position: relative;

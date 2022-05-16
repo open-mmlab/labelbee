@@ -672,8 +672,8 @@ class RectOperation extends BasicToolOperation {
 
             default: {
               if (
-                selectedRect.x + selectedRect.width > this.imgInfo?.width ||
-                selectedRect.y + selectedRect.height > this.imgInfo?.height
+                selectedRect.x + selectedRect.width > this.imgInfo?.width + 0.01 ||
+                selectedRect.y + selectedRect.height > this.imgInfo?.height + 0.01
               ) {
                 // 对线条和点先不做延伸的判断
                 return;
