@@ -2,6 +2,24 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [1.6.0](https://github.com/open-mmlab/labelbee/compare/v1.5.0...v1.6.0) (2022-05-16)
+
+
+### Features
+
+* Add a annotationPath display ([caf671f](https://github.com/open-mmlab/labelbee/commit/caf671f43c811f1b102301ff0d0d5659e25e6401))
+* I18next change init way ([8842bf0](https://github.com/open-mmlab/labelbee/commit/8842bf063c3b404912130e8c3c91e91eaba2d1a1))
+* Optimize edgeAbsorption of PolygonTool which can absorpts points ([3a75b04](https://github.com/open-mmlab/labelbee/commit/3a75b04228d8faccf71dee49234980f50a8c054a))
+* **pointTool:** The distance between limit points can't be less than 0.2px ([8e1d131](https://github.com/open-mmlab/labelbee/commit/8e1d131159c113d4330ca2ed7d4043868aafe1a9))
+
+
+### Bug Fixes
+
+* Fix the problem that the edge of rectTool cannot be dragged ([f6d3f11](https://github.com/open-mmlab/labelbee/commit/f6d3f1107773aaf84f60996ddb097b6c099145cb))
+* I18n fobid react-useSuspense ([dce6bf0](https://github.com/open-mmlab/labelbee/commit/dce6bf0bbd4ac6b4eecf23f8f95085bdae4dc9aa))
+* **pointTool:** DrawOutsideTarget doesn't work ([0a71a00](https://github.com/open-mmlab/labelbee/commit/0a71a008da437f02a6eef49d4199d10c0d7167e2))
+* **pointTool:** The point still follows the mouse when mouse is released ([8871e10](https://github.com/open-mmlab/labelbee/commit/8871e10292196047075a8fa7b9554887d70b48c0))
+
 ## [1.5.0](https://github.com/Kerwin-L/labelbee-1/compare/v1.4.0...v1.5.0) (2022-03-30)
 ### Features
 
