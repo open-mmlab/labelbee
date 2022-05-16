@@ -1,6 +1,8 @@
 name: Publish
 
-on: push
+on:
+  release:
+    types: [published]
 
 jobs:
   publish:
@@ -15,3 +17,6 @@ jobs:
       - run: npm run bootstrap
       - run: npm run build
       - run: npm run lint
+      - run: npm publish --access public
+        env:
+          NODE_AUTH_TOKEN: ${{secrets.NPM_TOKEN}}
