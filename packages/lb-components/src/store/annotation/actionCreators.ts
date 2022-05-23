@@ -1,6 +1,6 @@
 import { ANNOTATION_ACTIONS } from '@/store/Actions';
 import { IStepInfo } from '@/types/step';
-import { GetFileData, IFileItem, OnSave, OnSubmit } from '@/types/data';
+import { GetFileData, IFileItem, OnPageChange, OnSave, OnStepChange, OnSubmit } from '@/types/data';
 import { AnnotationActionTypes, ToolInstance } from './types';
 import { LoadImageAndFileData, getStepConfig } from './reducer';
 import { ESubmitType } from '@/constant';
@@ -31,12 +31,12 @@ const getSubmitByPageOperation = (pageTurningOperation: EPageTurningOperation) =
 };
 
 const getBasicIndex = (annotationStore: any, basicIndex: number) => {
-  const {imgList, imgIndex} = annotationStore;
+  const { imgList, imgIndex } = annotationStore;
   const { dataSourceStep } = getStepConfig(annotationStore.stepList, annotationStore.step);
-  let backwardResult = jsonParser(imgList[imgIndex - 1].result)
-  const index = backwardResult[`step_${dataSourceStep}`]?.result?.length - 1
-  return index || basicIndex
-}
+  let backwardResult = jsonParser(imgList[imgIndex - 1].result);
+  const index = backwardResult[`step_${dataSourceStep}`]?.result?.length - 1;
+  return index || basicIndex;
+};
 
 export function UpdateToolInstance(toolInstance: ToolInstance): AnnotationActionTypes {
   return {
@@ -99,6 +99,24 @@ export function UpdateOnSave(onSave: OnSave): AnnotationActionTypes {
   };
 }
 
+export function UpdateOnPageChange(onPageChange: OnPageChange): AnnotationActionTypes {
+  return {
+    type: ANNOTATION_ACTIONS.UPDATE_ON_PAGE_CHANGE,
+    payload: {
+      onPageChange,
+    },
+  };
+}
+
+export function UpdateOnStepChange(onStepChange: OnStepChange): AnnotationActionTypes {
+  return {
+    type: ANNOTATION_ACTIONS.UPDATE_ON_STEP_CHANGE,
+    payload: {
+      onStepChange,
+    },
+  };
+}
+
 export function UpdateGetFileData(getFileData: GetFileData): AnnotationActionTypes {
   return {
     type: ANNOTATION_ACTIONS.UPDATE_GET_FILE_DATA,
@@ -127,6 +145,8 @@ export function CopyBackWordResult(): AnnotationActionTypes {
 export function InitTaskData({
   onSubmit,
   onSave,
+  onPageChange,
+  onStepChange,
   getFileData,
   imgList,
   step,
@@ -140,6 +160,13 @@ export function InitTaskData({
   }
   if (onSave) {
     tasks.push(UpdateOnSave(onSave));
+  }
+  if (onPageChange) {
+    tasks.push(UpdateOnPageChange(onPageChange));
+  }
+
+  if (onStepChange) {
+    tasks.push(UpdateOnStepChange(onStepChange));
   }
 
   if (getFileData) {
@@ -178,21 +205,24 @@ export const ToNextStep = (pageNumber?: number) => (dispatch: any, getState: any
  * 更新当前操作的步骤
  * @param {number} toStep
  */
-export const UpdateProcessingStep = (toStep: number, index?: number) => (dispatch: any, state: any) => {
-  const imgIndex = state()?.annotation?.imgIndex ?? 0;
-  return [
-    dispatch({ type: ANNOTATION_ACTIONS.SUBMIT_RESULT }),
-    dispatch({
-      type: ANNOTATION_ACTIONS.SUBMIT_FILE_DATA,
-      payload: { submitType: ESubmitType.StepChanged },
-    }),
-    // ToSubmitFileData(ESubmitType.StepChanged),
-    dispatch({ type: ANNOTATION_ACTIONS.SET_STEP, payload: { toStep } }),
-    dispatch({ type: ANNOTATION_ACTIONS.CALC_STEP_PROGRESS }),
-    // 切换步骤保持图片位置
-    dispatch(LoadImageAndFileData(index ?? imgIndex, 0)),
-  ];
-};
+export const UpdateProcessingStep =
+  (toStep: number, index?: number) => (dispatch: any, getState: any) => {
+    const { annotation } = getState();
+    annotation?.onStepChange?.(toStep);
+    const imgIndex = annotation?.imgIndex ?? 0;
+    return [
+      dispatch({ type: ANNOTATION_ACTIONS.SUBMIT_RESULT }),
+      dispatch({
+        type: ANNOTATION_ACTIONS.SUBMIT_FILE_DATA,
+        payload: { submitType: ESubmitType.StepChanged },
+      }),
+      // ToSubmitFileData(ESubmitType.StepChanged),
+      dispatch({ type: ANNOTATION_ACTIONS.SET_STEP, payload: { toStep } }),
+      dispatch({ type: ANNOTATION_ACTIONS.CALC_STEP_PROGRESS }),
+      // 切换步骤保持图片位置
+      dispatch(LoadImageAndFileData(index ?? imgIndex, 0)),
+    ];
+  };
 
 /**
  * 提交当前的文件数据
@@ -305,7 +335,9 @@ export const DispatcherTurning = (
   ChangeTriggerEventAfterIndexChanged(dispatch, triggerEventAfterIndexChanged);
 
   if (fileIndexChanged) {
-    const index = submitType === ESubmitType.Backward ? getBasicIndex(annotationStore, basicIndex) : basicIndex;
+    annotationStore.onPageChange?.(fileIndex);
+    const index =
+      submitType === ESubmitType.Backward ? getBasicIndex(annotationStore, basicIndex) : basicIndex;
     return SubmitAndChangeFileIndex(dispatch, fileIndex, submitType, index);
   }
 

@@ -396,6 +396,20 @@ export const annotationReducer = (
       };
     }
 
+    case ANNOTATION_ACTIONS.UPDATE_ON_PAGE_CHANGE: {
+      return {
+        ...state,
+        onPageChange: action.payload.onPageChange,
+      };
+    }
+
+    case ANNOTATION_ACTIONS.UPDATE_ON_STEP_CHANGE: {
+      return {
+        ...state,
+        onStepChange: action.payload.onStepChange,
+      };
+    }
+
     case ANNOTATION_ACTIONS.UPDATE_GET_FILE_DATA: {
       return {
         ...state,

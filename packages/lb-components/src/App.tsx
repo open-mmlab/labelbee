@@ -6,7 +6,7 @@ import { store } from '.';
 import { AppState } from './store';
 import { InitTaskData } from './store/annotation/actionCreators';
 import { ToolInstance } from './store/annotation/types';
-import { GetFileData, OnSave, OnSubmit, IFileItem } from './types/data';
+import { GetFileData, OnSave, OnSubmit, IFileItem, OnPageChange, OnStepChange } from './types/data';
 import { Footer, Header, Sider } from './types/main';
 import { IStepInfo } from './types/step';
 
@@ -26,6 +26,8 @@ export interface AppProps {
   step: number;
   onSubmit?: OnSubmit;
   onSave?: OnSave;
+  onPageChange?: OnPageChange;
+  onStepChange?: OnStepChange;
   getFileData?: GetFileData;
   headerName?: string;
   initialIndex?: number;
@@ -59,19 +61,32 @@ export interface AppProps {
 const App: React.FC<AppProps> = (props) => {
   const {
     imgList,
-    step,
+    step = 1,
     stepList,
     onSubmit,
     onSave,
+    onPageChange,
+    onStepChange,
     initialIndex = 0,
     toolInstance,
     setToolInstance,
     getFileData,
     defaultLang = 'cn',
   } = props;
+
   useEffect(() => {
     store.dispatch(
-      InitTaskData({ imgList, onSubmit, stepList, step, initialIndex, getFileData, onSave }),
+      InitTaskData({
+        imgList,
+        onSubmit,
+        stepList,
+        step,
+        initialIndex,
+        getFileData,
+        onSave,
+        onPageChange,
+        onStepChange,
+      }),
     );
 
     // 初始化国际化语言
