@@ -332,6 +332,17 @@ class PointOperation extends BasicToolOperation {
       ? AxisUtils.getOriginCoordinateWithOffsetCoordinate(this.coord, this.zoom, this.currentPos) // 正常的坐标
       : AxisUtils.changePointByZoom(zoomCoordinate, 1 / this.zoom); // 恢复正常的坐标
 
+    // 边缘判断
+    if (this.drawOutsideTarget === false) {
+      if (
+        this.dependToolName === EToolName.Polygon &&
+        this.basicResult?.pointList?.length > 0 &&
+        !PolygonUtils.isInPolygon(coordinate, this.basicResult.pointList)
+      ) {
+        return;
+      }
+    }
+
     this.pointList.forEach((point) => {
       if (point.id === this.selectedID) {
         point.x = coordinate.x;
