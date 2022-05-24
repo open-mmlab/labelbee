@@ -4,7 +4,7 @@
   "workspaces": [
     "packages/*"
   ],
-  "version": "1.6.0",
+  "version": "1.6.1",
   "scripts": {
     "start": "lerna run build:type && lerna run --parallel --stream start",
     "dev": "npm run start",
