@@ -1,3 +1,9 @@
+/*
+ * @Author: Laoluo luozefeng@sensetime.com
+ * @Date: 2022-03-24 15:28:13
+ * @LastEditors: Laoluo luozefeng@sensetime.com
+ * @LastEditTime: 2022-05-17 15:59:42
+ */
 import { EMessage } from '../constants';
 
 const message: Record<string, string> = {
@@ -16,5 +22,6 @@ const message: Record<string, string> = {
   [EMessage.NoRotateInDependence]: '依赖情况下无法进行旋转',
   [EMessage.UnableToReannotation]: '无法进行续标操作',
   [EMessage.ForbiddenCreationOutsideBoundary]: '边界外禁止创建',
+  [EMessage.SuccessfulEdgeAdsorption]: '边缘吸附成功',
 };
 export default message;

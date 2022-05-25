@@ -422,6 +422,7 @@ class PointOperation extends BasicToolOperation {
       );
       if (dropFoot) {
         coordinate = dropFoot;
+        this.emit('messageSuccess', `${locale.getMessagesByLocale(EMessage.SuccessfulEdgeAdsorption, this.lang)}`);
       }
     }
 
