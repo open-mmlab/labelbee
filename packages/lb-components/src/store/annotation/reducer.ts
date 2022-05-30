@@ -7,6 +7,7 @@ import { ConfigUtils } from '@/utils/ConfigUtils';
 import { composeResult, composeResultWithBasicImgInfo } from '@/utils/data';
 import StepUtils from '@/utils/StepUtils';
 import { AnnotationEngine, CommonToolUtils, ImgUtils, cTool } from '@labelbee/lb-annotation';
+import { i18n } from '@labelbee/lb-utils';
 import { message } from 'antd/es';
 import _ from 'lodash';
 import { SetAnnotationLoading } from './actionCreators';
@@ -302,7 +303,7 @@ export const annotationReducer = (
         } else {
           annotationEngine?.setBasicInfo(dependStepConfig.tool);
           annotationEngine?.forbidOperation();
-          message.info('当前文件不存在依赖数据');
+          message.info(i18n.t('NoDependency'));
         }
       }
 
@@ -374,7 +375,7 @@ export const annotationReducer = (
           // TODO: 禁用绘制交互，有无依赖之间的操作切换
           annotationEngine?.setBasicInfo(dependStepConfig.tool);
           annotationEngine?.forbidOperation();
-          message.info('当前文件不存在依赖数据');
+          message.info(i18n.t('NoDependency'));
         }
       }
 

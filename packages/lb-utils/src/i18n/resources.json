@@ -119,7 +119,11 @@
     "CurveModeDoesNotSupportCutting": "Curve mode does not support cutting",
     "CombineSuccess": "Combine success",
     "CombiningFailedNotify": "Combining failed. Please check whether two polygons intersect or whether polygon combining forms a leak",
-    "CombineOverlapArea": "Combine Overlap Area"
+    "CombineOverlapArea": "Combine Overlap Area",
+    "NoDependency": "This image does not need to be labeled",
+    "TextCheckNumberOnly": "Please enter the number",
+    "TextCheckEnglishOnly": "Please enter English",
+    "TextCheckCustomFormat": "Please enter data in custom format"
   },
   "cn": {
     "TextInput": "文本输入",
@@ -241,6 +245,10 @@
     "CurveModeDoesNotSupportCutting": "曲线模式暂不支持裁剪",
     "CombineSuccess": "合并成功",
     "CombiningFailedNotify": "合并失败，请检查是否两个多边形是否有相交，或多边形合并是否形成漏空",
-    "CombineOverlapArea": "合并重叠区域"
+    "CombineOverlapArea": "合并重叠区域",
+    "NoDependency": "该图片无需标注",
+    "TextCheckNumberOnly": "请按仅数字的格式输入",
+    "TextCheckEnglishOnly": "请按仅英文的格式输入",
+    "TextCheckCustomFormat": "请按要求的格式输入"
   }
 }

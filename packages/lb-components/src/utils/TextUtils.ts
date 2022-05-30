@@ -1,4 +1,11 @@
+/*
+ * @Author: Laoluo luozefeng@sensetime.com
+ * @Date: 2022-01-12 13:15:33
+ * @LastEditors: Laoluo luozefeng@sensetime.com
+ * @LastEditTime: 2022-05-30 15:51:43
+ */
 import { ETextType } from '@/data/enums/ToolType';
+import { i18n } from '@labelbee/lb-utils';
 
 export const REGEXP_NUMBER = '^[0-9]+$';
 export const REGEXP_ENGLISH = '^[A-Za-z]+$';
@@ -25,11 +32,11 @@ export class TextUtils {
     switch (textCheckType) {
       case ETextType.Order:
       case ETextType.NumberOnly:
-        return '请按仅数字的格式输入';
+        return i18n.t("TextCheckNumberOnly");
       case ETextType.EnglishOnly:
-        return '请按仅英文的格式输入';
+        return i18n.t("TextCheckEnglishOnly");
       case ETextType.CustomFormat:
-        return '请按要求的格式输入';
+        return i18n.t("TextCheckCustomFormat");
       default:
         return '';
     }

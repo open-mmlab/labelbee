@@ -37,6 +37,8 @@ export default class AnnotationEngine {
 
   public toolName: EToolName;
 
+  public i18nLanguage: 'en' | 'cn'; // 存储当前 i18n 初始化数据
+
   private container: HTMLElement; // 当前结构绑定 container
 
   private size: ISize;
@@ -59,6 +61,7 @@ export default class AnnotationEngine {
     this.imgNode = props.imgNode;
     this.config = props.config ?? JSON.stringify(getConfig(props.toolName)); // 设置默认操作
     this.style = props.style ?? styleDefaultConfig; // 设置默认操作
+    this.i18nLanguage = 'cn'; // 默认为中文（跟 basicOperation 内同步）
     this._initToolOperation();
   }
 
@@ -143,6 +146,9 @@ export default class AnnotationEngine {
     }
 
     this.toolInstance = new ToolOperation(defaultData);
+
+    // 实时同步语言
+    this.setLang(this.i18nLanguage);
     this.toolInstance.init();
   }
 
@@ -186,6 +192,9 @@ export default class AnnotationEngine {
    * @param i18nLanguage
    */
   public setLang(i18nLanguage: 'en' | 'cn') {
+    // 同步跟进本地数据
+    this.i18nLanguage = i18nLanguage;
+
     switch (i18nLanguage) {
       case 'cn':
         this.toolInstance.setLang(ELang.Zh);
