@@ -32,9 +32,17 @@ interface IPagination {
 }
 
 const Forward: React.FC<IPageIconProps> = (props) =>
-  props.isVideo ? <StepBackwardFilled {...props.iconProps} /> : <RightOutlined {...props} />;
+  props.isVideo ? (
+    <StepForwardFilled {...props.iconProps} />
+  ) : (
+    <RightOutlined {...props.iconProps} />
+  );
 const Back: React.FC<IPageIconProps> = (props) =>
-  props.isVideo ? <StepForwardFilled {...props.iconProps} /> : <LeftOutlined {...props} />;
+  props.isVideo ? (
+    <StepBackwardFilled {...props.iconProps} />
+  ) : (
+    <LeftOutlined {...props.iconProps} />
+  );
 
 export const Pagination: React.FC<IPagination> = ({
   pageBackward,
@@ -47,7 +55,7 @@ export const Pagination: React.FC<IPagination> = ({
 }) => {
   return (
     <div className={`${footerCls}__pagination`}>
-      <Forward
+      <Back
         isVideo={isVideo}
         iconProps={{
           className: `${footerCls}__highlight`,
@@ -56,7 +64,7 @@ export const Pagination: React.FC<IPagination> = ({
       />
       <PageInput imgIndex={imgIndex} jumpSkip={pageJump} />/
       <span className={`${footerCls}__pageAll`}>{totalPage}</span>
-      <Back
+      <Forward
         isVideo={isVideo}
         iconProps={{
           className: `${footerCls}__highlight`,

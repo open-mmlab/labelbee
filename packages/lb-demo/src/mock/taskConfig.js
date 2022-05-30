@@ -1,3 +1,6 @@
+import { cTool } from '@labelbee/lb-annotation';
+const { EVideoToolName, EToolName } = cTool;
+
 const rectToolConfig = {
   showConfirm: false,
   skipWhileNoDependencies: false,
@@ -132,24 +135,28 @@ const polygonConfig = {
 };
 
 export const getConfig = (tool) => {
-  if (tool === 'lineTool') {
+  if (tool === EToolName.Line) {
     return lineToolConfig;
   }
 
-  if (tool === 'rectTool') {
+  if (tool === EToolName.Rect) {
     return rectToolConfig;
   }
 
-  if (tool === 'tagTool') {
+  if (tool === EToolName.Tag) {
     return tagToolConfig;
   }
 
-  if (tool === 'textTool') {
+  if (tool === EToolName.Text) {
     return textToolConfig;
   }
 
-  if (tool === 'polygonTool') {
+  if (tool === EToolName.Polygon) {
     return polygonConfig;
+  }
+
+  if (tool === EVideoToolName.VideoTagTool) {
+    return tagToolConfig;
   }
 
   return rectToolConfig;
@@ -163,7 +170,7 @@ const getStepConfig = (tool, step, sourceStep) => {
   return {
     step: step ?? 1,
     dataSourceStep: sourceStep || 0,
-    tool: tool ?? 'rectTool',
+    tool: tool ?? EToolName.Rect,
     config: JSON.stringify(getConfig(tool)),
   };
 };

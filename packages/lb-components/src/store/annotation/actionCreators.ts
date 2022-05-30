@@ -2,7 +2,7 @@ import { ANNOTATION_ACTIONS } from '@/store/Actions';
 import { IStepInfo } from '@/types/step';
 import { GetFileData, IFileItem, OnPageChange, OnSave, OnStepChange, OnSubmit } from '@/types/data';
 import { AnnotationActionTypes, ToolInstance } from './types';
-import { LoadImageAndFileData, getStepConfig } from './reducer';
+import { LoadFileAndFileData, getStepConfig } from './reducer';
 import { ESubmitType } from '@/constant';
 import { EPageTurningOperation } from '@/data/enums/AnnotationSize';
 import PageOperator from '@/utils/PageOperator';
@@ -174,15 +174,18 @@ export function InitTaskData({
   }
 
   tasks.push(UpdateImgList(imgList));
+
   tasks.push(SetTaskConfig({ stepList, step }));
+
   tasks.push({
     type: ANNOTATION_ACTIONS.CALC_STEP_PROGRESS,
   });
+
   tasks.push({
     type: ANNOTATION_ACTIONS.INIT_TOOL,
   });
 
-  tasks.push(LoadImageAndFileData(initialIndex));
+  tasks.push(LoadFileAndFileData(initialIndex));
 
   return (dispatch: any) => dispatchTasks(dispatch, tasks);
 }
@@ -220,7 +223,7 @@ export const UpdateProcessingStep =
       dispatch({ type: ANNOTATION_ACTIONS.SET_STEP, payload: { toStep } }),
       dispatch({ type: ANNOTATION_ACTIONS.CALC_STEP_PROGRESS }),
       // 切换步骤保持图片位置
-      dispatch(LoadImageAndFileData(index ?? imgIndex, 0)),
+      dispatch(LoadFileAndFileData(index ?? imgIndex, 0)),
     ];
   };
 
@@ -248,7 +251,7 @@ const SubmitAndChangeFileIndex = (
   nextBasicIndex?: number,
 ) => [
   dispatch(ToSubmitFileData(submitType)),
-  dispatch(LoadImageAndFileData(nextIndex, nextBasicIndex)),
+  dispatch(LoadFileAndFileData(nextIndex, nextBasicIndex)),
 ];
 
 const ChangeBasicIndex = (dispatch: any, nextBasicIndex: number) => [
