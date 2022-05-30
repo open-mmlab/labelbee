@@ -1,5 +1,8 @@
 import { EStepType } from '@/constant';
 import { IStepInfo } from '@/types/step';
+import { cTool } from '@labelbee/lb-annotation';
+
+const { EVideoToolName } = cTool;
 
 export default class StepUtils {
   /**
@@ -9,7 +12,7 @@ export default class StepUtils {
    * @param {IStepInfo[]} stepList
    * @returns {*}
    */
-   public static getCurrentStepInfo(currentStep: number, stepList: IStepInfo[]) {
+  public static getCurrentStepInfo(currentStep: number, stepList: IStepInfo[]) {
     const currentStepInfo = this.getStepInfo(currentStep, stepList);
 
     const useDataSourceStep = [EStepType.QUALITY_INSPECTION, EStepType.MANUAL_CORRECTION].includes(
@@ -30,7 +33,18 @@ export default class StepUtils {
    * @param stepList 步骤列表
    * @returns 步骤配置
    */
-   public static getStepInfo(step: number, stepList: IStepInfo[]) {
+  public static getStepInfo(step: number, stepList: IStepInfo[]) {
     return stepList?.filter((info) => info.step === step)[0];
+  }
+
+  /**
+   * 根据toolName判断当前步骤是否为视频工具
+   * @param step 步骤
+   * @param stepList 步骤列表
+   * @returns {Number} 是否为视频工具
+   */
+  public static currentToolIsVideo(step: number, stepList: IStepInfo[]) {
+    const currentStepInfo = StepUtils.getCurrentStepInfo(step, stepList);
+    return Object.values(EVideoToolName).includes(currentStepInfo?.tool as typeof EVideoToolName);
   }
 }

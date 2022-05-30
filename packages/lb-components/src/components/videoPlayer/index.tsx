@@ -2,11 +2,9 @@ import React from 'react';
 import VideoController from './components/controller';
 import { getClassName } from '@/utils/dom';
 import { cKeyCode } from '@labelbee/lb-annotation';
+import { IFileItem } from '@/types/data';
 
 const EKeyCode = cKeyCode.default;
-
-const videoSrc =
-  'https://sensebee.oss-accelerate.aliyuncs.com/Development%2F6629%2F1.mp4?Expires=1653562799&OSSAccessKeyId=LTAI4Fcnhge5ysEwVNGjQCpU&Signature=qVwAv2MWHPswT1ETFAuBeEhF%2Fuc%3D';
 
 export const VideoPlayerCtx = React.createContext<{
   videoRef?: React.RefObject<HTMLVideoElement> | null;
@@ -18,6 +16,11 @@ export const VideoPlayerCtx = React.createContext<{
   currentTime: number;
   duration: number;
   buffered: number;
+  imgList: IFileItem[];
+  imgIndex: number;
+  pageBackward: () => void;
+  pageJump: (page: number) => void;
+  pageForward: () => void;
 }>({
   isPlay: false,
   playPause: () => {},
@@ -27,13 +30,25 @@ export const VideoPlayerCtx = React.createContext<{
   duration: 0,
   buffered: 0,
   setCurrentTime: () => {},
+  imgList: [],
+  imgIndex: -1,
+  pageBackward: () => {},
+  pageJump: (page: number) => {},
+  pageForward: () => {},
 });
 
 const PER_INTERVAL = 50;
 const PER_FORWARD = 0.1;
 const PLAYBACK_RATES = [0.5, 1, 1.5, 2, 4, 6, 8, 16];
 
-interface IProps {}
+interface IProps {
+  imgList: IFileItem[];
+  imgIndex: number;
+  pageBackward: () => void;
+  pageJump: (page: number) => void;
+  pageForward: () => void;
+}
+
 interface IState {
   playbackRate: number;
   currentTime: number;
@@ -155,22 +170,26 @@ class VideoPlayer extends React.Component<IProps, IState> {
   public onVideoStart = () => {
     this.timeInterval = window.setInterval(() => {
       if (this.videoElm) {
-        const buffered = this.videoElm?.buffered.end(0);
+        try {
+          const buffered = this.videoElm?.buffered.end(0);
 
-        this.setState({
-          currentTime: decimalReserved(this.videoElm?.currentTime, 1),
-          buffered,
-        });
+          this.setState({
+            currentTime: decimalReserved(this.videoElm?.currentTime, 1),
+            buffered,
+          });
+        } catch (error) {
+          console.error('TimeRage Error');
+        }
       }
     }, PER_INTERVAL);
   };
 
   public resetVideoData = () => {
-    console.log(11);
     this.setState({
       currentTime: 0,
       buffered: 0,
     });
+    this.onVideoStopped();
   };
 
   public setDuration = () => {
@@ -204,6 +223,8 @@ class VideoPlayer extends React.Component<IProps, IState> {
 
   public render() {
     const { isPlay, playbackRate, currentTime, duration, buffered } = this.state;
+    const { imgList, imgIndex, pageBackward, pageJump, pageForward } = this.props;
+    const videoSrc = imgIndex > -1 ? imgList[imgIndex]?.url ?? '' : '';
 
     const {
       playPause,
@@ -227,22 +248,28 @@ class VideoPlayer extends React.Component<IProps, IState> {
           duration,
           buffered,
           setCurrentTime,
+          imgIndex,
+          imgList,
+          pageBackward,
+          pageJump,
+          pageForward,
         }}
       >
         <div className={getClassName('video-wrapper')}>
-          <video
-            ref={this.videoRef}
-            className={getClassName('video')}
-            src={videoSrc}
-            onPause={onPause}
-            onPlay={onPlay}
-            onLoadedMetadata={resetVideoData}
-            onError={resetVideoData}
-            onDurationChange={setDuration}
-            onLoadedData={() => {
-              console.log(123);
-            }}
-          />
+          <div className={getClassName('video-container')}>
+            <video
+              ref={this.videoRef}
+              className={getClassName('video')}
+              src={videoSrc}
+              onPause={onPause}
+              onPlay={onPlay}
+              onLoadedMetadata={resetVideoData}
+              onError={resetVideoData}
+              onDurationChange={setDuration}
+              width='100%'
+              height='100%'
+            />
+          </div>
           <VideoController />
         </div>
       </VideoPlayerCtx.Provider>

@@ -1209,13 +1209,11 @@ $hotkey-container-padding: 7px;
   display: flex;
   flex-direction: column;
   background-color: black;
-}
+  overflow: hidden;
 
-.#{$prefix}-video {
-  flex: 1;
-  video {
-    width: 100%;
-    height: 100%;
+  .#{$prefix}-video-container {
+    flex: 1;
+    overflow: hidden;
   }
 }
 

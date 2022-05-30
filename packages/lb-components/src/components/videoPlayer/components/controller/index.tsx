@@ -34,7 +34,6 @@ const VideoProgress = () => {
       const width = progressRef.current.clientWidth;
       const toTime = decimalReserved((offsetX / width) * duration, 1);
       setCurrentTime(toTime);
-      console.log(event.target, toTime, offsetX);
     }
   };
 
@@ -95,14 +94,17 @@ const VideoHotKeys = () => {
 };
 
 const VideoPageChange = () => {
+  const { imgIndex, imgList, pageBackward, pageJump, pageForward } =
+    React.useContext(VideoPlayerCtx);
+
   return (
     <Pagination
       isVideo={true}
-      pageBackward={() => {}}
-      imgIndex={1}
-      pageJump={() => {}}
-      totalPage={20}
-      pageForward={() => {}}
+      pageBackward={pageBackward}
+      imgIndex={imgIndex}
+      pageJump={pageJump}
+      totalPage={imgList.length}
+      pageForward={pageForward}
       footerCls={getClassName('video-controller')}
     />
   );

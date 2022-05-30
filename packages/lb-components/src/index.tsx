@@ -9,6 +9,7 @@ import App from './App';
 import configureStore from './configureStore';
 import { PageBackward, PageForward, PageJump } from './store/annotation/actionCreators';
 import { ToolInstance } from './store/annotation/types';
+import VideoPlayer from '@/components/VideoPlayer';
 
 export const store = configureStore();
 
@@ -43,4 +44,4 @@ const OutputApp = (props: AppProps, ref: any) => {
 
 export default React.forwardRef(OutputApp);
 
-export { AnnotationView, i18n };
+export { AnnotationView, i18n, VideoPlayer };
