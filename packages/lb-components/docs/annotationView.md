@@ -36,6 +36,9 @@ export default DefaultComponent;
 | onChange        | 监听内部的对标注数据的操作              | 否       | (type: 'hover' \| 'selected', ids: string[]) => void; |              -              |
 | showLoading     | 是否进行加载中                          | 否       | boolean                                               |            false            |
 
+### Special API
+
+- [renderEnhance - 渲染增强方法](./docs/renderEnhance.md)
 
 ### Type
 
