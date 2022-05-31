@@ -238,12 +238,12 @@ export const annotationReducer = (
     }
 
     case ANNOTATION_ACTIONS.SUBMIT_RESULT: {
-      const { imgList, basicIndex, resultList, annotationEngine, basicResultList } = state;
-      if (!annotationEngine) {
+      const { imgList, basicIndex, resultList, toolInstance, basicResultList } = state;
+      if (!toolInstance) {
         return state;
       }
 
-      const [exportResult] = annotationEngine?.toolInstance?.exportData();
+      const [exportResult] = toolInstance?.exportData();
 
       let previousResultList = exportResult;
 
@@ -420,6 +420,19 @@ export const annotationReducer = (
           ...state,
           toolInstance,
           annotationEngine,
+        };
+      }
+
+      return {
+        ...state,
+      };
+    }
+
+    case ANNOTATION_ACTIONS.SET_TOOL: {
+      if (action.payload.instance) {
+        return {
+          ...state,
+          toolInstance: action.payload.instance,
         };
       }
 
