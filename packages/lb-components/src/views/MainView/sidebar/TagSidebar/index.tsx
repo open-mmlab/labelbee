@@ -137,6 +137,7 @@ const TagSidebar: React.FC<IProps> = ({ toolInstance, imgIndex }) => {
                     display: 'flex',
                     justifyContent: 'space-between',
                     alignItems: 'center',
+                    flex: 1,
                   }}
                 >
                   <span>

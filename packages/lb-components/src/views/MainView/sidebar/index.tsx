@@ -19,6 +19,9 @@ import SwitchAttributeList from './SwitchAttributeList';
 import TagSidebar, { expandIconFuc } from './TagSidebar';
 import TextToolSidebar from './TextToolSidebar';
 import ToolStyle from './ToolStyle';
+import { cTool } from '@labelbee/lb-annotation';
+
+const { EVideoToolName } = cTool;
 
 const { Panel } = Collapse;
 
@@ -182,7 +185,7 @@ const Sidebar: React.FC<IProps> = ({ sider }) => {
     );
   }
 
-  if (toolName === EToolName.Tag) {
+  if (toolName === EToolName.Tag || toolName === EVideoToolName.VideoTagTool) {
     return (
       <div className={`${sidebarCls}`}>
         <TagSidebar />
