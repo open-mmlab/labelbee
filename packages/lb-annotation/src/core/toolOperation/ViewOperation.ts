@@ -520,6 +520,14 @@ export default class ViewOperation extends BasicToolOperation {
             //
           }
         }
+        annotation.annotation?.renderEnhance?.({
+          ctx: this.ctx,
+          canvas: this.canvas,
+          currentPos: this.currentPos,
+          zoom: this.zoom,
+          data: annotation,
+          toolInstance: this,
+        });
       });
     } catch (e) {
       console.error('ViewOperation Render Error', e);

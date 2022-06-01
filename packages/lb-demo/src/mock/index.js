@@ -220,4 +220,40 @@ export const DEFAULT_ANNOTATIONS = [
       text: 'Key: Loooooooooooooooooooooooooooooooooog value\nSecond One: short value',
     },
   },
+  {
+    type: 'rect',
+    annotation: {
+      id: '1231999923999',
+      x: 60,
+      y: 260,
+      width: 100,
+      height: 100,
+      stroke: 'pink',
+      name: 'Bag',
+      renderEnhance: (params) => {
+        console.log(params);
+        const {
+          ctx,
+          data: { annotation },
+          zoom,
+          currentPos,
+        } = params;
+
+        ctx.fillStyle = annotation.stroke;
+
+        ctx.fillRect(
+          annotation.x * zoom + currentPos.x - 2,
+          annotation.y * zoom + currentPos.y - 20 * zoom,
+          40 * zoom,
+          20 * zoom,
+        );
+        ctx.strokeStyle = 'white';
+        ctx.strokeText(
+          annotation.name,
+          annotation.x * zoom + currentPos.x + 6 * zoom,
+          annotation.y * zoom + currentPos.y - 7 * zoom,
+        );
+      },
+    },
+  },
 ];
