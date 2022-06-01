@@ -1,5 +1,12 @@
 import React from 'react';
 
+interface ITagLabelItem {
+  keyLabel: string;
+  valuesLabelArray: string[];
+}
+
+type ITagLabelsArray = ITagLabelItem[];
+
 /**
  * 通过 key和value在inputList找到对应的标签
  * @param key
@@ -12,25 +19,38 @@ const findTagLabel = (key: string, value: string, inputList: any[]) => {
   return { keyLabel: primaryTagConfig.key, valueLabel: secondaryTagConfig.key };
 };
 
+/**
+ * 根据inputList给结果的key进行排序
+ * @param tagsKeys
+ * @param inputList
+ */
+const tagKeySortByInputList = (tagsKeys: string[], inputList: any[]) => {
+  return tagsKeys.sort((key1, key2) => {
+    const key1Idx = inputList.findIndex((input) => key1 === input.value);
+    const key2Idx = inputList.findIndex((input) => key2 === input.value);
+    return key1Idx - key2Idx;
+  });
+};
+
 const result2LabelKey = (result: any[], inputList: any[]) => {
   try {
     return (
-      result?.reduce(
-        (
-          exitsTags: Array<{ keyLabel: string; valueLabel: string }>,
-          res: { result: { [key: string]: string } },
-        ) => {
-          Object.keys(res.result).forEach((key) => {
-            const value = res.result[key];
+      result?.reduce((exitsTags: ITagLabelsArray, res: { result: { [key: string]: string } }) => {
+        tagKeySortByInputList(Object.keys(res.result), inputList).forEach((key) => {
+          const values = res.result[key];
+          const valuesArray = values.split(';');
+          valuesArray.forEach((value) => {
             const { keyLabel, valueLabel } = findTagLabel(key, value, inputList);
-            if (!exitsTags.find((i) => i.keyLabel === keyLabel && i.valueLabel === valueLabel)) {
-              exitsTags.push({ keyLabel, valueLabel });
+            const tagHasAssign = exitsTags.find((i) => i.keyLabel === keyLabel);
+            if (tagHasAssign) {
+              tagHasAssign.valuesLabelArray.push(valueLabel);
+            } else {
+              exitsTags.push({ keyLabel, valuesLabelArray: [valueLabel] });
             }
           });
-          return exitsTags;
-        },
-        [],
-      ) ?? []
+        });
+        return exitsTags;
+      }, []) ?? []
     );
   } catch (error) {
     return [];
@@ -58,16 +78,16 @@ export const VideoTagLayer = ({
     overflowY: 'scroll',
   };
 
-  const tags: Array<{ keyLabel: string; valueLabel: string }> = result2LabelKey(result, inputList);
+  const tags: ITagLabelsArray = result2LabelKey(result, inputList);
 
   return (
     <div style={cssProperty}>
       <table>
         <tbody>
-          {tags.map(({ keyLabel, valueLabel }) => (
+          {tags.map(({ keyLabel, valuesLabelArray }) => (
             <tr key={keyLabel}>
               <td style={{ paddingRight: 8 }}>{`${keyLabel}:`}</td>
-              <td>{`${valueLabel}`}</td>
+              <td>{`${valuesLabelArray.join('、')}`}</td>
             </tr>
           ))}
         </tbody>
