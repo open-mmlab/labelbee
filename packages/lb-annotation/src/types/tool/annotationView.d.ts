@@ -10,13 +10,13 @@ declare interface IRenderEnhanceParams {
   currentPos: ICoordinate;
   zoom: number;
   data: IAnnotationData;
-  instance: ViewOperation;
+  toolInstance: ViewOperation;
 }
 
 declare interface IGraphicsBasicConfig extends IBasicStyle {
   hiddenText?: boolean; // 是否隐藏文本
   isReference?: boolean; // 是否进行的参考显示
-  renderEnhance: (params: IRenderEnhanceParams) => void;
+  renderEnhance?: (params: IRenderEnhanceParams) => void;
 }
 
 declare interface IAnnotationData {

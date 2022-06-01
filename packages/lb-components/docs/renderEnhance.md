@@ -1,4 +1,4 @@
-[English](./renderEnhance_en-US.md) | 简体中文
+ 简体中文
 
 # renderEnhance 渲染增强函数
 
@@ -62,14 +62,14 @@ export default DemoComponent;
 
 ## API
 
-| 参数       | 说明                                                         | 类型                            |                             默认                             |
-| ---------- | ------------------------------------------------------------ | ------------------------------- | :----------------------------------------------------------: |
-| ctx        | 当前canvas的上下文，有了上下文，您就可以绘制任何喜欢的东西   | CanvasRenderingContext2D \|null |                             null                             |
-| canvas     | 当前canvas标签的dom节点                                      | HTMLCanvasElement\|null         |                             null                             |
-| currentPos | 当前位置信息 - x，y是在当前2维平面画布上的横纵坐标，可用来计算新的位置信息 | ICoordinate                     |                         {x: 0, y: 0}                         |
-| zoom       | 当前缩放比例 - 例如可以根据currentPos和zoom建一个跟随框或文字 | number                          |                              1                               |
-| data       | 当前渲染的数据，type是该标注的渲染类型，annotation是与type相对应具体的标注信息 | IAnnotationData                 | eg:{type: "rect",annotation: {id: '1231999923999', x: 60, y: 260, width: 100, height: 100, …}} |
-| instance   | 当前标注工具实例，可以拿到当前实例的所有信息，除了上面的属性，还有绘制过程中用到的所有属性和数据，例如可以从instance.annotations拿到所有标注数据 | ViewOperation                   |                              {}                              |
+| 参数         | 说明                                                         | 类型                            |                             默认                             |
+| ------------ | ------------------------------------------------------------ | ------------------------------- | :----------------------------------------------------------: |
+| ctx          | 当前canvas的上下文，有了上下文，您就可以绘制任何喜欢的东西   | CanvasRenderingContext2D \|null |                             null                             |
+| canvas       | 当前canvas标签的dom节点                                      | HTMLCanvasElement\|null         |                             null                             |
+| currentPos   | 当前位置信息 ，x、y是二维平面上，画布距离 canvas 左上角，偏移的坐标，可用来计算新的位置信息 | ICoordinate                     |                         {x: 0, y: 0}                         |
+| zoom         | 当前缩放比例，判断渲染时当前坐标的转换，例如可以根据currentPos和zoom建一个跟随框或文字 | number                          |                              1                               |
+| data         | 当前渲染的数据，详情请见外层的的定义 - [AnnotationView 标注查看模式](./annotationView.md) | IAnnotationData                 | eg:{type: "rect",annotation: {id: '1231999923999', x: 60, y: 260, width: 100, height: 100, …}} |
+| toolInstance | 当前标注工具实例，可以拿到当前实例的所有信息，除了上面的属性，还有绘制过程中用到的所有属性和数据，例如可以从toolInstance.annotations拿到所有标注数据 | ViewOperation                   |                              {}                              |
 
 
 ### Type
@@ -77,11 +77,11 @@ export default DemoComponent;
 ```ts
 declare interface IRenderEnhanceParams {
   ctx: CanvasRenderingContext2D | null;
-  canvas: HTMLCanvasElement|null;
+  canvas: HTMLCanvasElement | null;
   currentPos: ICoordinate;
   zoom: number;
   data: IAnnotationData;
-  instance: ViewOperation;
+  toolInstance: ViewOperation;
 }
 ```
 

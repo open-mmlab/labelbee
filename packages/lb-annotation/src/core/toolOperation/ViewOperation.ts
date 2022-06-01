@@ -526,7 +526,7 @@ export default class ViewOperation extends BasicToolOperation {
           currentPos: this.currentPos,
           zoom: this.zoom,
           data: annotation,
-          instance: this,
+          toolInstance: this,
         });
       });
     } catch (e) {

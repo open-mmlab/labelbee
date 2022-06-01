@@ -38,7 +38,7 @@ export default DefaultComponent;
 
 ### Special API
 
-- [renderEnhance - 渲染增强方法](./docs/renderEnhance.md)
+- [renderEnhance - 渲染增强方法](./renderEnhance.md)
 
 ### Type
 
