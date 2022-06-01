@@ -1,6 +1,14 @@
 import { ANNOTATION_ACTIONS } from '@/store/Actions';
 import { IStepInfo } from '@/types/step';
-import { GetFileData, IFileItem, OnPageChange, OnSave, OnStepChange, OnSubmit } from '@/types/data';
+import {
+  GetFileData,
+  LoadFileList,
+  IFileItem,
+  OnPageChange,
+  OnSave,
+  OnStepChange,
+  OnSubmit,
+} from '@/types/data';
 import { AnnotationActionTypes, ToolInstance } from './types';
 import { LoadImageAndFileData, getStepConfig } from './reducer';
 import { ESubmitType } from '@/constant';
@@ -126,6 +134,24 @@ export function UpdateGetFileData(getFileData: GetFileData): AnnotationActionTyp
   };
 }
 
+export function UpdatePageSize(pageSize: number): AnnotationActionTypes {
+  return {
+    type: ANNOTATION_ACTIONS.UPDATE_PAGE_SIZE,
+    payload: {
+      pageSize,
+    },
+  };
+}
+
+export function UpdateGetFileList(loadFileList: LoadFileList): AnnotationActionTypes {
+  return {
+    type: ANNOTATION_ACTIONS.UPDATE_LOAD_FILE_LIST,
+    payload: {
+      loadFileList,
+    },
+  };
+}
+
 export function UpdateRotate(): AnnotationActionTypes {
   return {
     type: ANNOTATION_ACTIONS.UPDATE_ROTATE,
@@ -148,10 +174,10 @@ export function InitTaskData({
   onPageChange,
   onStepChange,
   getFileData,
-  imgList,
+  pageSize,
+  loadFileList,
   step,
   stepList,
-  initialIndex,
 }: any): any {
   const tasks: any[] = [];
 
@@ -173,7 +199,14 @@ export function InitTaskData({
     tasks.push(UpdateGetFileData(getFileData));
   }
 
-  tasks.push(UpdateImgList(imgList));
+  if (loadFileList) {
+    tasks.push(UpdateGetFileList(loadFileList));
+  }
+
+  if (pageSize) {
+    tasks.push(UpdatePageSize(pageSize));
+  }
+
   tasks.push(SetTaskConfig({ stepList, step }));
   tasks.push({
     type: ANNOTATION_ACTIONS.CALC_STEP_PROGRESS,
@@ -181,8 +214,6 @@ export function InitTaskData({
   tasks.push({
     type: ANNOTATION_ACTIONS.INIT_TOOL,
   });
-
-  tasks.push(LoadImageAndFileData(initialIndex));
 
   return (dispatch: any) => dispatchTasks(dispatch, tasks);
 }
@@ -313,13 +344,50 @@ export const PageJump =
   };
 
 /**
+ * 加载文件列表
+ * @param dispatch
+ * @param getState
+ * @param nextIndex 需要加载的图片index
+ * @param isInitial // 是否为初始化加载
+ */
+export const loadImgList = async (
+  dispatch: any,
+  getState: any,
+  nextIndex: number,
+  isInitial?: boolean,
+) => {
+  const { loadFileList, imgList, pageSize } = getState().annotation;
+  const page = Math.floor(nextIndex / pageSize);
+  SetAnnotationLoading(dispatch, true);
+  try {
+    const res: any = await loadFileList(page, pageSize);
+    SetAnnotationLoading(dispatch, false);
+    if (!res?.fileList?.length || !res?.total) {
+      throw new Error('fileList and total are required');
+    }
+    const newImgList = isInitial ? new Array(res.total) : [...imgList];
+    newImgList.splice(page * pageSize, pageSize, ...res.fileList);
+    dispatch({
+      type: ANNOTATION_ACTIONS.UPDATE_IMG_LIST,
+      payload: {
+        imgList: newImgList,
+      },
+    });
+    return true;
+  } catch (err) {
+    SetAnnotationLoading(dispatch, false);
+    console.error(err);
+  }
+};
+
+/**
  * 判断翻页还是切换依赖数据
  * @param dispatch
  * @param getState
  * @param pageTurningOperation
  * @param toIndex
  */
-export const DispatcherTurning = (
+export const DispatcherTurning = async (
   dispatch: any,
   getState: any,
   pageTurningOperation: EPageTurningOperation,
@@ -334,10 +402,24 @@ export const DispatcherTurning = (
 
   ChangeTriggerEventAfterIndexChanged(dispatch, triggerEventAfterIndexChanged);
 
+  // 翻页
   if (fileIndexChanged) {
+    if (annotationStore.loading) {
+      return;
+    }
+    // 加载图片列表
+    if (!annotationStore.imgList[fileIndex]) {
+      const isSuccess = await loadImgList(dispatch, getState, fileIndex);
+      if (!isSuccess) {
+        // 加载失败不往下执行
+        return;
+      }
+    }
     annotationStore.onPageChange?.(fileIndex);
     const index =
-      submitType === ESubmitType.Backward ? getBasicIndex(annotationStore, basicIndex) : basicIndex;
+      submitType === ESubmitType.Backward
+        ? getBasicIndex(getState().annotation, basicIndex)
+        : basicIndex;
     return SubmitAndChangeFileIndex(dispatch, fileIndex, submitType, index);
   }
 

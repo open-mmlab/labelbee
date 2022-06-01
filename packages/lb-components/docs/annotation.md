@@ -277,6 +277,34 @@ const App = () => {
    * @param {number} nextIndex
    */
   const getFileData = () => {};
+
+  /**
+   * 异步加载文件列表
+   * 与imgList只能传一个 如果两个都传了优先以loadFileList方式加载数据
+   * @param page 第一页为0
+   * @param size 默认为10
+   */
+  const loadFileList = (
+    page: number,
+    pageSize: number,
+  ): Promise<{ fileList: IFileItem[]; total: number }> => {
+    return new Promise((resolve) => {
+      resolve({ fileList: [], total: 100 });
+    });
+  };
+
+  /**
+   * 翻页的回调
+   * @param nextIndex
+   */
+  const onPageChange = (nextIndex: number) => {};
+
+  /**
+   * 切换步骤的回调
+   * @param nextStep
+   */
+  const onStepChange = (nextStep: number) => {};
+
   return (
     <AnnotationOperation
       //  ref={childrenRef}
@@ -287,6 +315,10 @@ const App = () => {
       stepList={stepList}
       goBack={goBack}
       getFileData={getFileData}
+      pageSize={10}
+      loadFileList={loadFileList}
+      onPageChange={onPageChange}
+      onStepChange={onStepChange}
       headerName='任务标题' // 不写则隐藏标题
       initialIndex={0} // 仅在初始化时使用，表示当前图片 index，默认为：0.
       // 支持覆盖 侧边栏 传入组件的形式
@@ -312,6 +344,10 @@ export default App;
 | onSave       | 保存的时候触发 data 表示当前标注的信息      | 否       | onSave       |
 | goBack       | 页面内自带跳转的回调函数                    | 否       | goBack       |
 | getFileData  | 支持外部传入获取文件接口                    | 否       | getFileData  |
+| loadFileList  | 异步加载文件列表                            | 否       | loadFileList  |
+| pageSize     | loadFileList 每次加载的文件数量              | 否       | number       |
+| onPageChange | 翻页的回调                                  | 否       | onPageChange |
+| onStepChange | 切换步骤的回调                              | 否       | onStepChange |
 | headerName   | 标题                                        | 否       | string       |
 | exportData   | 导出按钮 不写则隐藏导出按钮                 | 否       | {}           |
 | initialIndex | 当前图片列表的 index 初始化时候使用         | 否       | number       |
@@ -479,10 +515,10 @@ interface IFileItem {
   result?: string;
 }
 ```
+
 ## 工具扩展功能
 
 在原有的标注流程的基础上，提供各种扩展
 
 - [dataInjectionAtCreation](./annotation/dataInjectionAtCreation.md)
 - [renderEnhance](./annotation/renderEnhance.md)
-

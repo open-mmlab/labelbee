@@ -9,7 +9,15 @@ import {
 } from '@labelbee/lb-annotation';
 import { ANNOTATION_ACTIONS } from '@/store/Actions';
 import { IStepInfo } from '@/types/step';
-import { OnSubmit, IFileItem, GetFileData, OnSave, OnPageChange, OnStepChange } from '@/types/data';
+import {
+  OnSubmit,
+  IFileItem,
+  GetFileData,
+  OnSave,
+  OnPageChange,
+  OnStepChange,
+  LoadFileList,
+} from '@/types/data';
 import { ESubmitType } from '@/constant';
 
 export type GraphToolInstance =
@@ -40,6 +48,8 @@ export interface AnnotationState {
   onPageChange?: OnPageChange;
   onStepChange?: OnStepChange;
   getFileData?: GetFileData;
+  loadFileList?: LoadFileList;
+  pageSize?: number;
   basicIndex: number;
   basicResultList: any[];
   resultList: any[];
@@ -114,10 +124,36 @@ interface UpdateOnSave {
   };
 }
 
+interface UpdateOnPageChange {
+  type: typeof ANNOTATION_ACTIONS.UPDATE_ON_PAGE_CHANGE;
+  payload: {
+    getFileData: OnPageChange;
+  };
+}
+interface UpdateOnStepChange {
+  type: typeof ANNOTATION_ACTIONS.UPDATE_ON_STEP_CHANGE;
+  payload: {
+    getFileData: OnStepChange;
+  };
+}
+
 interface UpdateGetFileData {
   type: typeof ANNOTATION_ACTIONS.UPDATE_GET_FILE_DATA;
   payload: {
     getFileData: GetFileData;
+  };
+}
+interface UpdatePageSize {
+  type: typeof ANNOTATION_ACTIONS.UPDATE_PAGE_SIZE;
+  payload: {
+    pageSize: number;
+  };
+}
+
+interface UpdateGetFileList {
+  type: typeof ANNOTATION_ACTIONS.UPDATE_LOAD_FILE_LIST;
+  payload: {
+    getFileData: LoadFileList;
   };
 }
 
@@ -134,6 +170,10 @@ export type AnnotationActionTypes =
   | SetTaskConfig
   | InitTool
   | UpdateOnSubmit
+  | UpdateOnPageChange
+  | UpdateOnStepChange
   | UpdateGetFileData
+  | UpdatePageSize
+  | UpdateGetFileList
   | CopyBackWordResult
   | UpdateOnSave;

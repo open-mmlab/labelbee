@@ -44,10 +44,12 @@ export const getTotalPage = (state: AnnotationState) => {
 
 const calcStepProgress = (fileList: any[], step: number) =>
   fileList.reduce((pre, i) => {
-    const resultStr = i.result;
-    const resultObject = jsonParser(resultStr);
-    if (resultObject[`step_${step}`]) {
-      return pre + 1;
+    if (i) {
+      const resultStr = i.result;
+      const resultObject = jsonParser(resultStr);
+      if (resultObject[`step_${step}`]) {
+        return pre + 1;
+      }
     }
     return pre;
   }, 0) / fileList.length;
@@ -82,7 +84,8 @@ const updateToolInstance = (annotation: AnnotationState, imgNode: HTMLImageEleme
  * @param nextBasicIndex
  */
 export const LoadImageAndFileData =
-  (nextIndex: number, nextBasicIndex?: number) => async (dispatch: any, getState: any) => {
+  (nextIndex: number, nextBasicIndex?: number): any =>
+  async (dispatch: any, getState: any) => {
     const { getFileData, imgList, toolInstance } = getState().annotation;
     SetAnnotationLoading(dispatch, true);
 
@@ -98,7 +101,7 @@ export const LoadImageAndFileData =
       });
     }
 
-    const { url } = imgList[nextIndex];
+    const url = imgList?.[nextIndex]?.url;
 
     return ImgUtils.load(url)
       .then((imgNode) => {
@@ -158,7 +161,7 @@ export const annotationReducer = (
 
     case ANNOTATION_ACTIONS.SUBMIT_FILE_DATA: {
       const { imgList, imgIndex, step, stepList, toolInstance, onSubmit, resultList } = state;
-      if (!toolInstance) {
+      if (!toolInstance || !imgList[imgIndex]) {
         return state;
       }
 
@@ -414,6 +417,20 @@ export const annotationReducer = (
       return {
         ...state,
         getFileData: action.payload.getFileData,
+      };
+    }
+
+    case ANNOTATION_ACTIONS.UPDATE_PAGE_SIZE: {
+      return {
+        ...state,
+        pageSize: action.payload.pageSize,
+      };
+    }
+
+    case ANNOTATION_ACTIONS.UPDATE_LOAD_FILE_LIST: {
+      return {
+        ...state,
+        loadFileList: action.payload.loadFileList,
       };
     }
 

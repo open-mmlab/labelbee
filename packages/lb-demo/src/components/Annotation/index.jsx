@@ -2,6 +2,7 @@ import React from 'react';
 import AnnotationOperation from '@labelbee/lb-components';
 import '@labelbee/lb-components/dist/index.css';
 // import { DrawUtils } from '@labelbee/lb-annotation';
+import { fileList as urlList } from '../../mock';
 
 const Annotation = (props) => {
   const { fileList, goBack, stepList, step } = props;
@@ -23,6 +24,27 @@ const Annotation = (props) => {
     return {
       testDataInjection: 1,
     };
+  };
+
+  const loadFileList = (page, pageSize) => {
+    return new Promise((resolve) => {
+      const fileList = [];
+      const total = 105;
+      for (let i = 0; i < pageSize; i++) {
+        if (page * pageSize + i >= total) {
+          break;
+        }
+        fileList.push({
+          id: Number(`${page}${i}`),
+          result: '',
+          url: urlList[i % urlList.length],
+        });
+      }
+      console.log('loadFileList', fileList);
+      setTimeout(() => {
+        resolve({ fileList, total });
+      }, 500);
+    });
   };
 
   // const renderEnhance = {
@@ -48,6 +70,8 @@ const Annotation = (props) => {
         headerName='测试各类工具'
         onSubmit={onSubmit}
         imgList={fileList}
+        pageSize={10}
+        loadFileList={loadFileList}
         goBack={goBack}
         stepList={stepList}
         step={step}
