@@ -4,7 +4,7 @@ import { AppState } from '@/store';
 import { AnnotationState } from '@/store/annotation/types';
 import { PageBackward, PageForward, PageJump } from '@/store/annotation/actionCreators';
 import { ANNOTATION_ACTIONS } from '@/store/Actions';
-import { TagToolInstanceAdaptor } from '../VideoPlayer/TagToolInstanceAdaptor';
+import { TagToolInstanceAdaptor } from '@/components/videoPlayer/TagToolInstanceAdaptor';
 
 const VideoAnnotate: React.FC<{ annotation: AnnotationState }> = (props) => {
   const { imgList, imgIndex, stepList, step } = props.annotation;

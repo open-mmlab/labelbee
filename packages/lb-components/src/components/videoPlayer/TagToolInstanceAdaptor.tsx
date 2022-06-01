@@ -11,8 +11,9 @@ import { jsonParser } from '@/utils';
 import { VideoPlayer } from './index';
 import { VideoTagLayer } from './VideoTagLayer';
 import { IStepInfo } from '@/types/step';
+import _ from 'lodash';
 
-export interface IZProp {
+interface ITagInstanceAdaptorProps {
   imgIndex: number;
   imgList: any[];
   pageForward: () => void;
@@ -23,13 +24,37 @@ export interface IZProp {
   step: number;
   stepList: IStepInfo[];
 }
-export interface IZState {
+
+interface ITagInstanceAdaptorState {
   tagResult: any[];
   labelSelectedList: any;
 }
 
-export class TagToolInstanceAdaptor extends React.Component<IZProp, IZState> {
-  constructor(props: IZProp) {
+interface ObjectString {
+  [key: string]: string | undefined;
+}
+
+const getKeyCodeNumber = (keyCode: number) => {
+  if (keyCode <= 57 && keyCode >= 49) {
+    return keyCode - 48;
+  }
+
+  if (keyCode <= 105 && keyCode >= 97) {
+    return keyCode - 96;
+  }
+
+  return 0;
+};
+
+export class TagToolInstanceAdaptor extends React.Component<
+  ITagInstanceAdaptorProps,
+  ITagInstanceAdaptorState
+> {
+  public fns: { [key: string]: () => void } = {};
+
+  public labelSelectedList: number[] = [];
+
+  constructor(props: ITagInstanceAdaptorProps) {
     super(props);
     this.state = {
       tagResult: [],
@@ -42,23 +67,12 @@ export class TagToolInstanceAdaptor extends React.Component<IZProp, IZState> {
     return jsonParser(stepInfo?.config);
   }
 
-  // TODO 标签记录
-  get labelSelectedList() {
-    return [];
-  }
-
   get history() {
     return { initRecord: () => {} };
   }
 
   get currentTagResult() {
-    return this.state.tagResult;
-  }
-
-  set labelSelectedList(labelSelectedList: any) {
-    this.setState({
-      labelSelectedList,
-    });
+    return this.state.tagResult[0];
   }
 
   public clearResult = (sendMsg: boolean, value?: string) => {
@@ -80,7 +94,9 @@ export class TagToolInstanceAdaptor extends React.Component<IZProp, IZState> {
     return [this.state.tagResult, { valid: true }];
   };
 
-  public singleOn() {}
+  public singleOn(event: string, func: () => void) {
+    this.fns[event] = func;
+  }
 
   public getTagResultByCode(num1: number, num2?: number) {
     try {
@@ -107,12 +123,9 @@ export class TagToolInstanceAdaptor extends React.Component<IZProp, IZState> {
 
   public setLabelBySelectedList(num1: number, num2?: number) {
     const newTagConfig = this.getTagResultByCode(num1, num2);
-    const currentRes = this.state.tagResult.length > 0 ? this.state.tagResult[0].result : {};
 
     if (newTagConfig) {
-      const inputValue = { [newTagConfig.value.key]: newTagConfig.value.value };
-      // todo: 合并输入逻辑
-      const tagRes = newTagConfig.isMulti ? Object.assign(currentRes, inputValue) : inputValue;
+      const tagRes = this.combineResult(newTagConfig, this.state.tagResult[0]?.result ?? {});
 
       const tagResult = [
         {
@@ -125,30 +138,100 @@ export class TagToolInstanceAdaptor extends React.Component<IZProp, IZState> {
       this.setState({
         tagResult,
       });
+
+      this.emitEvent('render');
     }
   }
+
+  public emitEvent = (event: string) => {
+    if (this.fns[event]) {
+      this.fns[event]();
+    }
+  };
+
+  public combineResult = (
+    inputValue: { value: { key: string; value: string }; isMulti: boolean },
+    existValue: ObjectString = {},
+  ) => {
+    const { isMulti } = inputValue;
+    const { key, value } = inputValue.value;
+
+    if (isMulti) {
+      let valuesArray = existValue[key]?.split(';') ?? [];
+      if (valuesArray.includes(value)) {
+        valuesArray = valuesArray.filter((i) => i !== value);
+      } else {
+        valuesArray.push(value);
+      }
+
+      const valuesSet = new Set(valuesArray);
+      existValue[key] = Array.from(valuesSet).join(';');
+      return _.pickBy(existValue, (v) => v);
+    }
+
+    existValue[key] = existValue[key] === value ? undefined : value;
+
+    return _.pickBy(existValue, (v) => v);
+  };
 
   public setResult = (tagResult: any[]) => {
     this.setState({
       tagResult,
     });
+
+    if (this.fns['render']) {
+      this.fns['render']();
+    }
   };
 
   public setLabel = (num1: number, num2: number) => {
     this.setLabelBySelectedList(num1, num2);
   };
 
+  /** 参考 packages/lb-annotation/src/core/toolOperation/tagOperation.ts onKeyDown */
+  public keydown = (event: KeyboardEvent) => {
+    const keyCode = getKeyCodeNumber(event.keyCode);
+
+    if (keyCode) {
+      const keyIndex = keyCode - 1;
+
+      if (this.config.inputList.length === 1) {
+        // 说明标签只有一层
+        this.labelSelectedList = [0, keyIndex];
+        this.setLabel(0, keyIndex);
+        setTimeout(() => {
+          this.labelSelectedList = [];
+          this.emitEvent('render');
+        }, 500);
+
+        return;
+      }
+
+      if (this.labelSelectedList.length === 1) {
+        this.labelSelectedList = [this.labelSelectedList[0], keyIndex];
+        this.setLabel(this.labelSelectedList[0], keyIndex);
+        setTimeout(() => {
+          this.labelSelectedList = [];
+          this.emitEvent('render');
+        }, 500);
+      } else {
+        this.labelSelectedList = [keyIndex];
+        this.emitEvent('expend');
+      }
+    }
+  };
+
   public componentDidMount() {
-    // document.addEventListener('keydown', this.keydown);
+    document.addEventListener('keydown', this.keydown);
     this.props.onMounted(this);
   }
 
   public componentWillMount() {
-    // document.addEventListener('keydown', this.keydown);
+    document.addEventListener('keydown', this.keydown);
     this.props.onUnmounted();
   }
 
-  public shouldComponentUpdate({ imgIndex, imgList, step }: IZProp) {
+  public shouldComponentUpdate({ imgIndex, imgList, step }: ITagInstanceAdaptorProps) {
     if (imgIndex !== this.props.imgIndex) {
       this.setState({
         tagResult: jsonParser(imgList[imgIndex].result)[`step_${step}`]?.result ?? [],

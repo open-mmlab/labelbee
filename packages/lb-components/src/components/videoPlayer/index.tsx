@@ -60,18 +60,6 @@ interface IState {
 export const decimalReserved = (num: number, places: number = 2) =>
   typeof num === 'number' ? parseFloat(num.toFixed(places)) : num;
 
-const getKeyCodeNumber = (keyCode: number) => {
-  if (keyCode <= 57 && keyCode >= 49) {
-    return keyCode - 49;
-  }
-
-  if (keyCode <= 105 && keyCode >= 97) {
-    return keyCode - 97;
-  }
-
-  return 0;
-};
-
 export class VideoPlayer extends React.Component<IProps, IState> {
   public videoRef?: React.RefObject<HTMLVideoElement>;
   public timeInterval?: number;
