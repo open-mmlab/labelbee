@@ -954,7 +954,7 @@ class LineToolOperation extends BasicToolOperation {
       x: newX,
       y: newY,
     };
-
+    //@ts-ignore
     Object.assign(this.selectedPoint, this.getNextCoordByAbsCoord(pointPosition));
     this.updateLines();
     this.render();

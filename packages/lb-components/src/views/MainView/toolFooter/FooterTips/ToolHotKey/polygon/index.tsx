@@ -100,7 +100,7 @@ export const suspendAbsorption = {
   shortCut: ['Alt'],
 };
 
-export const segment = {
+export const splitPolygon = {
   name: 'CropOverlapArea',
   icon: IconSegment,
   noticeInfo: '',
@@ -135,7 +135,6 @@ const pointToolShortCutTable = [
   // changeSpecialLine,
   suspendAbsorption,
   // hidden,
-  // segment,
   // segmentByAlgorithm,
   // attributeLock,
   // attributeClickLock,
@@ -153,5 +152,6 @@ const pointToolShortCutTable = [
   tabChangeSelected,
   tabReverseChangeSelected,
   // changeRenderPattern,
+  splitPolygon,
 ];
 export default pointToolShortCutTable;

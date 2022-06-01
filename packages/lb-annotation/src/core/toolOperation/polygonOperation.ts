@@ -1,4 +1,11 @@
 import MathUtils from '@/utils/MathUtils';
+import {
+  clipPolygonFromWrapPolygon,
+  getMaxOrder,
+  getPolygonPointList,
+  getWrapPolygonIndex,
+  segmentPolygonByPolygon,
+} from '@/utils/tool/polygonTool';
 import RectUtils from '@/utils/tool/RectUtils';
 import {
   DEFAULT_TEXT_OFFSET,
@@ -9,7 +16,7 @@ import {
   TEXT_ATTRIBUTE_OFFSET,
 } from '../../constant/annotation';
 import EKeyCode from '../../constant/keyCode';
-import { edgeAdsorptionScope, EPolygonPattern, EToolName } from '../../constant/tool';
+import { edgeAdsorptionScope, ELineTypes, EPolygonPattern, EToolName } from '../../constant/tool';
 import locale from '../../locales';
 import { EMessage } from '../../locales/constants';
 import { IPolygonConfig, IPolygonData, IPolygonPoint } from '../../types/tool/polygon';
@@ -738,6 +745,10 @@ class PolygonOperation extends BasicToolOperation {
         break;
       }
 
+      case EKeyCode.X:
+        e.altKey && this.segment();
+        break;
+
       default: {
         if (this.config.attributeConfigurable) {
           const keyCode2Attribute = AttributeUtils.getAttributeByKeycode(keyCode, this.config.attributeList);
@@ -898,6 +909,85 @@ class PolygonOperation extends BasicToolOperation {
     };
 
     return true;
+  }
+
+  public segment() {
+    // 如果没有选中多边形直接进行裁剪操作，直接跳出
+    if (!this.selectedID) {
+      return;
+    }
+
+    if (this.config?.lineType !== ELineTypes.Line) {
+      return;
+    }
+    const selectedPointList = getPolygonPointList(this.selectedID, this.currentShowList);
+    const backgroundPolygonList = this.currentShowList.filter((v) => v.id !== this.selectedID);
+
+    if (backgroundPolygonList.length === 0 || selectedPointList.length === 0) {
+      return;
+    }
+
+    // 需判断是否存在包裹
+    const wrapIndex = getWrapPolygonIndex(selectedPointList, backgroundPolygonList);
+
+    let newPolygonList = [...this.polygonList];
+
+    if (wrapIndex === -1) {
+      // 并不存在合并的问题
+      const newPointListArray = segmentPolygonByPolygon(selectedPointList, backgroundPolygonList);
+
+      if (!newPointListArray) {
+        return;
+      }
+      const newPointList = newPointListArray.shift();
+
+      if (!newPointList) {
+        return;
+      }
+
+      let defaultAttribute = '';
+      let valid = true;
+      const sourceID = CommonToolUtils.getSourceID(this.basicResult);
+      let textAttribute = '';
+
+      newPolygonList = this.polygonList.map((v) => {
+        if (v.id === this.selectedID) {
+          defaultAttribute = v.attribute;
+          valid = v?.valid ?? true;
+          textAttribute = v?.textAttribute ?? '';
+          return {
+            ...v,
+            pointList: newPointList,
+          };
+        }
+
+        return v;
+      });
+
+      // 如果有多余的框则进行添加
+      if (newPointListArray.length > 0) {
+        newPointListArray.forEach((v, i) => {
+          newPolygonList.push({
+            sourceID,
+            id: uuid(8, 62),
+            pointList: v,
+            valid,
+            order: getMaxOrder(this.currentShowList) + 1 + i,
+            attribute: defaultAttribute,
+            textAttribute,
+          });
+        });
+      }
+    } else {
+      // 嵌套合并结果
+      newPolygonList[wrapIndex].pointList = clipPolygonFromWrapPolygon(
+        selectedPointList,
+        newPolygonList[wrapIndex].pointList,
+      );
+      newPolygonList = newPolygonList.filter((v) => v.id !== this.selectedID);
+    }
+    this.setPolygonList(newPolygonList);
+    this.render();
   }
 
   /**
