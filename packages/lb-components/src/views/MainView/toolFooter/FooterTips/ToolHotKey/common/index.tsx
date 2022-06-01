@@ -17,6 +17,10 @@ import IconSaveKj from '@/assets/annotation/toolHotKeyIcon/icon_save_kj.svg';
 import IconLineSpecialKj from '@/assets/annotation/toolHotKeyIcon/icon_lineSpecial_kj.svg';
 import IconNoDisplay from '@/assets/annotation/toolHotKeyIcon/icon_noDisplay.svg';
 import IconEyeLockKj from '@/assets/annotation/toolHotKeyIcon/icon_eyeLock_kj.svg';
+import IconPlayPause from '@/assets/annotation/toolHotKeyIcon/icon_playPause.svg';
+import IconFastForward from '@/assets/annotation/toolHotKeyIcon/icon_forward_kj.svg';
+import IconRewind from '@/assets/annotation/toolHotKeyIcon/icon_back_kj.svg';
+import IconSpeed from '@/assets/annotation/toolHotKeyIcon/icon_speed_kj.svg';
 
 export const revoke = {
   name: 'Undo',
@@ -56,13 +60,13 @@ export const setValid = {
 };
 
 export const backward = {
-  name: 'Previous',
+  name: 'PreviousImage',
   icon: BackwardSvg,
   shortCut: ['A'],
 };
 
 export const forward = {
-  name: 'Next',
+  name: 'NextImage',
   icon: ForwardSvg,
   shortCut: ['D'],
 };
@@ -146,4 +150,31 @@ export const saveResult = {
   name: 'Save',
   icon: IconSaveKj,
   shortCut: ['Ctrl', 'S'],
+};
+
+export const speed = {
+  name: 'Speed',
+  icon: IconSpeed,
+  shortCut: ['&#8593;', '&#8595;'],
+  shortCutUseHtml: true,
+};
+
+export const playPause = {
+  name: 'PlayPause',
+  icon: IconPlayPause,
+  shortCut: ['Space'],
+};
+
+export const forwardForward = {
+  name: 'FastForward',
+  icon: IconFastForward,
+  shortCut: ['&#8594;'],
+  shortCutUseHtml: true,
+};
+
+export const rewind = {
+  name: 'Rewind',
+  icon: IconRewind,
+  shortCut: ['&#8592;'],
+  shortCutUseHtml: true,
 };

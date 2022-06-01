@@ -2,7 +2,6 @@ import { Popover } from 'antd/es';
 import _ from 'lodash';
 import React, { useState } from 'react';
 import { useSelector } from 'react-redux';
-// import styles from './index.less';
 
 import hotKeySvg from '@/assets/annotation/toolHotKeyIcon/icon_kj1.svg';
 import hotKeyHoverSvg from '@/assets/annotation/toolHotKeyIcon/icon_kj_h.svg';
@@ -13,13 +12,17 @@ import polygonToolShortcutTable from './polygon';
 import lineToolShortCutTable from './line';
 import tagToolSingleShortCutTable from './tag';
 import textToolShortCutTable from './text';
+import videoToolShortCutTable from './videoTag';
 import StepUtils from '@/utils/StepUtils';
 import { footerCls } from '../../index';
 import { useTranslation } from 'react-i18next';
+import { cTool } from '@labelbee/lb-annotation';
+
+const { EVideoToolName } = cTool;
 
 interface IProps {
-  isSingleImg?: boolean;
   style?: any;
+  title?: JSX.Element;
 }
 
 const shortCutTable: any = {
@@ -29,15 +32,10 @@ const shortCutTable: any = {
   [EToolName.Polygon]: polygonToolShortcutTable,
   [EToolName.Line]: lineToolShortCutTable,
   [EToolName.Text]: textToolShortCutTable,
+  [EVideoToolName.VideoTagTool]: videoToolShortCutTable,
 };
 
-export interface IShortcuts {
-  name: string;
-  icon: any;
-  shortCut: string[];
-  noticeInfo?: string;
-}
-const ToolHotKey: React.FC<IProps> = ({ isSingleImg, style }) => {
+const ToolHotKey: React.FC<IProps> = ({ style, title }) => {
   const [svgFlag, setFlag] = useState(false);
   const { t } = useTranslation();
 
@@ -192,15 +190,18 @@ const ToolHotKey: React.FC<IProps> = ({ isSingleImg, style }) => {
         onMouseLeave={() => setFlag(false)}
         style={containerStyle}
       >
-        <a className='svg'>
-          <img
-            src={svgFlag ? hotKeyHoverSvg : hotKeySvg}
-            width={15}
-            height={13}
-            style={{ marginRight: '5px' }}
-          />
-          {t('Hotkeys')}
-        </a>
+        {title ?? (
+          <a className='svg'>
+            <img
+              src={svgFlag ? hotKeyHoverSvg : hotKeySvg}
+              width={15}
+              height={13}
+              style={{ marginRight: '5px' }}
+            />
+
+            {t('Hotkeys')}
+          </a>
+        )}
       </div>
     </Popover>
   );

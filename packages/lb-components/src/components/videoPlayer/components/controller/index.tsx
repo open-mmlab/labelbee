@@ -9,6 +9,8 @@ import {
 import { VideoPlayerCtx, decimalReserved } from '../..';
 import { Pagination } from '@/views/MainView/toolFooter/Pagination';
 import hotkey from '@/assets/annotation/video/icon_keyboard_h.svg';
+import ToolHotKey from '@/views/MainView/toolFooter/FooterTips/ToolHotKey';
+import { useTranslation } from 'react-i18next';
 
 /**
  * 视频音频时间格式化, 转化为 min:sec:mircoSec
@@ -85,11 +87,17 @@ const VideoSpeedButton = () => {
 };
 
 const VideoHotKeys = () => {
+  const { t } = useTranslation();
   return (
-    <span className={getClassName('video-controller', 'hotkey')}>
-      <img src={hotkey} />
-      快捷键
-    </span>
+    <ToolHotKey
+      title={
+        <span className={getClassName('video-controller', 'hotkey')}>
+          <img src={hotkey} />
+          {t('Hotkeys')}
+        </span>
+      }
+      style={{}}
+    />
   );
 };
 
