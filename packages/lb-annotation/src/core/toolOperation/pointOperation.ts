@@ -411,18 +411,23 @@ class PointOperation extends BasicToolOperation {
     let coordinate = AxisUtils.getOriginCoordinateWithOffsetCoordinate(this.coord, this.zoom, this.currentPos);
 
     if (this.config.edgeAdsorption && this.referenceData) {
-      const isClose = this.referenceData?.toolName === EToolName.Polygon;
+      const isAllowEdgeAdsoption = [EToolName.Polygon, EToolName.Line].includes(this.referenceData?.toolName);
 
-      const { dropFoot } = PolygonUtils.getClosestPoint(
-        coordinate,
-        this.referenceData.result as IPolygonData[],
-        this.referenceData.config?.lineType ?? ELineTypes.Line,
-        edgeAdsorptionScope / this.zoom,
-        { isClose },
-      );
-      if (dropFoot) {
-        coordinate = dropFoot;
-        this.emit('messageSuccess', `${locale.getMessagesByLocale(EMessage.SuccessfulEdgeAdsorption, this.lang)}`);
+      // Currently only available for PolygonTool and LineTool
+      if (isAllowEdgeAdsoption) {
+        const isClose = this.referenceData?.toolName === EToolName.Polygon;
+
+        const { dropFoot } = PolygonUtils.getClosestPoint(
+          coordinate,
+          this.referenceData.result as IPolygonData[],
+          this.referenceData.config?.lineType ?? ELineTypes.Line,
+          edgeAdsorptionScope / this.zoom,
+          { isClose },
+        );
+        if (dropFoot) {
+          coordinate = dropFoot;
+          this.emit('messageSuccess', `${locale.getMessagesByLocale(EMessage.SuccessfulEdgeAdsorption, this.lang)}`);
+        }
       }
     }
 
