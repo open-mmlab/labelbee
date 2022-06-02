@@ -5,12 +5,7 @@ import { ELineTypes, SEGMENT_NUMBER } from '../../constant/tool';
 import AxisUtils from './AxisUtils';
 import MathUtils from '../MathUtils';
 import LineToolUtils from './LineToolUtils';
-import { difference, polygon } from '@turf/turf';
-
-declare interface IAxis {
-  x: number;
-  y: number;
-}
+import { difference, polygon, union } from '@turf/turf';
 
 export default class PolygonUtils {
   static getHoverPolygonID(
@@ -649,7 +644,7 @@ export default class PolygonUtils {
   /**
    * 获取当前点与多边形点集最近的点，并返回 Index
    */
-  public static getClosePointDistanceFromPolygon(point: IAxis, pointList: IPolygonPoint[]) {
+  public static getClosePointDistanceFromPolygon(point: ICoordinate, pointList: IPolygonPoint[]) {
     let minLen = Number.MAX_SAFE_INTEGER;
     let index = -1;
 
@@ -662,5 +657,52 @@ export default class PolygonUtils {
     });
 
     return index;
+  }
+
+  /**
+   * 多边形合成多边形
+   * @param selectedPolygon
+   * @param combinedPolygon
+   */
+  public static combinePolygonWithPolygon(
+    selectedPolygon: IPolygonData,
+    combinedPolygon: IPolygonData,
+  ):
+    | {
+        newPolygon: IPolygonData;
+        unionList: string[];
+      }
+    | undefined {
+    try {
+      let turfSelectedPolygon = polygon([
+        [...PolygonUtils.concatBeginAndEnd(selectedPolygon.pointList.map((v) => [v.x, v.y]))],
+      ]);
+      const turfCombinedPolygon = polygon([
+        [...PolygonUtils.concatBeginAndEnd(combinedPolygon.pointList.map((v) => [v.x, v.y]))],
+      ]);
+      const unionPolygon = union(turfSelectedPolygon, turfCombinedPolygon);
+      const unionList: string[] = [];
+      let newPolygon = selectedPolygon;
+      if (unionPolygon?.geometry?.coordinates?.length === 1) {
+        unionList.push(combinedPolygon.id);
+        const pointList = unionPolygon?.geometry.coordinates.map((polygon) => {
+          // 多边形需要另外判断
+          if (unionPolygon?.geometry?.type === 'MultiPolygon') {
+            //@ts-ignore
+            return polygon[0].reduce(PolygonUtils.deletePolygonLastPoint, []);
+          }
+          //@ts-ignore
+          return polygon.reduce(PolygonUtils.deletePolygonLastPoint, []);
+        })[0];
+        newPolygon.pointList = pointList;
+      }
+
+      return {
+        newPolygon,
+        unionList,
+      };
+    } catch (e) {
+      console.error(e);
+    }
   }
 }

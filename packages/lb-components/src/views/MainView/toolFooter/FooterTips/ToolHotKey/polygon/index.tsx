@@ -1,9 +1,9 @@
-import DrawPolygonSvg from '@/assets/annotation/toolHotKeyIcon/icon_line_kj.svg'
-import DrawInvalidPolygonSvg from '@/assets/annotation/toolHotKeyIcon/icon_polygonNull_kj.svg'
-import SelectedPolygonSvg from '@/assets/annotation/toolHotKeyIcon/icon_polygonActive_kj.svg'
-import ChangePolygonAttribute from '@/assets/annotation/toolHotKeyIcon/icon_polygonChange_kj.svg'
-import DeletePolygonSvg from '@/assets/annotation/toolHotKeyIcon/icon_polygonDel_kj.svg'
-import MouseLeftSvg from '@/assets/annotation/toolHotKeyIcon/icon_mouse_left_kj.svg'
+import DrawPolygonSvg from '@/assets/annotation/toolHotKeyIcon/icon_line_kj.svg';
+import DrawInvalidPolygonSvg from '@/assets/annotation/toolHotKeyIcon/icon_polygonNull_kj.svg';
+import SelectedPolygonSvg from '@/assets/annotation/toolHotKeyIcon/icon_polygonActive_kj.svg';
+import ChangePolygonAttribute from '@/assets/annotation/toolHotKeyIcon/icon_polygonChange_kj.svg';
+import DeletePolygonSvg from '@/assets/annotation/toolHotKeyIcon/icon_polygonDel_kj.svg';
+import MouseLeftSvg from '@/assets/annotation/toolHotKeyIcon/icon_mouse_left_kj.svg';
 import MouseRightSvg from '@/assets/annotation/toolHotKeyIcon/icon_mouse_right_kj.svg';
 
 import IconLineContKj from '@/assets/annotation/toolHotKeyIcon/icon_lineCont_kj.svg';
@@ -11,6 +11,7 @@ import IconPolygonInsertKj from '@/assets/annotation/toolHotKeyIcon/icon_polygon
 import IconUnGripKj from '@/assets/annotation/toolHotKeyIcon/icon_unGrip_kj.svg';
 import IconPointSpecialKj from '@/assets/annotation/toolHotKeyIcon/icon_pointSpecial_kj.svg';
 import IconSegment from '@/assets/annotation/toolHotKeyIcon/icon_segment.svg';
+import IconPolygonMerge from '@/assets/annotation/toolHotKeyIcon/icon_polygonMerge_kj.svg';
 import IconAI from '@/assets/annotation/toolHotKeyIcon/icon_AI.svg';
 import IconSwapOutlined from '@/assets/annotation/toolHotKeyIcon/icon_swap_outlined.svg';
 
@@ -32,7 +33,7 @@ import {
   // hidden,
   // changeSpecialLine,
   // saveResult,
-  dargWithLeftClick
+  dargWithLeftClick,
 } from '../common';
 
 export const polygon = {
@@ -107,6 +108,13 @@ export const splitPolygon = {
   shortCut: ['ALT', 'X'],
 };
 
+export const combinePolygon = {
+  name: 'CombineOverlapArea',
+  icon: IconPolygonMerge,
+  noticeInfo: '',
+  shortCut: ['Alt', 'Z'],
+};
+
 export const segmentByAlgorithm = {
   name: 'SegmentationRecognition',
   icon: IconAI,
@@ -152,6 +160,7 @@ const pointToolShortCutTable = [
   tabChangeSelected,
   tabReverseChangeSelected,
   // changeRenderPattern,
+  combinePolygon,
   splitPolygon,
 ];
 export default pointToolShortCutTable;
