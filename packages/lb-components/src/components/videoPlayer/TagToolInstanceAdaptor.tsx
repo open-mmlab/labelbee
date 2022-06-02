@@ -1,6 +1,7 @@
 /**
- * @file 视频标签工具实现标签工具的方法
- * @author lijingchi <lijingchi1@sensetime.com>
+ * @file Implement TagTool interaction through class components.
+ *       Refer to: packages/lb-annotation/src/core/toolOperation/tagOperation.ts
+ * @author Glenfiddish <edwinlee0927@hotmail.com>
  * @date 2022-05-31
  */
 
@@ -12,12 +13,14 @@ import { VideoPlayer } from './index';
 import { VideoTagLayer } from './VideoTagLayer';
 import { IStepInfo } from '@/types/step';
 import _ from 'lodash';
+import type { ObjectString } from './types';
+import { getKeyCodeNumber } from './utils';
 
-interface ITagInstanceAdaptorProps {
+export interface IVideoTagInstanceAdaptorProps {
   imgIndex: number;
   imgList: any[];
   pageForward: () => void;
-  pageJump: (page: number) => void;
+  pageJump: (page: string) => void;
   pageBackward: () => void;
   onMounted: (instance: TagToolInstanceAdaptor) => void;
   onUnmounted: () => void;
@@ -30,31 +33,15 @@ interface ITagInstanceAdaptorState {
   labelSelectedList: any;
 }
 
-interface ObjectString {
-  [key: string]: string | undefined;
-}
-
-const getKeyCodeNumber = (keyCode: number) => {
-  if (keyCode <= 57 && keyCode >= 49) {
-    return keyCode - 48;
-  }
-
-  if (keyCode <= 105 && keyCode >= 97) {
-    return keyCode - 96;
-  }
-
-  return 0;
-};
-
 export class TagToolInstanceAdaptor extends React.Component<
-  ITagInstanceAdaptorProps,
+  IVideoTagInstanceAdaptorProps,
   ITagInstanceAdaptorState
 > {
   public fns: { [key: string]: () => void } = {};
 
   public labelSelectedList: number[] = [];
 
-  constructor(props: ITagInstanceAdaptorProps) {
+  constructor(props: IVideoTagInstanceAdaptorProps) {
     super(props);
     this.state = {
       tagResult: [],
@@ -67,6 +54,7 @@ export class TagToolInstanceAdaptor extends React.Component<
     return jsonParser(stepInfo?.config);
   }
 
+  /** Just implementation, no actual logic */
   get history() {
     return { initRecord: () => {} };
   }
@@ -149,6 +137,12 @@ export class TagToolInstanceAdaptor extends React.Component<
     }
   };
 
+  /**
+   * Combine result with inputValue and existValue
+   * @param inputValue
+   * @param existValue
+   * @returns newValue
+   */
   public combineResult = (
     inputValue: { value: { key: string; value: string }; isMulti: boolean },
     existValue: ObjectString = {},
@@ -188,7 +182,10 @@ export class TagToolInstanceAdaptor extends React.Component<
     this.setLabelBySelectedList(num1, num2);
   };
 
-  /** 参考 packages/lb-annotation/src/core/toolOperation/tagOperation.ts onKeyDown */
+  /**
+   * Keydown event for recording keycode input(numeric only)
+   * @param event
+   */
   public keydown = (event: KeyboardEvent) => {
     const keyCode = getKeyCodeNumber(event.keyCode);
 
@@ -231,7 +228,8 @@ export class TagToolInstanceAdaptor extends React.Component<
     this.props.onUnmounted();
   }
 
-  public shouldComponentUpdate({ imgIndex, imgList, step }: ITagInstanceAdaptorProps) {
+  /** Observer imgIndex and set tagResult */
+  public shouldComponentUpdate({ imgIndex, imgList, step }: IVideoTagInstanceAdaptorProps) {
     if (imgIndex !== this.props.imgIndex) {
       this.setState({
         tagResult: jsonParser(imgList[imgIndex].result)[`step_${step}`]?.result ?? [],

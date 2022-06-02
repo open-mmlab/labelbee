@@ -1,4 +1,4 @@
-import React, { useState, MouseEventHandler } from 'react';
+import React from 'react';
 import { getClassName } from '@/utils/dom';
 import {
   CaretRightOutlined,
@@ -6,16 +6,20 @@ import {
   CaretDownOutlined,
   PauseOutlined,
 } from '@ant-design/icons';
-import { VideoPlayerCtx, decimalReserved } from '../..';
+import { VideoPlayerCtx } from '../..';
 import { Pagination } from '@/views/MainView/toolFooter/Pagination';
 import hotkey from '@/assets/annotation/video/icon_keyboard_h.svg';
 import ToolHotKey from '@/views/MainView/toolFooter/FooterTips/ToolHotKey';
 import { useTranslation } from 'react-i18next';
+import { decimalReserved } from '../../utils';
+import { cTool } from '@labelbee/lb-annotation';
+const { EVideoToolName } = cTool;
 
 /**
- * 视频音频时间格式化, 转化为 min:sec:mircoSec
- * 例如: 61.9 => 01:01:9
- * @param time
+ * Format video time to display
+ * Such as 61.9 => 01:01:9
+ * @param {Number} time
+ * @returns {String} displayTime (min:sec:mircoSec)
  */
 const videoTimeFormat = (time: number) => {
   const min = Math.floor(time / 60);
@@ -27,7 +31,7 @@ const videoTimeFormat = (time: number) => {
 
 const VideoProgress = () => {
   const { currentTime, duration, buffered, setCurrentTime } = React.useContext(VideoPlayerCtx);
-  const progressRef = React.useRef<HTMLDivElement | null>();
+  const progressRef = React.useRef<HTMLDivElement>(null);
   const bufferLoadedPercent = `${decimalReserved((buffered / duration) * 100, 1)}%`;
   const playedPercent = `${decimalReserved((currentTime / duration) * 100, 1)}%`;
   const toCurrentTime = (event: React.MouseEvent<HTMLDivElement>) => {
@@ -65,10 +69,11 @@ const VideoProgress = () => {
 
 const VideoSpeedButton = () => {
   const { updateNextPlaybackRate, playbackRate } = React.useContext(VideoPlayerCtx);
+  const { t } = useTranslation();
 
   return (
     <span className={getClassName('video-controller', 'speed')}>
-      <span>倍速</span>
+      <span>{t('Speed')}</span>
       <span className={getClassName('video-controller', 'speedNum')}>{`${playbackRate}x`}</span>
       <span className={getClassName('video-controller', 'speedButton')}>
         <CaretUpOutlined
@@ -97,6 +102,7 @@ const VideoHotKeys = () => {
         </span>
       }
       style={{}}
+      toolName={EVideoToolName.VideoTagTool}
     />
   );
 };

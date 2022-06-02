@@ -45,6 +45,6 @@ export default class StepUtils {
    */
   public static currentToolIsVideo(step: number, stepList: IStepInfo[]) {
     const currentStepInfo = StepUtils.getCurrentStepInfo(step, stepList);
-    return Object.values(EVideoToolName).includes(currentStepInfo?.tool as typeof EVideoToolName);
+    return (Object.values(EVideoToolName) as string[]).includes(currentStepInfo?.tool);
   }
 }

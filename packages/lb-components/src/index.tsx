@@ -9,7 +9,7 @@ import App from './App';
 import configureStore from './configureStore';
 import { PageBackward, PageForward, PageJump } from './store/annotation/actionCreators';
 import { ToolInstance } from './store/annotation/types';
-import { TagToolInstanceAdaptor } from './components/videoPlayer/TagToolInstanceAdaptor';
+import { VideoTagTool } from '@/components/videoPlayer/TagToolInstanceAdaptorI18nProvider';
 
 export const store = configureStore();
 
@@ -44,4 +44,4 @@ const OutputApp = (props: AppProps, ref: any) => {
 
 export default React.forwardRef(OutputApp);
 
-export { AnnotationView, i18n, TagToolInstanceAdaptor };
+export { AnnotationView, i18n, VideoTagTool };

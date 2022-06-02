@@ -60,7 +60,7 @@ const Sidebar: React.FC<IProps> = ({ sider }) => {
   const stepInfo = useSelector((state: AppState) =>
     StepUtils.getCurrentStepInfo(state.annotation.step, state.annotation.stepList),
   );
-  const toolName = stepInfo?.tool as EToolName;
+  const toolName = stepInfo?.tool;
   const { t } = useTranslation();
 
   if (!toolName) {
@@ -165,9 +165,15 @@ const Sidebar: React.FC<IProps> = ({ sider }) => {
   }
 
   if (
-    [EToolName.Rect, EToolName.Point, EToolName.Line, EToolName.Rect, EToolName.Polygon].includes(
-      toolName,
-    )
+    (
+      [
+        EToolName.Rect,
+        EToolName.Point,
+        EToolName.Line,
+        EToolName.Rect,
+        EToolName.Polygon,
+      ] as string[]
+    ).includes(toolName)
   ) {
     return (
       <div className={`${sidebarCls}`}>

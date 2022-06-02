@@ -1,9 +1,15 @@
+/**
+ * @author Glenfiddish <edwinlee0927@hotmail.com>
+ * @file connect store & TagToolInstanceAdaptor
+ * @date 2022-06-02
+ */
+
 import React from 'react';
 import { connect, useDispatch } from 'react-redux';
 import { AppState } from '@/store';
+import { ANNOTATION_ACTIONS } from '@/store/Actions';
 import { AnnotationState } from '@/store/annotation/types';
 import { PageBackward, PageForward, PageJump } from '@/store/annotation/actionCreators';
-import { ANNOTATION_ACTIONS } from '@/store/Actions';
 import { TagToolInstanceAdaptor } from '@/components/videoPlayer/TagToolInstanceAdaptor';
 
 const VideoAnnotate: React.FC<{ annotation: AnnotationState }> = (props) => {
@@ -34,7 +40,7 @@ const VideoAnnotate: React.FC<{ annotation: AnnotationState }> = (props) => {
         imgList={imgList}
         pageBackward={() => dispatch(PageBackward())}
         pageForward={() => dispatch(PageForward())}
-        pageJump={(page) => dispatch(PageJump(page))}
+        pageJump={(page) => dispatch(PageJump(~~page))}
         onMounted={onMounted}
         onUnmounted={onUnmounted}
         stepList={stepList}

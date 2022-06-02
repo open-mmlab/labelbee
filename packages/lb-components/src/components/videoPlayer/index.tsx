@@ -1,8 +1,15 @@
+/**
+ * @author Glenfiddish <edwinlee0927@hotmail.com>
+ * @file Implement video player, including mouse and keyboard event
+ * @date 2022-06-02
+ */
+
 import React from 'react';
 import VideoController from './components/controller';
 import { getClassName } from '@/utils/dom';
 import { cKeyCode } from '@labelbee/lb-annotation';
 import { IFileItem } from '@/types/data';
+import { decimalReserved } from './utils';
 
 const EKeyCode = cKeyCode.default;
 
@@ -19,7 +26,7 @@ export const VideoPlayerCtx = React.createContext<{
   imgList: IFileItem[];
   imgIndex: number;
   pageBackward: () => void;
-  pageJump: (page: number) => void;
+  pageJump: (page: string) => void;
   pageForward: () => void;
 }>({
   isPlay: false,
@@ -33,7 +40,7 @@ export const VideoPlayerCtx = React.createContext<{
   imgList: [],
   imgIndex: -1,
   pageBackward: () => {},
-  pageJump: (page: number) => {},
+  pageJump: (page: string) => {},
   pageForward: () => {},
 });
 
@@ -45,7 +52,7 @@ interface IProps {
   imgList: IFileItem[];
   imgIndex: number;
   pageBackward: () => void;
-  pageJump: (page: number) => void;
+  pageJump: (page: string) => void;
   pageForward: () => void;
 }
 
@@ -56,9 +63,6 @@ interface IState {
   duration: number;
   buffered: number;
 }
-
-export const decimalReserved = (num: number, places: number = 2) =>
-  typeof num === 'number' ? parseFloat(num.toFixed(places)) : num;
 
 export class VideoPlayer extends React.Component<IProps, IState> {
   public videoRef?: React.RefObject<HTMLVideoElement>;
@@ -115,7 +119,14 @@ export class VideoPlayer extends React.Component<IProps, IState> {
     }
   };
 
-  public keyUpEvents = (event: KeyboardEvent) => {
+  /**
+   * Implement Video's keydown
+   * Play / Pause           -   Space
+   * Rewind / FastForward   -   ⬅️  /  ➡️
+   * Speed                  -   ⬆️  /  ⬇
+   * @param event
+   */
+  public keydown = (event: KeyboardEvent) => {
     if (event.keyCode === EKeyCode.Space) {
       event.preventDefault();
       this.playPause();
@@ -210,11 +221,11 @@ export class VideoPlayer extends React.Component<IProps, IState> {
   };
 
   public componentDidMount() {
-    window.addEventListener('keyup', this.keyUpEvents);
+    window.addEventListener('keydown', this.keydown);
   }
 
   public componentWillMount() {
-    window.removeEventListener('keyup', this.keyUpEvents);
+    window.removeEventListener('keydown', this.keydown);
   }
 
   public render() {

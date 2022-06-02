@@ -31,7 +31,7 @@ export function getTargetElement(
 }
 
 /**
- * 获取BEM风格的类名
+ * Get class like BEM
  * @param elm
  * @param modify
  */

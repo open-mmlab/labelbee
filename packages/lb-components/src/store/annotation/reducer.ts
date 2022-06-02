@@ -11,7 +11,6 @@ import { message } from 'antd/es';
 import _ from 'lodash';
 import { SetAnnotationLoading } from './actionCreators';
 import { AnnotationActionTypes, AnnotationState } from './types';
-
 const { EVideoToolName } = cTool;
 
 export const getStepConfig = (stepList: any[], step: number) =>
@@ -62,7 +61,7 @@ const updateToolInstance = (annotation: AnnotationState, imgNode: HTMLImageEleme
   const config = ConfigUtils.jsonParser(stepConfig.config);
 
   // 视频工具不支持实例化
-  if (Object.values(EVideoToolName).includes(stepConfig.tool as EVideoToolName)) {
+  if ((Object.values(EVideoToolName) as string[]).includes(stepConfig.tool)) {
     return;
   }
 

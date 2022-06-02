@@ -1,6 +1,7 @@
 /**
- * @file 实现线条工具的交互
- * @author lijingchi <lijingchi1@sensetime.com>
+ * @author Glenfiddish <edwinlee0927@hotmail.com>
+ * @file Implement LineTool's interaction
+ * @date 2022-06-02
  */
 
 import _ from 'lodash';
