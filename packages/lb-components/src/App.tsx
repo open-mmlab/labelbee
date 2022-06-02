@@ -4,9 +4,19 @@ import React, { useEffect } from 'react';
 import { connect } from 'react-redux';
 import { store } from '.';
 import { AppState } from './store';
-import { InitTaskData } from './store/annotation/actionCreators';
+import { ANNOTATION_ACTIONS } from './store/Actions';
+import { InitTaskData, loadImgList } from './store/annotation/actionCreators';
+import { LoadImageAndFileData } from './store/annotation/reducer';
 import { ToolInstance } from './store/annotation/types';
-import { GetFileData, OnSave, OnSubmit, IFileItem, OnPageChange, OnStepChange } from './types/data';
+import {
+  GetFileData,
+  OnSave,
+  OnSubmit,
+  IFileItem,
+  OnPageChange,
+  OnStepChange,
+  LoadFileList,
+} from './types/data';
 import { Footer, Header, Sider } from './types/main';
 import { IStepInfo } from './types/step';
 
@@ -20,7 +30,7 @@ interface IAnnotationStyle {
 export interface AppProps {
   exportData?: (data: any[]) => void;
   goBack?: () => void;
-  imgList: IFileItem[];
+  imgList?: IFileItem[];
   config: string;
   stepList: IStepInfo[];
   step: number;
@@ -29,6 +39,8 @@ export interface AppProps {
   onPageChange?: OnPageChange;
   onStepChange?: OnStepChange;
   getFileData?: GetFileData;
+  pageSize: number;
+  loadFileList?: LoadFileList;
   headerName?: string;
   initialIndex?: number;
   className?: string;
@@ -71,24 +83,27 @@ const App: React.FC<AppProps> = (props) => {
     toolInstance,
     setToolInstance,
     getFileData,
+    pageSize = 10,
+    loadFileList,
     defaultLang = 'cn',
   } = props;
 
   useEffect(() => {
     store.dispatch(
       InitTaskData({
-        imgList,
         onSubmit,
         stepList,
         step,
-        initialIndex,
         getFileData,
+        pageSize,
+        loadFileList,
         onSave,
         onPageChange,
         onStepChange,
       }),
     );
 
+    initImgList();
     // 初始化国际化语言
     i18n.changeLanguage(defaultLang);
   }, []);
@@ -96,6 +111,25 @@ const App: React.FC<AppProps> = (props) => {
   useEffect(() => {
     setToolInstance?.(toolInstance);
   }, [toolInstance]);
+
+  // 初始化imgList 优先以loadFileList方式加载数据
+  const initImgList = () => {
+    if (loadFileList) {
+      loadImgList(store.dispatch, store.getState, initialIndex, true).then((isSuccess) => {
+        if (isSuccess) {
+          store.dispatch(LoadImageAndFileData(initialIndex));
+        }
+      });
+    } else if (imgList && imgList.length > 0) {
+      store.dispatch({
+        type: ANNOTATION_ACTIONS.UPDATE_IMG_LIST,
+        payload: {
+          imgList,
+        },
+      });
+      store.dispatch(LoadImageAndFileData(initialIndex));
+    }
+  };
 
   return (
     <div>

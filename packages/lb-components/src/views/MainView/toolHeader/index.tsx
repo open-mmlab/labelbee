@@ -35,7 +35,7 @@ const NextButton: React.FC<{ disabled: boolean }> = ({ disabled }) => {
         marginLeft: 10,
       }}
       onClick={() => {
-        store.dispatch(ToNextStep(0) as any);
+        store.dispatch(ToNextStep() as any);
       }}
       disabled={disabled}
     >

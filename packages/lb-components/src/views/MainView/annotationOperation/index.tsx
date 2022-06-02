@@ -1,5 +1,5 @@
 import React, { useEffect, useRef, useState } from 'react';
-import { Spin, message } from 'antd/es';
+import { message } from 'antd/es';
 import { AppState } from 'src/store';
 import { connect } from 'react-redux';
 import { ImgAttributeState } from 'src/store/imgAttribute/types';
@@ -28,7 +28,6 @@ const AnnotationOperation: React.FC<IProps> = (props: IProps) => {
     toolStyle,
     toolInstance,
     annotationEngine,
-    loading,
     imgList,
     imgIndex,
     dataInjectionAtCreation,
@@ -112,8 +111,8 @@ const AnnotationOperation: React.FC<IProps> = (props: IProps) => {
    * @returns
    */
   const reloadImg = () => {
-    const imgInfo = imgList[imgIndex];
-    if (!imgInfo.url) {
+    const imgInfo = imgList?.[imgIndex];
+    if (!imgInfo?.url) {
       return;
     }
 
@@ -124,9 +123,7 @@ const AnnotationOperation: React.FC<IProps> = (props: IProps) => {
 
   return (
     <div ref={annotationRef} className='annotationOperation'>
-      <Spin spinning={loading} delay={500}>
-        <div className='canvas' ref={containerRef} style={size} id='toolContainer' />
-      </Spin>
+      <div className='canvas' ref={containerRef} style={size} id='toolContainer' />
       {toolInstance?.isImgError === true && (
         <ImageError
           {...size}
