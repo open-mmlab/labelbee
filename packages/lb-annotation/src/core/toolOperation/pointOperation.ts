@@ -417,7 +417,7 @@ class PointOperation extends BasicToolOperation {
       if (isAllowEdgeAdsoption) {
         const isClose = this.referenceData?.toolName === EToolName.Polygon;
 
-        const { dropFoot } = PolygonUtils.getClosestPoint(
+        const { dropFoot, hasClosed } = PolygonUtils.getClosestPoint(
           coordinate,
           this.referenceData.result as IPolygonData[],
           this.referenceData.config?.lineType ?? ELineTypes.Line,
@@ -426,6 +426,8 @@ class PointOperation extends BasicToolOperation {
         );
         if (dropFoot) {
           coordinate = dropFoot;
+        }
+        if (hasClosed) {
           this.emit('messageSuccess', `${locale.getMessagesByLocale(EMessage.SuccessfulEdgeAdsorption, this.lang)}`);
         }
       }
