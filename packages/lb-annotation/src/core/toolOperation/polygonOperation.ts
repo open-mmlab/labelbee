@@ -1,11 +1,4 @@
 import MathUtils from '@/utils/MathUtils';
-import {
-  clipPolygonFromWrapPolygon,
-  getMaxOrder,
-  getPolygonPointList,
-  getWrapPolygonIndex,
-  segmentPolygonByPolygon,
-} from '@/utils/tool/polygonTool';
 import RectUtils from '@/utils/tool/RectUtils';
 import {
   DEFAULT_TEXT_OFFSET,
@@ -920,7 +913,7 @@ class PolygonOperation extends BasicToolOperation {
     if (this.config?.lineType !== ELineTypes.Line) {
       return;
     }
-    const selectedPointList = getPolygonPointList(this.selectedID, this.currentShowList);
+    const selectedPointList = PolygonUtils.getPolygonPointList(this.selectedID, this.currentShowList);
     const backgroundPolygonList = this.currentShowList.filter((v) => v.id !== this.selectedID);
 
     if (backgroundPolygonList.length === 0 || selectedPointList.length === 0) {
@@ -928,13 +921,13 @@ class PolygonOperation extends BasicToolOperation {
     }
 
     // 需判断是否存在包裹
-    const wrapIndex = getWrapPolygonIndex(selectedPointList, backgroundPolygonList);
+    const wrapIndex = PolygonUtils.getWrapPolygonIndex(selectedPointList, backgroundPolygonList);
 
     let newPolygonList = [...this.polygonList];
 
     if (wrapIndex === -1) {
       // 并不存在合并的问题
-      const newPointListArray = segmentPolygonByPolygon(selectedPointList, backgroundPolygonList);
+      const newPointListArray = PolygonUtils.segmentPolygonByPolygon(selectedPointList, backgroundPolygonList);
 
       if (!newPointListArray) {
         return;
@@ -972,7 +965,7 @@ class PolygonOperation extends BasicToolOperation {
             id: uuid(8, 62),
             pointList: v,
             valid,
-            order: getMaxOrder(this.currentShowList) + 1 + i,
+            order: CommonToolUtils.getMaxOrder(this.currentShowList) + 1 + i,
             attribute: defaultAttribute,
             textAttribute,
           });
@@ -980,7 +973,7 @@ class PolygonOperation extends BasicToolOperation {
       }
     } else {
       // 嵌套合并结果
-      newPolygonList[wrapIndex].pointList = clipPolygonFromWrapPolygon(
+      newPolygonList[wrapIndex].pointList = PolygonUtils.clipPolygonFromWrapPolygon(
         selectedPointList,
         newPolygonList[wrapIndex].pointList,
       );
