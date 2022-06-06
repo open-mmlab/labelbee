@@ -7,10 +7,7 @@ import { getStepList, getDependStepList } from './mock/taskConfig';
 import qs from 'qs';
 import { AnnotationView } from '@labelbee/lb-components';
 import { DEFAULT_ANNOTATIONS } from './mock';
-import { cTool } from '@labelbee/lb-annotation';
 import StepUtils from '@labelbee/lb-components/dist/utils/StepUtils';
-
-const { EVideoToolName } = cTool;
 
 const App = () => {
   const tool = qs.parse(window.location.search, { ignoreQueryPrefix: true, comma: true }).tool;

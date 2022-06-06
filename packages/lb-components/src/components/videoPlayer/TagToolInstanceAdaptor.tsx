@@ -31,6 +31,7 @@ export interface IVideoTagInstanceAdaptorProps {
 interface ITagInstanceAdaptorState {
   tagResult: any[];
   labelSelectedList: any;
+  valid: boolean;
 }
 
 export class TagToolInstanceAdaptor extends React.Component<
@@ -46,21 +47,26 @@ export class TagToolInstanceAdaptor extends React.Component<
     this.state = {
       tagResult: [],
       labelSelectedList: [],
+      valid: true,
     };
   }
 
-  get config() {
+  public get config() {
     const stepInfo = StepUtils.getCurrentStepInfo(this.props.step, this.props.stepList);
     return jsonParser(stepInfo?.config);
   }
 
   /** Just implementation, no actual logic */
-  get history() {
+  public get history() {
     return { initRecord: () => {} };
   }
 
-  get currentTagResult() {
+  public get currentTagResult() {
     return this.state.tagResult[0];
+  }
+
+  public get valid() {
+    return this.state.valid;
   }
 
   public clearResult = (sendMsg: boolean, value?: string) => {
@@ -79,11 +85,15 @@ export class TagToolInstanceAdaptor extends React.Component<
   };
 
   public exportData = () => {
-    return [this.state.tagResult, { valid: true }];
+    return [this.state.tagResult, { valid: this.state.valid }];
   };
 
   public singleOn(event: string, func: () => void) {
     this.fns[event] = func;
+  }
+
+  public on(event: string, func: () => void) {
+    this.singleOn(event, func);
   }
 
   public getTagResultByCode(num1: number, num2?: number) {
@@ -218,6 +228,10 @@ export class TagToolInstanceAdaptor extends React.Component<
     }
   };
 
+  public setValid = (valid: boolean) => {
+    this.setState({ valid });
+  };
+
   public componentDidMount() {
     document.addEventListener('keydown', this.keydown);
     this.props.onMounted(this);
@@ -231,8 +245,10 @@ export class TagToolInstanceAdaptor extends React.Component<
   /** Observer imgIndex and set tagResult */
   public shouldComponentUpdate({ imgIndex, imgList, step }: IVideoTagInstanceAdaptorProps) {
     if (imgIndex !== this.props.imgIndex) {
+      const res = jsonParser(imgList[imgIndex].result)[`step_${step}`];
       this.setState({
-        tagResult: jsonParser(imgList[imgIndex].result)[`step_${step}`]?.result ?? [],
+        tagResult: res?.result ?? [],
+        valid: res.valid,
       });
     }
     return true;
