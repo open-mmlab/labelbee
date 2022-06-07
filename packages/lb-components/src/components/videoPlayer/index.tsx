@@ -10,8 +10,7 @@ import { getClassName } from '@/utils/dom';
 import { cKeyCode } from '@labelbee/lb-annotation';
 import { IFileItem } from '@/types/data';
 import { decimalReserved } from './utils';
-import FileError from '@/components/fileError';
-import src from '@/';
+import FileException from '../fileException';
 
 const EKeyCode = cKeyCode.default;
 
@@ -50,15 +49,16 @@ const PER_INTERVAL = 50;
 const PER_FORWARD = 0.1;
 const PLAYBACK_RATES = [0.5, 1, 1.5, 2, 4, 6, 8, 16];
 
-interface IProps {
+interface IVideoPlayerProps {
   imgList: IFileItem[];
   imgIndex: number;
   pageBackward: () => void;
   pageJump: (page: string) => void;
   pageForward: () => void;
+  valid: boolean;
 }
 
-interface IState {
+interface IVideoPlayerState {
   playbackRate: number;
   currentTime: number;
   isPlay: boolean;
@@ -67,11 +67,11 @@ interface IState {
   error: boolean;
 }
 
-export class VideoPlayer extends React.Component<IProps, IState> {
+export class VideoPlayer extends React.Component<IVideoPlayerProps, IVideoPlayerState> {
   public videoRef?: React.RefObject<HTMLVideoElement>;
   public timeInterval?: number;
 
-  constructor(props: IProps) {
+  constructor(props: IVideoPlayerProps) {
     super(props);
     this.state = {
       playbackRate: 1,
@@ -251,7 +251,7 @@ export class VideoPlayer extends React.Component<IProps, IState> {
 
   public render() {
     const { isPlay, playbackRate, currentTime, duration, buffered, error } = this.state;
-    const { imgList, imgIndex, pageBackward, pageJump, pageForward } = this.props;
+    const { imgList, imgIndex, pageBackward, pageJump, pageForward, valid } = this.props;
 
     const {
       playPause,
@@ -299,14 +299,19 @@ export class VideoPlayer extends React.Component<IProps, IState> {
               width='100%'
               height='100%'
             />
-            {error && (
-              <FileError
-                reloadImage={this.reload}
-                backgroundColor='#e2e2e2'
-                ignoreOffsetY={true}
-                fileTypeName='视频'
-              />
-            )}
+
+            <FileException
+              fileTypeName='视频'
+              errorProps={{
+                reloadImage: this.reload,
+                backgroundColor: '#e2e2e2',
+                ignoreOffsetY: true,
+                isError: error,
+              }}
+              invalidProps={{
+                isValid: valid,
+              }}
+            />
           </div>
           <VideoController />
         </div>

@@ -2,7 +2,7 @@ import { ReloadOutlined } from '@ant-design/icons';
 import { Button } from 'antd/es';
 import React from 'react';
 
-interface IProps {
+export interface IFileErrorProps {
   width?: number;
   height?: number;
   reloadImage: () => void;
@@ -12,9 +12,10 @@ interface IProps {
   layerStyle?: React.CSSProperties;
   backgroundColor: string;
   fileTypeName?: string;
+  isError?: boolean;
 }
 
-const FileError = (props: IProps) => {
+const FileError = (props: IFileErrorProps) => {
   const {
     width,
     height,

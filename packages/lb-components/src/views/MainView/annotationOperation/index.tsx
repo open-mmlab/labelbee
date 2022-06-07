@@ -9,7 +9,7 @@ import { store } from '@/index';
 import useSize from '@/hooks/useSize';
 import { InitToolStyleConfig } from '@/store/toolStyle/actionCreators';
 import { AnnotationEngine, ImgUtils } from '@labelbee/lb-annotation';
-import FileError from '@/components/fileError';
+import FileError from '@/components/fileException/FileError';
 import { i18n } from '@labelbee/lb-utils';
 import { AppProps } from '@/App';
 

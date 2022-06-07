@@ -15,7 +15,6 @@ import { IStepInfo } from '@/types/step';
 import _ from 'lodash';
 import type { ObjectString } from './types';
 import { getKeyCodeNumber } from './utils';
-import { IFileItem } from '@/types/data';
 
 export interface IVideoTagInstanceAdaptorProps {
   imgIndex: number;
@@ -268,7 +267,7 @@ export class TagToolInstanceAdaptor extends React.Component<
 
   public render() {
     const { imgIndex, imgList, pageForward, pageJump, pageBackward } = this.props;
-    const { tagResult } = this.state;
+    const { tagResult, valid } = this.state;
 
     return (
       <div style={{ height: '100%', width: '100%', position: 'relative' }}>
@@ -278,6 +277,7 @@ export class TagToolInstanceAdaptor extends React.Component<
           pageBackward={pageBackward}
           pageForward={pageForward}
           pageJump={pageJump}
+          valid={valid}
         />
         <VideoTagLayer result={tagResult} inputList={this.config?.inputList} />
       </div>

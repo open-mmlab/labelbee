@@ -191,10 +191,21 @@ const Sidebar: React.FC<IProps> = ({ sider }) => {
     );
   }
 
-  if (toolName === EToolName.Tag || toolName === EVideoToolName.VideoTagTool) {
+  if (toolName === EToolName.Tag) {
     return (
       <div className={`${sidebarCls}`}>
         <TagSidebar />
+      </div>
+    );
+  }
+
+  if (toolName === EVideoToolName.VideoTagTool) {
+    return (
+      <div className={`${sidebarCls}`}>
+        <div className={`${sidebarCls}__content`}>
+          <TagSidebar />
+        </div>
+        {operation}
       </div>
     );
   }
