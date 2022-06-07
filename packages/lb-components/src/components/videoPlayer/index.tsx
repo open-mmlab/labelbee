@@ -10,6 +10,8 @@ import { getClassName } from '@/utils/dom';
 import { cKeyCode } from '@labelbee/lb-annotation';
 import { IFileItem } from '@/types/data';
 import { decimalReserved } from './utils';
+import FileError from '@/components/fileError';
+import src from '@/';
 
 const EKeyCode = cKeyCode.default;
 
@@ -62,6 +64,7 @@ interface IState {
   isPlay: boolean;
   duration: number;
   buffered: number;
+  error: boolean;
 }
 
 export class VideoPlayer extends React.Component<IProps, IState> {
@@ -76,12 +79,18 @@ export class VideoPlayer extends React.Component<IProps, IState> {
       isPlay: false,
       duration: 0,
       buffered: 0,
+      error: false,
     };
     this.videoRef = React.createRef();
   }
 
   get videoElm() {
     return this.videoRef?.current;
+  }
+
+  get videoSrc() {
+    const { imgIndex, imgList } = this.props;
+    return imgIndex > -1 ? imgList[imgIndex]?.url ?? '' : '';
   }
 
   public changePlaybackPate = (playbackRate: number) => {
@@ -182,14 +191,16 @@ export class VideoPlayer extends React.Component<IProps, IState> {
     this.timeInterval = window.setInterval(() => {
       if (this.videoElm) {
         try {
-          const buffered = this.videoElm?.buffered.end(0);
+          if (this.videoElm?.buffered.length > 0) {
+            const buffered = this.videoElm?.buffered.end(0);
 
-          this.setState({
-            currentTime: decimalReserved(this.videoElm?.currentTime, 1),
-            buffered,
-          });
+            this.setState({
+              currentTime: decimalReserved(this.videoElm?.currentTime, 1),
+              buffered,
+            });
+          }
         } catch (error) {
-          console.error('TimeRage Error');
+          console.error(error);
         }
       }
     }, PER_INTERVAL);
@@ -199,6 +210,7 @@ export class VideoPlayer extends React.Component<IProps, IState> {
     this.setState({
       currentTime: 0,
       buffered: 0,
+      error: false,
     });
     this.onVideoStopped();
   };
@@ -220,18 +232,26 @@ export class VideoPlayer extends React.Component<IProps, IState> {
     }
   };
 
+  public reload = () => {
+    this.videoElm?.load();
+  };
+
+  public onError = () => {
+    this.resetVideoData();
+    this.setState({ error: true });
+  };
+
   public componentDidMount() {
     window.addEventListener('keydown', this.keydown);
   }
 
-  public componentWillMount() {
+  public componentWillUnmount() {
     window.removeEventListener('keydown', this.keydown);
   }
 
   public render() {
-    const { isPlay, playbackRate, currentTime, duration, buffered } = this.state;
+    const { isPlay, playbackRate, currentTime, duration, buffered, error } = this.state;
     const { imgList, imgIndex, pageBackward, pageJump, pageForward } = this.props;
-    const videoSrc = imgIndex > -1 ? imgList[imgIndex]?.url ?? '' : '';
 
     const {
       playPause,
@@ -241,6 +261,9 @@ export class VideoPlayer extends React.Component<IProps, IState> {
       resetVideoData,
       setDuration,
       setCurrentTime,
+      onError,
+      videoRef,
+      videoSrc,
     } = this;
 
     return (
@@ -265,17 +288,25 @@ export class VideoPlayer extends React.Component<IProps, IState> {
         <div className={getClassName('video-wrapper')}>
           <div className={getClassName('video-container')}>
             <video
-              ref={this.videoRef}
+              ref={videoRef}
               className={getClassName('video')}
               src={videoSrc}
               onPause={onPause}
               onPlay={onPlay}
               onLoadedMetadata={resetVideoData}
-              onError={resetVideoData}
+              onError={onError}
               onDurationChange={setDuration}
               width='100%'
               height='100%'
             />
+            {error && (
+              <FileError
+                reloadImage={this.reload}
+                backgroundColor='#e2e2e2'
+                ignoreOffsetY={true}
+                fileTypeName='视频'
+              />
+            )}
           </div>
           <VideoController />
         </div>

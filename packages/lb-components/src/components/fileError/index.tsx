@@ -14,7 +14,7 @@ interface IProps {
   fileTypeName?: string;
 }
 
-const ImageError = (props: IProps) => {
+const FileError = (props: IProps) => {
   const {
     width,
     height,
@@ -68,4 +68,4 @@ const ImageError = (props: IProps) => {
   );
 };
 
-export default ImageError;
+export default FileError;

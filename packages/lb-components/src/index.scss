@@ -1214,6 +1214,7 @@ $hotkey-container-padding: 7px;
   .#{$prefix}-video-container {
     flex: 1;
     overflow: hidden;
+    position: relative;
   }
 }
 

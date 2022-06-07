@@ -61,7 +61,7 @@ export class TagToolInstanceAdaptor extends React.Component<
     return { initRecord: () => {} };
   }
 
-  public get currentTagResult() {
+  get currentTagResult() {
     return this.state.tagResult[0];
   }
 
@@ -237,7 +237,7 @@ export class TagToolInstanceAdaptor extends React.Component<
     this.props.onMounted(this);
   }
 
-  public componentWillMount() {
+  public componentWillUnmount() {
     document.addEventListener('keydown', this.keydown);
     this.props.onUnmounted();
   }
