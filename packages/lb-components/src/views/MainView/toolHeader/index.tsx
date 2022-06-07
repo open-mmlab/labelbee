@@ -2,7 +2,7 @@ import { ESubmitType, prefix } from '@/constant';
 import { EToolName } from '@/data/enums/ToolType';
 import useSize from '@/hooks/useSize';
 import { AppState } from '@/store';
-import { ToNextStep, ToSubmitFileData } from '@/store/annotation/actionCreators';
+import { loadImgList, ToNextStep, ToSubmitFileData } from '@/store/annotation/actionCreators';
 import { IFileItem } from '@/types/data';
 import { Header } from '@/types/main';
 import { IStepInfo } from '@/types/step';
@@ -24,19 +24,36 @@ interface INextStep {
   stepProgress: number;
   stepList: IStepInfo[];
   step: number; // 当前步骤
+  imgList: IFileItem[];
 }
 
-const NextButton: React.FC<{ disabled: boolean }> = ({ disabled }) => {
+const NextButton: React.FC<{ disabled: boolean; imgList: IFileItem[] }> = ({
+  disabled,
+  imgList,
+}) => {
   const { t } = useTranslation();
+
+  const toNext = () => {
+    const { dispatch, getState } = store;
+    // 点击下一步跳转到第一页 第一页没有图片的话则需要先加载图片
+    if (imgList[0]) {
+      dispatch(ToNextStep(0) as any);
+    } else {
+      loadImgList(dispatch, getState, 0).then((isSuccess) => {
+        if (isSuccess) {
+          dispatch(ToNextStep(0) as any);
+        }
+      });
+    }
+  };
+
   return (
     <Button
       type='primary'
       style={{
         marginLeft: 10,
       }}
-      onClick={() => {
-        store.dispatch(ToNextStep() as any);
-      }}
+      onClick={toNext}
       disabled={disabled}
     >
       {t('NextStep')}
@@ -44,7 +61,7 @@ const NextButton: React.FC<{ disabled: boolean }> = ({ disabled }) => {
   );
 };
 
-const NextStep: React.FC<INextStep> = ({ step, stepProgress, stepList }) => {
+const NextStep: React.FC<INextStep> = ({ step, stepProgress, stepList, imgList }) => {
   const { t } = useTranslation();
   // 最后一步不显示下一步按钮
   const lastStep = last(stepList)?.step;
@@ -59,13 +76,13 @@ const NextStep: React.FC<INextStep> = ({ step, stepProgress, stepList }) => {
     return (
       <Tooltip title={t('StepNotFinishedNotify')}>
         <span>
-          <NextButton disabled={disabled} />
+          <NextButton disabled={disabled} imgList={imgList} />
         </span>
       </Tooltip>
     );
   }
 
-  return <NextButton disabled={disabled} />;
+  return <NextButton disabled={disabled} imgList={imgList} />;
 };
 
 interface IToolHeaderProps {
@@ -132,7 +149,7 @@ const ToolHeader: React.FC<IToolHeaderProps> = ({
   const stepListNode = stepList.length > 1 && (
     <>
       <StepSwitch stepProgress={stepProgress} />
-      <NextStep step={step} stepProgress={stepProgress} stepList={stepList} />
+      <NextStep step={step} stepProgress={stepProgress} stepList={stepList} imgList={imgList} />
     </>
   );
 
