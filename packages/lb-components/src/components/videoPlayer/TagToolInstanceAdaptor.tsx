@@ -15,6 +15,7 @@ import { IStepInfo } from '@/types/step';
 import _ from 'lodash';
 import type { ObjectString } from './types';
 import { getKeyCodeNumber } from './utils';
+import { IFileItem } from '@/types/data';
 
 export interface IVideoTagInstanceAdaptorProps {
   imgIndex: number;
@@ -28,7 +29,7 @@ export interface IVideoTagInstanceAdaptorProps {
   stepList: IStepInfo[];
 }
 
-interface ITagInstanceAdaptorState {
+interface IVideoTagInstanceAdaptorState {
   tagResult: any[];
   labelSelectedList: any;
   valid: boolean;
@@ -36,7 +37,7 @@ interface ITagInstanceAdaptorState {
 
 export class TagToolInstanceAdaptor extends React.Component<
   IVideoTagInstanceAdaptorProps,
-  ITagInstanceAdaptorState
+  IVideoTagInstanceAdaptorState
 > {
   public fns: { [key: string]: () => void } = {};
 
@@ -235,6 +236,7 @@ export class TagToolInstanceAdaptor extends React.Component<
   public componentDidMount() {
     document.addEventListener('keydown', this.keydown);
     this.props.onMounted(this);
+    this.setResultFromImgList(this.props);
   }
 
   public componentWillUnmount() {
@@ -242,14 +244,24 @@ export class TagToolInstanceAdaptor extends React.Component<
     this.props.onUnmounted();
   }
 
+  public setResultFromImgList = (props: IVideoTagInstanceAdaptorProps) => {
+    const { imgList, imgIndex, step } = props;
+
+    if (!imgList[imgIndex]) {
+      return;
+    }
+
+    const res = jsonParser(imgList[imgIndex].result)[`step_${step}`];
+    this.setState({
+      tagResult: res?.result ?? [],
+      valid: res?.valid === undefined ? true : res.valid,
+    });
+  };
+
   /** Observer imgIndex and set tagResult */
-  public shouldComponentUpdate({ imgIndex, imgList, step }: IVideoTagInstanceAdaptorProps) {
-    if (imgIndex !== this.props.imgIndex) {
-      const res = jsonParser(imgList[imgIndex].result)[`step_${step}`];
-      this.setState({
-        tagResult: res?.result ?? [],
-        valid: res.valid,
-      });
+  public shouldComponentUpdate(props: IVideoTagInstanceAdaptorProps) {
+    if (props.imgIndex !== this.props.imgIndex) {
+      this.setResultFromImgList(props);
     }
     return true;
   }
