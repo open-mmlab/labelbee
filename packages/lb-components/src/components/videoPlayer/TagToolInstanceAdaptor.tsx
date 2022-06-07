@@ -58,7 +58,7 @@ export class TagToolInstanceAdaptor extends React.Component<
 
   /** Just implementation, no actual logic */
   public get history() {
-    return { initRecord: () => {} };
+    return { initRecord: () => {}, pushHistory: () => {} };
   }
 
   get currentTagResult() {
