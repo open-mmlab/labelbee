@@ -39,7 +39,7 @@ export class TagToolInstanceAdaptor extends React.Component<
   IVideoTagInstanceAdaptorState
 > {
   public fns: { [key: string]: () => void } = {};
-
+  public videoRef?: HTMLVideoElement;
   public labelSelectedList: number[] = [];
 
   constructor(props: IVideoTagInstanceAdaptorProps) {
@@ -85,7 +85,16 @@ export class TagToolInstanceAdaptor extends React.Component<
   };
 
   public exportData = () => {
-    return [this.state.tagResult, { valid: this.state.valid }];
+    const duration = this.videoRef?.duration ?? 0;
+    const videoQulity = this.videoRef?.getVideoPlaybackQuality();
+    const frames = videoQulity?.totalVideoFrames;
+    const videoWidth = this.videoRef?.videoWidth ?? 0;
+    const videoHeight = this.videoRef?.videoHeight ?? 0;
+
+    return [
+      this.state.tagResult,
+      { valid: this.state.valid, duration, frames, videoWidth, videoHeight },
+    ];
   };
 
   public singleOn(event: string, func: () => void) {
@@ -278,6 +287,9 @@ export class TagToolInstanceAdaptor extends React.Component<
           pageForward={pageForward}
           pageJump={pageJump}
           valid={valid}
+          setVideoRef={(video) => {
+            this.videoRef = video;
+          }}
         />
         <VideoTagLayer result={tagResult} inputList={this.config?.inputList} />
       </div>

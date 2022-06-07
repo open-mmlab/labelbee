@@ -56,6 +56,7 @@ interface IVideoPlayerProps {
   pageJump: (page: string) => void;
   pageForward: () => void;
   valid: boolean;
+  setVideoRef?: (video: HTMLVideoElement) => void;
 }
 
 interface IVideoPlayerState {
@@ -217,8 +218,10 @@ export class VideoPlayer extends React.Component<IVideoPlayerProps, IVideoPlayer
 
   public setDuration = () => {
     if (this.videoElm) {
+      const duration = decimalReserved(this.videoElm?.duration, 1);
+
       this.setState({
-        duration: decimalReserved(this.videoElm?.duration, 1),
+        duration,
       });
     }
   };
@@ -243,6 +246,9 @@ export class VideoPlayer extends React.Component<IVideoPlayerProps, IVideoPlayer
 
   public componentDidMount() {
     window.addEventListener('keydown', this.keydown);
+    if (this.videoRef?.current && this.props.setVideoRef) {
+      this.props.setVideoRef(this.videoRef?.current as HTMLVideoElement);
+    }
   }
 
   public componentWillUnmount() {
