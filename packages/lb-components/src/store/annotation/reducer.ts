@@ -91,7 +91,7 @@ const updateToolInstance = (annotation: AnnotationState, imgNode: HTMLImageEleme
  * @param nextBasicIndex
  */
 export const LoadFileAndFileData =
-  (nextIndex: number, nextBasicIndex?: number) => async (dispatch: any, getState: any) => {
+  (nextIndex: number, nextBasicIndex?: number): any => async (dispatch: any, getState: any) => {
     const { stepList, step } = getState().annotation;
     const currentIsVideo = StepUtils.currentToolIsVideo(step, stepList);
 
@@ -327,7 +327,13 @@ export const annotationReducer = (
     case ANNOTATION_ACTIONS.LOAD_FILE_DATA: {
       const { imgList, step, toolInstance, annotationEngine, stepList } = state;
 
-      if (!toolInstance || !annotationEngine) {
+      /**
+       * TODO
+       * Before: !toolInstance || !annotationEngine
+       * 
+       * The roles of toolInstance and annotationEngine need to be clearly distinguished
+       */
+      if (!toolInstance) {
         return state;
       }
 
@@ -434,15 +440,17 @@ export const annotationReducer = (
       };
     }
 
+    // react hook tool Proprietary operations
     case ANNOTATION_ACTIONS.SET_TOOL: {
       const instance = action.payload?.instance;
       if (instance) {
         return {
           ...state,
           toolInstance: instance,
-          annotationEngine: {
-            toolInstance: instance,
-          },
+          // TODO It needs to optimize
+          // annotationEngine: {
+          //   toolInstance: instance,
+          // } as any,
         };
       }
 

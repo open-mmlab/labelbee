@@ -71,7 +71,7 @@ const Annotation = (props) => {
         onSubmit={onSubmit}
         imgList={fileList}
         pageSize={10}
-        loadFileList={loadFileList}
+        // loadFileList={loadFileList}
         goBack={goBack}
         stepList={stepList}
         step={step}
