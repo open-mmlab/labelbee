@@ -92,6 +92,7 @@
   "dependencies": {
     "color-rgba": "^2.3.0",
     "lodash": "^4.17.20",
-    "@turf/turf": "5.1.6"
+    "@turf/turf": "5.1.6",
+    "@labelbee/lb-utils": "^1.1.0"
   }
 }
