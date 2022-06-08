@@ -63,7 +63,7 @@ export class TagToolInstanceAdaptor extends React.Component<
     return { initRecord: () => {}, pushHistory: () => {} };
   }
 
-  get currentTagResult() {
+  public get currentTagResult() {
     return this.state.tagResult[0] ?? {};
   }
 
@@ -71,7 +71,7 @@ export class TagToolInstanceAdaptor extends React.Component<
     return this.state.valid;
   }
 
-  public clearResult = (sendMsg: boolean = true, value?: string) => {
+  public clearResult = (sendMsg = true, value?: string) => {
     const newTag = value
       ? this.state.tagResult.map((v) => {
           if (v?.result[value]) {

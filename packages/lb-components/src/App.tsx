@@ -6,7 +6,7 @@ import { store } from '.';
 import { AppState } from './store';
 import { ANNOTATION_ACTIONS } from './store/Actions';
 import { InitTaskData, loadImgList } from './store/annotation/actionCreators';
-import { LoadImageAndFileData } from './store/annotation/reducer';
+import { LoadFileAndFileData } from './store/annotation/reducer';
 import { ToolInstance } from './store/annotation/types';
 import {
   GetFileData,
@@ -117,7 +117,7 @@ const App: React.FC<AppProps> = (props) => {
     if (loadFileList) {
       loadImgList(store.dispatch, store.getState, initialIndex, true).then((isSuccess) => {
         if (isSuccess) {
-          store.dispatch(LoadImageAndFileData(initialIndex));
+          store.dispatch(LoadFileAndFileData(initialIndex));
         }
       });
     } else if (imgList && imgList.length > 0) {
@@ -127,7 +127,7 @@ const App: React.FC<AppProps> = (props) => {
           imgList,
         },
       });
-      store.dispatch(LoadImageAndFileData(initialIndex));
+      store.dispatch(LoadFileAndFileData(initialIndex));
     }
   };
 
