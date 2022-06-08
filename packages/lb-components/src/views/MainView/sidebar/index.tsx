@@ -19,6 +19,9 @@ import SwitchAttributeList from './SwitchAttributeList';
 import TagSidebar, { expandIconFuc } from './TagSidebar';
 import TextToolSidebar from './TextToolSidebar';
 import ToolStyle from './ToolStyle';
+import { cTool } from '@labelbee/lb-annotation';
+
+const { EVideoToolName } = cTool;
 
 const { Panel } = Collapse;
 
@@ -57,7 +60,7 @@ const Sidebar: React.FC<IProps> = ({ sider }) => {
   const stepInfo = useSelector((state: AppState) =>
     StepUtils.getCurrentStepInfo(state.annotation.step, state.annotation.stepList),
   );
-  const toolName = stepInfo?.tool as EToolName;
+  const toolName = stepInfo?.tool;
   const { t } = useTranslation();
 
   if (!toolName) {
@@ -162,9 +165,15 @@ const Sidebar: React.FC<IProps> = ({ sider }) => {
   }
 
   if (
-    [EToolName.Rect, EToolName.Point, EToolName.Line, EToolName.Rect, EToolName.Polygon].includes(
-      toolName,
-    )
+    (
+      [
+        EToolName.Rect,
+        EToolName.Point,
+        EToolName.Line,
+        EToolName.Rect,
+        EToolName.Polygon,
+      ] as string[]
+    ).includes(toolName)
   ) {
     return (
       <div className={`${sidebarCls}`}>
@@ -186,6 +195,17 @@ const Sidebar: React.FC<IProps> = ({ sider }) => {
     return (
       <div className={`${sidebarCls}`}>
         <TagSidebar />
+      </div>
+    );
+  }
+
+  if (toolName === EVideoToolName.VideoTagTool) {
+    return (
+      <div className={`${sidebarCls}`}>
+        <div className={`${sidebarCls}__content`}>
+          <TagSidebar />
+        </div>
+        {operation}
       </div>
     );
   }

@@ -4,7 +4,6 @@ import { PageBackward, PageForward, PageJump } from '@/store/annotation/actionCr
 import { getTotalPage } from '@/store/annotation/reducer';
 import { Footer } from '@/types/main';
 import { IStepInfo } from '@/types/step';
-import { LeftOutlined, RightOutlined } from '@ant-design/icons';
 import { Divider, Input } from 'antd/es';
 import React, { useEffect, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
@@ -13,6 +12,7 @@ import FooterTips from './FooterTips';
 import HiddenTips from './HiddenTips';
 import PageNumber from './PageNumber';
 import ZoomController from './ZoomController';
+import { Pagination } from './Pagination';
 
 interface IPageProps {
   jumpSkip: Function;
@@ -101,12 +101,14 @@ const ToolFooter: React.FC<IProps> = (props: IProps) => {
   const pageNumber = <PageNumber />;
 
   const pagination = (
-    <div className={`${footerCls}__pagination`}>
-      <LeftOutlined className={`${footerCls}__highlight`} onClick={pageBackward} />
-      <PageInput imgIndex={props.imgIndex} jumpSkip={pageJump} />/
-      <span className={`${footerCls}__pageAll`}>{props.totalPage}</span>
-      <RightOutlined className={`${footerCls}__highlight`} onClick={pageForward} />
-    </div>
+    <Pagination
+      imgIndex={props.imgIndex}
+      totalPage={props.totalPage}
+      pageJump={pageJump}
+      pageBackward={pageBackward}
+      pageForward={pageForward}
+      footerCls={footerCls}
+    />
   );
 
   const zoomController = <ZoomController mode={mode} />;

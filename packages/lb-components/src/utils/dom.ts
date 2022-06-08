@@ -1,4 +1,5 @@
 import { MutableRefObject } from 'react';
+import { prefix } from '@/constant';
 
 export type BasicTarget<T = HTMLElement> =
   | (() => T | null)
@@ -28,3 +29,11 @@ export function getTargetElement(
 
   return targetElement;
 }
+
+/**
+ * Get class like BEM
+ * @param elm
+ * @param modify
+ */
+export const getClassName = (elm: string, modify?: string) =>
+  `${prefix}-${elm}${modify ? '__' + modify : ''}`;

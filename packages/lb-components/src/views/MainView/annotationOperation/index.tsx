@@ -9,7 +9,7 @@ import { store } from '@/index';
 import useSize from '@/hooks/useSize';
 import { InitToolStyleConfig } from '@/store/toolStyle/actionCreators';
 import { AnnotationEngine, ImgUtils } from '@labelbee/lb-annotation';
-import ImageError from '@/components/ImageError';
+import FileError from '@/components/fileException/FileError';
 import { i18n } from '@labelbee/lb-utils';
 import { AppProps } from '@/App';
 
@@ -125,7 +125,7 @@ const AnnotationOperation: React.FC<IProps> = (props: IProps) => {
     <div ref={annotationRef} className='annotationOperation'>
       <div className='canvas' ref={containerRef} style={size} id='toolContainer' />
       {toolInstance?.isImgError === true && (
-        <ImageError
+        <FileError
           {...size}
           reloadImage={reloadImg}
           backgroundColor='#e2e2e2'

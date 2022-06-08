@@ -113,7 +113,7 @@ const ToolHeader: React.FC<IToolHeaderProps> = ({
 
   const changeLanguage = (lang: 'en' | 'cn') => {
     i18n.changeLanguage(lang);
-    annotationEngine.setLang(lang);
+    annotationEngine?.setLang(lang);
     forceUpdate();
   };
 

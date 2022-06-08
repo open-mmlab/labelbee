@@ -35,7 +35,7 @@ interface IProps {
   imgIndex: number;
 }
 
-const GenerationOperation: React.FC<IProps> = ({ toolInstance, stepInfo, imgList, imgIndex }) => {
+const GeneralOperation: React.FC<IProps> = ({ toolInstance, stepInfo }) => {
   const [isHover, setHover] = useState<string | null>(null);
   const { t } = useTranslation();
   const allOperation = [
@@ -131,4 +131,4 @@ const mapStateToProps = (state: AppState) => {
   };
 };
 
-export default connect(mapStateToProps)(GenerationOperation);
+export default connect(mapStateToProps)(GeneralOperation);

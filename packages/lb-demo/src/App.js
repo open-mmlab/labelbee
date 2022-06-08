@@ -2,20 +2,22 @@ import React, { useState } from 'react';
 import './App.css';
 import 'antd/dist/antd.css';
 import Annotation from './components/Annotation';
-import { fileList as mockFileList, getMockResult } from './mock/index';
+import { fileList as mockFileList, getMockResult, videoList } from './mock/index';
 import { getStepList, getDependStepList } from './mock/taskConfig';
 import qs from 'qs';
 import { AnnotationView } from '@labelbee/lb-components';
 import { DEFAULT_ANNOTATIONS } from './mock';
+import StepUtils from '@labelbee/lb-components/dist/utils/StepUtils';
 
 const App = () => {
   const tool = qs.parse(window.location.search, { ignoreQueryPrefix: true, comma: true }).tool;
 
   const isSingleTool = !Array.isArray(tool);
   const stepList = isSingleTool ? getStepList(tool) : getDependStepList(tool);
+  const currentIsVideo = StepUtils.currentToolIsVideo(1, stepList);
 
   const [fileList] = useState(
-    mockFileList.map((url, i) => ({
+    (currentIsVideo ? videoList : mockFileList).map((url, i) => ({
       id: i + 1,
       url,
       result: isSingleTool ? getMockResult(tool) : '',

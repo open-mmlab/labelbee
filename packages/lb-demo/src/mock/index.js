@@ -6,6 +6,12 @@ import img4 from './images/66.jpg';
 // const MOCK_URL = 'http://bee-sdk-demo.sensebee.xyz/images/';
 // export const fileList = ['10', '19', '20', '66'].map((i) => `${MOCK_URL}${i}.jpg`);
 export const fileList = [img1, img2, img3, img4];
+export const videoList = [
+  'http://127.0.0.1:8080/a.mp4',
+  'http://127.0.0.1:8080/d.mp4',
+  'http://127.0.0.1:8080/c.mp4',
+  'http://127.0.0.1:8080/e.mp4',
+];
 
 const data = Array(100)
   .fill('')
@@ -71,6 +77,14 @@ export const tagDefaultResult = JSON.stringify({
   },
 });
 
+export const videoTagDefaultResult = JSON.stringify({
+  step_1: {
+    dataSource: 0,
+    tool: 'videoTagTool',
+    result: [],
+  },
+});
+
 export const getMockResult = (tool) => {
   if (tool === 'rectTool') {
     return rectDefaultResult;
@@ -81,6 +95,10 @@ export const getMockResult = (tool) => {
 
   if (tool === 'polygonTool') {
     return polygonDefaultResult;
+  }
+
+  if (tool === 'videoTagTool') {
+    return videoTagDefaultResult;
   }
 
   return '';
@@ -206,7 +224,8 @@ export const DEFAULT_ANNOTATIONS = [
       y: 23,
       textMaxWidth: 416,
       color: 'yellow',
-      text: '标签1: 测试1LoooooooooooooooooooooooooooooooooogLoooooooooooooooooooooooooooooooooogLoooooooooooooooooooooooooooooooooogLoooooooooooooooooooooooooooooooooogLoooooooooooooooooooooooooooooooooog\n标签2: 测试2sdasdas\n\n\n标签1: 测试1asdasdasd\n标签2: 测试2标签1: 测试1\n标签2: 测试2sdasdas\n标签1: 测试1asdasdasd\n标签2: 测试2标签1: 测试1\n标签2: 测试2sdasdas\n标签1: 测试1asdasdasd\n标签2: 测试2标签1: 测试1\n标签2: 测试2sdasdas\n标签1: 测试1asdasdasd\n标签2: 测试2标签1: 测试1\n标签2: 测试2sdasdas\n标签1: 测试1asdasdasd\n标签2: 测试2标签1: 测试1\n标签2: 测试2sdasdas\n标签1: 测试1asdasdasd\n标签2: 测试2',
+      text:
+        '标签1: 测试1LoooooooooooooooooooooooooooooooooogLoooooooooooooooooooooooooooooooooogLoooooooooooooooooooooooooooooooooogLoooooooooooooooooooooooooooooooooogLoooooooooooooooooooooooooooooooooog\n标签2: 测试2sdasdas\n\n\n标签1: 测试1asdasdasd\n标签2: 测试2标签1: 测试1\n标签2: 测试2sdasdas\n标签1: 测试1asdasdasd\n标签2: 测试2标签1: 测试1\n标签2: 测试2sdasdas\n标签1: 测试1asdasdasd\n标签2: 测试2标签1: 测试1\n标签2: 测试2sdasdas\n标签1: 测试1asdasdasd\n标签2: 测试2标签1: 测试1\n标签2: 测试2sdasdas\n标签1: 测试1asdasdasd\n标签2: 测试2标签1: 测试1\n标签2: 测试2sdasdas\n标签1: 测试1asdasdasd\n标签2: 测试2',
     },
   },
   {
