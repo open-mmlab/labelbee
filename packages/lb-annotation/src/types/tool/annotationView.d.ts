@@ -1,3 +1,9 @@
+/*
+ * @Author: Laoluo luozefeng@sensetime.com
+ * @Date: 2022-02-15 16:41:44
+ * @LastEditors: Laoluo luozefeng@sensetime.com
+ * @LastEditTime: 2022-05-17 17:10:30
+ */
 declare interface IBasicStyle {
   stroke?: string; // 边框颜色
   fill?: string; // 填充颜色
@@ -47,6 +53,7 @@ declare interface IBasicPolygon extends IGraphicsBasicConfig {
   specialEdge?: boolean; // 顶点与a其下一个顶点连成的边是否为特殊边
 
   lineType?: ELineTypes;
+  showKeyPoint: boolean; // 是否展示关键点
 }
 
 declare type IBasicLine = IBasicPolygon;

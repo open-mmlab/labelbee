@@ -298,6 +298,7 @@ export default class PolygonUtils {
       isClose?: boolean; // 是否闭合
     },
   ) {
+    let hasClosed = false; // 是否有进行边缘吸附？
     const isClose = option?.isClose ?? true;
 
     // 第一步： 寻找所有图形中最新的边
@@ -353,6 +354,7 @@ export default class PolygonUtils {
                 closestEdgeIndex = lineIndex;
                 min = length;
                 dropFoot = footPoint;
+                hasClosed = true;
               }
             });
           }
@@ -376,6 +378,7 @@ export default class PolygonUtils {
                 closestEdgeIndex = Math.floor(i / (numberOfSegments + 1));
                 min = length;
                 dropFoot = footPoint;
+                hasClosed = true;
               }
             }
           }
@@ -388,7 +391,7 @@ export default class PolygonUtils {
       }
     });
 
-    return { dropFoot, closestEdgeIndex, closestPolygonID };
+    return { dropFoot, closestEdgeIndex, closestPolygonID, hasClosed };
   }
 
   /**

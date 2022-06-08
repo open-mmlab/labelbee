@@ -477,11 +477,50 @@ export default class DrawUtils {
       isClose: boolean; // 是否闭合
       lineType: ELineTypes;
     }> = {},
-  ): void {
+  ) {
     const { strokeColor, fillColor, thickness, lineCap, isClose, lineType } = options;
 
-    this.drawPolygon(canvas, pointList, { color: strokeColor, thickness, lineCap, isClose, lineType });
+    const newPointList = this.drawPolygon(canvas, pointList, {
+      color: strokeColor,
+      thickness,
+      lineCap,
+      isClose,
+      lineType,
+    });
     this.drawPolygonWithFill(canvas, pointList, { color: fillColor, lineType });
+
+    return newPointList;
+  }
+
+  /**
+   * 绘制多边形带有关键点的多边形
+   * @param canvas
+   * @param pointList
+   * @param options
+   * @returns
+   */
+  public static drawPolygonWithKeyPoint(
+    canvas: HTMLCanvasElement,
+    pointList: IPolygonPoint[],
+    options: Partial<{
+      strokeColor: string;
+      fillColor: string;
+      pointColor: string;
+      thickness: number;
+      lineCap: CanvasLineCap;
+      isClose: boolean; // 是否闭合
+      lineType: ELineTypes;
+      isFill: boolean;
+    }> = {},
+  ) {
+    const { pointColor = 'white', strokeColor } = options;
+
+    const newPointList = this.drawPolygon(canvas, pointList, options);
+    newPointList.forEach((point) => {
+      this.drawCircleWithFill(canvas, point, 4, { color: strokeColor });
+      this.drawCircleWithFill(canvas, point, 3, { color: pointColor });
+    });
+    return newPointList;
   }
 
   // 绘制选中的多边形
@@ -497,12 +536,11 @@ export default class DrawUtils {
       isClose: boolean; // 是否闭合
       lineType: ELineTypes;
     }> = {},
-  ): void {
+  ) {
     const { pointColor = 'white', strokeColor } = options;
 
-    this.drawPolygonWithFillAndLine(canvas, pointList, options);
+    const newPointList = this.drawPolygonWithFillAndLine(canvas, pointList, options);
 
-    const newPointList = [...pointList];
     // if (isClose === false) {
     //   newPointList.pop();
     // }
@@ -511,6 +549,7 @@ export default class DrawUtils {
       this.drawCircleWithFill(canvas, point, 4, { color: strokeColor });
       this.drawCircleWithFill(canvas, point, 3, { color: pointColor });
     });
+    return newPointList;
   }
 
   // 绘制文本

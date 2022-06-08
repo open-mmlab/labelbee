@@ -295,12 +295,23 @@ export default class ViewOperation extends BasicToolOperation {
               const fill = `rgba(${fillArr[0]}, ${fillArr[1]}, ${fillArr[2]},${fillArr[3] * 0.8})`;
               DrawUtils.drawPolygonWithFill(this.canvas, renderPolygon, { color: fill, lineType });
             }
-            const newPointList = DrawUtils.drawPolygon(this.canvas, renderPolygon, {
+
+            const polygonRenderOptions = {
               ...style,
               isClose: true,
               ...this.getReferenceOptions(polygon?.isReference),
               lineType,
-            });
+              strokeColor: style.stroke,
+            };
+
+            let newPointList = [];
+
+            // 是否展示关键点
+            if (polygon.showKeyPoint) {
+              newPointList = DrawUtils.drawPolygonWithKeyPoint(this.canvas, renderPolygon, polygonRenderOptions);
+            } else {
+              newPointList = DrawUtils.drawPolygon(this.canvas, renderPolygon, polygonRenderOptions);
+            }
 
             const isShowDirection = polygon?.showDirection === true && polygon?.pointList?.length > 2;
 

@@ -16,5 +16,6 @@ const message: Record<string, string> = {
   [EMessage.NoRotateInDependence]: 'Disallow rotation in dependent cases',
   [EMessage.UnableToReannotation]: 'Unabled to reannotation',
   [EMessage.ForbiddenCreationOutsideBoundary]: 'Fobid creation outside boundary',
+  [EMessage.SuccessfulEdgeAdsorption]: 'Successful edge adsorption',
 };
 export default message;
