@@ -69,7 +69,7 @@ export class TagToolInstanceAdaptor extends React.Component<
     return this.state.valid;
   }
 
-  public clearResult = (sendMsg: boolean, value?: string) => {
+  public clearResult = (sendMsg: boolean = true, value?: string) => {
     const newTag = value
       ? this.state.tagResult.map((v) => {
           if (v?.result[value]) {
@@ -79,9 +79,12 @@ export class TagToolInstanceAdaptor extends React.Component<
         })
       : [];
 
-    this.setState({
-      tagResult: newTag,
-    });
+    this.setState(
+      {
+        tagResult: newTag,
+      },
+      () => this.emitEvent('render'),
+    );
   };
 
   public exportData = () => {
@@ -142,11 +145,12 @@ export class TagToolInstanceAdaptor extends React.Component<
         },
       ];
 
-      this.setState({
-        tagResult,
-      });
-
-      this.emitEvent('render');
+      this.setState(
+        {
+          tagResult,
+        },
+        () => this.emitEvent('render'),
+      );
     }
   }
 
@@ -239,6 +243,11 @@ export class TagToolInstanceAdaptor extends React.Component<
 
   public setValid = (valid: boolean) => {
     this.setState({ valid });
+    if (valid === false) {
+      this.setState({ tagResult: [] });
+    }
+
+    this.emitEvent('render');
   };
 
   public componentDidMount() {
@@ -258,10 +267,11 @@ export class TagToolInstanceAdaptor extends React.Component<
     if (!imgList[imgIndex]) {
       return;
     }
+    const res = jsonParser(imgList[imgIndex].result);
+    const stepRes = res[`step_${step}`];
 
-    const res = jsonParser(imgList[imgIndex].result)[`step_${step}`];
     this.setState({
-      tagResult: res?.result ?? [],
+      tagResult: stepRes?.result ?? [],
       valid: res?.valid === undefined ? true : res.valid,
     });
   };
