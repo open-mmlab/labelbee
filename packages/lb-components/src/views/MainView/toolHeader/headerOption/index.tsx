@@ -14,6 +14,8 @@ import { EToolName } from '@/data/enums/ToolType';
 import { ChangeSave } from '@/store/annotation/actionCreators';
 import { IStepInfo } from '@/types/step';
 import { useTranslation } from 'react-i18next';
+import { cTool } from '@labelbee/lb-annotation';
+const { EVideoToolName } = cTool;
 
 interface IProps {
   isBegin?: boolean;
@@ -37,7 +39,10 @@ const HeaderOption: React.FC<IProps> = (props) => {
   }));
   const { t } = useTranslation();
 
-  const isBegin = props.isBegin || stepInfo?.tool === EToolName.Tag;
+  const isTagTool = [EToolName.Tag, EVideoToolName.VideoTagTool].includes(stepInfo?.tool as any);
+  const isVideo = [EVideoToolName.VideoTagTool].includes(stepInfo?.tool as any);
+
+  const isBegin = props.isBegin || isTagTool;
 
   const updateRotate = () => {
     /**
@@ -81,6 +86,10 @@ const HeaderOption: React.FC<IProps> = (props) => {
       commonSvg: revocationSvg,
       selectedSvg: revocationHighlightSvg,
       click: () => {
+        if (isTagTool) {
+          return;
+        }
+
         revocation();
       },
       style: {
@@ -96,6 +105,10 @@ const HeaderOption: React.FC<IProps> = (props) => {
       commonSvg: restoreSvg,
       selectedSvg: restoreHighlightSvg,
       click: () => {
+        if (isTagTool) {
+          return;
+        }
+
         restore();
       },
       style: {
@@ -111,9 +124,15 @@ const HeaderOption: React.FC<IProps> = (props) => {
       selectedSvg: rotateHighlightSvg,
       commonSvg: rotateSvg,
       click: () => {
+        if (isVideo) {
+          // VideoTool don't need to rotate
+          return;
+        }
+
         updateRotate();
       },
       style: {
+        opacity: isVideo === true ? 0.4 : 1,
         fontSize: '12px',
         color: !isBegin && toolHover === 'rotate' ? EColor.Hover : EColor.Normal,
       },
