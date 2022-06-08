@@ -4,6 +4,8 @@ import { IPolygonData, IPolygonPoint } from '../../types/tool/polygon';
 import { ELineTypes, SEGMENT_NUMBER } from '../../constant/tool';
 import AxisUtils from './AxisUtils';
 import MathUtils from '../MathUtils';
+import LineToolUtils from './LineToolUtils';
+import { difference, polygon, union } from '@turf/turf';
 
 export default class PolygonUtils {
   static getHoverPolygonID(
@@ -448,5 +450,259 @@ export default class PolygonUtils {
     rotate *= angle;
 
     return MathUtils.rotateRectPointList(rotate, pointList as [ICoordinate, ICoordinate, ICoordinate, ICoordinate]);
+  }
+
+  public static deletePolygonLastPoint(acc: any, cur: any[], index: number, array: string | any[]) {
+    if (index === array.length - 1) {
+      // 最后一个不用
+      return acc;
+    }
+
+    return [
+      ...acc,
+      {
+        x: cur[0],
+        y: cur[1],
+      },
+    ];
+  }
+
+  public static concatBeginAndEnd(array: any[]) {
+    if (array.length < 1) {
+      return array;
+    }
+
+    return [...array, array[0]];
+  }
+
+  public static segmentPolygonByPolygon(
+    pointList: IPolygonPoint[],
+    polygonList: IPolygonData[],
+  ): IPolygonPoint[][] | void {
+    try {
+      let selectedPolygon = polygon([[...PolygonUtils.concatBeginAndEnd(pointList.map((v) => [v.x, v.y]))]]);
+      // todo 包裹情况下还需改进
+      // let unionList = polygonList.reduce((acc, cur, index, array) => {
+      //   let backgroundPoint = [[...concatBeginAndEnd(cur.pointList.map(cur => [cur.x, cur.y]))]];
+
+      //   let backgroundPolygon = polygon(backgroundPoint);
+      //   let backgroundLine = lineString(backgroundPoint);
+
+      //   // if (!booleanCrosses(selectedPolygon, backgroundLine)) {
+      //   //   return acc;
+      //   // }
+
+      //   if (acc) {
+      //     return union(acc, backgroundPolygon);
+      //   } else {
+      //     return backgroundPolygon;
+      //   }
+      // }, undefined);
+      // selectedPolygon = difference(selectedPolygon, unionList);
+
+      // 批量对多边形进行减操作 （需要对包裹内部的多边形进行判断）
+      polygonList.forEach((v) => {
+        const backgroundPolygon = polygon([[...PolygonUtils.concatBeginAndEnd(v.pointList.map((v) => [v.x, v.y]))]]);
+        const diff = difference(selectedPolygon, backgroundPolygon);
+
+        if (diff) {
+          //@ts-ignore
+          selectedPolygon = diff;
+        }
+      });
+      const resultList =
+        selectedPolygon?.geometry?.coordinates.map((polygon) => {
+          // 多边形需要另外判断
+          //@ts-ignore
+          if (selectedPolygon?.geometry?.type === 'MultiPolygon') {
+            //@ts-ignore
+            return polygon[0].reduce(PolygonUtils.deletePolygonLastPoint, []);
+          }
+          return polygon.reduce(PolygonUtils.deletePolygonLastPoint, []);
+        }) ?? [];
+      return resultList.reduce((acc, pointList) => {
+        const len = pointList.length;
+        const newPointList = pointList.filter((point: IPolygonPoint, i: number) => {
+          const nextIndex = (i + 1) % len;
+          if (AxisUtils.getIsInScope(point, pointList[nextIndex], 1)) {
+            // 前后 1 像素之差的点清除
+            return false;
+          }
+          return true;
+        });
+
+        if (newPointList.length < 3) {
+          return acc;
+        }
+
+        return [...acc, newPointList];
+      }, []);
+    } catch (error) {
+      console.log(error);
+    }
+  }
+
+  /**
+   * 获取当前多边形的点集
+   *
+   * @export
+   * @param {string} selectedPolygonID
+   * @param {IPolygonData[]} polygonList
+   * @returns
+   */
+  public static getPolygonPointList(selectedPolygonID: string, polygonList: IPolygonData[]) {
+    const polygon = polygonList.filter((v) => v.id === selectedPolygonID);
+    if (polygon[0] && polygon[0].pointList && polygon[0].pointList.length > 0) {
+      return polygon[0].pointList;
+    }
+    return [];
+  }
+  /**
+   * 获取包裹当前 polygon 的 index
+   * @param pointList
+   * @param polygonList
+   * @returns
+   */
+  public static getWrapPolygonIndex(pointList: IPolygonPoint[], polygonList: IPolygonData[]) {
+    return polygonList.findIndex((polygon) => PolygonUtils.isPointListInPolygon(pointList, polygon.pointList));
+  }
+
+  /**
+   * 获取内部切割后的多边形合体点集
+   * @param pointList
+   * @param wrapPointList
+   * @returns
+   */
+  public static clipPolygonFromWrapPolygon(pointList: IPolygonPoint[], wrapPointList: IPolygonPoint[]) {
+    // 存在上下包裹的情况
+    const wrapDirection = PolygonUtils.isPolygonClosewise(wrapPointList);
+    const selectedDirection = PolygonUtils.isPolygonClosewise(pointList);
+    const linkIndex = PolygonUtils.getClosePointDistanceFromPolygon(pointList[0], wrapPointList);
+    const linkPoint = wrapPointList[linkIndex];
+
+    let newPointList = [
+      ...wrapPointList.slice(0, linkIndex),
+      linkPoint,
+      ...pointList,
+      pointList[0],
+      ...wrapPointList.slice(linkIndex, wrapPointList.length),
+    ];
+
+    if (wrapDirection === selectedDirection) {
+      newPointList = [
+        ...wrapPointList.slice(0, linkIndex),
+        linkPoint,
+        pointList[0],
+        ...pointList.reverse(),
+        ...wrapPointList.slice(linkIndex, wrapPointList.length),
+      ];
+    }
+
+    return newPointList;
+  }
+
+  /**
+   * 难点：判断凹多边形的方向
+   *
+   * https://www.huaweicloud.com/articles/12463693.html
+   * @param p
+   * @returns
+   */
+  public static isPolygonClosewise(p: IPolygonPoint[]) {
+    const n = p.length;
+    let i;
+    let j;
+    let k;
+    let count = 0;
+    let z;
+
+    if (n < 3) {
+      return 0;
+    }
+
+    for (i = 0; i < n; i++) {
+      j = (i + 1) % n;
+      k = (i + 2) % n;
+      z = (p[j].x - p[i].x) * (p[k].y - p[j].y);
+      z -= (p[j].y - p[i].y) * (p[k].x - p[j].x);
+      if (z < 0) {
+        count--;
+      } else if (z > 0) {
+        count++;
+      }
+    }
+
+    if (count > 0) {
+      return 1;
+    } else if (count < 0) {
+      return -1;
+    } else {
+      return 0;
+    }
+  }
+
+  /**
+   * 获取当前点与多边形点集最近的点，并返回 Index
+   */
+  public static getClosePointDistanceFromPolygon(point: ICoordinate, pointList: IPolygonPoint[]) {
+    let minLen = Number.MAX_SAFE_INTEGER;
+    let index = -1;
+
+    pointList.forEach((p, i) => {
+      let distance = LineToolUtils.calcDistance(point, p);
+      if (distance < minLen) {
+        minLen = distance;
+        index = i;
+      }
+    });
+
+    return index;
+  }
+
+  /**
+   * 多边形合成多边形
+   * @param selectedPolygon
+   * @param combinedPolygon
+   */
+  public static combinePolygonWithPolygon(
+    selectedPolygon: IPolygonData,
+    combinedPolygon: IPolygonData,
+  ):
+    | {
+        newPolygon: IPolygonData;
+        unionList: string[];
+      }
+    | undefined {
+    try {
+      let turfSelectedPolygon = polygon([
+        [...PolygonUtils.concatBeginAndEnd(selectedPolygon.pointList.map((v) => [v.x, v.y]))],
+      ]);
+      const turfCombinedPolygon = polygon([
+        [...PolygonUtils.concatBeginAndEnd(combinedPolygon.pointList.map((v) => [v.x, v.y]))],
+      ]);
+      const unionPolygon = union(turfSelectedPolygon, turfCombinedPolygon);
+      const unionList: string[] = [];
+      let newPolygon = selectedPolygon;
+      if (unionPolygon?.geometry?.coordinates?.length === 1) {
+        unionList.push(combinedPolygon.id);
+        const pointList = unionPolygon?.geometry.coordinates.map((polygon) => {
+          // 多边形需要另外判断
+          if (unionPolygon?.geometry?.type === 'MultiPolygon') {
+            //@ts-ignore
+            return polygon[0].reduce(PolygonUtils.deletePolygonLastPoint, []);
+          }
+          //@ts-ignore
+          return polygon.reduce(PolygonUtils.deletePolygonLastPoint, []);
+        })[0];
+        newPolygon.pointList = pointList;
+      }
+
+      return {
+        newPolygon,
+        unionList,
+      };
+    } catch (e) {
+      console.error(e);
+    }
   }
 }

@@ -1,6 +1,5 @@
 import { ELineTypes, SEGMENT_NUMBER } from '../../constant/tool';
 import { IPolygonPoint } from '../../types/tool/polygon';
-
 // 计算曲线的值
 export function createSmoothCurvePoints(
   points: any[],

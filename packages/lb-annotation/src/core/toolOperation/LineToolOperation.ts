@@ -946,6 +946,9 @@ class LineToolOperation extends BasicToolOperation {
    * @param coord
    */
   public moveSelectPoint(coord: ICoordinate) {
+    if (!this.selectedPoint) {
+      return;
+    }
     const offsetX = coord.x - this.prevAxis.x;
     const offsetY = coord.y - this.prevAxis.y;
     const newX = (this.selectedPoint ? this.selectedPoint.x : 0) + offsetX / this.zoom;
@@ -954,7 +957,6 @@ class LineToolOperation extends BasicToolOperation {
       x: newX,
       y: newY,
     };
-
     Object.assign(this.selectedPoint, this.getNextCoordByAbsCoord(pointPosition));
     this.updateLines();
     this.render();

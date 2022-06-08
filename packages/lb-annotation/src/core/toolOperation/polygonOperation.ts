@@ -9,7 +9,7 @@ import {
   TEXT_ATTRIBUTE_OFFSET,
 } from '../../constant/annotation';
 import EKeyCode from '../../constant/keyCode';
-import { edgeAdsorptionScope, EPolygonPattern, EToolName } from '../../constant/tool';
+import { edgeAdsorptionScope, ELineTypes, EPolygonPattern, EToolName } from '../../constant/tool';
 import locale from '../../locales';
 import { EMessage } from '../../locales/constants';
 import { IPolygonConfig, IPolygonData, IPolygonPoint } from '../../types/tool/polygon';
@@ -24,6 +24,7 @@ import StyleUtils from '../../utils/tool/StyleUtils';
 import uuid from '../../utils/uuid';
 import { BasicToolOperation, IBasicToolOperationProps } from './basicToolOperation';
 import TextAttributeClass from './textAttributeClass';
+import { i18n } from '@labelbee/lb-utils';
 
 const TEXT_MAX_WIDTH = 164;
 
@@ -48,6 +49,8 @@ class PolygonOperation extends BasicToolOperation {
   public editPolygonID?: string; // 是否进入编辑模式
 
   public pattern: EPolygonPattern; // 当前多边形标注形式
+
+  public isCombined: boolean; // 是否开启合并操作
 
   private dragInfo?: {
     dragStartCoord: ICoordinate;
@@ -75,6 +78,7 @@ class PolygonOperation extends BasicToolOperation {
     this.drawingHistory = new ActionsHistory();
     this.isCtrl = false;
     this.isAlt = false;
+    this.isCombined = false;
     this.pattern = EPolygonPattern.Normal;
 
     this.getCurrentSelectedData = this.getCurrentSelectedData.bind(this);
@@ -711,6 +715,11 @@ class PolygonOperation extends BasicToolOperation {
         break;
 
       case EKeyCode.Z:
+        if (e.altKey) {
+          this.onCombinedExecute();
+          return;
+        }
+
         this.setIsHidden(!this.isHidden);
         this.render();
         break;
@@ -737,6 +746,10 @@ class PolygonOperation extends BasicToolOperation {
         this.onTabKeyDown(e);
         break;
       }
+
+      case EKeyCode.X:
+        e.altKey && this.segment();
+        break;
 
       default: {
         if (this.config.attributeConfigurable) {
@@ -900,6 +913,139 @@ class PolygonOperation extends BasicToolOperation {
     return true;
   }
 
+  public segment() {
+    // 如果没有选中多边形直接进行裁剪操作，直接跳出
+    if (!this.selectedID) {
+      return;
+    }
+
+    if (this.config?.lineType !== ELineTypes.Line) {
+      return;
+    }
+    const selectedPointList = PolygonUtils.getPolygonPointList(this.selectedID, this.currentShowList);
+    const backgroundPolygonList = this.currentShowList.filter((v) => v.id !== this.selectedID);
+
+    if (backgroundPolygonList.length === 0 || selectedPointList.length === 0) {
+      return;
+    }
+
+    // 需判断是否存在包裹
+    const wrapIndex = PolygonUtils.getWrapPolygonIndex(selectedPointList, backgroundPolygonList);
+
+    let newPolygonList = [...this.polygonList];
+
+    if (wrapIndex === -1) {
+      // 并不存在合并的问题
+      const newPointListArray = PolygonUtils.segmentPolygonByPolygon(selectedPointList, backgroundPolygonList);
+
+      if (!newPointListArray) {
+        return;
+      }
+      const newPointList = newPointListArray.shift();
+
+      if (!newPointList) {
+        return;
+      }
+
+      let defaultAttribute = '';
+      let valid = true;
+      const sourceID = CommonToolUtils.getSourceID(this.basicResult);
+      let textAttribute = '';
+
+      newPolygonList = this.polygonList.map((v) => {
+        if (v.id === this.selectedID) {
+          defaultAttribute = v.attribute;
+          valid = v?.valid ?? true;
+          textAttribute = v?.textAttribute ?? '';
+          return {
+            ...v,
+            pointList: newPointList,
+          };
+        }
+
+        return v;
+      });
+
+      // 如果有多余的框则进行添加
+      if (newPointListArray.length > 0) {
+        newPointListArray.forEach((v, i) => {
+          newPolygonList.push({
+            sourceID,
+            id: uuid(8, 62),
+            pointList: v,
+            valid,
+            order: CommonToolUtils.getMaxOrder(this.currentShowList) + 1 + i,
+            attribute: defaultAttribute,
+            textAttribute,
+          });
+        });
+      }
+    } else {
+      // 嵌套合并结果
+      newPolygonList[wrapIndex].pointList = PolygonUtils.clipPolygonFromWrapPolygon(
+        selectedPointList,
+        newPolygonList[wrapIndex].pointList,
+      );
+      newPolygonList = newPolygonList.filter((v) => v.id !== this.selectedID);
+    }
+    this.setPolygonList(newPolygonList);
+    this.history.pushHistory(newPolygonList);
+    this.render();
+  }
+
+  public onCombinedExecute() {
+    if (!this.selectedID) {
+      this.emit('messageInfo', i18n.t('PolygonsToBeCombinedNeedToBeSelected'));
+      return;
+    }
+    this.isCombined = !this.isCombined;
+  }
+
+  public combine(e: MouseEvent) {
+    // 没有选中和 hover 都退出
+    const hoverID = this.getHoverID(e);
+    if (!hoverID || !this.selectedID || this.selectedID === hoverID) {
+      return;
+    }
+
+    if (this.config?.lineType !== ELineTypes.Line) {
+      this.emit('messageInfo', i18n.t('CurveModeDoesNotSupportCutting'));
+      return;
+    }
+
+    const selectedPolygon = this.polygonList.find((v) => v.id === this.selectedID);
+    const combinedPolygon = this.currentShowList.find((v) => v.id === hoverID);
+    if (!combinedPolygon || !selectedPolygon) {
+      return;
+    }
+
+    const composeData = PolygonUtils.combinePolygonWithPolygon(selectedPolygon, combinedPolygon);
+
+    if (!composeData) {
+      return;
+    }
+
+    const { newPolygon, unionList } = composeData;
+    if (unionList.length === 1 && newPolygon) {
+      const newPolygonList = this.polygonList
+        .filter((v) => !unionList.includes(v.id))
+        .map((v) => {
+          if (v.id === this.selectedID) {
+            return newPolygon;
+          }
+
+          return v;
+        });
+      this.setPolygonList(newPolygonList);
+      this.history.pushHistory(newPolygonList);
+      this.render();
+
+      this.emit('messageInfo', i18n.t('CombineSuccess'));
+    } else {
+      this.emit('messageInfo', i18n.t('CombiningFailedNotify'));
+    }
+    this.isCombined = false;
+  }
   /**
    * 判断是否在边界外
    * @param selectedPointList
@@ -1119,6 +1265,20 @@ class PolygonOperation extends BasicToolOperation {
   }
 
   public onMouseUp(e: MouseEvent) {
+    if (this.isCombined) {
+      switch (e.button) {
+        case 0:
+          this.combine(e);
+          break;
+
+        case 2:
+          this.isCombined = false;
+          break;
+      }
+
+      return;
+    }
+
     if (super.onMouseUp(e) || this.forbidMouseOperation || !this.imgInfo) {
       return undefined;
     }
@@ -1448,10 +1608,47 @@ class PolygonOperation extends BasicToolOperation {
     }
 
     super.render();
-    this.renderCursorLine(this.getLineColor(this.defaultAttribute));
     this.renderPolygon();
+    this.renderCursorLine(this.getLineColor(this.defaultAttribute));
   }
 
+  public renderCursorLine(lineColor: string) {
+    super.renderCursorLine(lineColor);
+    if (this.isCombined) {
+      const { x, y } = this.coord;
+      const padding = 10; // 框的边界
+      const rectWidth = 186; // 框的宽度
+      const rectHeight = 32; // 框的高度
+      DrawUtils.drawRectWithFill(
+        this.canvas,
+        {
+          x: x + padding,
+          y: y - padding * 4 - 1,
+          width: rectWidth,
+          height: rectHeight,
+        } as IRect,
+        { color: 'black' },
+      );
+
+      DrawUtils.drawText(this.canvas, { x, y }, i18n.t('ClickAnotherPolygon'), {
+        textAlign: 'center',
+        color: 'white',
+        offsetX: rectWidth / 2 + padding,
+        offsetY: -(rectHeight / 2 + padding / 2),
+      });
+
+      DrawUtils.drawRect(
+        this.canvas,
+        {
+          x: x - padding,
+          y: y - padding,
+          width: padding * 2,
+          height: padding * 2,
+        } as IRect,
+        { lineDash: [6], color: 'white' },
+      );
+    }
+  }
   /** 撤销 */
   public undo() {
     if (this.drawingPointList.length > 0) {

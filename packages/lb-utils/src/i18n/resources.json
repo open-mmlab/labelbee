@@ -113,7 +113,13 @@
     "imageInvalidAndSkip": "Image invalid, please skip",
     "videoErrorAndReload": "Failed to load video, please reload",
     "imageErrorAndReload": "Failed to load image, please reload",
-    "orMaskAsInvalid": " or mask it as invalid"
+    "orMaskAsInvalid": " or mask it as invalid",
+    "ClickAnotherPolygon": "Click another polygon",
+    "PolygonsToBeCombinedNeedToBeSelected": "Polygons to be combined need to be selected",
+    "CurveModeDoesNotSupportCutting": "Curve mode does not support cutting",
+    "CombineSuccess": "Combine success",
+    "CombiningFailedNotify": "Combining failed. Please check whether two polygons intersect or whether polygon combining forms a leak",
+    "CombineOverlapArea": "Combine Overlap Area"
   },
   "cn": {
     "TextInput": "文本输入",
@@ -229,6 +235,12 @@
     "imageInvalidAndSkip": "无效图片，请跳过",
     "videoErrorAndReload": "视频加载失败, 请重新加载",
     "imageErrorAndReload": "图片加载失败, 请重新加载",
-    "orMaskAsInvalid": " 或 将其标为无效"
+    "orMaskAsInvalid": " 或 将其标为无效",
+    "ClickAnotherPolygon": "请点击希望合并的多边形",
+    "PolygonsToBeCombinedNeedToBeSelected": "需要选中需要合并的多边形",
+    "CurveModeDoesNotSupportCutting": "曲线模式暂不支持裁剪",
+    "CombineSuccess": "合并成功",
+    "CombiningFailedNotify": "合并失败，请检查是否两个多边形是否有相交，或多边形合并是否形成漏空",
+    "CombineOverlapArea": "合并重叠区域"
   }
 }
