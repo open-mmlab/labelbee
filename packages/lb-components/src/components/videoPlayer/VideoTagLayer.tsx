@@ -1,10 +1,11 @@
 import React from 'react';
 import { result2LabelKey } from './utils';
 import type { ITagLabelsArray } from './types';
+import { IInputList } from '@/types/main';
 
 interface IVideoTagLayerProps {
   result: Array<{ result: { [key: string]: string } }>;
-  inputList: any[];
+  inputList: IInputList[];
 }
 
 const tagLayerCSSProperty: React.CSSProperties = {

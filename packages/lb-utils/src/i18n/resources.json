@@ -108,7 +108,12 @@
     "Speed": "Speed",
     "PlayPause": "Play / Pause",
     "FastForward": "Fast Forward",
-    "Rewind": "Rewind"
+    "Rewind": "Rewind",
+    "videoInvalidAndSkip": "Video invalid, please skip",
+    "imageInvalidAndSkip": "Image invalid, please skip",
+    "videoErrorAndReload": "Failed to load video, please reload",
+    "imageErrorAndReload": "Failed to load image, please reload",
+    "orMaskAsInvalid": " or mask it as invalid"
   },
   "cn": {
     "TextInput": "文本输入",
@@ -219,6 +224,11 @@
     "Speed": "倍速",
     "PlayPause": "播放/暂停",
     "FastForward": "快进",
-    "Rewind": "快退"
+    "Rewind": "快退",
+    "videoInvalidAndSkip": "无效视频，请跳过",
+    "imageInvalidAndSkip": "无效图片，请跳过",
+    "videoErrorAndReload": "视频加载失败, 请重新加载",
+    "imageErrorAndReload": "图片加载失败, 请重新加载",
+    "orMaskAsInvalid": " 或 将其标为无效"
   }
 }

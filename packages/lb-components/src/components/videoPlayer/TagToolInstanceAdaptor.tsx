@@ -15,10 +15,11 @@ import { IStepInfo } from '@/types/step';
 import _ from 'lodash';
 import type { ObjectString } from './types';
 import { getKeyCodeNumber } from './utils';
+import { IFileItem } from '@/types/data';
 
 export interface IVideoTagInstanceAdaptorProps {
   imgIndex: number;
-  imgList: any[];
+  imgList: IFileItem[];
   pageForward: () => void;
   pageJump: (page: string) => void;
   pageBackward: () => void;
@@ -29,8 +30,9 @@ export interface IVideoTagInstanceAdaptorProps {
 }
 
 interface IVideoTagInstanceAdaptorState {
+  // TODO: Use ITagResult from 'lb-annotation'
   tagResult: any[];
-  labelSelectedList: any;
+  labelSelectedList: number[];
   valid: boolean;
 }
 
@@ -62,7 +64,7 @@ export class TagToolInstanceAdaptor extends React.Component<
   }
 
   get currentTagResult() {
-    return this.state.tagResult[0];
+    return this.state.tagResult[0] ?? {};
   }
 
   public get valid() {
@@ -140,7 +142,7 @@ export class TagToolInstanceAdaptor extends React.Component<
       const tagResult = [
         {
           sourceID: CommonToolUtils.getSourceID(),
-          id: uuid(8, 62),
+          id: this.currentTagResult?.id ?? uuid(8, 62),
           result: tagRes,
         },
       ];

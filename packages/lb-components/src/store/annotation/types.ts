@@ -35,7 +35,7 @@ interface CommonActions {
 
 export interface AnnotationState {
   toolInstance: ToolInstance | null;
-  annotationEngine: AnnotationEngine | null;
+  annotationEngine: AnnotationEngine | null | { toolInstance: ToolInstance };
   imgList: IFileItem[];
   config: string;
   imgIndex: number;

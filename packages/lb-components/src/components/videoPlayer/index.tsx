@@ -307,7 +307,7 @@ export class VideoPlayer extends React.Component<IVideoPlayerProps, IVideoPlayer
             />
 
             <FileException
-              fileTypeName='视频'
+              fileType='video'
               errorProps={{
                 reloadImage: this.reload,
                 backgroundColor: '#e2e2e2',

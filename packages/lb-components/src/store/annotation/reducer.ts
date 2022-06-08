@@ -326,6 +326,10 @@ export const annotationReducer = (
     case ANNOTATION_ACTIONS.LOAD_FILE_DATA: {
       const { imgList, step, toolInstance, annotationEngine, stepList } = state;
 
+      if (!toolInstance || !annotationEngine) {
+        return state;
+      }
+
       const currentStepInfo = StepUtils.getCurrentStepInfo(step, stepList);
 
       const { nextIndex, imgNode, nextBasicIndex, imgError } = action.payload;
@@ -413,10 +417,10 @@ export const annotationReducer = (
 
     case ANNOTATION_ACTIONS.INIT_TOOL: {
       const { imgNode } = state;
-      const instances = updateToolInstance(state, imgNode);
+      const instance = updateToolInstance(state, imgNode);
 
-      if (instances) {
-        const { toolInstance, annotationEngine } = instances;
+      if (instance) {
+        const { toolInstance, annotationEngine } = instance;
         return {
           ...state,
           toolInstance,
@@ -430,10 +434,14 @@ export const annotationReducer = (
     }
 
     case ANNOTATION_ACTIONS.SET_TOOL: {
-      if (action.payload.instance) {
+      const instance = action.payload?.instance;
+      if (instance) {
         return {
           ...state,
-          toolInstance: action.payload.instance,
+          toolInstance: instance,
+          annotationEngine: {
+            toolInstance: instance,
+          },
         };
       }
 

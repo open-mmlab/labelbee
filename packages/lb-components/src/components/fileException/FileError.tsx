@@ -1,6 +1,7 @@
 import { ReloadOutlined } from '@ant-design/icons';
 import { Button } from 'antd/es';
 import React from 'react';
+import { useTranslation } from 'react-i18next';
 
 export interface IFileErrorProps {
   width?: number;
@@ -11,7 +12,7 @@ export interface IFileErrorProps {
   ignoreOffsetY?: boolean;
   layerStyle?: React.CSSProperties;
   backgroundColor: string;
-  fileTypeName?: string;
+  fileType?: string;
   isError?: boolean;
 }
 
@@ -23,8 +24,10 @@ const FileError = (props: IFileErrorProps) => {
     hideSetInvalidTips,
     ignoreOffsetY,
     backgroundColor,
-    fileTypeName = '图片',
+    fileType = 'image',
   } = props;
+
+  const { t } = useTranslation();
 
   const top = !ignoreOffsetY ? 40 : 0;
 
@@ -60,9 +63,7 @@ const FileError = (props: IFileErrorProps) => {
           <Button type='primary' shape='circle' icon={<ReloadOutlined />} onClick={reloadImage} />
         </div>
         <div>
-          {`${fileTypeName}加载失败, 请重新加载${
-            hideSetInvalidTips ? '' : ` 或 将${fileTypeName}标为无效`
-          }`}
+          {`${t(`${fileType}ErrorAndReload`)}${hideSetInvalidTips ? '' : t('orMaskAsInvalid')}`}
         </div>
       </div>
     </div>

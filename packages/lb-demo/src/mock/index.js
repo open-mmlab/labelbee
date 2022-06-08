@@ -80,7 +80,7 @@ export const tagDefaultResult = JSON.stringify({
 export const videoTagDefaultResult = JSON.stringify({
   step_1: {
     dataSource: 0,
-    tool: 'tagTool',
+    tool: 'videoTagTool',
     result: [],
   },
 });

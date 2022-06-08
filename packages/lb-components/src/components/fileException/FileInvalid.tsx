@@ -5,13 +5,16 @@
  */
 
 import React from 'react';
+import { useTranslation } from 'react-i18next';
 
 export interface IFileInvalidProps {
-  fileTypeName?: string;
+  fileType?: string;
   isValid: boolean;
 }
 
-const FileInvalid: React.FC<IFileInvalidProps> = ({ fileTypeName = '图片', isValid }) => {
+const FileInvalid: React.FC<IFileInvalidProps> = ({ fileType = 'image', isValid }) => {
+  const { t } = useTranslation();
+
   if (isValid) {
     return null;
   }
@@ -30,7 +33,7 @@ const FileInvalid: React.FC<IFileInvalidProps> = ({ fileTypeName = '图片', isV
         justifyContent: 'center',
       }}
     >
-      {`无效${fileTypeName}，请跳过`}
+      {t(`${fileType}InvalidAndSkip`)}
     </div>
   );
 };

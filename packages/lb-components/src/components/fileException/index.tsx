@@ -11,20 +11,16 @@ import FileInvalid, { IFileInvalidProps } from './FileInvalid';
 interface IFileExceptionProps {
   errorProps: IFileErrorProps & { isError: boolean };
   invalidProps: IFileInvalidProps;
-  fileTypeName: string;
+  fileType: string;
 }
 
-const FileException: React.FC<IFileExceptionProps> = ({
-  invalidProps,
-  errorProps,
-  fileTypeName,
-}) => {
+const FileException: React.FC<IFileExceptionProps> = ({ invalidProps, errorProps, fileType }) => {
   if (!invalidProps.isValid) {
-    return <FileInvalid {...{ fileTypeName, ...invalidProps }} />;
+    return <FileInvalid {...{ fileType, ...invalidProps }} />;
   }
 
   if (errorProps.isError) {
-    return <FileError {...{ fileTypeName, ...errorProps }} />;
+    return <FileError {...{ fileType, ...errorProps }} />;
   }
   return null;
 };
