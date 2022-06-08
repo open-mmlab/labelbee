@@ -201,6 +201,8 @@ export function InitTaskData({
 
   if (loadFileList) {
     tasks.push(UpdateGetFileList(loadFileList));
+  }
+  
   if (pageSize) {
     tasks.push(UpdatePageSize(pageSize));
   }
