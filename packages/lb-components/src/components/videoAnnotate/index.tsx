@@ -34,19 +34,17 @@ const VideoAnnotate: React.FC<{ annotation: AnnotationState }> = (props) => {
   };
 
   return (
-    <>
-      <TagToolInstanceAdaptor
-        imgIndex={imgIndex}
-        imgList={imgList}
-        pageBackward={() => dispatch(PageBackward())}
-        pageForward={() => dispatch(PageForward())}
-        pageJump={(page) => dispatch(PageJump(~~page))}
-        onMounted={onMounted}
-        onUnmounted={onUnmounted}
-        stepList={stepList}
-        step={step}
-      />
-    </>
+    <TagToolInstanceAdaptor
+      imgIndex={imgIndex}
+      imgList={imgList}
+      pageBackward={() => dispatch(PageBackward())}
+      pageForward={() => dispatch(PageForward())}
+      pageJump={(page) => dispatch(PageJump(~~page))}
+      onMounted={onMounted}
+      onUnmounted={onUnmounted}
+      stepList={stepList}
+      step={step}
+    />
   );
 };
 

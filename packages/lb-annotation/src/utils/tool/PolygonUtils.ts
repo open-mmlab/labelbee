@@ -1,11 +1,11 @@
 import { ERotateDirection } from '@/constant/annotation';
+import { difference, polygon, union } from '@turf/turf';
 import CommonToolUtils from './CommonToolUtils';
 import { IPolygonData, IPolygonPoint } from '../../types/tool/polygon';
 import { ELineTypes, SEGMENT_NUMBER } from '../../constant/tool';
 import AxisUtils from './AxisUtils';
 import MathUtils from '../MathUtils';
 import LineToolUtils from './LineToolUtils';
-import { difference, polygon, union } from '@turf/turf';
 
 export default class PolygonUtils {
   static getHoverPolygonID(
@@ -557,6 +557,7 @@ export default class PolygonUtils {
     }
     return [];
   }
+
   /**
    * 获取包裹当前 polygon 的 index
    * @param pointList
@@ -634,11 +635,11 @@ export default class PolygonUtils {
 
     if (count > 0) {
       return 1;
-    } else if (count < 0) {
-      return -1;
-    } else {
-      return 0;
     }
+    if (count < 0) {
+      return -1;
+    }
+    return 0;
   }
 
   /**
@@ -649,7 +650,7 @@ export default class PolygonUtils {
     let index = -1;
 
     pointList.forEach((p, i) => {
-      let distance = LineToolUtils.calcDistance(point, p);
+      const distance = LineToolUtils.calcDistance(point, p);
       if (distance < minLen) {
         minLen = distance;
         index = i;
@@ -674,7 +675,7 @@ export default class PolygonUtils {
       }
     | undefined {
     try {
-      let turfSelectedPolygon = polygon([
+      const turfSelectedPolygon = polygon([
         [...PolygonUtils.concatBeginAndEnd(selectedPolygon.pointList.map((v) => [v.x, v.y]))],
       ]);
       const turfCombinedPolygon = polygon([
@@ -682,7 +683,7 @@ export default class PolygonUtils {
       ]);
       const unionPolygon = union(turfSelectedPolygon, turfCombinedPolygon);
       const unionList: string[] = [];
-      let newPolygon = selectedPolygon;
+      const newPolygon = selectedPolygon;
       if (unionPolygon?.geometry?.coordinates?.length === 1) {
         unionList.push(combinedPolygon.id);
         const pointList = unionPolygon?.geometry.coordinates.map((polygon) => {

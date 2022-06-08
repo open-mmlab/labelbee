@@ -1,5 +1,6 @@
 import MathUtils from '@/utils/MathUtils';
 import RectUtils from '@/utils/tool/RectUtils';
+import { i18n } from '@labelbee/lb-utils';
 import {
   DEFAULT_TEXT_OFFSET,
   EDragStatus,
@@ -24,7 +25,6 @@ import StyleUtils from '../../utils/tool/StyleUtils';
 import uuid from '../../utils/uuid';
 import { BasicToolOperation, IBasicToolOperationProps } from './basicToolOperation';
 import TextAttributeClass from './textAttributeClass';
-import { i18n } from '@labelbee/lb-utils';
 
 const TEXT_MAX_WIDTH = 164;
 
@@ -1046,6 +1046,7 @@ class PolygonOperation extends BasicToolOperation {
     }
     this.isCombined = false;
   }
+
   /**
    * 判断是否在边界外
    * @param selectedPointList
@@ -1649,6 +1650,7 @@ class PolygonOperation extends BasicToolOperation {
       );
     }
   }
+
   /** 撤销 */
   public undo() {
     if (this.drawingPointList.length > 0) {
