@@ -304,6 +304,7 @@ export class VideoPlayer extends React.Component<IVideoPlayerProps, IVideoPlayer
               onDurationChange={setDuration}
               width='100%'
               height='100%'
+              onClick={playPause}
             />
 
             <FileException
