@@ -1,3 +1,9 @@
+/*
+ * @Author: Laoluo luozefeng@sensetime.com
+ * @Date: 2022-05-16 20:37:05
+ * @LastEditors: Laoluo luozefeng@sensetime.com
+ * @LastEditTime: 2022-06-13 20:09:22
+ */
 import { RectOperation } from './core/toolOperation/rectOperation';
 import TagOperation from './core/toolOperation/tagOperation';
 import PointOperation from './core/toolOperation/pointOperation';
@@ -32,6 +38,8 @@ import DblClickEventListener from './utils/tool/DblClickEventListener'; // æš‚æ—
 
 import AnnotationEngine from './core';
 
+import { PointCloud } from './core/pointCloud';
+
 const toolUtils = CommonToolUtils;
 
 export {
@@ -64,4 +72,5 @@ export {
   ImgUtils,
   MathUtils,
   AnnotationEngine,
+  PointCloud,
 };

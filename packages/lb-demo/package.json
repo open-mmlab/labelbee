@@ -6,6 +6,8 @@
     "@labelbee/lb-annotation": "^1.8.0-alpha.0",
     "@labelbee/lb-components": "^1.5.0-alpha.0",
     "@labelbee/lb-utils": "^1.2.0-alpha.0",
+    "three": ">=0.141.0",
+    "@types/three": ">=0.141.0",
     "@testing-library/jest-dom": "^5.11.4",
     "@testing-library/react": "^11.1.0",
     "@testing-library/user-event": "^12.1.10",
