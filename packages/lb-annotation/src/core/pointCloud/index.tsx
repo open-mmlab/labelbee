@@ -4,7 +4,7 @@
  * @Author: Laoluo luozefeng@sensetime.com
  * @Date: 2022-06-13 19:05:33
  * @LastEditors: Laoluo luozefeng@sensetime.com
- * @LastEditTime: 2022-06-14 11:12:08
+ * @LastEditTime: 2022-06-14 17:03:22
  */
 import * as THREE from 'three';
 import { OrbitControls } from './OrbitControls';
@@ -32,7 +32,9 @@ export class PointCloud {
   constructor({ container }: IProps) {
     this.container = container;
     this.renderer = new THREE.WebGLRenderer({ antialias: true });
-    this.camera = new THREE.PerspectiveCamera(30, window.innerWidth / window.innerHeight, 0.01, 2000);
+    this.camera = new THREE.PerspectiveCamera(30, window.innerWidth / window.innerHeight, 1, 1000);
+    this.initCamera();
+
     this.scene = new THREE.Scene();
     this.controls = new OrbitControls(this.camera, this.renderer.domElement);
     this.axesHelper = new THREE.AxesHelper(1000);
@@ -43,35 +45,66 @@ export class PointCloud {
     container.appendChild(this.renderer.domElement);
 
     this.init();
-    this.renderCircle();
+
+    // dev tool
+    const helper = new THREE.CameraHelper(this.camera);
+    this.scene.add(helper);
   }
 
-  public init() {
-    const { renderer, scene, controls, camera } = this;
+  public initCamera() {
+    // Camera setting must be setted before Control's initial.
+    const { camera } = this;
+    camera.position.set(-100, 15, 15);
+    camera.up.set(0, 0, 1);
+  }
 
-    // Background
-    scene.background = new THREE.Color(0x050505);
-
-    // size
-    renderer.setPixelRatio(window.devicePixelRatio);
-    renderer.setSize(window.innerWidth, window.innerHeight);
-
-    controls.target = new THREE.Vector3(0, 0, 0);
+  public initControls() {
+    const { controls } = this;
+    const centerPoint = [15, 15, 15];
+    controls.target = new THREE.Vector3(...centerPoint); // Camera watching?
     controls.addEventListener('change', () => {
       this.render();
     }); // use if there is no animation loop
-    controls.minDistance = 10;
+    controls.minDistance = 1;
 
-    //controls.update() must be called after any manual changes to the camera's transform
-    camera.position.set(0, 20, 100);
     controls.update();
   }
 
+  public initRenderer() {
+    const { renderer } = this;
+    renderer.setPixelRatio(window.devicePixelRatio);
+    renderer.setSize(window.innerWidth, window.innerHeight);
+  }
+
+  public init() {
+    const { scene } = this;
+    // Background
+    scene.background = new THREE.Color(0x050505);
+
+    this.initControls();
+    this.initRenderer();
+
+    // Test for Render
+    this.renderCircle();
+    this.addCube();
+  }
+
+  public addCube() {
+    const geometry = new THREE.BoxGeometry(30, 30, 30);
+    const matarial = new THREE.MeshLambertMaterial({ color: 'red' });
+
+    const cube = new THREE.Mesh(geometry, matarial);
+    cube.position.set(15, 15, 15);
+    const box = new THREE.BoxHelper(cube, 0xffff00);
+    this.scene.add(box);
+    this.render();
+  }
+
   public renderCircle() {
-    const radius = 30;
+    const radius = 15;
     const curve = new THREE.EllipseCurve(
-      0,
-      0, // ax, aY
+      15,
+      15, // ax, aY
       radius,
       radius, // xRadius, yRadius
       0,
