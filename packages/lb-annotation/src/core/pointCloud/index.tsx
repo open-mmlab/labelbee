@@ -14,6 +14,18 @@ interface IProps {
   container: HTMLElement;
 }
 
+interface I3DSpaceCoord {
+  x: number;
+  y: number;
+  z: number;
+}
+
+interface IVolume {
+  width: number;
+  depth: number;
+  height: number;
+}
+
 export class PointCloud {
   public renderer: THREE.WebGLRenderer;
 
@@ -86,22 +98,22 @@ export class PointCloud {
 
     // Test for Render
     this.renderCircle();
-    this.addCube();
+    this.addCube({ x: 13, y: -1, z: 1 }, { depth: 5, width: 2, height: 2 });
   }
 
-  public addCube() {
-    const geometry = new THREE.BoxGeometry(30, 30, 30);
+  public addCube(center: I3DSpaceCoord, volume: IVolume, color = 0xffff00) {
+    const geometry = new THREE.BoxGeometry(volume.depth, volume.width, volume.height);
     const matarial = new THREE.MeshLambertMaterial({ color: 'red' });
 
     const cube = new THREE.Mesh(geometry, matarial);
-    cube.position.set(15, 15, 15);
-    const box = new THREE.BoxHelper(cube, 0xffff00);
+    cube.position.set(center.x, center.y, center.z);
+    const box = new THREE.BoxHelper(cube, color);
     this.scene.add(box);
     this.render();
   }
 
   public renderCircle() {
-    const radius = 15;
+    const radius = 100;
     const curve = new THREE.EllipseCurve(
       15,
       15, // ax, aY
@@ -123,6 +135,14 @@ export class PointCloud {
     this.scene.add(ellipse);
     this.render();
   }
+
+  public loadPCDFile = (src: string) => {
+    this.pcdLoader.load(src, (points: any) => {
+      this.scene.add(points);
+      points.material.size = 0.3;
+      this.render();
+    });
+  };
 
   public render() {
     this.renderer.render(this.scene, this.camera);
