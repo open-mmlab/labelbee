@@ -1,3 +1,10 @@
+/**
+ * @author Glenfiddish <edwinlee0927@hotmail.com>
+ * @file Refer to https://github.com/mrdoob/three.js/blob/dev/examples/jsm/loaders/PCDLoader.js
+ * @date 2022-06-14
+ * @update Add genColorByCoord for rendering multiple colors based on the z-axis
+ */
+
 import { BufferGeometry, FileLoader, Float32BufferAttribute, Loader, LoaderUtils, Points, PointsMaterial } from 'three';
 
 class PCDLoader extends Loader {
@@ -188,25 +195,35 @@ class PCDLoader extends Loader {
           position.push(parseFloat(line[offset.z]));
         }
 
-        if (offset.rgb !== undefined) {
-          const rgb_field_index = PCDheader.fields.findIndex((field) => field === 'rgb');
-          const rgb_type = PCDheader.type[rgb_field_index];
+        // if (offset.rgb !== undefined) {
+        //   const rgb_field_index = PCDheader.fields.findIndex((field) => field === 'rgb');
+        //   const rgb_type = PCDheader.type[rgb_field_index];
 
-          const float = parseFloat(line[offset.rgb]);
-          let rgb = float;
+        //   const float = parseFloat(line[offset.rgb]);
+        //   let rgb = float;
 
-          if (rgb_type === 'F') {
-            // treat float values as int
-            // https://github.com/daavoo/pyntcloud/pull/204/commits/7b4205e64d5ed09abe708b2e91b615690c24d518
-            const farr = new Float32Array(1);
-            farr[0] = float;
-            rgb = new Int32Array(farr.buffer)[0];
-          }
+        //   if (rgb_type === 'F') {
+        //     // treat float values as int
+        //     // https://github.com/daavoo/pyntcloud/pull/204/commits/7b4205e64d5ed09abe708b2e91b615690c24d518
+        //     const farr = new Float32Array(1);
+        //     farr[0] = float;
+        //     rgb = new Int32Array(farr.buffer)[0];
+        //   }
 
-          const r = (rgb >> 16) & 0x0000ff;
-          const g = (rgb >> 8) & 0x0000ff;
-          const b = (rgb >> 0) & 0x0000ff;
-          color.push(r / 255, g / 255, b / 255);
+        //   const r = (rgb >> 16) & 0x0000ff;
+        //   const g = (rgb >> 8) & 0x0000ff;
+        //   const b = (rgb >> 0) & 0x0000ff;
+        //   color.push(r / 255, g / 255, b / 255);
+        // }
+
+        if (this.genColorByCoord) {
+          const pdColor = this.genColorByCoord(
+            parseFloat(line[offset.x]),
+            parseFloat(line[offset.y]),
+            parseFloat(line[offset.z]),
+          );
+          const pdColorUnit8 = pdColor.map((hex) => hex / 255);
+          color.push(...pdColorUnit8);
         }
 
         if (offset.normal_x !== undefined) {
@@ -242,11 +259,11 @@ class PCDLoader extends Loader {
           position.push(dataview.getFloat32(PCDheader.points * offset.z + PCDheader.size[2] * i, this.littleEndian));
         }
 
-        if (offset.rgb !== undefined) {
-          color.push(dataview.getUint8(PCDheader.points * offset.rgb + PCDheader.size[3] * i + 2) / 255.0);
-          color.push(dataview.getUint8(PCDheader.points * offset.rgb + PCDheader.size[3] * i + 1) / 255.0);
-          color.push(dataview.getUint8(PCDheader.points * offset.rgb + PCDheader.size[3] * i + 0) / 255.0);
-        }
+        // if (offset.rgb !== undefined) {
+        //   color.push(dataview.getUint8(PCDheader.points * offset.rgb + PCDheader.size[3] * i + 2) / 255.0);
+        //   color.push(dataview.getUint8(PCDheader.points * offset.rgb + PCDheader.size[3] * i + 1) / 255.0);
+        //   color.push(dataview.getUint8(PCDheader.points * offset.rgb + PCDheader.size[3] * i + 0) / 255.0);
+        // }
 
         if (offset.normal_x !== undefined) {
           normal.push(
@@ -258,6 +275,16 @@ class PCDLoader extends Loader {
           normal.push(
             dataview.getFloat32(PCDheader.points * offset.normal_z + PCDheader.size[6] * i, this.littleEndian),
           );
+        }
+
+        if (this.genColorByCoord) {
+          const pdColor = this.genColorByCoord(
+            dataview.getFloat32(PCDheader.points * offset.x + PCDheader.size[0] * i, this.littleEndian),
+            dataview.getFloat32(PCDheader.points * offset.y + PCDheader.size[0] * i, this.littleEndian),
+            dataview.getFloat32(PCDheader.points * offset.z + PCDheader.size[0] * i, this.littleEndian),
+          );
+          const pdColorUnit8 = pdColor.map((hex) => hex / 255);
+          color.push(...pdColorUnit8);
         }
       }
     }
@@ -275,16 +302,26 @@ class PCDLoader extends Loader {
           position.push(dataview.getFloat32(row + offset.z, this.littleEndian));
         }
 
-        if (offset.rgb !== undefined) {
-          color.push(dataview.getUint8(row + offset.rgb + 2) / 255.0);
-          color.push(dataview.getUint8(row + offset.rgb + 1) / 255.0);
-          color.push(dataview.getUint8(row + offset.rgb + 0) / 255.0);
-        }
+        // if (offset.rgb !== undefined) {
+        //   color.push(dataview.getUint8(row + offset.rgb + 2) / 255.0);
+        //   color.push(dataview.getUint8(row + offset.rgb + 1) / 255.0);
+        //   color.push(dataview.getUint8(row + offset.rgb + 0) / 255.0);
+        // }
 
         if (offset.normal_x !== undefined) {
           normal.push(dataview.getFloat32(row + offset.normal_x, this.littleEndian));
           normal.push(dataview.getFloat32(row + offset.normal_y, this.littleEndian));
           normal.push(dataview.getFloat32(row + offset.normal_z, this.littleEndian));
+        }
+
+        if (this.genColorByCoord) {
+          const pdColor = this.genColorByCoord(
+            dataview.getFloat32(row + offset.x, this.littleEndian),
+            dataview.getFloat32(row + offset.y, this.littleEndian),
+            dataview.getFloat32(row + offset.z, this.littleEndian),
+          );
+          const pdColorUnit8 = pdColor.map((hex) => hex / 255);
+          color.push(...pdColorUnit8);
         }
       }
     }
@@ -312,6 +349,23 @@ class PCDLoader extends Loader {
     // build point cloud
 
     return new Points(geometry, material);
+  }
+
+  // rendering multiple colors based on the z-axis
+  genColorByCoord(x, y, z) {
+    if (z <= 0) {
+      return [128, 128, 128];
+    }
+
+    if (z < 5) {
+      return [255, 0, 0];
+    }
+
+    if (z < 10) {
+      return [0, 255, 0];
+    }
+
+    return [0, 0, 255];
   }
 }
 
