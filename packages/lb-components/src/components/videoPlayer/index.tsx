@@ -173,15 +173,14 @@ export class VideoPlayer extends React.Component<IVideoPlayerProps, IVideoPlayer
   };
 
   public onPause = () => {
-    this.setState(
-      {
-        isPlay: false,
-      },
-      this.onVideoStopped,
-    );
+    this.onVideoStopped();
   };
 
   public onVideoStopped = () => {
+    this.setState({
+      isPlay: false,
+    });
+
     if (this.timeInterval) {
       clearInterval(this.timeInterval);
       this.timeInterval = undefined;
@@ -212,6 +211,7 @@ export class VideoPlayer extends React.Component<IVideoPlayerProps, IVideoPlayer
       currentTime: 0,
       buffered: 0,
       error: false,
+      isPlay: false,
     });
     this.onVideoStopped();
   };
@@ -264,7 +264,7 @@ export class VideoPlayer extends React.Component<IVideoPlayerProps, IVideoPlayer
       updateNextPlaybackRate,
       onPause,
       onPlay,
-      resetVideoData,
+      resetVideoData, 
       setDuration,
       setCurrentTime,
       onError,
