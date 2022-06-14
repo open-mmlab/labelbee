@@ -91,7 +91,8 @@ const updateToolInstance = (annotation: AnnotationState, imgNode: HTMLImageEleme
  * @param nextBasicIndex
  */
 export const LoadFileAndFileData =
-  (nextIndex: number, nextBasicIndex?: number): any => async (dispatch: any, getState: any) => {
+  (nextIndex: number, nextBasicIndex?: number): any =>
+  async (dispatch: any, getState: any) => {
     const { stepList, step } = getState().annotation;
     const currentIsVideo = StepUtils.currentToolIsVideo(step, stepList);
 
@@ -203,7 +204,7 @@ export const annotationReducer = (
       }
 
       const oldResultString = imgList[imgIndex]?.result || '';
-      const [, basicImgInfo] = toolInstance?.exportData();
+      const [, basicImgInfo] = toolInstance?.exportData() ?? [];
 
       const resultWithBasicInfo = composeResultWithBasicImgInfo(oldResultString, basicImgInfo);
       const newResultString = composeResult(
@@ -245,7 +246,7 @@ export const annotationReducer = (
         return state;
       }
 
-      const [exportResult] = toolInstance?.exportData();
+      const [exportResult] = toolInstance?.exportData() ?? [];
 
       let previousResultList = exportResult;
 
@@ -330,7 +331,7 @@ export const annotationReducer = (
       /**
        * TODO
        * Before: !toolInstance || !annotationEngine
-       * 
+       *
        * The roles of toolInstance and annotationEngine need to be clearly distinguished
        */
       if (!toolInstance) {

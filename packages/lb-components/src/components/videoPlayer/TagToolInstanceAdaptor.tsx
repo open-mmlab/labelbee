@@ -44,7 +44,7 @@ export class TagToolInstanceAdaptor extends React.Component<
   public videoRef?: HTMLVideoElement;
   public labelSelectedList: number[] = [];
 
-  constructor(props: IVideoTagInstanceAdaptorProps) {
+  public constructor(props: IVideoTagInstanceAdaptorProps) {
     super(props);
     this.state = {
       tagResult: [],
