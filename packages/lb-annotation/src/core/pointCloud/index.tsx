@@ -4,7 +4,7 @@
  * @Author: Laoluo luozefeng@sensetime.com
  * @Date: 2022-06-13 19:05:33
  * @LastEditors: Laoluo luozefeng@sensetime.com
- * @LastEditTime: 2022-06-14 10:43:45
+ * @LastEditTime: 2022-06-14 11:12:08
  */
 import * as THREE from 'three';
 import { OrbitControls } from './OrbitControls';
@@ -38,40 +38,36 @@ export class PointCloud {
     this.axesHelper = new THREE.AxesHelper(1000);
     this.pcdLoader = new PCDLoader();
 
+    this.scene.add(this.axesHelper);
+    this.scene.add(this.camera);
+    container.appendChild(this.renderer.domElement);
+
     this.init();
-    this.renderSomething();
+    this.renderCircle();
   }
 
   public init() {
-    const { renderer, scene, axesHelper, controls, container, camera } = this;
+    const { renderer, scene, controls, camera } = this;
 
     // Background
-    scene.background = new THREE.Color(0x000000);
-    scene.add(axesHelper);
+    scene.background = new THREE.Color(0x050505);
 
     // size
     renderer.setPixelRatio(window.devicePixelRatio);
     renderer.setSize(window.innerWidth, window.innerHeight);
-    container.appendChild(renderer.domElement);
-
-    camera.position.set(20, 20, 10);
-    camera.lookAt(0, 0, 0);
-    scene.add(camera);
 
     controls.target = new THREE.Vector3(0, 0, 0);
     controls.addEventListener('change', () => {
       this.render();
     }); // use if there is no animation loop
     controls.minDistance = 10;
-    // controls.update();
 
     //controls.update() must be called after any manual changes to the camera's transform
     camera.position.set(0, 20, 100);
     controls.update();
   }
 
-  public renderSomething() {
-    // 绘制范围弧线
+  public renderCircle() {
     const radius = 30;
     const curve = new THREE.EllipseCurve(
       0,
@@ -92,6 +88,7 @@ export class PointCloud {
     // Create the final object to add to the scene
     const ellipse = new THREE.Line(geometry, material);
     this.scene.add(ellipse);
+    this.render();
   }
 
   public render() {

@@ -141,7 +141,7 @@ class OrbitControls extends EventDispatcher {
       const twoPI = 2 * Math.PI;
 
       return function update() {
-        const position = scope.object.position;
+        const { position } = scope.object;
 
         offset.copy(position).sub(scope.target);
 
@@ -359,7 +359,7 @@ class OrbitControls extends EventDispatcher {
 
         if (scope.object.isPerspectiveCamera) {
           // perspective
-          const position = scope.object.position;
+          const { position } = scope.object;
           offset.copy(position).sub(scope.target);
           let targetDistance = offset.length();
 
