@@ -101,7 +101,7 @@ export class PointCloud {
   }
 
   public renderCircle() {
-    const radius = 15;
+    const radius = 100;
     const curve = new THREE.EllipseCurve(
       15,
       15, // ax, aY
@@ -123,6 +123,14 @@ export class PointCloud {
     this.scene.add(ellipse);
     this.render();
   }
+
+  public loadPCDFile = (src: string) => {
+    this.pcdLoader.load(src, (points: any) => {
+      this.scene.add(points);
+      points.material.size = 0.3;
+      this.render();
+    });
+  };
 
   public render() {
     this.renderer.render(this.scene, this.camera);
