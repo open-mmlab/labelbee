@@ -748,7 +748,9 @@ class PolygonOperation extends BasicToolOperation {
       }
 
       case EKeyCode.X:
-        e.altKey && this.segment();
+        if (e.altKey) {
+          this.segment();
+        }
         break;
 
       default: {
@@ -1275,6 +1277,8 @@ class PolygonOperation extends BasicToolOperation {
         case 2:
           this.isCombined = false;
           break;
+        default:
+          return;
       }
 
       return;

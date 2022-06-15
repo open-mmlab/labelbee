@@ -1,11 +1,11 @@
 {
   "name": "lb-demo",
-  "version": "1.3.0",
+  "version": "1.4.0-alpha.0",
   "private": true,
   "dependencies": {
-    "@labelbee/lb-annotation": "^1.7.1",
-    "@labelbee/lb-components": "^1.4.0",
-    "@labelbee/lb-utils": "^1.1.0",
+    "@labelbee/lb-annotation": "^1.8.0-alpha.1",
+    "@labelbee/lb-components": "^1.5.0-alpha.0",
+    "@labelbee/lb-utils": "^1.2.0-alpha.0",
     "@testing-library/jest-dom": "^5.11.4",
     "@testing-library/react": "^11.1.0",
     "@testing-library/user-event": "^12.1.10",
