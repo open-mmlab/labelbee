@@ -38,17 +38,8 @@ export const result2LabelKey = (result: any[], inputList: any[]) => {
     return (
       result?.reduce((exitsTags: ITagLabelsArray, res: { result: { [key: string]: string } }) => {
         tagsSortThruInputList(Object.keys(res.result), inputList).forEach((key) => {
-          const values = res.result[key];
-          const valuesArray = values.split(';');
-          valuesArray.forEach((value) => {
-            const { keyLabel, valueLabel } = findTagLabel(key, value, inputList);
-            const tagHasAssign = exitsTags.find((i) => i.keyLabel === keyLabel);
-            if (tagHasAssign) {
-              tagHasAssign.valuesLabelArray.push(valueLabel);
-            } else {
-              exitsTags.push({ keyLabel, valuesLabelArray: [valueLabel] });
-            }
-          });
+          const valuesArray = res.result[key]?.split(';');
+          findLabelFromValuesArray(valuesArray, key, inputList, exitsTags);
         });
         return exitsTags;
       }, []) ?? []
@@ -56,6 +47,30 @@ export const result2LabelKey = (result: any[], inputList: any[]) => {
   } catch (error) {
     return [];
   }
+};
+
+/**
+ * find label from valuesArray and push to exitsTags
+ * @param valuesArray
+ * @param key
+ * @param inputList
+ * @param exitsTags
+ */
+const findLabelFromValuesArray = (
+  valuesArray: string[],
+  key: string,
+  inputList: any[],
+  exitsTags: ITagLabelsArray,
+) => {
+  valuesArray.forEach((value) => {
+    const { keyLabel, valueLabel } = findTagLabel(key, value, inputList);
+    const tagHasAssign = exitsTags.find((i) => i.keyLabel === keyLabel);
+    if (tagHasAssign) {
+      tagHasAssign.valuesLabelArray.push(valueLabel);
+    } else {
+      exitsTags.push({ keyLabel, valuesLabelArray: [valueLabel] });
+    }
+  });
 };
 
 /**
@@ -81,5 +96,5 @@ export const getKeyCodeNumber = (keyCode: number) => {
  * @param places
  * @returns {Number}
  */
-export const decimalReserved = (num: number, places: number = 2) =>
+export const decimalReserved = (num: number, places = 2) =>
   typeof num === 'number' ? parseFloat(num.toFixed(places)) : num;

@@ -62,7 +62,7 @@ const VideoProgress = () => {
         <div className={getClassName('video-slider', 'played')} style={{ width: playedPercent }} />
       </div>
 
-      <div className={getClassName('video-slider-bar')} style={{ left: playedPercent }}></div>
+      <div className={getClassName('video-slider-bar')} style={{ left: playedPercent }} />
     </div>
   );
 };
