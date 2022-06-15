@@ -9,5 +9,7 @@ jobs:
       run: npm install
     - name: Run Bootstrap
       run: npm run bootstrap
+    - name: Build Type
+      run: npm run build:type
     - name: Run ESLint
       run:  npm run lint
