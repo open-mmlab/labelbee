@@ -7,6 +7,7 @@
  * @LastEditTime: 2022-06-14 17:03:22
  */
 import * as THREE from 'three';
+import { MathUtils, Matrix4 } from 'three';
 import { OrbitControls } from './OrbitControls';
 import { PCDLoader } from './PCDLoader';
 
@@ -21,11 +22,19 @@ interface I3DSpaceCoord {
 }
 
 interface IVolume {
+  /** 目标朝向垂直方向的长度 */
   width: number;
-  depth: number;
+  /** 目标朝向方向的长度 */
   height: number;
+  /** Z轴方向的长度 */
+  depth: number;
 }
 
+interface IBoxParams {
+  center: I3DSpaceCoord;
+  volume: IVolume;
+  rotate: number;
+}
 export class PointCloud {
   public renderer: THREE.WebGLRenderer;
 
@@ -96,19 +105,33 @@ export class PointCloud {
     this.initControls();
     this.initRenderer();
 
+    const params: IBoxParams = {
+      center: { x: 13, y: -1, z: 1 },
+      volume: { depth: 2, width: 5, height: 2 },
+      rotate: 180,
+    };
+
     // Test for Render
     this.renderCircle();
-    this.addCube({ x: 13, y: -1, z: 1 }, { depth: 5, width: 2, height: 2 });
+    this.generateBox(params);
   }
 
-  public addCube(center: I3DSpaceCoord, volume: IVolume, color = 0xffff00) {
-    const geometry = new THREE.BoxGeometry(volume.depth, volume.width, volume.height);
-    const matarial = new THREE.MeshLambertMaterial({ color: 'red' });
-
+  public generateBox(boxParams: IBoxParams, color = 0xffffff) {
+    const { center, volume, rotate } = boxParams;
+    const group = new THREE.Group();
+    const geometry = new THREE.BoxGeometry(volume.width, volume.height, volume.depth);
+    const matarial = new THREE.MeshBasicMaterial({ color: 'blue' });
     const cube = new THREE.Mesh(geometry, matarial);
-    cube.position.set(center.x, center.y, center.z);
     const box = new THREE.BoxHelper(cube, color);
-    this.scene.add(box);
+    const arrow = this.generateBoxArrow(boxParams);
+
+    group.add(box);
+    group.add(arrow);
+    group.position.set(center.x, center.y, center.z);
+
+    group.rotation.set(0, 0, MathUtils.degToRad(rotate));
+    this.scene.add(group);
+
     this.render();
   }
 
@@ -142,6 +165,15 @@ export class PointCloud {
       points.material.size = 0.3;
       this.render();
     });
+  };
+
+  public generateBoxArrow = ({ volume }: IBoxParams) => {
+    const dir = new THREE.Vector3(1, 0, 0);
+    const origin = new THREE.Vector3(-volume.width / 2, 0, -volume.depth / 2);
+    const length = volume.width;
+    const hex = 0xffff00;
+    const arrowHelper = new THREE.ArrowHelper(dir, origin, length, hex);
+    return arrowHelper;
   };
 
   public render() {
