@@ -4,7 +4,7 @@
  * @Author: Laoluo luozefeng@sensetime.com
  * @Date: 2022-06-13 19:05:33
  * @LastEditors: Laoluo luozefeng@sensetime.com
- * @LastEditTime: 2022-06-14 17:03:22
+ * @LastEditTime: 2022-06-16 16:12:38
  */
 import * as THREE from 'three';
 import { MathUtils, Matrix4 } from 'three';
@@ -87,6 +87,7 @@ export class PointCloud {
       this.render();
     }); // use if there is no animation loop
     controls.minDistance = 1;
+    controls.maxPolarAngle = Math.PI / 2; // Fobid orbit vertically over 90°
 
     controls.update();
   }
