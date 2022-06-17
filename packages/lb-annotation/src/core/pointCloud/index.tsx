@@ -98,7 +98,6 @@ export class PointCloud {
     };
 
     // Test for Render
-    this.renderCircle();
     this.generateBox(params);
     this.updateCamera(params, EPerspectiveView.LFT);
     this.controls.update();
@@ -186,11 +185,10 @@ export class PointCloud {
     return cameraVector;
   }
 
-  public renderCircle() {
-    const radius = 100;
+  public createCircle(radius: number) {
     const curve = new THREE.EllipseCurve(
-      15,
-      15, // ax, aY
+      0,
+      0,
       radius,
       radius, // xRadius, yRadius
       0,
@@ -206,14 +204,18 @@ export class PointCloud {
 
     // Create the final object to add to the scene
     const ellipse = new THREE.Line(geometry, material);
-    this.scene.add(ellipse);
-    this.render();
+    return ellipse;
   }
 
   public loadPCDFile = (src: string) => {
     this.pcdLoader.load(src, (points: any) => {
-      this.scene.add(points);
       points.material.size = 0.3;
+
+      const circle = this.createCircle(points.geometry.boundingSphere.radius * 2);
+
+      this.scene.add(points);
+      this.scene.add(circle);
+
       this.render();
     });
   };
