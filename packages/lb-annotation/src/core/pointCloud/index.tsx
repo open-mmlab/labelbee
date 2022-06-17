@@ -37,6 +37,8 @@ export class PointCloud {
 
   private container: HTMLElement;
 
+  private front: any;
+
   constructor({ container }: IProps) {
     this.container = container;
     this.renderer = new THREE.WebGLRenderer({ antialias: true });
@@ -110,9 +112,11 @@ export class PointCloud {
     const cube = new THREE.Mesh(geometry, matarial);
     const box = new THREE.BoxHelper(cube, color);
     const arrow = this.generateBoxArrow(boxParams);
+    const boxID = this.generateBoxID(boxParams);
 
     group.add(box);
     group.add(arrow);
+    group.add(boxID);
     group.position.set(center.x, center.y, center.z);
 
     group.rotation.set(0, 0, rotation);
@@ -222,6 +226,32 @@ export class PointCloud {
     const arrowHelper = new THREE.ArrowHelper(dir, origin, length, hex);
     return arrowHelper;
   };
+
+  public generateBoxID = (boxParams: IBoxParams) => {
+    const texture = new THREE.Texture(this.getTextCanvas('1000'));
+    texture.needsUpdate = true;
+    const sprite = new THREE.SpriteMaterial({ map: texture, depthWrite: false });
+    const boxID = new THREE.Sprite(sprite);
+    boxID.scale.set(5, 5, 5);
+    console.log(boxID);
+    boxID.position.set(-boxParams.volume.width / 2, 0, boxParams.volume.depth / 2 + 0.5);
+    return boxID;
+  };
+
+  public getTextCanvas(text: string) {
+    var canvas = document.createElement('canvas');
+
+    var ctx = canvas.getContext('2d');
+    if (ctx) {
+      ctx.font = 50 + 'px " bold';
+      ctx.fillStyle = 'white';
+      ctx.textAlign = 'center';
+      ctx.textBaseline = 'middle';
+      ctx.fillText(text, canvas.width / 2, canvas.height / 2);
+    }
+
+    return canvas;
+  }
 
   public render() {
     this.renderer.render(this.scene, this.camera);
