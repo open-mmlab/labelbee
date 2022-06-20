@@ -1,5 +1,5 @@
 import { isObject } from 'lodash';
-import { ECheckModel, EToolName } from '@/constant/tool';
+import { ECheckModel, EPointCloudName, EToolName } from '@/constant/tool';
 import { IPolygonPoint } from '../../types/tool/polygon';
 import { ESortDirection, EStepType } from '../../constant/annotation';
 import CheckOperation from '../../core/toolOperation/checkOperation';
@@ -113,7 +113,7 @@ export default class CommonToolUtils {
    * 筛选当前的步骤配置
    * @param toolName
    */
-  public static getCurrentOperation(toolName: EToolName | ECheckModel) {
+  public static getCurrentOperation(toolName: EToolName | ECheckModel | EPointCloudName) {
     switch (toolName) {
       case EToolName.Rect:
       case EToolName.RectTrack:
@@ -130,6 +130,9 @@ export default class CommonToolUtils {
         return PointOperation;
       case EToolName.Text:
         return TextToolOperation;
+      // TODO: 点云实例返回
+      case EPointCloudName.PointCloud:
+        return {};
       default:
         throw new Error('not match tool');
     }

@@ -11,13 +11,12 @@ import Sidebar from './sidebar';
 import ToolFooter from './toolFooter';
 import ToolHeader from './toolHeader';
 import { getStepConfig } from '@/store/annotation/reducer';
-import { cTool } from '@labelbee/lb-annotation';
 
 import VideoAnnotate from '@/components/videoAnnotate';
 import { AppState } from '@/store';
 import { connect } from 'react-redux';
-
-const { EVideoToolName } = cTool;
+import ToolUtils from '@/utils/ToolUtils';
+import PointCloudView from '@/components/pointCloudView';
 
 interface IProps {
   path: string;
@@ -41,9 +40,14 @@ const ImageAnnotate: React.FC<AppProps & IProps> = (props) => {
 const AnnotatedArea: React.FC<AppProps & IProps> = (props) => {
   const { stepList, step } = props;
   const currentToolName = getStepConfig(stepList, step)?.tool;
-  const isVideoTool = Object.values(EVideoToolName).includes(currentToolName);
+  const isVideoTool = ToolUtils.isVideoTool(currentToolName);
+  const isPointCloudTool = ToolUtils.isPointCloudTool(currentToolName);
   if (isVideoTool) {
     return <VideoAnnotate {...props} />;
+  }
+
+  if (isPointCloudTool) {
+    return <PointCloudView />;
   }
 
   return <ImageAnnotate {...props} />;
