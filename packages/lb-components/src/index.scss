@@ -1346,3 +1346,58 @@ $hotkey-container-padding: 7px;
 }
 
 /** VideoPlayer样式 end */
+
+/** PointCloud样式 start */
+.#{$prefix}-point-cloud-wrapper {
+  display: flex;
+  height: 100%;
+  width: 100;
+  overflow: hidden;
+  .#{$prefix}-point-cloud-container__left {
+    width: 580px;
+    display: flex;
+    flex-direction: column;
+    border: 1px solid #fff;
+    .#{$prefix}-point-cloud-2d-container {
+      flex: 1;
+      flex-direction: column;
+      display: flex;
+
+      .#{$prefix}-point-cloud-2d-image {
+        flex: 1;
+        display: flex;
+        align-items: center;
+      }
+    }
+
+    .#{$prefix}-point-cloud-3d-container {
+      height: 560px;
+    }
+  }
+
+  .#{$prefix}-point-cloud-container__right {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+
+    .#{$prefix}-point-cloud-container__top-view {
+      height: 540px;
+      border-bottom: 1px solid #fff;
+    }
+
+    .#{$prefix}-point-cloud-container__right-bottom {
+      flex: 1;
+      display: flex;
+
+      .#{$prefix}-point-cloud-container__side-view {
+        border-right: 1px solid white;
+      }
+
+      .#{$prefix}-point-cloud-container__side-view,
+      .#{$prefix}-point-cloud-container__back-view {
+        flex: 1;
+      }
+    }
+  }
+}
+/** PointCloud样式 end */

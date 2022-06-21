@@ -42,7 +42,7 @@ export class PointCloud {
   constructor({ container }: IProps) {
     this.container = container;
     this.renderer = new THREE.WebGLRenderer({ antialias: true });
-    this.camera = new THREE.PerspectiveCamera(30, window.innerWidth / window.innerHeight, 1, 1000);
+    this.camera = new THREE.PerspectiveCamera(30, this.containerWidth / this.containerHeight, 1, 1000);
     this.initCamera();
 
     this.scene = new THREE.Scene();
@@ -55,6 +55,14 @@ export class PointCloud {
     container.appendChild(this.renderer.domElement);
 
     this.init();
+  }
+
+  get containerWidth() {
+    return this.container.clientWidth;
+  }
+
+  get containerHeight() {
+    return this.container.clientWidth;
   }
 
   public initCamera() {
@@ -80,7 +88,7 @@ export class PointCloud {
   public initRenderer() {
     const { renderer } = this;
     renderer.setPixelRatio(window.devicePixelRatio);
-    renderer.setSize(window.innerWidth, window.innerHeight);
+    renderer.setSize(this.containerWidth, this.containerHeight);
   }
 
   public init() {
