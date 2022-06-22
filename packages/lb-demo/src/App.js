@@ -14,7 +14,6 @@ import qs from 'qs';
 import { AnnotationView } from '@labelbee/lb-components';
 import { DEFAULT_ANNOTATIONS } from './mock';
 import StepUtils from '@labelbee/lb-components/dist/utils/StepUtils';
-import PointCloudDom from './components/PointCloud';
 
 const App = () => {
   const tool = qs.parse(window.location.search, { ignoreQueryPrefix: true, comma: true }).tool;
@@ -30,10 +29,6 @@ const App = () => {
       result: isSingleTool ? getMockResult(tool) : '',
     })),
   );
-
-  if (tool === 'pointCloud') {
-    return <PointCloudDom />;
-  }
 
   // 参看工具的展示
   if (tool === 'annotationView') {

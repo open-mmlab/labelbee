@@ -6,13 +6,13 @@ import AnnotationDataUtils from '@/utils/AnnotationDataUtils';
 import { ConfigUtils } from '@/utils/ConfigUtils';
 import { composeResult, composeResultWithBasicImgInfo } from '@/utils/data';
 import StepUtils from '@/utils/StepUtils';
+import ToolUtils from '@/utils/ToolUtils';
 import { AnnotationEngine, CommonToolUtils, ImgUtils, cTool } from '@labelbee/lb-annotation';
 import { i18n } from '@labelbee/lb-utils';
 import { message } from 'antd/es';
 import _ from 'lodash';
 import { SetAnnotationLoading } from './actionCreators';
 import { AnnotationActionTypes, AnnotationState } from './types';
-const { EVideoToolName } = cTool;
 
 export const getStepConfig = (stepList: any[], step: number) =>
   stepList.find((i) => i.step === step);
@@ -62,7 +62,12 @@ const updateToolInstance = (annotation: AnnotationState, imgNode: HTMLImageEleme
   const config = ConfigUtils.jsonParser(stepConfig.config);
 
   // 视频工具不支持实例化
-  if ((Object.values(EVideoToolName) as string[]).includes(stepConfig.tool)) {
+  if (ToolUtils.isVideoTool(stepConfig?.tool)) {
+    return;
+  }
+
+  // TODO: 点云实例化对接
+  if (ToolUtils.isPointCloudTool(stepConfig?.tool)) {
     return;
   }
 
