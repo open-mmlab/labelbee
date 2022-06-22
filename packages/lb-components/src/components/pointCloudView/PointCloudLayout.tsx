@@ -1,24 +1,20 @@
+import { getClassName } from '@/utils/dom';
+import classNames from 'classnames';
 import React from 'react';
 
-export const PointCloudBlock = ({ title, toolbar, children }) => {
-  return (
-    <div>
-      <div>
-        <span>{title}</span>
-        <span>{toolbar}</span>
-      </div>
+export const PointCloudContainer: React.FC<{
+  title: string;
+  toolbar?: JSX.Element;
+  className?: string;
+}> = ({ title, toolbar, children, className }) => {
+  console.log(classNames([className, getClassName('point-cloud-container')]));
 
-      <div>{children}</div>
-    </div>
-  );
-};
-
-export const PointCloudConteiner = ({ title, toolbar, children }) => {
   return (
-    <div>
-      <div>
+    <div className={classNames([className, getClassName('point-cloud-container')])}>
+      <div className={getClassName('point-cloud-container', 'header')}>
         <span>{title}</span>
-        <span>{toolbar}</span>
+
+        {toolbar && <span>{toolbar}</span>}
       </div>
 
       <div>{children}</div>

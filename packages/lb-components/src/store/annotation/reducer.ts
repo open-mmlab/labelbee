@@ -7,7 +7,7 @@ import { ConfigUtils } from '@/utils/ConfigUtils';
 import { composeResult, composeResultWithBasicImgInfo } from '@/utils/data';
 import StepUtils from '@/utils/StepUtils';
 import ToolUtils from '@/utils/ToolUtils';
-import { AnnotationEngine, CommonToolUtils, ImgUtils, cTool } from '@labelbee/lb-annotation';
+import { AnnotationEngine, CommonToolUtils, ImgUtils } from '@labelbee/lb-annotation';
 import { i18n } from '@labelbee/lb-utils';
 import { message } from 'antd/es';
 import _ from 'lodash';
@@ -96,7 +96,8 @@ const updateToolInstance = (annotation: AnnotationState, imgNode: HTMLImageEleme
  * @param nextBasicIndex
  */
 export const LoadFileAndFileData =
-  (nextIndex: number, nextBasicIndex?: number): any => async (dispatch: any, getState: any) => {
+  (nextIndex: number, nextBasicIndex?: number): any =>
+  async (dispatch: any, getState: any) => {
     const { stepList, step } = getState().annotation;
     const currentIsVideo = StepUtils.currentToolIsVideo(step, stepList);
 
@@ -335,7 +336,7 @@ export const annotationReducer = (
       /**
        * TODO
        * Before: !toolInstance || !annotationEngine
-       * 
+       *
        * The roles of toolInstance and annotationEngine need to be clearly distinguished
        */
       if (!toolInstance) {

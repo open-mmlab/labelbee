@@ -1353,6 +1353,17 @@ $hotkey-container-padding: 7px;
   height: 100%;
   width: 100;
   overflow: hidden;
+
+  .#{$prefix}-point-cloud-container {
+    &__header {
+      background-color: #444;
+      color: white;
+      height: 40px;
+      padding-left: 16px;
+      line-height: 40px;
+      font-weight: 700 ;
+    }
+  }
   .#{$prefix}-point-cloud-container__left {
     width: 580px;
     display: flex;
