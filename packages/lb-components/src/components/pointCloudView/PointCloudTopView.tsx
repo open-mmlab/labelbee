@@ -4,6 +4,7 @@
  * @LastEditors: Laoluo luozefeng@sensetime.com
  * @LastEditTime: 2022-06-27 19:45:27
  */
+import { getClassName } from '@/utils/dom';
 import {
   PolygonOperation,
   cTool,
@@ -14,6 +15,7 @@ import {
 import { EPerspectiveView } from '@labelbee/lb-utils';
 import React, { useEffect, useRef } from 'react';
 import { pointCloudMain } from './PointCloud3DView';
+import { PointCloudContainer } from './PointCloudLayout';
 
 const { EPolygonPattern } = cTool;
 
@@ -191,7 +193,14 @@ const PointCloudTopView = () => {
     }
   }, []);
 
-  return <div style={{ width: '100%', height: 500 }} ref={ref} />;
+  return (
+    <PointCloudContainer
+      className={getClassName('point-cloud-container', 'top-view')}
+      title='俯视图'
+    >
+      <div style={{ width: '100%', height: 500 }} ref={ref} />
+    </PointCloudContainer>
+  );
 };
 
 export default PointCloudTopView;

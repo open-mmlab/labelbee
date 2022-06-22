@@ -49,8 +49,6 @@ export class PointCloud {
 
   private container: HTMLElement;
 
-  private front: any;
-
   private isOrthographicCamera = false;
 
   constructor({ container, noAppend, isOrthographicCamera, orthgraphicParams }: IProps) {
@@ -131,7 +129,7 @@ export class PointCloud {
   public init() {
     const { scene } = this;
     // Background
-    scene.background = new THREE.Color(0x050505);
+    scene.background = new THREE.Color(0x4c4c4c);
 
     this.initControls();
     this.initRenderer();

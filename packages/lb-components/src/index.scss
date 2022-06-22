@@ -1361,7 +1361,7 @@ $hotkey-container-padding: 7px;
       height: 40px;
       padding-left: 16px;
       line-height: 40px;
-      font-weight: 700 ;
+      font-weight: 700;
     }
   }
   .#{$prefix}-point-cloud-container__left {
@@ -1378,6 +1378,7 @@ $hotkey-container-padding: 7px;
         flex: 1;
         display: flex;
         align-items: center;
+        background-color: #4c4c4c;
       }
     }
 

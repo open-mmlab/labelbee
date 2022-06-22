@@ -17,7 +17,7 @@ export const PointCloudContainer: React.FC<{
         {toolbar && <span>{toolbar}</span>}
       </div>
 
-      <div>{children}</div>
+      {children}
     </div>
   );
 };
