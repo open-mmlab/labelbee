@@ -1,3 +1,9 @@
+/*
+ * @Author: Laoluo luozefeng@sensetime.com
+ * @Date: 2022-01-12 13:15:33
+ * @LastEditors: Laoluo luozefeng@sensetime.com
+ * @LastEditTime: 2022-06-27 17:34:35
+ */
 export default class EventListener {
   private _events: Map<string, any[]>;
 
@@ -10,7 +16,7 @@ export default class EventListener {
    * @param eventName 事件名字
    * @param callback 事件回调
    */
-  public on(eventName: string, callback: (params?: any) => void) {
+  public on(eventName: string, callback: (...args: any[]) => void) {
     const existEvents = this._events.get(eventName) || [];
     if (!existEvents.some((fn) => fn === callback)) {
       this._events.set(eventName, existEvents.concat(callback));

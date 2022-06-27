@@ -478,4 +478,28 @@ export default class MathUtils {
     const newPoint = MathUtils.getPerpendicularFootOfLine(pointList, coordinate);
     return MathUtils.getQuadrangleFromTriangle([...pointList, newPoint]);
   }
+
+  /**
+   * Get the radius from quadrangle
+   * @param points
+   * @returns
+   */
+  public static getRadiusFromQuadrangle(points: [ICoordinate, ICoordinate, ICoordinate, ICoordinate]) {
+    const [, point2, point3] = points;
+
+    const y = point3.y - point2.y;
+    const x = point2.x - point3.x;
+
+    const len = this.getLineLength(point2, point3);
+
+    const cosX = y / len;
+
+    const radius = Math.acos(cosX);
+
+    if (x > 0) {
+      return -radius;
+    }
+
+    return radius;
+  }
 }

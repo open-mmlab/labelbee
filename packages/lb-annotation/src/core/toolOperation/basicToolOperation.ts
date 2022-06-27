@@ -38,6 +38,8 @@ interface IBasicToolOperationProps {
   showDefaultCursor?: boolean; // 默认会展示为 none
 
   forbidBasicResultRender?: boolean;
+
+  isAppend?: boolean;
 }
 
 /**
@@ -159,7 +161,7 @@ class BasicToolOperation extends EventListener {
     this.showDefaultCursor = props.showDefaultCursor || false;
 
     this.destroyCanvas();
-    this.createCanvas(props.size);
+    this.createCanvas(props.size, props.isAppend);
     this.imgNode = props.imgNode;
     this.isImgError = !props.imgNode;
     this.basicImgInfo = {
@@ -325,7 +327,7 @@ class BasicToolOperation extends EventListener {
     this.eventUnbinding();
   }
 
-  public createCanvas(size: ISize) {
+  public createCanvas(size: ISize, isAppend = true) {
     // TODO 后续需要将 canvas 抽离出来，迭代器叠加
     const basicCanvas = document.createElement('canvas');
     const pixel = this.pixelRatio;
@@ -351,12 +353,17 @@ class BasicToolOperation extends EventListener {
     canvas.width = size.width * pixel;
     canvas.height = size.height * pixel;
 
-    if (this.container.hasChildNodes()) {
-      this.container.insertBefore(canvas, this.container.childNodes[0]);
-      this.container.insertBefore(basicCanvas, this.container.childNodes[0]);
-    } else {
-      this.container.appendChild(basicCanvas);
-      this.container.appendChild(canvas);
+    // set Attribute
+    this.container.style.position = 'relative';
+
+    if (isAppend) {
+      if (this.container.hasChildNodes()) {
+        this.container.insertBefore(canvas, this.container.childNodes[0]);
+        this.container.insertBefore(basicCanvas, this.container.childNodes[0]);
+      } else {
+        this.container.appendChild(basicCanvas);
+        this.container.appendChild(canvas);
+      }
     }
 
     this.canvas = canvas;
@@ -515,7 +522,7 @@ class BasicToolOperation extends EventListener {
     this.renderBasicCanvas();
 
     this.emit('dependRender');
-    this.emit('renderZoom', zoom);
+    this.emit('renderZoom', zoom, currentPos);
   };
 
   /**
@@ -903,7 +910,7 @@ class BasicToolOperation extends EventListener {
     this.currentPosStorage = newCurrentPos;
     this.imgInfo = imgInfo;
     zoomInfo.ratio = ratio;
-    this.emit('renderZoom', zoom, currentPos);
+    this.emit('renderZoom', zoom, newCurrentPos);
   };
 
   /**

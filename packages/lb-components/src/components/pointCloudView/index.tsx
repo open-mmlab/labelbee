@@ -1,3 +1,9 @@
+/*
+ * @Author: Laoluo luozefeng@sensetime.com
+ * @Date: 2022-06-22 11:08:31
+ * @LastEditors: Laoluo luozefeng@sensetime.com
+ * @LastEditTime: 2022-06-26 12:34:31
+ */
 /**
  * @author Glenfiddish <edwinlee0927@hotmail.com>
  * @file Point cloud tool view, includes 2D-view、3Dview、top-view、side-view、back-view
@@ -8,6 +14,7 @@ import { getClassName } from '@/utils/dom';
 import React from 'react';
 import PointCloud3D from './PointCloud3DView';
 import { PointCloudContainer } from './PointCloudLayout';
+import PointCloudTopView from './PointCloudTopView';
 
 const PointCloudView = () => {
   return (
@@ -29,7 +36,7 @@ const PointCloudView = () => {
           className={getClassName('point-cloud-container', 'top-view')}
           title='俯视图'
         >
-          <div></div>
+          <PointCloudTopView />
         </PointCloudContainer>
 
         <div className={getClassName('point-cloud-container', 'right-bottom')}>

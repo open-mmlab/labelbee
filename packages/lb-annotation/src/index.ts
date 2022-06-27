@@ -74,3 +74,5 @@ export {
   AnnotationEngine,
   PointCloud,
 };
+
+export * from './newCore';
