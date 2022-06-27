@@ -21,7 +21,7 @@ const { EVideoToolName } = cTool;
 
 interface IProps {
   style?: any;
-  title?: JSX.Element;
+  title?: React.ReactElement<any>;
   toolName?: string;
 }
 

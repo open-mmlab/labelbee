@@ -72,7 +72,7 @@ export class VideoPlayer extends React.Component<IVideoPlayerProps, IVideoPlayer
   public videoRef?: React.RefObject<HTMLVideoElement>;
   public timeInterval?: number;
 
-  constructor(props: IVideoPlayerProps) {
+  public constructor(props: IVideoPlayerProps) {
     super(props);
     this.state = {
       playbackRate: 1,
@@ -85,11 +85,11 @@ export class VideoPlayer extends React.Component<IVideoPlayerProps, IVideoPlayer
     this.videoRef = React.createRef();
   }
 
-  get videoElm() {
+  public get videoElm() {
     return this.videoRef?.current;
   }
 
-  get videoSrc() {
+  public get videoSrc() {
     const { imgIndex, imgList } = this.props;
     return imgIndex > -1 ? imgList[imgIndex]?.url ?? '' : '';
   }
@@ -111,7 +111,7 @@ export class VideoPlayer extends React.Component<IVideoPlayerProps, IVideoPlayer
     }
   };
 
-  public updateNextPlaybackRate = (isForward: boolean = true) => {
+  public updateNextPlaybackRate = (isForward = true) => {
     const idx = PLAYBACK_RATES.findIndex((r) => r === this.state.playbackRate);
     let nextIdx = isForward ? Math.min(idx + 1, PLAYBACK_RATES.length - 1) : Math.max(idx - 1, 0);
     this.changePlaybackPate(PLAYBACK_RATES[nextIdx]);
@@ -173,15 +173,14 @@ export class VideoPlayer extends React.Component<IVideoPlayerProps, IVideoPlayer
   };
 
   public onPause = () => {
-    this.setState(
-      {
-        isPlay: false,
-      },
-      this.onVideoStopped,
-    );
+    this.onVideoStopped();
   };
 
   public onVideoStopped = () => {
+    this.setState({
+      isPlay: false,
+    });
+
     if (this.timeInterval) {
       clearInterval(this.timeInterval);
       this.timeInterval = undefined;
@@ -212,6 +211,7 @@ export class VideoPlayer extends React.Component<IVideoPlayerProps, IVideoPlayer
       currentTime: 0,
       buffered: 0,
       error: false,
+      isPlay: false,
     });
     this.onVideoStopped();
   };
@@ -274,6 +274,7 @@ export class VideoPlayer extends React.Component<IVideoPlayerProps, IVideoPlayer
 
     return (
       <VideoPlayerCtx.Provider
+        // eslint-disable-next-line react/jsx-no-constructed-context-values
         value={{
           videoRef: this.videoRef,
           isPlay,
@@ -304,6 +305,7 @@ export class VideoPlayer extends React.Component<IVideoPlayerProps, IVideoPlayer
               onDurationChange={setDuration}
               width='100%'
               height='100%'
+              onClick={playPause}
             />
 
             <FileException

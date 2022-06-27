@@ -1,5 +1,5 @@
-import { ERotateDirection } from '@/constant/annotation';
 import { difference, polygon, union } from '@turf/turf';
+import { ERotateDirection } from '@/constant/annotation';
 import CommonToolUtils from './CommonToolUtils';
 import { IPolygonData, IPolygonPoint } from '../../types/tool/polygon';
 import { ELineTypes, SEGMENT_NUMBER } from '../../constant/tool';
@@ -19,12 +19,12 @@ export default class PolygonUtils {
 
     // 支持范围hoverPolygonID
     const axisList = AxisUtils.axisArea(checkPoint, scope);
-    polygonPoints.forEach((polygon) => {
-      if (polygon.pointList) {
+    polygonPoints.forEach((p) => {
+      if (p.pointList) {
         axisList.forEach((v) => {
-          const size = this.calcPolygonSize(polygon.pointList);
-          if (this.isInPolygon(v, polygon.pointList, lineType) && size < minSize) {
-            hoverPolygonID = polygon.id;
+          const size = this.calcPolygonSize(p.pointList);
+          if (this.isInPolygon(v, p.pointList, lineType) && size < minSize) {
+            hoverPolygonID = p.id;
             minSize = size;
           }
         });
@@ -237,7 +237,7 @@ export default class PolygonUtils {
    * @returns
    */
   public static getPolygonByID(polygonList: IPolygonData[], id?: string) {
-    return polygonList.find((polygon) => polygon.id === id);
+    return polygonList.find((p) => p.id === id);
   }
 
   public static getHoverEdgeIndex(
@@ -502,7 +502,7 @@ export default class PolygonUtils {
 
       // 批量对多边形进行减操作 （需要对包裹内部的多边形进行判断）
       polygonList.forEach((v) => {
-        const backgroundPolygon = polygon([[...PolygonUtils.concatBeginAndEnd(v.pointList.map((v) => [v.x, v.y]))]]);
+        const backgroundPolygon = polygon([[...PolygonUtils.concatBeginAndEnd(v.pointList.map((p) => [p.x, p.y]))]]);
         const diff = difference(selectedPolygon, backgroundPolygon);
 
         if (diff) {
@@ -511,20 +511,20 @@ export default class PolygonUtils {
         }
       });
       const resultList =
-        selectedPolygon?.geometry?.coordinates.map((polygon) => {
+        selectedPolygon?.geometry?.coordinates.map((p) => {
           // 多边形需要另外判断
           //@ts-ignore
           if (selectedPolygon?.geometry?.type === 'MultiPolygon') {
             //@ts-ignore
-            return polygon[0].reduce(PolygonUtils.deletePolygonLastPoint, []);
+            return p[0].reduce(PolygonUtils.deletePolygonLastPoint, []);
           }
-          return polygon.reduce(PolygonUtils.deletePolygonLastPoint, []);
+          return p.reduce(PolygonUtils.deletePolygonLastPoint, []);
         }) ?? [];
-      return resultList.reduce((acc, pointList) => {
-        const len = pointList.length;
-        const newPointList = pointList.filter((point: IPolygonPoint, i: number) => {
+      return resultList.reduce((acc, pointLists) => {
+        const len = pointLists.length;
+        const newPointList = pointLists.filter((point: IPolygonPoint, i: number) => {
           const nextIndex = (i + 1) % len;
-          if (AxisUtils.getIsInScope(point, pointList[nextIndex], 1)) {
+          if (AxisUtils.getIsInScope(point, pointLists[nextIndex], 1)) {
             // 前后 1 像素之差的点清除
             return false;
           }
@@ -538,7 +538,7 @@ export default class PolygonUtils {
         return [...acc, newPointList];
       }, []);
     } catch (error) {
-      console.log(error);
+      console.error(error);
     }
   }
 
@@ -551,9 +551,9 @@ export default class PolygonUtils {
    * @returns
    */
   public static getPolygonPointList(selectedPolygonID: string, polygonList: IPolygonData[]) {
-    const polygon = polygonList.filter((v) => v.id === selectedPolygonID);
-    if (polygon[0] && polygon[0].pointList && polygon[0].pointList.length > 0) {
-      return polygon[0].pointList;
+    const p = polygonList.find((v) => v.id === selectedPolygonID);
+    if (p && p.pointList && p.pointList.length > 0) {
+      return p.pointList;
     }
     return [];
   }
@@ -565,7 +565,7 @@ export default class PolygonUtils {
    * @returns
    */
   public static getWrapPolygonIndex(pointList: IPolygonPoint[], polygonList: IPolygonData[]) {
-    return polygonList.findIndex((polygon) => PolygonUtils.isPointListInPolygon(pointList, polygon.pointList));
+    return polygonList.findIndex((p) => PolygonUtils.isPointListInPolygon(pointList, p.pointList));
   }
 
   /**
@@ -686,14 +686,14 @@ export default class PolygonUtils {
       const newPolygon = selectedPolygon;
       if (unionPolygon?.geometry?.coordinates?.length === 1) {
         unionList.push(combinedPolygon.id);
-        const pointList = unionPolygon?.geometry.coordinates.map((polygon) => {
+        const pointList = unionPolygon?.geometry.coordinates.map((p) => {
           // 多边形需要另外判断
           if (unionPolygon?.geometry?.type === 'MultiPolygon') {
             //@ts-ignore
-            return polygon[0].reduce(PolygonUtils.deletePolygonLastPoint, []);
+            return p[0].reduce(PolygonUtils.deletePolygonLastPoint, []);
           }
           //@ts-ignore
-          return polygon.reduce(PolygonUtils.deletePolygonLastPoint, []);
+          return p.reduce(PolygonUtils.deletePolygonLastPoint, []);
         })[0];
         newPolygon.pointList = pointList;
       }

@@ -2,6 +2,49 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [1.7.0](https://github.com/open-mmlab/labelbee/compare/v1.6.0...v1.7.0) (2022-06-23)
+
+
+### Features
+
+* [lb-component] Add TagToolInstanceAdaptor to implement toolInstance ([85cd646](https://github.com/open-mmlab/labelbee/commit/85cd64694638e17efee32fdd841b9be7dd281dbf))
+* [lb-component] Implement keydown event for tagging ([5f441fe](https://github.com/open-mmlab/labelbee/commit/5f441feb0029cbcf704110c183d81dd8c1f67480))
+* [lb-components] Support and export 'VideoPlayer' ([0aea748](https://github.com/open-mmlab/labelbee/commit/0aea748991389933d4d7965af3e21345fffbffa4))
+* [lb-components] VideoTagTool Support i18n on hotkeys ([8216f5d](https://github.com/open-mmlab/labelbee/commit/8216f5dfb8ed0d723ed9aa5c2e15bdbbc4edf682))
+* [lb-demo] Support the use of VideoPlayer ([7ab27c2](https://github.com/open-mmlab/labelbee/commit/7ab27c2df4a794f0a5695768888da1a4a3b574be))
+* Add FileInvalid and FileException components, show operation on videoTagTool ([442318c](https://github.com/open-mmlab/labelbee/commit/442318cf1e38259b8314f538d0e91ada2329168d))
+* Add pageChange add stepChange callback ([ea20140](https://github.com/open-mmlab/labelbee/commit/ea201407655675ae48c7e9bcd21e7e530c3d7b7c))
+* add renderEnhance function ([009a734](https://github.com/open-mmlab/labelbee/commit/009a73498873ff489f0a2f44ad9bf6ca33a4a771))
+* AnntoationView-Polygon adds keypoint showing ([f414dab](https://github.com/open-mmlab/labelbee/commit/f414dab0cec2ce09f14cf7af22272632d9717c17))
+* Implement pushHistory on TagToolInstanceAdaptor ([cadd8c7](https://github.com/open-mmlab/labelbee/commit/cadd8c717e22f598325f5589ad9208862d3a1773))
+* Init result on state while TagToolInstanceAdaptor mounted ([954ba29](https://github.com/open-mmlab/labelbee/commit/954ba293b21c9bf5110ec7d8c6c5bec0ad0dd5bd))
+* PointTool emits messageSuccess when it adsorb edge ([e643dca](https://github.com/open-mmlab/labelbee/commit/e643dca72a7e3bcff45549d63ac3c2af67bb7dc2))
+* PolygonTool add combining operation ([56bb126](https://github.com/open-mmlab/labelbee/commit/56bb126da98965afeb1cad414094fea905b774c4))
+* PolygonTool add cutting operation ([cbc33ac](https://github.com/open-mmlab/labelbee/commit/cbc33ac68b2b66ca5a6b8d091098a77d0daedc6b))
+* Rename Image Error to FileError and replace life cycle fn 'componentWillUnmount' ([3063f7c](https://github.com/open-mmlab/labelbee/commit/3063f7cad8cff6366a209f13ab2b3daca4ba5a06))
+* Support batch data acquisition ([2d26c2d](https://github.com/open-mmlab/labelbee/commit/2d26c2d252bdb4c6b73b016f6833fb2b8d24dfe1))
+* TagToolInstanceAdaptor export fn: 'setValid' and getter 'valid' ([e73ca3c](https://github.com/open-mmlab/labelbee/commit/e73ca3c64cdf46cafbd235494c9e7c84aaeaa8ba))
+* VideoPlayer playPause while video clicked ([c003449](https://github.com/open-mmlab/labelbee/commit/c003449ae7c55428b27abbc7773c98a33da55933))
+* VideoTagToolInstance support exporting videoMetaData on exportData ([1b2166c](https://github.com/open-mmlab/labelbee/commit/1b2166c7b5cf7b756396ca7a681f463d099e29b3))
+
+
+### Bug Fixes
+
+* `GetCloestPoint` function needs to be added `hasClosed` ([1581ed1](https://github.com/open-mmlab/labelbee/commit/1581ed1614cd5c43e432afe18dbbfb78748f6748))
+* Click next step jump to the first page ([83a0335](https://github.com/open-mmlab/labelbee/commit/83a033520547dae0d9e57a0a8a338a3c4f2dcfca))
+* fix eslint errors ([f20b3a3](https://github.com/open-mmlab/labelbee/commit/f20b3a32572950665e20e670b1531ea8a3697d31))
+* Fix problems from comment ([145d20a](https://github.com/open-mmlab/labelbee/commit/145d20a7b1afd45521d41eeb88f8122e83e26e4b))
+* Fix the pr error ([4a2fa2b](https://github.com/open-mmlab/labelbee/commit/4a2fa2be649605a0378943e641863b14307d120c))
+* Fix the wrong internationalization issue ([3a78658](https://github.com/open-mmlab/labelbee/commit/3a7865844d4560f4f36bb454adf9a2655e2fa784))
+* PointTool for reference only to display polygons and lines ([b177dd2](https://github.com/open-mmlab/labelbee/commit/b177dd2143ca62754512bb6e0e2607102c44abc0))
+* PointTool is not allowed drawing outside the target when 'drawOutsideTarget' config is false ([2668cd7](https://github.com/open-mmlab/labelbee/commit/2668cd7c5f421b9ae9f8ae9d5c169cdeeb59df43))
+* remove ts-ignore ([9065c34](https://github.com/open-mmlab/labelbee/commit/9065c34421d8cbd152eba760233cf452c31e360f))
+* TagTool doesn't need to rotate ([c20576c](https://github.com/open-mmlab/labelbee/commit/c20576ce64b97f8610ca1810bac94289ce87a61b))
+* Temporarily supports the use of the react AnnotationTool ([004e851](https://github.com/open-mmlab/labelbee/commit/004e851b632f339ee7fe7dd73a2bcde9cfda84d2))
+* Update eslint error ([6941977](https://github.com/open-mmlab/labelbee/commit/6941977ab01476aa764d91fa9b60589fc51853d6))
+* VideoPlayer have error status while src changed ([0bbf25c](https://github.com/open-mmlab/labelbee/commit/0bbf25c4492e59b3d634849290fe65ae729fa438))
+* VideoTag emitEvent after clear result ([865575d](https://github.com/open-mmlab/labelbee/commit/865575da1a0928736f1e61cad588e5bca0d613fa))
+
 ## [1.6.0](https://github.com/open-mmlab/labelbee/compare/v1.5.0...v1.6.0) (2022-05-16)
 
 

@@ -4,12 +4,13 @@
   "workspaces": [
     "packages/*"
   ],
-  "version": "1.6.1",
+  "version": "1.7.0",
   "scripts": {
     "start": "lerna run build:type && lerna run --parallel --stream start",
     "dev": "npm run start",
     "bootstrap": "lerna bootstrap --no-ci",
     "build": "lerna run build",
+    "build:type": "lerna run build:type",
     "lint": "lerna run --parallel --stream lint",
     "clean": "lerna clean && rm -rf ./node_modules/ && rm -rf ./packages/**/node_modules && rm -rf ./packages/**/package-lock.json",
     "version": "lerna version --conventional-graduate --yes",

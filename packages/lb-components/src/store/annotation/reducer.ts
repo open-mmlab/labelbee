@@ -209,7 +209,7 @@ export const annotationReducer = (
       }
 
       const oldResultString = imgList[imgIndex]?.result || '';
-      const [, basicImgInfo] = toolInstance?.exportData();
+      const [, basicImgInfo] = toolInstance?.exportData() ?? [];
 
       const resultWithBasicInfo = composeResultWithBasicImgInfo(oldResultString, basicImgInfo);
       const newResultString = composeResult(
@@ -251,7 +251,7 @@ export const annotationReducer = (
         return state;
       }
 
-      const [exportResult] = toolInstance?.exportData();
+      const [exportResult] = toolInstance?.exportData() ?? [];
 
       let previousResultList = exportResult;
 
