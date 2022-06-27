@@ -1,3 +1,5 @@
+/* eslint-disable */
+
 /**
  * @author Glenfiddish <edwinlee0927@hotmail.com>
  * @file Refer to https://github.com/mrdoob/three.js/blob/dev/examples/jsm/loaders/PCDLoader.js

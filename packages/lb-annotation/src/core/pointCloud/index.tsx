@@ -4,8 +4,9 @@
  * @Author: Laoluo luozefeng@sensetime.com
  * @Date: 2022-06-13 19:05:33
  * @LastEditors: Laoluo luozefeng@sensetime.com
- * @LastEditTime: 2022-06-27 18:13:11
+ * @LastEditTime: 2022-06-27 23:09:45
  */
+/*eslint import/no-unresolved: 0*/
 import * as THREE from 'three';
 import {
   PerspectiveShiftUtils,
@@ -332,7 +333,7 @@ export class PointCloud {
 
     const ctx = canvas.getContext('2d');
     if (ctx) {
-      ctx.font = `50px bold`;
+      ctx.font = `${50}px " bold`;
       ctx.fillStyle = 'white';
       ctx.textAlign = 'center';
       ctx.textBaseline = 'middle';

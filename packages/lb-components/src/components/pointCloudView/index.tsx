@@ -1,8 +1,8 @@
 /*
  * @Author: Laoluo luozefeng@sensetime.com
- * @Date: 2022-06-22 11:08:31
+ * @Date: 2022-06-27 19:55:49
  * @LastEditors: Laoluo luozefeng@sensetime.com
- * @LastEditTime: 2022-06-26 12:34:31
+ * @LastEditTime: 2022-06-27 23:09:57
  */
 /**
  * @author Glenfiddish <edwinlee0927@hotmail.com>
@@ -22,7 +22,7 @@ const PointCloudView = () => {
       <div className={getClassName('point-cloud-container', 'left')}>
         <PointCloudContainer className={getClassName('point-cloud-2d-container')} title='2D视图'>
           <div className={getClassName('point-cloud-2d-image')}>
-            <img src='http://10.53.25.142:8001/1/000001.jpg' width='100%'></img>
+            <img src='http://10.53.25.142:8001/1/000001.jpg' width='100%' />
           </div>
         </PointCloudContainer>
 
@@ -44,14 +44,14 @@ const PointCloudView = () => {
             className={getClassName('point-cloud-container', 'side-view')}
             title='侧视图'
           >
-            <div></div>
+            <div />
           </PointCloudContainer>
 
           <PointCloudContainer
             className={getClassName('point-cloud-container', 'back-view')}
             title='背视图'
           >
-            <div></div>
+            <div />
           </PointCloudContainer>
         </div>
       </div>
