@@ -18,6 +18,8 @@ import {
 } from '@labelbee/lb-utils';
 import { OrbitControls } from './OrbitControls';
 import { PCDLoader } from './PCDLoader';
+import { isInPolygon } from '@/utils/tool/polygonTool';
+import { IPolygonPoint } from '@/types/tool/polygon';
 
 interface IProps {
   container: HTMLElement;
@@ -50,6 +52,7 @@ export class PointCloud {
   private container: HTMLElement;
 
   private isOrthographicCamera = false;
+  private pointsUuid = '';
 
   constructor({ container, noAppend, isOrthographicCamera, orthgraphicParams }: IProps) {
     this.container = container;
@@ -320,6 +323,8 @@ export class PointCloud {
 
       this.render();
 
+      this.pointsUuid = points.uuid;
+
       if (cb) {
         cb();
       }
@@ -358,6 +363,36 @@ export class PointCloud {
     }
 
     return canvas;
+  }
+
+  public getSensesPointZAxisInPolygon(polygon: IPolygonPoint[]) {
+    const points = this.scene.children.find((i) => i.uuid === this.pointsUuid);
+    let minZ = 0;
+    let maxZ = 0;
+
+    if (points && points?.geometry) {
+      const pointPosArray = points?.geometry.attributes.position;
+
+      for (let idx = 0; idx < pointPosArray.count; idx++) {
+        const cur = idx * 3;
+        const x = pointPosArray.getX(cur);
+        const y = pointPosArray.getY(cur);
+        const z = pointPosArray.getZ(cur);
+
+        if (z < 0) {
+          continue;
+        }
+
+        const inPolygon = isInPolygon({ x, y }, polygon);
+
+        if (inPolygon && z) {
+          maxZ = Math.max(z, maxZ);
+          minZ = Math.min(z, minZ);
+        }
+      }
+    }
+
+    return { maxZ, minZ };
   }
 
   public render() {

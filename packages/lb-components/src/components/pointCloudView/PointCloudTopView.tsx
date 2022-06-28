@@ -124,7 +124,7 @@ const PointCloudTopView = () => {
         polygonOperation.eventBinding();
         polygonOperation.setPattern(EPolygonPattern.Rect);
         polygonOperation.on('polygonCreated', (newPolygon: any) => {
-          const [point1, point2, point3] = newPolygon.pointList.map((v: any) =>
+          const [point1, point2, point3, point4] = newPolygon.pointList.map((v: any) =>
             TransferCanvas2World(v, mockImgInfo),
           );
 
@@ -133,16 +133,20 @@ const PointCloudTopView = () => {
           const width = MathUtils.getLineLength(point2, point3);
 
           const rotation = MathUtils.getRadiusFromQuadrangle(newPolygon.pointList);
+          const zInfo = pointCloud.getSensesPointZAxisInPolygon([point1, point2, point3, point4]);
+
+          console.log(zInfo);
+
           const newParams = {
             center: {
               x: centerPoint.x,
               y: centerPoint.y,
-              z: 1,
+              z: (zInfo.maxZ + zInfo.minZ) / 2,
             },
             volume: {
               width,
               height,
-              depth: 10,
+              depth: zInfo.maxZ - zInfo.minZ,
             },
             rotation,
           };
