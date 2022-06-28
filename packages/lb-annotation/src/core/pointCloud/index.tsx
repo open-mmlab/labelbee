@@ -198,7 +198,7 @@ export class PointCloud {
    * @param boxParams
    * @param perspectiveView
    */
-  public updateCamera(boxParams: IBoxParams, perspectiveView: EPerspectiveView) {
+  public updateCameraByBox(boxParams: IBoxParams, perspectiveView: EPerspectiveView) {
     const { center, volume, rotation } = boxParams;
     const newVector = this.getCameraVector(center, rotation, volume, perspectiveView);
     this.camera.position.set(newVector.x, newVector.y, newVector.z);
@@ -216,6 +216,25 @@ export class PointCloud {
     // this.camera.far = far;
     // this.camera.zoom = zoom;
     // this.camera.updateProjectionMatrix();
+    this.updateCamera(newVector, center);
+  }
+
+  /**
+   * Update camera position & target
+   * @param position
+   * @param target
+   */
+  public updateCamera(position: I3DSpaceCoord, target: I3DSpaceCoord) {
+    this.camera.position.set(position.x, position.y, position.z);
+    this.controls.target = new THREE.Vector3(target.x, target.y, target.z);
+    this.controls.update();
+  }
+
+  /**
+   * Reset camera to center-top
+   */
+  public resetCamera() {
+    this.updateCamera({ x: -1, y: 0, z: 500 }, { x: 0, y: 0, z: 0 });
   }
 
   public createThreeMatrix4(matrix4: TMatrix4Tuple) {

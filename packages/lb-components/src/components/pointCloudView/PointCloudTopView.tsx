@@ -149,7 +149,7 @@ const PointCloudTopView = () => {
 
           // Control the 3Dview data to create box
           pointCloudMain.generateBox(newParams);
-          pointCloudMain.updateCamera(newParams, EPerspectiveView.Front);
+          pointCloudMain.updateCameraByBox(newParams, EPerspectiveView.Front);
           pointCloudMain.controls.update();
           pointCloudMain.render();
         });
