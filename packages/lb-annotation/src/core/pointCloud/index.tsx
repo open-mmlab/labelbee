@@ -4,8 +4,9 @@
  * @Author: Laoluo luozefeng@sensetime.com
  * @Date: 2022-06-13 19:05:33
  * @LastEditors: Laoluo luozefeng@sensetime.com
- * @LastEditTime: 2022-06-16 19:30:06
+ * @LastEditTime: 2022-06-27 23:09:45
  */
+/*eslint import/no-unresolved: 0*/
 import * as THREE from 'three';
 import {
   PerspectiveShiftUtils,
@@ -20,6 +21,16 @@ import { PCDLoader } from './PCDLoader';
 
 interface IProps {
   container: HTMLElement;
+  noAppend?: boolean; // temporary;
+  isOrthographicCamera?: boolean;
+  orthgraphicParams?: {
+    left: number;
+    right: number;
+    top: number;
+    bottom: number;
+    near: number;
+    far: number;
+  };
 }
 
 export class PointCloud {
@@ -27,7 +38,8 @@ export class PointCloud {
 
   public scene: THREE.Scene;
 
-  public camera: THREE.PerspectiveCamera;
+  public camera: THREE.OrthographicCamera | THREE.PerspectiveCamera;
+  // public camera: THREE.PerspectiveCamera;
 
   public controls: OrbitControls;
 
@@ -39,10 +51,27 @@ export class PointCloud {
 
   private front: any;
 
-  constructor({ container }: IProps) {
+  private isOrthographicCamera = false;
+
+  constructor({ container, noAppend, isOrthographicCamera, orthgraphicParams }: IProps) {
     this.container = container;
     this.renderer = new THREE.WebGLRenderer({ antialias: true });
-    this.camera = new THREE.PerspectiveCamera(30, this.containerWidth / this.containerHeight, 1, 1000);
+
+    // TODO
+    if (isOrthographicCamera && orthgraphicParams) {
+      this.isOrthographicCamera = true;
+      this.camera = new THREE.OrthographicCamera(
+        orthgraphicParams.left,
+        orthgraphicParams.right,
+        orthgraphicParams.top,
+        orthgraphicParams.bottom,
+        orthgraphicParams.near,
+        orthgraphicParams.far,
+      );
+    } else {
+      this.camera = new THREE.PerspectiveCamera(30, this.containerWidth / this.containerHeight, 1, 1000);
+    }
+    // this.camera = new THREE.OrthographicCamera(-500, 500, 500, -500, 100, -100);
     this.initCamera();
 
     this.scene = new THREE.Scene();
@@ -52,7 +81,10 @@ export class PointCloud {
 
     this.scene.add(this.axesHelper);
     this.scene.add(this.camera);
-    container.appendChild(this.renderer.domElement);
+    // TODO
+    if (!noAppend) {
+      container.appendChild(this.renderer.domElement);
+    }
 
     this.init();
   }
@@ -62,24 +94,29 @@ export class PointCloud {
   }
 
   get containerHeight() {
-    return this.container.clientWidth;
+    return this.container.clientHeight;
   }
 
   public initCamera() {
     // Camera setting must be setted before Control's initial.
     const { camera } = this;
-    camera.position.set(-100, 15, 15);
+
+    // TODO
+    if (this.isOrthographicCamera) {
+      camera.position.set(-1, 0, 10);
+    } else {
+      camera.position.set(-100, 15, 15);
+    }
     camera.up.set(0, 0, 1);
   }
 
   public initControls() {
     const { controls } = this;
-    const centerPoint = [15, 15, 15];
+    const centerPoint = [0, 0, 0];
     controls.target = new THREE.Vector3(...centerPoint); // Camera watching?
     controls.addEventListener('change', () => {
       this.render();
     }); // use if there is no animation loop
-    controls.minDistance = 1;
     controls.maxPolarAngle = Math.PI / 2; // Fobid orbit vertically over 90°
 
     controls.update();
@@ -107,7 +144,6 @@ export class PointCloud {
 
     // Test for Render
     this.generateBox(params);
-    this.updateCamera(params, EPerspectiveView.LFT);
     this.controls.update();
   }
 
@@ -132,6 +168,34 @@ export class PointCloud {
   }
 
   /**
+   * Get OrthographicCamera Params to Change
+   * @param boxParams
+   * @returns
+   */
+  public getOrthograhicCamera(boxParams: IBoxParams) {
+    const { center, volume } = boxParams;
+    const offset = 10;
+    const left = center.x - volume.width / 2 - offset;
+    const right = center.x - volume.width / 2 + offset;
+    const top = center.y + volume.height / 2 + offset;
+    const bottom = center.y - volume.height / 2 - offset;
+
+    const near = 100;
+    const far = -100;
+    const zoom = 500 / near;
+
+    return {
+      left,
+      right,
+      top,
+      bottom,
+      near,
+      far,
+      zoom,
+    };
+  }
+
+  /**
    * Update Camera position & target
    * @param boxParams
    * @param perspectiveView
@@ -141,6 +205,19 @@ export class PointCloud {
     const newVector = this.getCameraVector(center, rotation, volume, perspectiveView);
     this.camera.position.set(newVector.x, newVector.y, newVector.z);
     this.controls.target = new THREE.Vector3(center.x, center.y, center.z);
+    // const { left, right, top, bottom, near, far, zoom } = this.getOrthograhicCamera(boxParams);
+
+    // console.log('ads', { left, right, top, bottom, near, far, zoom });
+
+    // // orthograpic camera
+    // this.camera.left = left;
+    // this.camera.right = right;
+    // this.camera.top = top;
+    // this.camera.bottom = bottom;
+    // this.camera.near = near;
+    // this.camera.far = far;
+    // this.camera.zoom = zoom;
+    // this.camera.updateProjectionMatrix();
   }
 
   public createThreeMatrix4(matrix4: TMatrix4Tuple) {
@@ -152,7 +229,7 @@ export class PointCloud {
     rotationZ: number,
     volume: IVolume,
     perspectiveView: EPerspectiveView = EPerspectiveView.Front,
-    DEFAULT_DISTANCE = 10,
+    DEFAULT_DISTANCE = 30,
   ) {
     let TcMatrix4 = PerspectiveShiftUtils.frontViewMatrix4(DEFAULT_DISTANCE);
 
@@ -215,7 +292,7 @@ export class PointCloud {
     return ellipse;
   }
 
-  public loadPCDFile = (src: string) => {
+  public loadPCDFile = (src: string, cb?: () => void) => {
     this.pcdLoader.load(src, (points: any) => {
       points.material.size = 0.3;
 
@@ -225,6 +302,10 @@ export class PointCloud {
       this.scene.add(circle);
 
       this.render();
+
+      if (cb) {
+        cb();
+      }
     });
   };
 
@@ -243,17 +324,16 @@ export class PointCloud {
     const sprite = new THREE.SpriteMaterial({ map: texture, depthWrite: false });
     const boxID = new THREE.Sprite(sprite);
     boxID.scale.set(5, 5, 5);
-    console.log(boxID);
     boxID.position.set(-boxParams.volume.width / 2, 0, boxParams.volume.depth / 2 + 0.5);
     return boxID;
   };
 
   public getTextCanvas(text: string) {
-    var canvas = document.createElement('canvas');
+    const canvas = document.createElement('canvas');
 
-    var ctx = canvas.getContext('2d');
+    const ctx = canvas.getContext('2d');
     if (ctx) {
-      ctx.font = 50 + 'px " bold';
+      ctx.font = `${50}px " bold`;
       ctx.fillStyle = 'white';
       ctx.textAlign = 'center';
       ctx.textBaseline = 'middle';

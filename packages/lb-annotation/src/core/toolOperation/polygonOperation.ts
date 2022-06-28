@@ -510,6 +510,8 @@ class PolygonOperation extends BasicToolOperation {
 
       polygonList.push(newPolygon);
 
+      this.emit('polygonCreated', newPolygon, this.zoom, this.currentPos);
+
       this.setSelectedIdAfterAddingDrawing(id);
     }
 

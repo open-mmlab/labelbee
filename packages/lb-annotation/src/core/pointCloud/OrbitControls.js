@@ -1,3 +1,5 @@
+/* eslint-disable */
+
 import { EventDispatcher, MOUSE, Quaternion, Spherical, TOUCH, Vector2, Vector3 } from 'three';
 
 // This set of controls performs orbiting, dollying (zooming), and panning.

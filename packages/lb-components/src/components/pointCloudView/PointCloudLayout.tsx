@@ -4,7 +4,7 @@ import React from 'react';
 
 export const PointCloudContainer: React.FC<{
   title: string;
-  toolbar?: JSX.Element;
+  toolbar?: React.ReactElement;
   className?: string;
 }> = ({ title, toolbar, children, className }) => {
   console.log(classNames([className, getClassName('point-cloud-container')]));

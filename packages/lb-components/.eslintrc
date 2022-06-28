@@ -33,6 +33,7 @@
         // 自定义您的规则
         // Customize your rules
         "complexity": ["off"],
-        "max-params": "off"
+        "max-params": "off",
+        "unicorn/no-abusive-eslint-disable": "off"
     }
 }
