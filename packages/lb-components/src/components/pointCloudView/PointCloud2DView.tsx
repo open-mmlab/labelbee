@@ -6,7 +6,7 @@ const PointCloud2DView = () => {
   return (
     <PointCloudContainer className={getClassName('point-cloud-2d-container')} title='2D视图'>
       <div className={getClassName('point-cloud-2d-image')}>
-        <img src='http://10.53.25.142:8001/1/000001.jpg' width='100%'></img>
+        <img src='http://10.53.25.142:8001/1/000001.jpg' width='100%' />
       </div>
     </PointCloudContainer>
   );

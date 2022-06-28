@@ -13,8 +13,6 @@
   "scripts": {
     "dev": "npm run build && cross-env NODE_ENV=developemnt rollup -m -c rollup.config.js -w",
     "start": "npm run dev",
-    "dev:style": "dart-sass --watch src/index.scss dist/index.css ",
-    "build:style": "dart-sass src/index.scss dist/index.css && cp -R ./src/assets/cssIcon/.  ./dist/assets/cssIcon && cp -R ./src/assets/cssIcon/.  ./es/assets/cssIcon",
     "build": "rm -fr dist && cross-env NODE_ENV=production rollup -c rollup.config.js && npm run build:type",
     "build:type": "tsc --emitDeclarationOnly",
     "commit": "git-cz",
@@ -77,7 +75,6 @@
     "commitizen": "^4.2.4",
     "cross-env": "^7.0.3",
     "cz-conventional-changelog": "^3.3.0",
-    "dart-sass": "^1.25.0",
     "esbuild": "^0.11.0",
     "eslint": "7.20.0",
     "eslint-config-airbnb": "18.2.1",

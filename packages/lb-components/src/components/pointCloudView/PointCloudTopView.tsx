@@ -135,8 +135,6 @@ const PointCloudTopView = () => {
           const rotation = MathUtils.getRadiusFromQuadrangle(newPolygon.pointList);
           const zInfo = pointCloud.getSensesPointZAxisInPolygon([point1, point2, point3, point4]);
 
-          console.log(zInfo);
-
           const newParams = {
             center: {
               x: centerPoint.x,

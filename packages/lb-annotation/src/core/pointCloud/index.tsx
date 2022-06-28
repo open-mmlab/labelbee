@@ -366,7 +366,7 @@ export class PointCloud {
   }
 
   public getSensesPointZAxisInPolygon(polygon: IPolygonPoint[]) {
-    const points = this.scene.children.find((i) => i.uuid === this.pointsUuid);
+    const points = this.scene.children.find((i) => i.uuid === this.pointsUuid) as THREE.Points;
     let minZ = 0;
     let maxZ = 0;
 
@@ -378,10 +378,6 @@ export class PointCloud {
         const x = pointPosArray.getX(cur);
         const y = pointPosArray.getY(cur);
         const z = pointPosArray.getZ(cur);
-
-        if (z < 0) {
-          continue;
-        }
 
         const inPolygon = isInPolygon({ x, y }, polygon);
 
