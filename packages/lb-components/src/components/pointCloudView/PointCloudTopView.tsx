@@ -4,6 +4,7 @@
  * @LastEditors: Laoluo luozefeng@sensetime.com
  * @LastEditTime: 2022-06-27 19:45:27
  */
+import { getClassName } from '@/utils/dom';
 import {
   PolygonOperation,
   cTool,
@@ -14,6 +15,7 @@ import {
 import { EPerspectiveView } from '@labelbee/lb-utils';
 import React, { useEffect, useRef } from 'react';
 import { pointCloudMain } from './PointCloud3DView';
+import { PointCloudContainer } from './PointCloudLayout';
 
 const { EPolygonPattern } = cTool;
 
@@ -122,7 +124,7 @@ const PointCloudTopView = () => {
         polygonOperation.eventBinding();
         polygonOperation.setPattern(EPolygonPattern.Rect);
         polygonOperation.on('polygonCreated', (newPolygon: any) => {
-          const [point1, point2, point3] = newPolygon.pointList.map((v: any) =>
+          const [point1, point2, point3, point4] = newPolygon.pointList.map((v: any) =>
             TransferCanvas2World(v, mockImgInfo),
           );
 
@@ -131,23 +133,25 @@ const PointCloudTopView = () => {
           const width = MathUtils.getLineLength(point2, point3);
 
           const rotation = MathUtils.getRadiusFromQuadrangle(newPolygon.pointList);
+          const zInfo = pointCloud.getSensesPointZAxisInPolygon([point1, point2, point3, point4]);
+
           const newParams = {
             center: {
               x: centerPoint.x,
               y: centerPoint.y,
-              z: 1,
+              z: (zInfo.maxZ + zInfo.minZ) / 2,
             },
             volume: {
               width,
               height,
-              depth: 10,
+              depth: zInfo.maxZ - zInfo.minZ,
             },
             rotation,
           };
 
           // Control the 3Dview data to create box
           pointCloudMain.generateBox(newParams);
-          pointCloudMain.updateCamera(newParams, EPerspectiveView.Front);
+          pointCloudMain.updateCameraByBox(newParams, EPerspectiveView.Front);
           pointCloudMain.controls.update();
           pointCloudMain.render();
         });
@@ -191,7 +195,14 @@ const PointCloudTopView = () => {
     }
   }, []);
 
-  return <div style={{ width: '100%', height: 500 }} ref={ref} />;
+  return (
+    <PointCloudContainer
+      className={getClassName('point-cloud-container', 'top-view')}
+      title='俯视图'
+    >
+      <div style={{ width: '100%', height: 500 }} ref={ref} />
+    </PointCloudContainer>
+  );
 };
 
 export default PointCloudTopView;

@@ -2,12 +2,32 @@ import esbuild from 'rollup-plugin-esbuild';
 import image from '@rollup/plugin-image';
 import alias from '@rollup/plugin-alias';
 import resolve from '@rollup/plugin-node-resolve';
+import postcss from 'rollup-plugin-postcss';
+import sass from 'sass';
+import url from 'postcss-url';
 
 import path from 'path';
 
 const customResolver = resolve({
   extensions: ['.tsx', '.ts', 'scss'],
 });
+
+const sassLoader = (context) => {
+  return new Promise((resolve, reject) => {
+    sass.render(
+      {
+        file: context,
+      },
+      (err, result) => {
+        if (!err) {
+          resolve(result.css);
+        } else {
+          reject(err);
+        }
+      },
+    );
+  });
+};
 
 const projectRootDir = path.resolve(__dirname);
 
@@ -58,6 +78,20 @@ export default {
         // Enable JSX in .js files too
         '.js': 'jsx',
       },
+    }),
+    // TODO: COPY ICON TO ES DIR
+    postcss({
+      extract: true,
+      assetsPath: './assets',
+      extensions: ['scss'],
+      plugins: [
+        url({
+          url: 'copy',
+          assetsPath: path.resolve('./dist/assets/icons'),
+          useHash: true,
+        }),
+      ],
+      process: sassLoader,
     }),
   ],
   external: ['react', 'antd'],

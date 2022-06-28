@@ -18,6 +18,8 @@ import {
 } from '@labelbee/lb-utils';
 import { OrbitControls } from './OrbitControls';
 import { PCDLoader } from './PCDLoader';
+import { isInPolygon } from '@/utils/tool/polygonTool';
+import { IPolygonPoint } from '@/types/tool/polygon';
 
 interface IProps {
   container: HTMLElement;
@@ -49,9 +51,8 @@ export class PointCloud {
 
   private container: HTMLElement;
 
-  private front: any;
-
   private isOrthographicCamera = false;
+  private pointsUuid = '';
 
   constructor({ container, noAppend, isOrthographicCamera, orthgraphicParams }: IProps) {
     this.container = container;
@@ -131,7 +132,7 @@ export class PointCloud {
   public init() {
     const { scene } = this;
     // Background
-    scene.background = new THREE.Color(0x050505);
+    scene.background = new THREE.Color(0x4c4c4c);
 
     this.initControls();
     this.initRenderer();
@@ -200,7 +201,7 @@ export class PointCloud {
    * @param boxParams
    * @param perspectiveView
    */
-  public updateCamera(boxParams: IBoxParams, perspectiveView: EPerspectiveView) {
+  public updateCameraByBox(boxParams: IBoxParams, perspectiveView: EPerspectiveView) {
     const { center, volume, rotation } = boxParams;
     const newVector = this.getCameraVector(center, rotation, volume, perspectiveView);
     this.camera.position.set(newVector.x, newVector.y, newVector.z);
@@ -218,6 +219,25 @@ export class PointCloud {
     // this.camera.far = far;
     // this.camera.zoom = zoom;
     // this.camera.updateProjectionMatrix();
+    this.updateCamera(newVector, center);
+  }
+
+  /**
+   * Update camera position & target
+   * @param position
+   * @param target
+   */
+  public updateCamera(position: I3DSpaceCoord, target: I3DSpaceCoord) {
+    this.camera.position.set(position.x, position.y, position.z);
+    this.controls.target = new THREE.Vector3(target.x, target.y, target.z);
+    this.controls.update();
+  }
+
+  /**
+   * Reset camera to center-top
+   */
+  public resetCamera() {
+    this.updateCamera({ x: -1, y: 0, z: 500 }, { x: 0, y: 0, z: 0 });
   }
 
   public createThreeMatrix4(matrix4: TMatrix4Tuple) {
@@ -303,6 +323,8 @@ export class PointCloud {
 
       this.render();
 
+      this.pointsUuid = points.uuid;
+
       if (cb) {
         cb();
       }
@@ -341,6 +363,32 @@ export class PointCloud {
     }
 
     return canvas;
+  }
+
+  public getSensesPointZAxisInPolygon(polygon: IPolygonPoint[]) {
+    const points = this.scene.children.find((i) => i.uuid === this.pointsUuid) as THREE.Points;
+    let minZ = 0;
+    let maxZ = 0;
+
+    if (points && points?.geometry) {
+      const pointPosArray = points?.geometry.attributes.position;
+
+      for (let idx = 0; idx < pointPosArray.count; idx++) {
+        const cur = idx * 3;
+        const x = pointPosArray.getX(cur);
+        const y = pointPosArray.getY(cur);
+        const z = pointPosArray.getZ(cur);
+
+        const inPolygon = isInPolygon({ x, y }, polygon);
+
+        if (inPolygon && z) {
+          maxZ = Math.max(z, maxZ);
+          minZ = Math.min(z, minZ);
+        }
+      }
+    }
+
+    return { maxZ, minZ };
   }
 
   public render() {

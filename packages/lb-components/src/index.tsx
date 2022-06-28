@@ -10,6 +10,7 @@ import configureStore from './configureStore';
 import { PageBackward, PageForward, PageJump } from './store/annotation/actionCreators';
 import { ToolInstance } from './store/annotation/types';
 import { VideoTagTool } from '@/components/videoPlayer/TagToolInstanceAdaptorI18nProvider';
+import './index.scss';
 
 export const store = configureStore();
 
