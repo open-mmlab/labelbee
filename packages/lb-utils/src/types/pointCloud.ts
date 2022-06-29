@@ -40,8 +40,13 @@ export interface I3DSpaceCoord {
   z: number;
 }
 
-export interface IBoxParams {
+export interface IPointCloudBox extends IVolume {
+  attribute: string;
   center: I3DSpaceCoord;
-  volume: IVolume;
+  id: string;
   rotation: number;
+  trackID: number;
+  valid: boolean;
 }
+
+export type IPointCloudBoxList = IPointCloudBox[];

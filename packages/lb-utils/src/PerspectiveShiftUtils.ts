@@ -5,7 +5,7 @@
  * @LastEditors: Laoluo luozefeng@sensetime.com
  * @LastEditTime: 2022-06-16 17:15:43
  */
-import { TMatrix4Tuple, IVolume } from "@/types/matrix";
+import { TMatrix4Tuple, IVolume } from "@/types/pointCloud";
 
 class PerspectiveShiftUtils {
   /**

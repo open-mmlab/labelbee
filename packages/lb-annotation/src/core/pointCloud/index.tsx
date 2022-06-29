@@ -13,13 +13,14 @@ import {
   TMatrix4Tuple,
   EPerspectiveView,
   IVolume,
-  IBoxParams,
+  IPointCloudBox,
   I3DSpaceCoord,
 } from '@labelbee/lb-utils';
 import { OrbitControls } from './OrbitControls';
 import { PCDLoader } from './PCDLoader';
 import { isInPolygon } from '@/utils/tool/polygonTool';
 import { IPolygonPoint } from '@/types/tool/polygon';
+import uuid from '@/utils/uuid';
 
 interface IProps {
   container: HTMLElement;
@@ -137,10 +138,16 @@ export class PointCloud {
     this.initControls();
     this.initRenderer();
 
-    const params: IBoxParams = {
+    const params: IPointCloudBox = {
       center: { x: 13, y: -1, z: 1 },
-      volume: { depth: 2, width: 5, height: 2 },
+      depth: 2,
+      width: 5,
+      height: 2,
       rotation: Math.PI / 6,
+      trackID: 0,
+      id: uuid(),
+      valid: true,
+      attribute: '',
     };
 
     // Test for Render
@@ -148,10 +155,10 @@ export class PointCloud {
     this.controls.update();
   }
 
-  public generateBox(boxParams: IBoxParams, color = 0xffffff) {
-    const { center, volume, rotation } = boxParams;
+  public generateBox(boxParams: IPointCloudBox, color = 0xffffff) {
+    const { center, width, height, depth, rotation } = boxParams;
     const group = new THREE.Group();
-    const geometry = new THREE.BoxGeometry(volume.width, volume.height, volume.depth);
+    const geometry = new THREE.BoxGeometry(width, height, depth);
     const matarial = new THREE.MeshBasicMaterial({ color: 'blue' });
     const cube = new THREE.Mesh(geometry, matarial);
     const box = new THREE.BoxHelper(cube, color);
@@ -173,13 +180,13 @@ export class PointCloud {
    * @param boxParams
    * @returns
    */
-  public getOrthograhicCamera(boxParams: IBoxParams) {
-    const { center, volume } = boxParams;
+  public getOrthograhicCamera(boxParams: IPointCloudBox) {
+    const { center, width, height } = boxParams;
     const offset = 10;
-    const left = center.x - volume.width / 2 - offset;
-    const right = center.x - volume.width / 2 + offset;
-    const top = center.y + volume.height / 2 + offset;
-    const bottom = center.y - volume.height / 2 - offset;
+    const left = center.x - width / 2 - offset;
+    const right = center.x - width / 2 + offset;
+    const top = center.y + height / 2 + offset;
+    const bottom = center.y - height / 2 - offset;
 
     const near = 100;
     const far = -100;
@@ -201,9 +208,9 @@ export class PointCloud {
    * @param boxParams
    * @param perspectiveView
    */
-  public updateCameraByBox(boxParams: IBoxParams, perspectiveView: EPerspectiveView) {
-    const { center, volume, rotation } = boxParams;
-    const newVector = this.getCameraVector(center, rotation, volume, perspectiveView);
+  public updateCameraByBox(boxParams: IPointCloudBox, perspectiveView: EPerspectiveView) {
+    const { center, width, height, depth, rotation } = boxParams;
+    const newVector = this.getCameraVector(center, rotation, { width, height, depth }, perspectiveView);
     this.camera.position.set(newVector.x, newVector.y, newVector.z);
     this.controls.target = new THREE.Vector3(center.x, center.y, center.z);
     // const { left, right, top, bottom, near, far, zoom } = this.getOrthograhicCamera(boxParams);
@@ -331,22 +338,22 @@ export class PointCloud {
     });
   };
 
-  public generateBoxArrow = ({ volume }: IBoxParams) => {
+  public generateBoxArrow = ({ width, height, depth }: IPointCloudBox) => {
     const dir = new THREE.Vector3(1, 0, 0);
-    const origin = new THREE.Vector3(-volume.width / 2, 0, -volume.depth / 2);
-    const length = volume.width;
+    const origin = new THREE.Vector3(-width / 2, 0, -depth / 2);
+    const arrowLen = width;
     const hex = 0xffff00;
-    const arrowHelper = new THREE.ArrowHelper(dir, origin, length, hex);
+    const arrowHelper = new THREE.ArrowHelper(dir, origin, arrowLen, hex);
     return arrowHelper;
   };
 
-  public generateBoxID = (boxParams: IBoxParams) => {
+  public generateBoxID = (boxParams: IPointCloudBox) => {
     const texture = new THREE.Texture(this.getTextCanvas('1000'));
     texture.needsUpdate = true;
     const sprite = new THREE.SpriteMaterial({ map: texture, depthWrite: false });
     const boxID = new THREE.Sprite(sprite);
     boxID.scale.set(5, 5, 5);
-    boxID.position.set(-boxParams.volume.width / 2, 0, boxParams.volume.depth / 2 + 0.5);
+    boxID.position.set(-boxParams.width / 2, 0, boxParams.depth / 2 + 0.5);
     return boxID;
   };
 

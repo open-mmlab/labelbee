@@ -7,27 +7,27 @@
 
 import { getClassName } from '@/utils/dom';
 import { PointCloud } from '@labelbee/lb-annotation';
-import { EPerspectiveView, IBoxParams } from '@labelbee/lb-utils';
+import { EPerspectiveView, IPointCloudBox } from '@labelbee/lb-utils';
 import classNames from 'classnames';
-import React, { useEffect, useRef } from 'react';
+import React, { useContext, useEffect, useRef } from 'react';
 import { PointCloudContainer } from './PointCloudLayout';
 const pointCloudID = 'LABELBEE-POINTCLOUD';
+import { PointCloudContext } from './PointCloudContext';
 
 let pointCloudMain: any; // TODO
 
 const PointCloud3D = () => {
   const ref = useRef<HTMLDivElement>(null);
   const pointCloudRef = useRef<PointCloud>();
+  const { selectedID, pointCloudBoxList } = useContext(PointCloudContext);
 
-  const box: IBoxParams = {
-    center: { x: 13, y: -1, z: 1 },
-    volume: { depth: 2, width: 5, height: 2 },
-    rotation: Math.PI / 6,
-  };
-
-  const hasSelectedBox = !!box;
+  const hasSelectedBox = selectedID;
 
   const setTarget3DView = (perspectiveView: EPerspectiveView) => {
+    const box = hasSelectedBox
+      ? pointCloudBoxList.find((i: IPointCloudBox) => i.id === selectedID)
+      : undefined;
+
     if (box) {
       pointCloudRef.current?.updateCameraByBox(box, perspectiveView);
     }
@@ -51,6 +51,15 @@ const PointCloud3D = () => {
       pointCloudMain = pointCloudRef.current;
     }
   }, []);
+
+  /**
+   *  Observe selectedID and reset camera to target top-view
+   */
+  useEffect(() => {
+    if (selectedID) {
+      setTarget3DView(EPerspectiveView.Top);
+    }
+  }, [selectedID]);
 
   return (
     <PointCloudContainer className={getClassName('point-cloud-3d-container')} title='3D视图'>

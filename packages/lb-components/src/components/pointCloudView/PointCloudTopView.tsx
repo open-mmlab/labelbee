@@ -4,6 +4,7 @@
  * @LastEditors: Laoluo luozefeng@sensetime.com
  * @LastEditTime: 2022-06-27 19:45:27
  */
+import { ISize } from '@/types/main';
 import { getClassName } from '@/utils/dom';
 import {
   PolygonOperation,
@@ -12,9 +13,10 @@ import {
   PointCloud,
   MathUtils,
 } from '@labelbee/lb-annotation';
-import { EPerspectiveView } from '@labelbee/lb-utils';
-import React, { useEffect, useRef } from 'react';
+import { IPointCloudBox } from '@labelbee/lb-utils';
+import React, { useEffect, useRef, useState } from 'react';
 import { pointCloudMain } from './PointCloud3DView';
+import { PointCloudContext } from './PointCloudContext';
 import { PointCloudContainer } from './PointCloudLayout';
 
 const { EPolygonPattern } = cTool;
@@ -81,6 +83,52 @@ const TransferCanvas2World = (
 
 const PointCloudTopView = () => {
   const ref = useRef<HTMLDivElement>(null);
+  const plgOpraRef = useRef<PolygonOperation | null>();
+  const ptCtx = React.useContext(PointCloudContext);
+  const pointCloudRef = useRef<PointCloud | null>();
+
+  const [imgInfo, setImgInfo] = useState({ width: 0, height: 0 });
+
+  const mainViewGenBox = (boxParams: IPointCloudBox) => {
+    pointCloudMain.generateBox(boxParams);
+    pointCloudMain.controls.update();
+    pointCloudMain.render();
+  };
+
+  const afterPolygonCreated = (newPolygon: any, pointCloud: PointCloud, mockImgInfo: ISize) => {
+    const [point1, point2, point3, point4] = newPolygon.pointList.map((v: any) =>
+      TransferCanvas2World(v, mockImgInfo),
+    );
+
+    const centerPoint = MathUtils.getLineCenterPoint([point1, point3]);
+    const height = MathUtils.getLineLength(point1, point2);
+    const width = MathUtils.getLineLength(point2, point3);
+
+    const rotation = MathUtils.getRadiusFromQuadrangle(newPolygon.pointList);
+    const zInfo = pointCloud.getSensesPointZAxisInPolygon([point1, point2, point3, point4]);
+
+    const newParams: IPointCloudBox = {
+      center: {
+        x: centerPoint.x,
+        y: centerPoint.y,
+        z: (zInfo.maxZ + zInfo.minZ) / 2,
+      },
+      width,
+      height,
+      depth: zInfo.maxZ - zInfo.minZ,
+      rotation,
+      id: newPolygon.id,
+      attribute: '',
+      valid: true,
+      // TODO: fix trackID
+      trackID: 0,
+    };
+
+    ptCtx.setPointCloudResult(ptCtx.pointCloudBoxList.concat(newParams));
+    ptCtx.setSelectedID(newParams.id);
+
+    mainViewGenBox(newParams);
+  };
 
   useEffect(() => {
     if (ref.current) {
@@ -88,6 +136,7 @@ const PointCloudTopView = () => {
         width: ref.current.clientWidth,
         height: ref.current.clientHeight,
       };
+      setImgInfo(mockImgInfo);
 
       const defaultOrthographic = {
         left: -mockImgInfo.width / 2,
@@ -111,6 +160,8 @@ const PointCloudTopView = () => {
           isOrthographicCamera: true,
           orthgraphicParams: defaultOrthographic,
         });
+
+        pointCloudRef.current = pointCloud;
         pointCloud.loadPCDFile('http://10.53.25.142:8001/1/000001.pcd');
         canvasSchuler.createCanvas(pointCloud.renderer.domElement);
 
@@ -121,39 +172,18 @@ const PointCloudTopView = () => {
           imgNode: image,
           isAppend: false,
         });
+
+        plgOpraRef.current = polygonOperation;
+
         polygonOperation.eventBinding();
         polygonOperation.setPattern(EPolygonPattern.Rect);
-        polygonOperation.on('polygonCreated', (newPolygon: any) => {
-          const [point1, point2, point3, point4] = newPolygon.pointList.map((v: any) =>
-            TransferCanvas2World(v, mockImgInfo),
-          );
+        polygonOperation.on('polygonCreated', (polygon: any) =>
+          afterPolygonCreated(polygon, pointCloud, mockImgInfo),
+        );
 
-          const centerPoint = MathUtils.getLineCenterPoint([point1, point3]);
-          const height = MathUtils.getLineLength(point1, point2);
-          const width = MathUtils.getLineLength(point2, point3);
-
-          const rotation = MathUtils.getRadiusFromQuadrangle(newPolygon.pointList);
-          const zInfo = pointCloud.getSensesPointZAxisInPolygon([point1, point2, point3, point4]);
-
-          const newParams = {
-            center: {
-              x: centerPoint.x,
-              y: centerPoint.y,
-              z: (zInfo.maxZ + zInfo.minZ) / 2,
-            },
-            volume: {
-              width,
-              height,
-              depth: zInfo.maxZ - zInfo.minZ,
-            },
-            rotation,
-          };
-
-          // Control the 3Dview data to create box
-          pointCloudMain.generateBox(newParams);
-          pointCloudMain.updateCameraByBox(newParams, EPerspectiveView.Front);
-          pointCloudMain.controls.update();
-          pointCloudMain.render();
+        polygonOperation.on('selectedChange', () => {
+          const selectedID = polygonOperation.selectedID;
+          ptCtx.setSelectedID(selectedID ?? '');
         });
 
         // Synchronized 3d point cloud view displacement operations
@@ -194,6 +224,16 @@ const PointCloudTopView = () => {
       };
     }
   }, []);
+
+  useEffect(() => {
+    if (plgOpraRef.current) {
+      plgOpraRef.current.on('polygonCreated', (polygon: any) => {
+        if (pointCloudRef.current) {
+          afterPolygonCreated(polygon, pointCloudRef.current, imgInfo);
+        }
+      });
+    }
+  }, [ptCtx]);
 
   return (
     <PointCloudContainer
