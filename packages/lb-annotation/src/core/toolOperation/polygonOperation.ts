@@ -1136,6 +1136,10 @@ class PolygonOperation extends BasicToolOperation {
       const basicLine: [ICoordinate, ICoordinate] = [initPointList[firstPointIndex], initPointList[secondPointIndex]];
 
       offset = MathUtils.getRectPerpendicularOffset(dragStartCoord, coordinate, basicLine);
+      offset = {
+        x: offset.x / this.zoom,
+        y: offset.y / this.zoom,
+      };
     }
 
     this.dragStatus = EDragStatus.Move;
