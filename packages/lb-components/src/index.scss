@@ -1429,8 +1429,8 @@ $pointCloudBg: #4c4c4c;
             &__right,
             &__back,
             &__bottom,
-            &__front-isometric,
-            &__back-isometric {
+            &__lft,
+            &__rbt {
               @include icon;
               background-image: url('./assets/annotation/pointCloudTool/3DViews.png');
               margin-bottom: 8px;
@@ -1464,11 +1464,11 @@ $pointCloudBg: #4c4c4c;
               background-position-y: -220px;
             }
 
-            &__front-isometric {
+            &__lft {
               background-position-y: -264px;
             }
 
-            &__back-isometric {
+            &__rbt {
               background-position-y: -308px;
               margin-bottom: 0px;
             }
@@ -1477,6 +1477,7 @@ $pointCloudBg: #4c4c4c;
 
         .#{$prefix}-point-cloud-3d-view {
           flex: 1;
+          overflow: hidden;
         }
       }
     }

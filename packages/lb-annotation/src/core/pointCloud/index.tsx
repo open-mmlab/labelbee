@@ -338,7 +338,7 @@ export class PointCloud {
     });
   };
 
-  public generateBoxArrow = ({ width, height, depth }: IPointCloudBox) => {
+  public generateBoxArrow = ({ width, depth }: IPointCloudBox) => {
     const dir = new THREE.Vector3(1, 0, 0);
     const origin = new THREE.Vector3(-width / 2, 0, -depth / 2);
     const arrowLen = width;

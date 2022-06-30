@@ -4,11 +4,9 @@
  * @LastEditors: Laoluo luozefeng@sensetime.com
  * @LastEditTime: 2022-06-16 19:32:34
  */
-import i18n from "./i18n/index";
-import toolStyleConverter from "./toolStyle";
+import i18n from './i18n/index';
+import toolStyleConverter from './toolStyle';
 import PerspectiveShiftUtils from './PerspectiveShiftUtils';
-
-
 
 // Constant
 export * from './constant/pointCloud';
