@@ -1302,6 +1302,9 @@ class PolygonOperation extends BasicToolOperation {
 
       // 同步 结果
       this.emit('updateResult');
+
+      // Emit polygon.
+      this.emit('updatePolygonByDrag', this.selectedPolygon);
       return;
     }
 
