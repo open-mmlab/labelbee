@@ -924,6 +924,17 @@ class BasicToolOperation extends EventListener {
     this.renderBasicCanvas();
   };
 
+  /**
+   *  Update by center.
+   *
+   * @param newZoom
+   */
+  public zoomChangeOnCenter = (newZoom: number) => {
+    this.wheelChangePos(this.getGetCenterCoordinate(), 0, newZoom);
+    this.render();
+    this.renderBasicCanvas();
+  };
+
   public renderCursorLine(lineColor = this.style.lineColor[0] ?? '') {
     if (!this.ctx || this.forbidCursorLine) {
       return;
