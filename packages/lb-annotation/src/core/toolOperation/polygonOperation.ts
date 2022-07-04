@@ -57,6 +57,8 @@ class PolygonOperation extends BasicToolOperation {
     initPointList: IPolygonPoint[];
     changePointIndex?: number[]; // 用于存储拖拽点 / 边的下标
     dragTarget: EDragTarget;
+
+    originPolygon?: IPolygonData; // For comparing data before and after drag and drop.
   };
 
   private drawingHistory: ActionsHistory; // 用于正在编辑中的历史记录
@@ -912,6 +914,7 @@ class PolygonOperation extends BasicToolOperation {
       dragTarget,
       initPointList,
       changePointIndex,
+      originPolygon: this.selectedPolygon,
     };
 
     return true;
@@ -1296,6 +1299,7 @@ class PolygonOperation extends BasicToolOperation {
 
     if (this.dragInfo && this.dragStatus === EDragStatus.Move) {
       // 拖拽停止
+      const { originPolygon } = this.dragInfo;
       this.dragInfo = undefined;
       this.dragStatus = EDragStatus.Wait;
       this.history.pushHistory(this.polygonList);
@@ -1304,7 +1308,7 @@ class PolygonOperation extends BasicToolOperation {
       this.emit('updateResult');
 
       // Emit polygon.
-      this.emit('updatePolygonByDrag', this.selectedPolygon);
+      this.emit('updatePolygonByDrag', { newPolygon: this.selectedPolygon, originPolygon });
       return;
     }
 
