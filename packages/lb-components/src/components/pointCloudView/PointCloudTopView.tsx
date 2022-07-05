@@ -2,7 +2,7 @@
  * @Author: Laoluo luozefeng@sensetime.com
  * @Date: 2022-06-22 11:08:31
  * @LastEditors: Laoluo luozefeng@sensetime.com
- * @LastEditTime: 2022-07-04 17:34:17
+ * @LastEditTime: 2022-07-05 17:13:09
  */
 import { ISize } from '@/types/main';
 import { getClassName } from '@/utils/dom';
@@ -111,7 +111,6 @@ const PointCloudTopView = () => {
     const centerPoint = MathUtils.getLineCenterPoint([point1, point3]);
     const height = MathUtils.getLineLength(point1, point2);
     const width = MathUtils.getLineLength(point2, point3);
-
     const rotation = MathUtils.getRadiusFromQuadrangle(newPolygon.pointList);
     const zInfo = pointCloud.getSensesPointZAxisInPolygon([point1, point2, point3, point4]);
 
@@ -152,7 +151,7 @@ const PointCloudTopView = () => {
   };
 
   /**
-   *
+   * NewBox synchronize sideView
    * @param boxParams
    * @param newPolygon TODO！ Need to add type
    */
@@ -173,7 +172,6 @@ const PointCloudTopView = () => {
     if (isInit) {
       SidePointCloud.setCacheCameraPosition(cameraPositionVector);
     }
-
     // Create Draw Polygon
     const { polygon2d, zoom } = SidePointCloud.getBoxSidePolygon2DCoordinate(boxParams);
 
@@ -245,41 +243,39 @@ const PointCloudTopView = () => {
 
         polygonOperation.eventBinding();
         polygonOperation.setPattern(EPolygonPattern.Rect);
-        polygonOperation.on('polygonCreated', (polygon: any) => {
+        TopPointCloudPolygonOperation = polygonOperation;
+
+        polygonOperation.singleOn('polygonCreated', (polygon: any) => {
           const { boxParams } = afterPolygonCreated(polygon, pointCloud, mockImgInfo);
           synchronizeSideView(boxParams, polygon, true);
         });
 
-        polygonOperation.on('selectedChange', () => {
+        polygonOperation.singleOn('selectedChange', () => {
           const selectedID = polygonOperation.selectedID;
           ptCtx.setSelectedID(selectedID ?? '');
         });
-
-        TopPointCloudPolygonOperation = polygonOperation;
 
         /**
          * Synchronized 3d point cloud view displacement operations
          *
          * Change Orthographic Camera size
          */
-        polygonOperation.on('renderZoom', (zoom: number, currentPos: any) => {
+        polygonOperation.singleOn('renderZoom', (zoom: number, currentPos: any) => {
           const { offsetX, offsetY } = TransferCanvas2WorldOffset(currentPos, mockImgInfo, zoom);
           pointCloud.camera.zoom = zoom;
           if (currentPos) {
-            const { x, y, z } = TopPointCloud.cacheCameraPosition;
+            const { x, y, z } = TopPointCloud.initCameraPosition;
             TopPointCloud.camera.position.set(x + offsetY, y - offsetX, z);
           }
 
           pointCloud.camera.updateProjectionMatrix();
-
           pointCloud.render();
         });
-
         // Synchronized 3d point cloud view displacement operations
-        polygonOperation.on('dragMove', ({ currentPos, zoom }) => {
+        polygonOperation.singleOn('dragMove', ({ currentPos, zoom }) => {
           const { offsetX, offsetY } = TransferCanvas2WorldOffset(currentPos, mockImgInfo, zoom);
           pointCloud.camera.zoom = zoom;
-          const { x, y, z } = TopPointCloud.cacheCameraPosition;
+          const { x, y, z } = TopPointCloud.initCameraPosition;
           TopPointCloud.camera.position.set(x + offsetY, y - offsetX, z);
           pointCloud.render();
         });
@@ -324,7 +320,7 @@ const PointCloudTopView = () => {
 
   useEffect(() => {
     if (plgOpraRef.current) {
-      plgOpraRef.current.on('polygonCreated', (polygon: any) => {
+      plgOpraRef.current.singleOn('polygonCreated', (polygon: any) => {
         if (pointCloudRef.current && ref.current) {
           const { boxParams } = afterPolygonCreated(polygon, TopPointCloud, {
             width: ref.current.clientWidth,

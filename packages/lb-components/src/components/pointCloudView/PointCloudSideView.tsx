@@ -2,7 +2,7 @@
  * @Author: Laoluo luozefeng@sensetime.com
  * @Date: 2022-06-22 11:08:31
  * @LastEditors: Laoluo luozefeng@sensetime.com
- * @LastEditTime: 2022-07-04 17:27:47
+ * @LastEditTime: 2022-07-05 17:02:31
  */
 import {
   PolygonOperation,
@@ -125,7 +125,7 @@ const PointCloudSideView = () => {
             const sin = Math.sin(SidePointCloud.templateBox.rotation);
             const offsetXX = offsetX * cos;
             const offsetXY = offsetX * sin;
-            const { x, y, z } = SidePointCloud.cacheCameraPosition;
+            const { x, y, z } = SidePointCloud.initCameraPosition;
             SidePointCloud.camera.position.set(x - offsetXX, y - offsetXY, z + offsetY);
           }
           SidePointCloud.camera.updateProjectionMatrix();
@@ -140,7 +140,7 @@ const PointCloudSideView = () => {
           const offsetXX = offsetX * cos;
           const offsetXY = offsetX * sin;
           SidePointCloud.camera.zoom = zoom;
-          const { x, y, z } = SidePointCloud.cacheCameraPosition;
+          const { x, y, z } = SidePointCloud.initCameraPosition;
           SidePointCloud.camera.position.set(x - offsetXX, y - offsetXY, z + offsetY);
           SidePointCloud.render();
         });
@@ -154,7 +154,7 @@ const PointCloudSideView = () => {
           const newCenterPoint = MathUtils.getLineCenterPoint([point1, point3]);
           const oldCenterPoint = MathUtils.getLineCenterPoint([op1, op3]);
 
-          const vector = {
+          const offset = {
             x: newCenterPoint.x - oldCenterPoint.x,
             y: newCenterPoint.y - oldCenterPoint.y,
           };
@@ -164,8 +164,8 @@ const PointCloudSideView = () => {
 
           const offsetCenterPoint = {
             // x: vector.x * cos - vector.y * sin,
-            x: vector.x,
-            y: vector.x * sin + vector.y * cos,
+            x: offset.x,
+            y: offset.x * sin + offset.y * cos,
             z: newCenterPoint.y - oldCenterPoint.y,
           };
 

@@ -2,7 +2,7 @@
  * @Author: Laoluo luozefeng@sensetime.com
  * @Date: 2022-01-12 13:15:33
  * @LastEditors: Laoluo luozefeng@sensetime.com
- * @LastEditTime: 2022-06-27 17:34:35
+ * @LastEditTime: 2022-07-05 15:51:18
  */
 export default class EventListener {
   private _events: Map<string, any[]>;
@@ -28,7 +28,7 @@ export default class EventListener {
    * @param eventName
    * @param callback
    */
-  public singleOn(eventName: string, callback: (params?: any) => void) {
+  public singleOn(eventName: string, callback: (...args: any[]) => void) {
     this._events.set(eventName, [callback]);
   }
 

@@ -4,7 +4,7 @@
  * @Author: Laoluo luozefeng@sensetime.com
  * @Date: 2022-06-13 19:05:33
  * @LastEditors: Laoluo luozefeng@sensetime.com
- * @LastEditTime: 2022-07-05 14:23:59
+ * @LastEditTime: 2022-07-05 17:10:23
  */
 /*eslint import/no-unresolved: 0*/
 import * as THREE from 'three';
@@ -56,7 +56,7 @@ export class PointCloud {
 
   public templateBox?: IPointCloudBox;
 
-  private cacheCameraPosition = new THREE.Vector3(-1, 0, 10);
+  private initCameraPosition = new THREE.Vector3(-1, 0, 10); // It will init when the camera positton be set
 
   private container: HTMLElement;
 
@@ -113,8 +113,8 @@ export class PointCloud {
     return this.container.clientHeight;
   }
 
-  public setCacheCameraPosition(vector: THREE.Vector3) {
-    this.cacheCameraPosition = vector;
+  public setInitCameraPosition(vector: THREE.Vector3) {
+    this.initCameraPosition = vector;
   }
 
   public initCamera() {
@@ -123,7 +123,7 @@ export class PointCloud {
 
     // TODO
     if (this.isOrthographicCamera) {
-      const { x, y, z } = this.cacheCameraPosition;
+      const { x, y, z } = this.initCameraPosition;
       camera.position.set(x, y, z);
     } else {
       camera.position.set(-1, 0, 500);
@@ -156,22 +156,6 @@ export class PointCloud {
 
     this.initControls();
     this.initRenderer();
-
-    const params: IPointCloudBox = {
-      center: { x: 13, y: -1, z: 1 },
-      depth: 2,
-      width: 5,
-      height: 2,
-      rotation: Math.PI / 6,
-      trackID: 0,
-      id: uuid(),
-      valid: true,
-      attribute: '',
-    };
-
-    // Test for Render
-    this.generateBox(params);
-    this.controls.update();
   }
 
   public generateBox(boxParams: IPointCloudBox, id: string = uuid(), color = 0xffffff) {
@@ -306,7 +290,7 @@ export class PointCloud {
   }
 
   /**
-   * For pcd filter point sets
+   * For pcd filter point under box
    * @param boxParams
    * @param points
    * @param color
@@ -457,7 +441,7 @@ export class PointCloud {
   };
 
   /**
-   * Load PCD File
+   * Load PCD File by box
    * @param src
    * @param boxParams
    */
@@ -640,7 +624,7 @@ export class PointCloud {
     return vectorList;
   }
 
-  public getWorld2CanvasMatrix(boxParams: IPointCloudBox) {
+  public getModelTransformationMatrix(boxParams: IPointCloudBox) {
     const {
       center: { x, y, z },
       rotation,
@@ -653,11 +637,17 @@ export class PointCloud {
     return new THREE.Matrix4().multiply(TBack).multiply(Rz).multiply(TFrom);
   }
 
+  /**
+   * Get Polygon from boxParams
+   *
+   * Notice.
+   * 1. You need to rotate camera to correct direction base because it uses matrixWorldInverse & projectionMatrix from camera
+   * @param boxParams
+   * @returns
+   */
   public getBoxSidePolygon2DCoordinate(boxParams: IPointCloudBox) {
     const { width, height } = boxParams;
     const vectorList = this.getPolygonSidePoints(boxParams);
-
-    // updateCamerta
 
     // 2022.07.03 Test for Matrix
     // First times
@@ -668,7 +658,7 @@ export class PointCloud {
       .premultiply(this.camera.projectionMatrix);
 
     const boxSideMatrix = new THREE.Matrix4()
-      .premultiply(this.getWorld2CanvasMatrix(boxParams)) // need to update everytimes
+      .premultiply(this.getModelTransformationMatrix(boxParams)) // need to update everytimes
       .premultiply(projectMatrix)
       .premultiply(this.basicCoordinate2CanvasMatrix4);
     this.sideMatrix = boxSideMatrix;
@@ -680,7 +670,7 @@ export class PointCloud {
       .map((vector) => vector.applyMatrix4(this.sideMatrix as any));
 
     // OriginWay to update
-    // .map((vector) => vector.applyMatrix4(this.getWorld2CanvasMatrix(boxParams)))
+    // .map((vector) => vector.applyMatrix4(this.getModelTransformationMatrix(boxParams)))
     // .map((vector) => vector.project(this.camera))
     // .map((vector) => this.getBasicCoordinate2Canvas(vector));
 
@@ -701,13 +691,16 @@ export class PointCloud {
     const polygon2d = vectorList
       .map((vector) => new THREE.Vector3(vector.x, vector.y, vector.z))
       // .map((vector) => vector.applyMatrix4(invertMatrix)); // Direct invertMatrix
-      .map((vector) => vector.applyMatrix4(this.getWorld2CanvasMatrix(boxParams)))
+      // Model Transfomation
+      .map((vector) => vector.applyMatrix4(this.getModelTransformationMatrix(boxParams)))
+      // rotate coordinate
       .map((vector) => {
         return {
           x: vector.y,
           y: vector.x,
         };
       })
+      // viewport transformation
       .map((vector) => {
         return {
           x: -(vector.x - this.containerWidth / 2),
