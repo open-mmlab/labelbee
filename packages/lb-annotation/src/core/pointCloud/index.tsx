@@ -4,7 +4,7 @@
  * @Author: Laoluo luozefeng@sensetime.com
  * @Date: 2022-06-13 19:05:33
  * @LastEditors: Laoluo luozefeng@sensetime.com
- * @LastEditTime: 2022-07-05 17:10:23
+ * @LastEditTime: 2022-07-05 19:59:34
  */
 /*eslint import/no-unresolved: 0*/
 import * as THREE from 'three';
@@ -558,6 +558,12 @@ export class PointCloud {
     return new THREE.Vector3(vector.x / w - w / 2, -(vector.y / h - h / 2), 1);
   }
 
+  /**
+   * The order of pointList is lt => lb => rb => rt
+   * The basic coordinate is top view(sensebee pointCloud topview coordinate)
+   * @param boxParams
+   * @returns
+   */
   public getPolygonSidePoints(boxParams: IPointCloudBox) {
     const {
       center: { x, y, z },
@@ -586,7 +592,39 @@ export class PointCloud {
       y: y + height / 2,
       z: z - depth / 2,
     };
-    const vectorList = [lfb, lft, lbt, lbb];
+    const vectorList = [lfb, lft, lbt, lbb]; // Important order
+
+    return vectorList;
+  }
+
+  public getPolygonBackPoints(boxParams: IPointCloudBox) {
+    const {
+      center: { x, y, z },
+      height,
+      width,
+      depth,
+    } = boxParams;
+    const lbt = {
+      x: x - width / 2,
+      y: y + height / 2,
+      z: z + depth / 2,
+    };
+    const lbb = {
+      x: x - width / 2,
+      y: y + height / 2,
+      z: z - depth / 2,
+    };
+    const rbb = {
+      x: x - width / 2,
+      y: y - height / 2,
+      z: z - depth / 2,
+    };
+    const rbt = {
+      x: x - width / 2,
+      y: y - height / 2,
+      z: z + depth / 2,
+    };
+    const vectorList = [lbt, lbb, rbb, rbt];
 
     return vectorList;
   }
@@ -646,13 +684,30 @@ export class PointCloud {
    * @returns
    */
   public getBoxSidePolygon2DCoordinate(boxParams: IPointCloudBox) {
-    const { width, height } = boxParams;
-    const vectorList = this.getPolygonSidePoints(boxParams);
+    return this.getBoxPolygon2DCoordinate(boxParams, EPerspectiveView.Left);
+  }
 
-    // 2022.07.03 Test for Matrix
-    // First times
-    // if (!this.sideMatrix) {
-    //   debugger;
+  public getBoxBackPolygon2DCoordinate(boxParams: IPointCloudBox) {
+    return this.getBoxPolygon2DCoordinate(boxParams, EPerspectiveView.Left);
+  }
+
+  public boxParams2ViewPolygon(boxParams: IPointCloudBox, perspectiveView: EPerspectiveView) {
+    switch (perspectiveView) {
+      case EPerspectiveView.Left:
+        return this.getPolygonSidePoints(boxParams);
+
+      case EPerspectiveView.Back:
+        return this.getPolygonBackPoints(boxParams);
+
+      default: {
+        return this.getPolygonTopPoints(boxParams);
+      }
+    }
+  }
+
+  public getBoxPolygon2DCoordinate(boxParams: IPointCloudBox, perspectiveView: EPerspectiveView) {
+    const vectorList = this.boxParams2ViewPolygon(boxParams, perspectiveView);
+    const { width, height } = boxParams;
     const projectMatrix = new THREE.Matrix4()
       .premultiply(this.camera.matrixWorldInverse)
       .premultiply(this.camera.projectionMatrix);
@@ -662,17 +717,10 @@ export class PointCloud {
       .premultiply(projectMatrix)
       .premultiply(this.basicCoordinate2CanvasMatrix4);
     this.sideMatrix = boxSideMatrix;
-    // }
 
     const polygon2d = vectorList
       .map((vector) => new THREE.Vector3(vector.x, vector.y, vector.z))
-      // // 2022.07.03 Test for Matrix
       .map((vector) => vector.applyMatrix4(this.sideMatrix as any));
-
-    // OriginWay to update
-    // .map((vector) => vector.applyMatrix4(this.getModelTransformationMatrix(boxParams)))
-    // .map((vector) => vector.project(this.camera))
-    // .map((vector) => this.getBasicCoordinate2Canvas(vector));
 
     const wZoom = this.containerWidth / width;
     const hZoom = this.containerHeight / height;
@@ -686,7 +734,6 @@ export class PointCloud {
   public getBoxTopPolygon2DCoordinate(boxParams: IPointCloudBox) {
     const { width, height } = boxParams;
     const vectorList = this.getPolygonTopPoints(boxParams);
-
     // TODO. Need to update
     const polygon2d = vectorList
       .map((vector) => new THREE.Vector3(vector.x, vector.y, vector.z))
@@ -707,10 +754,8 @@ export class PointCloud {
           y: -(vector.y - this.containerHeight / 2),
         };
       });
-
     const wZoom = this.containerWidth / width;
     const hZoom = this.containerHeight / height;
-
     return {
       polygon2d,
       zoom: Math.min(wZoom, hZoom) / 2,
@@ -741,6 +786,35 @@ export class PointCloud {
       ...newBoxParams,
       width: newBoxParams.width + offsetWidth,
       height: newBoxParams.height,
+      depth: newBoxParams.depth + offsetDepth,
+    };
+    return { newBoxParams };
+  }
+
+  public getNewBoxByBackUpdate(
+    offsetCenterPoint: { x: number; y: number; z: number },
+    offsetWidth: number,
+    offsetDepth: number,
+  ) {
+    if (!this.templateBox) {
+      return;
+    }
+
+    const Rz = new THREE.Matrix4().makeRotationZ(this.templateBox.rotation).invert();
+    const offsetVector = new THREE.Vector3(0, -offsetCenterPoint.x, 0).applyMatrix4(Rz);
+
+    // need to Change offset to world side
+    let newBoxParams = this.templateBox;
+    newBoxParams.center = {
+      x: newBoxParams.center.x + offsetVector.x,
+      y: newBoxParams.center.y + offsetVector.y,
+      z: newBoxParams.center.z - offsetCenterPoint.z,
+    };
+
+    newBoxParams = {
+      ...newBoxParams,
+      width: newBoxParams.width,
+      height: newBoxParams.height + offsetWidth,
       depth: newBoxParams.depth + offsetDepth,
     };
     return { newBoxParams };

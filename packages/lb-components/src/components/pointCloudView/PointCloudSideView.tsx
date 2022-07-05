@@ -2,7 +2,7 @@
  * @Author: Laoluo luozefeng@sensetime.com
  * @Date: 2022-06-22 11:08:31
  * @LastEditors: Laoluo luozefeng@sensetime.com
- * @LastEditTime: 2022-07-05 17:02:31
+ * @LastEditTime: 2022-07-05 19:03:28
  */
 import {
   PolygonOperation,
@@ -48,7 +48,7 @@ const TransferCanvas2WorldOffset = (
   const { width: w, height: h } = size;
 
   const canvasCenterPoint = {
-    x: currentPos.x + (w * zoom) / 2,
+    x: currentPos.x + (w * zoom) / 2, // 放大倍数之后的中心点的偏移量
     y: currentPos.y + (h * zoom) / 2,
   };
 
