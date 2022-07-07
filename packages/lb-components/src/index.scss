@@ -1349,42 +1349,88 @@ $hotkey-container-padding: 7px;
 
 /** PointCloud样式 start */
 $pointCloudBg: #4c4c4c;
+$ptPrefix: #{$prefix}-point-cloud;
 
-@mixin icon {
+@mixin icon($size: 36px) {
   display: inline-block;
-  height: 36px;
-  width: 36px;
+  height: $size;
+  width: $size;
   background-repeat: no-repeat;
   cursor: pointer;
 }
 
-.#{$prefix}-point-cloud-wrapper {
+.#{$ptPrefix}-wrapper {
   display: flex;
   height: 100%;
   width: 100;
   overflow: hidden;
 
-  .#{$prefix}-point-cloud-container {
+  .#{$ptPrefix}-container {
     &__header {
       background-color: #444;
       color: white;
       height: 40px;
-      padding-left: 16px;
+      padding: 0 16px;
       line-height: 40px;
       font-weight: 700;
+      display: flex;
+      justify-content: space-between;
+    }
+    &__header-title {
+      flex: 1;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+    &__header-toolbar {
+      display: flex;
+      align-items: center;
+
+      .#{$ptPrefix} {
+        @mixin iconMg {
+          margin-right: 16px;
+        }
+        &__rotate-reserve {
+          @include icon(24px);
+          @include iconMg;
+          background-image: url('./assets/annotation/pointCloudTool/rotateReserve.svg');
+          transform: rotateY(180deg);
+        }
+
+        &__rotate {
+          @include icon(24px);
+          @include iconMg;
+          background-image: url('./assets/annotation/pointCloudTool/rotateReserve.svg');
+        }
+
+        &__rotate-180 {
+          @include icon(24px);
+          background-image: url('./assets/annotation/pointCloudTool/rotate180.svg');
+        }
+
+        &__next {
+          font-size: 24px;
+          cursor: pointer;
+        }
+
+        &__prev {
+          font-size: 24px;
+          cursor: pointer;
+          @include iconMg;
+        }
+      }
     }
   }
-  .#{$prefix}-point-cloud-container__left {
+  .#{$ptPrefix}-container__left {
     width: 580px;
     display: flex;
     flex-direction: column;
     border: 1px solid #fff;
-    .#{$prefix}-point-cloud-2d-container {
+    .#{$ptPrefix}-2d-container {
       flex: 1;
       flex-direction: column;
       display: flex;
 
-      .#{$prefix}-point-cloud-2d-image {
+      .#{$ptPrefix}-2d-image {
         flex: 1;
         display: flex;
         align-items: center;
@@ -1392,17 +1438,17 @@ $pointCloudBg: #4c4c4c;
       }
     }
 
-    .#{$prefix}-point-cloud-3d-container {
+    .#{$ptPrefix}-3d-container {
       height: 560px;
       display: flex;
       flex-direction: column;
 
-      .#{$prefix}-point-cloud-3d-content {
+      .#{$ptPrefix}-3d-content {
         display: flex;
         flex: 1;
         overflow: hidden;
 
-        .#{$prefix}-point-cloud-3d-sidebar {
+        .#{$ptPrefix}-3d-sidebar {
           padding-left: 16px;
           height: 100%;
           background-color: $pointCloudBg;
@@ -1412,9 +1458,9 @@ $pointCloudBg: #4c4c4c;
           flex-direction: column;
           justify-content: flex-end;
 
-          .#{$prefix}-point-cloud-3d-view {
+          .#{$ptPrefix}-3d-view {
             &__reset {
-              @include icon;
+              @include icon();
               background-image: url('./assets/annotation/pointCloudTool/3DViewReset.svg');
               margin: 16px 0;
               font-size: 36px;
@@ -1431,7 +1477,7 @@ $pointCloudBg: #4c4c4c;
             &__bottom,
             &__lft,
             &__rbt {
-              @include icon;
+              @include icon();
               background-image: url('./assets/annotation/pointCloudTool/3DViews.png');
               margin-bottom: 8px;
 
@@ -1475,7 +1521,7 @@ $pointCloudBg: #4c4c4c;
           }
         }
 
-        .#{$prefix}-point-cloud-3d-view {
+        .#{$ptPrefix}-3d-view {
           flex: 1;
           overflow: hidden;
         }
@@ -1483,26 +1529,26 @@ $pointCloudBg: #4c4c4c;
     }
   }
 
-  .#{$prefix}-point-cloud-container__right {
+  .#{$ptPrefix}-container__right {
     flex: 1;
     display: flex;
     flex-direction: column;
 
-    .#{$prefix}-point-cloud-container__top-view {
+    .#{$ptPrefix}-container__top-view {
       height: 540px;
       border-bottom: 1px solid #fff;
     }
 
-    .#{$prefix}-point-cloud-container__right-bottom {
+    .#{$ptPrefix}-container__right-bottom {
       flex: 1;
       display: flex;
 
-      .#{$prefix}-point-cloud-container__side-view {
+      .#{$ptPrefix}-container__side-view {
         border-right: 1px solid white;
       }
 
-      .#{$prefix}-point-cloud-container__side-view,
-      .#{$prefix}-point-cloud-container__back-view {
+      .#{$ptPrefix}-container__side-view,
+      .#{$ptPrefix}-container__back-view {
         flex: 1;
       }
     }

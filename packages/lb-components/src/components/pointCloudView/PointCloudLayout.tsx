@@ -10,9 +10,11 @@ export const PointCloudContainer: React.FC<{
   return (
     <div className={classNames([className, getClassName('point-cloud-container')])}>
       <div className={getClassName('point-cloud-container', 'header')}>
-        <span>{title}</span>
+        <span className={getClassName('point-cloud-container', 'header-title')}>{title}</span>
 
-        {toolbar && <span>{toolbar}</span>}
+        {toolbar && (
+          <div className={getClassName('point-cloud-container', 'header-toolbar')}>{toolbar}</div>
+        )}
       </div>
 
       {children}

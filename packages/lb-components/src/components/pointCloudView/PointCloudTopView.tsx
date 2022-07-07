@@ -6,6 +6,8 @@
  */
 import { ISize } from '@/types/main';
 import { getClassName } from '@/utils/dom';
+import { ZoomController } from '@/views/MainView/toolFooter/ZoomController';
+import { DownSquareOutlined, UpSquareOutlined } from '@ant-design/icons';
 import {
   PointCloud2dOperation,
   cTool,
@@ -14,6 +16,7 @@ import {
   MathUtils,
 } from '@labelbee/lb-annotation';
 import { EPerspectiveView, IPointCloudBox } from '@labelbee/lb-utils';
+import { Divider } from 'antd';
 import React, { useEffect, useRef, useState } from 'react';
 import { pointCloudMain } from './PointCloud3DView';
 import { BackPointCloud, BackPointCloudPolygonOperation } from './PointCloudBackView';
@@ -208,6 +211,22 @@ export const synchronizeTopView = (newBoxParams: IPointCloudBox, newPolygon: any
 };
 
 export const PointCloudTopView = () => {
+const TopViewToolbar = () => {
+  return (
+    <>
+      <span className={getClassName('point-cloud', 'rotate-reserve')} />
+      <span className={getClassName('point-cloud', 'rotate')}></span>
+      <span className={getClassName('point-cloud', 'rotate-180')}></span>
+      <Divider type='vertical' style={{ background: 'rgba(153, 153, 153, 1)', height: '16px' }} />
+      <UpSquareOutlined className={getClassName('point-cloud', 'prev')} />
+      <DownSquareOutlined className={getClassName('point-cloud', 'next')} />
+      <Divider type='vertical' style={{ background: 'rgba(153, 153, 153, 1)', height: '16px' }} />
+      <ZoomController />
+    </>
+  );
+};
+
+const PointCloudTopView = () => {
   const ref = useRef<HTMLDivElement>(null);
   const plgOpraRef = useRef<PointCloud2dOperation | null>();
   const ptCtx = React.useContext(PointCloudContext);
@@ -429,6 +448,7 @@ export const PointCloudTopView = () => {
     <PointCloudContainer
       className={getClassName('point-cloud-container', 'top-view')}
       title='俯视图'
+      toolbar={<TopViewToolbar />}
     >
       <div style={{ width: '100%', height: 500 }} ref={ref} />
     </PointCloudContainer>

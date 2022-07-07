@@ -53,6 +53,8 @@ export const PageInput = (props: IPageProps) => {
   );
 };
 
+export type FooterTheme = 'light' | 'dark';
+
 interface IProps {
   totalPage: number;
   imgIndex: number;
@@ -61,7 +63,7 @@ interface IProps {
   step: number;
   basicResultList: any[];
   basicIndex: number;
-  mode?: 'light' | 'dark'; // 后面通过 context 的形式进行编写
+  mode?: FooterTheme; // 后面通过 context 的形式进行编写
   footer?: Footer;
 }
 
@@ -72,7 +74,7 @@ const FooterDivider = () => (
 );
 
 const ToolFooter: React.FC<IProps> = (props: IProps) => {
-  const { stepList, step, basicResultList, basicIndex, mode, footer } = props;
+  const { stepList, step, basicResultList, basicIndex, mode = 'light', footer } = props;
   const dispatch = useDispatch();
 
   const { t } = useTranslation();
