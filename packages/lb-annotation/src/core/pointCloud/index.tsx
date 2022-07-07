@@ -4,7 +4,7 @@
  * @Author: Laoluo luozefeng@sensetime.com
  * @Date: 2022-06-13 19:05:33
  * @LastEditors: Laoluo luozefeng@sensetime.com
- * @LastEditTime: 2022-07-05 19:59:34
+ * @LastEditTime: 2022-07-06 09:47:22
  */
 /*eslint import/no-unresolved: 0*/
 import * as THREE from 'three';
@@ -688,7 +688,7 @@ export class PointCloud {
   }
 
   public getBoxBackPolygon2DCoordinate(boxParams: IPointCloudBox) {
-    return this.getBoxPolygon2DCoordinate(boxParams, EPerspectiveView.Left);
+    return this.getBoxPolygon2DCoordinate(boxParams, EPerspectiveView.Back);
   }
 
   public boxParams2ViewPolygon(boxParams: IPointCloudBox, perspectiveView: EPerspectiveView) {

@@ -2,7 +2,7 @@
  * @Author: Laoluo luozefeng@sensetime.com
  * @Date: 2022-06-22 11:08:31
  * @LastEditors: Laoluo luozefeng@sensetime.com
- * @LastEditTime: 2022-07-05 20:07:41
+ * @LastEditTime: 2022-07-07 15:07:06
  */
 import {
   PolygonOperation,
@@ -14,9 +14,7 @@ import {
 import { getClassName } from '@/utils/dom';
 import { PointCloudContainer } from './PointCloudLayout';
 import React, { useEffect, useRef } from 'react';
-import { TopPointCloudPolygonOperation, TopPointCloud } from './PointCloudTopView';
-import { pointCloudMain } from './PointCloud3DView';
-import { EPerspectiveView } from '@labelbee/lb-utils';
+import { synchronizeSideView, synchronizeTopView } from './PointCloudTopView';
 
 const { EPolygonPattern } = cTool;
 
@@ -186,23 +184,8 @@ const PointCloudSideView = () => {
             offsetHeight,
           );
 
-          // Control the 3Dview data to create box
-          pointCloudMain.generateBox(newBoxParams, newPolygon.id);
-          pointCloudMain.updateCameraByBox(newBoxParams, EPerspectiveView.Top);
-          pointCloudMain.render();
-
-          BackPointCloud.setTemplateBox(newBoxParams);
-          TopPointCloud.setTemplateBox(newBoxParams);
-          const { polygon2d } = TopPointCloud.getBoxTopPolygon2DCoordinate(newBoxParams);
-
-          TopPointCloudPolygonOperation.setResult([
-            {
-              id: newPolygon.id,
-              pointList: polygon2d,
-              textAttribute: '',
-              isRect: true,
-            },
-          ]);
+          synchronizeTopView(newBoxParams, newPolygon);
+          synchronizeSideView(newBoxParams, newPolygon);
         });
 
         canvasSchuler.createCanvas(polygonOperation.canvas, { size: mockImgInfo });
