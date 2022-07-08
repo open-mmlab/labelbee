@@ -4,7 +4,7 @@
  * @Author: Laoluo luozefeng@sensetime.com
  * @Date: 2022-06-13 19:05:33
  * @LastEditors: Laoluo luozefeng@sensetime.com
- * @LastEditTime: 2022-07-07 16:11:29
+ * @LastEditTime: 2022-07-08 14:13:48
  */
 /*eslint import/no-unresolved: 0*/
 import * as THREE from 'three';
@@ -227,7 +227,7 @@ export class PointCloud {
   public updateOrthoCamera(boxParams: IPointCloudBox, perspectiveView: EPerspectiveView) {
     const cameraPositionVector = this.updateCameraByBox(boxParams, perspectiveView);
 
-    // It will make the
+    // Initialize the camera zoom to get right projectionMatrix.(like functin - getBoxPolygon2DCoordinate)
     this.camera.zoom = 1;
     this.camera.updateProjectionMatrix();
     return {
@@ -544,10 +544,6 @@ export class PointCloud {
   public getCanvas2BasicCoordinate(vector: THREE.Vector3) {
     const w = this.containerWidth / 2;
     const h = this.containerHeight / 2;
-    // return {
-    //   x: vector.x / w - w / 2,
-    //   y: -(vector.y / h - h / 2),
-    // };
     return new THREE.Vector3(vector.x / w - w / 2, -(vector.y / h - h / 2), 1);
   }
 
