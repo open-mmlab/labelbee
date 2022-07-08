@@ -2,7 +2,7 @@
  * @Author: Laoluo luozefeng@sensetime.com
  * @Date: 2022-06-22 11:08:31
  * @LastEditors: Laoluo luozefeng@sensetime.com
- * @LastEditTime: 2022-07-07 15:11:11
+ * @LastEditTime: 2022-07-08 11:09:02
  */
 import {
   PolygonOperation,
@@ -13,8 +13,10 @@ import {
 } from '@labelbee/lb-annotation';
 import { getClassName } from '@/utils/dom';
 import { PointCloudContainer } from './PointCloudLayout';
-import React, { useEffect, useRef } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import { synchronizeBackView, synchronizeTopView } from './PointCloudTopView';
+import { IPointCloudBox } from '@labelbee/lb-utils';
+import { PointCloudContext } from './PointCloudContext';
 
 const { EPolygonPattern } = cTool;
 
@@ -64,27 +66,50 @@ const TransferCanvas2WorldOffset = (
 let SidePointCloud: any;
 let SidePointCloudPolygonOperation: any;
 
+const updateSideViewByCanvas2D = (
+  currentPos: { x: number; y: number },
+  zoom: number,
+  size: { width: number; height: number },
+  selectedPointCloudBox: IPointCloudBox,
+) => {
+  const { offsetX, offsetY } = TransferCanvas2WorldOffset(currentPos, size, zoom);
+  SidePointCloud.camera.zoom = zoom;
+  if (currentPos) {
+    const cos = Math.cos(selectedPointCloudBox.rotation);
+    const sin = Math.sin(selectedPointCloudBox.rotation);
+    const offsetXX = offsetX * cos;
+    const offsetXY = offsetX * sin;
+    const { x, y, z } = SidePointCloud.initCameraPosition;
+    SidePointCloud.camera.position.set(x - offsetXX, y - offsetXY, z + offsetY);
+  }
+  SidePointCloud.camera.updateProjectionMatrix();
+  SidePointCloud.render();
+};
+
 const PointCloudSideView = () => {
+  const ptCtx = React.useContext(PointCloudContext);
+  const [size, setSize] = useState<{ width: number; height: number } | null>(null);
+
   const ref = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     if (ref.current) {
-      const mockImgInfo = {
+      const size = {
         width: ref.current.clientWidth,
         height: ref.current.clientHeight,
       };
 
       const defaultOrthographic = {
-        left: -mockImgInfo.width / 2,
-        right: mockImgInfo.width / 2,
-        top: mockImgInfo.height / 2,
-        bottom: -mockImgInfo.height / 2,
+        left: -size.width / 2,
+        right: size.width / 2,
+        top: size.height / 2,
+        bottom: -size.height / 2,
         near: 100,
         far: -100,
       };
 
       const container = ref.current;
-      const imgSrc = CreateEmptyImage(mockImgInfo);
+      const imgSrc = CreateEmptyImage(size);
 
       const image = new Image();
       image.src = imgSrc;
@@ -101,104 +126,106 @@ const PointCloudSideView = () => {
 
         const polygonOperation = new PolygonOperation({
           container: ref.current as HTMLDivElement,
-          size: mockImgInfo,
-          config: '{ textConfigurable: false }',
+          size,
+          config: '{ "textConfigurable": false, "poinCloudPattern": true }',
           imgNode: image,
           isAppend: false,
         });
         polygonOperation.eventBinding();
         polygonOperation.setPattern(EPolygonPattern.Rect);
         SidePointCloudPolygonOperation = polygonOperation;
-
-        /**
-         * Synchronized 3d point cloud view displacement operations
-         *
-         * Change Orthographic Camera size
-         */
-        polygonOperation.on('renderZoom', (zoom: number, currentPos: any) => {
-          const { offsetX, offsetY } = TransferCanvas2WorldOffset(currentPos, mockImgInfo, zoom);
-          SidePointCloud.camera.zoom = zoom;
-          if (currentPos) {
-            const cos = Math.cos(SidePointCloud.templateBox.rotation);
-            const sin = Math.sin(SidePointCloud.templateBox.rotation);
-            const offsetXX = offsetX * cos;
-            const offsetXY = offsetX * sin;
-            const { x, y, z } = SidePointCloud.initCameraPosition;
-            SidePointCloud.camera.position.set(x - offsetXX, y - offsetXY, z + offsetY);
-          }
-          SidePointCloud.camera.updateProjectionMatrix();
-          SidePointCloud.render();
-        });
-
-        // Synchronized 3d point cloud view displacement operations
-        polygonOperation.on('dragMove', ({ currentPos, zoom }) => {
-          const { offsetX, offsetY } = TransferCanvas2WorldOffset(currentPos, mockImgInfo, zoom);
-          const cos = Math.cos(SidePointCloud.templateBox.rotation);
-          const sin = Math.sin(SidePointCloud.templateBox.rotation);
-          const offsetXX = offsetX * cos;
-          const offsetXY = offsetX * sin;
-          SidePointCloud.camera.zoom = zoom;
-          const { x, y, z } = SidePointCloud.initCameraPosition;
-          SidePointCloud.camera.position.set(x - offsetXX, y - offsetXY, z + offsetY);
-          SidePointCloud.render();
-        });
-
-        polygonOperation.on('updatePolygonByDrag', ({ newPolygon, originPolygon }: any) => {
-          // Notice. The sort of polygon is important.
-          const [point1, point2, point3] = newPolygon.pointList;
-          const [op1, op2, op3] = originPolygon.pointList;
-
-          // 2D centerPoint => 3D x & z
-          const newCenterPoint = MathUtils.getLineCenterPoint([point1, point3]);
-          const oldCenterPoint = MathUtils.getLineCenterPoint([op1, op3]);
-
-          const offset = {
-            x: newCenterPoint.x - oldCenterPoint.x,
-            y: newCenterPoint.y - oldCenterPoint.y,
-          };
-
-          const cos = Math.cos(SidePointCloud.templateBox.rotation);
-          const sin = Math.sin(SidePointCloud.templateBox.rotation);
-
-          const offsetCenterPoint = {
-            // x: vector.x * cos - vector.y * sin,
-            x: offset.x,
-            y: offset.x * sin + offset.y * cos,
-            z: newCenterPoint.y - oldCenterPoint.y,
-          };
-
-          // 2D height => 3D depth
-          const height = MathUtils.getLineLength(point1, point2);
-          const oldHeight = MathUtils.getLineLength(op1, op2);
-          const offsetHeight = height - oldHeight; // 3D depth
-
-          // 2D width => 3D width
-          const width = MathUtils.getLineLength(point2, point3);
-          const oldWidth = MathUtils.getLineLength(op2, op3);
-          const offsetWidth = width - oldWidth; // 3D width
-
-          const { newBoxParams } = SidePointCloud.getNewBoxBySideUpdate(
-            offsetCenterPoint,
-            offsetWidth,
-            offsetHeight,
-          );
-
-          // TODO. It is another way to updateData
-          // const { newBoxParams } = SidePointCloud.getNewBoxBySideUpdateByPoints(
-          //   newPolygon.pointList,
-          //   offsetHeight,
-          //   offsetCenterPoint.y,
-          // );
-
-          synchronizeTopView(newBoxParams, newPolygon);
-
-          synchronizeBackView(newBoxParams, newPolygon);
-        });
-
-        canvasSchuler.createCanvas(polygonOperation.canvas, { size: mockImgInfo });
+        canvasSchuler.createCanvas(polygonOperation.canvas, { size });
+        setSize(size);
       };
     }
   }, []);
+
+  useEffect(() => {
+    // By the way as an initialization judgment
+    if (!size) {
+      return;
+    }
+
+    /**
+     * Synchronized 3d point cloud view displacement operations
+     *
+     * Change Orthographic Camera size
+     */
+    SidePointCloudPolygonOperation.singleOn('renderZoom', (zoom: number, currentPos: any) => {
+      if (!ptCtx.selectedPointCloudBox) {
+        return;
+      }
+      updateSideViewByCanvas2D(currentPos, zoom, size, ptCtx.selectedPointCloudBox);
+    });
+
+    // Synchronized 3d point cloud view displacement operations
+    SidePointCloudPolygonOperation.singleOn('dragMove', ({ currentPos, zoom }: any) => {
+      if (!ptCtx.selectedPointCloudBox) {
+        return;
+      }
+      updateSideViewByCanvas2D(currentPos, zoom, size, ptCtx.selectedPointCloudBox);
+    });
+
+    SidePointCloudPolygonOperation.singleOn(
+      'updatePolygonByDrag',
+      ({ newPolygon, originPolygon }: any) => {
+        if (!ptCtx.selectedPointCloudBox) {
+          return;
+        }
+
+        // Notice. The sort of polygon is important.
+        const [point1, point2, point3] = newPolygon.pointList;
+        const [op1, op2, op3] = originPolygon.pointList;
+
+        // 2D centerPoint => 3D x & z
+        const newCenterPoint = MathUtils.getLineCenterPoint([point1, point3]);
+        const oldCenterPoint = MathUtils.getLineCenterPoint([op1, op3]);
+
+        const offset = {
+          x: newCenterPoint.x - oldCenterPoint.x,
+          y: newCenterPoint.y - oldCenterPoint.y,
+        };
+
+        const cos = Math.cos(ptCtx.selectedPointCloudBox.rotation);
+        const sin = Math.sin(ptCtx.selectedPointCloudBox.rotation);
+
+        const offsetCenterPoint = {
+          // x: vector.x * cos - vector.y * sin,
+          x: offset.x,
+          y: offset.x * sin + offset.y * cos,
+          z: newCenterPoint.y - oldCenterPoint.y,
+        };
+
+        // 2D height => 3D depth
+        const height = MathUtils.getLineLength(point1, point2);
+        const oldHeight = MathUtils.getLineLength(op1, op2);
+        const offsetHeight = height - oldHeight; // 3D depth
+
+        // 2D width => 3D width
+        const width = MathUtils.getLineLength(point2, point3);
+        const oldWidth = MathUtils.getLineLength(op2, op3);
+        const offsetWidth = width - oldWidth; // 3D width
+
+        const { newBoxParams } = SidePointCloud.getNewBoxBySideUpdate(
+          offsetCenterPoint,
+          offsetWidth,
+          offsetHeight,
+          ptCtx.selectedPointCloudBox,
+        );
+
+        // TODO. It is another way to updateData
+        // const { newBoxParams } = SidePointCloud.getNewBoxBySideUpdateByPoints(
+        //   newPolygon.pointList,
+        //   offsetHeight,
+        //   offsetCenterPoint.y,
+        // );
+
+        synchronizeTopView(newBoxParams, newPolygon);
+        synchronizeBackView(newBoxParams, newPolygon);
+        ptCtx.updateSelectedPointCloud(newPolygon.id, newBoxParams);
+      },
+    );
+  }, [ptCtx, size]);
 
   return (
     <PointCloudContainer

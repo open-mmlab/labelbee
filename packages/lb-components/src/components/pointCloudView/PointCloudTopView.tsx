@@ -2,7 +2,7 @@
  * @Author: Laoluo luozefeng@sensetime.com
  * @Date: 2022-06-22 11:08:31
  * @LastEditors: Laoluo luozefeng@sensetime.com
- * @LastEditTime: 2022-07-07 15:08:17
+ * @LastEditTime: 2022-07-08 11:11:53
  */
 import { ISize } from '@/types/main';
 import { getClassName } from '@/utils/dom';
@@ -119,14 +119,17 @@ export const synchronizeSideView = (boxParams: IPointCloudBox, newPolygon: any, 
   // Update PolygonView to default zoom and currentPos.
   SidePointCloudPolygonOperation.initPosition();
   SidePointCloudPolygonOperation.zoomChangeOnCenter(zoom);
-  SidePointCloudPolygonOperation.setResult([
-    {
-      id: newPolygon.id,
-      pointList: polygon2d,
-      textAttribute: '',
-      isRect: true,
-    },
-  ]);
+  SidePointCloudPolygonOperation.setResultAndSelectedID(
+    [
+      {
+        id: newPolygon.id,
+        pointList: polygon2d,
+        textAttribute: '',
+        isRect: true,
+      },
+    ],
+    newPolygon.id,
+  );
 };
 
 /**
@@ -162,14 +165,17 @@ export const synchronizeBackView = (boxParams: IPointCloudBox, newPolygon: any, 
   // Update PolygonView to default zoom and currentPos.
   BackPointCloudPolygonOperation.initPosition();
   BackPointCloudPolygonOperation.zoomChangeOnCenter(zoom);
-  BackPointCloudPolygonOperation.setResult([
-    {
-      id: newPolygon.id,
-      pointList: polygon2d,
-      textAttribute: '',
-      isRect: true,
-    },
-  ]);
+  BackPointCloudPolygonOperation.setResultAndSelectedID(
+    [
+      {
+        id: newPolygon.id,
+        pointList: polygon2d,
+        textAttribute: '',
+        isRect: true,
+      },
+    ],
+    newPolygon.id,
+  );
 };
 
 /**
@@ -183,8 +189,6 @@ export const synchronizeTopView = (newBoxParams: IPointCloudBox, newPolygon: any
   pointCloudMain.updateCameraByBox(newBoxParams, EPerspectiveView.Top);
   pointCloudMain.render();
 
-  BackPointCloud.setTemplateBox(newBoxParams);
-  TopPointCloud.setTemplateBox(newBoxParams);
   const { polygon2d } = TopPointCloud.getBoxTopPolygon2DCoordinate(newBoxParams);
 
   const newPolygonList = [...TopPointCloudPolygonOperation.polygonList];
@@ -200,7 +204,7 @@ export const synchronizeTopView = (newBoxParams: IPointCloudBox, newPolygon: any
     });
   }
 
-  TopPointCloudPolygonOperation.setResult(newPolygonList);
+  TopPointCloudPolygonOperation.setResultAndSelectedID(newPolygonList, newPolygon.id);
 };
 
 export const PointCloudTopView = () => {
@@ -260,10 +264,6 @@ export const PointCloudTopView = () => {
 
     mainViewGenBox(newParams, newPolygon.id);
 
-    // Set Box data
-    SidePointCloud.setTemplateBox(newParams);
-    TopPointCloud.setTemplateBox(newParams);
-
     return {
       boxParams: newParams,
     };
@@ -310,7 +310,7 @@ export const PointCloudTopView = () => {
         const polygonOperation = new PolygonOperation({
           container: ref.current as HTMLDivElement,
           size: mockImgInfo,
-          config: '{ textConfigurable: false }',
+          config: '{ "textConfigurable": false, "poinCloudPattern": true }',
           imgNode: image,
           isAppend: false,
         });
@@ -323,6 +323,7 @@ export const PointCloudTopView = () => {
 
         polygonOperation.singleOn('polygonCreated', (polygon: any) => {
           const { boxParams } = afterPolygonCreated(polygon, pointCloud, mockImgInfo);
+
           synchronizeSideView(boxParams, polygon);
           synchronizeBackView(boxParams, polygon);
         });
@@ -332,11 +333,12 @@ export const PointCloudTopView = () => {
           ptCtx.setSelectedID(selectedID ?? '');
 
           const boxParams = ptCtx.pointCloudBoxList.find((v) => v.id === selectedID);
-          if (!boxParams) {
+          const polygon = polygonOperation.selectedPolygon;
+
+          // TODO! Need to Update setSeletctedID in PolygonOperation
+          if (!boxParams || !polygon) {
             return;
           }
-
-          const polygon = polygonOperation.selectedPolygon;
 
           synchronizeSideView(boxParams, polygon);
           synchronizeBackView(boxParams, polygon);
@@ -368,9 +370,13 @@ export const PointCloudTopView = () => {
         });
 
         polygonOperation.on('updatePolygonByDrag', ({ newPolygon }: any) => {
+          if (!ptCtx.selectedPointCloudBox) {
+            return;
+          }
+
           const newParams = topViewPolygon2PointCloud(newPolygon, pointCloud, mockImgInfo);
-          newParams.depth = TopPointCloud.templateBox.depth;
-          newParams.center.z = TopPointCloud.templateBox.center.z;
+          newParams.depth = ptCtx.selectedPointCloudBox.depth;
+          newParams.center.z = ptCtx.selectedPointCloudBox.center.z;
 
           mainViewGenBox(newParams, newPolygon.id);
 
@@ -378,22 +384,23 @@ export const PointCloudTopView = () => {
           SidePointCloud.updateOrthoCamera(newParams, EPerspectiveView.Left);
           SidePointCloud.render();
 
-          SidePointCloud.setTemplateBox(newParams);
-          TopPointCloud.setTemplateBox(newParams);
           const { polygon2d, zoom } = SidePointCloud.getBoxSidePolygon2DCoordinate(newParams);
 
           SidePointCloudPolygonOperation.initPosition();
           SidePointCloudPolygonOperation.zoomChangeOnCenter(zoom);
 
           // TODO, It need to synchronize polygonOperation
-          SidePointCloudPolygonOperation.setResult([
-            {
-              id: newPolygon.id,
-              pointList: polygon2d,
-              textAttribute: '',
-              isRect: true,
-            },
-          ]);
+          SidePointCloudPolygonOperation.setResultAndSelectedID(
+            [
+              {
+                id: newPolygon.id,
+                pointList: polygon2d,
+                textAttribute: '',
+                isRect: true,
+              },
+            ],
+            newPolygon.id,
+          );
 
           SidePointCloud.camera.zoom = zoom;
           SidePointCloud.camera.updateProjectionMatrix();
@@ -428,11 +435,10 @@ export const PointCloudTopView = () => {
         ptCtx.setSelectedID(selectedID ?? '');
 
         const boxParams = ptCtx.pointCloudBoxList.find((v) => v.id === selectedID);
-        if (!boxParams) {
+        const polygon = polygonOperation.selectedPolygon;
+        if (!boxParams || !polygon) {
           return;
         }
-
-        const polygon = polygonOperation.selectedPolygon;
 
         synchronizeSideView(boxParams, polygon);
         synchronizeBackView(boxParams, polygon);

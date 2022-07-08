@@ -4,7 +4,7 @@
  * @Author: Laoluo luozefeng@sensetime.com
  * @Date: 2022-06-13 19:05:33
  * @LastEditors: Laoluo luozefeng@sensetime.com
- * @LastEditTime: 2022-07-06 09:47:22
+ * @LastEditTime: 2022-07-07 16:11:29
  */
 /*eslint import/no-unresolved: 0*/
 import * as THREE from 'three';
@@ -53,8 +53,6 @@ export class PointCloud {
   public axesHelper: THREE.AxesHelper;
 
   public pcdLoader: PCDLoader;
-
-  public templateBox?: IPointCloudBox;
 
   private initCameraPosition = new THREE.Vector3(-1, 0, 10); // It will init when the camera positton be set
 
@@ -166,7 +164,6 @@ export class PointCloud {
     }
 
     const { center, width, height, depth, rotation } = boxParams;
-    this.templateBox = boxParams;
     const group = new THREE.Group();
     const geometry = new THREE.BoxGeometry(width, height, depth);
     const matarial = new THREE.MeshBasicMaterial({ color: 'blue' });
@@ -213,10 +210,6 @@ export class PointCloud {
       far,
       zoom,
     };
-  }
-
-  public setTemplateBox(boxParams: IPointCloudBox) {
-    this.templateBox = boxParams;
   }
 
   /**
@@ -766,16 +759,13 @@ export class PointCloud {
     offsetCenterPoint: { x: number; y: number; z: number },
     offsetWidth: number,
     offsetDepth: number,
+    selectedPointCloudBox: IPointCloudBox,
   ) {
-    if (!this.templateBox) {
-      return;
-    }
-
-    const Rz = new THREE.Matrix4().makeRotationZ(this.templateBox.rotation).invert();
+    const Rz = new THREE.Matrix4().makeRotationZ(selectedPointCloudBox.rotation).invert();
     const offsetVector = new THREE.Vector3(-offsetCenterPoint.x, 0, 0).applyMatrix4(Rz);
 
     // need to Change offset to world side
-    let newBoxParams = this.templateBox;
+    let newBoxParams = selectedPointCloudBox;
     newBoxParams.center = {
       x: newBoxParams.center.x + offsetVector.x,
       y: newBoxParams.center.y + offsetVector.y,
@@ -795,16 +785,13 @@ export class PointCloud {
     offsetCenterPoint: { x: number; y: number; z: number },
     offsetWidth: number,
     offsetDepth: number,
+    selectedPointCloudBox: IPointCloudBox,
   ) {
-    if (!this.templateBox) {
-      return;
-    }
-
-    const Rz = new THREE.Matrix4().makeRotationZ(this.templateBox.rotation).invert();
+    const Rz = new THREE.Matrix4().makeRotationZ(selectedPointCloudBox.rotation).invert();
     const offsetVector = new THREE.Vector3(0, -offsetCenterPoint.x, 0).applyMatrix4(Rz);
 
     // need to Change offset to world side
-    let newBoxParams = this.templateBox;
+    let newBoxParams = selectedPointCloudBox;
     newBoxParams.center = {
       x: newBoxParams.center.x + offsetVector.x,
       y: newBoxParams.center.y + offsetVector.y,
@@ -829,11 +816,12 @@ export class PointCloud {
    * @param offsetZ
    * @returns
    */
-  public getNewBoxBySideUpdateByPoints(pointList: any[], offsetHeight: number, offsetZ: number) {
-    if (!this.templateBox) {
-      return;
-    }
-
+  public getNewBoxBySideUpdateByPoints(
+    pointList: any[],
+    offsetHeight: number,
+    offsetZ: number,
+    selectedPointCloudBox: IPointCloudBox,
+  ) {
     const invertMatrix = this.sideMatrix?.invert();
     if (!this.sideMatrix || !invertMatrix) {
       console.error('No sideMatrix');
@@ -862,25 +850,29 @@ export class PointCloud {
     const offsetVector = centerVector
       .clone()
       .applyMatrix3(new THREE.Matrix3().set(-1, 0, 0, 0, -1, 0, 0, 0, -1))
-      .add(new THREE.Vector3(this.templateBox.center.x, this.templateBox.center.y, this.templateBox.center.z));
+      .add(
+        new THREE.Vector3(
+          selectedPointCloudBox.center.x,
+          selectedPointCloudBox.center.y,
+          selectedPointCloudBox.center.z,
+        ),
+      );
 
     const newBoxParams = {
-      ...this.templateBox,
+      ...selectedPointCloudBox,
       center: {
-        x: this.templateBox.center.x - offsetVector.x,
-        y: this.templateBox.center.y - offsetVector.y,
+        x: selectedPointCloudBox.center.x - offsetVector.x,
+        y: selectedPointCloudBox.center.y - offsetVector.y,
         // y: centerVector.y,
-        z: this.templateBox.center.z - offsetZ,
+        z: selectedPointCloudBox.center.z - offsetZ,
       },
       width,
-      height: this.templateBox.height,
-      depth: this.templateBox.depth + offsetHeight,
+      height: selectedPointCloudBox.height,
+      depth: selectedPointCloudBox.depth + offsetHeight,
       // depth,
-      rotation: this.templateBox.rotation,
+      rotation: selectedPointCloudBox.rotation,
     };
 
-    // Update templateBox Cache
-    this.templateBox = newBoxParams;
     return { newBoxParams };
   }
 

@@ -188,6 +188,18 @@ class PolygonOperation extends BasicToolOperation {
     return showingPolygon;
   }
 
+  /**
+   *  Just Update Data. Not Clear Status
+   * @param polygonList
+   */
+  public setResultAndSelectedID(polygonList: IPolygonData[], selectedID: string) {
+    this.setPolygonList(polygonList);
+    if (selectedID) {
+      this.selectedID = selectedID;
+    }
+    this.render();
+  }
+
   public setResult(polygonList: IPolygonData[]) {
     this.clearActiveStatus();
     this.setPolygonList(polygonList);
@@ -529,7 +541,7 @@ class PolygonOperation extends BasicToolOperation {
       return;
     }
 
-    if (this.config.textConfigurable) {
+    if (this.config.textConfigurable || this.config.poinCloudPattern) {
       this.setSelectedID(newID);
     } else {
       this.setSelectedID();

@@ -1,3 +1,9 @@
+/*
+ * @Author: Laoluo luozefeng@sensetime.com
+ * @Date: 2022-03-24 15:28:13
+ * @LastEditors: Laoluo luozefeng@sensetime.com
+ * @LastEditTime: 2022-07-08 10:41:40
+ */
 import { ELineColor, ELineTypes } from '../../constant/tool';
 
 declare interface IPolygonData {
@@ -41,4 +47,7 @@ declare interface IPolygonConfig extends IToolConfig {
   segmentSupport: boolean; // 分割辅助
   showConfirm?: boolean;
   panopticModel: string; // 分割模型
+
+  // New Pattern
+  poinCloudPattern?: boolean;
 }
