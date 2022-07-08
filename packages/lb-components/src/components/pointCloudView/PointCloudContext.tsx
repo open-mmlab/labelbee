@@ -1,4 +1,4 @@
-import { IPointCloudBoxList } from '@labelbee/lb-utils';
+import { IPointCloudBox, IPointCloudBoxList } from '@labelbee/lb-utils';
 import React from 'react';
 
 export interface IPointCloudContext {
@@ -6,6 +6,8 @@ export interface IPointCloudContext {
   selectedID: string;
   setSelectedID: (id: string) => void;
   setPointCloudResult: (resultList: IPointCloudBoxList) => void;
+  selectedPointCloudBox?: IPointCloudBox;
+  updateSelectedPointCloud: (id: string, newBox: IPointCloudBox) => void;
 }
 
 export const PointCloudContext = React.createContext<IPointCloudContext>({
@@ -13,4 +15,5 @@ export const PointCloudContext = React.createContext<IPointCloudContext>({
   selectedID: '',
   setSelectedID: () => {},
   setPointCloudResult: () => {},
+  updateSelectedPointCloud: () => {},
 });

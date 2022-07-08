@@ -3,7 +3,7 @@
  * @Author: Laoluo luozefeng@sensetime.com
  * @Date: 2022-06-15 14:39:02
  * @LastEditors: Laoluo luozefeng@sensetime.com
- * @LastEditTime: 2022-06-16 17:15:43
+ * @LastEditTime: 2022-06-28 15:54:18
  */
 import { TMatrix4Tuple, IVolume } from "@/types/pointCloud";
 
@@ -29,7 +29,7 @@ class PerspectiveShiftUtils {
    * @returns
    */
   public static frontViewMatrix4(distance: number): TMatrix4Tuple {
-    return this.translationMatrix(-distance, 0, 0);
+    return this.translationMatrix(distance, 0, 0);
   }
 
   /**
@@ -38,7 +38,7 @@ class PerspectiveShiftUtils {
    * @returns
    */
   public static backViewMatrix4(distance: number): TMatrix4Tuple {
-    return this.translationMatrix(distance, 0, 0);
+    return this.translationMatrix(-distance, 0, 0);
   }
 
   /**
@@ -47,7 +47,7 @@ class PerspectiveShiftUtils {
    * @returns
    */
   public static leftViewMatrix4(distance: number): TMatrix4Tuple {
-    return this.translationMatrix(0, -distance, 0);
+    return this.translationMatrix(0, distance, 0);
   }
 
   /**
@@ -56,7 +56,7 @@ class PerspectiveShiftUtils {
    * @returns
    */
   public static rightViewMatrix4(distance: number): TMatrix4Tuple {
-    return this.translationMatrix(0, distance, 0);
+    return this.translationMatrix(0, -distance, 0);
   }
 
   /**

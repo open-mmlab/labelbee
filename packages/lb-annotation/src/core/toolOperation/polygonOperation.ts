@@ -57,6 +57,8 @@ class PolygonOperation extends BasicToolOperation {
     initPointList: IPolygonPoint[];
     changePointIndex?: number[]; // 用于存储拖拽点 / 边的下标
     dragTarget: EDragTarget;
+
+    originPolygon?: IPolygonData; // For comparing data before and after drag and drop.
   };
 
   private drawingHistory: ActionsHistory; // 用于正在编辑中的历史记录
@@ -184,6 +186,18 @@ class PolygonOperation extends BasicToolOperation {
       [],
     );
     return showingPolygon;
+  }
+
+  /**
+   *  Just Update Data. Not Clear Status
+   * @param polygonList
+   */
+  public setResultAndSelectedID(polygonList: IPolygonData[], selectedID: string) {
+    this.setPolygonList(polygonList);
+    if (selectedID) {
+      this.selectedID = selectedID;
+    }
+    this.render();
   }
 
   public setResult(polygonList: IPolygonData[]) {
@@ -527,7 +541,7 @@ class PolygonOperation extends BasicToolOperation {
       return;
     }
 
-    if (this.config.textConfigurable) {
+    if (this.config.textConfigurable || this.config.poinCloudPattern) {
       this.setSelectedID(newID);
     } else {
       this.setSelectedID();
@@ -912,6 +926,7 @@ class PolygonOperation extends BasicToolOperation {
       dragTarget,
       initPointList,
       changePointIndex,
+      originPolygon: this.selectedPolygon,
     };
 
     return true;
@@ -1136,6 +1151,10 @@ class PolygonOperation extends BasicToolOperation {
       const basicLine: [ICoordinate, ICoordinate] = [initPointList[firstPointIndex], initPointList[secondPointIndex]];
 
       offset = MathUtils.getRectPerpendicularOffset(dragStartCoord, coordinate, basicLine);
+      offset = {
+        x: offset.x / this.zoom,
+        y: offset.y / this.zoom,
+      };
     }
 
     this.dragStatus = EDragStatus.Move;
@@ -1292,12 +1311,16 @@ class PolygonOperation extends BasicToolOperation {
 
     if (this.dragInfo && this.dragStatus === EDragStatus.Move) {
       // 拖拽停止
+      const { originPolygon } = this.dragInfo;
       this.dragInfo = undefined;
       this.dragStatus = EDragStatus.Wait;
       this.history.pushHistory(this.polygonList);
 
       // 同步 结果
       this.emit('updateResult');
+
+      // Emit polygon.
+      this.emit('updatePolygonByDrag', { newPolygon: this.selectedPolygon, originPolygon });
       return;
     }
 

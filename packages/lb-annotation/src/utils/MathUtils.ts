@@ -480,7 +480,7 @@ export default class MathUtils {
   }
 
   /**
-   * Get the radius from quadrangle
+   * Get the radius from quadrangle under top-view
    * @param points
    * @returns
    */
@@ -496,6 +496,7 @@ export default class MathUtils {
 
     const radius = Math.acos(cosX);
 
+    // Key Point
     if (x > 0) {
       return -radius;
     }

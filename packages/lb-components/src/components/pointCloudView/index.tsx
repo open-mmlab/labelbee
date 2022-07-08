@@ -1,3 +1,9 @@
+/*
+ * @Author: Laoluo luozefeng@sensetime.com
+ * @Date: 2022-07-04 14:39:44
+ * @LastEditors: Laoluo luozefeng@sensetime.com
+ * @LastEditTime: 2022-07-08 10:01:08
+ */
 /**
  * @author Glenfiddish <edwinlee0927@hotmail.com>
  * @file Point cloud tool view
@@ -24,7 +30,28 @@ const PointCloudView = () => {
   };
 
   const ptCtx = useMemo(() => {
-    return { pointCloudBoxList, selectedID, setPointCloudResult, setSelectedID, addBox };
+    const selectedPointCloudBox = pointCloudBoxList.find((v) => v.id === selectedID);
+
+    const updateSelectedPointCloud = (id: string, newPointCloudBox: IPointCloudBox) => {
+      const newPointCloudBoxList = [...pointCloudBoxList].map((v) => {
+        if (v.id === id) {
+          return newPointCloudBox;
+        }
+        return v;
+      });
+
+      setPointCloudResult(newPointCloudBoxList);
+    };
+
+    return {
+      pointCloudBoxList,
+      selectedID,
+      setPointCloudResult,
+      setSelectedID,
+      addBox,
+      selectedPointCloudBox,
+      updateSelectedPointCloud,
+    };
   }, [selectedID, pointCloudBoxList]);
 
   return (
