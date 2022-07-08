@@ -2,7 +2,7 @@
  * @Author: Laoluo luozefeng@sensetime.com
  * @Date: 2022-06-22 11:08:31
  * @LastEditors: Laoluo luozefeng@sensetime.com
- * @LastEditTime: 2022-07-08 11:11:53
+ * @LastEditTime: 2022-07-08 12:28:56
  */
 import { ISize } from '@/types/main';
 import { getClassName } from '@/utils/dom';
@@ -213,7 +213,7 @@ export const PointCloudTopView = () => {
   const ptCtx = React.useContext(PointCloudContext);
   const pointCloudRef = useRef<PointCloud | null>();
 
-  const [, setImgInfo] = useState({ width: 0, height: 0 });
+  const [size, setSize] = useState<{ width: number; height: number } | null>(null);
 
   const mainViewGenBox = (boxParams: IPointCloudBox, polygonID: string) => {
     pointCloudMain.generateBox(boxParams, polygonID);
@@ -223,28 +223,40 @@ export const PointCloudTopView = () => {
 
   const topViewPolygon2PointCloud = (
     newPolygon: any,
-    pointCloud: PointCloud,
-    mockImgInfo: ISize,
+    size: ISize,
+    pointCloud?: PointCloud,
+    selectedPointCloud?: IPointCloudBox,
   ) => {
     const [point1, point2, point3, point4] = newPolygon.pointList.map((v: any) =>
-      TransferCanvas2World(v, mockImgInfo),
+      TransferCanvas2World(v, size),
     );
 
     const centerPoint = MathUtils.getLineCenterPoint([point1, point3]);
     const height = MathUtils.getLineLength(point1, point2);
     const width = MathUtils.getLineLength(point2, point3);
     const rotation = MathUtils.getRadiusFromQuadrangle(newPolygon.pointList);
-    const zInfo = pointCloud.getSensesPointZAxisInPolygon([point1, point2, point3, point4]);
+    let z = 0;
+    let depth = 1;
+    if (pointCloud) {
+      const zInfo = pointCloud.getSensesPointZAxisInPolygon([point1, point2, point3, point4]);
+      z = (zInfo.maxZ + zInfo.minZ) / 2;
+      depth = zInfo.maxZ - zInfo.minZ;
+    }
+
+    if (selectedPointCloud) {
+      z = selectedPointCloud.center.z;
+      depth = selectedPointCloud.depth;
+    }
 
     const boxParams: IPointCloudBox = {
       center: {
         x: centerPoint.x,
         y: centerPoint.y,
-        z: (zInfo.maxZ + zInfo.minZ) / 2,
+        z,
       },
       width,
       height,
-      depth: zInfo.maxZ - zInfo.minZ,
+      depth,
       rotation: rotation,
       id: newPolygon.id,
       attribute: '',
@@ -256,8 +268,8 @@ export const PointCloudTopView = () => {
     return boxParams;
   };
 
-  const afterPolygonCreated = (newPolygon: any, pointCloud: PointCloud, mockImgInfo: ISize) => {
-    const newParams = topViewPolygon2PointCloud(newPolygon, pointCloud, mockImgInfo);
+  const afterPolygonCreated = (newPolygon: any, pointCloud: PointCloud, size: ISize) => {
+    const newParams = topViewPolygon2PointCloud(newPolygon, size, pointCloud);
 
     ptCtx.setPointCloudResult(ptCtx.pointCloudBoxList.concat(newParams));
     ptCtx.setSelectedID(newParams.id);
@@ -271,23 +283,22 @@ export const PointCloudTopView = () => {
 
   useEffect(() => {
     if (ref.current) {
-      const mockImgInfo = {
+      const size = {
         width: ref.current.clientWidth,
         height: ref.current.clientHeight,
       };
-      setImgInfo(mockImgInfo);
 
       const defaultOrthographic = {
-        left: -mockImgInfo.width / 2,
-        right: mockImgInfo.width / 2,
-        top: mockImgInfo.height / 2,
-        bottom: -mockImgInfo.height / 2,
+        left: -size.width / 2,
+        right: size.width / 2,
+        top: size.height / 2,
+        bottom: -size.height / 2,
         near: 100,
         far: -100,
       };
 
       const container = ref.current;
-      const imgSrc = CreateEmptyImage(mockImgInfo);
+      const imgSrc = CreateEmptyImage(size);
 
       const image = new Image();
       image.src = imgSrc;
@@ -309,7 +320,7 @@ export const PointCloudTopView = () => {
 
         const polygonOperation = new PolygonOperation({
           container: ref.current as HTMLDivElement,
-          size: mockImgInfo,
+          size,
           config: '{ "textConfigurable": false, "poinCloudPattern": true }',
           imgNode: image,
           isAppend: false,
@@ -322,7 +333,7 @@ export const PointCloudTopView = () => {
         TopPointCloudPolygonOperation = polygonOperation;
 
         polygonOperation.singleOn('polygonCreated', (polygon: any) => {
-          const { boxParams } = afterPolygonCreated(polygon, pointCloud, mockImgInfo);
+          const { boxParams } = afterPolygonCreated(polygon, pointCloud, size);
 
           synchronizeSideView(boxParams, polygon);
           synchronizeBackView(boxParams, polygon);
@@ -350,7 +361,7 @@ export const PointCloudTopView = () => {
          * Change Orthographic Camera size
          */
         polygonOperation.singleOn('renderZoom', (zoom: number, currentPos: any) => {
-          const { offsetX, offsetY } = TransferCanvas2WorldOffset(currentPos, mockImgInfo, zoom);
+          const { offsetX, offsetY } = TransferCanvas2WorldOffset(currentPos, size, zoom);
           pointCloud.camera.zoom = zoom;
           if (currentPos) {
             const { x, y, z } = TopPointCloud.initCameraPosition;
@@ -362,57 +373,24 @@ export const PointCloudTopView = () => {
         });
         // Synchronized 3d point cloud view displacement operations
         polygonOperation.singleOn('dragMove', ({ currentPos, zoom }) => {
-          const { offsetX, offsetY } = TransferCanvas2WorldOffset(currentPos, mockImgInfo, zoom);
+          const { offsetX, offsetY } = TransferCanvas2WorldOffset(currentPos, size, zoom);
           pointCloud.camera.zoom = zoom;
           const { x, y, z } = TopPointCloud.initCameraPosition;
           TopPointCloud.camera.position.set(x + offsetY, y - offsetX, z);
           pointCloud.render();
         });
 
-        polygonOperation.on('updatePolygonByDrag', ({ newPolygon }: any) => {
-          if (!ptCtx.selectedPointCloudBox) {
-            return;
-          }
-
-          const newParams = topViewPolygon2PointCloud(newPolygon, pointCloud, mockImgInfo);
-          newParams.depth = ptCtx.selectedPointCloudBox.depth;
-          newParams.center.z = ptCtx.selectedPointCloudBox.center.z;
-
-          mainViewGenBox(newParams, newPolygon.id);
-
-          // Init SidePointCloud, focus on the box
-          SidePointCloud.updateOrthoCamera(newParams, EPerspectiveView.Left);
-          SidePointCloud.render();
-
-          const { polygon2d, zoom } = SidePointCloud.getBoxSidePolygon2DCoordinate(newParams);
-
-          SidePointCloudPolygonOperation.initPosition();
-          SidePointCloudPolygonOperation.zoomChangeOnCenter(zoom);
-
-          // TODO, It need to synchronize polygonOperation
-          SidePointCloudPolygonOperation.setResultAndSelectedID(
-            [
-              {
-                id: newPolygon.id,
-                pointList: polygon2d,
-                textAttribute: '',
-                isRect: true,
-              },
-            ],
-            newPolygon.id,
-          );
-
-          SidePointCloud.camera.zoom = zoom;
-          SidePointCloud.camera.updateProjectionMatrix();
-          SidePointCloud.render();
-        });
-
-        canvasSchuler.createCanvas(polygonOperation.canvas, { size: mockImgInfo });
+        canvasSchuler.createCanvas(polygonOperation.canvas, { size });
+        setSize(size);
       };
     }
   }, []);
 
   useEffect(() => {
+    if (!size) {
+      return;
+    }
+
     if (plgOpraRef.current) {
       plgOpraRef.current.singleOn('polygonCreated', (polygon: any) => {
         if (pointCloudRef.current && ref.current) {
@@ -443,8 +421,29 @@ export const PointCloudTopView = () => {
         synchronizeSideView(boxParams, polygon);
         synchronizeBackView(boxParams, polygon);
       });
+
+      TopPointCloudPolygonOperation.singleOn('updatePolygonByDrag', ({ newPolygon }: any) => {
+        if (!ptCtx.selectedPointCloudBox) {
+          return;
+        }
+
+        const newBoxParams = topViewPolygon2PointCloud(
+          newPolygon,
+          size,
+          undefined,
+          ptCtx.selectedPointCloudBox,
+        );
+        newBoxParams.depth = ptCtx.selectedPointCloudBox.depth;
+        newBoxParams.center.z = ptCtx.selectedPointCloudBox.center.z;
+
+        mainViewGenBox(newBoxParams, newPolygon.id);
+
+        synchronizeSideView(newBoxParams, newPolygon);
+        synchronizeBackView(newBoxParams, newPolygon);
+        ptCtx.updateSelectedPointCloud(newPolygon.id, newBoxParams);
+      });
     }
-  }, [ptCtx]);
+  }, [ptCtx, size]);
 
   return (
     <PointCloudContainer
