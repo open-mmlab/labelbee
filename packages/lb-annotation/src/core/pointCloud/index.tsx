@@ -65,6 +65,8 @@ export class PointCloud {
 
   private orthgraphicParams?: IOrthographicCamera;
 
+  private cachePointCloudGeometry?: THREE.Points;
+
   private DEFAULT_POINTCLOUD = 'POINTCLOUD';
 
   constructor({ container, noAppend, isOrthographicCamera, orthgraphicParams }: IProps) {
@@ -505,8 +507,12 @@ export class PointCloud {
    * @param boxParams
    */
   public loadPCDFileByBox = (src: string, boxParams: IPointCloudBox) => {
-    this.pcdLoader.load(src, (points: any) => {
+    const cb = (points: any) => {
       points.material.size = 1;
+
+      if (!this.cachePointCloudGeometry) {
+        this.cachePointCloudGeometry = points;
+      }
 
       // TODO. Speed can be optimized.
       const newGeometry = this.filterPointsByBox(
@@ -519,7 +525,12 @@ export class PointCloud {
       newPoints.name = this.DEFAULT_POINTCLOUD;
       this.scene.add(newPoints);
       this.render();
-    });
+    };
+    if (!this.cachePointCloudGeometry) {
+      this.pcdLoader.load(src, cb);
+    } else {
+      cb(this.cachePointCloudGeometry);
+    }
   };
 
   public generateBoxArrow = ({ width, depth }: IPointCloudBox) => {
