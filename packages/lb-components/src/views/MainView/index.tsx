@@ -37,17 +37,27 @@ const ImageAnnotate: React.FC<AppProps & IProps> = (props) => {
   );
 };
 
+const PointCloudAnnotate: React.FC<AppProps & IProps> = (props) => {
+  return (
+    <>
+      <PointCloudView />
+      <ToolFooter style={props.style?.footer} mode={props.mode} footer={props?.footer} />
+    </>
+  );
+};
+
 const AnnotatedArea: React.FC<AppProps & IProps> = (props) => {
   const { stepList, step } = props;
   const currentToolName = getStepConfig(stepList, step)?.tool;
   const isVideoTool = ToolUtils.isVideoTool(currentToolName);
   const isPointCloudTool = ToolUtils.isPointCloudTool(currentToolName);
+
   if (isVideoTool) {
     return <VideoAnnotate {...props} />;
   }
 
   if (isPointCloudTool) {
-    return <PointCloudView />;
+    return <PointCloudAnnotate {...props} />;
   }
 
   return <ImageAnnotate {...props} />;

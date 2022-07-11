@@ -99,7 +99,7 @@ $prefix: bee;
   }
 }
 
-.pageInput {
+.#{$prefix}-page-input {
   margin: 0 5px;
   width: 50px;
   height: 24px;
@@ -1359,11 +1359,22 @@ $ptPrefix: #{$prefix}-point-cloud;
   cursor: pointer;
 }
 
+.#{$ptPrefix}-footer {
+  height: 40px;
+}
+
+.#{$ptPrefix}-layout {
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
 .#{$ptPrefix}-wrapper {
   display: flex;
   height: 100%;
   width: 100;
   overflow: hidden;
+  flex: 1;
 
   .#{$ptPrefix}-container {
     &__header {
@@ -1424,7 +1435,7 @@ $ptPrefix: #{$prefix}-point-cloud;
     width: 580px;
     display: flex;
     flex-direction: column;
-    border: 1px solid #fff;
+    border-right: 1px solid #fff;
     .#{$ptPrefix}-2d-container {
       flex: 1;
       flex-direction: column;
