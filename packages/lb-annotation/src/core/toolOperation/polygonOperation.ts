@@ -1440,9 +1440,7 @@ class PolygonOperation extends BasicToolOperation {
     });
   }
 
-  public renderPolygon() {
-    // 1. 静态多边形
-
+  public renderStaticPolygon() {
     if (this.isHidden === false) {
       this.polygonList?.forEach((polygon) => {
         if ([this.selectedID, this.editPolygonID].includes(polygon.id)) {
@@ -1486,30 +1484,9 @@ class PolygonOperation extends BasicToolOperation {
         );
       });
     }
+  }
 
-    // 2. hover 多边形
-    if (this.hoverID && this.hoverID !== this.editPolygonID) {
-      const hoverPolygon = this.polygonList.find((v) => v.id === this.hoverID && v.id !== this.selectedID);
-      if (hoverPolygon) {
-        let color = '';
-        const toolColor = this.getColor(hoverPolygon.attribute);
-        if (hoverPolygon.valid) {
-          color = toolColor.validHover.fill;
-        } else {
-          color = StyleUtils.getStrokeAndFill(toolColor, false, { isHover: true }).fill;
-        }
-
-        DrawUtils.drawPolygonWithFill(
-          this.canvas,
-          AxisUtils.changePointListByZoom(hoverPolygon.pointList, this.zoom, this.currentPos),
-          {
-            color,
-            lineType: this.config?.lineType,
-          },
-        );
-      }
-    }
-
+  public renderSelectedPolygon() {
     // 3. 选中多边形的渲染
     if (this.selectedID) {
       const selectdPolygon = this.selectedPolygon;
@@ -1552,9 +1529,41 @@ class PolygonOperation extends BasicToolOperation {
         this.renderTextAttribute();
       }
     }
+  }
+
+  public renderPolygon() {
+    // 1. 静态多边形
+    this.renderStaticPolygon();
+
+    // 2. hover 多边形
+    if (this.hoverID && this.hoverID !== this.editPolygonID) {
+      const hoverPolygon = this.polygonList.find((v) => v.id === this.hoverID && v.id !== this.selectedID);
+      if (hoverPolygon) {
+        let color = '';
+        const toolColor = this.getColor(hoverPolygon.attribute);
+        if (hoverPolygon.valid) {
+          color = toolColor.validHover.fill;
+        } else {
+          color = StyleUtils.getStrokeAndFill(toolColor, false, { isHover: true }).fill;
+        }
+
+        DrawUtils.drawPolygonWithFill(
+          this.canvas,
+          AxisUtils.changePointListByZoom(hoverPolygon.pointList, this.zoom, this.currentPos),
+          {
+            color,
+            lineType: this.config?.lineType,
+          },
+        );
+      }
+    }
+
+    // 3. 选中多边形的渲染
+    this.renderSelectedPolygon();
 
     const defaultColor = this.getColor(this.defaultAttribute);
     const toolData = StyleUtils.getStrokeAndFill(defaultColor, !this.isCtrl);
+
     // 4. 编辑中的多边形
     if (this.drawingPointList?.length > 0) {
       // 渲染绘制中的多边形
