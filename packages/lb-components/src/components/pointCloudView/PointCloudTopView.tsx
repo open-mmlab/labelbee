@@ -2,7 +2,7 @@
  * @Author: Laoluo luozefeng@sensetime.com
  * @Date: 2022-06-22 11:08:31
  * @LastEditors: Laoluo luozefeng@sensetime.com
- * @LastEditTime: 2022-07-08 12:28:56
+ * @LastEditTime: 2022-07-08 15:44:18
  */
 import { ISize } from '@/types/main';
 import { getClassName } from '@/utils/dom';
@@ -332,29 +332,6 @@ export const PointCloudTopView = () => {
         polygonOperation.setPattern(EPolygonPattern.Rect);
         TopPointCloudPolygonOperation = polygonOperation;
 
-        polygonOperation.singleOn('polygonCreated', (polygon: any) => {
-          const { boxParams } = afterPolygonCreated(polygon, pointCloud, size);
-
-          synchronizeSideView(boxParams, polygon);
-          synchronizeBackView(boxParams, polygon);
-        });
-
-        polygonOperation.singleOn('selectedChange', () => {
-          const selectedID = polygonOperation.selectedID;
-          ptCtx.setSelectedID(selectedID ?? '');
-
-          const boxParams = ptCtx.pointCloudBoxList.find((v) => v.id === selectedID);
-          const polygon = polygonOperation.selectedPolygon;
-
-          // TODO! Need to Update setSeletctedID in PolygonOperation
-          if (!boxParams || !polygon) {
-            return;
-          }
-
-          synchronizeSideView(boxParams, polygon);
-          synchronizeBackView(boxParams, polygon);
-        });
-
         /**
          * Synchronized 3d point cloud view displacement operations
          *
@@ -398,6 +375,7 @@ export const PointCloudTopView = () => {
             width: ref.current.clientWidth,
             height: ref.current.clientHeight,
           });
+          pointCloudMain.hightLightOriginPointCloud(boxParams);
           synchronizeSideView(boxParams, polygon);
           synchronizeBackView(boxParams, polygon);
         }
@@ -440,6 +418,7 @@ export const PointCloudTopView = () => {
 
         synchronizeSideView(newBoxParams, newPolygon);
         synchronizeBackView(newBoxParams, newPolygon);
+        pointCloudMain.hightLightOriginPointCloud(newBoxParams);
         ptCtx.updateSelectedPointCloud(newPolygon.id, newBoxParams);
       });
     }

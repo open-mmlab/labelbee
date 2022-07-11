@@ -17,6 +17,7 @@ import React, { useEffect, useRef, useState } from 'react';
 import { synchronizeSideView, synchronizeTopView } from './PointCloudTopView';
 import { PointCloudContext } from './PointCloudContext';
 import { IPointCloudBox } from '@labelbee/lb-utils';
+import { pointCloudMain } from './PointCloud3DView';
 
 const { EPolygonPattern } = cTool;
 
@@ -215,6 +216,7 @@ const PointCloudSideView = () => {
 
         synchronizeTopView(newBoxParams, newPolygon);
         synchronizeSideView(newBoxParams, newPolygon);
+        pointCloudMain.hightLightOriginPointCloud(newBoxParams);
         ptCtx.updateSelectedPointCloud(newPolygon.id, newBoxParams);
       },
     );

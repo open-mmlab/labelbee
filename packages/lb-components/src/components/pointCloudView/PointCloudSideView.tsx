@@ -1,8 +1,7 @@
-/*
- * @Author: Laoluo luozefeng@sensetime.com
- * @Date: 2022-06-22 11:08:31
- * @LastEditors: Laoluo luozefeng@sensetime.com
- * @LastEditTime: 2022-07-08 11:09:02
+/**
+ * @file PointCloud sideView - React Component
+ * @createdate 2022-07-11
+ * @author Ron <ron.f.luo@gmail.com>
  */
 import {
   PolygonOperation,
@@ -17,6 +16,7 @@ import React, { useEffect, useRef, useState } from 'react';
 import { synchronizeBackView, synchronizeTopView } from './PointCloudTopView';
 import { IPointCloudBox } from '@labelbee/lb-utils';
 import { PointCloudContext } from './PointCloudContext';
+import { pointCloudMain } from './PointCloud3DView';
 
 const { EPolygonPattern } = cTool;
 
@@ -222,6 +222,7 @@ const PointCloudSideView = () => {
 
         synchronizeTopView(newBoxParams, newPolygon);
         synchronizeBackView(newBoxParams, newPolygon);
+        pointCloudMain.hightLightOriginPointCloud(newBoxParams);
         ptCtx.updateSelectedPointCloud(newPolygon.id, newBoxParams);
       },
     );

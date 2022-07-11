@@ -1,11 +1,9 @@
-/*
- * POINTCLOUD - ALPHA - DEMO
- *
- * @Author: Laoluo luozefeng@sensetime.com
- * @Date: 2022-06-13 19:05:33
- * @LastEditors: Laoluo luozefeng@sensetime.com
- * @LastEditTime: 2022-07-08 14:13:48
+/**
+ * @file POINTCLOUD - ALPHA - DEMO
+ * @createdate 2022-07-11
+ * @author Ron <ron.f.luo@gmail.com>
  */
+
 /*eslint import/no-unresolved: 0*/
 import * as THREE from 'three';
 import {
@@ -15,6 +13,7 @@ import {
   IVolume,
   IPointCloudBox,
   I3DSpaceCoord,
+  PointCloudUtils,
 } from '@labelbee/lb-utils';
 import { isInPolygon } from '@/utils/tool/polygonTool';
 import { IPolygonPoint } from '@/types/tool/polygon';
@@ -65,6 +64,8 @@ export class PointCloud {
   private sideMatrix?: THREE.Matrix4;
 
   private orthgraphicParams?: IOrthographicCamera;
+
+  private DEFAULT_POINTCLOUD = 'POINTCLOUD';
 
   constructor({ container, noAppend, isOrthographicCamera, orthgraphicParams }: IProps) {
     this.container = container;
@@ -282,19 +283,10 @@ export class PointCloud {
     return pointVector.clone().applyMatrix4(TBack).applyMatrix4(Rz).applyMatrix4(TFrom);
   }
 
-  /**
-   * For pcd filter point under box
-   * @param boxParams
-   * @param points
-   * @param color
-   * @returns
-   */
-  public filterPointsByBox(boxParams: IPointCloudBox, points: number[], color: number[]) {
-    const newPosition = [];
-    const newColor = [];
+  public getCuboidFromPointCloudBox(boxParams: IPointCloudBox) {
     const { center, width, height, depth, rotation } = boxParams;
 
-    const polygon = [
+    const polygonPointList = [
       {
         x: center.x + width / 2,
         y: center.y + height / 2,
@@ -322,12 +314,32 @@ export class PointCloud {
     const zMax = center.z + depth / 2;
     const zMin = center.z - depth / 2;
 
+    return {
+      polygonPointList,
+      zMax,
+      zMin,
+    };
+  }
+
+  /**
+   * For pcd filter point under box
+   * @param boxParams
+   * @param points
+   * @param color
+   * @returns
+   */
+  public filterPointsByBox(boxParams: IPointCloudBox, points: number[], color: number[]) {
+    const newPosition = [];
+    const newColor = [];
+
+    const { zMin, zMax, polygonPointList } = this.getCuboidFromPointCloudBox(boxParams);
+
     for (let i = 0; i < points.length; i += 3) {
       const x = points[i];
       const y = points[i + 1];
       const z = points[i + 2];
 
-      const inPolygon = isInPolygon({ x, y }, polygon);
+      const inPolygon = isInPolygon({ x, y }, polygonPointList);
 
       if (inPolygon && z >= zMin && z <= zMax) {
         newPosition.push(x);
@@ -344,6 +356,39 @@ export class PointCloud {
     geometry.setAttribute('color', new THREE.Float32BufferAttribute(newColor, 3));
     geometry.computeBoundingSphere();
     return geometry;
+  }
+
+  /**
+   * For pcd points & Update Color
+   *
+   * Notice. It will directly update the parameter(color)
+   * @param boxParams
+   * @param points
+   * @param color
+   * @returns
+   */
+  public filterPointsColor(boxParams: IPointCloudBox, points: number[], color: number[]) {
+    const { zMin, zMax, polygonPointList } = this.getCuboidFromPointCloudBox(boxParams);
+
+    for (let i = 0; i < points.length; i += 3) {
+      const x = points[i];
+      const y = points[i + 1];
+      const z = points[i + 2];
+
+      const inPolygon = isInPolygon({ x, y }, polygonPointList);
+
+      if (inPolygon && z >= zMin && z <= zMax) {
+        color[i] = 0;
+        color[i + 1] = 1;
+        color[i + 2] = 1;
+      } else {
+        // DEFAULT COLOR RENDERc
+        const [r, g, b] = PointCloudUtils.getStandardColorByCoord(x, y, z);
+        color[i] = r;
+        color[i + 1] = g;
+        color[i + 2] = b;
+      }
+    }
   }
 
   public getCameraVector(
@@ -417,6 +462,7 @@ export class PointCloud {
   public loadPCDFile = (src: string, cb?: () => void) => {
     this.pcdLoader.load(src, (points: any) => {
       points.material.size = 1;
+      points.name = this.DEFAULT_POINTCLOUD;
 
       const circle = this.createCircle(points.geometry.boundingSphere.radius * 2);
 
@@ -432,6 +478,26 @@ export class PointCloud {
       }
     });
   };
+
+  /**
+   * It needs to be updated after load PointCLoud's data.
+   * @param boxParams
+   * @returns
+   */
+  public hightLightOriginPointCloud(boxParams: IPointCloudBox) {
+    const oldPointCloud: any = this.scene.getObjectByName(this.DEFAULT_POINTCLOUD);
+    if (!oldPointCloud) {
+      return;
+    }
+
+    this.filterPointsColor(
+      boxParams,
+      oldPointCloud.geometry.attributes.position.array,
+      oldPointCloud.geometry.attributes.color.array,
+    );
+    oldPointCloud.geometry.attributes.color.needsUpdate = true;
+    this.render();
+  }
 
   /**
    * Load PCD File by box
@@ -450,6 +516,7 @@ export class PointCloud {
       );
 
       const newPoints = new THREE.Points(newGeometry, points.material);
+      newPoints.name = this.DEFAULT_POINTCLOUD;
       this.scene.add(newPoints);
       this.render();
     });
