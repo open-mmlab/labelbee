@@ -12,18 +12,92 @@
  */
 
 import { getClassName } from '@/utils/dom';
-import React, { useMemo, useState } from 'react';
-import PointCloud3DView from './PointCloud3DView';
+import React, { useEffect, useMemo, useState } from 'react';
+import PointCloud3DView, { pointCloudMain } from './PointCloud3DView';
 import PointCloudBackView from './PointCloudBackView';
-import PointCloudTopView from './PointCloudTopView';
+import PointCloudTopView, {
+  synchronizeBackView,
+  synchronizeSideView,
+  TopPointCloudPolygonOperation,
+} from './PointCloudTopView';
 import PointCloudSideView from './PointCloudSideView';
 import PointCloud2DView from './PointCloud2DView';
 import { PointCloudContext } from './PointCloudContext';
 import { IPointCloudBoxList, IPointCloudBox } from '@labelbee/lb-utils';
+import { cAnnotation } from '@labelbee/lb-annotation';
+const { ERotateDirection } = cAnnotation;
 
 const PointCloudView = () => {
   const [pointCloudBoxList, setPointCloudResult] = useState<IPointCloudBoxList>([]);
   const [selectedID, setSelectedID] = useState<string>('');
+
+  useEffect(() => {
+    // TODO! It need to be optimize later;
+    const updateRotate = (angle: number) => {
+      const selectedPointCloudBox = pointCloudBoxList.find((v) => v.id === selectedID);
+
+      if (!selectedPointCloudBox) {
+        return;
+      }
+
+      selectedPointCloudBox.rotation =
+        selectedPointCloudBox.rotation + Number(Math.PI * angle) / 180;
+
+      const newPointCloudBoxList = [...pointCloudBoxList].map((v) => {
+        if (v.id === selectedID) {
+          return selectedPointCloudBox;
+        }
+        return v;
+      });
+
+      setPointCloudResult(newPointCloudBoxList);
+      TopPointCloudPolygonOperation.rotatePolygon(angle, ERotateDirection.Anticlockwise);
+      const selectedPolygon = TopPointCloudPolygonOperation.selectedPolygon;
+
+      pointCloudMain.generateBox(selectedPointCloudBox, selectedPolygon.id);
+      pointCloudMain.hightLightOriginPointCloud(selectedPointCloudBox);
+      synchronizeSideView(selectedPointCloudBox, selectedPolygon);
+      synchronizeBackView(selectedPointCloudBox, selectedPolygon);
+      pointCloudMain.render();
+    };
+
+    const onKeyDown = (e: KeyboardEvent) => {
+      switch (e.keyCode) {
+        case 81: {
+          // Q - anticlockwise
+          updateRotate(2);
+          break;
+        }
+
+        case 69:
+          // E - closewise
+          updateRotate(-2);
+
+          break;
+
+        case 71:
+          // G ， overturn 180
+          updateRotate(180);
+
+          break;
+
+        case 9:
+          // TAB
+
+          break;
+
+        default: {
+          return;
+        }
+      }
+    };
+
+    window.addEventListener('keydown', onKeyDown);
+
+    return () => {
+      window.removeEventListener('keydown', onKeyDown);
+    };
+  });
 
   const addBox = (box: IPointCloudBox) => {
     setPointCloudResult(pointCloudBoxList.concat(box));

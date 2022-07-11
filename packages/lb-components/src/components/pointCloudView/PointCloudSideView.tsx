@@ -4,7 +4,7 @@
  * @author Ron <ron.f.luo@gmail.com>
  */
 import {
-  PolygonOperation,
+  PointCloud2dOperation,
   cTool,
   CanvasSchduler,
   PointCloud,
@@ -124,7 +124,7 @@ const PointCloudSideView = () => {
         SidePointCloud = pointCloud;
         canvasSchuler.createCanvas(pointCloud.renderer.domElement);
 
-        const polygonOperation = new PolygonOperation({
+        const polygonOperation = new PointCloud2dOperation({
           container: ref.current as HTMLDivElement,
           size,
           config: '{ "textConfigurable": false, "poinCloudPattern": true }',

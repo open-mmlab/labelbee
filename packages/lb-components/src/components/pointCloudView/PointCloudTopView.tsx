@@ -7,7 +7,7 @@
 import { ISize } from '@/types/main';
 import { getClassName } from '@/utils/dom';
 import {
-  PolygonOperation,
+  PointCloud2dOperation,
   cTool,
   CanvasSchduler,
   PointCloud,
@@ -99,7 +99,7 @@ export const synchronizeSideView = (boxParams: IPointCloudBox, newPolygon: any, 
   SidePointCloud.generateBox(boxParams, newPolygon.id);
 
   // Create PointCloud
-  SidePointCloud.loadPCDFileByBox('http://10.53.25.142:8001/1/000001.pcd', boxParams);
+  SidePointCloud.loadPCDFileByBox('http://10.53.25.142:8001/10837/1/total.pcd', boxParams);
   const { cameraPositionVector } = SidePointCloud.updateOrthoCamera(
     boxParams,
     EPerspectiveView.Left,
@@ -111,7 +111,7 @@ export const synchronizeSideView = (boxParams: IPointCloudBox, newPolygon: any, 
   // Create Draw Polygon
   const { polygon2d, zoom } = SidePointCloud.getBoxSidePolygon2DCoordinate(boxParams);
 
-  // Synchronize SidePointCloud zoom with PolygonOperation
+  // Synchronize SidePointCloud zoom with PointCloud2dOperation
   SidePointCloud.camera.zoom = zoom;
   SidePointCloud.camera.updateProjectionMatrix();
   SidePointCloud.render();
@@ -145,7 +145,7 @@ export const synchronizeBackView = (boxParams: IPointCloudBox, newPolygon: any, 
   BackPointCloud.generateBox(boxParams, newPolygon.id);
 
   // Create PointCloud
-  BackPointCloud.loadPCDFileByBox('http://10.53.25.142:8001/1/000001.pcd', boxParams);
+  BackPointCloud.loadPCDFileByBox('http://10.53.25.142:8001/10837/1/total.pcd', boxParams);
   const { cameraPositionVector } = BackPointCloud.updateOrthoCamera(
     boxParams,
     EPerspectiveView.Back,
@@ -157,7 +157,7 @@ export const synchronizeBackView = (boxParams: IPointCloudBox, newPolygon: any, 
   // Create Draw Polygon
   const { polygon2d, zoom } = BackPointCloud.getBoxBackPolygon2DCoordinate(boxParams);
 
-  // Synchronize SidePointCloud zoom with PolygonOperation
+  // Synchronize SidePointCloud zoom with PointCloud2dOperation
   BackPointCloud.camera.zoom = zoom;
   BackPointCloud.camera.updateProjectionMatrix();
   BackPointCloud.render();
@@ -209,7 +209,7 @@ export const synchronizeTopView = (newBoxParams: IPointCloudBox, newPolygon: any
 
 export const PointCloudTopView = () => {
   const ref = useRef<HTMLDivElement>(null);
-  const plgOpraRef = useRef<PolygonOperation | null>();
+  const plgOpraRef = useRef<PointCloud2dOperation | null>();
   const ptCtx = React.useContext(PointCloudContext);
   const pointCloudRef = useRef<PointCloud | null>();
 
@@ -312,13 +312,13 @@ export const PointCloudTopView = () => {
         });
 
         pointCloudRef.current = pointCloud;
-        pointCloud.loadPCDFile('http://10.53.25.142:8001/1/000001.pcd');
+        pointCloud.loadPCDFile('http://10.53.25.142:8001/10837/1/total.pcd');
 
         // TODO.
         TopPointCloud = pointCloud;
         canvasSchuler.createCanvas(pointCloud.renderer.domElement);
 
-        const polygonOperation = new PolygonOperation({
+        const polygonOperation = new PointCloud2dOperation({
           container: ref.current as HTMLDivElement,
           size,
           config: '{ "textConfigurable": false, "poinCloudPattern": true }',
@@ -396,6 +396,7 @@ export const PointCloudTopView = () => {
           return;
         }
 
+        pointCloudMain.hightLightOriginPointCloud(boxParams);
         synchronizeSideView(boxParams, polygon);
         synchronizeBackView(boxParams, polygon);
       });
