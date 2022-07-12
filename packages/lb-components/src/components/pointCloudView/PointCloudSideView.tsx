@@ -190,7 +190,6 @@ const PointCloudSideView = () => {
         const sin = Math.sin(ptCtx.selectedPointCloudBox.rotation);
 
         const offsetCenterPoint = {
-          // x: vector.x * cos - vector.y * sin,
           x: offset.x,
           y: offset.x * sin + offset.y * cos,
           z: newCenterPoint.y - oldCenterPoint.y,
@@ -234,6 +233,17 @@ const PointCloudSideView = () => {
       title='侧视图'
     >
       <div style={{ width: '100%', height: 300 }} ref={ref} />
+      <div
+        style={{
+          position: 'absolute',
+          right: 0,
+          top: 0,
+          width: 200,
+          color: 'white',
+        }}
+      >
+        data
+      </div>
     </PointCloudContainer>
   );
 };

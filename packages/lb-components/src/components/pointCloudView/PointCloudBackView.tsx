@@ -82,7 +82,7 @@ const updateBackViewByCanvas2D = (
     const offsetXX = offsetX * cos;
     const offsetXY = offsetX * sin;
     const { x, y, z } = BackPointCloud.initCameraPosition;
-    BackPointCloud.camera.position.set(x - offsetXY, y - offsetXX, z + offsetY);
+    BackPointCloud.camera.position.set(x + offsetXY, y - offsetXX, z + offsetY);
   }
   BackPointCloud.camera.updateProjectionMatrix();
   BackPointCloud.render();

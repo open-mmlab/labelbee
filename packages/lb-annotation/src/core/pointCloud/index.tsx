@@ -835,7 +835,7 @@ export class PointCloud {
     offsetDepth: number,
     selectedPointCloudBox: IPointCloudBox,
   ) {
-    const Rz = new THREE.Matrix4().makeRotationZ(selectedPointCloudBox.rotation).invert();
+    const Rz = new THREE.Matrix4().makeRotationZ(selectedPointCloudBox.rotation);
     const offsetVector = new THREE.Vector3(-offsetCenterPoint.x, 0, 0).applyMatrix4(Rz);
 
     // need to Change offset to world side
