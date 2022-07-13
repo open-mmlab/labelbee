@@ -1383,7 +1383,6 @@ $ptPrefix: #{$prefix}-point-cloud;
       height: 40px;
       padding: 0 16px;
       line-height: 40px;
-      font-weight: 700;
       display: flex;
       justify-content: space-between;
     }
@@ -1391,10 +1390,12 @@ $ptPrefix: #{$prefix}-point-cloud;
       flex: 1;
       overflow: hidden;
       text-overflow: ellipsis;
+      font-weight: 700;
     }
     &__header-toolbar {
       display: flex;
       align-items: center;
+      font-size: 12px;
 
       .#{$ptPrefix} {
         @mixin iconMg {

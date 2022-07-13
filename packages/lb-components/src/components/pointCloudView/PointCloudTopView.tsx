@@ -23,6 +23,7 @@ import { BackPointCloud, BackPointCloudPolygonOperation } from './PointCloudBack
 import { PointCloudContext } from './PointCloudContext';
 import { PointCloudContainer } from './PointCloudLayout';
 import { SidePointCloud, SidePointCloudPolygonOperation } from './PointCloudSideView';
+import { BoxInfos } from './PointCloudInfos';
 
 const { EPolygonPattern } = cTool;
 
@@ -449,7 +450,9 @@ const PointCloudTopView = () => {
       title='俯视图'
       toolbar={<TopViewToolbar />}
     >
-      <div style={{ width: '100%', height: 500 }} ref={ref} />
+      <div style={{ width: '100%', height: 500, position: 'relative' }} ref={ref}>
+        <BoxInfos />
+      </div>
     </PointCloudContainer>
   );
 };
