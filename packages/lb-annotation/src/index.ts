@@ -13,6 +13,7 @@ import PolygonOperation from './core/toolOperation/polygonOperation';
 import MeasureOperation from './core/toolOperation/measureOperation';
 import { BasicToolOperation } from './core/toolOperation/basicToolOperation';
 import ViewOperation from './core/toolOperation/ViewOperation';
+import PointCloud2dOperation from './core/toolOperation/pointCloud2dOperation';
 
 // Constant
 import * as cAnnotation from './constant/annotation';
@@ -53,6 +54,7 @@ export {
   BasicToolOperation,
   MeasureOperation,
   ViewOperation,
+  PointCloud2dOperation,
   // 固定操作
   cAnnotation,
   cAnnotationTask,

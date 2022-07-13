@@ -1,10 +1,9 @@
-/*
- * PointCloud default constant
- * @Author: Laoluo luozefeng@sensetime.com
- * @Date: 2022-06-16 17:19:53
- * @LastEditors: Laoluo luozefeng@sensetime.com
- * @LastEditTime: 2022-06-16 19:31:56
+/**
+ * @file PointCloud default constant
+ * @createdate 2022-07-11
+ * @author Ron <ron.f.luo@gmail.com>
  */
+
 export enum EPerspectiveView {
   Front = 'FRONT',
   Back = 'BACK',

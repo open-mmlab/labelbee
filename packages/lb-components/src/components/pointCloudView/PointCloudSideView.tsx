@@ -1,11 +1,10 @@
-/*
- * @Author: Laoluo luozefeng@sensetime.com
- * @Date: 2022-06-22 11:08:31
- * @LastEditors: Laoluo luozefeng@sensetime.com
- * @LastEditTime: 2022-07-08 11:09:02
+/**
+ * @file PointCloud sideView - React Component
+ * @createdate 2022-07-11
+ * @author Ron <ron.f.luo@gmail.com>
  */
 import {
-  PolygonOperation,
+  PointCloud2dOperation,
   cTool,
   CanvasSchduler,
   PointCloud,
@@ -17,6 +16,7 @@ import React, { useEffect, useRef, useState } from 'react';
 import { synchronizeBackView, synchronizeTopView } from './PointCloudTopView';
 import { IPointCloudBox } from '@labelbee/lb-utils';
 import { PointCloudContext } from './PointCloudContext';
+import { pointCloudMain } from './PointCloud3DView';
 
 const { EPolygonPattern } = cTool;
 
@@ -124,7 +124,7 @@ const PointCloudSideView = () => {
         SidePointCloud = pointCloud;
         canvasSchuler.createCanvas(pointCloud.renderer.domElement);
 
-        const polygonOperation = new PolygonOperation({
+        const polygonOperation = new PointCloud2dOperation({
           container: ref.current as HTMLDivElement,
           size,
           config: '{ "textConfigurable": false, "poinCloudPattern": true }',
@@ -190,7 +190,6 @@ const PointCloudSideView = () => {
         const sin = Math.sin(ptCtx.selectedPointCloudBox.rotation);
 
         const offsetCenterPoint = {
-          // x: vector.x * cos - vector.y * sin,
           x: offset.x,
           y: offset.x * sin + offset.y * cos,
           z: newCenterPoint.y - oldCenterPoint.y,
@@ -222,6 +221,7 @@ const PointCloudSideView = () => {
 
         synchronizeTopView(newBoxParams, newPolygon);
         synchronizeBackView(newBoxParams, newPolygon);
+        pointCloudMain.hightLightOriginPointCloud(newBoxParams);
         ptCtx.updateSelectedPointCloud(newPolygon.id, newBoxParams);
       },
     );
@@ -233,6 +233,17 @@ const PointCloudSideView = () => {
       title='侧视图'
     >
       <div style={{ width: '100%', height: 300 }} ref={ref} />
+      <div
+        style={{
+          position: 'absolute',
+          right: 0,
+          top: 0,
+          width: 200,
+          color: 'white',
+        }}
+      >
+        data
+      </div>
     </PointCloudContainer>
   );
 };

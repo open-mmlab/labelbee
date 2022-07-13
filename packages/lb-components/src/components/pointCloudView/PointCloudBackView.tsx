@@ -5,7 +5,7 @@
  * @LastEditTime: 2022-07-08 11:08:02
  */
 import {
-  PolygonOperation,
+  PointCloud2dOperation,
   cTool,
   CanvasSchduler,
   PointCloud,
@@ -17,6 +17,7 @@ import React, { useEffect, useRef, useState } from 'react';
 import { synchronizeSideView, synchronizeTopView } from './PointCloudTopView';
 import { PointCloudContext } from './PointCloudContext';
 import { IPointCloudBox } from '@labelbee/lb-utils';
+import { pointCloudMain } from './PointCloud3DView';
 
 const { EPolygonPattern } = cTool;
 
@@ -81,7 +82,7 @@ const updateBackViewByCanvas2D = (
     const offsetXX = offsetX * cos;
     const offsetXY = offsetX * sin;
     const { x, y, z } = BackPointCloud.initCameraPosition;
-    BackPointCloud.camera.position.set(x - offsetXY, y - offsetXX, z + offsetY);
+    BackPointCloud.camera.position.set(x + offsetXY, y - offsetXX, z + offsetY);
   }
   BackPointCloud.camera.updateProjectionMatrix();
   BackPointCloud.render();
@@ -124,7 +125,7 @@ const PointCloudSideView = () => {
         BackPointCloud = pointCloud;
         canvasSchuler.createCanvas(pointCloud.renderer.domElement);
 
-        const polygonOperation = new PolygonOperation({
+        const polygonOperation = new PointCloud2dOperation({
           container: ref.current as HTMLDivElement,
           size,
           config: '{ "textConfigurable": false, "poinCloudPattern": true }',
@@ -215,6 +216,7 @@ const PointCloudSideView = () => {
 
         synchronizeTopView(newBoxParams, newPolygon);
         synchronizeSideView(newBoxParams, newPolygon);
+        pointCloudMain.hightLightOriginPointCloud(newBoxParams);
         ptCtx.updateSelectedPointCloud(newPolygon.id, newBoxParams);
       },
     );
