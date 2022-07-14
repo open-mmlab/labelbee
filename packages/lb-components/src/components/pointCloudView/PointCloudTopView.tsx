@@ -24,6 +24,7 @@ import { PointCloudContext } from './PointCloudContext';
 import { PointCloudContainer } from './PointCloudLayout';
 import { SidePointCloud, SidePointCloudPolygonOperation } from './PointCloudSideView';
 import { BoxInfos } from './PointCloudInfos';
+import { Slider } from 'antd';
 
 const { EPolygonPattern } = cTool;
 
@@ -226,6 +227,30 @@ const TopViewToolbar = () => {
   );
 };
 
+/**
+ * Z-axis points filter
+ */
+const ZAxisSlider = ({
+  setZAxisLimit,
+  zAxisLimit,
+}: {
+  setZAxisLimit: (value: number) => void;
+  zAxisLimit: number;
+}) => {
+  return (
+    <div style={{ position: 'absolute', top: 128, right: 8, height: 200, zIndex: 20 }}>
+      <Slider
+        vertical
+        step={0.5}
+        max={10}
+        min={0.5}
+        defaultValue={zAxisLimit}
+        onAfterChange={setZAxisLimit}
+      />
+    </div>
+  );
+};
+
 const PointCloudTopView = () => {
   const ref = useRef<HTMLDivElement>(null);
   const plgOpraRef = useRef<PointCloud2dOperation | null>();
@@ -233,6 +258,7 @@ const PointCloudTopView = () => {
   const pointCloudRef = useRef<PointCloud | null>();
 
   const [size, setSize] = useState<{ width: number; height: number } | null>(null);
+  const [zAxisLimit, setZAxisLimit] = useState<number>(10);
 
   const mainViewGenBox = (boxParams: IPointCloudBox, polygonID: string) => {
     pointCloudMain.generateBox(boxParams, polygonID);
@@ -444,14 +470,24 @@ const PointCloudTopView = () => {
     }
   }, [ptCtx, size]);
 
+  useEffect(() => {
+    console.log(zAxisLimit);
+    if (pointCloudRef.current) {
+      pointCloudRef.current.applyZAxisPoints(zAxisLimit);
+    }
+  }, [zAxisLimit]);
+
   return (
     <PointCloudContainer
       className={getClassName('point-cloud-container', 'top-view')}
       title='俯视图'
       toolbar={<TopViewToolbar />}
     >
-      <div style={{ width: '100%', height: 500, position: 'relative' }} ref={ref}>
+      <div style={{ position: 'relative' }}>
+        <div style={{ width: '100%', height: 500 }} ref={ref}></div>
+
         <BoxInfos />
+        <ZAxisSlider zAxisLimit={zAxisLimit} setZAxisLimit={setZAxisLimit} />
       </div>
     </PointCloudContainer>
   );

@@ -20,6 +20,7 @@ import { IPolygonPoint } from '@/types/tool/polygon';
 import uuid from '@/utils/uuid';
 import { PCDLoader } from './PCDLoader';
 import { OrbitControls } from './OrbitControls';
+import { Shader, WebGLRenderer } from 'three';
 
 interface IOrthographicCamera {
   left: number;
@@ -52,6 +53,11 @@ export class PointCloud {
   public axesHelper: THREE.AxesHelper;
 
   public pcdLoader: PCDLoader;
+
+  /**
+   * zAxis Limit for filter point over a value
+   */
+  public zAxisLimit: number = 10;
 
   private initCameraPosition = new THREE.Vector3(-1, 0, 10); // It will init when the camera positton be set
 
@@ -461,19 +467,49 @@ export class PointCloud {
     return ellipse;
   }
 
+  public overridePointShader = (shader: Shader, renderer: WebGLRenderer) => {
+    shader.vertexShader = `
+    attribute float sizes;
+    attribute float visibility;
+    varying float vVisible;
+  ${shader.vertexShader}`.replace(
+      `gl_PointSize = size;`,
+      `gl_PointSize = size * sizes;
+      vVisible = visibility;
+    `,
+    );
+    shader.fragmentShader = `
+    varying float vVisible;
+  ${shader.fragmentShader}`.replace(
+      `#include <clipping_planes_fragment>`,
+      `
+      if (vVisible < 0.5) discard;
+    #include <clipping_planes_fragment>`,
+    );
+  };
+
   public loadPCDFile = (src: string, cb?: () => void) => {
     this.pcdLoader.load(src, (points: any) => {
       points.material.size = 1;
       points.name = this.DEFAULT_POINTCLOUD;
 
+      const pointsMaterial = new THREE.PointsMaterial({
+        vertexColors: true,
+      });
+
+      pointsMaterial.onBeforeCompile = this.overridePointShader;
+
       const circle = this.createCircle(points.geometry.boundingSphere.radius * 2);
+      this.pointsUuid = points.uuid;
+
+      points.material = pointsMaterial;
+
+      this.filterZAxisPoints(points);
 
       this.scene.add(points);
       this.scene.add(circle);
 
       this.render();
-
-      this.pointsUuid = points.uuid;
 
       if (cb) {
         cb();
@@ -949,6 +985,34 @@ export class PointCloud {
 
     return { newBoxParams };
   }
+
+  /**
+   * Filter Point by z-aixs
+   */
+  public filterZAxisPoints(pcdPoints?: any) {
+    const points: any = pcdPoints ? pcdPoints : this.scene.children.find((i) => i.uuid === this.pointsUuid);
+
+    if (points) {
+      const attributes = points.geometry.attributes;
+      const position = attributes.position;
+      const visibility = [];
+      const count = position.count;
+
+      for (let i = 0; i < count; i++) {
+        const z = position.getZ(i);
+        visibility.push(z > this.zAxisLimit ? 0 : 1);
+      }
+
+      points.geometry.setAttribute('visibility', new THREE.Float32BufferAttribute(visibility, 1));
+      points.geometry.attributes.visibility.needsUpdate = true;
+    }
+  }
+
+  public applyZAxisPoints = (zAxisLimit: number) => {
+    this.zAxisLimit = zAxisLimit;
+    this.filterZAxisPoints();
+    this.render();
+  };
 
   public render() {
     this.renderer.render(this.scene, this.camera);

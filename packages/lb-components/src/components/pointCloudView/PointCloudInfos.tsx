@@ -89,6 +89,7 @@ export const BoxInfos = () => {
           top: 8,
           fontSize: 12,
           padding: 8,
+          zIndex: 20,
         }}
       >
         {infos.map((i) => (
