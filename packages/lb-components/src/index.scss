@@ -290,20 +290,32 @@ $prefix: bee;
   }
 
   &__level {
-    margin: 20px 20px 0 20px;
-  }
-
-  &__toolsOption {
+    padding: 28px;
+    border-bottom: 1px solid #eee;
     display: flex;
     justify-content: center;
+  }
+
+  &__toolOption {
+    display: inline-flex;
+    flex-direction: column;
+    align-items: center;
+    color: #999;
     cursor: pointer;
-    margin: 10px 0 30px;
+  }
+
+  &__toolOption + &__toolOption {
+    margin-left: 16px;
   }
 
   &__singleTool {
     max-width: 20px;
     max-height: 20px;
     margin: 0 10px;
+
+    &.selected {
+      color: #666fff;
+    }
   }
 
   &__horizontal {
