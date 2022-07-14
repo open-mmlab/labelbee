@@ -14,6 +14,7 @@ import ImgAttributeInfo from './ImgAttributeInfo';
 import SwitchAttributeList from './SwitchAttributeList';
 import TagSidebar, { expandIconFuc } from './TagSidebar';
 import TextToolSidebar from './TextToolSidebar';
+import PointCloudToolSidebar from './PointCloudToolSidebar';
 import ToolStyle from './ToolStyle';
 import { cTool } from '@labelbee/lb-annotation';
 import { ToolIcons } from './ToolIcons';
@@ -178,7 +179,11 @@ const Sidebar: React.FC<IProps> = ({ sider }) => {
   }
 
   if (toolName === EPointCloudName.PointCloud) {
-    return <div className={`${sidebarCls}`}>{toolIcon}</div>;
+    return (
+      <div className={`${sidebarCls}`}>
+        <PointCloudToolSidebar />
+      </div>
+    );
   }
 
   return null;
