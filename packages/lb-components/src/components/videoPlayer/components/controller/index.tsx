@@ -126,7 +126,8 @@ const VideoPageChange = () => {
 
 const VideoTime = () => {
   const { currentTime, duration } = React.useContext(VideoPlayerCtx);
-  const remaingTime = (duration * 10 - currentTime * 10) / 10;
+  const remained10x = duration * 10 - currentTime * 10;
+  const remaingTime = (remained10x > 0 ? remained10x : 0) / 10;
 
   return (
     <div className={getClassName('video-controller', 'time')}>

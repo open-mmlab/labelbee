@@ -2,10 +2,10 @@
  * 查看模式 - 严格配置要求
  */
 
+import { cloneDeep } from 'lodash';
 import CommonToolUtils from '@/utils/tool/CommonToolUtils';
 import RectUtils from '@/utils/tool/RectUtils';
 import TagUtils from '@/utils/tool/TagUtils';
-import { cloneDeep } from 'lodash';
 import { DEFAULT_TEXT_OFFSET } from '../../constant/annotation';
 import { EToolName } from '../../constant/tool';
 import { IPolygonData } from '../../types/tool/polygon';

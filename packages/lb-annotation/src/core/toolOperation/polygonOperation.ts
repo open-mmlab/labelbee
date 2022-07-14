@@ -1,6 +1,6 @@
+import { i18n } from '@labelbee/lb-utils';
 import MathUtils from '@/utils/MathUtils';
 import RectUtils from '@/utils/tool/RectUtils';
-import { i18n } from '@labelbee/lb-utils';
 import {
   DEFAULT_TEXT_OFFSET,
   EDragStatus,

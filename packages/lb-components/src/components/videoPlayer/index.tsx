@@ -185,6 +185,11 @@ export class VideoPlayer extends React.Component<IVideoPlayerProps, IVideoPlayer
       clearInterval(this.timeInterval);
       this.timeInterval = undefined;
     }
+
+    /** Due to speedrate can less than PER_INTERVAL, it need to set current time after stopped */
+    if (this.videoElm) {
+      this.setCurrentTime(this.videoElm.currentTime);
+    }
   };
 
   public onVideoStart = () => {
@@ -213,6 +218,10 @@ export class VideoPlayer extends React.Component<IVideoPlayerProps, IVideoPlayer
       error: false,
       isPlay: false,
     });
+
+    if (this.videoElm) {
+      this.videoElm.playbackRate = this.state.playbackRate;
+    }
     this.onVideoStopped();
   };
 
