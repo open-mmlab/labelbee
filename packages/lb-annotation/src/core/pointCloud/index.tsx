@@ -15,12 +15,12 @@ import {
   I3DSpaceCoord,
   PointCloudUtils,
 } from '@labelbee/lb-utils';
+import { Shader } from 'three';
 import { isInPolygon } from '@/utils/tool/polygonTool';
 import { IPolygonPoint } from '@/types/tool/polygon';
 import uuid from '@/utils/uuid';
 import { PCDLoader } from './PCDLoader';
 import { OrbitControls } from './OrbitControls';
-import { Shader, WebGLRenderer } from 'three';
 
 interface IOrthographicCamera {
   left: number;
@@ -36,6 +36,7 @@ interface IProps {
   noAppend?: boolean; // temporary;
   isOrthographicCamera?: boolean;
   orthgraphicParams?: IOrthographicCamera;
+  backgroundColor?: string;
 }
 
 const DEFAULT_DISTANCE = 30;
@@ -71,13 +72,16 @@ export class PointCloud {
 
   private orthgraphicParams?: IOrthographicCamera;
 
+  private backgroundColor: string;
+
   private cachePointCloudGeometry?: THREE.Points;
 
   private DEFAULT_POINTCLOUD = 'POINTCLOUD';
 
-  constructor({ container, noAppend, isOrthographicCamera, orthgraphicParams }: IProps) {
+  constructor({ container, noAppend, isOrthographicCamera, orthgraphicParams, backgroundColor = 'black' }: IProps) {
     this.container = container;
     this.renderer = new THREE.WebGLRenderer({ antialias: true });
+    this.backgroundColor = backgroundColor;
 
     // TODO
     if (isOrthographicCamera && orthgraphicParams) {
@@ -159,7 +163,7 @@ export class PointCloud {
   public init() {
     const { scene } = this;
     // Background
-    scene.background = new THREE.Color(0x4c4c4c);
+    scene.background = new THREE.Color(this.backgroundColor);
 
     this.initControls();
     this.initRenderer();
@@ -467,7 +471,7 @@ export class PointCloud {
     return ellipse;
   }
 
-  public overridePointShader = (shader: Shader, renderer: WebGLRenderer) => {
+  public overridePointShader = (shader: Shader) => {
     shader.vertexShader = `
     attribute float sizes;
     attribute float visibility;
@@ -990,13 +994,13 @@ export class PointCloud {
    * Filter Point by z-aixs
    */
   public filterZAxisPoints(pcdPoints?: any) {
-    const points: any = pcdPoints ? pcdPoints : this.scene.children.find((i) => i.uuid === this.pointsUuid);
+    const points: any = pcdPoints || this.scene.children.find((i) => i.uuid === this.pointsUuid);
 
     if (points) {
-      const attributes = points.geometry.attributes;
-      const position = attributes.position;
+      const { attributes } = points.geometry;
+      const { position } = attributes;
       const visibility = [];
-      const count = position.count;
+      const { count } = position;
 
       for (let i = 0; i < count; i++) {
         const z = position.getZ(i);

@@ -67,7 +67,7 @@ const BoxIdInput = () => {
             onPressEnter={() => {
               applyValue();
             }}
-          ></Input>
+          />
         ) : (
           <span>{value}</span>
         )}

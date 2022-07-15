@@ -95,7 +95,10 @@ const PointCloud3D = () => {
 
   useEffect(() => {
     if (ref.current) {
-      pointCloudRef.current = new PointCloud({ container: ref.current });
+      pointCloudRef.current = new PointCloud({
+        container: ref.current,
+        backgroundColor: '#4c4c4c',
+      });
       pointCloudRef.current.loadPCDFile('http://10.53.25.142:8001/10837/1/total.pcd');
       pointCloudMain = pointCloudRef.current;
     }

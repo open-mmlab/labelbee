@@ -238,7 +238,7 @@ const ZAxisSlider = ({
   zAxisLimit: number;
 }) => {
   return (
-    <div style={{ position: 'absolute', top: 128, right: 8, height: 200, zIndex: 20 }}>
+    <div style={{ position: 'absolute', top: 128, right: 8, height: '50%', zIndex: 20 }}>
       <Slider
         vertical
         step={0.5}
@@ -471,7 +471,6 @@ const PointCloudTopView = () => {
   }, [ptCtx, size]);
 
   useEffect(() => {
-    console.log(zAxisLimit);
     if (pointCloudRef.current) {
       pointCloudRef.current.applyZAxisPoints(zAxisLimit);
     }
@@ -483,9 +482,8 @@ const PointCloudTopView = () => {
       title='俯视图'
       toolbar={<TopViewToolbar />}
     >
-      <div style={{ position: 'relative' }}>
-        <div style={{ width: '100%', height: 500 }} ref={ref}></div>
-
+      <div style={{ position: 'relative', flex: 1 }}>
+        <div style={{ width: '100%', height: '100%' }} ref={ref} />
         <BoxInfos />
         <ZAxisSlider zAxisLimit={zAxisLimit} setZAxisLimit={setZAxisLimit} />
       </div>

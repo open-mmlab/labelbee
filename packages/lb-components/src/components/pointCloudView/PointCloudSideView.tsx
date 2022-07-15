@@ -243,9 +243,7 @@ const PointCloudSideView = () => {
           width: 200,
           color: 'white',
         }}
-      >
-        data
-      </div>
+      />
     </PointCloudContainer>
   );
 };

@@ -12,6 +12,10 @@ import StyleUtils from '@/utils/tool/StyleUtils';
 import PolygonOperation from './polygonOperation';
 
 class PointCloud2dOperation extends PolygonOperation {
+  public getLineColor() {
+    return 'rgba(0, 255, 255, 0.5)';
+  }
+
   public renderStaticPolygon() {
     if (this.isHidden === false) {
       this.polygonList?.forEach((polygon) => {

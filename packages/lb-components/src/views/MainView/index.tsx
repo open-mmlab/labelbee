@@ -17,6 +17,8 @@ import { AppState } from '@/store';
 import { connect } from 'react-redux';
 import ToolUtils from '@/utils/ToolUtils';
 import PointCloudView from '@/components/pointCloudView';
+import { getClassName } from '@/utils/dom';
+import { classnames } from '@/utils';
 
 interface IProps {
   path: string;
@@ -64,10 +66,12 @@ const AnnotatedArea: React.FC<AppProps & IProps> = (props) => {
 };
 
 const MainView: React.FC<AppProps & IProps> = (props) => {
+  const siderWidth = props.style?.sider?.width;
+
   return (
     <ViewportProvider>
       <Spin spinning={props.loading}>
-        <Layout className={`${layoutCls} ${props.className}`} style={props.style?.layout}>
+        <Layout className={classnames([layoutCls, props.className])} style={props.style?.layout}>
           <header className={`${layoutCls}__header`} style={props.style?.header}>
             <ToolHeader
               header={props?.header}
@@ -76,12 +80,17 @@ const MainView: React.FC<AppProps & IProps> = (props) => {
               exportData={props.exportData}
             />
           </header>
-          <Layout>
+
+          <Layout className={getClassName('layout', 'container')}>
             {props?.leftSider}
             <Content className={`${layoutCls}__content`}>
               <AnnotatedArea {...props} />
             </Content>
-            <Sider className={`${layoutCls}__side`} width='auto' style={props.style?.sider}>
+            <Sider
+              className={`${layoutCls}__side`}
+              width={siderWidth ? siderWidth : 240}
+              style={props.style?.sider}
+            >
               <Sidebar sider={props?.sider} />
             </Sider>
           </Layout>
