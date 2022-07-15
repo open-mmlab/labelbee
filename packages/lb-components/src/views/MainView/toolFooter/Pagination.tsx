@@ -1,11 +1,12 @@
+import { getClassName } from '@/utils/dom';
 import {
   LeftOutlined,
   RightOutlined,
   StepForwardFilled,
   StepBackwardFilled,
 } from '@ant-design/icons';
-import React from 'react';
-import { PageInput } from './index';
+import { Input } from 'antd';
+import React, { useEffect, useRef, useState } from 'react';
 
 interface IPageIconProps {
   isVideo?: boolean;
@@ -15,36 +16,91 @@ interface IPageIconProps {
   };
 }
 
-interface IPagination {
-  // 当前文件的页码
+interface IPaginationProps {
+  // current file page
   imgIndex: number;
-  // 文件总数
+  // number of total files
   totalPage: number;
-  // 跳到对应的页码
+  // redirect to target page
   pageJump: (page: string) => void;
-  // 向后翻页
+  // to next page
   pageForward: () => void;
-  // 向前翻页
+  // to prev page
   pageBackward: () => void;
+  // footer classname
   footerCls: string;
-  // 文件是否为视频
+  // whether file is video
   isVideo?: boolean;
 }
 
-const Forward: React.FC<IPageIconProps> = (props) =>
+interface IPageProps {
+  jumpSkip: Function;
+  imgIndex: number;
+}
+
+/**
+ * page input for changing current page or file index
+ * @param props
+ * @returns
+ */
+export const PageInput = (props: IPageProps) => {
+  const { jumpSkip, imgIndex } = props;
+  const [newIndex, setIndex] = useState(imgIndex);
+  const inputEl = useRef(null);
+
+  useEffect(() => {
+    setIndex(imgIndex + 1);
+  }, [imgIndex]);
+
+  const newHandleJump = (e: any) => {
+    const reg = /^\d*$/;
+    if (reg.test(e.target.value)) {
+      setIndex(e.target.value);
+    }
+  };
+
+  const newJumpSkip = (e: any) => {
+    if (e.keyCode === 13) {
+      jumpSkip(e.target.value);
+    }
+  };
+
+  return (
+    <Input
+      className={getClassName('page-input')}
+      ref={inputEl}
+      onChange={newHandleJump}
+      value={newIndex}
+      onKeyDown={newJumpSkip}
+    />
+  );
+};
+
+/**
+ * Next page icon
+ * @param props
+ * @returns
+ */
+const NextPage: React.FC<IPageIconProps> = (props) =>
   props.isVideo ? (
     <StepForwardFilled {...props.iconProps} />
   ) : (
     <RightOutlined {...props.iconProps} />
   );
-const Back: React.FC<IPageIconProps> = (props) =>
+
+/**
+ * Prev page icon
+ * @param props
+ * @returns
+ */
+const PrevPage: React.FC<IPageIconProps> = (props) =>
   props.isVideo ? (
     <StepBackwardFilled {...props.iconProps} />
   ) : (
     <LeftOutlined {...props.iconProps} />
   );
 
-export const Pagination: React.FC<IPagination> = ({
+export const Pagination: React.FC<IPaginationProps> = ({
   pageBackward,
   imgIndex,
   pageJump,
@@ -55,7 +111,7 @@ export const Pagination: React.FC<IPagination> = ({
 }) => {
   return (
     <div className={`${footerCls}__pagination`}>
-      <Back
+      <PrevPage
         isVideo={isVideo}
         iconProps={{
           className: `${footerCls}__highlight`,
@@ -64,7 +120,7 @@ export const Pagination: React.FC<IPagination> = ({
       />
       <PageInput imgIndex={imgIndex} jumpSkip={pageJump} />/
       <span className={`${footerCls}__pageAll`}>{totalPage}</span>
-      <Forward
+      <NextPage
         isVideo={isVideo}
         iconProps={{
           className: `${footerCls}__highlight`,

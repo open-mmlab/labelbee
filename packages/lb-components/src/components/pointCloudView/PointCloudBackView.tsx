@@ -16,8 +16,9 @@ import { PointCloudContainer } from './PointCloudLayout';
 import React, { useEffect, useRef, useState } from 'react';
 import { synchronizeSideView, synchronizeTopView } from './PointCloudTopView';
 import { PointCloudContext } from './PointCloudContext';
-import { IPointCloudBox } from '@labelbee/lb-utils';
 import { pointCloudMain } from './PointCloud3DView';
+import { EPerspectiveView, IPointCloudBox } from '@labelbee/lb-utils';
+import { SizeInfoForView } from './PointCloudInfos';
 
 const { EPolygonPattern } = cTool;
 
@@ -226,6 +227,7 @@ const PointCloudSideView = () => {
     <PointCloudContainer
       className={getClassName('point-cloud-container', 'back-view')}
       title='背视图'
+      toolbar={<SizeInfoForView perspectiveView={EPerspectiveView.Back} />}
     >
       <div style={{ width: '100%', height: 300 }} ref={ref} />
     </PointCloudContainer>

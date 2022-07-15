@@ -6,6 +6,9 @@
  */
 import { ISize } from '@/types/main';
 import { getClassName } from '@/utils/dom';
+import { FooterDivider } from '@/views/MainView/toolFooter';
+import { ZoomController } from '@/views/MainView/toolFooter/ZoomController';
+import { DownSquareOutlined, UpSquareOutlined } from '@ant-design/icons';
 import {
   PointCloud2dOperation,
   cTool,
@@ -20,6 +23,8 @@ import { BackPointCloud, BackPointCloudPolygonOperation } from './PointCloudBack
 import { PointCloudContext } from './PointCloudContext';
 import { PointCloudContainer } from './PointCloudLayout';
 import { SidePointCloud, SidePointCloudPolygonOperation } from './PointCloudSideView';
+import { BoxInfos } from './PointCloudInfos';
+import { Slider } from 'antd';
 
 const { EPolygonPattern } = cTool;
 
@@ -207,13 +212,53 @@ export const synchronizeTopView = (newBoxParams: IPointCloudBox, newPolygon: any
   TopPointCloudPolygonOperation.setResultAndSelectedID(newPolygonList, newPolygon.id);
 };
 
-export const PointCloudTopView = () => {
+const TopViewToolbar = () => {
+  return (
+    <>
+      <span className={getClassName('point-cloud', 'rotate-reserve')} />
+      <span className={getClassName('point-cloud', 'rotate')} />
+      <span className={getClassName('point-cloud', 'rotate-180')} />
+      <FooterDivider />
+      <UpSquareOutlined className={getClassName('point-cloud', 'prev')} />
+      <DownSquareOutlined className={getClassName('point-cloud', 'next')} />
+      <FooterDivider />
+      <ZoomController />
+    </>
+  );
+};
+
+/**
+ * Z-axis points filter
+ */
+const ZAxisSlider = ({
+  setZAxisLimit,
+  zAxisLimit,
+}: {
+  setZAxisLimit: (value: number) => void;
+  zAxisLimit: number;
+}) => {
+  return (
+    <div style={{ position: 'absolute', top: 128, right: 8, height: '50%', zIndex: 20 }}>
+      <Slider
+        vertical
+        step={0.5}
+        max={10}
+        min={0.5}
+        defaultValue={zAxisLimit}
+        onAfterChange={setZAxisLimit}
+      />
+    </div>
+  );
+};
+
+const PointCloudTopView = () => {
   const ref = useRef<HTMLDivElement>(null);
   const plgOpraRef = useRef<PointCloud2dOperation | null>();
   const ptCtx = React.useContext(PointCloudContext);
   const pointCloudRef = useRef<PointCloud | null>();
 
   const [size, setSize] = useState<{ width: number; height: number } | null>(null);
+  const [zAxisLimit, setZAxisLimit] = useState<number>(10);
 
   const mainViewGenBox = (boxParams: IPointCloudBox, polygonID: string) => {
     pointCloudMain.generateBox(boxParams, polygonID);
@@ -425,12 +470,23 @@ export const PointCloudTopView = () => {
     }
   }, [ptCtx, size]);
 
+  useEffect(() => {
+    if (pointCloudRef.current) {
+      pointCloudRef.current.applyZAxisPoints(zAxisLimit);
+    }
+  }, [zAxisLimit]);
+
   return (
     <PointCloudContainer
       className={getClassName('point-cloud-container', 'top-view')}
       title='俯视图'
+      toolbar={<TopViewToolbar />}
     >
-      <div style={{ width: '100%', height: 500 }} ref={ref} />
+      <div style={{ position: 'relative', flex: 1 }}>
+        <div style={{ width: '100%', height: '100%' }} ref={ref} />
+        <BoxInfos />
+        <ZAxisSlider zAxisLimit={zAxisLimit} setZAxisLimit={setZAxisLimit} />
+      </div>
     </PointCloudContainer>
   );
 };
