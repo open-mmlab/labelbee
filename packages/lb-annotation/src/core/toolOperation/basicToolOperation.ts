@@ -447,6 +447,7 @@ class BasicToolOperation extends EventListener {
 
   public setForbidOperation(forbidOperation: boolean) {
     this.forbidOperation = forbidOperation;
+    this.setShowDefaultCursor(true);
     this.render();
   }
 
@@ -936,7 +937,7 @@ class BasicToolOperation extends EventListener {
   };
 
   public renderCursorLine(lineColor = this.style.lineColor[0] ?? '') {
-    if (!this.ctx || this.forbidCursorLine) {
+    if (!this.ctx || this.forbidCursorLine || this.forbidOperation) {
       return;
     }
 
