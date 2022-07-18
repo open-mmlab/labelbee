@@ -47,7 +47,4 @@ declare interface IPolygonConfig extends IToolConfig {
   segmentSupport: boolean; // 分割辅助
   showConfirm?: boolean;
   panopticModel: string; // 分割模型
-
-  // New Pattern
-  poinCloudPattern?: boolean;
 }

@@ -548,7 +548,7 @@ class PolygonOperation extends BasicToolOperation {
       return;
     }
 
-    if (this.config.textConfigurable || this.config.poinCloudPattern) {
+    if (this.config.textConfigurable) {
       this.setSelectedID(newID);
     } else {
       this.setSelectedID();

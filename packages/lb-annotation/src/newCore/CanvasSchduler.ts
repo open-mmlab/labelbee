@@ -1,14 +1,14 @@
-/*
- * Canvas Schduler
- * @Author: Laoluo luozefeng@sensetime.com
- * @Date: 2022-06-22 14:59:33
- * @LastEditors: Laoluo luozefeng@sensetime.com
- * @LastEditTime: 2022-06-27 16:57:59
+/**
+ * @file Scheduling creation for multi-layer canvas
+ * @createdate 2022-06-22
+ * @author Ron <ron.f.luo@gmail.com>
  */
 interface ICanvasBasicOperation {
   createCanvas(id: string, options?: { size?: { width: number; height: number } }): HTMLCanvasElement;
   createCanvas(canvas: HTMLCanvasElement): HTMLCanvasElement;
   destroyCanvas(id: string): HTMLElement | null;
+
+  switchOrder?: (key: string) => void; // 
 }
 
 interface ICavnasSchdulerProps {
@@ -23,6 +23,7 @@ class CanvasSchduler implements ICanvasBasicOperation {
   }
 
   public createCanvas(id: string | HTMLCanvasElement, options?: { size?: { width: number; height: number } }) {
+    // Add Directly
     if (typeof id !== 'string') {
       this.container.appendChild(id);
       id.style.position = 'absolute';

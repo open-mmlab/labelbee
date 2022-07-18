@@ -366,7 +366,7 @@ const PointCloudTopView = () => {
         const polygonOperation = new PointCloud2dOperation({
           container: ref.current as HTMLDivElement,
           size,
-          config: '{ "textConfigurable": false, "poinCloudPattern": true }',
+          config: '{ "textConfigurable": false }',
           imgNode: image,
           isAppend: false,
         });

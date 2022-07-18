@@ -20,6 +20,10 @@ class PointCloud2dOperation extends PolygonOperation {
     return 'rgba(0, 255, 255, 0.5)';
   }
 
+  /**
+   * Add direction
+   * @override
+   * */
   public renderStaticPolygon() {
     if (this.isHidden === false) {
       this.polygonList?.forEach((polygon) => {
@@ -52,6 +56,10 @@ class PointCloud2dOperation extends PolygonOperation {
     }
   }
 
+  /**
+   * Update the show
+   * @override
+   * */
   public renderSelectedPolygon() {
     if (this.selectedID) {
       const selectdPolygon = this.selectedPolygon;
@@ -97,6 +105,10 @@ class PointCloud2dOperation extends PolygonOperation {
     });
   }
 
+  /**
+   * Filter the polygon by Pattern
+   * @override
+   * */
   public getHoverID(e: MouseEvent) {
     const coordinate = this.getCoordinateUnderZoom(e);
 
@@ -110,6 +122,10 @@ class PointCloud2dOperation extends PolygonOperation {
     return PolygonUtils.getHoverPolygonID(coordinate, polygonListWithZoom, 10, this.config?.lineType);
   }
 
+  /**
+   * Filter the polygon by Pattern
+   * @override
+   * */
   public onTabKeyDown(e: KeyboardEvent) {
     e.preventDefault();
 
@@ -135,6 +151,18 @@ class PointCloud2dOperation extends PolygonOperation {
       this.setSelectedID(nextSelectedResult.id);
     }
     this.render();
+  }
+
+  /**
+   * Be selected after created.
+   * @override
+   */
+  public setSelectedIdAfterAddingDrawing(newID: string) {
+    if (this.drawingPointList.length === 0) {
+      return;
+    }
+
+    this.setSelectedID(newID);
   }
 }
 
