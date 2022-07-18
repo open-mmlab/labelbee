@@ -96,11 +96,6 @@ $prefix: bee;
     padding: 4px;
     border: 1px solid #cccccc;
   }
-
-  &__hotkey-content {
-    max-height: 70vh;
-    overflow-y: auto;
-  }
 }
 
 .#{$prefix}-page-input {
@@ -128,7 +123,6 @@ $prefix: bee;
 }
 
 // 头部
-
 .#{$prefix}-header {
   &__title {
     color: rgba(153, 153, 153, 1);
@@ -707,16 +701,15 @@ $prefix: bee;
 $hotkey-item-height: 46px;
 $hotkey-container-padding: 7px;
 
+.ant-popover.tool-hotkeys-popover .ant-popover-inner-content {
+  max-height: 70vh;
+  overflow-y: scroll;
+  padding: 0;
+}
+
 .tipsBar {
   display: flex;
   height: 100%;
-
-  :global {
-    .ant-popover.tool-hotkeys-popover .ant-popover-inner-content {
-      max-height: $hotkey-item-height * 10 + $hotkey-container-padding * 2;
-      overflow-y: auto;
-    }
-  }
 
   .hotKeyIconGray,
   .helpIconGray {
