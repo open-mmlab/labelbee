@@ -371,10 +371,9 @@ const PointCloudTopView = () => {
           isAppend: false,
         });
 
-        plgOpraRef.current = polygonOperation;
-
         polygonOperation.eventBinding();
         polygonOperation.setPattern(EPolygonPattern.Rect);
+        plgOpraRef.current = polygonOperation;
         TopPointCloudPolygonOperation = polygonOperation;
 
         /**
@@ -414,16 +413,16 @@ const PointCloudTopView = () => {
     }
 
     if (plgOpraRef.current) {
-      plgOpraRef.current.singleOn('polygonCreated', (polygon: any) => {
-        if (pointCloudRef.current && ref.current) {
-          const { boxParams } = afterPolygonCreated(polygon, TopPointCloud, {
-            width: ref.current.clientWidth,
-            height: ref.current.clientHeight,
-          });
-          pointCloudMain.hightLightOriginPointCloud(boxParams);
-          synchronizeSideView(boxParams, polygon);
-          synchronizeBackView(boxParams, polygon);
+      TopPointCloudPolygonOperation.singleOn('polygonCreated', (polygon: any) => {
+        if (TopPointCloudPolygonOperation.pattern === EPolygonPattern.Normal) {
+          return;
         }
+
+        const { boxParams } = afterPolygonCreated(polygon, TopPointCloud, size);
+        pointCloudMain.hightLightOriginPointCloud(boxParams);
+        synchronizeSideView(boxParams, polygon);
+        synchronizeBackView(boxParams, polygon);
+        // }
       });
 
       plgOpraRef.current.singleOn('selectedChange', () => {

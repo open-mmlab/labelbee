@@ -304,6 +304,9 @@ $prefix: bee;
     align-items: center;
     color: #999;
     cursor: pointer;
+    &__selected {
+      color: #666fff;
+    }
   }
 
   &__toolOption + &__toolOption {
@@ -314,10 +317,6 @@ $prefix: bee;
     max-width: 20px;
     max-height: 20px;
     margin: 0 10px;
-
-    &.selected {
-      color: #666fff;
-    }
   }
 
   &__horizontal {
@@ -1392,6 +1391,8 @@ $ptPrefix: #{$prefix}-point-cloud;
   flex: 1;
 
   .#{$ptPrefix}-container {
+    position: relative;
+
     &__header {
       background-color: #444;
       color: white;

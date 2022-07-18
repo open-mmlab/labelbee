@@ -24,7 +24,10 @@ import PointCloudSideView from './PointCloudSideView';
 import PointCloud2DView from './PointCloud2DView';
 import { PointCloudContext } from './PointCloudContext';
 import { IPointCloudBoxList, IPointCloudBox } from '@labelbee/lb-utils';
-import { cAnnotation } from '@labelbee/lb-annotation';
+import { cAnnotation, cTool } from '@labelbee/lb-annotation';
+import { message } from 'antd';
+
+const { EPolygonPattern } = cTool;
 const { ERotateDirection } = cAnnotation;
 
 const PointCloudView = () => {
@@ -81,8 +84,25 @@ const PointCloudView = () => {
 
           break;
 
-        case 9:
-          // TAB
+        case 85:
+          {
+            // U , change TopOpereation Pattern
+            const newPattern =
+              TopPointCloudPolygonOperation.pattern === EPolygonPattern.Normal
+                ? EPolygonPattern.Rect
+                : EPolygonPattern.Normal;
+            TopPointCloudPolygonOperation.setPattern(newPattern);
+            const POLYGON_PATTERN = {
+              [EPolygonPattern.Normal]: 'Normal Pattern',
+              [EPolygonPattern.Rect]: 'Rect Pattern',
+            };
+
+            message.success(`Change Pattern to ${POLYGON_PATTERN[newPattern]} successfully`);
+
+            // Clear Status
+            TopPointCloudPolygonOperation.clearActiveStatus();
+            TopPointCloudPolygonOperation.clearDrawingStatus();
+          }
 
           break;
 

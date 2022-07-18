@@ -3,6 +3,7 @@ import { ToolIcons } from '../ToolIcons';
 import { cTool } from '@labelbee/lb-annotation';
 import { Input, Tag } from 'antd';
 import { EditFilled } from '@ant-design/icons';
+const { EToolName } = cTool;
 
 const SELECTED_BOX_ID = [1, 2, 3, 7, 8, 10, 101, 1002, 9999, 99999];
 
@@ -83,9 +84,15 @@ const BoxIdInput = () => {
 };
 
 const PointCloudToolSidebar = () => {
+  const onChange = () => {};
+
   return (
     <>
-      <ToolIcons toolName={cTool.EPointCloudName.PointCloud} />
+      <ToolIcons
+        toolName={cTool.EPointCloudName.PointCloud}
+        selectedToolName={EToolName.Rect}
+        onChange={onChange}
+      />
       <AnnotatedBox />
       <BoxIdInput />
     </>
