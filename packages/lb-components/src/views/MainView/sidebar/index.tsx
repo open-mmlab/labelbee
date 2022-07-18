@@ -53,7 +53,8 @@ const Sidebar: React.FC<IProps> = ({ sider }) => {
     );
   };
 
-  const toolIcon = <ToolIcons toolName={toolName} />;
+  // onChange is empty by default.
+  const toolIcon = <ToolIcons toolName={toolName} onChange={() => {}} />;
   const attributeList = <SwitchAttributeList />;
 
   const annotationText = <AnnotationText />;
