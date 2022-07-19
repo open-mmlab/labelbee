@@ -60,7 +60,7 @@ export class PointCloud {
    */
   public zAxisLimit: number = 10;
 
-  private initCameraPosition = new THREE.Vector3(-1, 0, 10); // It will init when the camera positton be set
+  public initCameraPosition = new THREE.Vector3(-1, 0, 10); // It will init when the camera positton be set
 
   private container: HTMLElement;
 

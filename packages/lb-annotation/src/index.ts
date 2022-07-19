@@ -40,6 +40,7 @@ import DblClickEventListener from './utils/tool/DblClickEventListener'; // 暂�
 import AnnotationEngine from './core';
 
 import { PointCloud } from './core/pointCloud';
+import { PointCloudAnnotation } from './core/pointCloud/anntation';
 import UnitUtils from './utils/tool/UnitUtils';
 
 const toolUtils = CommonToolUtils;
@@ -56,6 +57,7 @@ export {
   MeasureOperation,
   ViewOperation,
   PointCloud2dOperation,
+  PointCloudAnnotation,
   // 固定操作
   cAnnotation,
   cAnnotationTask,
