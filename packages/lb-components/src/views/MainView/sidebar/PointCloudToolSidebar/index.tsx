@@ -1,9 +1,11 @@
-import React, { useState } from 'react';
+import React, { useContext, useState } from 'react';
 import { ToolIcons } from '../ToolIcons';
 import { cTool } from '@labelbee/lb-annotation';
 import { Input, Tag } from 'antd';
 import { EditFilled } from '@ant-design/icons';
-const { EToolName } = cTool;
+import { PointCloudContext } from '@/components/pointCloudView/PointCloudContext';
+
+const { EToolName, EPolygonPattern } = cTool;
 
 const SELECTED_BOX_ID = [1, 2, 3, 7, 8, 10, 101, 1002, 9999, 99999];
 
@@ -84,7 +86,19 @@ const BoxIdInput = () => {
 };
 
 const PointCloudToolSidebar = () => {
-  const onChange = () => {};
+  const ptCtx = useContext(PointCloudContext);
+
+  const onChange = (toolName: any) => {
+    switch (toolName) {
+      case EToolName.Rect:
+        ptCtx.topViewInstance?.pointCloud2dOpeartion.setPattern(EPolygonPattern.Rect);
+
+        break;
+      case EToolName.Polygon:
+        ptCtx.topViewInstance?.pointCloud2dOpeartion.setPattern(EPolygonPattern.Normal);
+        break;
+    }
+  };
 
   return (
     <>

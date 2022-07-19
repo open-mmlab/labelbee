@@ -70,7 +70,7 @@ export const ToolIcons = ({
           <span
             className={`${sidebarCls}__toolOption`}
             key={tool.toolName}
-            onChange={() => onChange(tool.toolName)}
+            onClick={() => onChange?.(tool.toolName)}
           >
             <img
               className={`${sidebarCls}__singleTool`}

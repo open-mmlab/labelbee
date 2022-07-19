@@ -18,12 +18,11 @@ import PointCloudBackView from './PointCloudBackView';
 import PointCloudTopView from './PointCloudTopView';
 import PointCloudSideView from './PointCloudSideView';
 import PointCloud2DView from './PointCloud2DView';
-import { PointCloudProvider } from './PointCloudContext';
 import PointCloudListener from './PointCloudListener';
 
 const PointCloudView = () => {
   return (
-    <PointCloudProvider>
+    <>
       <PointCloudListener />
       <div className={getClassName('point-cloud-layout')}>
         <div className={getClassName('point-cloud-wrapper')}>
@@ -41,7 +40,7 @@ const PointCloudView = () => {
           </div>
         </div>
       </div>
-    </PointCloudProvider>
+    </>
   );
 };
 

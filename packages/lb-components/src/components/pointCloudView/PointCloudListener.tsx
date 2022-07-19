@@ -1,50 +1,21 @@
 import { useContext, useEffect } from 'react';
-import { PointCloudContext } from './PointCloudContext';
-import { cAnnotation, cTool } from '@labelbee/lb-annotation';
-import {
-  synchronizeBackView,
-  synchronizeSideView,
-  TopPointCloudPolygonOperation,
-} from './PointCloudTopView';
-import { pointCloudMain } from './PointCloud3DView';
+import { PointCloudContext, useRotate } from './PointCloudContext';
+import { cTool } from '@labelbee/lb-annotation';
 import { message } from 'antd';
 
 const { EPolygonPattern } = cTool;
-const { ERotateDirection } = cAnnotation;
 
 const PointCloudListener = () => {
-  const ptx = useContext(PointCloudContext);
+  const ptCtx = useContext(PointCloudContext);
+  const { updateRotate } = useRotate();
 
   useEffect(() => {
-    const { selectedID, pointCloudBoxList, setPointCloudResult } = ptx;
+    const { topViewInstance } = ptCtx;
+    if (!topViewInstance) {
+      return;
+    }
 
-    const updateRotate = (angle: number) => {
-      const selectedPointCloudBox = pointCloudBoxList.find((v) => v.id === selectedID);
-
-      if (!selectedPointCloudBox) {
-        return;
-      }
-
-      selectedPointCloudBox.rotation =
-        selectedPointCloudBox.rotation + Number(Math.PI * angle) / 180;
-
-      const newPointCloudBoxList = [...pointCloudBoxList].map((v) => {
-        if (v.id === selectedID) {
-          return selectedPointCloudBox;
-        }
-        return v;
-      });
-
-      setPointCloudResult(newPointCloudBoxList);
-      TopPointCloudPolygonOperation.rotatePolygon(angle, ERotateDirection.Anticlockwise);
-      const selectedPolygon = TopPointCloudPolygonOperation.selectedPolygon;
-
-      pointCloudMain.generateBox(selectedPointCloudBox, selectedPolygon.id);
-      pointCloudMain.hightLightOriginPointCloud(selectedPointCloudBox);
-      synchronizeSideView(selectedPointCloudBox, selectedPolygon);
-      synchronizeBackView(selectedPointCloudBox, selectedPolygon);
-      pointCloudMain.render();
-    };
+    const { pointCloud2dOpeartion: TopPointCloudPolygonOperation } = topViewInstance;
 
     const onKeyDown = (e: KeyboardEvent) => {
       switch (e.keyCode) {
@@ -98,7 +69,7 @@ const PointCloudListener = () => {
     return () => {
       window.removeEventListener('keydown', onKeyDown);
     };
-  }, [ptx]);
+  }, [ptCtx]);
 
   return null;
 };

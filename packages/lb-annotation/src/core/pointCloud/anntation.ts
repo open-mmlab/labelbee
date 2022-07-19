@@ -46,7 +46,6 @@ export class PointCloudAnnotation implements IPointCloudAnnotationOperation {
       far: -100,
     };
 
-
     const imgSrc = CreateEmptyImage(size);
 
     const image = new Image();

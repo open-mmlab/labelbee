@@ -8,7 +8,7 @@ interface ICanvasBasicOperation {
   createCanvas(canvas: HTMLCanvasElement): HTMLCanvasElement;
   destroyCanvas(id: string): HTMLElement | null;
 
-  switchOrder?: (key: string) => void; // 
+  switchOrder?: (key: string) => void;
 }
 
 interface ICavnasSchdulerProps {
