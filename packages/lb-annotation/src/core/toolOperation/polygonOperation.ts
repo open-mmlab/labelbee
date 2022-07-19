@@ -665,14 +665,18 @@ class PolygonOperation extends BasicToolOperation {
 
   public onTabKeyDown(e: KeyboardEvent) {
     e.preventDefault();
-    if (this.drawingPointList.length > 0) {
-      // 如果正在编辑则不允许使用 Tab 切换
-      return;
-    }
-
     let sort = ESortDirection.ascend;
     if (e.shiftKey) {
       sort = ESortDirection.descend;
+    }
+
+    this.switchToNextPolygon(sort);
+  }
+
+  public switchToNextPolygon(sort: ESortDirection) {
+    if (this.drawingPointList.length > 0) {
+      // 如果正在编辑则不允许使用 Tab 切换
+      return;
     }
 
     const [showingResult, selectedResult] = CommonToolUtils.getRenderResultList<IPolygonData>(

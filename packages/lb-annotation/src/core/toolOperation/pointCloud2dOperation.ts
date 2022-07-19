@@ -126,17 +126,10 @@ class PointCloud2dOperation extends PolygonOperation {
    * Filter the polygon by Pattern
    * @override
    * */
-  public onTabKeyDown(e: KeyboardEvent) {
-    e.preventDefault();
-
+  public switchToNextPolygon(sort: ESortDirection = ESortDirection.ascend) {
     // If it is in drawing, return;
     if (this.drawingPointList.length > 0) {
       return;
-    }
-
-    let sort = ESortDirection.ascend;
-    if (e.shiftKey) {
-      sort = ESortDirection.descend;
     }
 
     // Compared to the original filtering of patterns
