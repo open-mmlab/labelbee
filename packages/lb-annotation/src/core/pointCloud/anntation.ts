@@ -10,6 +10,7 @@ import { CanvasSchduler } from '@/newCore';
 import { IPolygonData } from '@/types/tool/polygon';
 import { PointCloud } from '.';
 import PointCloud2dOperation from '../toolOperation/pointCloud2dOperation';
+import { IPolygonData } from '@/types/tool/polygon';
 
 interface IPointCloudAnnotationOperation {
   updateData: (pcdPath: string, result: string) => void;
