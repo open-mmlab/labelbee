@@ -4,6 +4,8 @@
  * @author Ron <ron.f.luo@gmail.com>
  */
 
+import { IPointCloudBox } from './types/pointCloud';
+
 class PointCloudUtils {
   public static genColorByCoord(x: number, y: number, z: number) {
     if (z <= 0) {
@@ -24,6 +26,29 @@ class PointCloudUtils {
   public static getStandardColorByCoord(x: number, y: number, z: number) {
     const pdColor = this.genColorByCoord(x, y, z);
     return pdColor.map((hex) => hex / 255);
+  }
+
+  /**
+   * TE
+   * @param content
+   * @param defaultValue
+   * @returns
+   */
+  public static jsonParser = (content: any) => {
+    try {
+      return JSON.parse(content);
+    } catch (e) {
+      return {};
+    }
+  };
+
+  public static getBoxParamsFromResultList(result: string): IPointCloudBox[] {
+    const data = this.jsonParser(result);
+
+    const DEFAULT_STEP = `step_1`;
+    const pointCloudDataList = data[DEFAULT_STEP].result;
+
+    return pointCloudDataList;
   }
 }
 

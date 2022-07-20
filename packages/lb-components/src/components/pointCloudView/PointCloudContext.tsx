@@ -3,7 +3,6 @@ import { PointCloud, PointCloudAnnotation, cAnnotation } from '@labelbee/lb-anno
 import React, { useCallback, useContext, useMemo, useState } from 'react';
 
 import { synchronizeBackView, synchronizeSideView } from './PointCloudTopView';
-import { pointCloudMain } from './PointCloud3DView';
 const { ERotateDirection, ESortDirection } = cAnnotation;
 
 export interface IPointCloudContext {
@@ -18,11 +17,13 @@ export interface IPointCloudContext {
   sideViewInstance?: PointCloudAnnotation;
   backViewInstance?: PointCloudAnnotation;
 
-  MainViewInstance?: PointCloud;
+  mainViewInstance?: PointCloud;
 
   setTopViewInstance: (instance: PointCloudAnnotation) => void;
   setSideViewInstance: (instance: PointCloudAnnotation) => void;
   setBackViewInstance: (instance: PointCloudAnnotation) => void;
+
+  setMainViewInstance: (instance: PointCloud) => void;
 }
 
 export const PointCloudContext = React.createContext<IPointCloudContext>({
@@ -35,6 +36,7 @@ export const PointCloudContext = React.createContext<IPointCloudContext>({
   setTopViewInstance: () => {},
   setSideViewInstance: () => {},
   setBackViewInstance: () => {},
+  setMainViewInstance: () => {},
 });
 
 export const PointCloudProvider: React.FC<{}> = ({ children }) => {
@@ -43,6 +45,7 @@ export const PointCloudProvider: React.FC<{}> = ({ children }) => {
   const [topViewInstance, setTopViewInstance] = useState<PointCloudAnnotation>();
   const [sideViewInstance, setSideViewInstance] = useState<PointCloudAnnotation>();
   const [backViewInstance, setBackViewInstance] = useState<PointCloudAnnotation>();
+  const [mainViewInstance, setMainViewInstance] = useState<PointCloud>();
 
   const ptCtx = useMemo(() => {
     const selectedPointCloudBox = pointCloudBoxList.find((v) => v.id === selectedID);
@@ -77,8 +80,17 @@ export const PointCloudProvider: React.FC<{}> = ({ children }) => {
       setSideViewInstance,
       backViewInstance,
       setBackViewInstance,
+      mainViewInstance,
+      setMainViewInstance,
     };
-  }, [selectedID, pointCloudBoxList, topViewInstance, sideViewInstance, backViewInstance]);
+  }, [
+    selectedID,
+    pointCloudBoxList,
+    topViewInstance,
+    sideViewInstance,
+    backViewInstance,
+    mainViewInstance,
+  ]);
 
   return <PointCloudContext.Provider value={ptCtx}>{children}</PointCloudContext.Provider>;
 };
@@ -92,8 +104,14 @@ export const useRotate = () => {
 
   const updateRotate = useCallback(
     (angle: number) => {
-      const { selectedID, pointCloudBoxList, setPointCloudResult, topViewInstance } = ptCtx;
-      if (!topViewInstance) {
+      const {
+        selectedID,
+        pointCloudBoxList,
+        setPointCloudResult,
+        topViewInstance,
+        mainViewInstance,
+      } = ptCtx;
+      if (!topViewInstance || !mainViewInstance) {
         return;
       }
 
@@ -119,11 +137,11 @@ export const useRotate = () => {
       TopPointCloudPolygonOperation.rotatePolygon(angle, ERotateDirection.Anticlockwise);
       const selectedPolygon = TopPointCloudPolygonOperation.selectedPolygon;
 
-      pointCloudMain.generateBox(selectedPointCloudBox, selectedPolygon.id);
-      pointCloudMain.hightLightOriginPointCloud(selectedPointCloudBox);
+      mainViewInstance.generateBox(selectedPointCloudBox, selectedPolygon.id);
+      mainViewInstance.hightLightOriginPointCloud(selectedPointCloudBox);
       synchronizeSideView(selectedPointCloudBox, selectedPolygon, ptCtx.sideViewInstance);
       synchronizeBackView(selectedPointCloudBox, selectedPolygon, ptCtx.backViewInstance);
-      pointCloudMain.render();
+      mainViewInstance.render();
     },
     [ptCtx.selectedID, ptCtx.pointCloudBoxList, ptCtx.setPointCloudResult, ptCtx.topViewInstance],
   );

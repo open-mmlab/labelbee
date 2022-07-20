@@ -18,11 +18,12 @@ import {
 } from '@labelbee/lb-annotation';
 import { EPerspectiveView, IPointCloudBox } from '@labelbee/lb-utils';
 import React, { useEffect, useRef, useState } from 'react';
-import { pointCloudMain } from './PointCloud3DView';
 import { PointCloudContext, useRotate, useNextOne } from './PointCloudContext';
 import { PointCloudContainer } from './PointCloudLayout';
 import { BoxInfos } from './PointCloudInfos';
 import { Slider } from 'antd';
+import { aMapStateToProps, IAnnotationStateProps } from '@/store/annotation/map';
+import { connect } from 'react-redux';
 
 const { EPolygonPattern } = cTool;
 const { ESortDirection } = cAnnotation;
@@ -196,15 +197,16 @@ export const synchronizeTopView = (
   newBoxParams: IPointCloudBox,
   newPolygon: any,
   topViewInstance?: PointCloudAnnotation,
+  mainViewInstance?: PointCloud,
 ) => {
-  if (!topViewInstance) {
+  if (!topViewInstance || !mainViewInstance) {
     return;
   }
 
   // Control the 3Dview data to create box
-  pointCloudMain.generateBox(newBoxParams, newPolygon.id);
-  pointCloudMain.updateCameraByBox(newBoxParams, EPerspectiveView.Top);
-  pointCloudMain.render();
+  mainViewInstance.generateBox(newBoxParams, newPolygon.id);
+  mainViewInstance.updateCameraByBox(newBoxParams, EPerspectiveView.Top);
+  mainViewInstance.render();
 
   const { pointCloud2dOpeartion, pointCloudInstance } = topViewInstance;
 
@@ -291,7 +293,7 @@ const ZAxisSlider = ({
   );
 };
 
-const PointCloudTopView = () => {
+const PointCloudTopView: React.FC<IAnnotationStateProps> = ({ currentData }) => {
   const ref = useRef<HTMLDivElement>(null);
   const ptCtx = React.useContext(PointCloudContext);
   const pointCloudRef = useRef<PointCloud | null>();
@@ -300,9 +302,9 @@ const PointCloudTopView = () => {
   const [zAxisLimit, setZAxisLimit] = useState<number>(10);
 
   const mainViewGenBox = (boxParams: IPointCloudBox, polygonID: string) => {
-    pointCloudMain.generateBox(boxParams, polygonID);
-    pointCloudMain.controls.update();
-    pointCloudMain.render();
+    ptCtx.mainViewInstance?.generateBox(boxParams, polygonID);
+    ptCtx.mainViewInstance?.controls.update();
+    ptCtx.mainViewInstance?.render();
   };
 
   const topViewPolygon2PointCloud = (
@@ -366,17 +368,30 @@ const PointCloudTopView = () => {
   };
 
   useEffect(() => {
-    if (ref.current) {
+    if (ref.current && currentData?.url && currentData?.result) {
       const size = {
         width: ref.current.clientWidth,
         height: ref.current.clientHeight,
       };
 
+      if (ptCtx.topViewInstance) {
+        /**
+         * Listen to flip
+         * 1. Init
+         * 2. Reload PointCloud
+         * 3. Clear Polygon
+         */
+        ptCtx.topViewInstance.updateData(currentData.url, currentData.result);
+        return;
+      }
+
       const pointCloudAnnotaiton = new PointCloudAnnotation({
         container: ref.current,
         size,
-        pcdPath: 'http://10.53.25.142:8001/10837/1/total.pcd',
+        pcdPath: currentData.url,
       });
+      pointCloudAnnotaiton.addPolygonListOnTopView(currentData.result);
+
       ptCtx.setTopViewInstance(pointCloudAnnotaiton);
 
       const pointCloud = pointCloudAnnotaiton.pointCloudInstance;
@@ -411,7 +426,7 @@ const PointCloudTopView = () => {
 
       setSize(size);
     }
-  }, []);
+  }, [currentData]);
 
   useEffect(() => {
     if (!size || !ptCtx.topViewInstance || !ptCtx.sideViewInstance) {
@@ -427,7 +442,7 @@ const PointCloudTopView = () => {
       }
 
       const { boxParams } = afterPolygonCreated(polygon, TopViewPointCloud, size);
-      pointCloudMain.hightLightOriginPointCloud(boxParams);
+      ptCtx.mainViewInstance?.hightLightOriginPointCloud(boxParams);
       synchronizeSideView(boxParams, polygon, ptCtx.sideViewInstance);
       synchronizeBackView(boxParams, polygon, ptCtx.backViewInstance);
       // }
@@ -448,7 +463,7 @@ const PointCloudTopView = () => {
         return;
       }
 
-      pointCloudMain.hightLightOriginPointCloud(boxParams);
+      ptCtx.mainViewInstance?.hightLightOriginPointCloud(boxParams);
       synchronizeSideView(boxParams, polygon, ptCtx.sideViewInstance);
       synchronizeBackView(boxParams, polygon, ptCtx.backViewInstance);
     });
@@ -471,7 +486,7 @@ const PointCloudTopView = () => {
 
       synchronizeSideView(newBoxParams, newPolygon, ptCtx.sideViewInstance);
       synchronizeBackView(newBoxParams, newPolygon, ptCtx.backViewInstance);
-      pointCloudMain.hightLightOriginPointCloud(newBoxParams);
+      ptCtx.mainViewInstance?.hightLightOriginPointCloud(newBoxParams);
       ptCtx.updateSelectedPointCloud(newPolygon.id, newBoxParams);
     });
   }, [ptCtx, size]);
@@ -497,4 +512,4 @@ const PointCloudTopView = () => {
   );
 };
 
-export default PointCloudTopView;
+export default connect(aMapStateToProps)(PointCloudTopView);

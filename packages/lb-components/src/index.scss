@@ -1536,14 +1536,15 @@ $ptPrefix: #{$prefix}-point-cloud;
             &__left {
               background-position-y: -88px;
             }
-
-            &__right {
+            
+            &__back {
               background-position-y: -132px;
             }
 
-            &__back {
+            &__right {
               background-position-y: -176px;
             }
+            
 
             &__bottom {
               background-position-y: -220px;

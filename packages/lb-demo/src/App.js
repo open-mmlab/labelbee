@@ -8,7 +8,7 @@ import React, { useState } from 'react';
 import './App.css';
 import 'antd/dist/antd.css';
 import Annotation from './components/Annotation';
-import { fileList as mockFileList, getMockResult, videoList } from './mock/index';
+import { fileList as mockFileList, getMockResult, pointCloudList, videoList } from './mock/index';
 import { getStepList, getDependStepList } from './mock/taskConfig';
 import qs from 'qs';
 import { AnnotationView } from '@labelbee/lb-components';
@@ -21,14 +21,26 @@ const App = () => {
   const isSingleTool = !Array.isArray(tool);
   const stepList = isSingleTool ? getStepList(tool) : getDependStepList(tool);
   const currentIsVideo = StepUtils.currentToolIsVideo(1, stepList);
+  const currentIsPointCloud = StepUtils.currentToolIsPointCloud(1, stepList);
+  const getMockList = () => {
+    let srcList = mockFileList;
 
-  const [fileList] = useState(
-    (currentIsVideo ? videoList : mockFileList).map((url, i) => ({
+    if (currentIsVideo) {
+      srcList = videoList;
+    }
+
+    if (currentIsPointCloud) {
+      srcList = pointCloudList;
+    }
+
+    return srcList.map((url, i) => ({
       id: i + 1,
       url,
       result: isSingleTool ? getMockResult(tool) : '',
-    })),
-  );
+    }));
+  };
+
+  const [fileList] = useState(getMockList());
 
   // 参看工具的展示
   if (tool === 'annotationView') {

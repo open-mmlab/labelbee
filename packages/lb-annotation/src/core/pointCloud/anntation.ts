@@ -4,12 +4,16 @@
  * @author Ron <ron.f.luo@gmail.com>
  */
 
+import { PointCloudUtils } from '@labelbee/lb-utils';
 import { EPolygonPattern } from '@/constant/tool';
 import { CanvasSchduler } from '@/newCore';
+import { IPolygonData } from '@/types/tool/polygon';
 import { PointCloud } from '.';
 import PointCloud2dOperation from '../toolOperation/pointCloud2dOperation';
 
-interface IPointCloudAnnotationOperation {}
+interface IPointCloudAnnotationOperation {
+  updateData: (pcdPath: string, result: string) => void;
+}
 
 interface IPointCloudAnnotationProps {
   container: HTMLElement;
@@ -35,6 +39,8 @@ export class PointCloudAnnotation implements IPointCloudAnnotationOperation {
   public pointCloudInstance: PointCloud;
 
   public pointCloud2dOpeartion: PointCloud2dOperation;
+
+  public canvasSchuler: CanvasSchduler;
 
   constructor({ size, container, pcdPath }: IPointCloudAnnotationProps) {
     const defaultOrthographic = {
@@ -82,5 +88,36 @@ export class PointCloudAnnotation implements IPointCloudAnnotationOperation {
     // 3. Data record
     this.pointCloud2dOpeartion = polygonOperation;
     this.pointCloudInstance = pointCloud;
+    this.canvasSchuler = canvasSchuler;
+  }
+
+  public addPolygonListOnTopView(result: string) {
+    const pointCloudDataList = PointCloudUtils.getBoxParamsFromResultList(result);
+    const polygonList = pointCloudDataList.map((v) => {
+      const { polygon2d: pointList } = this.pointCloudInstance.getBoxTopPolygon2DCoordinate(v);
+      return {
+        id: v.id,
+        sourceID: '',
+        pointList,
+        isRect: true,
+      };
+    }) as IPolygonData[];
+
+    this.pointCloud2dOpeartion.setResult(polygonList);
+  }
+
+  /**
+   * Init or Update PointCloud Data
+   * @param pcdPath
+   * @param result
+   * @returns
+   */
+  public updateData(pcdPath: string, result: string) {
+    if (!this.pointCloud2dOpeartion || !this.pointCloudInstance) {
+      return;
+    }
+
+    this.pointCloudInstance.loadPCDFile(pcdPath);
+    this.addPolygonListOnTopView(result);
   }
 }

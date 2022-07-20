@@ -7,14 +7,14 @@
 
 import { getClassName } from '@/utils/dom';
 import { PointCloud } from '@labelbee/lb-annotation';
-import { EPerspectiveView, IPointCloudBox } from '@labelbee/lb-utils';
+import { EPerspectiveView, IPointCloudBox, PointCloudUtils } from '@labelbee/lb-utils';
 import classNames from 'classnames';
 import React, { useContext, useEffect, useMemo, useRef } from 'react';
 import { PointCloudContainer } from './PointCloudLayout';
 const pointCloudID = 'LABELBEE-POINTCLOUD';
 import { PointCloudContext } from './PointCloudContext';
-
-let pointCloudMain: any; // TODO
+import { aMapStateToProps, IAnnotationStateProps } from '@/store/annotation/map';
+import { connect } from 'react-redux';
 
 const PointCloud3DContext = React.createContext<{
   isActive: boolean;
@@ -61,7 +61,6 @@ const PointCloud3DSideBar = () => {
       <PointCloudViewIcon perspectiveView='Right' />
       <PointCloudViewIcon perspectiveView='LFT' />
       <PointCloudViewIcon perspectiveView='RBT' />
-      <PointCloudViewIcon perspectiveView='LFT' />
       <span
         onClick={() => {
           reset3DView();
@@ -72,9 +71,9 @@ const PointCloud3DSideBar = () => {
   );
 };
 
-const PointCloud3D = () => {
+const PointCloud3D: React.FC<IAnnotationStateProps> = ({ currentData }) => {
+  const ptCtx = useContext(PointCloudContext);
   const ref = useRef<HTMLDivElement>(null);
-  const pointCloudRef = useRef<PointCloud>();
   const { selectedID, pointCloudBoxList } = useContext(PointCloudContext);
 
   const hasSelectedBox = selectedID;
@@ -85,24 +84,43 @@ const PointCloud3D = () => {
       : undefined;
 
     if (box) {
-      pointCloudRef.current?.updateCameraByBox(box, perspectiveView);
+      ptCtx.mainViewInstance?.updateCameraByBox(box, perspectiveView);
     }
   };
 
   const reset3DView = () => {
-    pointCloudRef.current?.resetCamera();
+    ptCtx.mainViewInstance?.resetCamera();
   };
 
   useEffect(() => {
-    if (ref.current) {
-      pointCloudRef.current = new PointCloud({
-        container: ref.current,
-        backgroundColor: '#4c4c4c',
-      });
-      pointCloudRef.current.loadPCDFile('http://10.53.25.142:8001/10837/1/total.pcd');
-      pointCloudMain = pointCloudRef.current;
+    if (ref.current && currentData?.url) {
+      let pointCloud = ptCtx.mainViewInstance;
+      if (pointCloud) {
+        pointCloud.loadPCDFile(currentData.url);
+      } else {
+        pointCloud = new PointCloud({
+          container: ref.current,
+          backgroundColor: '#4c4c4c',
+        });
+        pointCloud.loadPCDFile(currentData.url);
+      }
+
+      if (currentData.result) {
+        const boxParamsList = PointCloudUtils.getBoxParamsFromResultList(currentData.result);
+
+        // Add Init Box
+        boxParamsList.forEach((v: IPointCloudBox) => {
+          pointCloud?.generateBox(v, v.id);
+        });
+
+        ptCtx.setPointCloudResult(boxParamsList);
+      }
+
+      pointCloud?.controls.update();
+      pointCloud?.render();
+      ptCtx.setMainViewInstance(pointCloud);
     }
-  }, []);
+  }, [currentData]);
 
   /**
    *  Observe selectedID and reset camera to target top-view
@@ -129,6 +147,4 @@ const PointCloud3D = () => {
   );
 };
 
-export default PointCloud3D;
-
-export { pointCloudMain };
+export default connect(aMapStateToProps)(PointCloud3D);

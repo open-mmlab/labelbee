@@ -10,7 +10,6 @@ import React, { useEffect, useRef, useState } from 'react';
 import { synchronizeBackView, synchronizeTopView } from './PointCloudTopView';
 import { EPerspectiveView, IPointCloudBox } from '@labelbee/lb-utils';
 import { PointCloudContext } from './PointCloudContext';
-import { pointCloudMain } from './PointCloud3DView';
 import { SizeInfoForView } from './PointCloudInfos';
 
 /**
@@ -124,7 +123,7 @@ const PointCloudSideView = () => {
     });
 
     pointCloud2dOpeartion.singleOn('updatePolygonByDrag', ({ newPolygon, originPolygon }: any) => {
-      if (!ptCtx.selectedPointCloudBox) {
+      if (!ptCtx.selectedPointCloudBox || !ptCtx.mainViewInstance) {
         return;
       }
 
@@ -174,9 +173,9 @@ const PointCloudSideView = () => {
       //   offsetCenterPoint.y,
       // );
 
-      synchronizeTopView(newBoxParams, newPolygon, ptCtx.topViewInstance);
+      synchronizeTopView(newBoxParams, newPolygon, ptCtx.topViewInstance, ptCtx.mainViewInstance);
       synchronizeBackView(newBoxParams, newPolygon, ptCtx.backViewInstance);
-      pointCloudMain.hightLightOriginPointCloud(newBoxParams);
+      ptCtx.mainViewInstance.hightLightOriginPointCloud(newBoxParams);
       ptCtx.updateSelectedPointCloud(newPolygon.id, newBoxParams);
     });
   }, [ptCtx, size]);

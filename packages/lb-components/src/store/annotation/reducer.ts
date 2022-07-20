@@ -100,12 +100,13 @@ export const LoadFileAndFileData =
   async (dispatch: any, getState: any) => {
     const { stepList, step } = getState().annotation;
     const currentIsVideo = StepUtils.currentToolIsVideo(step, stepList);
+    const currentIsPointCloud = StepUtils.currentToolIsPointCloud(step, stepList);
 
     SetAnnotationLoading(dispatch, true);
 
     dispatch(TryGetFileDataByAPI(nextIndex));
 
-    if (currentIsVideo) {
+    if (currentIsVideo || currentIsPointCloud) {
       dispatch(AfterVideoLoaded(nextIndex));
       return;
     }
@@ -340,7 +341,7 @@ export const annotationReducer = (
        * The roles of toolInstance and annotationEngine need to be clearly distinguished
        */
       if (!toolInstance) {
-        return state;
+        return { ...state, imgIndex: action.payload.nextIndex };
       }
 
       const currentStepInfo = StepUtils.getCurrentStepInfo(step, stepList);

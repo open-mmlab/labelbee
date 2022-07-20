@@ -19,8 +19,19 @@ import PointCloudTopView from './PointCloudTopView';
 import PointCloudSideView from './PointCloudSideView';
 import PointCloud2DView from './PointCloud2DView';
 import PointCloudListener from './PointCloudListener';
+import { AppState } from '@/store';
+import { connect } from 'react-redux';
+import { IFileItem } from '@/types/data';
 
-const PointCloudView = () => {
+interface IProps {
+  imgList: IFileItem[];
+}
+
+const PointCloudView: React.FC<IProps> = ({ imgList }) => {
+  if (imgList.length === 0) {
+    return null;
+  }
+
   return (
     <>
       <PointCloudListener />
@@ -44,4 +55,8 @@ const PointCloudView = () => {
   );
 };
 
-export default PointCloudView;
+const mapStateToProps = (state: AppState) => ({
+  imgList: state.annotation.imgList,
+});
+
+export default connect(mapStateToProps)(PointCloudView);
