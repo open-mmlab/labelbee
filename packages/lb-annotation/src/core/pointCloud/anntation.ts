@@ -22,7 +22,7 @@ interface IPointCloudAnnotationProps {
   pcdPath?: string;
 }
 
-const CreateEmptyImage = (size: { width: number; height: number }) => {
+const createEmptyImage = (size: { width: number; height: number }) => {
   const canvas = document.createElement('canvas');
   canvas.width = size.width;
   canvas.height = size.height;
@@ -52,7 +52,7 @@ export class PointCloudAnnotation implements IPointCloudAnnotationOperation {
       far: -100,
     };
 
-    const imgSrc = CreateEmptyImage(size);
+    const imgSrc = createEmptyImage(size);
 
     const image = new Image();
     image.src = imgSrc;

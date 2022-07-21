@@ -8,6 +8,7 @@
 
 import { ESortDirection } from '@/constant/annotation';
 import { EPolygonPattern } from '@/constant/tool';
+import { IPolygonPoint } from '@/types/tool/polygon';
 import AxisUtils from '@/utils/tool/AxisUtils';
 import CommonToolUtils from '@/utils/tool/CommonToolUtils';
 import DrawUtils from '@/utils/tool/DrawUtils';
@@ -47,10 +48,7 @@ class PointCloud2dOperation extends PolygonOperation {
 
         // Only the rectangle shows the direction.
         if (polygon.isRect === true) {
-          DrawUtils.drawLine(this.canvas, transformPointList[0], transformPointList[1], {
-            color: 'red',
-            thickness: 3,
-          });
+          this.renderRectPolygonDirection(transformPointList);
         }
       });
     }
@@ -82,13 +80,21 @@ class PointCloud2dOperation extends PolygonOperation {
 
         // Only the rectangle shows the direction.
         if (selectdPolygon.isRect === true) {
-          DrawUtils.drawLine(this.canvas, polygon[0], polygon[1], {
-            color: 'red',
-            thickness: 3,
-          });
+          this.renderRectPolygonDirection(polygon);
         }
       }
     }
+  }
+
+  public renderRectPolygonDirection(polygon: IPolygonPoint[]) {
+    if (polygon.length < 2) {
+      return;
+    }
+
+    DrawUtils.drawLine(this.canvas, polygon[0], polygon[1], {
+      color: 'red',
+      thickness: 3,
+    });
   }
 
   public get currentPolygonListByPattern() {

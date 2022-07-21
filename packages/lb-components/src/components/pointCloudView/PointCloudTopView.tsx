@@ -145,37 +145,37 @@ export const synchronizeBackView = (
   }
 
   const {
-    pointCloud2dOpeartion: BackPointCloudPolygonOperation,
-    pointCloudInstance: BackPointCloud,
+    pointCloud2dOpeartion: backPointCloudPolygonOperation,
+    pointCloudInstance: backPointCloud,
   } = BackViewInstance;
 
   /**
    * TEMPLATE - Will be deleted.
    * For confirming the location.
    */
-  BackPointCloud.generateBox(boxParams, newPolygon.id);
+  backPointCloud.generateBox(boxParams, newPolygon.id);
 
   // Create PointCloud
-  BackPointCloud.loadPCDFileByBox('http://10.53.25.142:8001/10837/1/total.pcd', boxParams);
-  const { cameraPositionVector } = BackPointCloud.updateOrthoCamera(
+  backPointCloud.loadPCDFileByBox('http://10.53.25.142:8001/10837/1/total.pcd', boxParams);
+  const { cameraPositionVector } = backPointCloud.updateOrthoCamera(
     boxParams,
     EPerspectiveView.Back,
   );
 
-  BackPointCloud.setInitCameraPosition(cameraPositionVector);
+  backPointCloud.setInitCameraPosition(cameraPositionVector);
 
   // Create Draw Polygon
-  const { polygon2d, zoom } = BackPointCloud.getBoxBackPolygon2DCoordinate(boxParams);
+  const { polygon2d, zoom } = backPointCloud.getBoxBackPolygon2DCoordinate(boxParams);
 
   // Synchronize SidePointCloud zoom with PointCloud2dOperation
-  BackPointCloud.camera.zoom = zoom;
-  BackPointCloud.camera.updateProjectionMatrix();
-  BackPointCloud.render();
+  backPointCloud.camera.zoom = zoom;
+  backPointCloud.camera.updateProjectionMatrix();
+  backPointCloud.render();
 
   // Update PolygonView to default zoom and currentPos.
-  BackPointCloudPolygonOperation.initPosition();
-  BackPointCloudPolygonOperation.zoomChangeOnCenter(zoom);
-  BackPointCloudPolygonOperation.setResultAndSelectedID(
+  backPointCloudPolygonOperation.initPosition();
+  backPointCloudPolygonOperation.zoomChangeOnCenter(zoom);
+  backPointCloudPolygonOperation.setResultAndSelectedID(
     [
       {
         id: newPolygon.id,

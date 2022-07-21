@@ -48,20 +48,20 @@ const updateBackViewByCanvas2D = (
   zoom: number,
   size: { width: number; height: number },
   selectedPointCloudBox: IPointCloudBox,
-  BackPointCloud: PointCloud,
+  backPointCloud: PointCloud,
 ) => {
   const { offsetX, offsetY } = TransferCanvas2WorldOffset(currentPos, size, zoom);
-  BackPointCloud.camera.zoom = zoom;
+  backPointCloud.camera.zoom = zoom;
   if (currentPos) {
     const cos = Math.cos(selectedPointCloudBox.rotation);
     const sin = Math.sin(selectedPointCloudBox.rotation);
     const offsetXX = offsetX * cos;
     const offsetXY = offsetX * sin;
-    const { x, y, z } = BackPointCloud.initCameraPosition;
-    BackPointCloud.camera.position.set(x + offsetXY, y - offsetXX, z + offsetY);
+    const { x, y, z } = backPointCloud.initCameraPosition;
+    backPointCloud.camera.position.set(x + offsetXY, y - offsetXX, z + offsetY);
   }
-  BackPointCloud.camera.updateProjectionMatrix();
-  BackPointCloud.render();
+  backPointCloud.camera.updateProjectionMatrix();
+  backPointCloud.render();
 };
 
 const PointCloudSideView = () => {
@@ -92,8 +92,8 @@ const PointCloudSideView = () => {
     }
 
     const {
-      pointCloud2dOpeartion: BackPointCloudPolygonOperation,
-      pointCloudInstance: BackPointCloud,
+      pointCloud2dOpeartion: backPointCloudPolygonOperation,
+      pointCloudInstance: backPointCloud,
     } = ptCtx.backViewInstance;
 
     /**
@@ -101,22 +101,22 @@ const PointCloudSideView = () => {
      *
      * Change Orthographic Camera size
      */
-    BackPointCloudPolygonOperation.singleOn('renderZoom', (zoom: number, currentPos: any) => {
+    backPointCloudPolygonOperation.singleOn('renderZoom', (zoom: number, currentPos: any) => {
       if (!ptCtx.selectedPointCloudBox) {
         return;
       }
-      updateBackViewByCanvas2D(currentPos, zoom, size, ptCtx.selectedPointCloudBox, BackPointCloud);
+      updateBackViewByCanvas2D(currentPos, zoom, size, ptCtx.selectedPointCloudBox, backPointCloud);
     });
 
     // Synchronized 3d point cloud view displacement operations
-    BackPointCloudPolygonOperation.singleOn('dragMove', ({ currentPos, zoom }: any) => {
+    backPointCloudPolygonOperation.singleOn('dragMove', ({ currentPos, zoom }: any) => {
       if (!ptCtx.selectedPointCloudBox) {
         return;
       }
-      updateBackViewByCanvas2D(currentPos, zoom, size, ptCtx.selectedPointCloudBox, BackPointCloud);
+      updateBackViewByCanvas2D(currentPos, zoom, size, ptCtx.selectedPointCloudBox, backPointCloud);
     });
 
-    BackPointCloudPolygonOperation.singleOn(
+    backPointCloudPolygonOperation.singleOn(
       'updatePolygonByDrag',
       ({ newPolygon, originPolygon }: any) => {
         if (!ptCtx.selectedPointCloudBox || !ptCtx.mainViewInstance) {
@@ -156,7 +156,7 @@ const PointCloudSideView = () => {
         const oldWidth = MathUtils.getLineLength(op2, op3);
         const offsetWidth = width - oldWidth; // 3D width
 
-        const { newBoxParams } = BackPointCloud.getNewBoxByBackUpdate(
+        const { newBoxParams } = backPointCloud.getNewBoxByBackUpdate(
           offsetCenterPoint,
           offsetWidth,
           offsetHeight,
