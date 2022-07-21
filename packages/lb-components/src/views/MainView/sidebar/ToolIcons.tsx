@@ -16,6 +16,7 @@ import PolygonSvg from '@/assets/annotation/polygonTool/icon_polygon.svg';
 import rectSvg from '@/assets/annotation/rectTool/icon_rect.svg';
 import rectASvg from '@/assets/annotation/rectTool/icon_rect_a.svg';
 import { cTool } from '@labelbee/lb-annotation';
+import classnames from 'classnames';
 
 const { EPointCloudName, TOOL_NAME } = cTool;
 
@@ -45,9 +46,11 @@ const toolList = [
 export const ToolIcons = ({
   toolName,
   selectedToolName,
+  onChange,
 }: {
   toolName: string;
   selectedToolName?: string;
+  onChange: (toolName: EToolName) => void;
 }) => {
   const renderTools = toolList?.filter((item) => {
     if (toolName === (EPointCloudName.PointCloud as unknown as EToolName)) {
@@ -61,19 +64,28 @@ export const ToolIcons = ({
 
   return (
     <div className={`${sidebarCls}__level`}>
-      {renderTools.map((tool) => (
-        <span className={`${sidebarCls}__toolOption`} key={tool.toolName}>
-          <img
-            className={`${sidebarCls}__singleTool`}
-            src={
-              hasMultiTools && selectedToolName === tool.toolName
-                ? tool?.selectedSvg
-                : tool?.commonSvg
-            }
-          />
-          <span>{TOOL_NAME[tool.toolName]}</span>
-        </span>
-      ))}
+      {renderTools.map((tool) => {
+        const isSelected = hasMultiTools && selectedToolName === tool.toolName;
+        return (
+          <span
+            className={`${sidebarCls}__toolOption`}
+            key={tool.toolName}
+            onClick={() => onChange?.(tool.toolName)}
+          >
+            <img
+              className={`${sidebarCls}__singleTool`}
+              src={isSelected ? tool?.selectedSvg : tool?.commonSvg}
+            />
+            <span
+              className={classnames({
+                [`${sidebarCls}__toolOption__selected`]: isSelected,
+              })}
+            >
+              {TOOL_NAME[tool.toolName]}
+            </span>
+          </span>
+        );
+      })}
     </div>
   );
 };

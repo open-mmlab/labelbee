@@ -112,6 +112,10 @@ class PolygonOperation extends BasicToolOperation {
     return PolygonUtils.getPolygonByID(this.polygonList, this.selectedID);
   }
 
+  public get hoverPolygon() {
+    return this.polygonList.find((v) => v.id === this.hoverID && v.id !== this.selectedID);
+  }
+
   public get polygonListUnderZoom() {
     return this.polygonList.map((polygon) => ({
       ...polygon,
@@ -140,9 +144,8 @@ class PolygonOperation extends BasicToolOperation {
     return this.polygonList;
   }
 
-  // 更改当前标注模式
-  public setPattern(pattern: EPolygonPattern) {
-    if (this.drawingPointList?.length > 0) {
+  public setPattern(pattern: EPolygonPattern, isForce = false) {
+    if (this.drawingPointList?.length > 0 && isForce === true) {
       // 编辑中不允许直接跳出
       return;
     }
@@ -364,6 +367,10 @@ class PolygonOperation extends BasicToolOperation {
     this.setSelectedID(undefined);
   }
 
+  public clearDrawingStatus() {
+    this.drawingPointList = [];
+  }
+
   // SET DATA
   public setPolygonList(polygonList: IPolygonData[]) {
     const oldLen = this.polygonList.length;
@@ -541,7 +548,7 @@ class PolygonOperation extends BasicToolOperation {
       return;
     }
 
-    if (this.config.textConfigurable || this.config.poinCloudPattern) {
+    if (this.config.textConfigurable) {
       this.setSelectedID(newID);
     } else {
       this.setSelectedID();
@@ -658,14 +665,18 @@ class PolygonOperation extends BasicToolOperation {
 
   public onTabKeyDown(e: KeyboardEvent) {
     e.preventDefault();
-    if (this.drawingPointList.length > 0) {
-      // 如果正在编辑则不允许使用 Tab 切换
-      return;
-    }
-
     let sort = ESortDirection.ascend;
     if (e.shiftKey) {
       sort = ESortDirection.descend;
+    }
+
+    this.switchToNextPolygon(sort);
+  }
+
+  public switchToNextPolygon(sort: ESortDirection) {
+    if (this.drawingPointList.length > 0) {
+      // 如果正在编辑则不允许使用 Tab 切换
+      return;
     }
 
     const [showingResult, selectedResult] = CommonToolUtils.getRenderResultList<IPolygonData>(
@@ -1531,13 +1542,9 @@ class PolygonOperation extends BasicToolOperation {
     }
   }
 
-  public renderPolygon() {
-    // 1. 静态多边形
-    this.renderStaticPolygon();
-
-    // 2. hover 多边形
+  public renderHoverPolygon() {
     if (this.hoverID && this.hoverID !== this.editPolygonID) {
-      const hoverPolygon = this.polygonList.find((v) => v.id === this.hoverID && v.id !== this.selectedID);
+      const { hoverPolygon } = this;
       if (hoverPolygon) {
         let color = '';
         const toolColor = this.getColor(hoverPolygon.attribute);
@@ -1557,6 +1564,14 @@ class PolygonOperation extends BasicToolOperation {
         );
       }
     }
+  }
+
+  public renderPolygon() {
+    // 1. 静态多边形
+    this.renderStaticPolygon();
+
+    // 2. hover 多边形
+    this.renderHoverPolygon();
 
     // 3. 选中多边形的渲染
     this.renderSelectedPolygon();

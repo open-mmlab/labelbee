@@ -6,8 +6,13 @@
  * @author Ron <ron.f.luo@gmail.com>
  */
 
+import { ESortDirection } from '@/constant/annotation';
+import { EPolygonPattern } from '@/constant/tool';
+import { IPolygonPoint } from '@/types/tool/polygon';
 import AxisUtils from '@/utils/tool/AxisUtils';
+import CommonToolUtils from '@/utils/tool/CommonToolUtils';
 import DrawUtils from '@/utils/tool/DrawUtils';
+import PolygonUtils from '@/utils/tool/PolygonUtils';
 import StyleUtils from '@/utils/tool/StyleUtils';
 import PolygonOperation from './polygonOperation';
 
@@ -16,6 +21,10 @@ class PointCloud2dOperation extends PolygonOperation {
     return 'rgba(0, 255, 255, 0.5)';
   }
 
+  /**
+   * Add direction
+   * @override
+   * */
   public renderStaticPolygon() {
     if (this.isHidden === false) {
       this.polygonList?.forEach((polygon) => {
@@ -37,14 +46,18 @@ class PointCloud2dOperation extends PolygonOperation {
           lineType: this.config?.lineType,
         });
 
-        DrawUtils.drawLine(this.canvas, transformPointList[0], transformPointList[1], {
-          color: 'red',
-          thickness: 3,
-        });
+        // Only the rectangle shows the direction.
+        if (polygon.isRect === true) {
+          this.renderRectPolygonDirection(transformPointList);
+        }
       });
     }
   }
 
+  /**
+   * Update the show
+   * @override
+   * */
   public renderSelectedPolygon() {
     if (this.selectedID) {
       const selectdPolygon = this.selectedPolygon;
@@ -65,12 +78,90 @@ class PointCloud2dOperation extends PolygonOperation {
           lineType: this.config?.lineType,
         });
 
-        DrawUtils.drawLine(this.canvas, polygon[0], polygon[1], {
-          color: 'red',
-          thickness: 3,
-        });
+        // Only the rectangle shows the direction.
+        if (selectdPolygon.isRect === true) {
+          this.renderRectPolygonDirection(polygon);
+        }
       }
     }
+  }
+
+  public renderRectPolygonDirection(polygon: IPolygonPoint[]) {
+    if (polygon.length < 2) {
+      return;
+    }
+
+    DrawUtils.drawLine(this.canvas, polygon[0], polygon[1], {
+      color: 'red',
+      thickness: 3,
+    });
+  }
+
+  public get currentPolygonListByPattern() {
+    return this.polygonList.filter((v) => {
+      if (this.pattern === EPolygonPattern.Rect) {
+        return v.isRect === true;
+      }
+
+      if (this.pattern === EPolygonPattern.Normal) {
+        return v.isRect !== true;
+      }
+
+      return true;
+    });
+  }
+
+  /**
+   * Filter the polygon by Pattern
+   * @override
+   * */
+  public getHoverID(e: MouseEvent) {
+    const coordinate = this.getCoordinateUnderZoom(e);
+
+    // Key Point!
+    const currentPolygonList = this.currentPolygonListByPattern;
+
+    const polygonListWithZoom = currentPolygonList.map((polygon) => ({
+      ...polygon,
+      pointList: AxisUtils.changePointListByZoom(polygon.pointList, this.zoom),
+    }));
+    return PolygonUtils.getHoverPolygonID(coordinate, polygonListWithZoom, 10, this.config?.lineType);
+  }
+
+  /**
+   * Filter the polygon by Pattern
+   * @override
+   * */
+  public switchToNextPolygon(sort: ESortDirection = ESortDirection.ascend) {
+    // If it is in drawing, return;
+    if (this.drawingPointList.length > 0) {
+      return;
+    }
+
+    // Compared to the original filtering of patterns
+    const sortList = this.currentPolygonListByPattern.map((v) => ({
+      ...v,
+      x: v.pointList[0]?.x ?? 0, // Sort with the first point.
+      y: v.pointList[0]?.y ?? 0,
+    }));
+
+    const nextSelectedResult = CommonToolUtils.getNextSelectedRectID(sortList, sort, this.selectedID);
+    if (nextSelectedResult) {
+      this.setSelectedID(nextSelectedResult.id);
+    }
+    this.render();
+  }
+
+  /**
+   * Be selected after created.
+   * @override
+   */
+  public setSelectedIdAfterAddingDrawing(newID: string) {
+    if (this.drawingPointList.length === 0) {
+      return;
+    }
+
+    this.setSelectedID(newID);
   }
 }
 

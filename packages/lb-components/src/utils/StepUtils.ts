@@ -45,4 +45,16 @@ export default class StepUtils {
     const currentStepInfo = StepUtils.getCurrentStepInfo(step, stepList);
     return ToolUtils.isVideoTool(currentStepInfo?.tool);
   }
+
+
+  /**
+   * Check for PointCloud
+   * @param step 
+   * @param stepList 
+   * @returns 
+   */
+  public static currentToolIsPointCloud(step: number, stepList: IStepInfo[]) {
+    const currentStepInfo = StepUtils.getCurrentStepInfo(step, stepList);
+    return ToolUtils.isPointCloudTool(currentStepInfo?.tool);
+  }
 }

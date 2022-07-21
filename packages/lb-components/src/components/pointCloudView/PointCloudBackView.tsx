@@ -4,36 +4,14 @@
  * @LastEditors: Laoluo luozefeng@sensetime.com
  * @LastEditTime: 2022-07-08 11:08:02
  */
-import {
-  PointCloud2dOperation,
-  cTool,
-  CanvasSchduler,
-  PointCloud,
-  MathUtils,
-} from '@labelbee/lb-annotation';
+import { PointCloud, MathUtils, PointCloudAnnotation } from '@labelbee/lb-annotation';
 import { getClassName } from '@/utils/dom';
 import { PointCloudContainer } from './PointCloudLayout';
 import React, { useEffect, useRef, useState } from 'react';
 import { synchronizeSideView, synchronizeTopView } from './PointCloudTopView';
 import { PointCloudContext } from './PointCloudContext';
-import { pointCloudMain } from './PointCloud3DView';
 import { EPerspectiveView, IPointCloudBox } from '@labelbee/lb-utils';
 import { SizeInfoForView } from './PointCloudInfos';
-
-const { EPolygonPattern } = cTool;
-
-const CreateEmptyImage = (size: { width: number; height: number }) => {
-  const canvas = document.createElement('canvas');
-  canvas.width = size.width;
-  canvas.height = size.height;
-  const ctx = canvas.getContext('2d');
-  if (ctx) {
-    ctx.fillStyle = 'black';
-    ctx.fillRect(0, 0, size.width, size.height);
-    return canvas.toDataURL();
-  }
-  return '';
-};
 
 /**
  * 统一一下，将其拓展为 二维转换为 三维坐标的转换
@@ -65,28 +43,25 @@ const TransferCanvas2WorldOffset = (
     offsetY: -(worldCenterPoint.y - canvasCenterPoint.y) / zoom,
   };
 };
-
-let BackPointCloud: any;
-let BackPointCloudPolygonOperation: any;
-
 const updateBackViewByCanvas2D = (
   currentPos: { x: number; y: number },
   zoom: number,
   size: { width: number; height: number },
   selectedPointCloudBox: IPointCloudBox,
+  backPointCloud: PointCloud,
 ) => {
   const { offsetX, offsetY } = TransferCanvas2WorldOffset(currentPos, size, zoom);
-  BackPointCloud.camera.zoom = zoom;
+  backPointCloud.camera.zoom = zoom;
   if (currentPos) {
     const cos = Math.cos(selectedPointCloudBox.rotation);
     const sin = Math.sin(selectedPointCloudBox.rotation);
     const offsetXX = offsetX * cos;
     const offsetXY = offsetX * sin;
-    const { x, y, z } = BackPointCloud.initCameraPosition;
-    BackPointCloud.camera.position.set(x + offsetXY, y - offsetXX, z + offsetY);
+    const { x, y, z } = backPointCloud.initCameraPosition;
+    backPointCloud.camera.position.set(x + offsetXY, y - offsetXX, z + offsetY);
   }
-  BackPointCloud.camera.updateProjectionMatrix();
-  BackPointCloud.render();
+  backPointCloud.camera.updateProjectionMatrix();
+  backPointCloud.render();
 };
 
 const PointCloudSideView = () => {
@@ -101,77 +76,50 @@ const PointCloudSideView = () => {
         height: ref.current.clientHeight,
       };
 
-      const defaultOrthographic = {
-        left: -size.width / 2,
-        right: size.width / 2,
-        top: size.height / 2,
-        bottom: -size.height / 2,
-        near: 100,
-        far: -100,
-      };
-
-      const container = ref.current;
-      const imgSrc = CreateEmptyImage(size);
-
-      const image = new Image();
-      image.src = imgSrc;
-      image.onload = () => {
-        const canvasSchuler = new CanvasSchduler({ container });
-        const pointCloud = new PointCloud({
-          container,
-          noAppend: true,
-          isOrthographicCamera: true,
-          orthgraphicParams: defaultOrthographic,
-        });
-        BackPointCloud = pointCloud;
-        canvasSchuler.createCanvas(pointCloud.renderer.domElement);
-
-        const polygonOperation = new PointCloud2dOperation({
-          container: ref.current as HTMLDivElement,
-          size,
-          config: '{ "textConfigurable": false, "poinCloudPattern": true }',
-          imgNode: image,
-          isAppend: false,
-        });
-        polygonOperation.eventBinding();
-        polygonOperation.setPattern(EPolygonPattern.Rect);
-        BackPointCloudPolygonOperation = polygonOperation;
-
-        canvasSchuler.createCanvas(polygonOperation.canvas, { size });
-        setSize(size);
-      };
+      const pointCloudAnnotaiton = new PointCloudAnnotation({
+        container: ref.current,
+        size,
+      });
+      ptCtx.setBackViewInstance(pointCloudAnnotaiton);
+      setSize(size);
     }
   }, []);
 
   useEffect(() => {
-    if (!size) {
+    // By the way as an initialization judgment
+    if (!size || !ptCtx.backViewInstance) {
       return;
     }
+
+    const {
+      pointCloud2dOpeartion: backPointCloudPolygonOperation,
+      pointCloudInstance: backPointCloud,
+    } = ptCtx.backViewInstance;
 
     /**
      * Synchronized 3d point cloud view displacement operations
      *
      * Change Orthographic Camera size
      */
-    BackPointCloudPolygonOperation.singleOn('renderZoom', (zoom: number, currentPos: any) => {
+    backPointCloudPolygonOperation.singleOn('renderZoom', (zoom: number, currentPos: any) => {
       if (!ptCtx.selectedPointCloudBox) {
         return;
       }
-      updateBackViewByCanvas2D(currentPos, zoom, size, ptCtx.selectedPointCloudBox);
+      updateBackViewByCanvas2D(currentPos, zoom, size, ptCtx.selectedPointCloudBox, backPointCloud);
     });
 
     // Synchronized 3d point cloud view displacement operations
-    BackPointCloudPolygonOperation.singleOn('dragMove', ({ currentPos, zoom }: any) => {
+    backPointCloudPolygonOperation.singleOn('dragMove', ({ currentPos, zoom }: any) => {
       if (!ptCtx.selectedPointCloudBox) {
         return;
       }
-      updateBackViewByCanvas2D(currentPos, zoom, size, ptCtx.selectedPointCloudBox);
+      updateBackViewByCanvas2D(currentPos, zoom, size, ptCtx.selectedPointCloudBox, backPointCloud);
     });
 
-    BackPointCloudPolygonOperation.singleOn(
+    backPointCloudPolygonOperation.singleOn(
       'updatePolygonByDrag',
       ({ newPolygon, originPolygon }: any) => {
-        if (!ptCtx.selectedPointCloudBox) {
+        if (!ptCtx.selectedPointCloudBox || !ptCtx.mainViewInstance) {
           return;
         }
 
@@ -208,16 +156,16 @@ const PointCloudSideView = () => {
         const oldWidth = MathUtils.getLineLength(op2, op3);
         const offsetWidth = width - oldWidth; // 3D width
 
-        const { newBoxParams } = BackPointCloud.getNewBoxByBackUpdate(
+        const { newBoxParams } = backPointCloud.getNewBoxByBackUpdate(
           offsetCenterPoint,
           offsetWidth,
           offsetHeight,
           ptCtx.selectedPointCloudBox,
         );
 
-        synchronizeTopView(newBoxParams, newPolygon);
-        synchronizeSideView(newBoxParams, newPolygon);
-        pointCloudMain.hightLightOriginPointCloud(newBoxParams);
+        synchronizeTopView(newBoxParams, newPolygon, ptCtx.topViewInstance, ptCtx.mainViewInstance);
+        synchronizeSideView(newBoxParams, newPolygon, ptCtx.sideViewInstance);
+        ptCtx.mainViewInstance.hightLightOriginPointCloud(newBoxParams);
         ptCtx.updateSelectedPointCloud(newPolygon.id, newBoxParams);
       },
     );
@@ -235,5 +183,3 @@ const PointCloudSideView = () => {
 };
 
 export default PointCloudSideView;
-
-export { BackPointCloud, BackPointCloudPolygonOperation };

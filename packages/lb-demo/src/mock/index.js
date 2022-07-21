@@ -2,6 +2,7 @@ import img1 from './images/10.jpg';
 import img2 from './images/19.jpg';
 import img3 from './images/20.jpg';
 import img4 from './images/66.jpg';
+import { pointCloudResult1 } from './pointCloud';
 
 // const MOCK_URL = 'http://bee-sdk-demo.sensebee.xyz/images/';
 // export const fileList = ['10', '19', '20', '66'].map((i) => `${MOCK_URL}${i}.jpg`);
@@ -11,6 +12,29 @@ export const videoList = [
   'http://127.0.0.1:8080/d.mp4',
   'http://127.0.0.1:8080/c.mp4',
   'http://127.0.0.1:8080/e.mp4',
+];
+
+export const pointCloudList = [
+  'http://10.53.25.142:8001/10837/1/total.pcd',
+  'http://10.53.25.142:8001/10837/2/total.pcd',
+  'http://10.53.25.142:8001/10837/3/total.pcd',
+  'http://10.53.25.142:8001/10837/4/total.pcd',
+  'http://10.53.25.142:8001/10837/5/total.pcd',
+  'http://10.53.25.142:8001/10837/6/total.pcd',
+  'http://10.53.25.142:8001/10837/7/total.pcd',
+  'http://10.53.25.142:8001/10837/8/total.pcd',
+  'http://10.53.25.142:8001/10837/9/total.pcd',
+  'http://10.53.25.142:8001/10837/10/total.pcd',
+  'http://10.53.25.142:8001/10837/11/total.pcd',
+  'http://10.53.25.142:8001/10837/12/total.pcd',
+  'http://10.53.25.142:8001/10837/13/total.pcd',
+  'http://10.53.25.142:8001/10837/14/total.pcd',
+  'http://10.53.25.142:8001/10837/15/total.pcd',
+  'http://10.53.25.142:8001/10837/16/total.pcd',
+  'http://10.53.25.142:8001/10837/17/total.pcd',
+  'http://10.53.25.142:8001/10837/18/total.pcd',
+  'http://10.53.25.142:8001/10837/19/total.pcd',
+  'http://10.53.25.142:8001/10837/20/total.pcd',
 ];
 
 const data = Array(100)
@@ -85,6 +109,8 @@ export const videoTagDefaultResult = JSON.stringify({
   },
 });
 
+export const pointCloudResult = pointCloudResult1;
+
 export const getMockResult = (tool) => {
   if (tool === 'rectTool') {
     return rectDefaultResult;
@@ -99,6 +125,10 @@ export const getMockResult = (tool) => {
 
   if (tool === 'videoTagTool') {
     return videoTagDefaultResult;
+  }
+
+  if (tool === 'pointCloudTool') {
+    return pointCloudResult;
   }
 
   return '';
@@ -224,8 +254,7 @@ export const DEFAULT_ANNOTATIONS = [
       y: 23,
       textMaxWidth: 416,
       color: 'yellow',
-      text:
-        '标签1: 测试1LoooooooooooooooooooooooooooooooooogLoooooooooooooooooooooooooooooooooogLoooooooooooooooooooooooooooooooooogLoooooooooooooooooooooooooooooooooogLoooooooooooooooooooooooooooooooooog\n标签2: 测试2sdasdas\n\n\n标签1: 测试1asdasdasd\n标签2: 测试2标签1: 测试1\n标签2: 测试2sdasdas\n标签1: 测试1asdasdasd\n标签2: 测试2标签1: 测试1\n标签2: 测试2sdasdas\n标签1: 测试1asdasdasd\n标签2: 测试2标签1: 测试1\n标签2: 测试2sdasdas\n标签1: 测试1asdasdasd\n标签2: 测试2标签1: 测试1\n标签2: 测试2sdasdas\n标签1: 测试1asdasdasd\n标签2: 测试2标签1: 测试1\n标签2: 测试2sdasdas\n标签1: 测试1asdasdasd\n标签2: 测试2',
+      text: '标签1: 测试1LoooooooooooooooooooooooooooooooooogLoooooooooooooooooooooooooooooooooogLoooooooooooooooooooooooooooooooooogLoooooooooooooooooooooooooooooooooogLoooooooooooooooooooooooooooooooooog\n标签2: 测试2sdasdas\n\n\n标签1: 测试1asdasdasd\n标签2: 测试2标签1: 测试1\n标签2: 测试2sdasdas\n标签1: 测试1asdasdasd\n标签2: 测试2标签1: 测试1\n标签2: 测试2sdasdas\n标签1: 测试1asdasdasd\n标签2: 测试2标签1: 测试1\n标签2: 测试2sdasdas\n标签1: 测试1asdasdasd\n标签2: 测试2标签1: 测试1\n标签2: 测试2sdasdas\n标签1: 测试1asdasdasd\n标签2: 测试2标签1: 测试1\n标签2: 测试2sdasdas\n标签1: 测试1asdasdasd\n标签2: 测试2',
     },
   },
   {

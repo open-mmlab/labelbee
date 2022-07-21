@@ -60,7 +60,7 @@ export class PointCloud {
    */
   public zAxisLimit: number = 10;
 
-  private initCameraPosition = new THREE.Vector3(-1, 0, 10); // It will init when the camera positton be set
+  public initCameraPosition = new THREE.Vector3(-1, 0, 10); // It will init when the camera positton be set
 
   private container: HTMLElement;
 
@@ -493,6 +493,13 @@ export class PointCloud {
   };
 
   public loadPCDFile = (src: string, cb?: () => void) => {
+    const oldPointCloud: any = this.scene.getObjectByName(this.DEFAULT_POINTCLOUD);
+
+    // Remove old PointCLoud
+    if (oldPointCloud) {
+      oldPointCloud.removeFromParent();
+    }
+
     this.pcdLoader.load(src, (points: any) => {
       points.material.size = 1;
       points.name = this.DEFAULT_POINTCLOUD;

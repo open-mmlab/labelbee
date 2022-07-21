@@ -78,8 +78,8 @@ class PerspectiveShiftUtils {
     scale: number,
     volume: IVolume
   ): TMatrix4Tuple {
-    const offsetX = -volume.width / 2;
-    const offsetY = -volume.height / 2;
+    const offsetX = volume.width / 2;
+    const offsetY = volume.height / 2;
     const offsetZ = volume.depth / 2;
 
     return this.translationMatrix(
@@ -98,8 +98,8 @@ class PerspectiveShiftUtils {
     scale: number,
     volume: IVolume
   ): TMatrix4Tuple {
-    const offsetX = volume.width / 2;
-    const offsetY = volume.height / 2;
+    const offsetX = -volume.width / 2;
+    const offsetY = -volume.height / 2;
     const offsetZ = volume.depth / 2;
 
     return this.translationMatrix(

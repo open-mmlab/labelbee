@@ -12,124 +12,29 @@
  */
 
 import { getClassName } from '@/utils/dom';
-import React, { useEffect, useMemo, useState } from 'react';
-import PointCloud3DView, { pointCloudMain } from './PointCloud3DView';
+import React from 'react';
+import PointCloud3DView from './PointCloud3DView';
 import PointCloudBackView from './PointCloudBackView';
-import PointCloudTopView, {
-  synchronizeBackView,
-  synchronizeSideView,
-  TopPointCloudPolygonOperation,
-} from './PointCloudTopView';
+import PointCloudTopView from './PointCloudTopView';
 import PointCloudSideView from './PointCloudSideView';
 import PointCloud2DView from './PointCloud2DView';
-import { PointCloudContext } from './PointCloudContext';
-import { IPointCloudBoxList, IPointCloudBox } from '@labelbee/lb-utils';
-import { cAnnotation } from '@labelbee/lb-annotation';
-const { ERotateDirection } = cAnnotation;
+import PointCloudListener from './PointCloudListener';
+import { AppState } from '@/store';
+import { connect } from 'react-redux';
+import { IFileItem } from '@/types/data';
 
-const PointCloudView = () => {
-  const [pointCloudBoxList, setPointCloudResult] = useState<IPointCloudBoxList>([]);
-  const [selectedID, setSelectedID] = useState<string>('');
+interface IProps {
+  imgList: IFileItem[];
+}
 
-  useEffect(() => {
-    // TODO! It need to be optimize later;
-    const updateRotate = (angle: number) => {
-      const selectedPointCloudBox = pointCloudBoxList.find((v) => v.id === selectedID);
-
-      if (!selectedPointCloudBox) {
-        return;
-      }
-
-      selectedPointCloudBox.rotation =
-        selectedPointCloudBox.rotation + Number(Math.PI * angle) / 180;
-
-      const newPointCloudBoxList = [...pointCloudBoxList].map((v) => {
-        if (v.id === selectedID) {
-          return selectedPointCloudBox;
-        }
-        return v;
-      });
-
-      setPointCloudResult(newPointCloudBoxList);
-      TopPointCloudPolygonOperation.rotatePolygon(angle, ERotateDirection.Anticlockwise);
-      const selectedPolygon = TopPointCloudPolygonOperation.selectedPolygon;
-
-      pointCloudMain.generateBox(selectedPointCloudBox, selectedPolygon.id);
-      pointCloudMain.hightLightOriginPointCloud(selectedPointCloudBox);
-      synchronizeSideView(selectedPointCloudBox, selectedPolygon);
-      synchronizeBackView(selectedPointCloudBox, selectedPolygon);
-      pointCloudMain.render();
-    };
-
-    const onKeyDown = (e: KeyboardEvent) => {
-      switch (e.keyCode) {
-        case 81: {
-          // Q - anticlockwise
-          updateRotate(2);
-          break;
-        }
-
-        case 69:
-          // E - closewise
-          updateRotate(-2);
-
-          break;
-
-        case 71:
-          // G ， overturn 180
-          updateRotate(180);
-
-          break;
-
-        case 9:
-          // TAB
-
-          break;
-
-        default: {
-          return;
-        }
-      }
-    };
-
-    window.addEventListener('keydown', onKeyDown);
-
-    return () => {
-      window.removeEventListener('keydown', onKeyDown);
-    };
-  });
-
-  const addBox = (box: IPointCloudBox) => {
-    setPointCloudResult(pointCloudBoxList.concat(box));
-  };
-
-  const ptCtx = useMemo(() => {
-    const selectedPointCloudBox = pointCloudBoxList.find((v) => v.id === selectedID);
-
-    const updateSelectedPointCloud = (id: string, newPointCloudBox: IPointCloudBox) => {
-      const newPointCloudBoxList = [...pointCloudBoxList].map((v) => {
-        if (v.id === id) {
-          return newPointCloudBox;
-        }
-        return v;
-      });
-
-      setPointCloudResult(newPointCloudBoxList);
-    };
-
-    return {
-      pointCloudBoxList,
-      selectedID,
-      setPointCloudResult,
-      setSelectedID,
-      addBox,
-      selectedPointCloudBox,
-      updateSelectedPointCloud,
-    };
-  }, [selectedID, pointCloudBoxList]);
+const PointCloudView: React.FC<IProps> = ({ imgList }) => {
+  if (imgList.length === 0) {
+    return null;
+  }
 
   return (
-    <PointCloudContext.Provider value={ptCtx}>
+    <>
+      <PointCloudListener />
       <div className={getClassName('point-cloud-layout')}>
         <div className={getClassName('point-cloud-wrapper')}>
           <div className={getClassName('point-cloud-container', 'left')}>
@@ -146,8 +51,12 @@ const PointCloudView = () => {
           </div>
         </div>
       </div>
-    </PointCloudContext.Provider>
+    </>
   );
 };
 
-export default PointCloudView;
+const mapStateToProps = (state: AppState) => ({
+  imgList: state.annotation.imgList,
+});
+
+export default connect(mapStateToProps)(PointCloudView);
