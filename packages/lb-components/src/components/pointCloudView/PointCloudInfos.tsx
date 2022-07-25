@@ -101,3 +101,27 @@ export const BoxInfos = () => {
 
   return null;
 };
+
+export const PointCloudValidaty = () => {
+  const ptCtx = React.useContext(PointCloudContext);
+  console.log(ptCtx.valid);
+
+  if (ptCtx.valid === false) {
+    return (
+      <div
+        style={{
+          position: 'absolute',
+          backgroundColor: 'red',
+          left: 0,
+          top: 0,
+          fontSize: 24,
+          padding: 8,
+          zIndex: 20,
+        }}
+      >
+        无效
+      </div>
+    );
+  }
+  return null;
+};

@@ -9,9 +9,11 @@ export interface IPointCloudContext {
   pointCloudBoxList: IPointCloudBoxList;
   selectedID: string;
   setSelectedID: (id: string) => void;
+  valid: boolean;
   setPointCloudResult: (resultList: IPointCloudBoxList) => void;
   selectedPointCloudBox?: IPointCloudBox;
   updateSelectedPointCloud: (id: string, newBox: IPointCloudBox) => void;
+  setPointCloudValid: (valid?: boolean) => void;
 
   topViewInstance?: PointCloudAnnotation;
   sideViewInstance?: PointCloudAnnotation;
@@ -29,10 +31,11 @@ export interface IPointCloudContext {
 export const PointCloudContext = React.createContext<IPointCloudContext>({
   pointCloudBoxList: [],
   selectedID: '',
+  valid: true,
   setSelectedID: () => {},
   setPointCloudResult: () => {},
   updateSelectedPointCloud: () => {},
-
+  setPointCloudValid: () => {},
   setTopViewInstance: () => {},
   setSideViewInstance: () => {},
   setBackViewInstance: () => {},
@@ -42,6 +45,7 @@ export const PointCloudContext = React.createContext<IPointCloudContext>({
 export const PointCloudProvider: React.FC<{}> = ({ children }) => {
   const [pointCloudBoxList, setPointCloudResult] = useState<IPointCloudBoxList>([]);
   const [selectedID, setSelectedID] = useState<string>('');
+  const [valid, setValid] = useState<boolean>(true);
   const [topViewInstance, setTopViewInstance] = useState<PointCloudAnnotation>();
   const [sideViewInstance, setSideViewInstance] = useState<PointCloudAnnotation>();
   const [backViewInstance, setBackViewInstance] = useState<PointCloudAnnotation>();
@@ -65,14 +69,20 @@ export const PointCloudProvider: React.FC<{}> = ({ children }) => {
       setPointCloudResult(pointCloudBoxList.concat(box));
     };
 
+    const setPointCloudValid = (valid?: boolean) => {
+      setValid(valid === false ? false : true);
+    };
+
     return {
       pointCloudBoxList,
       selectedID,
       setPointCloudResult,
       setSelectedID,
       addBox,
+      valid,
       selectedPointCloudBox,
       updateSelectedPointCloud,
+      setPointCloudValid,
 
       topViewInstance,
       setTopViewInstance,
@@ -84,6 +94,7 @@ export const PointCloudProvider: React.FC<{}> = ({ children }) => {
       setMainViewInstance,
     };
   }, [
+    valid,
     selectedID,
     pointCloudBoxList,
     topViewInstance,

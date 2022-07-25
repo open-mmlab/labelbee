@@ -20,7 +20,7 @@ import { EPerspectiveView, IPointCloudBox } from '@labelbee/lb-utils';
 import React, { useEffect, useRef, useState } from 'react';
 import { PointCloudContext, useRotate, useNextOne } from './PointCloudContext';
 import { PointCloudContainer } from './PointCloudLayout';
-import { BoxInfos } from './PointCloudInfos';
+import { BoxInfos, PointCloudValidaty } from './PointCloudInfos';
 import { Slider } from 'antd';
 import { aMapStateToProps, IAnnotationStateProps } from '@/store/annotation/map';
 import { connect } from 'react-redux';
@@ -270,7 +270,7 @@ const TopViewToolbar = () => {
 };
 
 /**
- * Z-axis points filter
+ * Slider for filtering Z-axis points
  */
 const ZAxisSlider = ({
   setZAxisLimit,
@@ -507,6 +507,7 @@ const PointCloudTopView: React.FC<IAnnotationStateProps> = ({ currentData }) => 
         <div style={{ width: '100%', height: '100%' }} ref={ref} />
         <BoxInfos />
         <ZAxisSlider zAxisLimit={zAxisLimit} setZAxisLimit={setZAxisLimit} />
+        <PointCloudValidaty />
       </div>
     </PointCloudContainer>
   );

@@ -18,26 +18,26 @@ const PointCloudListener = () => {
     const { pointCloud2dOpeartion: TopPointCloudPolygonOperation } = topViewInstance;
 
     const onKeyDown = (e: KeyboardEvent) => {
-      switch (e.keyCode) {
-        case 81: {
+      switch (e.key.toLocaleLowerCase()) {
+        case 'q': {
           // Q - anticlockwise
           updateRotate(2);
           break;
         }
 
-        case 69:
+        case 'e':
           // E - closewise
           updateRotate(-2);
 
           break;
 
-        case 71:
+        case 'g':
           // G ， overturn 180
           updateRotate(180);
 
           break;
 
-        case 85:
+        case 'u':
           {
             // U , change TopOpereation Pattern
             const newPattern =
@@ -59,13 +59,17 @@ const PointCloudListener = () => {
           break;
 
         // +: Increase points size
-        case 187:
+        case '+':
           mainViewInstance?.updatePointSize(true);
           break;
 
         // -: Reduce points size
-        case 189:
+        case '-':
           mainViewInstance?.updatePointSize(false);
+          break;
+
+        case 'v':
+          ptCtx.setPointCloudValid(!ptCtx.valid);
           break;
 
         default: {
