@@ -34,7 +34,7 @@ const PointCloudViewIcon = ({
 }) => {
   const { isActive, setTarget3DView } = useContext(PointCloud3DContext);
 
-  const getTaget3DViewClassname = (position: string) => {
+  const getTarget3DViewClassName = (position: string) => {
     return classNames({
       [getClassName('point-cloud-3d-view', position)]: true,
       active: isActive,
@@ -46,7 +46,7 @@ const PointCloudViewIcon = ({
       onClick={() => {
         setTarget3DView(EPerspectiveView[perspectiveView]);
       }}
-      className={getTaget3DViewClassname(perspectiveView.toLocaleLowerCase())}
+      className={getTarget3DViewClassName(perspectiveView.toLocaleLowerCase())}
     />
   );
 };

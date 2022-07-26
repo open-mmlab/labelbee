@@ -90,13 +90,13 @@ const PointCloudSideView = () => {
       return;
     }
 
-    const { pointCloud2dOpeartion, pointCloudInstance } = ptCtx.sideViewInstance;
+    const { pointCloud2dOperation, pointCloudInstance } = ptCtx.sideViewInstance;
     /**
      * Synchronized 3d point cloud view displacement operations
      *
      * Change Orthographic Camera size
      */
-    pointCloud2dOpeartion.singleOn('renderZoom', (zoom: number, currentPos: any) => {
+    pointCloud2dOperation.singleOn('renderZoom', (zoom: number, currentPos: any) => {
       if (!ptCtx.selectedPointCloudBox) {
         return;
       }
@@ -110,7 +110,7 @@ const PointCloudSideView = () => {
     });
 
     // Synchronized 3d point cloud view displacement operations
-    pointCloud2dOpeartion.singleOn('dragMove', ({ currentPos, zoom }: any) => {
+    pointCloud2dOperation.singleOn('dragMove', ({ currentPos, zoom }: any) => {
       if (!ptCtx.selectedPointCloudBox) {
         return;
       }
@@ -123,7 +123,7 @@ const PointCloudSideView = () => {
       );
     });
 
-    pointCloud2dOpeartion.singleOn('updatePolygonByDrag', ({ newPolygon, originPolygon }: any) => {
+    pointCloud2dOperation.singleOn('updatePolygonByDrag', ({ newPolygon, originPolygon }: any) => {
       if (!ptCtx.selectedPointCloudBox || !ptCtx.mainViewInstance) {
         return;
       }

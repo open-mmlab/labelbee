@@ -152,7 +152,7 @@ export const useRotate = ({ currentData }: IAnnotationStateProps) => {
         return;
       }
 
-      const { pointCloud2dOpeartion: TopPointCloudPolygonOperation } = topViewInstance;
+      const { pointCloud2dOperation: TopPointCloudPolygonOperation } = topViewInstance;
 
       const selectedPointCloudBox = selectedBox?.info;
 
@@ -228,9 +228,9 @@ export const useSingleBox = () => {
         return;
       }
 
-      const { pointCloud2dOpeartion } = topViewInstance;
+      const { pointCloud2dOperation } = topViewInstance;
 
-      pointCloud2dOpeartion.switchToNextPolygon(sort);
+      pointCloud2dOperation.switchToNextPolygon(sort);
     },
     [topViewInstance],
   );

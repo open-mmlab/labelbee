@@ -5,4 +5,4 @@
  * @LastEditTime: 2022-06-22 15:29:37
  */
 
-export * from './CanvasSchduler';
+export * from './CanvasScheduler';

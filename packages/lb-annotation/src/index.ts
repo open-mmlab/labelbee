@@ -40,7 +40,7 @@ import DblClickEventListener from './utils/tool/DblClickEventListener'; // æš‚æ—
 import AnnotationEngine from './core';
 
 import { PointCloud } from './core/pointCloud';
-import { PointCloudAnnotation } from './core/pointCloud/anntation';
+import { PointCloudAnnotation } from './core/pointCloud/annotation';
 import UnitUtils from './utils/tool/UnitUtils';
 
 const toolUtils = CommonToolUtils;

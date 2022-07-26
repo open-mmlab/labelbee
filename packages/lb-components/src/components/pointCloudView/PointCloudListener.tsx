@@ -60,7 +60,7 @@ const PointCloudListener: React.FC<IAnnotationStateProps> = ({ currentData }) =>
       return;
     }
 
-    const { pointCloud2dOpeartion: TopPointCloudPolygonOperation } = topViewInstance;
+    const { pointCloud2dOperation: TopPointCloudPolygonOperation } = topViewInstance;
 
     switch (lowerCaseKey) {
       case 'q': {
