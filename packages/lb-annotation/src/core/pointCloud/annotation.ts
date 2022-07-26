@@ -120,4 +120,24 @@ export class PointCloudAnnotation implements IPointCloudAnnotationOperation {
     this.pointCloudInstance.loadPCDFile(pcdPath);
     this.addPolygonListOnTopView(result);
   }
+
+  /**
+   * Init All Position
+   * 1. PointCloud camera change to topView
+   * 2. Initial Polygon Position.
+   */
+  public initAllPosition() {
+    this.pointCloudInstance.updateTopCamera();
+    this.pointCloud2dOperation.initPosition();
+  }
+
+  /**
+   * Clear All Data
+   * 1. pointCloud Data
+   * 2. polygonOperation Data
+   */
+  public clearAllData() {
+    this.pointCloudInstance.clearPointCloudAndRender();
+    this.pointCloud2dOperation.clearResult();
+  }
 }

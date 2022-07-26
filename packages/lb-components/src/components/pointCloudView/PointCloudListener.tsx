@@ -141,8 +141,8 @@ const PointCloudListener: React.FC<IAnnotationStateProps> = ({ currentData }) =>
       pointCloud.updateTopCamera();
 
       // Clear other view data during initialization
-      ptCtx.sideViewInstance?.pointCloudInstance.clearPointCloud();
-      ptCtx.backViewInstance?.pointCloudInstance.clearPointCloud();
+      ptCtx.sideViewInstance?.clearAllData();
+      ptCtx.backViewInstance?.clearAllData();
     }
   }, [currentData, ptCtx.mainViewInstance]);
 
