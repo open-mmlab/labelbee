@@ -17,6 +17,11 @@ import StyleUtils from '@/utils/tool/StyleUtils';
 import PolygonOperation from './polygonOperation';
 
 class PointCloud2dOperation extends PolygonOperation {
+  /**
+   * remove default keydown event
+   */
+  public onKeyDown = () => {};
+
   public getLineColor() {
     return 'rgba(0, 255, 255, 0.5)';
   }

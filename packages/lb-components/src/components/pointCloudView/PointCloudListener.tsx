@@ -1,13 +1,15 @@
 import { useContext, useEffect } from 'react';
-import { PointCloudContext, useRotate } from './PointCloudContext';
-import { cTool } from '@labelbee/lb-annotation';
+import { PointCloudContext, useNextOne, useRotate } from './PointCloudContext';
+import { cTool, cAnnotation } from '@labelbee/lb-annotation';
 import { message } from 'antd';
+const { ESortDirection } = cAnnotation;
 
 const { EPolygonPattern } = cTool;
 
 const PointCloudListener = () => {
   const ptCtx = useContext(PointCloudContext);
   const { updateRotate } = useRotate();
+  const { switchToNextPolygon } = useNextOne();
 
   useEffect(() => {
     const { topViewInstance, mainViewInstance } = ptCtx;
@@ -70,6 +72,14 @@ const PointCloudListener = () => {
 
         case 'v':
           ptCtx.setPointCloudValid(!ptCtx.valid);
+          break;
+
+        case 'z':
+          switchToNextPolygon(ESortDirection.ascend);
+          break;
+
+        case 'c':
+          switchToNextPolygon(ESortDirection.descend);
           break;
 
         default: {
