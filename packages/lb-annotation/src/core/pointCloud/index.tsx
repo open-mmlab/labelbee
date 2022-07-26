@@ -36,7 +36,7 @@ interface IProps {
   container: HTMLElement;
   noAppend?: boolean; // temporary;
   isOrthographicCamera?: boolean;
-  orthgraphicParams?: IOrthographicCamera;
+  orthographicParams?: IOrthographicCamera;
   backgroundColor?: string;
 }
 
@@ -61,7 +61,7 @@ export class PointCloud {
    */
   public zAxisLimit: number = 10;
 
-  public initCameraPosition = new THREE.Vector3(-1, 0, 10); // It will init when the camera positton be set
+  public initCameraPosition = new THREE.Vector3(-1, 0, 10); // It will init when the camera position be set
 
   private container: HTMLElement;
 
@@ -77,21 +77,21 @@ export class PointCloud {
 
   private cacheInstance: PointCloudCache; // PointCloud Cache Map
 
-  constructor({ container, noAppend, isOrthographicCamera, orthgraphicParams, backgroundColor = 'black' }: IProps) {
+  constructor({ container, noAppend, isOrthographicCamera, orthographicParams, backgroundColor = 'black' }: IProps) {
     this.container = container;
     this.renderer = new THREE.WebGLRenderer({ antialias: true });
     this.backgroundColor = backgroundColor;
 
     // TODO
-    if (isOrthographicCamera && orthgraphicParams) {
+    if (isOrthographicCamera && orthographicParams) {
       this.isOrthographicCamera = true;
       this.camera = new THREE.OrthographicCamera(
-        orthgraphicParams.left,
-        orthgraphicParams.right,
-        orthgraphicParams.top,
-        orthgraphicParams.bottom,
-        orthgraphicParams.near,
-        orthgraphicParams.far,
+        orthographicParams.left,
+        orthographicParams.right,
+        orthographicParams.top,
+        orthographicParams.bottom,
+        orthographicParams.near,
+        orthographicParams.far,
       );
     } else {
       this.camera = new THREE.PerspectiveCamera(30, this.containerWidth / this.containerHeight, 1, 1000);
@@ -129,7 +129,7 @@ export class PointCloud {
   }
 
   public initCamera() {
-    // Camera setting must be setted before Control's initial.
+    // Camera setting must be set before Control's initial.
     const { camera } = this;
 
     // TODO
@@ -149,7 +149,7 @@ export class PointCloud {
     controls.addEventListener('change', () => {
       this.render();
     }); // use if there is no animation loop
-    controls.maxPolarAngle = Math.PI / 2; // Fobid orbit vertically over 90°
+    controls.maxPolarAngle = Math.PI / 2; // Forbid orbit vertically over 90°
 
     controls.update();
   }
@@ -183,8 +183,8 @@ export class PointCloud {
     const { center, width, height, depth, rotation } = boxParams;
     const group = new THREE.Group();
     const geometry = new THREE.BoxGeometry(width, height, depth);
-    const matarial = new THREE.MeshBasicMaterial({ color: 'blue' });
-    const cube = new THREE.Mesh(geometry, matarial);
+    const material = new THREE.MeshBasicMaterial({ color: 'blue' });
+    const cube = new THREE.Mesh(geometry, material);
     const box = new THREE.BoxHelper(cube, color);
     const arrow = this.generateBoxArrow(boxParams);
     const boxID = this.generateBoxID(boxParams);
@@ -206,7 +206,7 @@ export class PointCloud {
    * @param boxParams
    * @returns
    */
-  public getOrthograhicCamera(boxParams: IPointCloudBox) {
+  public getOrthographicCamera(boxParams: IPointCloudBox) {
     const { center, width, height } = boxParams;
     const offset = 10;
     const left = center.x - width / 2 - offset;
@@ -684,7 +684,7 @@ export class PointCloud {
 
   /**
    * The order of pointList is lt => lb => rb => rt
-   * The basic coordinate is top view(sensebee pointCloud topview coordinate)
+   * The basic coordinate is top view(senseBee pointCloud topView coordinate)
    * @param boxParams
    * @returns
    */
@@ -837,7 +837,7 @@ export class PointCloud {
       .premultiply(this.camera.projectionMatrix);
 
     const boxSideMatrix = new THREE.Matrix4()
-      .premultiply(this.getModelTransformationMatrix(boxParams)) // need to update everytimes
+      .premultiply(this.getModelTransformationMatrix(boxParams)) // need to update every times
       .premultiply(projectMatrix)
       .premultiply(this.basicCoordinate2CanvasMatrix4);
     this.sideMatrix = boxSideMatrix;
@@ -862,7 +862,7 @@ export class PointCloud {
     const polygon2d = vectorList
       .map((vector) => new THREE.Vector3(vector.x, vector.y, vector.z))
       // .map((vector) => vector.applyMatrix4(invertMatrix)); // Direct invertMatrix
-      // Model Transfomation
+      // Model Transformation
       .map((vector) => vector.applyMatrix4(this.getModelTransformationMatrix(boxParams)))
       // rotate coordinate
       .map((vector) => {

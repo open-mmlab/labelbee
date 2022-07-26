@@ -91,11 +91,11 @@ const PointCloudToolSidebar = () => {
   const onChange = (toolName: any) => {
     switch (toolName) {
       case EToolName.Rect:
-        ptCtx.topViewInstance?.pointCloud2dOpeartion.setPattern(EPolygonPattern.Rect);
+        ptCtx.topViewInstance?.pointCloud2dOperation.setPattern(EPolygonPattern.Rect);
 
         break;
       case EToolName.Polygon:
-        ptCtx.topViewInstance?.pointCloud2dOpeartion.setPattern(EPolygonPattern.Normal);
+        ptCtx.topViewInstance?.pointCloud2dOperation.setPattern(EPolygonPattern.Normal);
         break;
     }
   };

@@ -94,7 +94,7 @@ const PointCloudSideView = ({ currentData }: IAnnotationStateProps) => {
     }
 
     const {
-      pointCloud2dOpeartion: backPointCloudPolygonOperation,
+      pointCloud2dOperation: backPointCloudPolygonOperation,
       pointCloudInstance: backPointCloud,
     } = ptCtx.backViewInstance;
 

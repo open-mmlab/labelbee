@@ -90,7 +90,7 @@ export const synchronizeSideView = (
     return;
   }
 
-  const { pointCloud2dOpeartion, pointCloudInstance } = sideViewInstance;
+  const { pointCloud2dOperation, pointCloudInstance } = sideViewInstance;
 
   // Create PointCloud
   pointCloudInstance.loadPCDFileByBox(url, boxParams);
@@ -110,9 +110,9 @@ export const synchronizeSideView = (
   pointCloudInstance.render();
 
   // Update PolygonView to default zoom and currentPos.
-  pointCloud2dOpeartion.initPosition();
-  pointCloud2dOpeartion.zoomChangeOnCenter(zoom);
-  pointCloud2dOpeartion.setResultAndSelectedID(
+  pointCloud2dOperation.initPosition();
+  pointCloud2dOperation.zoomChangeOnCenter(zoom);
+  pointCloud2dOperation.setResultAndSelectedID(
     [
       {
         id: newPolygon.id,
@@ -140,7 +140,7 @@ export const synchronizeBackView = (
   }
 
   const {
-    pointCloud2dOpeartion: backPointCloudPolygonOperation,
+    pointCloud2dOperation: backPointCloudPolygonOperation,
     pointCloudInstance: backPointCloud,
   } = BackViewInstance;
 
@@ -197,11 +197,11 @@ export const synchronizeTopView = (
   mainViewInstance.updateCameraByBox(newBoxParams, EPerspectiveView.Top);
   mainViewInstance.render();
 
-  const { pointCloud2dOpeartion, pointCloudInstance } = topViewInstance;
+  const { pointCloud2dOperation, pointCloudInstance } = topViewInstance;
 
   const { polygon2d } = pointCloudInstance.getBoxTopPolygon2DCoordinate(newBoxParams);
 
-  const newPolygonList = [...pointCloud2dOpeartion.polygonList];
+  const newPolygonList = [...pointCloud2dOperation.polygonList];
   const oldPolygon = newPolygonList.find((v) => v.id === newPolygon.id);
   if (oldPolygon) {
     oldPolygon.pointList = polygon2d;
@@ -214,7 +214,7 @@ export const synchronizeTopView = (
     });
   }
 
-  pointCloud2dOpeartion.setResultAndSelectedID(newPolygonList, newPolygon.id);
+  pointCloud2dOperation.setResultAndSelectedID(newPolygonList, newPolygon.id);
 };
 
 const TopViewToolbar = ({ currentData }: IAnnotationStateProps) => {
@@ -384,7 +384,7 @@ const PointCloudTopView: React.FC<IAnnotationStateProps> = ({ currentData }) => 
       ptCtx.setTopViewInstance(pointCloudAnnotation);
 
       const pointCloud = pointCloudAnnotation.pointCloudInstance;
-      const polygonOperation = pointCloudAnnotation.pointCloud2dOpeartion;
+      const polygonOperation = pointCloudAnnotation.pointCloud2dOperation;
 
       pointCloudRef.current = pointCloud;
 
@@ -422,7 +422,7 @@ const PointCloudTopView: React.FC<IAnnotationStateProps> = ({ currentData }) => 
       return;
     }
 
-    const { pointCloud2dOpeartion: TopView2dOperation, pointCloudInstance: TopViewPointCloud } =
+    const { pointCloud2dOperation: TopView2dOperation, pointCloudInstance: TopViewPointCloud } =
       ptCtx.topViewInstance;
 
     TopView2dOperation.singleOn('polygonCreated', (polygon: any) => {
