@@ -15,7 +15,7 @@ import {
   I3DSpaceCoord,
   PointCloudUtils,
 } from '@labelbee/lb-utils';
-import { Shader } from 'three';
+import { PointsMaterial, Shader } from 'three';
 import { isInPolygon } from '@/utils/tool/polygonTool';
 import { IPolygonPoint } from '@/types/tool/polygon';
 import uuid from '@/utils/uuid';
@@ -478,7 +478,7 @@ export class PointCloud {
     varying float vVisible;
   ${shader.vertexShader}`.replace(
       `gl_PointSize = size;`,
-      `gl_PointSize = size * sizes;
+      `gl_PointSize = size;
       vVisible = visibility;
     `,
     );
@@ -1022,6 +1022,28 @@ export class PointCloud {
   public applyZAxisPoints = (zAxisLimit: number) => {
     this.zAxisLimit = zAxisLimit;
     this.filterZAxisPoints();
+    this.render();
+  };
+
+  /**
+   * Update point size
+   * @param zoomIn
+   */
+  public updatePointSize = (zoomIn: boolean) => {
+    const points = this.scene.getObjectByName(this.DEFAULT_POINTCLOUD) as { material: PointsMaterial } | undefined;
+
+    if (!points) {
+      return;
+    }
+
+    const preSize = points.material.size;
+
+    if (zoomIn) {
+      points.material.size = Math.min(preSize * 1.2, 10);
+    } else {
+      points.material.size = Math.max(preSize / 1.2, 1);
+    }
+
     this.render();
   };
 

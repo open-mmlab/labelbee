@@ -10,7 +10,7 @@ const PointCloudListener = () => {
   const { updateRotate } = useRotate();
 
   useEffect(() => {
-    const { topViewInstance } = ptCtx;
+    const { topViewInstance, mainViewInstance } = ptCtx;
     if (!topViewInstance) {
       return;
     }
@@ -56,6 +56,16 @@ const PointCloudListener = () => {
             TopPointCloudPolygonOperation.clearDrawingStatus();
           }
 
+          break;
+
+        // +: Increase points size
+        case 187:
+          mainViewInstance?.updatePointSize(true);
+          break;
+
+        // -: Reduce points size
+        case 189:
+          mainViewInstance?.updatePointSize(false);
           break;
 
         default: {
