@@ -532,6 +532,11 @@ export class PointCloud {
     }
   }
 
+  public clearPointCloudAndRender() {
+    this.clearPointCloud();
+    this.render();
+  }
+
   public loadPCDFile = async (src: string, cb?: () => void) => {
     this.clearPointCloud();
     const points = (await this.cacheInstance.loadPCDFile(src)) as THREE.Points;
