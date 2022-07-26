@@ -76,7 +76,8 @@ const TransferCanvas2World = (
 export const synchronizeSideView = (
   boxParams: IPointCloudBox,
   newPolygon: any,
-  sideViewInstance?: PointCloudAnnotation,
+  sideViewInstance: PointCloudAnnotation | undefined,
+  url: string,
 ) => {
   if (!sideViewInstance) {
     return;
@@ -84,14 +85,8 @@ export const synchronizeSideView = (
 
   const { pointCloud2dOpeartion, pointCloudInstance } = sideViewInstance;
 
-  /**
-   * TEMPLATE - Will be deleted.
-   * For confirming the location.
-   */
-  pointCloudInstance.generateBox(boxParams, newPolygon.id);
-
   // Create PointCloud
-  pointCloudInstance.loadPCDFileByBox('http://10.53.25.142:8001/10837/1/total.pcd', boxParams);
+  pointCloudInstance.loadPCDFileByBox(url, boxParams);
   const { cameraPositionVector } = pointCloudInstance.updateOrthoCamera(
     boxParams,
     EPerspectiveView.Left,
@@ -141,12 +136,6 @@ export const synchronizeBackView = (
     pointCloud2dOpeartion: backPointCloudPolygonOperation,
     pointCloudInstance: backPointCloud,
   } = BackViewInstance;
-
-  /**
-   * TEMPLATE - Will be deleted.
-   * For confirming the location.
-   */
-  backPointCloud.generateBox(boxParams, newPolygon.id);
 
   // Create PointCloud
   backPointCloud.loadPCDFileByBox('http://10.53.25.142:8001/10837/1/total.pcd', boxParams);
@@ -221,9 +210,10 @@ export const synchronizeTopView = (
   pointCloud2dOpeartion.setResultAndSelectedID(newPolygonList, newPolygon.id);
 };
 
-const TopViewToolbar = () => {
-  const { updateRotate } = useRotate();
+const TopViewToolbar = ({ currentData }: IAnnotationStateProps) => {
   const { selectNextBox, selectPrevBox } = useSingleBox();
+  const { updateRotate } = useRotate({ currentData });
+  const { switchToNextPolygon } = useNextOne();
   const ratio = 2;
 
   const clockwiseRotate = () => {
@@ -381,17 +371,17 @@ const PointCloudTopView: React.FC<IAnnotationStateProps> = ({ currentData }) => 
         return;
       }
 
-      const pointCloudAnnotaiton = new PointCloudAnnotation({
+      const pointCloudAnnotation = new PointCloudAnnotation({
         container: ref.current,
         size,
         pcdPath: currentData.url,
       });
-      pointCloudAnnotaiton.addPolygonListOnTopView(currentData.result);
+      pointCloudAnnotation.addPolygonListOnTopView(currentData.result);
 
-      ptCtx.setTopViewInstance(pointCloudAnnotaiton);
+      ptCtx.setTopViewInstance(pointCloudAnnotation);
 
-      const pointCloud = pointCloudAnnotaiton.pointCloudInstance;
-      const polygonOperation = pointCloudAnnotaiton.pointCloud2dOpeartion;
+      const pointCloud = pointCloudAnnotation.pointCloudInstance;
+      const polygonOperation = pointCloudAnnotation.pointCloud2dOpeartion;
 
       pointCloudRef.current = pointCloud;
 
@@ -433,13 +423,13 @@ const PointCloudTopView: React.FC<IAnnotationStateProps> = ({ currentData }) => 
       ptCtx.topViewInstance;
 
     TopView2dOperation.singleOn('polygonCreated', (polygon: any) => {
-      if (TopView2dOperation.pattern === EPolygonPattern.Normal) {
+      if (TopView2dOperation.pattern === EPolygonPattern.Normal || !currentData?.url) {
         return;
       }
 
       const { boxParams } = afterPolygonCreated(polygon, TopViewPointCloud, size);
       ptCtx.mainViewInstance?.hightLightOriginPointCloud(boxParams);
-      synchronizeSideView(boxParams, polygon, ptCtx.sideViewInstance);
+      synchronizeSideView(boxParams, polygon, ptCtx.sideViewInstance, currentData.url);
       synchronizeBackView(boxParams, polygon, ptCtx.backViewInstance);
       // }
     });
@@ -457,7 +447,7 @@ const PointCloudTopView: React.FC<IAnnotationStateProps> = ({ currentData }) => 
     });
 
     TopView2dOperation.singleOn('updatePolygonByDrag', ({ newPolygon }: any) => {
-      if (!ptCtx.selectedPointCloudBox) {
+      if (!ptCtx.selectedPointCloudBox || !currentData.url) {
         return;
       }
 
@@ -472,12 +462,12 @@ const PointCloudTopView: React.FC<IAnnotationStateProps> = ({ currentData }) => 
 
       mainViewGenBox(newBoxParams, newPolygon.id);
 
-      synchronizeSideView(newBoxParams, newPolygon, ptCtx.sideViewInstance);
+      synchronizeSideView(newBoxParams, newPolygon, ptCtx.sideViewInstance, currentData.url);
       synchronizeBackView(newBoxParams, newPolygon, ptCtx.backViewInstance);
       ptCtx.mainViewInstance?.hightLightOriginPointCloud(newBoxParams);
       updateSelectedBox(newBoxParams);
     });
-  }, [ptCtx, size]);
+  }, [ptCtx, size, currentData]);
 
   useEffect(() => {
     if (pointCloudRef.current) {
@@ -506,7 +496,7 @@ const PointCloudTopView: React.FC<IAnnotationStateProps> = ({ currentData }) => 
     }
 
     ptCtx.mainViewInstance?.hightLightOriginPointCloud(boxParams);
-    synchronizeSideView(boxParams, polygon, ptCtx.sideViewInstance);
+    synchronizeSideView(boxParams, polygon, ptCtx.sideViewInstance, currentData.url);
     synchronizeBackView(boxParams, polygon, ptCtx.backViewInstance);
   }, [ptCtx.selectedIDs]);
 
@@ -514,7 +504,7 @@ const PointCloudTopView: React.FC<IAnnotationStateProps> = ({ currentData }) => 
     <PointCloudContainer
       className={getClassName('point-cloud-container', 'top-view')}
       title='俯视图'
-      toolbar={<TopViewToolbar />}
+      toolbar={<TopViewToolbar currentData={currentData} />}
     >
       <div style={{ position: 'relative', flex: 1 }}>
         <div style={{ width: '100%', height: '100%' }} ref={ref} />

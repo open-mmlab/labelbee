@@ -5,6 +5,7 @@ import React, { useCallback, useContext, useMemo, useState } from 'react';
 import { synchronizeBackView, synchronizeSideView } from './PointCloudTopView';
 import _ from 'lodash';
 import { message } from 'antd';
+import { IAnnotationStateProps } from '@/store/annotation/map';
 const { ERotateDirection, ESortDirection } = cAnnotation;
 
 interface IPointCloudContextInstances {
@@ -140,7 +141,7 @@ export const PointCloudProvider: React.FC<{}> = ({ children }) => {
  * PointCloud Rotate Hook
  * @ret
  */
-export const useRotate = () => {
+export const useRotate = ({ currentData }: IAnnotationStateProps) => {
   const ptCtx = useContext(PointCloudContext);
   const { selectedBox, updateSelectedBox } = useSingleBox();
 
@@ -155,7 +156,7 @@ export const useRotate = () => {
 
       const selectedPointCloudBox = selectedBox?.info;
 
-      if (!selectedPointCloudBox) {
+      if (!selectedPointCloudBox || !currentData?.url) {
         return;
       }
 
@@ -168,11 +169,22 @@ export const useRotate = () => {
 
       mainViewInstance.generateBox(selectedPointCloudBox, selectedPolygon.id);
       mainViewInstance.hightLightOriginPointCloud(selectedPointCloudBox);
-      synchronizeSideView(selectedPointCloudBox, selectedPolygon, ptCtx.sideViewInstance);
+      synchronizeSideView(
+        selectedPointCloudBox,
+        selectedPolygon,
+        ptCtx.sideViewInstance,
+        currentData.url,
+      );
       synchronizeBackView(selectedPointCloudBox, selectedPolygon, ptCtx.backViewInstance);
       mainViewInstance.render();
     },
-    [ptCtx.selectedIDs, ptCtx.pointCloudBoxList, ptCtx.setPointCloudResult, ptCtx.topViewInstance],
+    [
+      ptCtx.selectedID,
+      ptCtx.pointCloudBoxList,
+      ptCtx.setPointCloudResult,
+      ptCtx.topViewInstance,
+      currentData,
+    ],
   );
 
   return { updateRotate };

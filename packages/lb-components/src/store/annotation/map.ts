@@ -19,5 +19,4 @@ export const aMapStateToProps = (state: AppState) => {
 
 export interface IAnnotationStateProps {
   currentData: IFileItem;
-
 }
