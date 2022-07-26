@@ -76,8 +76,8 @@ const PointCloudSideView = () => {
         height: ref.current.clientHeight,
       };
 
-      const pointCloudAnnotaiton = new PointCloudAnnotation({ container: ref.current, size });
-      ptCtx.setSideViewInstance(pointCloudAnnotaiton);
+      const pointCloudAnnotation = new PointCloudAnnotation({ container: ref.current, size });
+      ptCtx.setSideViewInstance(pointCloudAnnotation);
       setSize(size);
       // };
     }

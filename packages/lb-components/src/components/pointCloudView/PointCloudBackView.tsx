@@ -12,6 +12,8 @@ import { synchronizeSideView, synchronizeTopView } from './PointCloudTopView';
 import { PointCloudContext } from './PointCloudContext';
 import { EPerspectiveView, IPointCloudBox } from '@labelbee/lb-utils';
 import { SizeInfoForView } from './PointCloudInfos';
+import { connect } from 'react-redux';
+import { aMapStateToProps, IAnnotationStateProps } from '@/store/annotation/map';
 
 /**
  * 统一一下，将其拓展为 二维转换为 三维坐标的转换
@@ -64,7 +66,7 @@ const updateBackViewByCanvas2D = (
   backPointCloud.render();
 };
 
-const PointCloudSideView = () => {
+const PointCloudSideView = ({ currentData }: IAnnotationStateProps) => {
   const ptCtx = React.useContext(PointCloudContext);
   const [size, setSize] = useState<{ width: number; height: number } | null>(null);
   const ref = useRef<HTMLDivElement>(null);
@@ -76,11 +78,11 @@ const PointCloudSideView = () => {
         height: ref.current.clientHeight,
       };
 
-      const pointCloudAnnotaiton = new PointCloudAnnotation({
+      const pointCloudAnnotation = new PointCloudAnnotation({
         container: ref.current,
         size,
       });
-      ptCtx.setBackViewInstance(pointCloudAnnotaiton);
+      ptCtx.setBackViewInstance(pointCloudAnnotation);
       setSize(size);
     }
   }, []);
@@ -119,7 +121,7 @@ const PointCloudSideView = () => {
     backPointCloudPolygonOperation.singleOn(
       'updatePolygonByDrag',
       ({ newPolygon, originPolygon }: any) => {
-        if (!ptCtx.selectedPointCloudBox || !ptCtx.mainViewInstance) {
+        if (!ptCtx.selectedPointCloudBox || !ptCtx.mainViewInstance || !currentData.url) {
           return;
         }
 
@@ -164,7 +166,7 @@ const PointCloudSideView = () => {
         );
 
         synchronizeTopView(newBoxParams, newPolygon, ptCtx.topViewInstance, ptCtx.mainViewInstance);
-        synchronizeSideView(newBoxParams, newPolygon, ptCtx.sideViewInstance);
+        synchronizeSideView(newBoxParams, newPolygon, ptCtx.sideViewInstance, currentData.url);
         ptCtx.mainViewInstance.hightLightOriginPointCloud(newBoxParams);
         ptCtx.updateSelectedPointCloud(newPolygon.id, newBoxParams);
       },
@@ -182,4 +184,4 @@ const PointCloudSideView = () => {
   );
 };
 
-export default PointCloudSideView;
+export default connect(aMapStateToProps)(PointCloudSideView);

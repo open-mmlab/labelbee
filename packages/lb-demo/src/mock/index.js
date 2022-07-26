@@ -128,7 +128,8 @@ export const getMockResult = (tool) => {
   }
 
   if (tool === 'pointCloudTool') {
-    return pointCloudResult;
+    return '{}';
+    // return pointCloudResult;
   }
 
   return '';

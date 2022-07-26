@@ -3,6 +3,7 @@ import { PointCloud, PointCloudAnnotation, cAnnotation } from '@labelbee/lb-anno
 import React, { useCallback, useContext, useMemo, useState } from 'react';
 
 import { synchronizeBackView, synchronizeSideView } from './PointCloudTopView';
+import { IAnnotationStateProps } from '@/store/annotation/map';
 const { ERotateDirection, ESortDirection } = cAnnotation;
 
 export interface IPointCloudContext {
@@ -99,7 +100,7 @@ export const PointCloudProvider: React.FC<{}> = ({ children }) => {
  * PointCloud Rotate Hook
  * @returns
  */
-export const useRotate = () => {
+export const useRotate = ({ currentData }: IAnnotationStateProps) => {
   const ptCtx = useContext(PointCloudContext);
 
   const updateRotate = useCallback(
@@ -119,7 +120,7 @@ export const useRotate = () => {
 
       const selectedPointCloudBox = pointCloudBoxList.find((v) => v.id === selectedID);
 
-      if (!selectedPointCloudBox) {
+      if (!selectedPointCloudBox || !currentData?.url) {
         return;
       }
 
@@ -127,7 +128,7 @@ export const useRotate = () => {
         selectedPointCloudBox.rotation + Number(Math.PI * angle) / 180;
 
       const newPointCloudBoxList = [...pointCloudBoxList].map((v) => {
-        if (v.id === selectedID) {
+        if (v.id === selectedID || !currentData?.url) {
           return selectedPointCloudBox;
         }
         return v;
@@ -139,11 +140,22 @@ export const useRotate = () => {
 
       mainViewInstance.generateBox(selectedPointCloudBox, selectedPolygon.id);
       mainViewInstance.hightLightOriginPointCloud(selectedPointCloudBox);
-      synchronizeSideView(selectedPointCloudBox, selectedPolygon, ptCtx.sideViewInstance);
+      synchronizeSideView(
+        selectedPointCloudBox,
+        selectedPolygon,
+        ptCtx.sideViewInstance,
+        currentData.url,
+      );
       synchronizeBackView(selectedPointCloudBox, selectedPolygon, ptCtx.backViewInstance);
       mainViewInstance.render();
     },
-    [ptCtx.selectedID, ptCtx.pointCloudBoxList, ptCtx.setPointCloudResult, ptCtx.topViewInstance],
+    [
+      ptCtx.selectedID,
+      ptCtx.pointCloudBoxList,
+      ptCtx.setPointCloudResult,
+      ptCtx.topViewInstance,
+      currentData,
+    ],
   );
 
   return { updateRotate };

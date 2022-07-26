@@ -7,15 +7,15 @@
 
 import { getClassName } from '@/utils/dom';
 import { PointCloud } from '@labelbee/lb-annotation';
-import { EPerspectiveView, IPointCloudBox, PointCloudUtils } from '@labelbee/lb-utils';
+import { EPerspectiveView, IPointCloudBox } from '@labelbee/lb-utils';
 import classNames from 'classnames';
 import React, { useContext, useEffect, useMemo, useRef } from 'react';
 import { PointCloudContainer } from './PointCloudLayout';
-const pointCloudID = 'LABELBEE-POINTCLOUD';
 import { PointCloudContext } from './PointCloudContext';
 import { aMapStateToProps, IAnnotationStateProps } from '@/store/annotation/map';
 import { connect } from 'react-redux';
 
+const pointCloudID = 'LABELBEE-POINTCLOUD';
 const PointCloud3DContext = React.createContext<{
   isActive: boolean;
   setTarget3DView: (perspectiveView: EPerspectiveView) => void;
@@ -95,32 +95,16 @@ const PointCloud3D: React.FC<IAnnotationStateProps> = ({ currentData }) => {
   useEffect(() => {
     if (ref.current && currentData?.url) {
       let pointCloud = ptCtx.mainViewInstance;
-      if (pointCloud) {
-        pointCloud.loadPCDFile(currentData.url);
-      } else {
+      if (!pointCloud) {
         pointCloud = new PointCloud({
           container: ref.current,
           backgroundColor: '#4c4c4c',
         });
-        pointCloud.loadPCDFile(currentData.url);
       }
 
-      if (currentData.result) {
-        const boxParamsList = PointCloudUtils.getBoxParamsFromResultList(currentData.result);
-
-        // Add Init Box
-        boxParamsList.forEach((v: IPointCloudBox) => {
-          pointCloud?.generateBox(v, v.id);
-        });
-
-        ptCtx.setPointCloudResult(boxParamsList);
-      }
-
-      pointCloud?.controls.update();
-      pointCloud?.render();
       ptCtx.setMainViewInstance(pointCloud);
     }
-  }, [currentData]);
+  }, []);
 
   /**
    *  Observe selectedID and reset camera to target top-view
