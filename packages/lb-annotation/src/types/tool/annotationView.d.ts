@@ -36,6 +36,7 @@ declare interface IBasicRect extends IGraphicsBasicConfig {
   y: number;
   width: number;
   height: number;
+  hiddenRectSize?: boolean;
 }
 
 declare interface IBasicPoint extends IGraphicsBasicConfig {

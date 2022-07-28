@@ -11,10 +11,34 @@ import { AnnotationView } from '@labelbee/lb-components';
 
 const src = ''; // 可访问的图片路径
 
+const [data, setData] = useState(DEFAULT_ANNOTATIONS);
+
+const onChange = (type, ids) => {
+  if (type === 'hover') {
+    setData((pre) => {
+      return pre.map((item) => {
+        if (item.annotation.id === '1231999923999') {
+          const { annotation } = item;
+          return {
+            ...item,
+            annotation: {
+              ...annotation,
+              hiddenRectSize: !ids.includes('1231999923999'),
+            },
+          };
+        }
+        return item;
+      });
+    });
+  }
+};
+
+
 const DefaultComponent = () => {
   return (
     <AnnotationView
      src={src}
+     annotations={data}
    />
   )
 }
@@ -70,6 +94,7 @@ interface IBasicRect extends IGraphicsBasicConfig {
   y: number;
   width: number;
   height: number;
+  hiddenRectSize?: boolean;
 }
 
 interface IBasicPolygon extends IGraphicsBasicConfig {
