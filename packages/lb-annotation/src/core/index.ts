@@ -2,11 +2,11 @@
  * AnnotationEngine 标注引擎 - 各类标注工具管理
  */
 
-import { EToolName } from '@/constant/tool';
-import { getConfig, styleDefaultConfig } from '@/constant/defaultConfig';
-import { IPolygonData } from '@/types/tool/polygon';
 import { ELang } from '@/constant/annotation';
-import { ToolScheduler, THybridToolName, HybridToolUtils } from './scheduler';
+import { getConfig, styleDefaultConfig } from '@/constant/defaultConfig';
+import { EToolName } from '@/constant/tool';
+import { IPolygonData } from '@/types/tool/polygon';
+import { HybridToolUtils, THybridToolName, ToolScheduler } from './scheduler';
 
 interface IProps {
   container: HTMLElement;
@@ -250,5 +250,13 @@ export default class AnnotationEngine {
    */
   public get firstToolInstance() {
     return this.toolScheduler.getFirstToolOperation();
+  }
+  
+  /**
+   * 自定义样式渲染
+   * @param customRenderStyle
+   */
+  public setCustomRenderStyle(customRenderStyle: (data: IAnnotationStyle) => IAnnotationStyle) {
+    this.toolInstance.setCustomRenderStyle(customRenderStyle);
   }
 }

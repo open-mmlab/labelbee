@@ -1,15 +1,17 @@
-import { isNumber } from 'lodash';
+import { styleDefaultConfig } from '@/constant/defaultConfig';
+import { EToolName } from '@/constant/tool';
+import { IPolygonConfig, IPolygonData } from '@/types/tool/polygon';
+import MathUtils from '@/utils/MathUtils';
+import AxisUtils, { CoordinateUtils } from '@/utils/tool/AxisUtils';
 import CanvasUtils from '@/utils/tool/CanvasUtils';
 import CommonToolUtils from '@/utils/tool/CommonToolUtils';
-import MathUtils from '@/utils/MathUtils';
-import { styleDefaultConfig } from '@/constant/defaultConfig';
-import AxisUtils, { CoordinateUtils } from '@/utils/tool/AxisUtils';
-import { EToolName } from '@/constant/tool';
 import LineToolUtils from '@/utils/tool/LineToolUtils';
-import { IPolygonConfig, IPolygonData } from '@/types/tool/polygon';
+import { isNumber } from 'lodash';
 import { EDragStatus, EGrowthMode, ELang } from '../../constant/annotation';
 import EKeyCode from '../../constant/keyCode';
 import { BASE_ICON, COLORS_ARRAY } from '../../constant/style';
+import locale from '../../locales';
+import { EMessage } from '../../locales/constants';
 import ActionsHistory from '../../utils/ActionsHistory';
 import AttributeUtils from '../../utils/tool/AttributeUtils';
 import DblClickEventListener from '../../utils/tool/DblClickEventListener';
@@ -18,8 +20,6 @@ import ImgPosUtils from '../../utils/tool/ImgPosUtils';
 import RenderDomUtils from '../../utils/tool/RenderDomUtils';
 import ZoomUtils from '../../utils/tool/ZoomUtils';
 import EventListener from './eventListener';
-import locale from '../../locales';
-import { EMessage } from '../../locales/constants';
 
 interface IBasicToolOperationProps {
   container: HTMLElement;
@@ -130,6 +130,10 @@ class BasicToolOperation extends EventListener {
   public dataInjectionAtCreation?: TDataInjectionAtCreateion;
 
   public renderEnhance?: IRenderEnhance;
+
+  public customRenderStyle?: (
+    data: IRect | IPolygonData | IPoint | ILine | ITagResult | IBasicText,
+  ) => IAnnotationStyle;
 
   // 拖拽 - 私有变量
   private _firstClickCoordinate?: ICoordinate; // 存储第一次点击的坐标
@@ -1036,6 +1040,12 @@ class BasicToolOperation extends EventListener {
 
   public setRenderEnhance(renderEnhance: IRenderEnhance) {
     this.renderEnhance = renderEnhance;
+  }
+
+  public setCustomRenderStyle(
+    customRenderStyle: (data: IRect | IPolygonData | IPoint | ILine | ITagResult | IBasicText) => IAnnotationStyle,
+  ) {
+    this.customRenderStyle = customRenderStyle;
   }
 
   /**

@@ -9,6 +9,11 @@ declare interface IAnnotationStyle {
 }
 
 /**
+ * 标注数据格式
+ */
+declare type TAnnotationType = IRect | IPolygonData | IPoint | ILine | ITagResult | IBasicText;
+
+/**
  * 数据渲染增强
  */
 declare interface IRenderEnhance {
@@ -20,6 +25,6 @@ declare interface IRenderEnhance {
 /**
  * 创建时数据时的增强
  */
-declare type TDataInjectionAtCreateion = (data: IRect | IPolygon | IPoint | ILine | ITagResult | IBasicText) => {
+declare type TDataInjectionAtCreateion = (data: IRect | IPolygonData | IPoint | ILine | ITagResult | IBasicText) => {
   [a: string]: any;
 };
