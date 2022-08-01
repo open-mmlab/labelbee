@@ -38,6 +38,9 @@ interface IBasicToolOperationProps {
   showDefaultCursor?: boolean; // 默认会展示为 none
 
   forbidBasicResultRender?: boolean;
+
+  isAppend?: boolean; // 用于 canvas 层次的关闭
+  hiddenImg?: boolean; // 隐藏图片渲染
 }
 
 /**
@@ -151,6 +154,8 @@ class BasicToolOperation extends EventListener {
 
   private showDefaultCursor: boolean; // 是否展示默认的 cursor
 
+  private hiddenImg: boolean;
+
   public coordUtils: CoordinateUtils;
 
   constructor(props: IBasicToolOperationProps) {
@@ -159,7 +164,7 @@ class BasicToolOperation extends EventListener {
     this.showDefaultCursor = props.showDefaultCursor || false;
 
     this.destroyCanvas();
-    this.createCanvas(props.size);
+    this.createCanvas(props.size, props.isAppend);
     this.imgNode = props.imgNode;
     this.isImgError = !props.imgNode;
     this.basicImgInfo = {
@@ -219,6 +224,8 @@ class BasicToolOperation extends EventListener {
     this.dblClickListener = new DblClickEventListener(this.container, 200);
     this.coordUtils = new CoordinateUtils(this);
     this.coordUtils.setBasicImgInfo(this.basicImgInfo);
+
+    this.hiddenImg = props.hiddenImg || false;
   }
 
   public onContextmenu(e: MouseEvent) {
@@ -276,6 +283,10 @@ class BasicToolOperation extends EventListener {
     this.referenceData = referenceData;
   }
 
+  public setImgInfo(size: ISize) {
+    this.imgInfo = size;
+  }
+
   /**
    * 外界直接更改当前渲染位置
    * @param zoom
@@ -305,7 +316,8 @@ class BasicToolOperation extends EventListener {
 
   // 是否限制鼠标操作
   public get forbidMouseOperation() {
-    return this.forbidOperation || this.valid === false;
+    // return this.forbidOperation || this.valid === false;
+    return false;
   }
 
   public get pixelRatio() {
@@ -325,7 +337,7 @@ class BasicToolOperation extends EventListener {
     this.eventUnbinding();
   }
 
-  public createCanvas(size: ISize) {
+  public createCanvas(size: ISize, isAppend = true) {
     // TODO 后续需要将 canvas 抽离出来，迭代器叠加
     const basicCanvas = document.createElement('canvas');
     const pixel = this.pixelRatio;
@@ -351,12 +363,14 @@ class BasicToolOperation extends EventListener {
     canvas.width = size.width * pixel;
     canvas.height = size.height * pixel;
 
-    if (this.container.hasChildNodes()) {
-      this.container.insertBefore(canvas, this.container.childNodes[0]);
-      this.container.insertBefore(basicCanvas, this.container.childNodes[0]);
-    } else {
-      this.container.appendChild(basicCanvas);
-      this.container.appendChild(canvas);
+    if (isAppend) {
+      if (this.container.hasChildNodes()) {
+        this.container.insertBefore(canvas, this.container.childNodes[0]);
+        this.container.insertBefore(basicCanvas, this.container.childNodes[0]);
+      } else {
+        this.container.appendChild(basicCanvas);
+        this.container.appendChild(canvas);
+      }
     }
 
     this.canvas = canvas;
@@ -506,7 +520,7 @@ class BasicToolOperation extends EventListener {
     this.setCurrentPos(currentPos);
 
     this.currentPosStorage = currentPos;
-    this.imgInfo = imgInfo;
+    this.setImgInfo(imgInfo);
     this.setZoom(zoom);
 
     this.innerZoom = zoom;
@@ -515,7 +529,7 @@ class BasicToolOperation extends EventListener {
     this.renderBasicCanvas();
 
     this.emit('dependRender');
-    this.emit('renderZoom', zoom);
+    this.emit('renderZoom', zoom, currentPos, imgInfo);
   };
 
   /**
@@ -561,11 +575,12 @@ class BasicToolOperation extends EventListener {
         if (pos) {
           this.setCurrentPos(pos.currentPos);
           this.currentPosStorage = this.currentPos;
-          this.imgInfo = {
+          this.setImgInfo({
             ...imgInfo,
             width: (imgInfo.width / this.innerZoom) * pos.innerZoom,
             height: (imgInfo.height / this.innerZoom) * pos.innerZoom,
-          };
+          });
+
           this.innerZoom = pos.innerZoom;
 
           // 需要加载下更改当前的 imgInfo
@@ -718,7 +733,7 @@ class BasicToolOperation extends EventListener {
         this.emit('dependRender');
 
         // 拖拽信息触发
-        this.emit('dragMove', { currentPos, zoom: this.zoom });
+        this.emit('dragMove', { currentPos, zoom: this.zoom, imgInfo: this.imgInfo });
       }
 
       this.render();
@@ -901,9 +916,10 @@ class BasicToolOperation extends EventListener {
     this.setZoom(zoom);
     this.setCurrentPos(newCurrentPos);
     this.currentPosStorage = newCurrentPos;
-    this.imgInfo = imgInfo;
+    this.setImgInfo(imgInfo);
+
     zoomInfo.ratio = ratio;
-    this.emit('renderZoom', zoom, currentPos);
+    this.emit('renderZoom', zoom, newCurrentPos, imgInfo);
   };
 
   /**
@@ -929,7 +945,7 @@ class BasicToolOperation extends EventListener {
   }
 
   public drawImg = () => {
-    if (!this.imgNode) return;
+    if (!this.imgNode || this.hiddenImg === true) return;
 
     DrawUtils.drawImg(this.basicCanvas, this.imgNode, {
       zoom: this.zoom,
