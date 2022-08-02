@@ -20,7 +20,7 @@ import { EPerspectiveView, IPointCloudBox } from '@labelbee/lb-utils';
 import React, { useEffect, useRef, useState } from 'react';
 import { PointCloudContext, useRotate, useNextOne } from './PointCloudContext';
 import { PointCloudContainer } from './PointCloudLayout';
-import { BoxInfos, PointCloudValidaty } from './PointCloudInfos';
+import { BoxInfos, PointCloudValidity } from './PointCloudInfos';
 import { Slider } from 'antd';
 import { aMapStateToProps, IAnnotationStateProps } from '@/store/annotation/map';
 import { connect } from 'react-redux';
@@ -507,7 +507,7 @@ const PointCloudTopView: React.FC<IAnnotationStateProps> = ({ currentData }) => 
         <div style={{ width: '100%', height: '100%' }} ref={ref} />
         <BoxInfos />
         <ZAxisSlider zAxisLimit={zAxisLimit} setZAxisLimit={setZAxisLimit} />
-        <PointCloudValidaty />
+        <PointCloudValidity />
       </div>
     </PointCloudContainer>
   );

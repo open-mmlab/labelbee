@@ -3,6 +3,7 @@ import { PointCloud, PointCloudAnnotation, cAnnotation } from '@labelbee/lb-anno
 import React, { useCallback, useContext, useMemo, useState } from 'react';
 
 import { synchronizeBackView, synchronizeSideView } from './PointCloudTopView';
+import _ from 'lodash';
 const { ERotateDirection, ESortDirection } = cAnnotation;
 
 export interface IPointCloudContext {
@@ -108,7 +109,7 @@ export const PointCloudProvider: React.FC<{}> = ({ children }) => {
 
 /**
  * PointCloud Rotate Hook
- * @returns
+ * @ret
  */
 export const useRotate = () => {
   const ptCtx = useContext(PointCloudContext);
@@ -183,4 +184,34 @@ export const useNextOne = () => {
   );
 
   return { switchToNextPolygon };
+};
+
+/**
+ * Actions for selected box
+ */
+export const useSelectedBox = () => {
+  const { selectedID, pointCloudBoxList, setPointCloudResult } = useContext(PointCloudContext);
+
+  const selectedBox = useMemo(() => {
+    const boxIndex = pointCloudBoxList.findIndex((i: { id: string }) => i.id === selectedID);
+    return { info: pointCloudBoxList[boxIndex], index: boxIndex };
+  }, [selectedID, pointCloudBoxList]);
+
+  const updateSelectedBox = useCallback(
+    (params: Partial<IPointCloudBox>) => {
+      if (selectedBox.info) {
+        pointCloudBoxList.splice(selectedBox.index, 1, _.merge(selectedBox.info, params));
+        setPointCloudResult(_.cloneDeep(pointCloudBoxList));
+      }
+    },
+    [selectedID],
+  );
+
+  const changeSelectedBoxValid = useCallback(() => {
+    if (selectedBox.info) {
+      updateSelectedBox({ valid: !selectedBox.info.valid });
+    }
+  }, [selectedID]);
+
+  return { selectedBox, updateSelectedBox, changeSelectedBoxValid };
 };
