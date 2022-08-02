@@ -123,7 +123,10 @@
     "NoDependency": "This image does not need to be labeled",
     "TextCheckNumberOnly": "Please enter the number",
     "TextCheckEnglishOnly": "Please enter English",
-    "TextCheckCustomFormat": "Please enter data in custom format"
+    "TextCheckCustomFormat": "Please enter data in custom format",
+    "FramingOfObjectToBeDivided": "Please frame the object to be divided first",
+    "ClickOnTarget": "Please click on target object",
+    "SplittingAlgorithmPrediction": "Splitting algorithm prediction in..."
   },
   "cn": {
     "TextInput": "文本输入",
@@ -249,6 +252,9 @@
     "NoDependency": "该图片无需标注",
     "TextCheckNumberOnly": "请按仅数字的格式输入",
     "TextCheckEnglishOnly": "请按仅英文的格式输入",
-    "TextCheckCustomFormat": "请按要求的格式输入"
+    "TextCheckCustomFormat": "请按要求的格式输入",
+    "FramingOfObjectToBeDivided" : "请先框出需分割的物体",
+    "ClickOnTarget" : "请单击目标物体",
+    "SplittingAlgorithmPrediction" : "分割算法预测中..."
   }
 }
