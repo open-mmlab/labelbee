@@ -6,34 +6,38 @@ import { synchronizeBackView, synchronizeSideView } from './PointCloudTopView';
 import _ from 'lodash';
 const { ERotateDirection, ESortDirection } = cAnnotation;
 
-export interface IPointCloudContext {
+interface IPointCloudContextInstances {
+  topViewInstance?: PointCloudAnnotation;
+  sideViewInstance?: PointCloudAnnotation;
+  backViewInstance?: PointCloudAnnotation;
+  mainViewInstance?: PointCloud;
+  setTopViewInstance: (instance: PointCloudAnnotation) => void;
+  setSideViewInstance: (instance: PointCloudAnnotation) => void;
+  setBackViewInstance: (instance: PointCloudAnnotation) => void;
+  setMainViewInstance: (instance: PointCloud) => void;
+}
+
+export interface IPointCloudContext extends IPointCloudContextInstances {
   pointCloudBoxList: IPointCloudBoxList;
   selectedID: string;
+  selectedIDs: string[];
   setSelectedID: (id: string) => void;
+  setSelectedIDs: (id: string) => void;
   valid: boolean;
   setPointCloudResult: (resultList: IPointCloudBoxList) => void;
   selectedPointCloudBox?: IPointCloudBox;
   updateSelectedPointCloud: (id: string, newBox: IPointCloudBox) => void;
   setPointCloudValid: (valid?: boolean) => void;
-
-  topViewInstance?: PointCloudAnnotation;
-  sideViewInstance?: PointCloudAnnotation;
-  backViewInstance?: PointCloudAnnotation;
-
-  mainViewInstance?: PointCloud;
-
-  setTopViewInstance: (instance: PointCloudAnnotation) => void;
-  setSideViewInstance: (instance: PointCloudAnnotation) => void;
-  setBackViewInstance: (instance: PointCloudAnnotation) => void;
-
-  setMainViewInstance: (instance: PointCloud) => void;
+  addSelectedID: (selectedID: string) => void;
 }
 
 export const PointCloudContext = React.createContext<IPointCloudContext>({
   pointCloudBoxList: [],
   selectedID: '',
+  selectedIDs: [],
   valid: true,
   setSelectedID: () => {},
+  setSelectedIDs: () => {},
   setPointCloudResult: () => {},
   updateSelectedPointCloud: () => {},
   setPointCloudValid: () => {},
@@ -41,16 +45,21 @@ export const PointCloudContext = React.createContext<IPointCloudContext>({
   setSideViewInstance: () => {},
   setBackViewInstance: () => {},
   setMainViewInstance: () => {},
+  addSelectedID: () => {},
 });
 
 export const PointCloudProvider: React.FC<{}> = ({ children }) => {
   const [pointCloudBoxList, setPointCloudResult] = useState<IPointCloudBoxList>([]);
-  const [selectedID, setSelectedID] = useState<string>('');
+  const [selectedIDs, setSelectedIDs] = useState<string[]>([]);
   const [valid, setValid] = useState<boolean>(true);
   const [topViewInstance, setTopViewInstance] = useState<PointCloudAnnotation>();
   const [sideViewInstance, setSideViewInstance] = useState<PointCloudAnnotation>();
   const [backViewInstance, setBackViewInstance] = useState<PointCloudAnnotation>();
   const [mainViewInstance, setMainViewInstance] = useState<PointCloud>();
+
+  const selectedID = useMemo(() => {
+    return selectedIDs.length === 1 ? selectedIDs[0] : '';
+  }, [selectedIDs]);
 
   const ptCtx = useMemo(() => {
     const selectedPointCloudBox = pointCloudBoxList.find((v) => v.id === selectedID);
@@ -74,17 +83,30 @@ export const PointCloudProvider: React.FC<{}> = ({ children }) => {
       setValid(valid === false ? false : true);
     };
 
+    const addSelectedID = (selectedID: string) => {
+      setSelectedIDs([...selectedIDs, selectedID]);
+    };
+
+    const setSelectedID = (selectedID?: string) => {
+      setSelectedIDs(selectedID ? [selectedID] : []);
+    };
+
+    const instances = {};
+
     return {
+      ...instances,
       pointCloudBoxList,
       selectedID,
+      selectedIDs,
       setPointCloudResult,
       setSelectedID,
+      setSelectedIDs,
       addBox,
       valid,
       selectedPointCloudBox,
       updateSelectedPointCloud,
       setPointCloudValid,
-
+      addSelectedID,
       topViewInstance,
       setTopViewInstance,
       sideViewInstance,
@@ -96,7 +118,7 @@ export const PointCloudProvider: React.FC<{}> = ({ children }) => {
     };
   }, [
     valid,
-    selectedID,
+    selectedIDs,
     pointCloudBoxList,
     topViewInstance,
     sideViewInstance,

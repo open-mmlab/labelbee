@@ -63,9 +63,9 @@ class PolygonOperation extends BasicToolOperation {
 
   private drawingHistory: ActionsHistory; // 用于正在编辑中的历史记录
 
-  private isCtrl: boolean; // 当前的是否按住了 ctrl
+  public isCtrl: boolean; // 当前的是否按住了 ctrl
 
-  private isAlt: boolean; // 当前是否按住了 alt
+  public isAlt: boolean; // 当前是否按住了 alt
 
   private _textAttributInstance?: TextAttributeClass;
 
@@ -274,7 +274,7 @@ class PolygonOperation extends BasicToolOperation {
       return;
     }
 
-    this.setSelectedID('');
+    this.deleteSelectedID();
     const coordinateZoom = this.getCoordinateUnderZoom(e);
     const coordinate = AxisUtils.changeDrawOutsideTarget(
       coordinateZoom,
@@ -342,7 +342,7 @@ class PolygonOperation extends BasicToolOperation {
   // 全局操作
   public clearResult() {
     this.setPolygonList([]);
-    this.setSelectedID(undefined);
+    this.deleteSelectedID();
     this.render();
   }
 
@@ -364,7 +364,7 @@ class PolygonOperation extends BasicToolOperation {
    */
   public clearActiveStatus() {
     this.clearPolygonDrag();
-    this.setSelectedID(undefined);
+    this.deleteSelectedID();
   }
 
   public clearDrawingStatus() {
@@ -551,7 +551,7 @@ class PolygonOperation extends BasicToolOperation {
     if (this.config.textConfigurable) {
       this.setSelectedID(newID);
     } else {
-      this.setSelectedID();
+      this.deleteSelectedID();
     }
   }
 
@@ -658,7 +658,7 @@ class PolygonOperation extends BasicToolOperation {
       this.drawingHistory.initRecord(this.drawingPointList);
 
       this.hoverID = '';
-      this.setSelectedID('');
+      this.deleteSelectedID();
       this.render();
     }
   }
@@ -816,7 +816,8 @@ class PolygonOperation extends BasicToolOperation {
     }
   }
 
-  public rightMouseUp() {
+  // eslint-disable-next-line no-unused-vars
+  public rightMouseUp(e: MouseEvent) {
     // 标注中的数据结束
     if (this.drawingPointList.length > 0) {
       //
@@ -1342,7 +1343,7 @@ class PolygonOperation extends BasicToolOperation {
       }
 
       case 2: {
-        this.rightMouseUp();
+        this.rightMouseUp(e);
 
         break;
       }
@@ -1721,7 +1722,7 @@ class PolygonOperation extends BasicToolOperation {
     const polygonList = this.history.undo();
     if (polygonList) {
       if (polygonList.length !== this.polygonList.length) {
-        this.setSelectedID('');
+        this.deleteSelectedID();
       }
 
       this.setPolygonList(polygonList);
@@ -1746,12 +1747,16 @@ class PolygonOperation extends BasicToolOperation {
     const polygonList = this.history.redo();
     if (polygonList) {
       if (polygonList.length !== this.polygonList.length) {
-        this.setSelectedID('');
+        this.deleteSelectedID();
       }
 
       this.setPolygonList(polygonList);
       this.render();
     }
+  }
+
+  public deleteSelectedID() {
+    this.setSelectedID('');
   }
 }
 
