@@ -10,13 +10,15 @@ import TagOperation from '../../core/toolOperation/tagOperation';
 import LineToolOperation from '../../core/toolOperation/LineToolOperation';
 import PointOperation from '../../core/toolOperation/pointOperation';
 import TextToolOperation from '../../core/toolOperation/TextToolOperation';
+import SegmentByRect from '../../core/toolOperation/segmentByRect';
 
 const getCurrentOperation = (toolName: EToolName | ECheckModel) => {
   switch (toolName) {
     case EToolName.Rect:
     case EToolName.RectTrack:
       return RectOperationAsNewName;
-
+    case EToolName.SegmentByRect:
+      return SegmentByRect;
     case EToolName.Tag:
       return TagOperation;
     case EToolName.Polygon:

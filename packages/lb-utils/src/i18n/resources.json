@@ -126,7 +126,7 @@
     "TextCheckCustomFormat": "Please enter data in custom format",
     "FramingOfObjectToBeDivided": "Please frame the object to be divided first",
     "ClickOnTarget": "Please click on target object",
-    "SplittingAlgorithmPrediction": "Splitting algorithm prediction in..."
+    "SplittingAlgorithmPrediction": "Splitting algorithm prediction in progress..."
   },
   "cn": {
     "TextInput": "文本输入",

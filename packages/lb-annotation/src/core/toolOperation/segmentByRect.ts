@@ -118,7 +118,7 @@ class SegmentByRect extends RectOperation {
 
     if (this.isRunSegment) {
       // 进行算法中
-      rectWidth = isEn ? 252 : 136;
+      rectWidth = isEn ? 316 : 136;
       text = i18n.t('SplittingAlgorithmPrediction');
     }
 
