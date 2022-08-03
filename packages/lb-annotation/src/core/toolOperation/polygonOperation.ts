@@ -67,7 +67,7 @@ class PolygonOperation extends BasicToolOperation {
 
   public isAlt: boolean; // 当前是否按住了 alt
 
-  private _textAttributInstance?: TextAttributeClass;
+  public _textAttributInstance?: TextAttributeClass;
 
   constructor(props: IPolygonOperationProps) {
     super(props);

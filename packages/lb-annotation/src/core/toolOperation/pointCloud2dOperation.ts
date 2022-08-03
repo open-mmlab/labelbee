@@ -14,54 +14,30 @@ import CommonToolUtils from '@/utils/tool/CommonToolUtils';
 import DrawUtils from '@/utils/tool/DrawUtils';
 import PolygonUtils from '@/utils/tool/PolygonUtils';
 import StyleUtils from '@/utils/tool/StyleUtils';
-import { IBasicToolOperationProps } from './basicToolOperation';
 import PolygonOperation from './polygonOperation';
 
 class PointCloud2dOperation extends PolygonOperation {
   private selectedIDs: string[] = [];
 
-  // constructor(props: IPointCloud2dOperationProps) {
-  //   super(props)
-  // }
+  get getSelectedIDs() {
+    return this.selectedIDs;
+  }
 
   /**
    * Update selectedIDs and rerender
    * @param selectedIDs
    */
-  public setSelectedIDs(selectedIDs?: string[] | string) {
-    if (selectedIDs === undefined) {
-      this.selectedIDs = [];
-    }
-
-    if (typeof selectedIDs === 'string') {
-      this.selectedIDs = [selectedIDs];
-    }
-
-    if (Array.isArray(selectedIDs)) {
-      this.selectedIDs = Array.from(new Set(selectedIDs));
-    }
-
+  public setSelectedIDs(selectedIDs: string[]) {
+    this.selectedIDs = selectedIDs;
     this.setSelectedID(this.selectedIDs.length === 1 ? this.selectedIDs[0] : '');
     this.render();
-  }
-
-  /**
-   * If selectedID existed, remove selectedID from selectedIDs
-   * If selectedID not existed, add selectedID to selectedIDs
-   * @param selectedID
-   */
-  public addSelectedIDs(selectedID: string) {
-    if (this.selectedIDs.includes(selectedID)) {
-      this.setSelectedIDs(this.selectedIDs.filter((i) => i !== selectedID));
-    } else {
-      this.setSelectedIDs([...this.selectedIDs, selectedID]);
-    }
   }
 
   public deleteSelectedID() {
     super.deleteSelectedID();
     /** ID not existed and empty selectedID */
     this.selectedIDs = [];
+    this.emit('deleteSelectedIDs');
   }
 
   /**
@@ -75,9 +51,9 @@ class PointCloud2dOperation extends PolygonOperation {
     }
 
     if (e.ctrlKey && this.hoverID) {
-      this.addSelectedIDs(this.hoverID);
+      this.emit('addSelectedIDs', this.hoverID);
     } else {
-      this.setSelectedIDs(this.hoverID);
+      this.emit('setSelectedIDs', this.hoverID);
     }
   };
 
@@ -244,6 +220,27 @@ class PointCloud2dOperation extends PolygonOperation {
     }
 
     this.setSelectedID(newID);
+  }
+
+  /**
+   * Overwrite and prevent selectedChange emit
+   * @override
+   */
+  public setSelectedID(newID?: string) {
+    const oldID = this.selectedID;
+    if (newID !== oldID && oldID) {
+      // 触发文本切换的操作
+
+      this._textAttributInstance?.changeSelected();
+    }
+
+    if (!newID) {
+      this._textAttributInstance?.clearTextAttribute();
+    }
+
+    this.selectedID = newID;
+
+    this.render();
   }
 }
 

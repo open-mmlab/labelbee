@@ -4,6 +4,7 @@ import React, { useCallback, useContext, useMemo, useState } from 'react';
 
 import { synchronizeBackView, synchronizeSideView } from './PointCloudTopView';
 import _ from 'lodash';
+import { message } from 'antd';
 const { ERotateDirection, ESortDirection } = cAnnotation;
 
 interface IPointCloudContextInstances {
@@ -19,16 +20,15 @@ interface IPointCloudContextInstances {
 
 export interface IPointCloudContext extends IPointCloudContextInstances {
   pointCloudBoxList: IPointCloudBoxList;
-  selectedID: string;
   selectedIDs: string[];
-  setSelectedID: (id: string) => void;
-  setSelectedIDs: (id: string) => void;
+  setSelectedIDs: (ids?: string[]) => void;
   valid: boolean;
   setPointCloudResult: (resultList: IPointCloudBoxList) => void;
   selectedPointCloudBox?: IPointCloudBox;
-  updateSelectedPointCloud: (id: string, newBox: IPointCloudBox) => void;
   setPointCloudValid: (valid?: boolean) => void;
   addSelectedID: (selectedID: string) => void;
+  selectedAllBoxes: () => void;
+  selectedID: string;
 }
 
 export const PointCloudContext = React.createContext<IPointCloudContext>({
@@ -36,21 +36,20 @@ export const PointCloudContext = React.createContext<IPointCloudContext>({
   selectedID: '',
   selectedIDs: [],
   valid: true,
-  setSelectedID: () => {},
   setSelectedIDs: () => {},
   setPointCloudResult: () => {},
-  updateSelectedPointCloud: () => {},
   setPointCloudValid: () => {},
   setTopViewInstance: () => {},
   setSideViewInstance: () => {},
   setBackViewInstance: () => {},
   setMainViewInstance: () => {},
   addSelectedID: () => {},
+  selectedAllBoxes: () => {},
 });
 
 export const PointCloudProvider: React.FC<{}> = ({ children }) => {
   const [pointCloudBoxList, setPointCloudResult] = useState<IPointCloudBoxList>([]);
-  const [selectedIDs, setSelectedIDs] = useState<string[]>([]);
+  const [selectedIDs, setSelectedIDsState] = useState<string[]>([]);
   const [valid, setValid] = useState<boolean>(true);
   const [topViewInstance, setTopViewInstance] = useState<PointCloudAnnotation>();
   const [sideViewInstance, setSideViewInstance] = useState<PointCloudAnnotation>();
@@ -64,17 +63,6 @@ export const PointCloudProvider: React.FC<{}> = ({ children }) => {
   const ptCtx = useMemo(() => {
     const selectedPointCloudBox = pointCloudBoxList.find((v) => v.id === selectedID);
 
-    const updateSelectedPointCloud = (id: string, newPointCloudBox: IPointCloudBox) => {
-      const newPointCloudBoxList = [...pointCloudBoxList].map((v) => {
-        if (v.id === id) {
-          return newPointCloudBox;
-        }
-        return v;
-      });
-
-      setPointCloudResult(newPointCloudBoxList);
-    };
-
     const addBox = (box: IPointCloudBox) => {
       setPointCloudResult(pointCloudBoxList.concat(box));
     };
@@ -83,30 +71,49 @@ export const PointCloudProvider: React.FC<{}> = ({ children }) => {
       setValid(valid === false ? false : true);
     };
 
+    const setSelectedIDs = (selectedIDs?: string[] | string) => {
+      if (selectedIDs === undefined) {
+        setSelectedIDsState([]);
+      }
+
+      if (typeof selectedIDs === 'string') {
+        setSelectedIDsState([selectedIDs]);
+      }
+
+      if (Array.isArray(selectedIDs)) {
+        setSelectedIDsState(Array.from(new Set(selectedIDs)));
+      }
+    };
+
+    /**
+     * If selectedID existed, remove selectedID from selectedIDs
+     * If selectedID not existed, add selectedID to selectedIDs
+     * @param selectedID
+     */
     const addSelectedID = (selectedID: string) => {
-      setSelectedIDs([...selectedIDs, selectedID]);
+      if (selectedIDs.includes(selectedID)) {
+        setSelectedIDs(selectedIDs.filter((i) => i !== selectedID));
+      } else {
+        setSelectedIDs([...selectedIDs, selectedID]);
+      }
     };
 
-    const setSelectedID = (selectedID?: string) => {
-      setSelectedIDs(selectedID ? [selectedID] : []);
+    const selectedAllBoxes = () => {
+      setSelectedIDs(pointCloudBoxList.map((i) => i.id));
     };
-
-    const instances = {};
 
     return {
-      ...instances,
-      pointCloudBoxList,
       selectedID,
+      pointCloudBoxList,
       selectedIDs,
       setPointCloudResult,
-      setSelectedID,
       setSelectedIDs,
       addBox,
       valid,
       selectedPointCloudBox,
-      updateSelectedPointCloud,
       setPointCloudValid,
       addSelectedID,
+      selectedAllBoxes,
       topViewInstance,
       setTopViewInstance,
       sideViewInstance,
@@ -135,39 +142,27 @@ export const PointCloudProvider: React.FC<{}> = ({ children }) => {
  */
 export const useRotate = () => {
   const ptCtx = useContext(PointCloudContext);
+  const { selectedBox, updateSelectedBox } = useSingleBox();
 
   const updateRotate = useCallback(
     (angle: number) => {
-      const {
-        selectedID,
-        pointCloudBoxList,
-        setPointCloudResult,
-        topViewInstance,
-        mainViewInstance,
-      } = ptCtx;
+      const { topViewInstance, mainViewInstance } = ptCtx;
       if (!topViewInstance || !mainViewInstance) {
         return;
       }
 
       const { pointCloud2dOpeartion: TopPointCloudPolygonOperation } = topViewInstance;
 
-      const selectedPointCloudBox = pointCloudBoxList.find((v) => v.id === selectedID);
+      const selectedPointCloudBox = selectedBox?.info;
 
       if (!selectedPointCloudBox) {
         return;
       }
 
-      selectedPointCloudBox.rotation =
-        selectedPointCloudBox.rotation + Number(Math.PI * angle) / 180;
-
-      const newPointCloudBoxList = [...pointCloudBoxList].map((v) => {
-        if (v.id === selectedID) {
-          return selectedPointCloudBox;
-        }
-        return v;
+      updateSelectedBox({
+        rotation: selectedPointCloudBox.rotation + Number(Math.PI * angle) / 180,
       });
 
-      setPointCloudResult(newPointCloudBoxList);
       TopPointCloudPolygonOperation.rotatePolygon(angle, ERotateDirection.Anticlockwise);
       const selectedPolygon = TopPointCloudPolygonOperation.selectedPolygon;
 
@@ -177,51 +172,29 @@ export const useRotate = () => {
       synchronizeBackView(selectedPointCloudBox, selectedPolygon, ptCtx.backViewInstance);
       mainViewInstance.render();
     },
-    [ptCtx.selectedID, ptCtx.pointCloudBoxList, ptCtx.setPointCloudResult, ptCtx.topViewInstance],
+    [ptCtx.selectedIDs, ptCtx.pointCloudBoxList, ptCtx.setPointCloudResult, ptCtx.topViewInstance],
   );
 
   return { updateRotate };
 };
 
-/**
- * PointCloud get next one - Hook
- * @returns
- */
-export const useNextOne = () => {
-  const ptCtx = useContext(PointCloudContext);
+/** Actions for single selected box */
+export const useSingleBox = () => {
+  const { pointCloudBoxList, setPointCloudResult, topViewInstance, selectedIDs, selectedID } =
+    useContext(PointCloudContext);
 
-  const switchToNextPolygon = useCallback(
-    (sort = ESortDirection.ascend) => {
-      const { topViewInstance } = ptCtx;
-
-      if (!topViewInstance) {
-        return;
-      }
-
-      const { pointCloud2dOpeartion } = topViewInstance;
-
-      pointCloud2dOpeartion.switchToNextPolygon(sort);
-    },
-    [ptCtx.topViewInstance],
-  );
-
-  return { switchToNextPolygon };
-};
-
-/**
- * Actions for selected box
- */
-export const useSelectedBox = () => {
-  const { selectedID, pointCloudBoxList, setPointCloudResult } = useContext(PointCloudContext);
-
+  /** Returns { info: selected box, index: selected box index } */
   const selectedBox = useMemo(() => {
     const boxIndex = pointCloudBoxList.findIndex((i: { id: string }) => i.id === selectedID);
-    return { info: pointCloudBoxList[boxIndex], index: boxIndex };
+    if (boxIndex > -1) {
+      return { info: pointCloudBoxList[boxIndex], index: boxIndex };
+    }
   }, [selectedID, pointCloudBoxList]);
 
+  /** Use Partial<IPointCloudBox> to update selected box  */
   const updateSelectedBox = useCallback(
     (params: Partial<IPointCloudBox>) => {
-      if (selectedBox.info) {
+      if (selectedBox?.info) {
         pointCloudBoxList.splice(selectedBox.index, 1, _.merge(selectedBox.info, params));
         setPointCloudResult(_.cloneDeep(pointCloudBoxList));
       }
@@ -229,11 +202,82 @@ export const useSelectedBox = () => {
     [selectedID],
   );
 
+  /** Toggle selected box‘s validity  */
   const changeSelectedBoxValid = useCallback(() => {
-    if (selectedBox.info) {
+    if (selectedBox?.info) {
       updateSelectedBox({ valid: !selectedBox.info.valid });
     }
   }, [selectedID]);
 
-  return { selectedBox, updateSelectedBox, changeSelectedBoxValid };
+  /** PointCloud get next one */
+  const switchToNextBox = useCallback(
+    (sort = ESortDirection.ascend) => {
+      if (!topViewInstance || selectedIDs.length > 1) {
+        return;
+      }
+
+      const { pointCloud2dOpeartion } = topViewInstance;
+
+      pointCloud2dOpeartion.switchToNextPolygon(sort);
+    },
+    [topViewInstance],
+  );
+
+  const selectPrevBox = () => {
+    switchToNextBox(ESortDirection.descend);
+  };
+
+  return {
+    selectedBox,
+    updateSelectedBox,
+    changeSelectedBoxValid,
+    selectNextBox: switchToNextBox,
+    selectPrevBox,
+  };
+};
+
+/**
+ * Actions for selected boxes
+ */
+export const useBoxes = () => {
+  const { selectedIDs, pointCloudBoxList, setPointCloudResult } = useContext(PointCloudContext);
+  const [copiedBoxes, setCopiedBoxes] = useState<IPointCloudBoxList>([]);
+
+  const hasDuplicateID = (checkBoxList: IPointCloudBoxList) => {
+    return pointCloudBoxList.some((item) => {
+      return checkBoxList.some((i) => i.id === item.id);
+    });
+  };
+
+  const selectedBoxes = useMemo(() => {
+    return pointCloudBoxList.filter((i) => selectedIDs.includes(i.id));
+  }, [selectedIDs, pointCloudBoxList]);
+
+  const copySelectedBoxes = useCallback(() => {
+    if (selectedBoxes.length > 0) {
+      setCopiedBoxes(_.cloneDeep(selectedBoxes));
+    } else {
+      setCopiedBoxes([]);
+      message.error('复制内容为空，请选择对应的点云数据');
+    }
+  }, [selectedIDs]);
+
+  const pasteSelectedBoxes = useCallback(() => {
+    if (copiedBoxes.length === 0) {
+      message.error('选者对应的点云数据并进行复制');
+      return;
+    }
+
+    const hasDuplicate = hasDuplicateID(copiedBoxes);
+
+    if (hasDuplicate) {
+      message.error('存在重复ID,复制失败');
+    } else {
+      /** Paste succeed and empty */
+      setPointCloudResult(copiedBoxes);
+      setCopiedBoxes([]);
+    }
+  }, [copiedBoxes]);
+
+  return { copySelectedBoxes, pasteSelectedBoxes, copiedBoxes };
 };
