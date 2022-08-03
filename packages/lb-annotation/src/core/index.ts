@@ -4,9 +4,9 @@
 
 import { EToolName } from '@/constant/tool';
 import { getConfig, styleDefaultConfig } from '@/constant/defaultConfig';
-import CommonToolUtils from '@/utils/tool/CommonToolUtils';
 import { IPolygonData } from '@/types/tool/polygon';
 import { ELang } from '@/constant/annotation';
+import { getCurrentOperation } from '../utils/tool/CurrentOperation';
 
 interface IProps {
   container: HTMLElement;
@@ -125,7 +125,7 @@ export default class AnnotationEngine {
       this.toolInstance.destroy();
     }
 
-    const ToolOperation: any = CommonToolUtils.getCurrentOperation(this.toolName);
+    const ToolOperation: any = getCurrentOperation(this.toolName);
     if (!ToolOperation) {
       return;
     }
