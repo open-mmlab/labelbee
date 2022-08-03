@@ -679,7 +679,7 @@ export class PointCloud {
   };
 
   public generateBoxID = (boxParams: IPointCloudBox) => {
-    const texture = new THREE.Texture(this.getTextCanvas('1000'));
+    const texture = new THREE.Texture(this.getTextCanvas(boxParams.trackID.toString()));
     texture.needsUpdate = true;
     const sprite = new THREE.SpriteMaterial({ map: texture, depthWrite: false });
     const boxID = new THREE.Sprite(sprite);

@@ -22,7 +22,7 @@ interface IPointCloudContextInstances {
 export interface IPointCloudContext extends IPointCloudContextInstances {
   pointCloudBoxList: IPointCloudBoxList;
   selectedIDs: string[];
-  setSelectedIDs: (ids?: string[]) => void;
+  setSelectedIDs: (ids?: string[] | string) => void;
   valid: boolean;
   setPointCloudResult: (resultList: IPointCloudBoxList) => void;
   selectedPointCloudBox?: IPointCloudBox;
@@ -30,6 +30,7 @@ export interface IPointCloudContext extends IPointCloudContextInstances {
   addSelectedID: (selectedID: string) => void;
   selectedAllBoxes: () => void;
   selectedID: string;
+  addPointCloudBox: (boxParams: IPointCloudBox) => void;
 }
 
 export const PointCloudContext = React.createContext<IPointCloudContext>({
@@ -46,6 +47,7 @@ export const PointCloudContext = React.createContext<IPointCloudContext>({
   setMainViewInstance: () => {},
   addSelectedID: () => {},
   selectedAllBoxes: () => {},
+  addPointCloudBox: () => {},
 });
 
 export const PointCloudProvider: React.FC<{}> = ({ children }) => {
@@ -57,6 +59,11 @@ export const PointCloudProvider: React.FC<{}> = ({ children }) => {
   const [backViewInstance, setBackViewInstance] = useState<PointCloudAnnotation>();
   const [mainViewInstance, setMainViewInstance] = useState<PointCloud>();
 
+  const getNextBoxID = () => {
+    const sortedPcList = pointCloudBoxList.sort((a, b) => a.trackID - b.trackID);
+    return sortedPcList.slice(-1)[0]?.trackID + 1 ?? 1;
+  };
+
   const selectedID = useMemo(() => {
     return selectedIDs.length === 1 ? selectedIDs[0] : '';
   }, [selectedIDs]);
@@ -64,7 +71,8 @@ export const PointCloudProvider: React.FC<{}> = ({ children }) => {
   const ptCtx = useMemo(() => {
     const selectedPointCloudBox = pointCloudBoxList.find((v) => v.id === selectedID);
 
-    const addBox = (box: IPointCloudBox) => {
+    const addPointCloudBox = (box: IPointCloudBox) => {
+      box.trackID = getNextBoxID();
       setPointCloudResult(pointCloudBoxList.concat(box));
     };
 
@@ -109,7 +117,7 @@ export const PointCloudProvider: React.FC<{}> = ({ children }) => {
       selectedIDs,
       setPointCloudResult,
       setSelectedIDs,
-      addBox,
+      addPointCloudBox,
       valid,
       selectedPointCloudBox,
       setPointCloudValid,
@@ -221,7 +229,7 @@ export const useSingleBox = () => {
     }
   }, [selectedID]);
 
-  /** PointCloud get next one */
+  /** PointCloud select next/prev one */
   const switchToNextBox = useCallback(
     (sort = ESortDirection.ascend) => {
       if (!topViewInstance || selectedIDs.length > 1) {
@@ -291,5 +299,5 @@ export const useBoxes = () => {
     }
   }, [copiedBoxes]);
 
-  return { copySelectedBoxes, pasteSelectedBoxes, copiedBoxes };
+  return { copySelectedBoxes, pasteSelectedBoxes, copiedBoxes, selectedBoxes };
 };

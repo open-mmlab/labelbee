@@ -343,8 +343,8 @@ const PointCloudTopView: React.FC<IAnnotationStateProps> = ({ currentData }) => 
   const afterPolygonCreated = (newPolygon: any, pointCloud: PointCloud, size: ISize) => {
     const newParams = topViewPolygon2PointCloud(newPolygon, size, pointCloud);
 
-    ptCtx.setPointCloudResult(ptCtx.pointCloudBoxList.concat(newParams));
-    ptCtx.setSelectedIDs([newParams.id]);
+    ptCtx.addPointCloudBox(newParams);
+    ptCtx.setSelectedIDs(newParams.id);
 
     mainViewGenBox(newParams, newPolygon.id);
 
