@@ -64,6 +64,7 @@ class SegmentByRect extends RectOperation {
     if (e.button === 0 && this.rectList.length === 1 && !this.isRunSegment) {
       e.stopPropagation();
       this.segmentPrediction(e);
+      this.clearActiveStatus();
       return;
     }
 
@@ -162,6 +163,10 @@ class SegmentByRect extends RectOperation {
     const coord = this.getCoordinateUnderZoom(e);
     this.isRunSegment = true;
     this.render();
+
+    if (!this.runPrediction) {
+      return;
+    }
 
     const res = await this.runPrediction({
       point: coord,

@@ -675,6 +675,13 @@ class BasicToolOperation extends EventListener {
     this.forbidCursorLine = false;
   }
 
+  public clearCursorLine() {
+    this.coord = {
+      x: -1,
+      y: -1,
+    };
+  }
+
   public onMouseDown(e: MouseEvent): void | boolean {
     // e.stopPropagation();
     if (!this.canvas || this.isImgError) {

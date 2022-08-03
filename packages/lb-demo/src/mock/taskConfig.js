@@ -167,10 +167,16 @@ export const getStepList = (tool, sourceStep, step) => {
 };
 
 const getStepConfig = (tool, step, sourceStep) => {
+  let toolList = tool ?? EToolName.Rect;
+
+  const splitChar = ' ';
+  if (toolList.indexOf(splitChar) > -1) {
+    toolList = tool.split(splitChar);
+  }
   return {
     step: step ?? 1,
     dataSourceStep: sourceStep || 0,
-    tool: tool ?? EToolName.Rect,
+    tool: toolList,
     config: JSON.stringify(getConfig(tool)),
   };
 };

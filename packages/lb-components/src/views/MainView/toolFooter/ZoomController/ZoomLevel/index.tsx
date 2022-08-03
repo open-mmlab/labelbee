@@ -13,7 +13,7 @@ const ZoomLevel: React.FC<IProps> = ({ toolInstance }) => {
   useEffect(() => {
     if (toolInstance) {
       // 这里会有内存泄漏的问题  useSafeState 用这个解决下
-      toolInstance.singleOn('renderZoom', () => {
+      toolInstance.on('renderZoom', () => {
         forceRender((s) => s + 1);
       });
     }
@@ -21,12 +21,7 @@ const ZoomLevel: React.FC<IProps> = ({ toolInstance }) => {
 
   const zoom = toolInstance?.zoom ?? 1;
 
-  return (
-    <span className="zoomValue">
-      {(zoom * 100).toFixed(1)}
-      %
-    </span>
-  );
+  return <span className='zoomValue'>{(zoom * 100).toFixed(1)}%</span>;
 };
 
 const mapStateToProps = (state: AppState) => ({
