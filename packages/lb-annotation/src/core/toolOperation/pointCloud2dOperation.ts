@@ -8,7 +8,7 @@
 
 import { ESortDirection } from '@/constant/annotation';
 import { EPolygonPattern } from '@/constant/tool';
-import { IPolygonPoint } from '@/types/tool/polygon';
+import { IPolygonData, IPolygonPoint } from '@/types/tool/polygon';
 import AxisUtils from '@/utils/tool/AxisUtils';
 import CommonToolUtils from '@/utils/tool/CommonToolUtils';
 import DrawUtils from '@/utils/tool/DrawUtils';
@@ -17,6 +17,62 @@ import StyleUtils from '@/utils/tool/StyleUtils';
 import PolygonOperation from './polygonOperation';
 
 class PointCloud2dOperation extends PolygonOperation {
+  private selectedIDs: string[] = [];
+
+  get getSelectedIDs() {
+    return this.selectedIDs;
+  }
+
+  /**
+   * Update selectedIDs and rerender
+   * @param selectedIDs
+   */
+  public setSelectedIDs(selectedIDs: string[]) {
+    this.selectedIDs = selectedIDs;
+    this.setSelectedID(this.selectedIDs.length === 1 ? this.selectedIDs[0] : '');
+    this.render();
+  }
+
+  public deleteSelectedID() {
+    super.deleteSelectedID();
+    /** ID not existed and empty selectedID */
+    this.selectedIDs = [];
+    this.emit('deleteSelectedIDs');
+  }
+
+  /**
+   * Right click event
+   * @override
+   */
+  public rightMouseUp = (e: MouseEvent) => {
+    if (this.drawingPointList.length > 0) {
+      this.addDrawingPointToPolygonList();
+      return;
+    }
+
+    if (e.ctrlKey && this.hoverID) {
+      this.emit('addSelectedIDs', this.hoverID);
+    } else {
+      this.emit('setSelectedIDs', this.hoverID);
+    }
+  };
+
+  public get selectedPolygons() {
+    return PolygonUtils.getPolygonByIDs(this.polygonList, this.selectedIDs);
+  }
+
+  /**
+   * keydown event
+   * @override
+   */
+  public onKeyDown = () => {};
+
+  /**
+   * keyup event
+   * @override
+   */
+  public onKeyUp = () => {};
+
   public getLineColor() {
     return 'rgba(0, 255, 255, 0.5)';
   }
@@ -28,7 +84,7 @@ class PointCloud2dOperation extends PolygonOperation {
   public renderStaticPolygon() {
     if (this.isHidden === false) {
       this.polygonList?.forEach((polygon) => {
-        if ([this.selectedID, this.editPolygonID].includes(polygon.id)) {
+        if ([...this.selectedIDs, this.editPolygonID].includes(polygon.id)) {
           return;
         }
         const { attribute } = polygon;
@@ -59,32 +115,34 @@ class PointCloud2dOperation extends PolygonOperation {
    * @override
    * */
   public renderSelectedPolygon() {
-    if (this.selectedID) {
-      const selectdPolygon = this.selectedPolygon;
+    this.selectedPolygons?.forEach((polygon) => {
+      this.renderSingleSelectedPolygon(polygon);
+    });
+  }
 
-      if (selectdPolygon) {
-        const toolColor = this.getColor(selectdPolygon.attribute);
-        const toolData = StyleUtils.getStrokeAndFill(toolColor, selectdPolygon.valid, { isSelected: true });
+  public renderSingleSelectedPolygon = (selectedPolygon: IPolygonData) => {
+    if (this.selectedPolygons) {
+      const toolColor = this.getColor(selectedPolygon.attribute);
+      const toolData = StyleUtils.getStrokeAndFill(toolColor, selectedPolygon.valid, { isSelected: true });
 
-        const polygon = AxisUtils.changePointListByZoom(selectdPolygon.pointList, this.zoom, this.currentPos);
+      const polygon = AxisUtils.changePointListByZoom(selectedPolygon.pointList, this.zoom, this.currentPos);
 
-        DrawUtils.drawSelectedPolygonWithFillAndLine(this.canvas, polygon, {
-          fillColor: 'transparent',
-          strokeColor: toolData.stroke,
-          pointColor: 'white',
-          thickness: 2,
-          lineCap: 'round',
-          isClose: true,
-          lineType: this.config?.lineType,
-        });
+      DrawUtils.drawSelectedPolygonWithFillAndLine(this.canvas, polygon, {
+        fillColor: 'transparent',
+        strokeColor: toolData.stroke,
+        pointColor: 'white',
+        thickness: 2,
+        lineCap: 'round',
+        isClose: true,
+        lineType: this.config?.lineType,
+      });
 
-        // Only the rectangle shows the direction.
-        if (selectdPolygon.isRect === true) {
-          this.renderRectPolygonDirection(polygon);
-        }
+      // Only the rectangle shows the direction.
+      if (selectedPolygon.isRect === true) {
+        this.renderRectPolygonDirection(polygon);
       }
     }
-  }
+  };
 
   public renderRectPolygonDirection(polygon: IPolygonPoint[]) {
     if (polygon.length < 2) {
@@ -162,6 +220,27 @@ class PointCloud2dOperation extends PolygonOperation {
     }
 
     this.setSelectedID(newID);
+  }
+
+  /**
+   * Overwrite and prevent selectedChange emit
+   * @override
+   */
+  public setSelectedID(newID?: string) {
+    const oldID = this.selectedID;
+    if (newID !== oldID && oldID) {
+      // 触发文本切换的操作
+
+      this._textAttributInstance?.changeSelected();
+    }
+
+    if (!newID) {
+      this._textAttributInstance?.clearTextAttribute();
+    }
+
+    this.selectedID = newID;
+
+    this.render();
   }
 }
 

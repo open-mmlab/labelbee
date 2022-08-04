@@ -9,7 +9,7 @@ import { getClassName } from '@/utils/dom';
 import { PointCloudContainer } from './PointCloudLayout';
 import React, { useEffect, useRef, useState } from 'react';
 import { synchronizeSideView, synchronizeTopView } from './PointCloudTopView';
-import { PointCloudContext } from './PointCloudContext';
+import { PointCloudContext, useSingleBox } from './PointCloudContext';
 import { EPerspectiveView, IPointCloudBox } from '@labelbee/lb-utils';
 import { SizeInfoForView } from './PointCloudInfos';
 
@@ -68,6 +68,7 @@ const PointCloudSideView = () => {
   const ptCtx = React.useContext(PointCloudContext);
   const [size, setSize] = useState<{ width: number; height: number } | null>(null);
   const ref = useRef<HTMLDivElement>(null);
+  const { updateSelectedBox } = useSingleBox();
 
   useEffect(() => {
     if (ref.current) {
@@ -166,7 +167,7 @@ const PointCloudSideView = () => {
         synchronizeTopView(newBoxParams, newPolygon, ptCtx.topViewInstance, ptCtx.mainViewInstance);
         synchronizeSideView(newBoxParams, newPolygon, ptCtx.sideViewInstance);
         ptCtx.mainViewInstance.hightLightOriginPointCloud(newBoxParams);
-        ptCtx.updateSelectedPointCloud(newPolygon.id, newBoxParams);
+        updateSelectedBox(newBoxParams);
       },
     );
   }, [ptCtx, size]);

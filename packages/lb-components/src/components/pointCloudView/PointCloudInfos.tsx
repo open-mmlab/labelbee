@@ -77,6 +77,10 @@ export const BoxInfos = () => {
         label: '点数',
         value: 1000,
       },
+      {
+        label: '是否有效',
+        value: box.valid === false ? '无效' : '有效',
+      },
     ];
 
     return (
@@ -99,5 +103,28 @@ export const BoxInfos = () => {
     );
   }
 
+  return null;
+};
+
+export const PointCloudValidity = () => {
+  const ptCtx = React.useContext(PointCloudContext);
+
+  if (ptCtx.valid === false) {
+    return (
+      <div
+        style={{
+          position: 'absolute',
+          backgroundColor: 'red',
+          left: 0,
+          top: 0,
+          fontSize: 24,
+          padding: 8,
+          zIndex: 20,
+        }}
+      >
+        无效
+      </div>
+    );
+  }
   return null;
 };

@@ -9,24 +9,17 @@ import { getClassName } from '@/utils/dom';
 import { FooterDivider } from '@/views/MainView/toolFooter';
 import { ZoomController } from '@/views/MainView/toolFooter/ZoomController';
 import { DownSquareOutlined, UpSquareOutlined } from '@ant-design/icons';
-import {
-  cTool,
-  cAnnotation,
-  PointCloud,
-  MathUtils,
-  PointCloudAnnotation,
-} from '@labelbee/lb-annotation';
+import { cTool, PointCloud, MathUtils, PointCloudAnnotation } from '@labelbee/lb-annotation';
 import { EPerspectiveView, IPointCloudBox } from '@labelbee/lb-utils';
 import React, { useEffect, useRef, useState } from 'react';
-import { PointCloudContext, useRotate, useNextOne } from './PointCloudContext';
+import { PointCloudContext, useRotate, useSingleBox } from './PointCloudContext';
 import { PointCloudContainer } from './PointCloudLayout';
-import { BoxInfos } from './PointCloudInfos';
+import { BoxInfos, PointCloudValidity } from './PointCloudInfos';
 import { Slider } from 'antd';
 import { aMapStateToProps, IAnnotationStateProps } from '@/store/annotation/map';
 import { connect } from 'react-redux';
 
 const { EPolygonPattern } = cTool;
-const { ESortDirection } = cAnnotation;
 
 /**
  * Get the offset from canvas2d-coordinate to world coordinate
@@ -230,7 +223,7 @@ export const synchronizeTopView = (
 
 const TopViewToolbar = () => {
   const { updateRotate } = useRotate();
-  const { switchToNextPolygon } = useNextOne();
+  const { selectNextBox, selectPrevBox } = useSingleBox();
   const ratio = 2;
 
   const clockwiseRotate = () => {
@@ -244,14 +237,6 @@ const TopViewToolbar = () => {
     updateRotate(180);
   };
 
-  const preRect = () => {
-    switchToNextPolygon(ESortDirection.descend);
-  };
-
-  const nextRect = () => {
-    switchToNextPolygon(ESortDirection.ascend);
-  };
-
   return (
     <>
       <span
@@ -261,8 +246,18 @@ const TopViewToolbar = () => {
       <span onClick={clockwiseRotate} className={getClassName('point-cloud', 'rotate')} />
       <span onClick={reverseRotate} className={getClassName('point-cloud', 'rotate-180')} />
       <FooterDivider />
-      <UpSquareOutlined onClick={preRect} className={getClassName('point-cloud', 'prev')} />
-      <DownSquareOutlined onClick={nextRect} className={getClassName('point-cloud', 'next')} />
+      <UpSquareOutlined
+        onClick={() => {
+          selectPrevBox();
+        }}
+        className={getClassName('point-cloud', 'prev')}
+      />
+      <DownSquareOutlined
+        onClick={() => {
+          selectNextBox();
+        }}
+        className={getClassName('point-cloud', 'next')}
+      />
       <FooterDivider />
       <ZoomController />
     </>
@@ -270,7 +265,7 @@ const TopViewToolbar = () => {
 };
 
 /**
- * Z-axis points filter
+ * Slider for filtering Z-axis points
  */
 const ZAxisSlider = ({
   setZAxisLimit,
@@ -297,6 +292,7 @@ const PointCloudTopView: React.FC<IAnnotationStateProps> = ({ currentData }) => 
   const ref = useRef<HTMLDivElement>(null);
   const ptCtx = React.useContext(PointCloudContext);
   const pointCloudRef = useRef<PointCloud | null>();
+  const { updateSelectedBox } = useSingleBox();
 
   const [size, setSize] = useState<{ width: number; height: number } | null>(null);
   const [zAxisLimit, setZAxisLimit] = useState<number>(10);
@@ -358,7 +354,7 @@ const PointCloudTopView: React.FC<IAnnotationStateProps> = ({ currentData }) => 
     const newParams = topViewPolygon2PointCloud(newPolygon, size, pointCloud);
 
     ptCtx.setPointCloudResult(ptCtx.pointCloudBoxList.concat(newParams));
-    ptCtx.setSelectedID(newParams.id);
+    ptCtx.setSelectedIDs([newParams.id]);
 
     mainViewGenBox(newParams, newPolygon.id);
 
@@ -448,24 +444,16 @@ const PointCloudTopView: React.FC<IAnnotationStateProps> = ({ currentData }) => 
       // }
     });
 
-    TopView2dOperation.singleOn('selectedChange', () => {
-      const polygonOperation = TopView2dOperation;
-      if (!polygonOperation) {
-        return;
-      }
+    TopView2dOperation.singleOn('deleteSelectedIDs', () => {
+      ptCtx.setSelectedIDs([]);
+    });
 
-      const selectedID = polygonOperation.selectedID;
-      ptCtx.setSelectedID(selectedID ?? '');
+    TopView2dOperation.singleOn('addSelectedIDs', (selectedID: string) => {
+      ptCtx.addSelectedID(selectedID);
+    });
 
-      const boxParams = ptCtx.pointCloudBoxList.find((v) => v.id === selectedID);
-      const polygon = polygonOperation.selectedPolygon;
-      if (!boxParams || !polygon) {
-        return;
-      }
-
-      ptCtx.mainViewInstance?.hightLightOriginPointCloud(boxParams);
-      synchronizeSideView(boxParams, polygon, ptCtx.sideViewInstance);
-      synchronizeBackView(boxParams, polygon, ptCtx.backViewInstance);
+    TopView2dOperation.singleOn('setSelectedIDs', (selectedIDs: string[]) => {
+      ptCtx.setSelectedIDs(selectedIDs);
     });
 
     TopView2dOperation.singleOn('updatePolygonByDrag', ({ newPolygon }: any) => {
@@ -487,7 +475,7 @@ const PointCloudTopView: React.FC<IAnnotationStateProps> = ({ currentData }) => 
       synchronizeSideView(newBoxParams, newPolygon, ptCtx.sideViewInstance);
       synchronizeBackView(newBoxParams, newPolygon, ptCtx.backViewInstance);
       ptCtx.mainViewInstance?.hightLightOriginPointCloud(newBoxParams);
-      ptCtx.updateSelectedPointCloud(newPolygon.id, newBoxParams);
+      updateSelectedBox(newBoxParams);
     });
   }, [ptCtx, size]);
 
@@ -496,6 +484,31 @@ const PointCloudTopView: React.FC<IAnnotationStateProps> = ({ currentData }) => 
       pointCloudRef.current.applyZAxisPoints(zAxisLimit);
     }
   }, [zAxisLimit]);
+
+  useEffect(() => {
+    if (!size || !ptCtx.topViewInstance || !ptCtx.sideViewInstance) {
+      return;
+    }
+
+    const { pointCloud2dOpeartion: TopView2dOperation } = ptCtx.topViewInstance;
+
+    const polygonOperation = TopView2dOperation;
+    if (!polygonOperation) {
+      return;
+    }
+
+    polygonOperation.setSelectedIDs(ptCtx.selectedIDs);
+
+    const boxParams = ptCtx.pointCloudBoxList.find((v) => v.id === ptCtx.selectedID);
+    const polygon = polygonOperation.selectedPolygon;
+    if (!boxParams || !polygon) {
+      return;
+    }
+
+    ptCtx.mainViewInstance?.hightLightOriginPointCloud(boxParams);
+    synchronizeSideView(boxParams, polygon, ptCtx.sideViewInstance);
+    synchronizeBackView(boxParams, polygon, ptCtx.backViewInstance);
+  }, [ptCtx.selectedIDs]);
 
   return (
     <PointCloudContainer
@@ -507,6 +520,7 @@ const PointCloudTopView: React.FC<IAnnotationStateProps> = ({ currentData }) => 
         <div style={{ width: '100%', height: '100%' }} ref={ref} />
         <BoxInfos />
         <ZAxisSlider zAxisLimit={zAxisLimit} setZAxisLimit={setZAxisLimit} />
+        <PointCloudValidity />
       </div>
     </PointCloudContainer>
   );

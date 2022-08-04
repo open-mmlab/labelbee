@@ -15,6 +15,7 @@ const pointCloudID = 'LABELBEE-POINTCLOUD';
 import { PointCloudContext } from './PointCloudContext';
 import { aMapStateToProps, IAnnotationStateProps } from '@/store/annotation/map';
 import { connect } from 'react-redux';
+import { jsonParser } from '@/utils';
 
 const PointCloud3DContext = React.createContext<{
   isActive: boolean;
@@ -114,6 +115,7 @@ const PointCloud3D: React.FC<IAnnotationStateProps> = ({ currentData }) => {
         });
 
         ptCtx.setPointCloudResult(boxParamsList);
+        ptCtx.setPointCloudValid(jsonParser(currentData.result)?.valid);
       }
 
       pointCloud?.controls.update();
