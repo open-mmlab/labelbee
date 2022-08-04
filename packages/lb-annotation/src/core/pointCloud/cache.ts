@@ -6,10 +6,18 @@
 
 import { PCDLoader } from './PCDLoader';
 
+type TCacheInfo = {
+  src: string;
+};
+
 export class PointCloudCache {
   public pcdLoader: PCDLoader;
 
+  public MAX_SIZE: number = 50; // Tetatively set at 50.
+
   private pointsMap: Map<string, THREE.Points>;
+
+  private cacheList: Array<TCacheInfo> = [];
 
   private static instance: PointCloudCache;
 
@@ -35,6 +43,18 @@ export class PointCloudCache {
         return;
       }
 
+      /**
+       * Garbage Collection.
+       * If it exceeds the MAX_SIZE, clear the first one.(FIFO)
+       */
+      if (this.cacheList.length > this.MAX_SIZE) {
+        const firstCacheInfo = this.cacheList.shift();
+        if (firstCacheInfo) {
+          this.pointsMap.delete(firstCacheInfo.src);
+        }
+      }
+
+      this.cacheList.push({ src });
       this.pcdLoader.load(
         src,
         (points: any) => {

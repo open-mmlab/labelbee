@@ -1,5 +1,5 @@
 import { PointCloudContext, useBoxes, useRotate, useSingleBox } from './PointCloudContext';
-import React, { useContext, useEffect, useRef } from 'react';
+import React, { useContext, useEffect } from 'react';
 import { cTool } from '@labelbee/lb-annotation';
 import { message } from 'antd';
 import { connect } from 'react-redux';

@@ -213,7 +213,6 @@ export const synchronizeTopView = (
 const TopViewToolbar = ({ currentData }: IAnnotationStateProps) => {
   const { selectNextBox, selectPrevBox } = useSingleBox();
   const { updateRotate } = useRotate({ currentData });
-  const { switchToNextPolygon } = useNextOne();
   const ratio = 2;
 
   const clockwiseRotate = () => {
@@ -480,7 +479,7 @@ const PointCloudTopView: React.FC<IAnnotationStateProps> = ({ currentData }) => 
       return;
     }
 
-    const { pointCloud2dOpeartion: TopView2dOperation } = ptCtx.topViewInstance;
+    const { pointCloud2dOperation: TopView2dOperation } = ptCtx.topViewInstance;
 
     const polygonOperation = TopView2dOperation;
     if (!polygonOperation) {
@@ -491,7 +490,7 @@ const PointCloudTopView: React.FC<IAnnotationStateProps> = ({ currentData }) => 
 
     const boxParams = ptCtx.pointCloudBoxList.find((v) => v.id === ptCtx.selectedID);
     const polygon = polygonOperation.selectedPolygon;
-    if (!boxParams || !polygon) {
+    if (!boxParams || !polygon || !currentData.url) {
       return;
     }
 
