@@ -241,7 +241,7 @@ export const DEFAULT_ANNOTATIONS = [
   {
     type: 'rect',
     annotation: {
-      id: '1231999923999',
+      id: 'g5r2l7mcrv8',
       x: 60,
       y: 260,
       width: 100,

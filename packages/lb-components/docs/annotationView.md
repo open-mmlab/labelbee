@@ -17,13 +17,13 @@ const onChange = (type, ids) => {
   if (type === 'hover') {
     setData((pre) => {
       return pre.map((item) => {
-        if (item.annotation.id === '1231999923999') {
+        if (item.annotation.id === 'g5r2l7mcrv8') {
           const { annotation } = item;
           return {
             ...item,
             annotation: {
               ...annotation,
-              hiddenRectSize: !ids.includes('1231999923999'),
+              hiddenRectSize: !ids.includes('g5r2l7mcrv8'),
             },
           };
         }
