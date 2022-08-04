@@ -2,10 +2,10 @@ import { PointCloudContext, useBoxes, useRotate, useSingleBox } from './PointClo
 import React, { useContext, useEffect, useRef } from 'react';
 import { cTool } from '@labelbee/lb-annotation';
 import { message } from 'antd';
-import { connect, useDispatch } from 'react-redux';
+import { connect } from 'react-redux';
 import { aMapStateToProps, IAnnotationStateProps } from '@/store/annotation/map';
-import { ANNOTATION_ACTIONS } from '@/store/Actions';
 import { IPointCloudBox, PointCloudUtils } from '@labelbee/lb-utils';
+import { useCustomToolInstance } from '@/hooks/annotation';
 
 const { EPolygonPattern } = cTool;
 
@@ -13,46 +13,8 @@ const PointCloudListener: React.FC<IAnnotationStateProps> = ({ currentData }) =>
   const ptCtx = useContext(PointCloudContext);
   const { changeSelectedBoxValid, selectNextBox, selectPrevBox } = useSingleBox();
   const { copySelectedBoxes, pasteSelectedBoxes, copiedBoxes } = useBoxes();
-  const dispatch = useDispatch();
-  const toolInstanceRef = useRef({
-    exportData: () => {
-      return [[], {}];
-    },
-    singleOn: () => {},
-    setResult: () => {
-      // Rerender Data
-    },
-    history: {
-      initRecord: () => {},
-    },
-  });
+  const { toolInstanceRef } = useCustomToolInstance();
   const { updateRotate } = useRotate({ currentData });
-
-  const onMounted = (instance: any) => {
-    dispatch({
-      type: ANNOTATION_ACTIONS.SET_TOOL,
-      payload: {
-        instance,
-      },
-    });
-  };
-
-  const onUnmounted = () => {
-    dispatch({
-      type: ANNOTATION_ACTIONS.SET_TOOL,
-      payload: {
-        instance: undefined,
-      },
-    });
-  };
-
-  useEffect(() => {
-    // Initial toolInstance
-    onMounted(toolInstanceRef.current);
-    return () => {
-      onUnmounted();
-    };
-  }, []);
 
   const keydownEvents = (lowerCaseKey: string) => {
     const { topViewInstance, mainViewInstance } = ptCtx;
