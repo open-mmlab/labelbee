@@ -6,12 +6,12 @@ import { EToolName } from '@/constant/tool';
 import { getConfig, styleDefaultConfig } from '@/constant/defaultConfig';
 import { IPolygonData } from '@/types/tool/polygon';
 import { ELang } from '@/constant/annotation';
-import { getCurrentOperation } from '../utils/tool/CurrentOperation';
+import { ToolScheduler, THybridToolName, HybridToolUtils } from './scheduler';
 
 interface IProps {
   container: HTMLElement;
   size: ISize;
-  toolName: EToolName;
+  toolName: THybridToolName;
   imgNode?: HTMLImageElement; // 展示图片的内容
   config?: string; // 任务配置
   style?: any;
@@ -35,7 +35,7 @@ const loadImage = (imgSrc: string) => {
 export default class AnnotationEngine {
   public toolInstance: any; // 用于存储当前工具实例
 
-  public toolName: EToolName;
+  public toolName: THybridToolName;
 
   public i18nLanguage: 'en' | 'cn'; // 存储当前 i18n 初始化数据
 
@@ -54,13 +54,18 @@ export default class AnnotationEngine {
 
   private dependToolName?: EToolName;
 
+  private toolScheduler: ToolScheduler; // For multi-level management of tools
+
   constructor(props: IProps) {
     this.container = props.container;
     this.size = props.size;
     this.toolName = props.toolName;
     this.imgNode = props.imgNode;
-    this.config = props.config ?? JSON.stringify(getConfig(props.toolName)); // 设置默认操作
+
+    this.config = props.config ?? JSON.stringify(getConfig(HybridToolUtils.getTopToolName(props.toolName))); // 设置默认操作
     this.style = props.style ?? styleDefaultConfig; // 设置默认操作
+    this.toolScheduler = new ToolScheduler(props);
+
     this.i18nLanguage = 'cn'; // 默认为中文（跟 basicOperation 内同步）
     this._initToolOperation();
   }
@@ -78,9 +83,9 @@ export default class AnnotationEngine {
    * @param toolName
    * @param config
    */
-  public setToolName(toolName: EToolName, config?: string) {
+  public setToolName(toolName: THybridToolName, config?: string) {
     this.toolName = toolName;
-    const defaultConfig = config || JSON.stringify(getConfig(toolName)); // 防止用户没有注入配置
+    const defaultConfig = config || JSON.stringify(getConfig(HybridToolUtils.getTopToolName(toolName))); // 防止用户没有注入配置
     this.config = defaultConfig;
     this._initToolOperation();
   }
@@ -101,11 +106,8 @@ export default class AnnotationEngine {
       rotate: number;
     }>,
   ) {
-    if (!this.toolInstance) {
-      return;
-    }
+    this.toolScheduler.setImgNode(imgNode, basicImgInfo);
     this.imgNode = imgNode;
-    this.toolInstance.setImgNode(imgNode, basicImgInfo);
   }
 
   public setSize(size: ISize) {
@@ -121,35 +123,34 @@ export default class AnnotationEngine {
    * @returns
    */
   private _initToolOperation() {
-    if (this.toolInstance) {
-      this.toolInstance.destroy();
+    this.toolScheduler.destroyAllLayer();
+
+    let toolList: EToolName[] = [];
+    const config = { hiddenImg: true };
+
+    if (HybridToolUtils.isSingleTool(this.toolName)) {
+      toolList = [this.toolName] as EToolName[];
+
+      // Single tool retains images and tools at the same level
+      Object.assign(config, { hiddenImg: false });
+    } else {
+      toolList = this.toolName as EToolName[];
     }
 
-    const ToolOperation: any = getCurrentOperation(this.toolName);
-    if (!ToolOperation) {
-      return;
+    if (toolList.length > 1) {
+      this.toolScheduler.createOperation(undefined, this.imgNode);
     }
 
-    const defaultData = {
-      container: this.container,
-      size: this.size,
-      config: this.config,
-      drawOutSideTarget: false,
-      style: this.style,
-    };
-
-    /**
-     * 存储上层
-     */
-    if (this.imgNode) {
-      Object.assign(defaultData, { imgNode: this.imgNode });
-    }
-
-    this.toolInstance = new ToolOperation(defaultData);
+    toolList.forEach((toolName, i) => {
+      const toolInstance = this.toolScheduler.createOperation(toolName, undefined, config);
+      if (i === toolList.length - 1) {
+        // The last one by default is the topmost operation.
+        this.toolInstance = toolInstance;
+      }
+    });
 
     // 实时同步语言
     this.setLang(this.i18nLanguage);
-    this.toolInstance.init();
   }
 
   /**
@@ -225,5 +226,19 @@ export default class AnnotationEngine {
    */
   public setRenderEnhance(renderEnhance: IRenderEnhance) {
     this.toolInstance.setRenderEnhance(renderEnhance);
+  }
+
+  /**
+   * Notice & TODO. Temporary additions
+   * Just to switch last two canvas。
+   *
+   * It will be deleted later.
+   */
+  public switchLastTwoCanvas() {
+    const newInstance = this.toolScheduler.switchLastTwoCanvas();
+    if (newInstance) {
+      this.toolInstance = newInstance;
+      return newInstance;
+    }
   }
 }
