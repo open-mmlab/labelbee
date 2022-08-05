@@ -46,8 +46,8 @@ class PointCloudUtils {
     const data = this.jsonParser(result);
 
     const DEFAULT_STEP = `step_1`;
-    const pointCloudDataList = data[DEFAULT_STEP].result;
-
+    const pointCloudDataList = data[DEFAULT_STEP]?.result ?? [];
+ 
     return pointCloudDataList;
   }
 }

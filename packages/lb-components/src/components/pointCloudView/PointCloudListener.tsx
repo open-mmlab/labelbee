@@ -1,15 +1,20 @@
-import { useContext, useEffect } from 'react';
 import { PointCloudContext, useBoxes, useRotate, useSingleBox } from './PointCloudContext';
+import React, { useContext, useEffect } from 'react';
 import { cTool } from '@labelbee/lb-annotation';
 import { message } from 'antd';
+import { connect } from 'react-redux';
+import { aMapStateToProps, IAnnotationStateProps } from '@/store/annotation/map';
+import { IPointCloudBox, PointCloudUtils } from '@labelbee/lb-utils';
+import { useCustomToolInstance } from '@/hooks/annotation';
 
 const { EPolygonPattern } = cTool;
 
-const PointCloudListener = () => {
+const PointCloudListener: React.FC<IAnnotationStateProps> = ({ currentData }) => {
   const ptCtx = useContext(PointCloudContext);
-  const { updateRotate } = useRotate();
   const { changeSelectedBoxValid, selectNextBox, selectPrevBox } = useSingleBox();
   const { copySelectedBoxes, pasteSelectedBoxes, copiedBoxes } = useBoxes();
+  const { toolInstanceRef } = useCustomToolInstance();
+  const { updateRotate } = useRotate({ currentData });
 
   const keydownEvents = (lowerCaseKey: string) => {
     const { topViewInstance, mainViewInstance } = ptCtx;
@@ -17,7 +22,7 @@ const PointCloudListener = () => {
       return;
     }
 
-    const { pointCloud2dOpeartion: TopPointCloudPolygonOperation } = topViewInstance;
+    const { pointCloud2dOperation: TopPointCloudPolygonOperation } = topViewInstance;
 
     switch (lowerCaseKey) {
       case 'q': {
@@ -131,7 +136,45 @@ const PointCloudListener = () => {
     };
   }, [ptCtx, copiedBoxes]);
 
+  // Page switch data initialization
+  useEffect(() => {
+    const pointCloud = ptCtx.mainViewInstance;
+    if (currentData?.url && pointCloud) {
+      pointCloud.loadPCDFile(currentData.url);
+
+      // Clear All Data
+      ptCtx.pointCloudBoxList.forEach((v) => {
+        pointCloud?.removeObjectByName(v.id);
+      });
+
+      if (currentData.result) {
+        const boxParamsList = PointCloudUtils.getBoxParamsFromResultList(currentData.result);
+
+        // Add Init Box
+        boxParamsList.forEach((v: IPointCloudBox) => {
+          pointCloud?.generateBox(v, v.id);
+        });
+
+        ptCtx.setPointCloudResult(boxParamsList);
+      } else {
+        ptCtx.setPointCloudResult([]);
+      }
+
+      pointCloud.updateTopCamera();
+
+      // Clear other view data during initialization
+      ptCtx.sideViewInstance?.clearAllData();
+      ptCtx.backViewInstance?.clearAllData();
+    }
+  }, [currentData, ptCtx.mainViewInstance]);
+
+  useEffect(() => {
+    toolInstanceRef.current.exportData = () => {
+      return [ptCtx.pointCloudBoxList, {}];
+    };
+  }, [ptCtx.pointCloudBoxList]);
+
   return null;
 };
 
-export default PointCloudListener;
+export default connect(aMapStateToProps)(PointCloudListener);

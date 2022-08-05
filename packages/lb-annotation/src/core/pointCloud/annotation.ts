@@ -1,12 +1,12 @@
 /**
- * @file Unified management of pointCloud  &  pointCloud2dOpeartion
- * @createdate 2022-07-18
+ * @file Unified management of pointCloud  &  pointCloud2dOperation
+ * @createDate 2022-07-18
  * @author Ron <ron.f.luo@gmail.com>
  */
 
 import { PointCloudUtils } from '@labelbee/lb-utils';
 import { EPolygonPattern } from '@/constant/tool';
-import { CanvasSchduler } from '@/newCore';
+import { CanvasScheduler } from '@/newCore';
 import { IPolygonData } from '@/types/tool/polygon';
 import { PointCloud } from '.';
 import PointCloud2dOperation from '../toolOperation/pointCloud2dOperation';
@@ -38,9 +38,9 @@ const createEmptyImage = (size: { width: number; height: number }) => {
 export class PointCloudAnnotation implements IPointCloudAnnotationOperation {
   public pointCloudInstance: PointCloud;
 
-  public pointCloud2dOpeartion: PointCloud2dOperation;
+  public pointCloud2dOperation: PointCloud2dOperation;
 
-  public canvasSchuler: CanvasSchduler;
+  public canvasScheduler: CanvasScheduler;
 
   constructor({ size, container, pcdPath }: IPointCloudAnnotationProps) {
     const defaultOrthographic = {
@@ -56,20 +56,20 @@ export class PointCloudAnnotation implements IPointCloudAnnotationOperation {
 
     const image = new Image();
     image.src = imgSrc;
-    const canvasSchuler = new CanvasSchduler({ container });
+    const canvasScheduler = new CanvasScheduler({ container });
 
     // 1. PointCloud initialization
     const pointCloud = new PointCloud({
       container,
       noAppend: true,
       isOrthographicCamera: true,
-      orthgraphicParams: defaultOrthographic,
+      orthographicParams: defaultOrthographic,
     });
 
     if (pcdPath) {
       pointCloud.loadPCDFile(pcdPath);
     }
-    canvasSchuler.createCanvas(pointCloud.renderer.domElement);
+    canvasScheduler.createCanvas(pointCloud.renderer.domElement);
 
     // 2. PointCloud2dOperation initialization
     const polygonOperation = new PointCloud2dOperation({
@@ -83,12 +83,12 @@ export class PointCloudAnnotation implements IPointCloudAnnotationOperation {
     polygonOperation.eventBinding();
     polygonOperation.setPattern(EPolygonPattern.Rect);
 
-    canvasSchuler.createCanvas(polygonOperation.canvas, { size });
+    canvasScheduler.createCanvas(polygonOperation.canvas, { size });
 
     // 3. Data record
-    this.pointCloud2dOpeartion = polygonOperation;
+    this.pointCloud2dOperation = polygonOperation;
     this.pointCloudInstance = pointCloud;
-    this.canvasSchuler = canvasSchuler;
+    this.canvasScheduler = canvasScheduler;
   }
 
   public addPolygonListOnTopView(result: string) {
@@ -103,7 +103,7 @@ export class PointCloudAnnotation implements IPointCloudAnnotationOperation {
       };
     }) as IPolygonData[];
 
-    this.pointCloud2dOpeartion.setResult(polygonList);
+    this.pointCloud2dOperation.setResult(polygonList);
   }
 
   /**
@@ -113,11 +113,31 @@ export class PointCloudAnnotation implements IPointCloudAnnotationOperation {
    * @returns
    */
   public updateData(pcdPath: string, result: string) {
-    if (!this.pointCloud2dOpeartion || !this.pointCloudInstance) {
+    if (!this.pointCloud2dOperation || !this.pointCloudInstance) {
       return;
     }
 
     this.pointCloudInstance.loadPCDFile(pcdPath);
     this.addPolygonListOnTopView(result);
+  }
+
+  /**
+   * Init All Position
+   * 1. PointCloud camera change to topView
+   * 2. Initial Polygon Position.
+   */
+  public initAllPosition() {
+    this.pointCloudInstance.updateTopCamera();
+    this.pointCloud2dOperation.initPosition();
+  }
+
+  /**
+   * Clear All Data
+   * 1. pointCloud Data
+   * 2. polygonOperation Data
+   */
+  public clearAllData() {
+    this.pointCloudInstance.clearPointCloudAndRender();
+    this.pointCloud2dOperation.clearResult();
   }
 }

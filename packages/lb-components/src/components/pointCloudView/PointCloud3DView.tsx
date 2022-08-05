@@ -11,12 +11,12 @@ import { EPerspectiveView, IPointCloudBox, PointCloudUtils } from '@labelbee/lb-
 import classNames from 'classnames';
 import React, { useContext, useEffect, useMemo, useRef } from 'react';
 import { PointCloudContainer } from './PointCloudLayout';
-const pointCloudID = 'LABELBEE-POINTCLOUD';
 import { PointCloudContext } from './PointCloudContext';
 import { aMapStateToProps, IAnnotationStateProps } from '@/store/annotation/map';
 import { connect } from 'react-redux';
 import { jsonParser } from '@/utils';
 
+const pointCloudID = 'LABELBEE-POINTCLOUD';
 const PointCloud3DContext = React.createContext<{
   isActive: boolean;
   setTarget3DView: (perspectiveView: EPerspectiveView) => void;
@@ -34,7 +34,7 @@ const PointCloudViewIcon = ({
 }) => {
   const { isActive, setTarget3DView } = useContext(PointCloud3DContext);
 
-  const getTaget3DViewClassname = (position: string) => {
+  const getTarget3DViewClassName = (position: string) => {
     return classNames({
       [getClassName('point-cloud-3d-view', position)]: true,
       active: isActive,
@@ -46,7 +46,7 @@ const PointCloudViewIcon = ({
       onClick={() => {
         setTarget3DView(EPerspectiveView[perspectiveView]);
       }}
-      className={getTaget3DViewClassname(perspectiveView.toLocaleLowerCase())}
+      className={getTarget3DViewClassName(perspectiveView.toLocaleLowerCase())}
     />
   );
 };
@@ -96,9 +96,7 @@ const PointCloud3D: React.FC<IAnnotationStateProps> = ({ currentData }) => {
   useEffect(() => {
     if (ref.current && currentData?.url) {
       let pointCloud = ptCtx.mainViewInstance;
-      if (pointCloud) {
-        pointCloud.loadPCDFile(currentData.url);
-      } else {
+      if (!pointCloud) {
         pointCloud = new PointCloud({
           container: ref.current,
           backgroundColor: '#4c4c4c',
@@ -118,11 +116,9 @@ const PointCloud3D: React.FC<IAnnotationStateProps> = ({ currentData }) => {
         ptCtx.setPointCloudValid(jsonParser(currentData.result)?.valid);
       }
 
-      pointCloud?.controls.update();
-      pointCloud?.render();
       ptCtx.setMainViewInstance(pointCloud);
     }
-  }, [currentData]);
+  }, []);
 
   /**
    *  Observe selectedID and reset camera to target top-view

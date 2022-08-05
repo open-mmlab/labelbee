@@ -15,7 +15,7 @@ interface ICavnasSchdulerProps {
   container: HTMLElement;
 }
 
-class CanvasSchduler implements ICanvasBasicOperation {
+class CanvasScheduler implements ICanvasBasicOperation {
   private container: HTMLElement;
 
   constructor(props: ICavnasSchdulerProps) {
@@ -53,4 +53,4 @@ class CanvasSchduler implements ICanvasBasicOperation {
   }
 }
 
-export { CanvasSchduler };
+export { CanvasScheduler };

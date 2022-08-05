@@ -246,6 +246,13 @@ export const annotationReducer = (
       };
     }
 
+    /**
+     * For data storage in dependent states
+     * 
+     * Features: 
+     * 1. Get Data from ToolInstance (If it use toolInstance)
+     * 2. Filter Data By BasicResultList
+     */
     case ANNOTATION_ACTIONS.SUBMIT_RESULT: {
       const { imgList, basicIndex, resultList, toolInstance, basicResultList } = state;
       if (!toolInstance) {
