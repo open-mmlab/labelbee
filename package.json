@@ -1,9 +1,6 @@
 {
   "name": "labelbee",
   "private": true,
-  "workspaces": [
-    "packages/*"
-  ],
   "version": "1.7.0",
   "scripts": {
     "start": "lerna run build:type && lerna run --parallel --stream start",
