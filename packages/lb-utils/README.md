@@ -101,3 +101,76 @@ const data4: IToolStyle = toolStyleConverter.getColorFromConfig(
   status
 );
 ```
+
+
+### ImgConversionUtils
+
+For picture conversion, providing input single channel mask output color picture
+
+#### Quick Start
+
+```ts
+import { ImgConversionUtils } from '@labelbee/lb-utils';
+
+const maskSrc = 'http://10.152.32.16:8080/ADE_val_00001993.png';
+const basicImgSrc = 'http://10.152.32.16:8080/ADE_val_00001993.jpg';
+
+/**
+ * Convert mask to color map
+ */
+ImgConversionUtils.getColorMapBySingleChannelMask(
+  maskSrc,
+  basicImgSrc,
+  
+).then(newImg => {
+  // Update your images
+});
+```
+
+Show by labelbee
+
+```ts
+import { AnnotationView } from '@labelbee/lb-components';
+import { ImgConversionUtils } from '@labelbee/lb-utils';
+
+const App = () => {
+  const [imgSrc, setImgSrc] = useState(maskSrc);
+  useEffect(() => {
+    ImgConversionUtils.getColorMapBySingleChannelMask({
+      maskSrc,
+      basicImgSrc: basicImgSrc,
+    }).then((newSrc) => {
+      setImgSrc(newSrc);
+    });
+  }, []);
+
+  return (
+    <div style={{ height: 1000 }}>
+      <AnnotationView
+        src={imgSrc}
+      />
+    </div>
+  )
+}
+
+```
+
+#### Other Props
+
+```ts
+interface ICustomColor {
+    channel?: number;
+    color?: string;
+}
+
+declare class ImgConversionUtils {
+    static getColorMapBySingleChannelMask: (params: {
+        maskSrc: string;
+        basicImgSrc?: string | undefined;
+        customColor?: ICustomColor[] | undefined; // You can customize the color of the specified channel value
+        opacity?: number | undefined; // You can customize the opacity of your mask.
+    }) => Promise<string | undefined>;
+}
+export default ImgConversionUtils;
+
+```

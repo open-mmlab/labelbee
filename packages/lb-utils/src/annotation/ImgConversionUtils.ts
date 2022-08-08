@@ -1,3 +1,8 @@
+/**
+ * @file Image Conversion Utils
+ * @createDate 2022-08-08
+ * @author Ron <ron.f.luo@gmail.com>
+ */
 import { colorArr } from "../constant/color";
 
 interface ICustomColor {
@@ -6,58 +11,125 @@ interface ICustomColor {
 }
 
 class ImgConversionUtils {
-  /**
-   * 获取绘制的mask图片
-   * @param color
-   * @param imgSrc
-   * @param channel
-   * @returns
-   */
+  public static createCanvas(imgNode: HTMLImageElement) {
+    const canvas = document.createElement("canvas");
+    canvas.width = imgNode.width;
+    canvas.height = imgNode.height;
+    const ctx = canvas.getContext("2d")!;
+    return { canvas, ctx };
+  }
 
-  public static getDrawnMaskImg = (params: {
-    imgSrc: string;
-    customColor?: ICustomColor[];
-  }) => {
-    const { imgSrc, customColor } = params;
+  public static createImgDom(src: string): Promise<HTMLImageElement> {
     const imgNode = new Image();
-    imgNode.crossOrigin = "";
-    imgNode.src = imgSrc;
+    imgNode.crossOrigin = "Anonymous";
+    imgNode.src = src;
 
-    const oldCanvas = document.createElement("canvas");
-    const ctx = oldCanvas.getContext("2d")!;
-    oldCanvas.width = imgNode.width;
-    oldCanvas.height = imgNode.height;
-    return new Promise(() => {
+    return new Promise((resolve) => {
       imgNode.onload = () => {
-        ctx.drawImage(imgNode, 0, 0, imgNode.width, imgNode.height);
-        const imgData = ctx.getImageData(0, 0, imgNode.width, imgNode.height);
-        const newCanvas = document.createElement("canvas");
-        const newCtx = newCanvas.getContext("2d");
-        newCanvas.width = imgNode.width;
-        newCanvas.height = imgNode.height;
-
-        if (newCtx) {
-          newCtx.fillStyle = "black";
-          newCtx.fillRect(0, 0, imgNode.width, imgNode.height);
-
-          for (let i = 0; i < imgData.data.length / 4; i++) {
-            const value = imgData.data[i * 4];
-            const color = customColor?.find((i) => i?.channel === value)?.color;
-            const colorRgb = colorArr[value]?.rgb;
-            const r = colorRgb?.r;
-            const g = colorRgb?.g;
-            const b = colorRgb?.b;
-            newCtx.fillStyle = color ? color : `rgb(${r}, ${g}, ${b})`;
-            const y = Math.floor(i / imgNode.width);
-            const x = Math.floor(i % imgNode.width);
-            newCtx.fillRect(x, y, 1, 1);
-          }
-
-          const newImgSrc = newCanvas.toDataURL("image/png");
-          return newImgSrc;
-        }
+        resolve(imgNode);
       };
     });
+  }
+
+  public static nextTick = () => {
+    return new Promise((resolve) => {
+      setTimeout(() => {
+        resolve("");
+      });
+    });
+  };
+
+  /**
+   * Extract single channel mask to render random colors
+   * @param param0
+   * @returns
+   */
+  public static renderColorByMask({
+    renderCanvas,
+    imgData,
+    imgNode,
+    customColor,
+  }: {
+    renderCanvas: HTMLCanvasElement;
+    imgData: ImageData;
+    imgNode: HTMLImageElement;
+    customColor?: ICustomColor[];
+  }) {
+    const ctx = renderCanvas.getContext("2d");
+
+    if (ctx) {
+      // 1. The default background color is black.
+      ctx.fillStyle = "black";
+      ctx.fillRect(0, 0, imgNode.width, imgNode.height);
+
+      /**
+       * 2. Traversing image pixels
+       *
+       * If no color is set then the default color is drawn (From 'constant/color')
+       */
+      for (let i = 0; i < imgData.data.length / 4; i++) {
+        const value = imgData.data[i * 4];
+        const colorByCustom = customColor?.find(
+          (i) => i?.channel === value
+        )?.color;
+
+        ctx.fillStyle = colorByCustom || colorArr[value].hexString;
+        const x = Math.floor(i % imgNode.width);
+        const y = Math.floor(i / imgNode.width);
+        ctx.fillRect(x, y, 1, 1);
+      }
+      const newImgSrc = renderCanvas.toDataURL("image/png");
+
+      return newImgSrc;
+    }
+  }
+
+  /**
+   * Obtaining a color map from a single channel image
+   * @param params
+   * @returns
+   */
+  public static getColorMapBySingleChannelMask = async (params: {
+    maskSrc: string;
+    basicImgSrc?: string;
+    customColor?: ICustomColor[];
+    opacity?: number;
+  }) => {
+    const { maskSrc, customColor, basicImgSrc, opacity = 0.3 } = params;
+    try {
+      const imgNode = await this.createImgDom(maskSrc);
+      const { ctx: basicCtx } = this.createCanvas(imgNode);
+      basicCtx.drawImage(imgNode, 0, 0, imgNode.width, imgNode.height);
+
+      const { canvas: renderCanvas, ctx: renderCtx } =
+        this.createCanvas(imgNode);
+
+      /**
+       * Rendering the underlying image by the way
+       */
+      if (basicImgSrc) {
+        const basicImg = await this.createImgDom(basicImgSrc);
+        renderCtx.drawImage(basicImg, 0, 0);
+
+        // It needs to set transparency.
+        renderCtx.globalAlpha = opacity;
+      }
+
+      /**
+       * imgData requires delayed fetching.
+       */
+      await this.nextTick();
+      const imgData = basicCtx.getImageData(0, 0, imgNode.width, imgNode.height);
+      const newImgSrc = this.renderColorByMask({
+        renderCanvas,
+        imgData,
+        imgNode,
+        customColor,
+      });
+      return newImgSrc;
+    } catch (e) {
+      console.error("Failed to load image");
+    }
   };
 }
 
