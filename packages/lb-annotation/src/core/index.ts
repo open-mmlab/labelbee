@@ -112,6 +112,7 @@ export default class AnnotationEngine {
 
   public setSize(size: ISize) {
     this.size = size;
+    this.toolScheduler.setSize(size);
   }
 
   public setStyle(style: any) {

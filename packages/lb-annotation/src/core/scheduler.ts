@@ -100,6 +100,12 @@ export class ToolScheduler implements IToolSchedulerOperation {
     });
   }
 
+  public setSize(size: ISize) {
+    this.toolOperationList.forEach((toolInstance) => {
+      toolInstance.setSize(size);
+    });
+  }
+
   public syncPosition(currentPos: ICoordinate, zoom: number, imgInfo: ISize, currentToolInstance: any) {
     this.toolOperationList.forEach((toolInstance) => {
       if (currentToolInstance === toolInstance) {
