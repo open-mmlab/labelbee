@@ -1,5 +1,5 @@
-import AxisUtils from '@/utils/tool/AxisUtils';
 import { i18n } from '@labelbee/lb-utils';
+import AxisUtils from '@/utils/tool/AxisUtils';
 import { RectOperation } from './rectOperation';
 import type { IRectOperationProps } from './rectOperation';
 import EKeyCode from '../../constant/keyCode';
