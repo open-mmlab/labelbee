@@ -134,7 +134,7 @@ class BasicToolOperation extends EventListener {
   // 拖拽 - 私有变量
   private _firstClickCoordinate?: ICoordinate; // 存储第一次点击的坐标
 
-  private innerZoom = 1; // 用于内外 zoom 事件的变量
+  private innerZoom = 1; // 用于内外 zoom 事件的变量，缓存 zoom 变换前的数据
 
   private currentPosStorage?: ICoordinate; // 存储当前点击的平移位置
 
@@ -271,6 +271,7 @@ class BasicToolOperation extends EventListener {
 
   public setZoom(zoom: number) {
     this.zoom = zoom;
+    this.innerZoom = zoom;
     this.coordUtils.setZoomAndCurrentPos(this.zoom, this.currentPos);
   }
 
@@ -299,7 +300,6 @@ class BasicToolOperation extends EventListener {
     this.setZoom(zoom);
     this.setCurrentPos(currentPos);
     this.currentPosStorage = currentPos;
-    this.innerZoom = zoom;
 
     this.renderBasicCanvas();
     this.render();
@@ -522,9 +522,6 @@ class BasicToolOperation extends EventListener {
     this.currentPosStorage = currentPos;
     this.setImgInfo(imgInfo);
     this.setZoom(zoom);
-
-    this.innerZoom = zoom;
-
     this.render();
     this.renderBasicCanvas();
 
@@ -580,8 +577,6 @@ class BasicToolOperation extends EventListener {
             width: (imgInfo.width / this.innerZoom) * pos.innerZoom,
             height: (imgInfo.height / this.innerZoom) * pos.innerZoom,
           });
-
-          this.innerZoom = pos.innerZoom;
 
           // 需要加载下更改当前的 imgInfo
           this.setZoom(pos.innerZoom);
@@ -919,7 +914,6 @@ class BasicToolOperation extends EventListener {
     }
 
     const { currentPos: newCurrentPos, ratio, zoom, imgInfo } = pos;
-    this.innerZoom = zoom;
     this.setZoom(zoom);
     this.setCurrentPos(newCurrentPos);
     this.currentPosStorage = newCurrentPos;
