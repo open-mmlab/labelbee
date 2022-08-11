@@ -10,6 +10,7 @@ import { getCurrentOperation } from '@/utils/tool/CurrentOperation';
 import { RectOperation } from './toolOperation/rectOperation';
 import PolygonOperation from './toolOperation/polygonOperation';
 import { BasicToolOperation } from './toolOperation/basicToolOperation';
+import SegmentByRect from './toolOperation/segmentByRect';
 
 export type THybridToolName = EToolName | Array<EToolName>;
 
@@ -66,7 +67,7 @@ export class HybridToolUtils {
 export class ToolScheduler implements IToolSchedulerOperation {
   private container: HTMLElement;
 
-  private toolOperationList: Array<RectOperation | PolygonOperation> = [];
+  private toolOperationList: Array<RectOperation | PolygonOperation | SegmentByRect> = [];
 
   private toolOperationDom: Array<HTMLElement> = [];
 
@@ -255,6 +256,20 @@ export class ToolScheduler implements IToolSchedulerOperation {
     this.toolOperationDom = arraySwap(this.toolOperationDom, lastOneIndex, last2SecondIndex);
 
     return this.toolOperationList[lastOneIndex];
+  }
+
+  /**
+   * Notice & TODO. Temporary additions
+   * Just to set data to toolInstance.
+   * @returns
+   */
+  public getFirstToolOperation() {
+    if (this.toolOperationList.length > 1) {
+      // Multi Layer
+      return this.toolOperationList[1];
+    }
+
+    return this.toolOperationList[0];
   }
 
   public destroyAllLayer() {

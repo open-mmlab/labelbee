@@ -242,4 +242,13 @@ export default class AnnotationEngine {
       return newInstance;
     }
   }
+
+  /**
+   * Notice & TODO. Temporary additions
+   * Just to get ToolInstance to update something.
+   * @returns
+   */
+  public get firstToolInstance() {
+    return this.toolScheduler.getFirstToolOperation();
+  }
 }
