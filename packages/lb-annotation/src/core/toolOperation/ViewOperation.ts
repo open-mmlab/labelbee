@@ -34,6 +34,8 @@ export default class ViewOperation extends BasicToolOperation {
 
   private renderDomInstance: RenderDomClass;
 
+  private connectionPoints: ICoordinate[] = [];
+
   constructor(props: IViewOperationProps) {
     super({ ...props, showDefaultCursor: true });
     this.style = props.style ?? { stroke: DEFAULT_STROKE_COLOR, thickness: 3 };
@@ -43,6 +45,15 @@ export default class ViewOperation extends BasicToolOperation {
       container: this.container,
       height: this.canvas.height,
     });
+  }
+
+  /**
+   * Get the connection points in annotationData.
+   * @param newAnnotations
+   */
+  public checkConnectionPoints(newAnnotations: IAnnotationData[] = this.annotations) {
+    const { connectionPoints } = MathUtils.getCollectionPointByAnnotationData(newAnnotations);
+    this.connectionPoints = connectionPoints;
   }
 
   public setLoading(loading: boolean) {
@@ -210,6 +221,15 @@ export default class ViewOperation extends BasicToolOperation {
 
   public getReferenceOptions(isReference?: boolean): { lineCap?: CanvasLineCap; lineDash?: number[] } {
     return isReference ? { lineCap: 'butt', lineDash: [20, 20] } : {};
+  }
+
+  public renderConnectionPoints() {
+    this.connectionPoints.forEach((point) => {
+      const renderPoint = AxisUtils.changePointByZoom(point, this.zoom, this.currentPos);
+
+      DrawUtils.drawCircleWithFill(this.canvas, renderPoint, 4, { color: '#fff' });
+      DrawUtils.drawCircleWithFill(this.canvas, renderPoint, 2, { color: '#000' });
+    });
   }
 
   public render() {
@@ -540,6 +560,8 @@ export default class ViewOperation extends BasicToolOperation {
           toolInstance: this,
         });
       });
+
+      this.renderConnectionPoints();
     } catch (e) {
       console.error('ViewOperation Render Error', e);
     }
