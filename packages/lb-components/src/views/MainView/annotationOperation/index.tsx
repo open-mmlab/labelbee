@@ -1,17 +1,17 @@
-import React, { useEffect, useRef, useState } from 'react';
-import { message } from 'antd/es';
-import { AppState } from 'src/store';
-import { connect } from 'react-redux';
-import { ImgAttributeState } from 'src/store/imgAttribute/types';
-import _ from 'lodash';
 import { store } from '@/index';
+import { message } from 'antd/es';
+import _ from 'lodash';
+import React, { useEffect, useRef, useState } from 'react';
+import { connect } from 'react-redux';
+import { AppState } from 'src/store';
+import { ImgAttributeState } from 'src/store/imgAttribute/types';
 
+import { AppProps } from '@/App';
+import FileError from '@/components/fileException/FileError';
 import useSize from '@/hooks/useSize';
 import { InitToolStyleConfig } from '@/store/toolStyle/actionCreators';
 import { AnnotationEngine, ImgUtils } from '@labelbee/lb-annotation';
-import FileError from '@/components/fileException/FileError';
 import { i18n } from '@labelbee/lb-utils';
-import { AppProps } from '@/App';
 
 interface IProps extends AppState, AppProps {
   imgAttribute: ImgAttributeState;
@@ -32,6 +32,7 @@ const AnnotationOperation: React.FC<IProps> = (props: IProps) => {
     imgIndex,
     dataInjectionAtCreation,
     renderEnhance,
+    customRenderStyle,
   } = props;
   const annotationRef = useRef<HTMLDivElement>(null);
   const containerRef = useRef<HTMLDivElement>(null);
@@ -61,7 +62,10 @@ const AnnotationOperation: React.FC<IProps> = (props: IProps) => {
     }
     annotationEngine?.setDataInjectionAtCreation(dataInjectionAtCreation);
     annotationEngine?.setRenderEnhance(renderEnhance);
-  }, [annotationEngine, dataInjectionAtCreation, renderEnhance]);
+    if (customRenderStyle) {
+      annotationEngine?.setCustomRenderStyle(customRenderStyle);
+    }
+  }, [annotationEngine, dataInjectionAtCreation, renderEnhance, customRenderStyle]);
 
   useEffect(() => {
     if (toolInstance) {
