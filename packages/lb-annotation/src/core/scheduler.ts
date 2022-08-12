@@ -6,7 +6,7 @@
 
 import { getConfig, styleDefaultConfig } from '@/constant/defaultConfig';
 import { EToolName } from '@/constant/tool';
-import { getCurrentOperation } from '@/utils/tool/CurrentOperation';
+import { getCurrentOperation } from '@/utils/tool/EnhanceCommonToolUtils';
 import { RectOperation } from './toolOperation/rectOperation';
 import PolygonOperation from './toolOperation/polygonOperation';
 import { BasicToolOperation } from './toolOperation/basicToolOperation';

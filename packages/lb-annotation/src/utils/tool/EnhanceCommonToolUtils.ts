@@ -1,7 +1,9 @@
 /**
- * 筛选当前的步骤配置
- * @param toolName
+ * @file Enhance CommonToolUtils with getCurrentOperation, solving circular reference problems.
+ * @createDate 2022-08-12
+ * @author Ron <ron.f.luo@gmail.com>
  */
+
 import { ECheckModel, EToolName } from '@/constant/tool';
 import CheckOperation from '../../core/toolOperation/checkOperation';
 import PolygonOperation from '../../core/toolOperation/polygonOperation';
@@ -11,6 +13,7 @@ import LineToolOperation from '../../core/toolOperation/LineToolOperation';
 import PointOperation from '../../core/toolOperation/pointOperation';
 import TextToolOperation from '../../core/toolOperation/TextToolOperation';
 import SegmentByRect from '../../core/toolOperation/segmentByRect';
+import CommonToolUtils from './CommonToolUtils';
 
 const getCurrentOperation = (toolName: EToolName | ECheckModel) => {
   switch (toolName) {
@@ -35,4 +38,10 @@ const getCurrentOperation = (toolName: EToolName | ECheckModel) => {
       throw new Error('not match tool');
   }
 };
+
+class EnhanceCommonToolUtils extends CommonToolUtils {
+  public static getCurrentOperation = getCurrentOperation;
+}
+
 export { getCurrentOperation };
+export default EnhanceCommonToolUtils;
