@@ -4,19 +4,28 @@ import { RectOperation } from './rectOperation';
 import type { IRectOperationProps } from './rectOperation';
 import EKeyCode from '../../constant/keyCode';
 
+type TRunPrediction = (params: {
+  point: ICoordinate;
+  rect: { x: number; y: number; w: number; h: number };
+}) => Promise<unknown>;
+
 interface ISegmentByRectProps extends IRectOperationProps {
-  runPrediction: any;
+  runPrediction: TRunPrediction;
 }
 
 class SegmentByRect extends RectOperation {
   public isRunSegment: boolean; // 是否进行算法预算
 
-  public runPrediction: Function; // 分割方法
+  public runPrediction: TRunPrediction; // 分割方法
 
   constructor(props: ISegmentByRectProps) {
     super(props);
     this.isRunSegment = false;
     this.runPrediction = props.runPrediction;
+  }
+
+  public setRunPrediction(runPrediction: TRunPrediction) {
+    this.runPrediction = runPrediction;
   }
 
   public eventBinding() {
@@ -165,10 +174,12 @@ class SegmentByRect extends RectOperation {
     this.render();
 
     if (!this.runPrediction) {
+      this.emit('messageError', 'You needs to set runPrediction function');
+      this.clearPredictionInfo();
       return;
     }
 
-    const res = await this.runPrediction({
+    await this.runPrediction({
       point: coord,
       rect: {
         x: this.rectList[0].x,
@@ -177,9 +188,7 @@ class SegmentByRect extends RectOperation {
         h: this.rectList[0].height,
       },
     });
-    if (res) {
-      this.clearPredictionInfo();
-    }
+    this.clearPredictionInfo();
   };
 }
 export default SegmentByRect;

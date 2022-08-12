@@ -1,15 +1,46 @@
-import React from 'react';
+import React, { useEffect, useRef } from 'react';
 import AnnotationOperation from '@labelbee/lb-components';
 import '@labelbee/lb-components/dist/index.css';
 // import { DrawUtils } from '@labelbee/lb-annotation';
 import { fileList as urlList } from '../../mock';
+import { message } from 'antd';
+
+// Type definition.
+// type TRunPrediction = (params: {
+//   point: ICoordinate;
+//   rect: { x: number; y: number; w: number; h: number };
+// }) => Promise<unknown>;
 
 const Annotation = (props) => {
+  const ref = useRef();
   const { fileList, goBack, stepList, step } = props;
 
   // const exportData = (data) => {
   //   console.log('exportData', data);
   // };
+
+  useEffect(() => {
+    setTimeout(() => {
+      const { annotationEngine } = ref.current;
+      if (annotationEngine) {
+        const firstToolInstance = annotationEngine.firstToolInstance;
+        firstToolInstance?.setRunPrediction?.((data) => {
+          // data: TRunPrediction
+          return new Promise((resolve) => {
+            // 模拟异步的操作
+            setTimeout(() => {
+              // 关键，需要返回成功
+              resolve('');
+              message.success('Predict successfully');
+
+              // 返回的原来的工具
+              annotationEngine.switchLastTwoCanvas();
+            }, 1000);
+          });
+        });
+      }
+    });
+  }, []);
 
   const onSubmit = (data) => {
     // 翻页时触发当前页面数据的输出
@@ -67,6 +98,7 @@ const Annotation = (props) => {
     <div>
       <AnnotationOperation
         // exportData={exportData}
+        ref={ref}
         headerName='测试各类工具'
         onSubmit={onSubmit}
         imgList={fileList}
