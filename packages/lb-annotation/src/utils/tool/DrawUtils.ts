@@ -11,6 +11,20 @@ const DEFAULT_CURRENT_POS = {
 const DEFAULT_ROTATE = 0;
 const DEFAULT_COLOR = '';
 
+export interface IDrawTextConfig {
+  color: string;
+  font: string;
+  shadowColor: string;
+  shadowOffsetX: number;
+  shadowOffsetY: number;
+  shadowBlur: number;
+  textMaxWidth: number;
+  offsetX: number;
+  offsetY: number;
+  textAlign: 'start' | 'center' | 'end' | 'left' | 'right';
+  lineHeight: number;
+}
+
 export default class DrawUtils {
   public static drawImg = (
     canvas: HTMLCanvasElement,
@@ -557,19 +571,7 @@ export default class DrawUtils {
     canvas: HTMLCanvasElement,
     startPoint: IPoint | IPolygonPoint,
     text: string,
-    options: Partial<{
-      color: string;
-      font: string;
-      shadowColor: string;
-      shadowOffsetX: number;
-      shadowOffsetY: number;
-      shadowBlur: number;
-      textMaxWidth: number;
-      offsetX: number;
-      offsetY: number;
-      textAlign: 'start' | 'center' | 'end' | 'left' | 'right';
-      lineHeight: number;
-    }> = {},
+    options: Partial<IDrawTextConfig> = {},
   ): void {
     if (!text) {
       return;
