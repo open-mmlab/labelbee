@@ -8,7 +8,13 @@ import React, { useState } from 'react';
 import './App.css';
 import 'antd/dist/antd.css';
 import Annotation from './components/Annotation';
-import { fileList as mockFileList, getMockResult, pointCloudList, videoList } from './mock/index';
+import {
+  fileList as mockFileList,
+  getMockResult,
+  pointCloudList,
+  pointCloudMappingImgList,
+  videoList,
+} from './mock/index';
 import { getStepList, getDependStepList } from './mock/taskConfig';
 import qs from 'qs';
 import { AnnotationView } from '@labelbee/lb-components';
@@ -25,15 +31,21 @@ const App = () => {
   const getMockList = () => {
     let srcList = mockFileList;
 
+    const extraData = {};
+
     if (currentIsVideo) {
       srcList = videoList;
     }
 
     if (currentIsPointCloud) {
       srcList = pointCloudList;
+      Object.assign(extraData, {
+        mappingImgList: pointCloudMappingImgList,
+      });
     }
 
     return srcList.map((url, i) => ({
+      ...extraData,
       id: i + 1,
       url,
       result: isSingleTool ? getMockResult(tool) : '',
