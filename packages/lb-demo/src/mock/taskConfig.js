@@ -1,5 +1,5 @@
 import { cTool } from '@labelbee/lb-annotation';
-const { EVideoToolName, EToolName } = cTool;
+const { EVideoToolName, EToolName, EPointCloudName } = cTool;
 
 const rectToolConfig = {
   showConfirm: false,
@@ -134,6 +134,56 @@ const polygonConfig = {
   customFormat: '',
 };
 
+const pointCloudConfig = {
+  attributeList: [
+    {
+      key: '类别1',
+      value: '类别1',
+      // 点云暂不支持
+      sizeLimit: {
+        lengthMin: '1',
+        lengthMax: '2',
+        widthMin: '3',
+        widthMax: '4',
+        heightMin: '5',
+        heightMax: '6',
+      },
+      default: false,
+    },
+    { key: '类别Iq', value: 'class-Iq', sizeLimit: { lengthMin: '1' } },
+  ],
+  radius: 90,
+  inputList: [
+    {
+      key: '类别1',
+      value: 'class1',
+      isMulti: false,
+      subSelected: [
+        { key: '选项1-1', value: 'option1', isDefault: false },
+        { key: '选项1-2', value: 'option2', isDefault: false },
+      ],
+    },
+    {
+      key: '类别v0',
+      value: 'class-v0',
+      isMulti: false,
+      subSelected: [
+        { key: '选项2-1', value: 'option2-1', isMulti: false },
+        { key: '选项2-2', value: 'option2-2', isMulti: false },
+        { key: '选项2-3', value: 'option2-3', isMulti: false },
+      ],
+    },
+    {
+      key: '类别Rt',
+      value: 'class-Rt',
+      isMulti: false,
+      subSelected: [{ key: '选项3-1', value: 'option3-1', isMulti: false }],
+    },
+  ],
+  secondaryAttributeConfigurable: true,
+  lowerLimitPointsNumInBox: '',
+};
+
 export const getConfig = (tool) => {
   if (tool === EToolName.Line) {
     return lineToolConfig;
@@ -157,6 +207,10 @@ export const getConfig = (tool) => {
 
   if (tool === EVideoToolName.VideoTagTool) {
     return tagToolConfig;
+  }
+
+  if (tool === EPointCloudName.PointCloud) {
+    return pointCloudConfig;
   }
 
   return rectToolConfig;

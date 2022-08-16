@@ -11,7 +11,8 @@ const { EPolygonPattern } = cTool;
 
 const PointCloudListener: React.FC<IAnnotationStateProps> = ({ currentData }) => {
   const ptCtx = useContext(PointCloudContext);
-  const { changeSelectedBoxValid, selectNextBox, selectPrevBox } = useSingleBox();
+  const { changeSelectedBoxValid, selectNextBox, selectPrevBox, updateSelectedBox } =
+    useSingleBox();
   const { copySelectedBoxes, pasteSelectedBoxes, copiedBoxes } = useBoxes();
   const { toolInstanceRef } = useCustomToolInstance();
   const { updateRotate } = useRotate({ currentData });
@@ -172,7 +173,30 @@ const PointCloudListener: React.FC<IAnnotationStateProps> = ({ currentData }) =>
     toolInstanceRef.current.exportData = () => {
       return [ptCtx.pointCloudBoxList, {}];
     };
-  }, [ptCtx.pointCloudBoxList]);
+
+    toolInstanceRef.current.setDefaultAttribute = (newAttribute: string) => {
+      const selectBox = ptCtx.selectedPointCloudBox;
+      if (selectBox) {
+        selectBox.attribute = newAttribute;
+
+        updateSelectedBox(selectBox);
+      }
+    };
+
+    toolInstanceRef.current.setSubAttribute = (key: string, value: string) => {
+      const selectBox = ptCtx.selectedPointCloudBox;
+      if (selectBox) {
+        const originSubAttribute = selectBox?.subAttribute ?? {};
+
+        selectBox.subAttribute = {
+          ...originSubAttribute,
+          [key]: value,
+        };
+
+        updateSelectedBox(selectBox);
+      }
+    };
+  }, [ptCtx.pointCloudBoxList, ptCtx.selectedID]);
 
   return null;
 };
