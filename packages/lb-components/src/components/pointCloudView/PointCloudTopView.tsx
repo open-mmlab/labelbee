@@ -125,7 +125,8 @@ export const synchronizeSideView = (
 export const synchronizeBackView = (
   boxParams: IPointCloudBox,
   newPolygon: any,
-  BackViewInstance?: PointCloudAnnotation,
+  BackViewInstance: PointCloudAnnotation | undefined,
+  url: string,
 ) => {
   if (!BackViewInstance) {
     return;
@@ -137,7 +138,7 @@ export const synchronizeBackView = (
   } = BackViewInstance;
 
   // Create PointCloud
-  backPointCloud.loadPCDFileByBox('http://10.53.25.142:8001/10837/1/total.pcd', boxParams);
+  backPointCloud.loadPCDFileByBox(url, boxParams);
   const { cameraPositionVector } = backPointCloud.updateOrthoCamera(
     boxParams,
     EPerspectiveView.Back,
@@ -430,8 +431,7 @@ const PointCloudTopView: React.FC<IAnnotationStateProps> = ({ currentData }) => 
       const { boxParams } = afterPolygonCreated(polygon, TopViewPointCloud, size);
       ptCtx.mainViewInstance?.hightLightOriginPointCloud(boxParams);
       synchronizeSideView(boxParams, polygon, ptCtx.sideViewInstance, currentData.url);
-      synchronizeBackView(boxParams, polygon, ptCtx.backViewInstance);
-      // }
+      synchronizeBackView(boxParams, polygon, ptCtx.backViewInstance, currentData.url);
     });
 
     TopView2dOperation.singleOn('deleteSelectedIDs', () => {
@@ -463,7 +463,7 @@ const PointCloudTopView: React.FC<IAnnotationStateProps> = ({ currentData }) => 
       mainViewGenBox(newBoxParams, newPolygon.id);
 
       synchronizeSideView(newBoxParams, newPolygon, ptCtx.sideViewInstance, currentData.url);
-      synchronizeBackView(newBoxParams, newPolygon, ptCtx.backViewInstance);
+      synchronizeBackView(newBoxParams, newPolygon, ptCtx.backViewInstance, currentData.url);
       ptCtx.mainViewInstance?.hightLightOriginPointCloud(newBoxParams);
       updateSelectedBox(newBoxParams);
     });
@@ -491,7 +491,7 @@ const PointCloudTopView: React.FC<IAnnotationStateProps> = ({ currentData }) => 
 
     ptCtx.mainViewInstance?.hightLightOriginPointCloud(boxParams);
     synchronizeSideView(boxParams, polygon, ptCtx.sideViewInstance, currentData.url);
-    synchronizeBackView(boxParams, polygon, ptCtx.backViewInstance);
+    synchronizeBackView(boxParams, polygon, ptCtx.backViewInstance, currentData.url);
   }, [ptCtx.selectedIDs]);
 
   return (

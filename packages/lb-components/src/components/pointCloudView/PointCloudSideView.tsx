@@ -11,6 +11,8 @@ import { synchronizeBackView, synchronizeTopView } from './PointCloudTopView';
 import { EPerspectiveView, IPointCloudBox } from '@labelbee/lb-utils';
 import { PointCloudContext, useSingleBox } from './PointCloudContext';
 import { SizeInfoForView } from './PointCloudInfos';
+import { connect } from 'react-redux';
+import { aMapStateToProps, IAnnotationStateProps } from '@/store/annotation/map';
 
 /**
  * Get the offset from canvas2d-coordinate to world coordinate
@@ -63,7 +65,7 @@ const updateSideViewByCanvas2D = (
   SidePointCloud.render();
 };
 
-const PointCloudSideView = () => {
+const PointCloudSideView: React.FC<IAnnotationStateProps> = ({ currentData }) => {
   const ptCtx = React.useContext(PointCloudContext);
   const [size, setSize] = useState<{ width: number; height: number } | null>(null);
   const { updateSelectedBox } = useSingleBox();
@@ -124,7 +126,7 @@ const PointCloudSideView = () => {
     });
 
     pointCloud2dOperation.singleOn('updatePolygonByDrag', ({ newPolygon, originPolygon }: any) => {
-      if (!ptCtx.selectedPointCloudBox || !ptCtx.mainViewInstance) {
+      if (!ptCtx.selectedPointCloudBox || !ptCtx.mainViewInstance || !currentData?.url) {
         return;
       }
 
@@ -175,7 +177,7 @@ const PointCloudSideView = () => {
       // );
 
       synchronizeTopView(newBoxParams, newPolygon, ptCtx.topViewInstance, ptCtx.mainViewInstance);
-      synchronizeBackView(newBoxParams, newPolygon, ptCtx.backViewInstance);
+      synchronizeBackView(newBoxParams, newPolygon, ptCtx.backViewInstance, currentData?.url);
       ptCtx.mainViewInstance.hightLightOriginPointCloud(newBoxParams);
       updateSelectedBox(newBoxParams);
     });
@@ -201,4 +203,4 @@ const PointCloudSideView = () => {
   );
 };
 
-export default PointCloudSideView;
+export default connect(aMapStateToProps)(PointCloudSideView);

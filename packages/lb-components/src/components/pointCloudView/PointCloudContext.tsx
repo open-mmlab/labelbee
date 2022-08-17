@@ -184,7 +184,12 @@ export const useRotate = ({ currentData }: IAnnotationStateProps) => {
         ptCtx.sideViewInstance,
         currentData.url,
       );
-      synchronizeBackView(selectedPointCloudBox, selectedPolygon, ptCtx.backViewInstance);
+      synchronizeBackView(
+        selectedPointCloudBox,
+        selectedPolygon,
+        ptCtx.backViewInstance,
+        currentData.url,
+      );
       mainViewInstance.render();
     },
     [
