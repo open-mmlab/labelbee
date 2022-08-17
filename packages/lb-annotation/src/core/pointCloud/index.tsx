@@ -646,16 +646,28 @@ export class PointCloud {
    * Load PCD File by box
    * @param src
    * @param boxParams
+   * @param scope
    */
-  public loadPCDFileByBox = async (src: string, boxParams: IPointCloudBox) => {
+  public loadPCDFileByBox = async (
+    src: string,
+    boxParams: IPointCloudBox,
+    scope?: Partial<{ width: number; height: number; depth: number }>,
+  ) => {
     this.clearPointCloud();
 
     const cb = (points: any) => {
       points.material.size = 1;
 
+      const { width = 0, height = 0, depth = 0 } = scope ?? {};
+
       // TODO. Speed can be optimized.
       const newGeometry = this.filterPointsByBox(
-        boxParams,
+        {
+          ...boxParams,
+          width: boxParams.width + width,
+          height: boxParams.height + height,
+          depth: boxParams.depth + depth,
+        },
         points.geometry.attributes.position.array,
         points.geometry.attributes.color.array,
       );

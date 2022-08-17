@@ -19,6 +19,7 @@ import { aMapStateToProps, IAnnotationStateProps } from '@/store/annotation/map'
 import { connect } from 'react-redux';
 
 const { EPolygonPattern } = cTool;
+const DEFAULT_SCOPE = 5;
 
 /**
  * Get the offset from canvas2d-coordinate to world coordinate (Top View)
@@ -85,7 +86,10 @@ export const synchronizeSideView = (
   const { pointCloud2dOperation, pointCloudInstance } = sideViewInstance;
 
   // Create PointCloud
-  pointCloudInstance.loadPCDFileByBox(url, boxParams);
+  pointCloudInstance.loadPCDFileByBox(url, boxParams, {
+    width: DEFAULT_SCOPE,
+    depth: DEFAULT_SCOPE,
+  });
   const { cameraPositionVector } = pointCloudInstance.updateOrthoCamera(
     boxParams,
     EPerspectiveView.Left,
@@ -138,7 +142,7 @@ export const synchronizeBackView = (
   } = BackViewInstance;
 
   // Create PointCloud
-  backPointCloud.loadPCDFileByBox(url, boxParams);
+  backPointCloud.loadPCDFileByBox(url, boxParams, { height: DEFAULT_SCOPE, depth: DEFAULT_SCOPE });
   const { cameraPositionVector } = backPointCloud.updateOrthoCamera(
     boxParams,
     EPerspectiveView.Back,
