@@ -101,7 +101,6 @@ const PointCloud3D: React.FC<IAnnotationStateProps> = ({ currentData }) => {
           container: ref.current,
           backgroundColor: '#4c4c4c',
         });
-        pointCloud.loadPCDFile(currentData.url);
       }
 
       if (currentData.result) {
