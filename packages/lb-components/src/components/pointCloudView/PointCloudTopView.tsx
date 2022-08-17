@@ -334,6 +334,7 @@ const PointCloudTopView: React.FC<IAnnotationStateProps> = ({ currentData }) => 
       valid: true,
       // TODO: fix trackID
       trackID: 0,
+      subAttribute: {},
     };
 
     return boxParams;

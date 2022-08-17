@@ -8,6 +8,7 @@ import i18n from './i18n/index';
 import toolStyleConverter from './toolStyle';
 import PerspectiveShiftUtils from './PerspectiveShiftUtils';
 import PointCloudUtils from './PointCloudUtils';
+import MatrixUtils from './MatrixUtils';
 
 // Constant
 export * from './constant/pointCloud';
@@ -16,4 +17,4 @@ export * from './constant/pointCloud';
 export * from './types/pointCloud';
 
 // Utils
-export { i18n, toolStyleConverter, PerspectiveShiftUtils, PointCloudUtils };
+export { i18n, toolStyleConverter, PerspectiveShiftUtils, PointCloudUtils, MatrixUtils };

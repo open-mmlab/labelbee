@@ -7,25 +7,42 @@ import { useEffect, useRef } from 'react';
 import { useDispatch } from 'react-redux';
 import { ANNOTATION_ACTIONS } from '@/store/Actions';
 
+export interface ICustomToolInstance {
+  exportData: () => [any[], {}];
+  singleOn: () => void;
+  setResult: () => void;
+  history: {
+    initRecord: () => void;
+  };
+  setDefaultAttribute: (attribute: string) => void;
+
+  // PointCloud Exclusive function
+  setSubAttribute: (key: string, value: string) => void;
+}
+
 /**
  * Custom an empty toolInstance to adapt old use.
- * @returns 
+ * @returns
  */
 const useCustomToolInstance = () => {
   const dispatch = useDispatch();
-  const toolInstanceRef = useRef({
+  const toolInstanceRef = useRef<ICustomToolInstance>({
     exportData: () => {
       return [[], {}];
     },
-    singleOn: () => { },
+    singleOn: () => {},
     setResult: () => {
       // Rerender Data
     },
     history: {
-      initRecord: () => { },
+      initRecord: () => {},
     },
+    setDefaultAttribute: (attribute: string) => {},
+
+    // PointCloud Exclusive function
+    setSubAttribute: (key: string, value: string) => {},
   });
-  
+
   const onMounted = (instance: any) => {
     dispatch({
       type: ANNOTATION_ACTIONS.SET_TOOL,
@@ -53,8 +70,8 @@ const useCustomToolInstance = () => {
   }, []);
 
   return {
-    toolInstanceRef
-  }
-}
+    toolInstanceRef,
+  };
+};
 
-export { useCustomToolInstance }
+export { useCustomToolInstance };

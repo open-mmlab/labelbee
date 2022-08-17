@@ -22,7 +22,38 @@ export type TMatrix4Tuple = [
   number,
   number,
   number,
-  number
+  number,
+];
+
+export type TMatrix13Tuple = [number, number, number];
+
+export type TMatrix14Tuple = [number, number, number, number];
+
+export type TMatrix43Tuple = [
+  number,
+  number,
+  number,
+  number,
+  number,
+  number,
+  number,
+  number,
+  number,
+  number,
+  number,
+  number,
+];
+
+export type TMatrix3Tuple = [
+  number,
+  number,
+  number,
+  number,
+  number,
+  number,
+  number,
+  number,
+  number,
 ];
 
 export interface IVolume {
@@ -47,6 +78,9 @@ export interface IPointCloudBox extends IVolume {
   rotation: number;
   trackID: number;
   valid: boolean;
+  subAttribute: {
+    [k: string]: string;
+  };
 }
 
 export type IPointCloudBoxList = IPointCloudBox[];

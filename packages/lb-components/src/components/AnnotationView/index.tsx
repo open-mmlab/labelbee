@@ -13,14 +13,14 @@ interface IProps {
     width: number;
     height: number;
   };
-  style: {
+  style?: {
     color?: string;
     fill?: string;
     thickness?: number;
   };
   annotations: any[]; // TODO
   zoomChange?: (zoom: number) => void;
-  backgroundStyle: React.CSSProperties;
+  backgroundStyle?: React.CSSProperties;
   onChange?: (type: 'hover' | 'selected', ids: string[]) => void;
 
   showLoading?: boolean;

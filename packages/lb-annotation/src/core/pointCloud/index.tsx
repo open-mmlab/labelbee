@@ -9,11 +9,14 @@ import * as THREE from 'three';
 import {
   PerspectiveShiftUtils,
   TMatrix4Tuple,
+  MatrixUtils,
   EPerspectiveView,
   IVolume,
   IPointCloudBox,
   I3DSpaceCoord,
   PointCloudUtils,
+  TMatrix14Tuple,
+  TMatrix13Tuple,
 } from '@labelbee/lb-utils';
 import { PointsMaterial, Shader } from 'three';
 import { isInPolygon } from '@/utils/tool/polygonTool';
@@ -177,6 +180,77 @@ export class PointCloud {
     }
   }
 
+  /**
+   * Transfer the Kitti format (defined by array) to Three Matrix (flatten array)
+   * @param P
+   * @param R
+   * @param T
+   * @returns
+   */
+  public transferKitti2Matrix(
+    P: [TMatrix14Tuple, TMatrix14Tuple, TMatrix14Tuple],
+    R: [TMatrix13Tuple, TMatrix13Tuple, TMatrix13Tuple],
+    T: [TMatrix14Tuple, TMatrix14Tuple, TMatrix14Tuple],
+  ) {
+    const PMA = MatrixUtils.transferMatrix34FromKitti2Three(P);
+    const RMA = MatrixUtils.transferMatrix33FromKitti2Three(R);
+    const TMA = MatrixUtils.transferMatrix34FromKitti2Three(T);
+
+    const PM = this.createThreeMatrix4(PMA);
+    const RM = this.createThreeMatrix4(RMA);
+    const TM = this.createThreeMatrix4(TMA);
+    // const TM = this.createThreeMatrix4(TMA).invert(); // The T Matrix is camera to lidar.
+
+    return {
+      composeMatrix4: TM.clone().premultiply(RM).premultiply(PM),
+      PM,
+      RM,
+      TM,
+    };
+  }
+
+  public lidar2image(
+    boxParams: IPointCloudBox,
+    cameraMatrix: {
+      P: [TMatrix14Tuple, TMatrix14Tuple, TMatrix14Tuple];
+      R: [TMatrix13Tuple, TMatrix13Tuple, TMatrix13Tuple];
+      T: [TMatrix14Tuple, TMatrix14Tuple, TMatrix14Tuple];
+    },
+  ) {
+    const allViewData = PointCloudUtils.getAllViewData(boxParams);
+    const { P, R, T } = cameraMatrix;
+    const { RM, TM, PM } = this.transferKitti2Matrix(P, R, T);
+
+    const transferViewData = allViewData.map((viewData) => ({
+      type: viewData.type,
+      pointList: viewData.pointList
+        .map((point) => this.rotatePoint(point, boxParams.center, boxParams.rotation))
+        .map((point) => {
+          const vector = new THREE.Vector4(point.x, point.y, point.z);
+
+          // Baidu Automotive Data Processing
+          const newV = vector.applyMatrix4(TM);
+
+          // Just keep the front object.
+          if (newV.z < 0) {
+            return undefined;
+          }
+
+          /*
+           * Depth normalization of the imaging plane
+           * 成像平面深度归一化
+           */
+          const z = 1 / newV.z;
+          const fixMatrix4 = new THREE.Matrix4().set(z, 0, 0, 0, 0, z, 0, 0, 0, 0, z, 0, 0, 0, 0, 1);
+
+          return newV.applyMatrix4(fixMatrix4).applyMatrix4(RM).applyMatrix4(PM);
+        })
+        .filter((v) => v !== undefined),
+    }));
+
+    return transferViewData;
+  }
+
   public generateBox(boxParams: IPointCloudBox, id: string = uuid(), color = 0xffffff) {
     this.removeObjectByName(id);
 
@@ -292,8 +366,8 @@ export class PointCloud {
    * @param rotationZ
    * @returns
    */
-  public rotatePoint(points: ICoordinate, centerPoint: I3DSpaceCoord, rotationZ: number) {
-    const pointVector = new THREE.Vector3(points.x, points.y, 1);
+  public rotatePoint(points: { x: number; y: number; z?: number }, centerPoint: I3DSpaceCoord, rotationZ: number) {
+    const pointVector = new THREE.Vector3(points.x, points.y, points?.z ?? 1);
     const Rz = new THREE.Matrix4().makeRotationZ(rotationZ);
     const TFrom = new THREE.Matrix4().makeTranslation(centerPoint.x, centerPoint.y, centerPoint.z);
     const TBack = new THREE.Matrix4().makeTranslation(-centerPoint.x, -centerPoint.y, -centerPoint.z);

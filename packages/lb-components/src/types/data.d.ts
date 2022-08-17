@@ -1,10 +1,23 @@
 import { ESubmitType } from '@/constant';
+import { TMatrix13Tuple, TMatrix14Tuple } from '@labelbee/lb-utils';
 
 /** 标注文件对象 */
+export interface ICalib {
+  P: [TMatrix14Tuple, TMatrix14Tuple, TMatrix14Tuple];
+  R: [TMatrix13Tuple, TMatrix13Tuple, TMatrix13Tuple];
+  T: [TMatrix14Tuple, TMatrix14Tuple, TMatrix14Tuple];
+}
+
+export interface IMappingImg {
+  url: string;
+  calib: ICalib;
+}
+
 export interface IFileItem {
   id: number;
   url?: string;
   result?: string;
+  mappingImgList?: IMappingImg[];
 }
 export type AnnotationFileList = IFileItem[];
 export interface KVObject {
