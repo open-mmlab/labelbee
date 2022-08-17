@@ -2,10 +2,10 @@ import { IPointCloudBox, IPointCloudBoxList } from '@labelbee/lb-utils';
 import { PointCloud, PointCloudAnnotation, cAnnotation } from '@labelbee/lb-annotation';
 import React, { useCallback, useContext, useMemo, useState } from 'react';
 
-import { synchronizeBackView, synchronizeSideView } from './PointCloudTopView';
 import _ from 'lodash';
 import { message } from 'antd';
 import { IAnnotationStateProps } from '@/store/annotation/map';
+import { synchronizeBackView, synchronizeSideView } from './hooks/usePointCloudViews';
 const { ERotateDirection, ESortDirection } = cAnnotation;
 
 interface IPointCloudContextInstances {
@@ -59,11 +59,6 @@ export const PointCloudProvider: React.FC<{}> = ({ children }) => {
   const [backViewInstance, setBackViewInstance] = useState<PointCloudAnnotation>();
   const [mainViewInstance, setMainViewInstance] = useState<PointCloud>();
 
-  const getNextBoxID = () => {
-    const sortedPcList = pointCloudBoxList.sort((a, b) => a.trackID - b.trackID);
-    return sortedPcList.slice(-1)[0]?.trackID + 1 ?? 1;
-  };
-
   const selectedID = useMemo(() => {
     return selectedIDs.length === 1 ? selectedIDs[0] : '';
   }, [selectedIDs]);
@@ -72,7 +67,6 @@ export const PointCloudProvider: React.FC<{}> = ({ children }) => {
     const selectedPointCloudBox = pointCloudBoxList.find((v) => v.id === selectedID);
 
     const addPointCloudBox = (box: IPointCloudBox) => {
-      box.trackID = getNextBoxID();
       setPointCloudResult(pointCloudBoxList.concat(box));
     };
 
@@ -164,7 +158,7 @@ export const useRotate = ({ currentData }: IAnnotationStateProps) => {
 
       const selectedPointCloudBox = selectedBox?.info;
 
-      if (!selectedPointCloudBox || !currentData?.url) {
+      if (!selectedPointCloudBox || !currentData?.url || !ptCtx.backViewInstance) {
         return;
       }
 

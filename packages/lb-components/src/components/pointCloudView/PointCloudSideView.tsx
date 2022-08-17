@@ -3,14 +3,14 @@
  * @createdate 2022-07-11
  * @author Ron <ron.f.luo@gmail.com>
  */
-import { PointCloud, MathUtils, PointCloudAnnotation } from '@labelbee/lb-annotation';
+import { PointCloud, PointCloudAnnotation } from '@labelbee/lb-annotation';
 import { getClassName } from '@/utils/dom';
 import { PointCloudContainer } from './PointCloudLayout';
 import React, { useEffect, useRef, useState } from 'react';
-import { synchronizeBackView, synchronizeTopView } from './PointCloudTopView';
 import { EPerspectiveView, IPointCloudBox } from '@labelbee/lb-utils';
-import { PointCloudContext, useSingleBox } from './PointCloudContext';
+import { PointCloudContext } from './PointCloudContext';
 import { SizeInfoForView } from './PointCloudInfos';
+import { usePointCloudViews } from './hooks/usePointCloudViews';
 
 /**
  * Get the offset from canvas2d-coordinate to world coordinate
@@ -66,7 +66,7 @@ const updateSideViewByCanvas2D = (
 const PointCloudSideView = () => {
   const ptCtx = React.useContext(PointCloudContext);
   const [size, setSize] = useState<{ width: number; height: number } | null>(null);
-  const { updateSelectedBox } = useSingleBox();
+  const { sideViewUpdateBox } = usePointCloudViews();
 
   const ref = useRef<HTMLDivElement>(null);
 
@@ -124,60 +124,7 @@ const PointCloudSideView = () => {
     });
 
     pointCloud2dOperation.singleOn('updatePolygonByDrag', ({ newPolygon, originPolygon }: any) => {
-      if (!ptCtx.selectedPointCloudBox || !ptCtx.mainViewInstance) {
-        return;
-      }
-
-      // Notice. The sort of polygon is important.
-      const [point1, point2, point3] = newPolygon.pointList;
-      const [op1, op2, op3] = originPolygon.pointList;
-
-      // 2D centerPoint => 3D x & z
-      const newCenterPoint = MathUtils.getLineCenterPoint([point1, point3]);
-      const oldCenterPoint = MathUtils.getLineCenterPoint([op1, op3]);
-
-      const offset = {
-        x: newCenterPoint.x - oldCenterPoint.x,
-        y: newCenterPoint.y - oldCenterPoint.y,
-      };
-
-      const cos = Math.cos(ptCtx.selectedPointCloudBox.rotation);
-      const sin = Math.sin(ptCtx.selectedPointCloudBox.rotation);
-
-      const offsetCenterPoint = {
-        x: offset.x,
-        y: offset.x * sin + offset.y * cos,
-        z: newCenterPoint.y - oldCenterPoint.y,
-      };
-
-      // 2D height => 3D depth
-      const height = MathUtils.getLineLength(point1, point2);
-      const oldHeight = MathUtils.getLineLength(op1, op2);
-      const offsetHeight = height - oldHeight; // 3D depth
-
-      // 2D width => 3D width
-      const width = MathUtils.getLineLength(point2, point3);
-      const oldWidth = MathUtils.getLineLength(op2, op3);
-      const offsetWidth = width - oldWidth; // 3D width
-
-      const { newBoxParams } = pointCloudInstance.getNewBoxBySideUpdate(
-        offsetCenterPoint,
-        offsetWidth,
-        offsetHeight,
-        ptCtx.selectedPointCloudBox,
-      );
-
-      // TODO. It is another way to updateData
-      // const { newBoxParams } = SidePointCloud.getNewBoxBySideUpdateByPoints(
-      //   newPolygon.pointList,
-      //   offsetHeight,
-      //   offsetCenterPoint.y,
-      // );
-
-      synchronizeTopView(newBoxParams, newPolygon, ptCtx.topViewInstance, ptCtx.mainViewInstance);
-      synchronizeBackView(newBoxParams, newPolygon, ptCtx.backViewInstance);
-      ptCtx.mainViewInstance.hightLightOriginPointCloud(newBoxParams);
-      updateSelectedBox(newBoxParams);
+      sideViewUpdateBox(newPolygon, originPolygon);
     });
   }, [ptCtx, size]);
 

@@ -8,12 +8,12 @@ import { PointCloud, MathUtils, PointCloudAnnotation } from '@labelbee/lb-annota
 import { getClassName } from '@/utils/dom';
 import { PointCloudContainer } from './PointCloudLayout';
 import React, { useEffect, useRef, useState } from 'react';
-import { synchronizeSideView, synchronizeTopView } from './PointCloudTopView';
 import { PointCloudContext, useSingleBox } from './PointCloudContext';
 import { EPerspectiveView, IPointCloudBox } from '@labelbee/lb-utils';
 import { SizeInfoForView } from './PointCloudInfos';
 import { connect } from 'react-redux';
 import { aMapStateToProps, IAnnotationStateProps } from '@/store/annotation/map';
+import { synchronizeSideView, synchronizeTopView } from './hooks/usePointCloudViews';
 
 /**
  * 统一一下，将其拓展为 二维转换为 三维坐标的转换

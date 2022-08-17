@@ -251,6 +251,12 @@ export class PointCloud {
     return transferViewData;
   }
 
+  /*
+   * Remove exist box and generate new one
+   * @param boxParams
+   * @param id
+   * @param color
+   */
   public generateBox(boxParams: IPointCloudBox, id: string = uuid(), color = 0xffffff) {
     this.removeObjectByName(id);
 
