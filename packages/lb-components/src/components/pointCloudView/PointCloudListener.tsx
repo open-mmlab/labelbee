@@ -198,6 +198,19 @@ const PointCloudListener: React.FC<IAnnotationStateProps> = ({ currentData }) =>
     };
   }, [ptCtx.pointCloudBoxList, ptCtx.selectedID]);
 
+  // Unified modification of individual view data
+  useEffect(() => {
+    const { topViewInstance, sideViewInstance, backViewInstance, mainViewInstance } = ptCtx;
+    [topViewInstance, sideViewInstance, backViewInstance].forEach((instance) => {
+      if (!instance) {
+        return;
+      }
+      const pointCloudInstance = instance.pointCloudInstance;
+      pointCloudInstance.applyZAxisPoints(ptCtx.zAxisLimit);
+    });
+    mainViewInstance?.applyZAxisPoints(ptCtx.zAxisLimit);
+  }, [ptCtx.zAxisLimit]);
+
   return null;
 };
 

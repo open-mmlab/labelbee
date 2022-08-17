@@ -2,7 +2,6 @@
  * @Author: Laoluo luozefeng@sensetime.com
  * @Date: 2022-06-22 11:08:31
  * @LastEditors: Laoluo luozefeng@sensetime.com
- * @LastEditTime: 2022-07-08 15:44:18
  */
 import { ISize } from '@/types/main';
 import { getClassName } from '@/utils/dom';
@@ -22,7 +21,7 @@ import { connect } from 'react-redux';
 const { EPolygonPattern } = cTool;
 
 /**
- * Get the offset from canvas2d-coordinate to world coordinate
+ * Get the offset from canvas2d-coordinate to world coordinate (Top View)
  * @param currentPos
  * @param size
  * @param zoom
@@ -271,7 +270,9 @@ const ZAxisSlider = ({
         max={10}
         min={0.5}
         defaultValue={zAxisLimit}
-        onAfterChange={setZAxisLimit}
+        onAfterChange={(v) => {
+          setZAxisLimit(v);
+        }}
       />
     </div>
   );
@@ -284,7 +285,6 @@ const PointCloudTopView: React.FC<IAnnotationStateProps> = ({ currentData }) => 
   const { updateSelectedBox } = useSingleBox();
 
   const [size, setSize] = useState<{ width: number; height: number } | null>(null);
-  const [zAxisLimit, setZAxisLimit] = useState<number>(10);
 
   const mainViewGenBox = (boxParams: IPointCloudBox, polygonID: string) => {
     ptCtx.mainViewInstance?.generateBox(boxParams, polygonID);
@@ -470,12 +470,6 @@ const PointCloudTopView: React.FC<IAnnotationStateProps> = ({ currentData }) => 
   }, [ptCtx, size, currentData]);
 
   useEffect(() => {
-    if (pointCloudRef.current) {
-      pointCloudRef.current.applyZAxisPoints(zAxisLimit);
-    }
-  }, [zAxisLimit]);
-
-  useEffect(() => {
     if (!size || !ptCtx.topViewInstance || !ptCtx.sideViewInstance) {
       return;
     }
@@ -508,8 +502,9 @@ const PointCloudTopView: React.FC<IAnnotationStateProps> = ({ currentData }) => 
     >
       <div style={{ position: 'relative', flex: 1 }}>
         <div style={{ width: '100%', height: '100%' }} ref={ref} />
+
         <BoxInfos />
-        <ZAxisSlider zAxisLimit={zAxisLimit} setZAxisLimit={setZAxisLimit} />
+        <ZAxisSlider zAxisLimit={ptCtx.zAxisLimit} setZAxisLimit={ptCtx.setZAxisLimit} />
         <PointCloudValidity />
       </div>
     </PointCloudContainer>

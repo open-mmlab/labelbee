@@ -30,6 +30,9 @@ export interface IPointCloudContext extends IPointCloudContextInstances {
   addSelectedID: (selectedID: string) => void;
   selectedAllBoxes: () => void;
   selectedID: string;
+
+  zAxisLimit: number; // Filter of pointCloud by z-axis
+  setZAxisLimit: (zAxisLimit: number) => void;
 }
 
 export const PointCloudContext = React.createContext<IPointCloudContext>({
@@ -37,6 +40,8 @@ export const PointCloudContext = React.createContext<IPointCloudContext>({
   selectedID: '',
   selectedIDs: [],
   valid: true,
+  zAxisLimit: 10,
+  setZAxisLimit: () => {},
   setSelectedIDs: () => {},
   setPointCloudResult: () => {},
   setPointCloudValid: () => {},
@@ -56,6 +61,7 @@ export const PointCloudProvider: React.FC<{}> = ({ children }) => {
   const [sideViewInstance, setSideViewInstance] = useState<PointCloudAnnotation>();
   const [backViewInstance, setBackViewInstance] = useState<PointCloudAnnotation>();
   const [mainViewInstance, setMainViewInstance] = useState<PointCloud>();
+  const [zAxisLimit, setZAxisLimit] = useState<number>(10);
 
   const selectedID = useMemo(() => {
     return selectedIDs.length === 1 ? selectedIDs[0] : '';
@@ -110,6 +116,7 @@ export const PointCloudProvider: React.FC<{}> = ({ children }) => {
       setPointCloudResult,
       setSelectedIDs,
       addBox,
+      zAxisLimit,
       valid,
       selectedPointCloudBox,
       setPointCloudValid,
@@ -123,6 +130,7 @@ export const PointCloudProvider: React.FC<{}> = ({ children }) => {
       setBackViewInstance,
       mainViewInstance,
       setMainViewInstance,
+      setZAxisLimit,
     };
   }, [
     valid,
@@ -132,6 +140,7 @@ export const PointCloudProvider: React.FC<{}> = ({ children }) => {
     sideViewInstance,
     backViewInstance,
     mainViewInstance,
+    zAxisLimit,
   ]);
 
   return <PointCloudContext.Provider value={ptCtx}>{children}</PointCloudContext.Provider>;
