@@ -141,7 +141,7 @@ export const PointCloudProvider: React.FC<{}> = ({ children }) => {
 
 /**
  * PointCloud Rotate Hook
- * @ret
+ * @returns
  */
 export const useRotate = ({ currentData }: IAnnotationStateProps) => {
   const ptCtx = useContext(PointCloudContext);
