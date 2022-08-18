@@ -4,7 +4,7 @@
  * @author Ron <ron.f.luo@gmail.com>
  */
 
-import { PointCloudUtils } from '@labelbee/lb-utils';
+import { IPointCloudBox, PointCloudUtils } from '@labelbee/lb-utils';
 import { EPolygonPattern } from '@/constant/tool';
 import { CanvasScheduler } from '@/newCore';
 import { IPolygonData } from '@/types/tool/polygon';
@@ -93,6 +93,10 @@ export class PointCloudAnnotation implements IPointCloudAnnotationOperation {
 
   public addPolygonListOnTopView(result: string) {
     const pointCloudDataList = PointCloudUtils.getBoxParamsFromResultList(result);
+    this.updatePolygonList(pointCloudDataList);
+  }
+
+  public updatePolygonList = (pointCloudDataList: IPointCloudBox[]) => {
     const polygonList = pointCloudDataList.map((v) => {
       const { polygon2d: pointList } = this.pointCloudInstance.getBoxTopPolygon2DCoordinate(v);
       return {
@@ -104,7 +108,7 @@ export class PointCloudAnnotation implements IPointCloudAnnotationOperation {
     }) as IPolygonData[];
 
     this.pointCloud2dOperation.setResult(polygonList);
-  }
+  };
 
   /**
    * Init or Update PointCloud Data

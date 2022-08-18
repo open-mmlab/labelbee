@@ -253,13 +253,25 @@ export class PointCloud {
     return transferViewData;
   }
 
+  /**
+   * Render box by params
+   * @param boxParams
+   * @param color
+   */
+  public generateBox(boxParams: IPointCloudBox, color = 0xffffff) {
+    this.AddBoxToSense(boxParams, color);
+    this.render();
+  }
+
   /*
-   * Remove exist box and generate new one
+   * Remove exist box and add new one to scene
    * @param boxParams
    * @param id
    * @param color
    */
-  public generateBox(boxParams: IPointCloudBox, id: string = uuid(), color = 0xffffff) {
+  public AddBoxToSense = (boxParams: IPointCloudBox, color = 0xffffff) => {
+    const id = boxParams.id ?? uuid();
+
     this.removeObjectByName(id);
 
     const { center, width, height, depth, rotation } = boxParams;
@@ -269,7 +281,7 @@ export class PointCloud {
     const cube = new THREE.Mesh(geometry, material);
     const box = new THREE.BoxHelper(cube, color);
     const arrow = this.generateBoxArrow(boxParams);
-    const boxID = this.generateBoxID(boxParams);
+    const boxID = this.generateBoxTrackID(boxParams);
 
     group.add(box);
     group.add(arrow);
@@ -280,6 +292,12 @@ export class PointCloud {
 
     group.name = id;
     this.scene.add(group);
+  };
+
+  public generateBoxes(boxes: IPointCloudBox[]) {
+    boxes.forEach((box) => {
+      this.generateBox(box);
+    });
     this.render();
   }
 
@@ -683,7 +701,7 @@ export class PointCloud {
     return arrowHelper;
   };
 
-  public generateBoxID = (boxParams: IPointCloudBox) => {
+  public generateBoxTrackID = (boxParams: IPointCloudBox) => {
     const texture = new THREE.Texture(this.getTextCanvas(boxParams.trackID.toString()));
     texture.needsUpdate = true;
     const sprite = new THREE.SpriteMaterial({ map: texture, depthWrite: false });

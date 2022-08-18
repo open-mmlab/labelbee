@@ -5,7 +5,11 @@ import React, { useCallback, useContext, useMemo, useState } from 'react';
 import _ from 'lodash';
 import { message } from 'antd';
 import { IAnnotationStateProps } from '@/store/annotation/map';
-import { synchronizeBackView, synchronizeSideView } from './hooks/usePointCloudViews';
+import {
+  synchronizeBackView,
+  synchronizeSideView,
+  usePointCloudViews,
+} from './hooks/usePointCloudViews';
 const { ERotateDirection, ESortDirection } = cAnnotation;
 
 interface IPointCloudContextInstances {
@@ -95,8 +99,10 @@ export const PointCloudProvider: React.FC<{}> = ({ children }) => {
      */
     const addSelectedID = (selectedID: string) => {
       if (selectedIDs.includes(selectedID)) {
+        console.log(selectedIDs.filter((i) => i !== selectedID));
         setSelectedIDs(selectedIDs.filter((i) => i !== selectedID));
       } else {
+        console.log([...selectedIDs, selectedID]);
         setSelectedIDs([...selectedIDs, selectedID]);
       }
     };
@@ -169,7 +175,7 @@ export const useRotate = ({ currentData }: IAnnotationStateProps) => {
       TopPointCloudPolygonOperation.rotatePolygon(angle, ERotateDirection.Anticlockwise);
       const selectedPolygon = TopPointCloudPolygonOperation.selectedPolygon;
 
-      mainViewInstance.generateBox(selectedPointCloudBox, selectedPolygon.id);
+      mainViewInstance.generateBox(selectedPointCloudBox);
       mainViewInstance.hightLightOriginPointCloud(selectedPointCloudBox);
       synchronizeSideView(
         selectedPointCloudBox,
@@ -256,6 +262,7 @@ export const useSingleBox = () => {
 export const useBoxes = () => {
   const { selectedIDs, pointCloudBoxList, setPointCloudResult } = useContext(PointCloudContext);
   const [copiedBoxes, setCopiedBoxes] = useState<IPointCloudBoxList>([]);
+  const { pointCloudBoxListUpdated } = usePointCloudViews();
 
   const hasDuplicateID = (checkBoxList: IPointCloudBoxList) => {
     return pointCloudBoxList.some((item) => {
@@ -274,7 +281,7 @@ export const useBoxes = () => {
       setCopiedBoxes([]);
       message.error('复制内容为空，请选择对应的点云数据');
     }
-  }, [selectedIDs]);
+  }, [selectedIDs, pointCloudBoxList]);
 
   const pasteSelectedBoxes = useCallback(() => {
     if (copiedBoxes.length === 0) {
@@ -289,9 +296,10 @@ export const useBoxes = () => {
     } else {
       /** Paste succeed and empty */
       setPointCloudResult(copiedBoxes);
+      pointCloudBoxListUpdated?.(copiedBoxes);
       setCopiedBoxes([]);
     }
-  }, [copiedBoxes]);
+  }, [copiedBoxes, pointCloudBoxList]);
 
   return { copySelectedBoxes, pasteSelectedBoxes, copiedBoxes, selectedBoxes };
 };

@@ -337,12 +337,12 @@ export const usePointCloudViews = () => {
     const boxParams = selectedBox?.info;
     const polygonOperation = topViewInstance?.pointCloud2dOperation;
 
+    polygonOperation.setSelectedIDs(selectedIDs);
     if (!boxParams || !polygonOperation) {
       return;
     }
 
     const polygon = polygonOperation.selectedPolygon;
-    polygonOperation.setSelectedIDs(selectedIDs);
     syncPointCloudViews(PointCloudView.Top, polygon, boxParams);
   };
 
@@ -427,11 +427,17 @@ export const usePointCloudViews = () => {
     mainViewInstance?.hightLightOriginPointCloud(boxParams);
   };
 
+  const pointCloudBoxListUpdated = (newBoxes: IPointCloudBox[]) => {
+    topViewInstance.updatePolygonList(newBoxes);
+    mainViewInstance?.generateBoxes(newBoxes);
+  };
+
   return {
     topViewAddBox,
     topViewSelectedChanged,
     topViewUpdateBox,
     sideViewUpdateBox,
     backViewUpdateBox,
+    pointCloudBoxListUpdated,
   };
 };
