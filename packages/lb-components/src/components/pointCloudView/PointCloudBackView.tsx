@@ -8,7 +8,8 @@ import { PointCloud, MathUtils, PointCloudAnnotation } from '@labelbee/lb-annota
 import { getClassName } from '@/utils/dom';
 import { PointCloudContainer } from './PointCloudLayout';
 import React, { useEffect, useRef, useState } from 'react';
-import { PointCloudContext, useSingleBox } from './PointCloudContext';
+import { PointCloudContext } from './PointCloudContext';
+import { useSingleBox } from './hooks/useSingleBox';
 import { EPerspectiveView, IPointCloudBox } from '@labelbee/lb-utils';
 import { SizeInfoForView } from './PointCloudInfos';
 import { connect } from 'react-redux';

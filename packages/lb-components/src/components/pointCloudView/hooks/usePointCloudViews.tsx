@@ -6,7 +6,8 @@
 import { PointCloudAnnotation, PointCloud, MathUtils } from '@labelbee/lb-annotation';
 import { IPointCloudBox, EPerspectiveView } from '@labelbee/lb-utils';
 import { useContext } from 'react';
-import { PointCloudContext, useSingleBox } from '../PointCloudContext';
+import { PointCloudContext } from '../PointCloudContext';
+import { useSingleBox } from "./useSingleBox";
 import { ISize } from '@/types/main';
 import _ from 'lodash';
 import { useSelector } from 'react-redux';

@@ -1,4 +1,7 @@
-import { PointCloudContext, useBoxes, useRotate, useSingleBox } from './PointCloudContext';
+import { PointCloudContext } from './PointCloudContext';
+import { useRotate } from "./hooks/useRotate";
+import { useBoxes } from "./hooks/useBoxes";
+import { useSingleBox } from "./hooks/useSingleBox";
 import React, { useContext, useEffect } from 'react';
 import { cTool } from '@labelbee/lb-annotation';
 import { message } from 'antd';
@@ -195,6 +198,10 @@ const PointCloudListener: React.FC<IAnnotationStateProps> = ({ currentData }) =>
 
         updateSelectedBox(selectBox);
       }
+    };
+
+    toolInstanceRef.current.clearResult = () => {
+      ptCtx.clearResult();
     };
   }, [ptCtx.pointCloudBoxList, ptCtx.selectedID]);
 
