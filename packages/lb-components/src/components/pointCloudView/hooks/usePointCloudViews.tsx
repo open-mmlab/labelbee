@@ -7,7 +7,7 @@ import { PointCloudAnnotation, PointCloud, MathUtils } from '@labelbee/lb-annota
 import { IPointCloudBox, EPerspectiveView } from '@labelbee/lb-utils';
 import { useContext } from 'react';
 import { PointCloudContext } from '../PointCloudContext';
-import { useSingleBox } from "./useSingleBox";
+import { useSingleBox } from './useSingleBox';
 import { ISize } from '@/types/main';
 import _ from 'lodash';
 import { useSelector } from 'react-redux';
@@ -312,8 +312,8 @@ export const usePointCloudViews = () => {
     return 1;
   };
 
-  const mainViewGenBox = (boxParams: IPointCloudBox, polygonID: string) => {
-    mainViewInstance?.generateBox(boxParams, polygonID);
+  const mainViewGenBox = (boxParams: IPointCloudBox) => {
+    mainViewInstance?.generateBox(boxParams);
     mainViewInstance?.controls.update();
     mainViewInstance?.render();
   };
@@ -424,7 +424,7 @@ export const usePointCloudViews = () => {
         viewToBeUpdated[key]();
       }
     });
-    mainViewGenBox(boxParams, polygon.id);
+    mainViewGenBox(boxParams);
     mainViewInstance?.hightLightOriginPointCloud(boxParams);
   };
 

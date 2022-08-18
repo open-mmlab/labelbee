@@ -1,16 +1,19 @@
 import { IPointCloudBox } from '@labelbee/lb-utils';
 import { useCallback, useContext, useMemo } from 'react';
 import _ from 'lodash';
-import { PointCloudContext } from './PointCloudContext';
+import { PointCloudContext } from '../PointCloudContext';
+import { cAnnotation } from '@labelbee/lb-annotation';
+
+const { ESortDirection } = cAnnotation;
 
 /** Actions for single selected box */
-
 export const useSingleBox = () => {
-  const { pointCloudBoxList, setPointCloudResult, topViewInstance, selectedIDs, selectedID } = useContext(PointCloudContext);
+  const { pointCloudBoxList, setPointCloudResult, topViewInstance, selectedIDs, selectedID } =
+    useContext(PointCloudContext);
 
   /** Returns { info: selected box, index: selected box index } */
   const selectedBox = useMemo(() => {
-    const boxIndex = pointCloudBoxList.findIndex((i: { id: string; }) => i.id === selectedID);
+    const boxIndex = pointCloudBoxList.findIndex((i: { id: string }) => i.id === selectedID);
     if (boxIndex > -1) {
       return { info: pointCloudBoxList[boxIndex], index: boxIndex };
     }
@@ -24,7 +27,7 @@ export const useSingleBox = () => {
         setPointCloudResult(_.cloneDeep(pointCloudBoxList));
       }
     },
-    [selectedID]
+    [selectedID],
   );
 
   /** Toggle selected box‘s validity  */
@@ -45,7 +48,7 @@ export const useSingleBox = () => {
 
       pointCloud2dOperation.switchToNextPolygon(sort);
     },
-    [topViewInstance]
+    [topViewInstance],
   );
 
   const selectPrevBox = () => {
