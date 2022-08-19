@@ -124,6 +124,7 @@ const PointCloudTopView: React.FC<IAnnotationStateProps> = ({ currentData }) => 
   const ref = useRef<HTMLDivElement>(null);
   const ptCtx = React.useContext(PointCloudContext);
   const pointCloudRef = useRef<PointCloud | null>();
+  const { deletePointCloudBox } = useSingleBox();
 
   const [size, setSize] = useState<{ width: number; height: number } | null>(null);
   const [zAxisLimit, setZAxisLimit] = useState<number>(10);
@@ -205,6 +206,10 @@ const PointCloudTopView: React.FC<IAnnotationStateProps> = ({ currentData }) => 
       }
 
       pointCloudViews.topViewAddBox(polygon, size);
+    });
+
+    TopView2dOperation.singleOn('deletedObject', ({ id }) => {
+      deletePointCloudBox(id);
     });
 
     TopView2dOperation.singleOn('deleteSelectedIDs', () => {
