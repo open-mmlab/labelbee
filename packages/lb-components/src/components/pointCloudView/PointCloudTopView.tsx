@@ -20,7 +20,6 @@ import { connect } from 'react-redux';
 import { usePointCloudViews } from './hooks/usePointCloudViews';
 
 const { EPolygonPattern } = cTool;
-const DEFAULT_SCOPE = 5;
 
 /**
  * Get the offset from canvas2d-coordinate to world coordinate (Top View)
@@ -113,7 +112,7 @@ const ZAxisSlider = ({
         max={10}
         min={0.5}
         defaultValue={zAxisLimit}
-        onAfterChange={(v) => {
+        onAfterChange={(v: number) => {
           setZAxisLimit(v);
         }}
       />
