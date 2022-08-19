@@ -76,7 +76,9 @@ export class PointCloud {
 
   private backgroundColor: string;
 
-  private DEFAULT_POINTCLOUD = 'POINTCLOUD';
+  private pointCloudObjectName = 'pointCloud';
+
+  private rangeObjectName = 'range';
 
   private cacheInstance: PointCloudCache; // PointCloud Cache Map
 
@@ -251,7 +253,25 @@ export class PointCloud {
     return transferViewData;
   }
 
-  public generateBox(boxParams: IPointCloudBox, id: string = uuid(), color = 0xffffff) {
+  /**
+   * Render box by params
+   * @param boxParams
+   * @param color
+   */
+  public generateBox(boxParams: IPointCloudBox, color = 0xffffff) {
+    this.AddBoxToSense(boxParams, color);
+    this.render();
+  }
+
+  /*
+   * Remove exist box and add new one to scene
+   * @param boxParams
+   * @param id
+   * @param color
+   */
+  public AddBoxToSense = (boxParams: IPointCloudBox, color = 0xffffff) => {
+    const id = boxParams.id ?? uuid();
+
     this.removeObjectByName(id);
 
     const { center, width, height, depth, rotation } = boxParams;
@@ -261,7 +281,7 @@ export class PointCloud {
     const cube = new THREE.Mesh(geometry, material);
     const box = new THREE.BoxHelper(cube, color);
     const arrow = this.generateBoxArrow(boxParams);
-    const boxID = this.generateBoxID(boxParams);
+    const boxID = this.generateBoxTrackID(boxParams);
 
     group.add(box);
     group.add(arrow);
@@ -272,6 +292,12 @@ export class PointCloud {
 
     group.name = id;
     this.scene.add(group);
+  };
+
+  public generateBoxes(boxes: IPointCloudBox[]) {
+    boxes.forEach((box) => {
+      this.generateBox(box);
+    });
     this.render();
   }
 
@@ -529,7 +555,8 @@ export class PointCloud {
     return cameraVector;
   }
 
-  public createCircle(radius: number) {
+  public createRange(radius: number) {
+    this.removeObjectByName(this.rangeObjectName);
     const curve = new THREE.EllipseCurve(
       0,
       0,
@@ -548,6 +575,7 @@ export class PointCloud {
 
     // Create the final object to add to the scene
     const ellipse = new THREE.Line(geometry, material);
+    ellipse.name = this.rangeObjectName;
     return ellipse;
   }
 
@@ -575,7 +603,7 @@ export class PointCloud {
   public renderPointCloud(points: THREE.Points) {
     // @ts-ignore
     points.material.size = 1;
-    points.name = this.DEFAULT_POINTCLOUD;
+    points.name = this.pointCloudObjectName;
 
     const pointsMaterial = new THREE.PointsMaterial({
       vertexColors: true,
@@ -584,7 +612,7 @@ export class PointCloud {
     pointsMaterial.onBeforeCompile = this.overridePointShader;
 
     // @ts-ignore
-    const circle = this.createCircle(points.geometry.boundingSphere.radius * 2);
+    const circle = this.createRange(points.geometry.boundingSphere.radius * 2);
     this.pointsUuid = points.uuid;
 
     points.material = pointsMaterial;
@@ -598,12 +626,7 @@ export class PointCloud {
   }
 
   public clearPointCloud() {
-    const oldPointCloud: any = this.scene.getObjectByName(this.DEFAULT_POINTCLOUD);
-
-    // Remove old PointCLoud
-    if (oldPointCloud) {
-      oldPointCloud.removeFromParent();
-    }
+    this.removeObjectByName(this.pointCloudObjectName);
   }
 
   public clearPointCloudAndRender() {
@@ -614,7 +637,7 @@ export class PointCloud {
   public loadPCDFile = async (src: string, cb?: () => void) => {
     this.clearPointCloud();
     const points = (await this.cacheInstance.loadPCDFile(src)) as THREE.Points;
-    points.name = this.DEFAULT_POINTCLOUD;
+    points.name = this.pointCloudObjectName;
 
     this.renderPointCloud(points);
     if (cb) {
@@ -628,7 +651,7 @@ export class PointCloud {
    * @returns
    */
   public hightLightOriginPointCloud(boxParams: IPointCloudBox) {
-    const oldPointCloud: any = this.scene.getObjectByName(this.DEFAULT_POINTCLOUD);
+    const oldPointCloud: any = this.scene.getObjectByName(this.pointCloudObjectName);
     if (!oldPointCloud) {
       return;
     }
@@ -673,7 +696,7 @@ export class PointCloud {
       );
 
       const newPoints = new THREE.Points(newGeometry, points.material);
-      newPoints.name = this.DEFAULT_POINTCLOUD;
+      newPoints.name = this.pointCloudObjectName;
       this.scene.add(newPoints);
       this.render();
     };
@@ -690,8 +713,8 @@ export class PointCloud {
     return arrowHelper;
   };
 
-  public generateBoxID = (boxParams: IPointCloudBox) => {
-    const texture = new THREE.Texture(this.getTextCanvas('1000'));
+  public generateBoxTrackID = (boxParams: IPointCloudBox) => {
+    const texture = new THREE.Texture(this.getTextCanvas(boxParams.trackID.toString()));
     texture.needsUpdate = true;
     const sprite = new THREE.SpriteMaterial({ map: texture, depthWrite: false });
     const boxID = new THREE.Sprite(sprite);
@@ -1131,7 +1154,7 @@ export class PointCloud {
    * @param zoomIn
    */
   public updatePointSize = (zoomIn: boolean) => {
-    const points = this.scene.getObjectByName(this.DEFAULT_POINTCLOUD) as { material: PointsMaterial } | undefined;
+    const points = this.scene.getObjectByName(this.pointCloudObjectName) as { material: PointsMaterial } | undefined;
 
     if (!points) {
       return;

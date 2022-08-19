@@ -108,7 +108,7 @@ const PointCloud3D: React.FC<IAnnotationStateProps> = ({ currentData }) => {
 
         // Add Init Box
         boxParamsList.forEach((v: IPointCloudBox) => {
-          pointCloud?.generateBox(v, v.id);
+          pointCloud?.generateBox(v);
         });
 
         ptCtx.setPointCloudResult(boxParamsList);
