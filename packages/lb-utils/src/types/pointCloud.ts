@@ -78,7 +78,7 @@ export interface IPointCloudBox extends IVolume {
   rotation: number;
   trackID: number;
   valid: boolean;
-  subAttribute: {
+  subAttribute?: {
     [k: string]: string;
   };
 }

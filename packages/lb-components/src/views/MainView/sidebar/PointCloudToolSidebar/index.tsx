@@ -18,33 +18,66 @@ interface IProps {
 }
 
 // Temporarily hidden, this feature does not support the function for the time being.
-// const SELECTED_BOX_ID = [1, 2, 3, 7, 8, 10, 101, 1002, 9999, 99999];
 // const AnnotatedBox = () => {
+//   const ptCtx = useContext(PointCloudContext);
+//   const { pointCloudBoxList } = ptCtx;
+
 //   return (
 //     <div style={{ padding: 24, borderBottom: '1px solid #eee' }}>
 //       <div style={{ marginBottom: 16 }}>所有已标注的框ID</div>
 //       <div>
-//         {SELECTED_BOX_ID.map((i) => (
-//           <Tag color='#F3F4FF' key={i} style={{ color: '#666', marginBottom: 8 }}>
-//             {i}
-//           </Tag>
-//         ))}
+//         {pointCloudBoxList
+//           .sort((a, b) => a.trackID - b.trackID)
+//           .map((i) => (
+//             <Tag color='#F3F4FF' key={i.trackID} style={{ color: '#666', marginBottom: 8 }}>
+//               {i.trackID}
+//             </Tag>
+//           ))}
 //       </div>
 //     </div>
 //   );
 // };
-// const BoxIdInput = () => {
-//   const [isEdit, setIsEdit] = useState(false);
-//   const [value, setValue] = useState('5');
 
-//   const applyValue = (newValue?: string) => {
-//     if (newValue) {
-//       setValue(newValue);
+// const BoxTrackIDInput = () => {
+//   const [isEdit, setIsEdit] = useState(false);
+//   const { pointCloudBoxList } = useContext(PointCloudContext);
+//   const { selectedBox, updateSelectedBox } = useSingleBox();
+//   const [inputValue, setInputValue] = useState('');
+
+//   const selectedBoxTrackID = selectedBox?.info.trackID;
+
+//   const hasDuplicateTrackID = (trackID: number) => {
+//     const duplicateBox = pointCloudBoxList.find((i) => i.trackID === selectedBoxTrackID);
+//     return duplicateBox && duplicateBox.id !== selectedBox?.info.id;
+//   };
+
+//   const applyInputValue = (isBlurEvent = false) => {
+//     const newTrackID = parseInt(inputValue, 10);
+
+//     if (isBlurEvent) {
+//       setIsEdit(false);
 //     }
 
-//     // TODO: emit value;
-//     setIsEdit(false);
+//     if (inputValue.indexOf('.') > -1) {
+//       message.error('输入trackID不允许包含小数点');
+//       return;
+//     }
+
+//     if (hasDuplicateTrackID(newTrackID)) {
+//       message.error('存在重复的trackID');
+//       return;
+//     }
+
+//     if (!(newTrackID > 0)) {
+//       message.error('输入trackID必须为正整数!');
+//     }
+
+//     updateSelectedBox({ trackID: ~~inputValue });
 //   };
+
+//   useEffect(() => {
+//     setIsEdit(false);
+//   }, [selectedBoxTrackID]);
 
 //   return (
 //     <div style={{ padding: 24 }}>
@@ -66,27 +99,34 @@ interface IProps {
 //           alignItems: 'center',
 //         }}
 //       >
-//         {isEdit ? (
+//         {isEdit && selectedBoxTrackID ? (
 //           <Input
-//             value={value}
+//             defaultValue={selectedBoxTrackID}
 //             onChange={(e) => {
-//               setValue(e.target.value);
+//               setInputValue(e.target.value);
 //             }}
+//             disabled={!selectedBoxTrackID}
 //             size='small'
-//             onBlur={(e) => {
-//               applyValue(e.target.value);
+//             onBlur={() => {
+//               applyInputValue();
 //             }}
 //             onPressEnter={() => {
-//               applyValue();
+//               applyInputValue(true);
 //             }}
 //           />
 //         ) : (
-//           <span>{value}</span>
+//           <span>{selectedBoxTrackID}</span>
 //         )}
 //         <EditFilled
-//           style={{ color: '#999', marginLeft: 16 }}
+//           style={{
+//             color: '#999',
+//             marginLeft: 16,
+//             cursor: selectedBoxTrackID ? 'pointer' : 'not-allowed',
+//           }}
 //           onClick={() => {
-//             setIsEdit(!isEdit);
+//             if (selectedBoxTrackID) {
+//               setIsEdit(!isEdit);
+//             }
 //           }}
 //         />
 //       </div>
@@ -195,7 +235,7 @@ const PointCloudToolSidebar: React.FC<IProps> = ({ stepInfo, toolInstance }) => 
         onChange={onChange}
       />
       {/* <AnnotatedBox />
-      <BoxIdInput /> */}
+      <BoxTrackIDInput /> */}
       {ptCtx.selectedID && (
         <AttributeUpdater
           toolInstance={toolInstance}

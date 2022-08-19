@@ -77,10 +77,6 @@ export const BoxInfos = () => {
         label: '点数',
         value: 1000,
       },
-      {
-        label: '是否有效',
-        value: box.valid === false ? '无效' : '有效',
-      },
     ];
 
     return (

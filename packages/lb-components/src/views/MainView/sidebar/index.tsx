@@ -9,7 +9,7 @@ import { useTranslation } from 'react-i18next';
 import { useSelector } from 'react-redux';
 import AnnotationText from './AnnotationText';
 import ClearIcon from './ClearIcon';
-import GeneralOperation from './GeneralOperation';
+import GeneralOperation, { PointCloudOperation } from './GeneralOperation';
 import ImgAttributeInfo from './ImgAttributeInfo';
 import SwitchAttributeList from './SwitchAttributeList';
 import TagSidebar, { expandIconFuc } from './TagSidebar';
@@ -182,7 +182,10 @@ const Sidebar: React.FC<IProps> = ({ sider }) => {
   if (toolName === EPointCloudName.PointCloud) {
     return (
       <div className={`${sidebarCls}`}>
-        <PointCloudToolSidebar />
+        <div className={`${sidebarCls}__content`}>
+          <PointCloudToolSidebar />
+        </div>
+        <PointCloudOperation />
       </div>
     );
   }
