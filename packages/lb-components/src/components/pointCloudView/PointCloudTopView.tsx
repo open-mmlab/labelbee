@@ -10,8 +10,8 @@ import { DownSquareOutlined, UpSquareOutlined } from '@ant-design/icons';
 import { cTool, PointCloud, PointCloudAnnotation } from '@labelbee/lb-annotation';
 import React, { useEffect, useRef, useState } from 'react';
 import { PointCloudContext } from './PointCloudContext';
-import { useRotate } from "./hooks/useRotate";
-import { useSingleBox } from "./hooks/useSingleBox";
+import { useRotate } from './hooks/useRotate';
+import { useSingleBox } from './hooks/useSingleBox';
 import { PointCloudContainer } from './PointCloudLayout';
 import { BoxInfos, PointCloudValidity } from './PointCloudInfos';
 import { Slider } from 'antd';
@@ -127,6 +127,7 @@ const PointCloudTopView: React.FC<IAnnotationStateProps> = ({ currentData }) => 
   const pointCloudRef = useRef<PointCloud | null>();
 
   const [size, setSize] = useState<{ width: number; height: number } | null>(null);
+  const [zAxisLimit, setZAxisLimit] = useState<number>(10);
 
   const pointCloudViews = usePointCloudViews();
 
@@ -244,7 +245,7 @@ const PointCloudTopView: React.FC<IAnnotationStateProps> = ({ currentData }) => 
         <div style={{ width: '100%', height: '100%' }} ref={ref} />
 
         <BoxInfos />
-        <ZAxisSlider zAxisLimit={ptCtx.zAxisLimit} setZAxisLimit={ptCtx.setZAxisLimit} />
+        <ZAxisSlider zAxisLimit={zAxisLimit} setZAxisLimit={setZAxisLimit} />
         <PointCloudValidity />
       </div>
     </PointCloudContainer>

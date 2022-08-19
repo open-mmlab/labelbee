@@ -24,8 +24,6 @@ export interface IPointCloudContext extends IPointCloudContextInstances {
   addSelectedID: (selectedID: string) => void;
   selectedAllBoxes: () => void;
   selectedID: string;
-  zAxisLimit: number; // Filter of pointCloud by z-axis
-  setZAxisLimit: (zAxisLimit: number) => void;
   addPointCloudBox: (boxParams: IPointCloudBox) => void;
 }
 
@@ -34,8 +32,6 @@ export const PointCloudContext = React.createContext<IPointCloudContext>({
   selectedID: '',
   selectedIDs: [],
   valid: true,
-  zAxisLimit: 10,
-  setZAxisLimit: () => {},
   setSelectedIDs: () => {},
   setPointCloudResult: () => {},
   setPointCloudValid: () => {},
