@@ -289,6 +289,7 @@ export const usePointCloudViews = () => {
     selectedIDs,
     pointCloudBoxList,
   } = useContext(PointCloudContext);
+  const { updateSelectedBox } = useSingleBox();
 
   const currentData = useSelector(
     (state: AppState) => state.annotation.imgList[state.annotation.imgIndex],
@@ -366,6 +367,8 @@ export const usePointCloudViews = () => {
         selectedPointCloudBox,
         sideViewInstance.pointCloudInstance,
       );
+
+      updateSelectedBox(newBoxParams);
       syncPointCloudViews(fromView, newPolygon, newBoxParams);
     }
   };
@@ -397,6 +400,7 @@ export const usePointCloudViews = () => {
         _.pickBy(newBoxParams, (v, k) => ['width', 'height', 'x', 'y']),
       );
 
+      updateSelectedBox(newBoxParams);
       syncPointCloudViews(PointCloudView.Top, polygon, selectedPointCloudBox);
     }
   };
