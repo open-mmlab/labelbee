@@ -1,8 +1,20 @@
+/*
+ * @Author: Laoluo luozefeng@sensetime.com
+ * @Date: 2022-06-08 21:17:07
+ * @LastEditors: Laoluo luozefeng@sensetime.com
+ * @LastEditTime: 2022-06-13 19:34:53
+ */
 import React, { useState } from 'react';
 import './App.css';
 import 'antd/dist/antd.css';
 import Annotation from './components/Annotation';
-import { fileList as mockFileList, getMockResult, videoList } from './mock/index';
+import {
+  fileList as mockFileList,
+  getMockResult,
+  pointCloudList,
+  pointCloudMappingImgList,
+  videoList,
+} from './mock/index';
 import { getStepList, getDependStepList } from './mock/taskConfig';
 import qs from 'qs';
 import { AnnotationView } from '@labelbee/lb-components';
@@ -15,14 +27,32 @@ const App = () => {
   const isSingleTool = !Array.isArray(tool);
   const stepList = isSingleTool ? getStepList(tool) : getDependStepList(tool);
   const currentIsVideo = StepUtils.currentToolIsVideo(1, stepList);
+  const currentIsPointCloud = StepUtils.currentToolIsPointCloud(1, stepList);
+  const getMockList = () => {
+    let srcList = mockFileList;
 
-  const [fileList] = useState(
-    (currentIsVideo ? videoList : mockFileList).map((url, i) => ({
+    const extraData = {};
+
+    if (currentIsVideo) {
+      srcList = videoList;
+    }
+
+    if (currentIsPointCloud) {
+      srcList = pointCloudList;
+      Object.assign(extraData, {
+        mappingImgList: pointCloudMappingImgList,
+      });
+    }
+
+    return srcList.map((url, i) => ({
+      ...extraData,
       id: i + 1,
       url,
       result: isSingleTool ? getMockResult(tool) : '',
-    })),
-  );
+    }));
+  };
+
+  const [fileList] = useState(getMockList());
 
   const [data, setData] = useState(DEFAULT_ANNOTATIONS);
 

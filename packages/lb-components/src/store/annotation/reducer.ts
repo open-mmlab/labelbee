@@ -6,13 +6,13 @@ import AnnotationDataUtils from '@/utils/AnnotationDataUtils';
 import { ConfigUtils } from '@/utils/ConfigUtils';
 import { composeResult, composeResultWithBasicImgInfo } from '@/utils/data';
 import StepUtils from '@/utils/StepUtils';
-import { AnnotationEngine, CommonToolUtils, ImgUtils, cTool } from '@labelbee/lb-annotation';
+import ToolUtils from '@/utils/ToolUtils';
+import { AnnotationEngine, CommonToolUtils, ImgUtils } from '@labelbee/lb-annotation';
 import { i18n } from '@labelbee/lb-utils';
 import { message } from 'antd/es';
 import _ from 'lodash';
 import { SetAnnotationLoading } from './actionCreators';
 import { AnnotationActionTypes, AnnotationState } from './types';
-const { EVideoToolName } = cTool;
 
 export const getStepConfig = (stepList: any[], step: number) =>
   stepList.find((i) => i.step === step);
@@ -62,7 +62,12 @@ const updateToolInstance = (annotation: AnnotationState, imgNode: HTMLImageEleme
   const config = ConfigUtils.jsonParser(stepConfig.config);
 
   // 视频工具不支持实例化
-  if ((Object.values(EVideoToolName) as string[]).includes(stepConfig.tool)) {
+  if (ToolUtils.isVideoTool(stepConfig?.tool)) {
+    return;
+  }
+
+  // TODO: 点云实例化对接
+  if (ToolUtils.isPointCloudTool(stepConfig?.tool)) {
     return;
   }
 
@@ -95,12 +100,13 @@ export const LoadFileAndFileData =
   async (dispatch: any, getState: any) => {
     const { stepList, step } = getState().annotation;
     const currentIsVideo = StepUtils.currentToolIsVideo(step, stepList);
+    const currentIsPointCloud = StepUtils.currentToolIsPointCloud(step, stepList);
 
     SetAnnotationLoading(dispatch, true);
 
     dispatch(TryGetFileDataByAPI(nextIndex));
 
-    if (currentIsVideo) {
+    if (currentIsVideo || currentIsPointCloud) {
       dispatch(AfterVideoLoaded(nextIndex));
       return;
     }
@@ -240,6 +246,13 @@ export const annotationReducer = (
       };
     }
 
+    /**
+     * For data storage in dependent states
+     * 
+     * Features: 
+     * 1. Get Data from ToolInstance (If it use toolInstance)
+     * 2. Filter Data By BasicResultList
+     */
     case ANNOTATION_ACTIONS.SUBMIT_RESULT: {
       const { imgList, basicIndex, resultList, toolInstance, basicResultList } = state;
       if (!toolInstance) {
@@ -335,7 +348,7 @@ export const annotationReducer = (
        * The roles of toolInstance and annotationEngine need to be clearly distinguished
        */
       if (!toolInstance) {
-        return state;
+        return { ...state, imgIndex: action.payload.nextIndex };
       }
 
       const currentStepInfo = StepUtils.getCurrentStepInfo(step, stepList);

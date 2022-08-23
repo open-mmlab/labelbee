@@ -37,15 +37,18 @@ export const ViewportProviderComponent = (props: any) => {
     if (!toolUtils.hotkeyFilter(e)) {
       return;
     }
-    if (e.keyCode === EKeyCode.A) {
-      dispatch(PageBackward());
-    }
 
-    if (e.keyCode === EKeyCode.D) {
-      dispatch(PageForward());
-    }
-    if (e.keyCode === EKeyCode.R) {
-      dispatch(UpdateRotate());
+    if (!e.shiftKey || !e.ctrlKey) {
+      if (e.keyCode === EKeyCode.A) {
+        dispatch(PageBackward());
+      }
+
+      if (e.keyCode === EKeyCode.D) {
+        dispatch(PageForward());
+      }
+      if (e.keyCode === EKeyCode.R) {
+        dispatch(UpdateRotate());
+      }
     }
 
     /**

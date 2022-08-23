@@ -169,7 +169,7 @@ export default class AnnotationEngine {
   }
 
   /**
-   * 清空当前依赖
+   * 清空当前依赖
    */
   public clearBasicResult() {
     this.setBasicInfo();

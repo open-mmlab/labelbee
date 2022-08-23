@@ -10,6 +10,8 @@ import configureStore from './configureStore';
 import { PageBackward, PageForward, PageJump } from './store/annotation/actionCreators';
 import { ToolInstance } from './store/annotation/types';
 import { VideoTagTool } from '@/components/videoPlayer/TagToolInstanceAdaptorI18nProvider';
+import './index.scss';
+import { PointCloudProvider } from './components/pointCloudView/PointCloudContext';
 import { AppState } from './store';
 
 export const store = configureStore();
@@ -38,7 +40,9 @@ const OutputApp = (props: AppProps, ref: any) => {
   return (
     <Provider store={store}>
       <I18nextProvider i18n={i18n}>
-        <App {...props} setToolInstance={setToolInstance} />
+        <PointCloudProvider>
+          <App {...props} setToolInstance={setToolInstance} />
+        </PointCloudProvider>
       </I18nextProvider>
     </Provider>
   );

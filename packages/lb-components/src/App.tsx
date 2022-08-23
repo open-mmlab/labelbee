@@ -17,7 +17,7 @@ import {
   OnStepChange,
   OnSubmit,
 } from './types/data';
-import { Footer, Header, Sider } from './types/main';
+import { Header, RenderFooter, Sider } from './types/main';
 import { IStepInfo } from './types/step';
 
 interface IAnnotationStyle {
@@ -46,7 +46,7 @@ export interface AppProps {
   className?: string;
   toolInstance: ToolInstance;
   header?: Header;
-  footer?: Footer;
+  footer?: RenderFooter;
   sider?: Sider;
   style?: {
     layout?: { [key: string]: any };

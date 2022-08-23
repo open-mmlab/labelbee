@@ -1,3 +1,9 @@
+/*
+ * @Author: Laoluo luozefeng@sensetime.com
+ * @Date: 2022-06-15 11:45:52
+ * @LastEditors: Laoluo luozefeng@sensetime.com
+ * @LastEditTime: 2022-06-27 23:06:16
+ */
 module.exports = {
   extends: ['airbnb', 'plugin:import/typescript', 'plugin:markdown/recommended', 'plugin:prettier/recommended'],
   env: {
@@ -54,7 +60,7 @@ module.exports = {
     'unicorn/better-regex': 2,
     'unicorn/prefer-string-trim-start-end': 2,
     'unicorn/expiring-todo-comments': 2,
-    'unicorn/no-abusive-eslint-disable': 2,
+    'unicorn/no-abusive-eslint-disable': 'off',
 
     // https://github.com/typescript-eslint/typescript-eslint/issues/2540#issuecomment-692866111
     'no-use-before-define': 0,

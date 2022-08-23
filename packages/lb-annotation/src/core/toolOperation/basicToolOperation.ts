@@ -367,6 +367,8 @@ class BasicToolOperation extends EventListener {
     canvas.width = size.width * pixel;
     canvas.height = size.height * pixel;
 
+    // set Attribute
+    this.container.style.position = 'relative';
     if (isAppend) {
       if (this.container.hasChildNodes()) {
         this.container.insertBefore(canvas, this.container.childNodes[0]);
@@ -458,6 +460,7 @@ class BasicToolOperation extends EventListener {
 
   public setForbidOperation(forbidOperation: boolean) {
     this.forbidOperation = forbidOperation;
+    this.setShowDefaultCursor(true);
     this.render();
   }
 
@@ -530,6 +533,7 @@ class BasicToolOperation extends EventListener {
     this.renderBasicCanvas();
 
     this.emit('dependRender');
+
     this.emit('renderZoom', zoom, currentPos, imgInfo);
   };
 
@@ -924,6 +928,7 @@ class BasicToolOperation extends EventListener {
     this.setImgInfo(imgInfo);
 
     zoomInfo.ratio = ratio;
+
     this.emit('renderZoom', zoom, newCurrentPos, imgInfo);
   };
 
@@ -938,8 +943,19 @@ class BasicToolOperation extends EventListener {
     this.renderBasicCanvas();
   };
 
+  /**
+   *  Update by center.
+   *
+   * @param newZoom
+   */
+  public zoomChangeOnCenter = (newZoom: number) => {
+    this.wheelChangePos(this.getGetCenterCoordinate(), 0, newZoom);
+    this.render();
+    this.renderBasicCanvas();
+  };
+
   public renderCursorLine(lineColor = this.style.lineColor[0] ?? '') {
-    if (!this.ctx || this.forbidCursorLine) {
+    if (!this.ctx || this.forbidCursorLine || this.forbidOperation) {
       return;
     }
 

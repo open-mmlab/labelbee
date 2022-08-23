@@ -12,12 +12,13 @@ import lineToolShortCutTable from './line';
 import tagToolSingleShortCutTable from './tag';
 import textToolShortCutTable from './text';
 import videoToolShortCutTable from './videoTag';
+import pointCloudShortCutTable from './pointCloud';
 
 import { footerCls } from '../../index';
 import { useTranslation } from 'react-i18next';
 import { cTool } from '@labelbee/lb-annotation';
 
-const { EVideoToolName } = cTool;
+const { EVideoToolName, EPointCloudName } = cTool;
 
 interface IProps {
   style?: any;
@@ -33,6 +34,19 @@ const shortCutTable: any = {
   [EToolName.Line]: lineToolShortCutTable,
   [EToolName.Text]: textToolShortCutTable,
   [EVideoToolName.VideoTagTool]: videoToolShortCutTable,
+  [EPointCloudName.PointCloud]: pointCloudShortCutTable,
+};
+
+const ToolHotKeyIcon = ({ icon }: { icon: React.ReactElement | string }) => {
+  if (typeof icon === 'string') {
+    return <img width={16} height={16} src={icon} />;
+  }
+
+  if (icon) {
+    return icon;
+  }
+
+  return null;
 };
 
 const ToolHotKey: React.FC<IProps> = ({ style, title, toolName }) => {
@@ -43,21 +57,11 @@ const ToolHotKey: React.FC<IProps> = ({ style, title, toolName }) => {
     return null;
   }
 
-  const renderImg = (info: Element | string) => {
-    if (typeof info === 'string') {
-      return <img width={16} height={16} src={info} style={iconStyle} />;
-    }
-    return info;
-  };
   const shortCutStyle = {
     width: 320,
     display: 'flex',
     justifyContent: 'space-between',
-    margin: '23px 21px',
-  };
-
-  const iconStyle = {
-    marginRight: 10,
+    margin: 16,
   };
 
   const shortCutNameStyles: React.CSSProperties = {
@@ -74,8 +78,8 @@ const ToolHotKey: React.FC<IProps> = ({ style, title, toolName }) => {
   const setHotKey = (info: any, index: number) => (
     <div style={shortCutStyle} key={index}>
       <span style={{ display: 'flex', alignItems: 'center' }}>
-        {renderImg(info.icon)}
-        {t(info.name)}
+        <ToolHotKeyIcon icon={info.icon} />
+        <span style={{ marginLeft: info.icon ? 16 : 0 }}>{t(info.name)}</span>
       </span>
       <span style={{ display: 'flex', alignItems: 'center' }}>
         {info.noticeInfo && (
@@ -86,11 +90,16 @@ const ToolHotKey: React.FC<IProps> = ({ style, title, toolName }) => {
     </div>
   );
 
-  const setSVG = (list: any[], useDangerInnerHtml = false, linkSymbol?: string) => {
+  const setSVG = (list: any[], useDangerInnerHtml = false, linkSymbol = '+') => {
+    if (!list) {
+      return null;
+    }
     const listDom = list.map((item, index) => {
+      const wrapperStyle = { display: 'flex', alignItems: 'center' };
+
       if (useDangerInnerHtml) {
         return (
-          <span key={index} style={{ display: 'flex' }}>
+          <span key={index} style={wrapperStyle}>
             <span style={shortCutNameStyles} dangerouslySetInnerHTML={{ __html: item }} />
           </span>
         );
@@ -99,7 +108,7 @@ const ToolHotKey: React.FC<IProps> = ({ style, title, toolName }) => {
       if (index < list.length - 1) {
         if (typeof item === 'number') {
           return (
-            <span key={index} style={{ display: 'flex' }}>
+            <span key={index} style={wrapperStyle}>
               <span style={shortCutNameStyles}>{item}</span>
               <span style={{ marginRight: '3px' }}>~</span>
             </span>
@@ -108,7 +117,7 @@ const ToolHotKey: React.FC<IProps> = ({ style, title, toolName }) => {
 
         if (item?.startsWith('data')) {
           return (
-            <span key={index} style={{ display: 'flex' }}>
+            <span key={index} style={wrapperStyle}>
               <span className='shortCutButton' style={{ marginRight: '3px' }}>
                 <img width={16} height={23} src={item} />
               </span>
@@ -117,15 +126,15 @@ const ToolHotKey: React.FC<IProps> = ({ style, title, toolName }) => {
           );
         }
         return (
-          <span key={index} style={{ display: 'flex' }}>
+          <span key={index} style={wrapperStyle}>
             <span style={shortCutNameStyles}>{item}</span>
-            <span style={{ marginRight: '3px' }}>{linkSymbol || '+'}</span>
+            <span style={{ marginRight: '3px' }}>{linkSymbol}</span>
           </span>
         );
       }
       if (typeof item === 'number') {
         return (
-          <span key={index} style={{ display: 'flex' }}>
+          <span key={index} style={wrapperStyle}>
             <span style={shortCutNameStyles}>{item}</span>
           </span>
         );

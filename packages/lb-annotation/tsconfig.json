@@ -3,6 +3,7 @@
     "target": "es5",
     "module": "commonjs",
     "outDir": "./lib",
+    "jsx": "react",
     "strict": true,
     "lib": ["es6", "DOM", "es2017"],
     "baseUrl": "./",
