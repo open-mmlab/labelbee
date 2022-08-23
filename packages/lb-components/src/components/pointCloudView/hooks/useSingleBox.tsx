@@ -8,8 +8,14 @@ const { ESortDirection } = cAnnotation;
 
 /** Actions for single selected box */
 export const useSingleBox = () => {
-  const { pointCloudBoxList, setPointCloudResult, topViewInstance, selectedIDs, selectedID } =
-    useContext(PointCloudContext);
+  const {
+    pointCloudBoxList,
+    setPointCloudResult,
+    topViewInstance,
+    selectedIDs,
+    selectedID,
+    mainViewInstance,
+  } = useContext(PointCloudContext);
 
   /** Returns { info: selected box, index: selected box index } */
   const selectedBox = useMemo(() => {
@@ -55,11 +61,19 @@ export const useSingleBox = () => {
     switchToNextBox(ESortDirection.descend);
   };
 
+  const deletePointCloudBox = (id: string) => {
+    setPointCloudResult(pointCloudBoxList.filter((v) => v.id !== id));
+    mainViewInstance?.removeObjectByName(id);
+    mainViewInstance?.render();
+    // TODO Clear Highlight.
+  };
+
   return {
     selectedBox,
     updateSelectedBox,
     changeSelectedBoxValid,
     selectNextBox: switchToNextBox,
     selectPrevBox,
+    deletePointCloudBox,
   };
 };

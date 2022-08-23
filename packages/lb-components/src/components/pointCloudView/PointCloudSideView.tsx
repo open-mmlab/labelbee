@@ -10,6 +10,8 @@ import React, { useEffect, useRef, useState } from 'react';
 import { EPerspectiveView, IPointCloudBox } from '@labelbee/lb-utils';
 import { PointCloudContext } from './PointCloudContext';
 import { SizeInfoForView } from './PointCloudInfos';
+import { connect } from 'react-redux';
+import { aMapStateToProps, IAnnotationStateProps } from '@/store/annotation/map';
 import { usePointCloudViews } from './hooks/usePointCloudViews';
 
 /**
@@ -63,7 +65,7 @@ const updateSideViewByCanvas2D = (
   SidePointCloud.render();
 };
 
-const PointCloudSideView = () => {
+const PointCloudSideView: React.FC<IAnnotationStateProps> = ({ currentData }) => {
   const ptCtx = React.useContext(PointCloudContext);
   const [size, setSize] = useState<{ width: number; height: number } | null>(null);
   const { sideViewUpdateBox } = usePointCloudViews();
@@ -148,4 +150,4 @@ const PointCloudSideView = () => {
   );
 };
 
-export default PointCloudSideView;
+export default connect(aMapStateToProps)(PointCloudSideView);

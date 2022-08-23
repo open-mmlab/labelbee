@@ -140,13 +140,9 @@ const PointCloudSideView = ({ currentData }: IAnnotationStateProps) => {
           y: newCenterPoint.y - oldCenterPoint.y,
         };
 
-        const cos = Math.cos(ptCtx.selectedPointCloudBox.rotation);
-        const sin = Math.sin(ptCtx.selectedPointCloudBox.rotation);
-
         const offsetCenterPoint = {
-          // x: vector.x * cos - vector.y * sin,
           x: offset.x,
-          y: offset.x * sin + offset.y * cos,
+          y: 0, // Not be used.
           z: newCenterPoint.y - oldCenterPoint.y,
         };
 

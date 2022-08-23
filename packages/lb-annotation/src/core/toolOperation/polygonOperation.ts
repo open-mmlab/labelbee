@@ -604,6 +604,10 @@ class PolygonOperation extends BasicToolOperation {
       return;
     }
 
+    const deletedPolygon = this.polygonList.find((p) => p.id === id);
+
+    this.emit('deletedObject', { deletedObject: deletedPolygon, id });
+
     this.setPolygonList(this.polygonList.filter((polygon) => polygon.id !== id));
     this.history.pushHistory(this.polygonList);
     this._textAttributInstance?.clearTextAttribute();

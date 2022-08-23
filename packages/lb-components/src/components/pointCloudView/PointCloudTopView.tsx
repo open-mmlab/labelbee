@@ -2,7 +2,6 @@
  * @Author: Laoluo luozefeng@sensetime.com
  * @Date: 2022-06-22 11:08:31
  * @LastEditors: Laoluo luozefeng@sensetime.com
- * @LastEditTime: 2022-07-08 15:44:18
  */
 import { getClassName } from '@/utils/dom';
 import { FooterDivider } from '@/views/MainView/toolFooter';
@@ -11,8 +10,8 @@ import { DownSquareOutlined, UpSquareOutlined } from '@ant-design/icons';
 import { cTool, PointCloud, PointCloudAnnotation } from '@labelbee/lb-annotation';
 import React, { useEffect, useRef, useState } from 'react';
 import { PointCloudContext } from './PointCloudContext';
-import { useRotate } from "./hooks/useRotate";
-import { useSingleBox } from "./hooks/useSingleBox";
+import { useRotate } from './hooks/useRotate';
+import { useSingleBox } from './hooks/useSingleBox';
 import { PointCloudContainer } from './PointCloudLayout';
 import { BoxInfos, PointCloudValidity } from './PointCloudInfos';
 import { Slider } from 'antd';
@@ -23,7 +22,7 @@ import { usePointCloudViews } from './hooks/usePointCloudViews';
 const { EPolygonPattern } = cTool;
 
 /**
- * Get the offset from canvas2d-coordinate to world coordinate
+ * Get the offset from canvas2d-coordinate to world coordinate (Top View)
  * @param currentPos
  * @param size
  * @param zoom
@@ -113,7 +112,9 @@ const ZAxisSlider = ({
         max={10}
         min={0.5}
         defaultValue={zAxisLimit}
-        onAfterChange={setZAxisLimit}
+        onAfterChange={(v: number) => {
+          setZAxisLimit(v);
+        }}
       />
     </div>
   );
@@ -123,6 +124,7 @@ const PointCloudTopView: React.FC<IAnnotationStateProps> = ({ currentData }) => 
   const ref = useRef<HTMLDivElement>(null);
   const ptCtx = React.useContext(PointCloudContext);
   const pointCloudRef = useRef<PointCloud | null>();
+  const { deletePointCloudBox } = useSingleBox();
 
   const [size, setSize] = useState<{ width: number; height: number } | null>(null);
   const [zAxisLimit, setZAxisLimit] = useState<number>(10);
@@ -206,6 +208,10 @@ const PointCloudTopView: React.FC<IAnnotationStateProps> = ({ currentData }) => 
       pointCloudViews.topViewAddBox(polygon, size);
     });
 
+    TopView2dOperation.singleOn('deletedObject', ({ id }) => {
+      deletePointCloudBox(id);
+    });
+
     TopView2dOperation.singleOn('deleteSelectedIDs', () => {
       ptCtx.setSelectedIDs([]);
     });
@@ -241,6 +247,7 @@ const PointCloudTopView: React.FC<IAnnotationStateProps> = ({ currentData }) => 
     >
       <div style={{ position: 'relative', flex: 1 }}>
         <div style={{ width: '100%', height: '100%' }} ref={ref} />
+
         <BoxInfos />
         <ZAxisSlider zAxisLimit={zAxisLimit} setZAxisLimit={setZAxisLimit} />
         <PointCloudValidity />

@@ -13,6 +13,8 @@ import _ from 'lodash';
 import { useSelector } from 'react-redux';
 import { AppState } from '@/store';
 
+const DEFAULT_SCOPE = 5;
+
 const PointCloudView = {
   '3D': '3D',
   Top: 'Top',
@@ -148,7 +150,10 @@ export const synchronizeSideView = (
   const { pointCloud2dOperation, pointCloudInstance } = sideViewInstance;
 
   // Create PointCloud
-  pointCloudInstance.loadPCDFileByBox(url, boxParams);
+  pointCloudInstance.loadPCDFileByBox(url, boxParams, {
+    width: DEFAULT_SCOPE,
+    depth: DEFAULT_SCOPE,
+  });
   const { cameraPositionVector } = pointCloudInstance.updateOrthoCamera(
     boxParams,
     EPerspectiveView.Left,
@@ -189,7 +194,7 @@ export const synchronizeBackView = (
   boxParams: IPointCloudBox,
   newPolygon: any,
   BackViewInstance: PointCloudAnnotation,
-  url?: string,
+  url: string,
 ) => {
   if (!BackViewInstance) {
     return;
@@ -201,7 +206,7 @@ export const synchronizeBackView = (
   } = BackViewInstance;
 
   // Create PointCloud
-  backPointCloud.loadPCDFileByBox(url ?? 'http://10.53.25.142:8001/10837/1/total.pcd', boxParams);
+  backPointCloud.loadPCDFileByBox(url, boxParams, { height: DEFAULT_SCOPE, depth: DEFAULT_SCOPE });
   const { cameraPositionVector } = backPointCloud.updateOrthoCamera(
     boxParams,
     EPerspectiveView.Back,
