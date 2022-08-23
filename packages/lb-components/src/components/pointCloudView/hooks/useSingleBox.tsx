@@ -33,7 +33,7 @@ export const useSingleBox = () => {
         setPointCloudResult(_.cloneDeep(pointCloudBoxList));
       }
     },
-    [selectedID],
+    [selectedID, pointCloudBoxList],
   );
 
   /** Toggle selected box‘s validity  */

@@ -56,7 +56,8 @@
   },
   "peerDependencies": {
     "antd": ">=4.15.0",
-    "react": ">=16.9.0"
+    "react": ">=16.9.0",
+    "three": ">=0.141.0"
   },
   "devDependencies": {
     "@commitlint/cli": "^13.1.0",
