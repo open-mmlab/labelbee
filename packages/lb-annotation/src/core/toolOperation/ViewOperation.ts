@@ -226,7 +226,7 @@ export default class ViewOperation extends BasicToolOperation {
         switch (annotation.type) {
           case 'rect': {
             const rect: any = annotation.annotation;
-            const { hiddenText = false, isReference } = rect;
+            const { hiddenText = false, isReference, hiddenRectSize = false } = rect;
             const { zoom } = this;
             const renderRect = AxisUtils.changeRectByZoom(rect, this.zoom, this.currentPos);
 
@@ -260,7 +260,8 @@ export default class ViewOperation extends BasicToolOperation {
             // 框大小数值显示
             const rectSize = `${Math.round(width / zoom)} * ${Math.round(height / zoom)}`;
             const textSizeWidth = rectSize.length * 7;
-            if (!hiddenText) {
+
+            if (!hiddenText && !hiddenRectSize) {
               DrawUtils.drawText(this.canvas, { x: x + width - textSizeWidth, y: y + height + 15 }, rectSize, {
                 color: style.stroke,
                 font: 'normal normal 600 14px Arial',

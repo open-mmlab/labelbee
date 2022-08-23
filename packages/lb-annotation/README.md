@@ -143,3 +143,68 @@ interface IPolygonData {
   attribute: string;
 }
 ```
+
+### 多层级标注
+
+该方式可以将多个工具进行融合，实现多个工具在统一层次进行展示。
+
+下方以一个多边形 + 分割辅助操作进行为例子
+
+```ts
+import React, { useEffect } from 'react';
+import { AnnotationEngine } from '@labelbee/lb-annotation';
+
+const imgSrc =
+  'https://upload.wikimedia.org/wikipedia/commons/thumb/6/6e/Andre_Iguodala_2016.jpg/1200px-Andre_Iguodala_2016.jpg';
+
+type TRunPrediction = (params: {
+  point: { x: number; y: number };
+  rect: { x: number; y: number; w: number; h: number };
+}) => Promise<unknown>;
+
+const App = () => {
+  const ref = React.useRef(null);
+
+  useEffect(() => {
+    if (ref.current) {
+      const imgNode = new Image();
+      imgNode.src = imgSrc;
+      imgNode.onload = () => {
+        // 获取当前工具的类
+        const annotationEngine = new AnnotationEngine({
+          container: ref.current,
+          size: {
+            width: 1000,
+            height: 600,
+          },
+          toolName: ['segmentByRectTool', 'polygonTool'], // 创建通过多层级进行创建
+          imgNode,
+        });
+
+        // 1. 切换层级 (临时使用该方式切换两个层级的变换)
+        annotationEngine.switchLastTwoCanvas();
+
+        // 2. 获取分割层次的 instance, 设置 runPrediction 函数
+        const firstToolInstance = annotationEngine.firstToolInstance;
+
+        const runPrediction = (params: TRunPrediction) => {
+          return new Promise((resolve) => {
+            // 模拟异步的操作
+            setTimeout(() => {
+              // 关键，需要返回成功
+              resolve('');
+              message.success('Predict successfully');
+              annotationEngine.switchLastTwoCanvas();
+            }, 1000);
+          });
+        };
+        firstToolInstance?.setRunPrediction?.(runPrediction);
+      };
+    }
+  }, []);
+
+  return <div ref={ref} />;
+};
+
+export default App;
+```

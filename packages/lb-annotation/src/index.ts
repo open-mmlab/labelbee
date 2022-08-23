@@ -25,8 +25,7 @@ import * as cTool from './constant/tool';
 // Utils
 import TagUtils from './utils/tool/TagUtils';
 import uuid from './utils/uuid';
-import CommonToolUtils from './utils/tool/CommonToolUtils';
-// TODO 后续将 Util 后缀 => Utils
+import EnhanceCommonToolUtils from './utils/tool/EnhanceCommonToolUtils';
 import MarkerUtils from './utils/tool/MarkerUtils';
 import RectUtils from './utils/tool/RectUtils';
 import AxisUtils from './utils/tool/AxisUtils';
@@ -35,7 +34,7 @@ import ImgUtils from './utils/ImgUtils';
 import MathUtils from './utils/MathUtils';
 
 // ToolListener
-import DblClickEventListener from './utils/tool/DblClickEventListener'; // 暂时这样支持外部工具的使用
+import DblClickEventListener from './utils/tool/DblClickEventListener'; // temporarily supports the use of external tools in this way
 
 import AnnotationEngine from './core';
 
@@ -43,7 +42,8 @@ import { PointCloud } from './core/pointCloud';
 import { PointCloudAnnotation } from './core/pointCloud/annotation';
 import UnitUtils from './utils/tool/UnitUtils';
 
-const toolUtils = CommonToolUtils;
+const CommonToolUtils = EnhanceCommonToolUtils;
+const toolUtils = EnhanceCommonToolUtils; // Compatible with the old version of the definition
 
 export {
   // 各类图形操作

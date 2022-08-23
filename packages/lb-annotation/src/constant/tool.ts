@@ -54,6 +54,8 @@ export enum EToolName {
   ClientAttribute = 'clientAttributeTool',
   /** OCR关联关系工具 */
   OCRRelation = 'OCRRelationTool',
+  /** 算法分割辅助工具 */
+  SegmentByRect = 'segmentByRectTool',
 }
 
 export enum ECheckModel {
@@ -84,6 +86,7 @@ export const TOOL_NAME: { [a: string]: string } = {
   [EToolName.Face]: '人脸106工具',
   [EToolName.ClientAttribute]: '客户端属性工具',
   [EToolName.OCRRelation]: 'OCR关联关系工具',
+  [EToolName.SegmentByRect]: '算法分割辅助工具',
   [EVideoToolName.VideoTextTool]: '视频文本',
   [EVideoToolName.VideoTagTool]: '视频标签',
   [EVideoToolName.VideoClipTool]: '视频截取',

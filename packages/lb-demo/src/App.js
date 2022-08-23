@@ -54,6 +54,28 @@ const App = () => {
 
   const [fileList] = useState(getMockList());
 
+  const [data, setData] = useState(DEFAULT_ANNOTATIONS);
+
+  const onChange = (type, ids) => {
+    if (type === 'hover') {
+      setData((pre) => {
+        return pre.map((item) => {
+          if (item.annotation.id === 'g5r2l7mcrv8') {
+            const { annotation } = item;
+            return {
+              ...item,
+              annotation: {
+                ...annotation,
+                hiddenRectSize: !ids.includes('g5r2l7mcrv8'),
+              },
+            };
+          }
+          return item;
+        });
+      });
+    }
+  };
+
   // 参看工具的展示
   if (tool === 'annotationView') {
     return (
@@ -61,11 +83,12 @@ const App = () => {
         <div style={{ height: 1000 }}>
           <AnnotationView
             src='https://cdn.nba.com/manage/2020/10/andre-iguodala-iso-smile-0520-784x588.jpg'
-            annotations={DEFAULT_ANNOTATIONS}
+            annotations={data}
             style={{
               stroke: 'blue',
               thickness: 3,
             }}
+            onChange={onChange}
           />
         </div>
       </div>

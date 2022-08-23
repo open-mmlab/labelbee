@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect, useRef, useCallback } from 'react';
 import { connect } from 'react-redux';
 import { AppState } from 'src/store';
 import { GraphToolInstance } from 'src/store/annotation/types';
@@ -36,6 +36,14 @@ const SwitchAttributeList: React.FC<IProps> = (props) => {
     };
   }, [toolInstance, listRef]);
 
+  const attributeChanged = useCallback(
+    (v: string) => {
+      toolInstance.setDefaultAttribute(v);
+      forceRender((s) => s + 1);
+    },
+    [toolInstance],
+  );
+
   if (!props.stepInfo) {
     return null;
   }
@@ -45,16 +53,12 @@ const SwitchAttributeList: React.FC<IProps> = (props) => {
     return null;
   }
 
-  if (toolInstance?.config.attributeConfigurable === true && toolInstance?.config?.attributeList) {
+  if (toolInstance?.config?.attributeConfigurable === true && toolInstance?.config?.attributeList) {
     const list = toolInstance.config.attributeList.map((i: any) => ({
       label: i.key,
       value: i.value,
     }));
     list.unshift({ label: t('NoAttribute'), value: '' });
-    const attributeChanged = (v: string) => {
-      toolInstance.setDefaultAttribute(v);
-      forceRender((s) => s + 1);
-    };
 
     return (
       <div>

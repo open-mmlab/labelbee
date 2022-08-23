@@ -1,6 +1,6 @@
 {
   "name": "@labelbee/lb-utils",
-  "version": "1.2.0",
+  "version": "1.3.0-alpha.0",
   "description": "utils for label-bee",
   "author": "Glenfiddish <edwinlee0927@hotmail.com>",
   "license": "Apache-2.0",
@@ -19,6 +19,7 @@
   "scripts": {
     "test": "echo \"Error: run tests from root\" && exit 1",
     "dev": "rollup -c rollup.config.js -w ",
+    "start": "npm run dev",
     "build": "rollup -c rollup.config.js && npm run build:type",
     "build:type": "tsc --emitDeclarationOnly --resolveJsonModule",
     "prepublishOnly": "npm run build"

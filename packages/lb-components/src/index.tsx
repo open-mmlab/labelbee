@@ -12,6 +12,7 @@ import { ToolInstance } from './store/annotation/types';
 import { VideoTagTool } from '@/components/videoPlayer/TagToolInstanceAdaptorI18nProvider';
 import './index.scss';
 import { PointCloudProvider } from './components/pointCloudView/PointCloudContext';
+import { AppState } from './store';
 
 export const store = configureStore();
 
@@ -23,6 +24,7 @@ const OutputApp = (props: AppProps, ref: any) => {
     () => {
       return {
         toolInstance,
+        annotationEngine: (store.getState() as AppState).annotation.annotationEngine,
         pageBackwardActions: () => store.dispatch(PageBackward() as unknown as AnyAction),
         pageForwardActions: () => store.dispatch(PageForward() as unknown as AnyAction),
         pageJump: (page: string) => {

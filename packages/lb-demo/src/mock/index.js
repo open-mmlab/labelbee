@@ -144,19 +144,7 @@ export const pointCloudMappingImgList = [
   },
 ];
 
-const data = Array(100)
-  .fill('')
-  .map((v, i) => ({
-    id: i + 1,
-    sourceID: '',
-    x: Math.random() * 1000,
-    y: Math.random() * 1000,
-    width: 20,
-    height: 20,
-    order: i + 1,
-    attribute: '',
-    valid: true,
-  }));
+const data = [];
 
 const polygonData = [];
 // Array(1)
@@ -379,15 +367,15 @@ export const DEFAULT_ANNOTATIONS = [
   {
     type: 'rect',
     annotation: {
-      id: '1231999923999',
+      id: 'g5r2l7mcrv8',
       x: 60,
       y: 260,
       width: 100,
       height: 100,
       stroke: 'pink',
       name: 'Bag',
+      hiddenRectSize: true,
       renderEnhance: (params) => {
-        console.log(params);
         const {
           ctx,
           data: { annotation },
