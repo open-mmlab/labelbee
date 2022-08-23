@@ -96,7 +96,7 @@
     "color-rgba": "^2.3.0",
     "lodash": "^4.17.20"
   },
-  "pureDependencies": {
+  "peerDependencies": {
     "three": ">=0.141.0"
   }
 }

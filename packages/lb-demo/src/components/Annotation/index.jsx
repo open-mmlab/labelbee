@@ -21,8 +21,8 @@ const Annotation = (props) => {
 
   useEffect(() => {
     setTimeout(() => {
-      const { annotationEngine } = ref.current;
-      if (annotationEngine) {
+      if (ref.current?.annotationEngine) {
+        const { annotationEngine } = ref.current;
         const firstToolInstance = annotationEngine.firstToolInstance;
         firstToolInstance?.setRunPrediction?.((data) => {
           // data: TRunPrediction
