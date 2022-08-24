@@ -15,6 +15,7 @@ import { PointCloudContext } from './PointCloudContext';
 import { aMapStateToProps, IAnnotationStateProps } from '@/store/annotation/map';
 import { connect } from 'react-redux';
 import { jsonParser } from '@/utils';
+import { useSingleBox } from './hooks/useSingleBox';
 
 const pointCloudID = 'LABELBEE-POINTCLOUD';
 const PointCloud3DContext = React.createContext<{
@@ -75,14 +76,10 @@ const PointCloud3DSideBar = () => {
 const PointCloud3D: React.FC<IAnnotationStateProps> = ({ currentData }) => {
   const ptCtx = useContext(PointCloudContext);
   const ref = useRef<HTMLDivElement>(null);
-  const { selectedID, pointCloudBoxList } = useContext(PointCloudContext);
-
-  const hasSelectedBox = selectedID;
+  const { selectedBox } = useSingleBox();
 
   const setTarget3DView = (perspectiveView: EPerspectiveView) => {
-    const box = hasSelectedBox
-      ? pointCloudBoxList.find((i: IPointCloudBox) => i.id === selectedID)
-      : undefined;
+    const box = selectedBox?.info;
 
     if (box) {
       ptCtx.mainViewInstance?.updateCameraByBox(box, perspectiveView);
@@ -123,14 +120,14 @@ const PointCloud3D: React.FC<IAnnotationStateProps> = ({ currentData }) => {
    *  Observe selectedID and reset camera to target top-view
    */
   useEffect(() => {
-    if (selectedID) {
+    if (selectedBox) {
       setTarget3DView(EPerspectiveView.Top);
     }
-  }, [selectedID]);
+  }, [selectedBox]);
 
   const ptCloud3DCtx = useMemo(() => {
-    return { reset3DView, setTarget3DView, isActive: !!selectedID };
-  }, [selectedID]);
+    return { reset3DView, setTarget3DView, isActive: !!selectedBox };
+  }, [selectedBox]);
 
   return (
     <PointCloudContainer className={getClassName('point-cloud-3d-container')} title='3D视图'>
