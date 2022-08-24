@@ -368,7 +368,8 @@ class BasicToolOperation extends EventListener {
     canvas.height = size.height * pixel;
 
     // set Attribute
-    this.container.style.position = 'relative';
+    // this.container.style.position = 'relative';
+
     if (isAppend) {
       if (this.container.hasChildNodes()) {
         this.container.insertBefore(canvas, this.container.childNodes[0]);
