@@ -135,53 +135,48 @@ const polygonConfig = {
 };
 
 const pointCloudConfig = {
+  // 主属性
   attributeList: [
     {
       key: '类别1',
-      value: '类别1',
-      // 点云暂不支持
-      sizeLimit: {
-        lengthMin: '1',
-        lengthMax: '2',
-        widthMin: '3',
-        widthMax: '4',
-        heightMin: '5',
-        heightMax: '6',
-      },
-      default: false,
+      value: 'class-1',
     },
-    { key: '类别Iq', value: 'class-Iq', sizeLimit: { lengthMin: '1' } },
+    {
+      key: '类别Iq',
+      value: 'class-Iq',
+    },
   ],
+  // 标注半径范围
   radius: 90,
+  // 副属性配置开关
+  secondaryAttributeConfigurable: true,
+  // 副属性
   inputList: [
     {
       key: '类别1',
       value: 'class1',
-      isMulti: false,
       subSelected: [
-        { key: '选项1-1', value: 'option1', isDefault: false },
-        { key: '选项1-2', value: 'option2', isDefault: false },
+        { key: '选项1-1', value: 'option1' },
+        { key: '选项1-2', value: 'option2' },
       ],
     },
     {
       key: '类别v0',
       value: 'class-v0',
-      isMulti: false,
       subSelected: [
-        { key: '选项2-1', value: 'option2-1', isMulti: false },
-        { key: '选项2-2', value: 'option2-2', isMulti: false },
-        { key: '选项2-3', value: 'option2-3', isMulti: false },
+        { key: '选项2-1', value: 'option2-1' },
+        { key: '选项2-2', value: 'option2-2' },
+        { key: '选项2-3', value: 'option2-3' },
       ],
     },
     {
       key: '类别Rt',
       value: 'class-Rt',
-      isMulti: false,
-      subSelected: [{ key: '选项3-1', value: 'option3-1', isMulti: false }],
+      subSelected: [{ key: '选项3-1', value: 'option3-1' }],
     },
   ],
-  secondaryAttributeConfigurable: true,
-  lowerLimitPointsNumInBox: '',
+  // 框内点数下限
+  lowerLimitPointsNumInBox: 5,
 };
 
 export const getConfig = (tool) => {
@@ -222,16 +217,19 @@ export const getStepList = (tool, sourceStep, step) => {
 
 const getStepConfig = (tool, step, sourceStep) => {
   let toolList = tool ?? EToolName.Rect;
+  let toolName = tool;
 
   const splitChar = ' ';
   if (toolList.indexOf(splitChar) > -1) {
     toolList = tool.split(splitChar);
+    toolName = toolList[toolList.length - 1];
   }
+
   return {
     step: step ?? 1,
     dataSourceStep: sourceStep || 0,
     tool: toolList,
-    config: JSON.stringify(getConfig(tool)),
+    config: JSON.stringify(getConfig(toolName)),
   };
 };
 
