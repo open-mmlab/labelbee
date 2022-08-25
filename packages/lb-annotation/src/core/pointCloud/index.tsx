@@ -82,6 +82,8 @@ export class PointCloud {
 
   private cacheInstance: PointCloudCache; // PointCloud Cache Map
 
+  private showDirection: boolean = true; // Whether to display the direction of box
+
   constructor({ container, noAppend, isOrthographicCamera, orthographicParams, backgroundColor = 'black' }: IProps) {
     this.container = container;
     this.renderer = new THREE.WebGLRenderer({ antialias: true });
@@ -704,12 +706,28 @@ export class PointCloud {
     cb(points);
   };
 
+  public setShowDirection(showDirection: boolean) {
+    this.showDirection = showDirection;
+    this.scene.children.forEach((v) => {
+      if (v.type === 'Group') {
+        v.children.forEach((object) => {
+          if (object.type === 'ArrowHelper') {
+            object.visible = showDirection;
+          }
+        });
+      }
+    });
+    this.render();
+  }
+
   public generateBoxArrow = ({ width, depth }: IPointCloudBox) => {
     const dir = new THREE.Vector3(1, 0, 0);
     const origin = new THREE.Vector3(-width / 2, 0, -depth / 2);
     const arrowLen = width;
     const hex = 0xffff00;
     const arrowHelper = new THREE.ArrowHelper(dir, origin, arrowLen, hex);
+    arrowHelper.visible = this.showDirection;
+
     return arrowHelper;
   };
 
