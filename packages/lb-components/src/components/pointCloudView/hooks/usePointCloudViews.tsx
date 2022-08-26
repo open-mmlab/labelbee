@@ -288,6 +288,7 @@ export const usePointCloudViews = () => {
     setSelectedIDs,
     selectedIDs,
     pointCloudBoxList,
+    setPointCloudResult,
   } = useContext(PointCloudContext);
   const { updateSelectedBox } = useSingleBox();
 
@@ -442,6 +443,18 @@ export const usePointCloudViews = () => {
     mainViewInstance?.generateBoxes(newBoxes);
   };
 
+  const clearAllResult = () => {
+    // Clear All PointView Data
+    pointCloudBoxList.forEach((v) => {
+      mainViewInstance?.removeObjectByName(v.id);
+    });
+    mainViewInstance?.render();
+
+    setPointCloudResult([]);
+    topViewInstance.pointCloud2dOperation.clearActiveStatus();
+    topViewInstance.pointCloud2dOperation.clearResult();
+  };
+
   return {
     topViewAddBox,
     topViewSelectedChanged,
@@ -449,5 +462,6 @@ export const usePointCloudViews = () => {
     sideViewUpdateBox,
     backViewUpdateBox,
     pointCloudBoxListUpdated,
+    clearAllResult,
   };
 };

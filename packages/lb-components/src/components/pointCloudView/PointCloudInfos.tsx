@@ -110,11 +110,12 @@ export const PointCloudValidity = () => {
       <div
         style={{
           position: 'absolute',
-          backgroundColor: 'red',
+          backgroundColor: 'rgb(242, 101, 73)',
+          color: 'white',
           left: 0,
           top: 0,
-          fontSize: 24,
-          padding: 8,
+          fontSize: 20,
+          padding: '8px 16px',
           zIndex: 20,
         }}
       >

@@ -129,7 +129,6 @@ const PointCloud2DView = ({ imgInfo }: IProps) => {
 const mapStateToProps = (state: AppState) => {
   const { imgList, imgIndex } = state.annotation;
 
-  console.log('imgList[imgIndex]', imgList[imgIndex], imgList);
   return {
     imgInfo: imgList[imgIndex],
   };

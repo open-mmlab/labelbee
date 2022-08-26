@@ -10,10 +10,13 @@ import { ANNOTATION_ACTIONS } from '@/store/Actions';
 export interface ICustomToolInstance {
   exportData: () => [any[], {}];
   singleOn: () => void;
+  clearResult: () => void;
   on: () => void;
   setResult: () => void;
+  setValid: (valid: boolean) => void;
   history: {
     initRecord: () => void;
+    pushHistory: () => void;
   };
   setDefaultAttribute: (attribute: string) => void;
 
@@ -31,6 +34,7 @@ const useCustomToolInstance = () => {
     exportData: () => {
       return [[], {}];
     },
+    clearResult: () => {},
     singleOn: () => {},
     on: () => {},
     setResult: () => {
@@ -38,11 +42,13 @@ const useCustomToolInstance = () => {
     },
     history: {
       initRecord: () => {},
+      pushHistory: () => {},
     },
     setDefaultAttribute: (attribute: string) => {},
 
     // PointCloud Exclusive function
     setSubAttribute: (key: string, value: string) => {},
+    setValid: () => {}
   });
 
   const onMounted = (instance: any) => {

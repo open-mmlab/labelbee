@@ -9,6 +9,8 @@ import { connect } from 'react-redux';
 import { aMapStateToProps, IAnnotationStateProps } from '@/store/annotation/map';
 import { IPointCloudBox, PointCloudUtils } from '@labelbee/lb-utils';
 import { useCustomToolInstance } from '@/hooks/annotation';
+import { usePointCloudViews } from './hooks/usePointCloudViews';
+import { jsonParser } from '@/utils';
 
 const { EPolygonPattern } = cTool;
 
@@ -16,6 +18,7 @@ const PointCloudListener: React.FC<IAnnotationStateProps> = ({ currentData }) =>
   const ptCtx = useContext(PointCloudContext);
   const { changeSelectedBoxValid, selectNextBox, selectPrevBox, updateSelectedBox } =
     useSingleBox();
+  const { clearAllResult } = usePointCloudViews();
   const { copySelectedBoxes, pasteSelectedBoxes, copiedBoxes } = useBoxes();
   const { toolInstanceRef } = useCustomToolInstance();
   const { updateRotate } = useRotate({ currentData });
@@ -166,6 +169,9 @@ const PointCloudListener: React.FC<IAnnotationStateProps> = ({ currentData }) =>
 
       pointCloud.updateTopCamera();
 
+      const valid = jsonParser(currentData.result)?.valid ?? true;
+      ptCtx.setPointCloudValid(valid);
+
       // Clear other view data during initialization
       ptCtx.sideViewInstance?.clearAllData();
       ptCtx.backViewInstance?.clearAllData();
@@ -174,7 +180,7 @@ const PointCloudListener: React.FC<IAnnotationStateProps> = ({ currentData }) =>
 
   useEffect(() => {
     toolInstanceRef.current.exportData = () => {
-      return [ptCtx.pointCloudBoxList, {}];
+      return [ptCtx.pointCloudBoxList, { valid: ptCtx.valid }];
     };
 
     toolInstanceRef.current.setDefaultAttribute = (newAttribute: string) => {
@@ -199,7 +205,16 @@ const PointCloudListener: React.FC<IAnnotationStateProps> = ({ currentData }) =>
         updateSelectedBox(selectBox);
       }
     };
-  }, [ptCtx.pointCloudBoxList, ptCtx.selectedID]);
+    toolInstanceRef.current.clearResult = () => {
+      clearAllResult?.();
+    };
+  }, [ptCtx.pointCloudBoxList, ptCtx.selectedID, ptCtx.valid]);
+
+  useEffect(() => {
+    toolInstanceRef.current.setValid = () => {
+      ptCtx.setPointCloudValid(!ptCtx.valid);
+    };
+  }, [ptCtx.valid]);
 
   return null;
 };
