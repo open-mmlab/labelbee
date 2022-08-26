@@ -560,7 +560,10 @@ export const annotationReducer = (
         step,
         imgList[imgIndex].result ?? '',
       );
-      imgList[imgIndex].result = newResult;
+      imgList[imgIndex] = {
+        ...imgList[imgIndex],
+        result: newResult
+      };
 
       // 更新当前的结果
       const fileResult = jsonParser(newResult);
