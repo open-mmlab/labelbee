@@ -12,6 +12,8 @@ import { ISize } from '@/types/main';
 import _ from 'lodash';
 import { useSelector } from 'react-redux';
 import { AppState } from '@/store';
+import StepUtils from '@/utils/StepUtils';
+import { jsonParser } from '@/utils';
 
 const DEFAULT_SCOPE = 5;
 
@@ -44,6 +46,7 @@ export const topViewPolygon2PointCloud = (
   size: ISize,
   pointCloud?: PointCloud,
   selectedPointCloud?: IPointCloudBox,
+  defaultValue?: { [v: string]: any },
 ) => {
   const [point1, point2, point3, point4] = newPolygon.pointList.map((v: any) =>
     transferCanvas2World(v, size),
@@ -81,6 +84,10 @@ export const topViewPolygon2PointCloud = (
     attribute: '',
     valid: true,
   };
+
+  if (defaultValue) {
+    Object.assign(boxParams, defaultValue);
+  }
 
   return boxParams;
 };
@@ -292,9 +299,14 @@ export const usePointCloudViews = () => {
   } = useContext(PointCloudContext);
   const { updateSelectedBox } = useSingleBox();
 
-  const currentData = useSelector(
-    (state: AppState) => state.annotation.imgList[state.annotation.imgIndex],
-  );
+  const { currentData, config } = useSelector((state: AppState) => {
+    const { stepList, step, imgList, imgIndex } = state.annotation;
+
+    return {
+      currentData: imgList[imgIndex],
+      config: jsonParser(StepUtils.getCurrentStepInfo(step, stepList).config),
+    };
+  });
 
   const { selectedBox } = useSingleBox();
 
@@ -327,7 +339,9 @@ export const usePointCloudViews = () => {
 
   /** Top-view create box from 2D */
   const topViewAddBox = (newPolygon: any, size: ISize) => {
-    const newParams = topViewPolygon2PointCloud(newPolygon, size, topViewPointCloud);
+    const newParams = topViewPolygon2PointCloud(newPolygon, size, topViewPointCloud, undefined, {
+      attribute: config?.attributeList?.[0]?.value ?? '',
+    });
     const polygonOperation = topViewInstance?.pointCloud2dOperation;
 
     const boxParams: IPointCloudBox = Object.assign(newParams, {
