@@ -9,8 +9,8 @@ import { connect } from 'react-redux';
 import { IStepInfo } from '@/types/step';
 import { jsonParser } from '@/utils';
 import { ICustomToolInstance } from '@/hooks/annotation';
-
-const { EToolName, EPolygonPattern } = cTool;
+import { useStatus } from '@/components/pointCloudView/hooks/useStatus';
+import { useSingleBox } from '@/components/pointCloudView/hooks/useSingleBox';
 
 interface IProps {
   stepInfo: IStepInfo;
@@ -208,19 +208,8 @@ const AttributeUpdater = ({
 };
 
 const PointCloudToolSidebar: React.FC<IProps> = ({ stepInfo, toolInstance }) => {
-  const ptCtx = useContext(PointCloudContext);
-
-  const onChange = (toolName: any) => {
-    switch (toolName) {
-      case EToolName.Rect:
-        ptCtx.topViewInstance?.pointCloud2dOperation.setPattern(EPolygonPattern.Rect);
-
-        break;
-      case EToolName.Polygon:
-        ptCtx.topViewInstance?.pointCloud2dOperation.setPattern(EPolygonPattern.Normal);
-        break;
-    }
-  };
+  const { selectedBox } = useSingleBox();
+  const { updatePointCloudPattern, pointCloudPattern } = useStatus();
 
   const config = jsonParser(stepInfo.config);
   const attributeList = config?.attributeList ?? [];
@@ -231,12 +220,12 @@ const PointCloudToolSidebar: React.FC<IProps> = ({ stepInfo, toolInstance }) => 
     <>
       <ToolIcons
         toolName={cTool.EPointCloudName.PointCloud}
-        selectedToolName={EToolName.Rect}
-        onChange={onChange}
+        selectedToolName={pointCloudPattern}
+        onChange={(v) => updatePointCloudPattern?.(v)}
       />
       {/* <AnnotatedBox />
       <BoxTrackIDInput /> */}
-      {ptCtx.selectedID && (
+      {selectedBox && (
         <AttributeUpdater
           toolInstance={toolInstance}
           attributeList={attributeList}
