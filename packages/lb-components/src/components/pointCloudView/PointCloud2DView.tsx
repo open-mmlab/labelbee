@@ -46,6 +46,7 @@ const PointCloud2DView = ({ imgInfo }: IProps) => {
   const [annotations2d, setAnnotations2d] = useState<IAnnotationDataTemporarily[]>([]);
   const { pointCloudBoxList, topViewInstance } = useContext(PointCloudContext);
   const [mappingIndex, setMappingIndex] = useState(0);
+
   const mappingData = imgInfo?.mappingImgList?.[mappingIndex];
 
   useEffect(() => {
@@ -104,9 +105,15 @@ const PointCloud2DView = ({ imgInfo }: IProps) => {
           imgIndex={mappingIndex}
           imgLength={mappingImgList.length}
           onNext={() => {
+            if (mappingIndex >= mappingImgList.length - 1) {
+              return;
+            }
             setMappingIndex((v) => v + 1);
           }}
           onPrev={() => {
+            if (mappingIndex <= 0) {
+              return;
+            }
             setMappingIndex((v) => v - 1);
           }}
         />
