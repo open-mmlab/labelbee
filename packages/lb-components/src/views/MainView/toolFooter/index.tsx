@@ -13,6 +13,9 @@ import HiddenTips from './HiddenTips';
 import PageNumber from './PageNumber';
 import ZoomController from './ZoomController';
 import { Pagination } from './Pagination';
+import { cTool } from '@labelbee/lb-annotation';
+
+const { EPointCloudName } = cTool;
 
 export type FooterTheme = 'light' | 'dark';
 interface IProps {
@@ -105,6 +108,16 @@ const ToolFooter: React.FC<IProps> = (props: IProps) => {
       <span>{t('curItems', { current: basicIndex + 1, total: basicResultList.length })}</span>
     ) : null;
 
+  if (stepInfo.tool === EPointCloudName.PointCloud) {
+    return (
+      <div className={`${footerCls}`} style={props.style}>
+        <FooterTips />
+        <div style={{ flex: 1 }} />
+        {pagination}
+      </div>
+    );
+  }
+
   if (typeof footer === 'function') {
     return (
       <div className={`${footerCls}`} style={props.style}>
@@ -119,9 +132,9 @@ const ToolFooter: React.FC<IProps> = (props: IProps) => {
         })}
       </div>
     );
-  } else {
-    return footer;
   }
+
+  return footer;
 };
 
 const mapStateToProps = (state: AppState) => ({
