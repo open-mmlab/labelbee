@@ -1,3 +1,4 @@
+import { isNumber } from 'lodash';
 import { styleDefaultConfig } from '@/constant/defaultConfig';
 import { EToolName } from '@/constant/tool';
 import { IPolygonConfig, IPolygonData } from '@/types/tool/polygon';
@@ -6,7 +7,6 @@ import AxisUtils, { CoordinateUtils } from '@/utils/tool/AxisUtils';
 import CanvasUtils from '@/utils/tool/CanvasUtils';
 import CommonToolUtils from '@/utils/tool/CommonToolUtils';
 import LineToolUtils from '@/utils/tool/LineToolUtils';
-import { isNumber } from 'lodash';
 import { EDragStatus, EGrowthMode, ELang } from '../../constant/annotation';
 import EKeyCode from '../../constant/keyCode';
 import { BASE_ICON, COLORS_ARRAY } from '../../constant/style';
@@ -864,6 +864,14 @@ class BasicToolOperation extends EventListener {
         break;
       }
     }
+  }
+
+  /**
+   * 导出自定义数据
+   * @returns
+   */
+  public exportCustomData() {
+    return {};
   }
 
   // 按鼠标位置放大缩小

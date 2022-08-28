@@ -99,11 +99,13 @@ export class PointCloudAnnotation implements IPointCloudAnnotationOperation {
 
   public addPolygonListOnTopView(result: string) {
     const pointCloudDataList = PointCloudUtils.getBoxParamsFromResultList(result);
-    this.updatePolygonList(pointCloudDataList);
+    const polygonList = PointCloudUtils.getPolygonListFromResultList(result);
+
+    this.updatePolygonList(pointCloudDataList, polygonList);
   }
 
-  public updatePolygonList = (pointCloudDataList: IPointCloudBox[]) => {
-    const polygonList = pointCloudDataList.map((v) => {
+  public updatePolygonList = (pointCloudDataList: IPointCloudBox[], extraList?: IPolygonData[]) => {
+    let polygonList = pointCloudDataList.map((v) => {
       const { polygon2d: pointList } = this.pointCloudInstance.getBoxTopPolygon2DCoordinate(v);
       return {
         id: v.id,
@@ -112,6 +114,10 @@ export class PointCloudAnnotation implements IPointCloudAnnotationOperation {
         isRect: true,
       };
     }) as IPolygonData[];
+
+    if (extraList) {
+      polygonList = polygonList.concat(extraList);
+    }
 
     this.pointCloud2dOperation.setResult(polygonList);
   };

@@ -14,7 +14,7 @@ import MatrixUtils from './MatrixUtils';
 export * from './constant/pointCloud';
 
 // Types
-export * from './types/pointCloud';
+export * from './types/index';
 
 // Utils
 export { i18n, toolStyleConverter, PerspectiveShiftUtils, PointCloudUtils, MatrixUtils };

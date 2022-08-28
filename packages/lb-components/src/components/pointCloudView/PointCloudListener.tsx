@@ -157,6 +157,7 @@ const PointCloudListener: React.FC<IAnnotationStateProps> = ({ currentData }) =>
 
       if (currentData.result) {
         const boxParamsList = PointCloudUtils.getBoxParamsFromResultList(currentData.result);
+        const polygonList = PointCloudUtils.getPolygonListFromResultList(currentData.result);
 
         // Add Init Box
         boxParamsList.forEach((v: IPointCloudBox) => {
@@ -164,8 +165,10 @@ const PointCloudListener: React.FC<IAnnotationStateProps> = ({ currentData }) =>
         });
 
         ptCtx.setPointCloudResult(boxParamsList);
+        ptCtx.setPolygonList(polygonList);
       } else {
         ptCtx.setPointCloudResult([]);
+        ptCtx.setPolygonList([]);
       }
 
       pointCloud.updateTopCamera();
@@ -182,6 +185,12 @@ const PointCloudListener: React.FC<IAnnotationStateProps> = ({ currentData }) =>
   useEffect(() => {
     toolInstanceRef.current.exportData = () => {
       return [ptCtx.pointCloudBoxList, { valid: ptCtx.valid }];
+    };
+
+    toolInstanceRef.current.exportCustomData = () => {
+      return {
+        renderPolygon: ptCtx.polygonList ?? [],
+      };
     };
 
     toolInstanceRef.current.setDefaultAttribute = (newAttribute: string) => {
@@ -209,7 +218,7 @@ const PointCloudListener: React.FC<IAnnotationStateProps> = ({ currentData }) =>
     toolInstanceRef.current.clearResult = () => {
       clearAllResult?.();
     };
-  }, [ptCtx.pointCloudBoxList, ptCtx.selectedID, ptCtx.valid]);
+  }, [ptCtx.pointCloudBoxList, ptCtx.selectedID, ptCtx.valid, ptCtx.polygonList]);
 
   useEffect(() => {
     toolInstanceRef.current.setValid = () => {

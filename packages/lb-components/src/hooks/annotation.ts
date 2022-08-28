@@ -9,6 +9,7 @@ import { ANNOTATION_ACTIONS } from '@/store/Actions';
 
 export interface ICustomToolInstance {
   exportData: () => [any[], {}];
+  exportCustomData: () => {};
   singleOn: () => void;
   clearResult: () => void;
   on: () => void;
@@ -33,6 +34,9 @@ const useCustomToolInstance = () => {
   const toolInstanceRef = useRef<ICustomToolInstance>({
     exportData: () => {
       return [[], {}];
+    },
+    exportCustomData: () => {
+      return {};
     },
     clearResult: () => {},
     singleOn: () => {},

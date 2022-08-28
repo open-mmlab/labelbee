@@ -211,12 +211,14 @@ export const annotationReducer = (
 
       const oldResultString = imgList[imgIndex]?.result || '';
       const [, basicImgInfo] = toolInstance?.exportData() ?? [];
+      const customObject = toolInstance?.exportCustomData?.() ?? {};
 
       const resultWithBasicInfo = composeResultWithBasicImgInfo(oldResultString, basicImgInfo);
       const newResultString = composeResult(
         resultWithBasicInfo,
         { step, stepList },
         { rect: resultList },
+        customObject,
       );
 
       imgList[imgIndex].result = AnnotationDataUtils.dataCorrection(
@@ -225,6 +227,7 @@ export const annotationReducer = (
         step,
         stepList,
       );
+
 
       if (onSubmit) {
         onSubmit([imgList[imgIndex]], action.payload?.submitType, imgIndex);
@@ -248,8 +251,8 @@ export const annotationReducer = (
 
     /**
      * For data storage in dependent states
-     * 
-     * Features: 
+     *
+     * Features:
      * 1. Get Data from ToolInstance (If it use toolInstance)
      * 2. Filter Data By BasicResultList
      */
@@ -562,7 +565,7 @@ export const annotationReducer = (
       );
       imgList[imgIndex] = {
         ...imgList[imgIndex],
-        result: newResult
+        result: newResult,
       };
 
       // 更新当前的结果

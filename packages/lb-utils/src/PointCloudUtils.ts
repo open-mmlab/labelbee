@@ -46,7 +46,16 @@ class PointCloudUtils {
     const data = this.jsonParser(result);
 
     const DEFAULT_STEP = `step_1`;
-    const pointCloudDataList = data[DEFAULT_STEP]?.result ?? [];
+    const pointCloudDataList = data?.[DEFAULT_STEP]?.result ?? [];
+
+    return pointCloudDataList;
+  }
+
+  public static getPolygonListFromResultList(result: string): any[] {
+    const data = this.jsonParser(result);
+
+    const DEFAULT_STEP = `step_1`;
+    const pointCloudDataList = data?.[DEFAULT_STEP]?.renderPolygon ?? [];
 
     return pointCloudDataList;
   }
