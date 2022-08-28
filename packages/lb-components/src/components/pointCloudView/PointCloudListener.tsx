@@ -9,7 +9,6 @@ import { connect } from 'react-redux';
 import { aMapStateToProps, IAnnotationStateProps } from '@/store/annotation/map';
 import { IPointCloudBox, PointCloudUtils } from '@labelbee/lb-utils';
 import { useCustomToolInstance } from '@/hooks/annotation';
-import { usePointCloudViews } from './hooks/usePointCloudViews';
 import { useStatus } from './hooks/useStatus';
 import { jsonParser } from '@/utils';
 

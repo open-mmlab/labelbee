@@ -206,7 +206,6 @@ export class PointCloud {
     const PM = this.createThreeMatrix4(PMA);
     const RM = this.createThreeMatrix4(RMA);
     const TM = this.createThreeMatrix4(TMA);
-    // const TM = this.createThreeMatrix4(TMA).invert(); // The T Matrix is camera to lidar.
 
     return {
       composeMatrix4: TM.clone().premultiply(RM).premultiply(PM),
@@ -216,7 +215,7 @@ export class PointCloud {
     };
   }
 
-  public lidar2image(
+  public pointCloudLidar2image(
     boxParams: IPointCloudBox,
     cameraMatrix: {
       P: [TMatrix14Tuple, TMatrix14Tuple, TMatrix14Tuple];
@@ -226,36 +225,35 @@ export class PointCloud {
   ) {
     const allViewData = PointCloudUtils.getAllViewData(boxParams);
     const { P, R, T } = cameraMatrix;
-    const { RM, TM, PM } = this.transferKitti2Matrix(P, R, T);
+    const { composeMatrix4 } = this.transferKitti2Matrix(P, R, T);
 
     const transferViewData = allViewData.map((viewData) => ({
       type: viewData.type,
       pointList: viewData.pointList
         .map((point) => this.rotatePoint(point, boxParams.center, boxParams.rotation))
-        .map((point) => {
-          const vector = new THREE.Vector4(point.x, point.y, point.z);
-
-          // Baidu Automotive Data Processing
-          const newV = vector.applyMatrix4(TM).applyMatrix4(RM).applyMatrix4(PM);
-
-          // Just keep the front object.
-          if (newV.z < 0) {
-            return undefined;
-          }
-
-          /*
-           * Depth normalization of the imaging plane
-           * 成像平面深度归一化
-           */
-          const z = 1 / newV.z;
-          const fixMatrix4 = new THREE.Matrix4().set(z, 0, 0, 0, 0, z, 0, 0, 0, 0, z, 0, 0, 0, 0, 1);
-
-          return newV.applyMatrix4(fixMatrix4);
-        })
+        .map((point) => this.lidar2image(point, composeMatrix4))
         .filter((v) => v !== undefined),
     }));
 
     return transferViewData;
+  }
+
+  public lidar2image(point: { x: number; y: number; z: number }, composeMatrix4: THREE.Matrix4) {
+    const vector = new THREE.Vector4(point.x, point.y, point.z);
+    const newV = vector.applyMatrix4(composeMatrix4);
+
+    // Just keep the front object.
+    if (newV.z < 0) {
+      return undefined;
+    }
+
+    /*
+     * Depth normalization of the imaging plane
+     * 成像平面深度归一化
+     */
+    const z = 1 / newV.z;
+    const fixMatrix4 = new THREE.Matrix4().set(z, 0, 0, 0, 0, z, 0, 0, 0, 0, z, 0, 0, 0, 0, 1);
+    return newV.applyMatrix4(fixMatrix4);
   }
 
   /**

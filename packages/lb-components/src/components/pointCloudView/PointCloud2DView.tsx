@@ -57,7 +57,7 @@ const PointCloud2DView = ({ imgInfo }: IProps) => {
       };
       const newAnnotations2d: IAnnotationDataTemporarily[] = pointCloudBoxList.reduce(
         (acc: IAnnotationDataTemporarily[], pointCloudBox) => {
-          const viewDataPointList = pointCloudInstance.lidar2image(
+          const viewDataPointList = pointCloudInstance.pointCloudLidar2image(
             pointCloudBox,
             mappingData.calib,
           );
