@@ -1699,7 +1699,6 @@ class RectOperation extends BasicToolOperation {
     return [rectList, this.basicImgInfo];
   }
 
-
   /** 撤销 */
   public undo() {
     const rectList = this.history.undo();
