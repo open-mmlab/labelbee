@@ -108,10 +108,13 @@ export class PointCloud {
 
     this.scene = new THREE.Scene();
     this.controls = new OrbitControls(this.camera, this.renderer.domElement);
-    this.axesHelper = new THREE.AxesHelper(1000);
     this.pcdLoader = new PCDLoader();
 
-    this.scene.add(this.axesHelper);
+    this.axesHelper = new THREE.AxesHelper(1000);
+
+    // For Developer
+    // this.scene.add(this.axesHelper);
+
     this.scene.add(this.camera);
     // TODO
     if (!noAppend) {
