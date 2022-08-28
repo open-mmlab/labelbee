@@ -4,10 +4,14 @@
  * @LastEditors: Laoluo luozefeng@sensetime.com
  * @LastEditTime: 2022-06-13 19:34:53
  */
+import { AnnotationView, PointCloudAnnotationView } from '@labelbee/lb-components';
+import StepUtils from '@labelbee/lb-components/dist/utils/StepUtils';
+import 'antd/dist/antd.css';
+import qs from 'qs';
 import React, { useState } from 'react';
 import './App.css';
-import 'antd/dist/antd.css';
 import Annotation from './components/Annotation';
+import { DEFAULT_ANNOTATIONS } from './mock';
 import {
   fileList as mockFileList,
   getMockResult,
@@ -15,11 +19,7 @@ import {
   pointCloudMappingImgList,
   videoList,
 } from './mock/index';
-import { getStepList, getDependStepList } from './mock/taskConfig';
-import qs from 'qs';
-import { AnnotationView } from '@labelbee/lb-components';
-import { DEFAULT_ANNOTATIONS } from './mock';
-import StepUtils from '@labelbee/lb-components/dist/utils/StepUtils';
+import { getDependStepList, getStepList } from './mock/taskConfig';
 
 const App = () => {
   const tool = qs.parse(window.location.search, { ignoreQueryPrefix: true, comma: true }).tool;
@@ -92,6 +92,20 @@ const App = () => {
           />
         </div>
       </div>
+    );
+  }
+
+  if (tool === 'PointCloudAnnotationView') {
+    return (
+      <PointCloudAnnotationView
+        src='http://10.152.32.16:8080/top_center_lidar/2022-02-20-12-21-03-100.pcd'
+        size={{
+          height: 1080,
+          width: 1000,
+        }}
+        // result={'{}'}
+        // result={pointCloudResult1}
+      />
     );
   }
 
