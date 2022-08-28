@@ -5,7 +5,7 @@
  */
 import { PointCloud, PointCloudAnnotation } from '@labelbee/lb-annotation';
 import { getClassName } from '@/utils/dom';
-import { PointCloudContainer } from './PointCloudLayout';
+import { PointCloudContainer, usePointCloudSize } from './PointCloudLayout';
 import React, { useEffect, useRef, useState } from 'react';
 import { EPerspectiveView, IPointCloudBox } from '@labelbee/lb-utils';
 import { PointCloudContext } from './PointCloudContext';
@@ -13,6 +13,7 @@ import { SizeInfoForView } from './PointCloudInfos';
 import { connect } from 'react-redux';
 import { aMapStateToProps, IAnnotationStateProps } from '@/store/annotation/map';
 import { usePointCloudViews } from './hooks/usePointCloudViews';
+import { useSingleBox } from './hooks/useSingleBox';
 
 /**
  * Get the offset from canvas2d-coordinate to world coordinate
@@ -69,6 +70,7 @@ const PointCloudSideView: React.FC<IAnnotationStateProps> = ({ currentData }) =>
   const ptCtx = React.useContext(PointCloudContext);
   const [size, setSize] = useState<{ width: number; height: number } | null>(null);
   const { sideViewUpdateBox } = usePointCloudViews();
+  const { selectedBox } = useSingleBox();
 
   const ref = useRef<HTMLDivElement>(null);
 
@@ -136,16 +138,12 @@ const PointCloudSideView: React.FC<IAnnotationStateProps> = ({ currentData }) =>
       title='侧视图'
       toolbar={<SizeInfoForView perspectiveView={EPerspectiveView.Left} />}
     >
-      <div style={{ width: '100%', height: 300 }} ref={ref} />
-      <div
-        style={{
-          position: 'absolute',
-          right: 0,
-          top: 0,
-          width: 200,
-          color: 'white',
-        }}
-      />
+      <div style={{ width: '100%', height: 300, position: 'relative' }} ref={ref} />
+      {!selectedBox && (
+        <div style={{ ...size }} className={getClassName('point-cloud-container', 'empty-page')}>
+          暂无数据
+        </div>
+      )}
     </PointCloudContainer>
   );
 };

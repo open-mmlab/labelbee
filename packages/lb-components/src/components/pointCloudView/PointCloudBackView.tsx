@@ -71,7 +71,7 @@ const PointCloudSideView = ({ currentData }: IAnnotationStateProps) => {
   const ptCtx = React.useContext(PointCloudContext);
   const [size, setSize] = useState<{ width: number; height: number } | null>(null);
   const ref = useRef<HTMLDivElement>(null);
-  const { updateSelectedBox } = useSingleBox();
+  const { updateSelectedBox, selectedBox } = useSingleBox();
 
   useEffect(() => {
     if (ref.current) {
@@ -177,7 +177,13 @@ const PointCloudSideView = ({ currentData }: IAnnotationStateProps) => {
       title='背视图'
       toolbar={<SizeInfoForView perspectiveView={EPerspectiveView.Back} />}
     >
-      <div style={{ width: '100%', height: 300 }} ref={ref} />
+      <div style={{ width: '100%', height: 300, position: 'relative' }} ref={ref} />
+
+      {!selectedBox && (
+        <div style={{ ...size }} className={getClassName('point-cloud-container', 'empty-page')}>
+          暂无数据
+        </div>
+      )}
     </PointCloudContainer>
   );
 };
