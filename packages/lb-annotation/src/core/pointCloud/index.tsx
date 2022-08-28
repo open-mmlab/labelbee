@@ -236,7 +236,7 @@ export class PointCloud {
           const vector = new THREE.Vector4(point.x, point.y, point.z);
 
           // Baidu Automotive Data Processing
-          const newV = vector.applyMatrix4(TM);
+          const newV = vector.applyMatrix4(TM).applyMatrix4(RM).applyMatrix4(PM);
 
           // Just keep the front object.
           if (newV.z < 0) {
@@ -250,7 +250,7 @@ export class PointCloud {
           const z = 1 / newV.z;
           const fixMatrix4 = new THREE.Matrix4().set(z, 0, 0, 0, 0, z, 0, 0, 0, 0, z, 0, 0, 0, 0, 1);
 
-          return newV.applyMatrix4(fixMatrix4).applyMatrix4(RM).applyMatrix4(PM);
+          return newV.applyMatrix4(fixMatrix4);
         })
         .filter((v) => v !== undefined),
     }));
