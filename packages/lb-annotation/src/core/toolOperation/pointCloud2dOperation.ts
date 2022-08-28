@@ -221,7 +221,7 @@ class PointCloud2dOperation extends PolygonOperation {
 
     const nextSelectedResult = CommonToolUtils.getNextSelectedRectID(sortList, sort, this.selectedID);
     if (nextSelectedResult) {
-      this.setSelectedID(nextSelectedResult.id);
+      this.setSelectedIDs([nextSelectedResult.id]);
     }
     this.render();
   }
@@ -255,7 +255,6 @@ class PointCloud2dOperation extends PolygonOperation {
     }
 
     this.selectedID = newID;
-
     this.render();
   }
 
