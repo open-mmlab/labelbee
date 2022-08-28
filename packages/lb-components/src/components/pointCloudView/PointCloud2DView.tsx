@@ -51,38 +51,31 @@ const PointCloud2DView = ({ imgInfo }: IProps) => {
   useEffect(() => {
     if (topViewInstance && mappingData) {
       const { pointCloudInstance } = topViewInstance;
-      const newAnnotations2d: IAnnotationDataTemporarily[] = [];
       const defaultViewStyle = {
         fill: 'transparent',
         color: 'green',
       };
-      pointCloudBoxList.forEach((pointCloudBox) => {
-        const viewDataPointList = pointCloudInstance.lidar2image(pointCloudBox, mappingData.calib);
-        viewDataPointList.forEach((v: any) => {
-          switch (v.type) {
-            case 'polygon':
-              newAnnotations2d.push({
-                type: 'polygon',
+      const newAnnotations2d: IAnnotationDataTemporarily[] = pointCloudBoxList.reduce(
+        (acc: IAnnotationDataTemporarily[], pointCloudBox) => {
+          const viewDataPointList = pointCloudInstance.lidar2image(
+            pointCloudBox,
+            mappingData.calib,
+          );
+          return [
+            ...acc,
+            ...viewDataPointList.map((v: any) => {
+              return {
+                type: v.type,
                 annotation: {
                   pointList: v.pointList,
                   ...defaultViewStyle,
                 },
-              });
-
-              break;
-            case 'line':
-              newAnnotations2d.push({
-                type: 'line',
-                annotation: {
-                  pointList: v.pointList,
-                  ...defaultViewStyle,
-                },
-              });
-
-              break;
-          }
-        });
-      });
+              };
+            }),
+          ];
+        },
+        [],
+      );
       setAnnotations2d(newAnnotations2d);
     }
   }, [pointCloudBoxList, mappingData]);
