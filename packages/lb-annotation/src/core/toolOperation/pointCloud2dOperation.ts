@@ -224,6 +224,8 @@ class PointCloud2dOperation extends PolygonOperation {
       this.setSelectedIDs([nextSelectedResult.id]);
     }
     this.render();
+
+    return [nextSelectedResult.id];
   }
 
   /**
