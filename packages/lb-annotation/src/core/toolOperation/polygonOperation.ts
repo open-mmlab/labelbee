@@ -28,7 +28,7 @@ import TextAttributeClass from './textAttributeClass';
 
 const TEXT_MAX_WIDTH = 164;
 
-interface IPolygonOperationProps extends IBasicToolOperationProps {}
+export interface IPolygonOperationProps extends IBasicToolOperationProps {}
 
 class PolygonOperation extends BasicToolOperation {
   public config: IPolygonConfig;

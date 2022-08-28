@@ -83,6 +83,7 @@ const PointCloudSideView = ({ currentData }: IAnnotationStateProps) => {
       const pointCloudAnnotation = new PointCloudAnnotation({
         container: ref.current,
         size,
+        polygonOperationProps: { showDirectionLine: false, forbidAddNew: true },
       });
       ptCtx.setBackViewInstance(pointCloudAnnotation);
       setSize(size);

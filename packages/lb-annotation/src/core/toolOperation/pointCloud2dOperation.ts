@@ -14,10 +14,26 @@ import CommonToolUtils from '@/utils/tool/CommonToolUtils';
 import DrawUtils from '@/utils/tool/DrawUtils';
 import PolygonUtils from '@/utils/tool/PolygonUtils';
 import StyleUtils from '@/utils/tool/StyleUtils';
-import PolygonOperation from './polygonOperation';
+import PolygonOperation, { IPolygonOperationProps } from './polygonOperation';
+
+interface IPointCloud2dOperationProps {
+  showDirectionLine?: boolean;
+  forbidAddNew?: boolean;
+}
 
 class PointCloud2dOperation extends PolygonOperation {
+  public showDirectionLine: boolean;
+
+  public forbidAddNew: boolean;
+
   private selectedIDs: string[] = [];
+
+  constructor(props: IPolygonOperationProps & IPointCloud2dOperationProps) {
+    super(props);
+
+    this.showDirectionLine = props.showDirectionLine ?? true;
+    this.forbidAddNew = props.forbidAddNew ?? false;
+  }
 
   get getSelectedIDs() {
     return this.selectedIDs;
@@ -103,7 +119,7 @@ class PointCloud2dOperation extends PolygonOperation {
         });
 
         // Only the rectangle shows the direction.
-        if (polygon.isRect === true) {
+        if (polygon.isRect === true && this.showDirectionLine === true) {
           this.renderRectPolygonDirection(transformPointList);
         }
       });
@@ -138,7 +154,7 @@ class PointCloud2dOperation extends PolygonOperation {
       });
 
       // Only the rectangle shows the direction.
-      if (selectedPolygon.isRect === true) {
+      if (selectedPolygon.isRect === true && this.showDirectionLine === true) {
         this.renderRectPolygonDirection(polygon);
       }
     }
@@ -242,6 +258,15 @@ class PointCloud2dOperation extends PolygonOperation {
 
     this.render();
   }
+
+  public addPointInDrawing(e: MouseEvent) {
+    if (this.forbidAddNew) {
+      return;
+    }
+    super.addPointInDrawing(e);
+  }
 }
 
 export default PointCloud2dOperation;
+
+export { IPointCloud2dOperationProps };

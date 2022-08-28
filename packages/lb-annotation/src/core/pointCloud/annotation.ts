@@ -1,5 +1,5 @@
 /**
- * @file Unified management of pointCloud  &  pointCloud2dOperation
+ * @file Unified management of pointCloud & pointCloud2dOperation
  * @createDate 2022-07-18
  * @author Ron <ron.f.luo@gmail.com>
  */
@@ -9,7 +9,7 @@ import { EPolygonPattern } from '@/constant/tool';
 import { CanvasScheduler } from '@/newCore';
 import { IPolygonData } from '@/types/tool/polygon';
 import { PointCloud } from '.';
-import PointCloud2dOperation from '../toolOperation/pointCloud2dOperation';
+import PointCloud2dOperation, { IPointCloud2dOperationProps } from '../toolOperation/pointCloud2dOperation';
 
 interface IPointCloudAnnotationOperation {
   updateData: (pcdPath: string, result: string) => void;
@@ -20,6 +20,7 @@ interface IPointCloudAnnotationProps {
   size: ISize;
 
   pcdPath?: string;
+  polygonOperationProps?: IPointCloud2dOperationProps;
 }
 
 const createEmptyImage = (size: { width: number; height: number }) => {
@@ -42,7 +43,7 @@ export class PointCloudAnnotation implements IPointCloudAnnotationOperation {
 
   public canvasScheduler: CanvasScheduler;
 
-  constructor({ size, container, pcdPath }: IPointCloudAnnotationProps) {
+  constructor({ size, container, pcdPath, polygonOperationProps }: IPointCloudAnnotationProps) {
     const defaultOrthographic = {
       left: -size.width / 2,
       right: size.width / 2,
@@ -72,13 +73,18 @@ export class PointCloudAnnotation implements IPointCloudAnnotationOperation {
     canvasScheduler.createCanvas(pointCloud.renderer.domElement);
 
     // 2. PointCloud2dOperation initialization
-    const polygonOperation = new PointCloud2dOperation({
+    const defaultPolygonProps = {
       container,
       size,
       config: '{ "textConfigurable": false }',
       imgNode: image,
       isAppend: false,
-    });
+    };
+    if (polygonOperationProps) {
+      Object.assign(defaultPolygonProps, polygonOperationProps);
+    }
+
+    const polygonOperation = new PointCloud2dOperation(defaultPolygonProps);
 
     polygonOperation.eventBinding();
     polygonOperation.setPattern(EPolygonPattern.Rect);

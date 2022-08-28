@@ -81,7 +81,11 @@ const PointCloudSideView: React.FC<IAnnotationStateProps> = ({ currentData }) =>
         height: ref.current.clientHeight,
       };
 
-      const pointCloudAnnotation = new PointCloudAnnotation({ container: ref.current, size });
+      const pointCloudAnnotation = new PointCloudAnnotation({
+        container: ref.current,
+        size,
+        polygonOperationProps: { showDirectionLine: false, forbidAddNew: true },
+      });
       ptCtx.setSideViewInstance(pointCloudAnnotation);
       setSize(size);
       // };
