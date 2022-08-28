@@ -69,6 +69,8 @@ class PolygonOperation extends BasicToolOperation {
 
   public _textAttributInstance?: TextAttributeClass;
 
+  public forbidAddNewPolygonFuc?: (e: MouseEvent) => boolean;
+
   constructor(props: IPolygonOperationProps) {
     super(props);
     this.config = CommonToolUtils.jsonParser(props.config);
@@ -260,6 +262,10 @@ class PolygonOperation extends BasicToolOperation {
 
   public addPointInDrawing(e: MouseEvent) {
     if (!this.imgInfo) {
+      return;
+    }
+
+    if (this.forbidAddNewPolygonFuc && this.forbidAddNewPolygonFuc(e)) {
       return;
     }
 
