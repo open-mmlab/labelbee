@@ -127,7 +127,7 @@ const PointCloud3D: React.FC<IAnnotationStateProps> = ({ currentData }) => {
 
       ptCtx.setMainViewInstance(pointCloud);
     }
-  }, []);
+  }, [currentData]);
 
   /**
    *  Observe selectedID and reset camera to target top-view
