@@ -469,6 +469,16 @@ export const usePointCloudViews = () => {
     topViewInstance.pointCloud2dOperation.clearResult();
   };
 
+  const initPointCloud3d = () => {
+    if (!mainViewInstance) {
+      return;
+    }
+
+    mainViewInstance.initPerspectiveCamera();
+    mainViewInstance.initRenderer();
+    mainViewInstance.render();
+  };
+
   return {
     topViewAddBox,
     topViewSelectedChanged,
@@ -477,5 +487,6 @@ export const usePointCloudViews = () => {
     backViewUpdateBox,
     pointCloudBoxListUpdated,
     clearAllResult,
+    initPointCloud3d,
   };
 };

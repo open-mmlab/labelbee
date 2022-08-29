@@ -7,7 +7,7 @@
 import { PointCloud, MathUtils, PointCloudAnnotation } from '@labelbee/lb-annotation';
 import { getClassName } from '@/utils/dom';
 import { PointCloudContainer } from './PointCloudLayout';
-import React, { useEffect, useRef, useState } from 'react';
+import React, { useEffect, useRef } from 'react';
 import { PointCloudContext } from './PointCloudContext';
 import { useSingleBox } from './hooks/useSingleBox';
 import { EPerspectiveView, IPointCloudBox } from '@labelbee/lb-utils';
@@ -15,6 +15,7 @@ import { SizeInfoForView } from './PointCloudInfos';
 import { connect } from 'react-redux';
 import { aMapStateToProps, IAnnotationStateProps } from '@/store/annotation/map';
 import { synchronizeSideView, synchronizeTopView } from './hooks/usePointCloudViews';
+import useSize from '@/hooks/useSize';
 
 /**
  * 统一一下，将其拓展为 二维转换为 三维坐标的转换
@@ -69,8 +70,8 @@ const updateBackViewByCanvas2D = (
 
 const PointCloudSideView = ({ currentData }: IAnnotationStateProps) => {
   const ptCtx = React.useContext(PointCloudContext);
-  const [size, setSize] = useState<{ width: number; height: number } | null>(null);
   const ref = useRef<HTMLDivElement>(null);
+  const size = useSize(ref);
   const { updateSelectedBox, selectedBox } = useSingleBox();
 
   useEffect(() => {
@@ -86,7 +87,6 @@ const PointCloudSideView = ({ currentData }: IAnnotationStateProps) => {
         polygonOperationProps: { showDirectionLine: false, forbidAddNew: true },
       });
       ptCtx.setBackViewInstance(pointCloudAnnotation);
-      setSize(size);
     }
   }, []);
 
@@ -172,19 +172,25 @@ const PointCloudSideView = ({ currentData }: IAnnotationStateProps) => {
     );
   }, [ptCtx, size]);
 
+  useEffect(() => {
+    // Update Size
+    ptCtx?.backViewInstance?.initSize(size);
+  }, [size]);
+
   return (
     <PointCloudContainer
       className={getClassName('point-cloud-container', 'back-view')}
       title='背视图'
       toolbar={<SizeInfoForView perspectiveView={EPerspectiveView.Back} />}
     >
-      <div style={{ width: '100%', height: 300, position: 'relative' }} ref={ref} />
-
-      {!selectedBox && (
-        <div style={{ ...size }} className={getClassName('point-cloud-container', 'empty-page')}>
-          暂无数据
-        </div>
-      )}
+      <div className={getClassName('point-cloud-container', 'bottom-view-content')}>
+        <div className={getClassName('point-cloud-container', 'core-instance')} ref={ref} />
+        {!selectedBox && (
+          <div style={{ ...size }} className={getClassName('point-cloud-container', 'empty-page')}>
+            暂无数据
+          </div>
+        )}
+      </div>
     </PointCloudContainer>
   );
 };

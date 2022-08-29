@@ -17,6 +17,8 @@ import { connect } from 'react-redux';
 import { jsonParser } from '@/utils';
 import { useSingleBox } from './hooks/useSingleBox';
 import { Switch } from 'antd';
+import useSize from '@/hooks/useSize';
+import { usePointCloudViews } from './hooks/usePointCloudViews';
 
 const pointCloudID = 'LABELBEE-POINTCLOUD';
 const PointCloud3DContext = React.createContext<{
@@ -77,8 +79,16 @@ const PointCloud3DSideBar = () => {
 const PointCloud3D: React.FC<IAnnotationStateProps> = ({ currentData }) => {
   const ptCtx = useContext(PointCloudContext);
   const [showDirection, setShowDirection] = useState(true);
-
   const ref = useRef<HTMLDivElement>(null);
+  const { initPointCloud3d } = usePointCloudViews();
+  const size = useSize(ref);
+
+  useEffect(() => {
+    if (!ptCtx.mainViewInstance) {
+      return;
+    }
+    initPointCloud3d?.();
+  }, [size]);
   const { selectedBox } = useSingleBox();
 
   const setTarget3DView = (perspectiveView: EPerspectiveView) => {

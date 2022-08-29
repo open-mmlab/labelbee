@@ -138,6 +138,42 @@ export class PointCloud {
     this.initCameraPosition = vector;
   }
 
+  /**
+   * Init OrthographicCamera to default config by size
+   * @param orthographicParams
+   * @returns
+   */
+  public initOrthographicCamera(orthographicParams: IOrthographicCamera) {
+    if (this.camera.type !== 'OrthographicCamera') {
+      return;
+    }
+
+    const { left, right, top, bottom, near, far } = orthographicParams;
+
+    this.camera.left = left;
+    this.camera.right = right;
+    this.camera.top = top;
+    this.camera.bottom = bottom;
+    this.camera.near = near;
+    this.camera.far = far;
+    this.camera.updateProjectionMatrix();
+  }
+
+  /**
+   * Init PerspectiveCamera to default config by size
+   * @returns
+   */
+  public initPerspectiveCamera() {
+    if (this.camera.type !== 'PerspectiveCamera') {
+      return;
+    }
+    this.camera.fov = 30;
+    this.camera.aspect = this.containerWidth / this.containerHeight;
+    this.camera.near = 1;
+    this.camera.far = 1000;
+    this.camera.updateProjectionMatrix();
+  }
+
   public initCamera() {
     // Camera setting must be set before Control's initial.
     const { camera } = this;

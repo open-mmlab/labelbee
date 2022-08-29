@@ -341,31 +341,29 @@ class BasicToolOperation extends EventListener {
     this.eventUnbinding();
   }
 
+  public updateCanvasBasicStyle(canvas: HTMLCanvasElement, size: ISize, zIndex: number) {
+    const pixel = this.pixelRatio;
+    canvas.style.position = 'absolute';
+    canvas.width = size.width * pixel;
+    canvas.height = size.height * pixel;
+    canvas.style.width = `${size.width}px`;
+    canvas.style.height = `${size.height}px`;
+    canvas.style.left = '0';
+    canvas.style.top = '0';
+    canvas.style.zIndex = `${zIndex} `;
+  }
+
   public createCanvas(size: ISize, isAppend = true) {
     // TODO 后续需要将 canvas 抽离出来，迭代器叠加
-    const basicCanvas = document.createElement('canvas');
     const pixel = this.pixelRatio;
 
-    basicCanvas.width = size.width * pixel;
-    basicCanvas.height = size.height * pixel;
-    basicCanvas.style.width = `${size.width}px`;
-    basicCanvas.style.height = `${size.height}px`;
-    basicCanvas.style.left = '0';
-    basicCanvas.style.top = '0';
-    basicCanvas.style.zIndex = '0';
+    const basicCanvas = document.createElement('canvas');
+    this.updateCanvasBasicStyle(basicCanvas, size, 0);
 
     this.basicCanvas = basicCanvas;
 
     const canvas = document.createElement('canvas');
-    canvas.style.position = 'absolute';
-    canvas.style.left = '0';
-    canvas.style.top = '0';
-    canvas.style.zIndex = '10';
-    canvas.style.width = `${size.width}px`;
-    canvas.style.height = `${size.height}px`;
-
-    canvas.width = size.width * pixel;
-    canvas.height = size.height * pixel;
+    this.updateCanvasBasicStyle(canvas, size, 10);
 
     // set Attribute
     // this.container.style.position = 'relative';

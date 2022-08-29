@@ -265,6 +265,31 @@ class PointCloud2dOperation extends PolygonOperation {
     }
     super.addPointInDrawing(e);
   }
+
+  /**
+   * Update canvas size directly
+   * @param size
+   */
+  public setCanvasSize(size: ISize) {
+    const pixel = this.pixelRatio;
+
+    // Init Data
+    this.size = size;
+    this.setImgInfo(size);
+
+    // Update canvas size.
+    this.updateCanvasBasicStyle(this.basicCanvas, size, 0);
+    this.updateCanvasBasicStyle(this.canvas, size, 10);
+    this.ctx?.scale(pixel, pixel);
+    this.basicCtx?.scale(pixel, pixel);
+
+    // Restore to the initialization position
+    this.initImgPos();
+
+    // Render
+    this.renderBasicCanvas();
+    this.render();
+  }
 }
 
 export default PointCloud2dOperation;

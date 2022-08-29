@@ -1,5 +1,5 @@
 import { getClassName } from '@/utils/dom';
-import React, { useContext, useEffect, useState } from 'react';
+import React, { useContext, useEffect, useRef, useState } from 'react';
 import { PointCloudContainer } from './PointCloudLayout';
 import AnnotationView from '@/components/AnnotationView';
 import { PointCloudContext } from './PointCloudContext';
@@ -7,6 +7,7 @@ import { AppState } from '@/store';
 import { connect } from 'react-redux';
 import { IFileItem } from '@/types/data';
 import { LeftOutlined, RightOutlined } from '@ant-design/icons';
+import useSize from '@/hooks/useSize';
 
 interface IProps {
   imgInfo: IFileItem;
@@ -46,6 +47,8 @@ const PointCloud2DView = ({ imgInfo }: IProps) => {
   const [annotations2d, setAnnotations2d] = useState<IAnnotationDataTemporarily[]>([]);
   const { pointCloudBoxList, topViewInstance } = useContext(PointCloudContext);
   const [mappingIndex, setMappingIndex] = useState(0);
+  const ref = useRef(null);
+  const size = useSize(ref);
 
   const mappingData = imgInfo?.mappingImgList?.[mappingIndex];
 
@@ -77,14 +80,10 @@ const PointCloud2DView = ({ imgInfo }: IProps) => {
         },
         [],
       );
+
       setAnnotations2d(newAnnotations2d);
     }
   }, [pointCloudBoxList, mappingData]);
-
-  const size = {
-    width: 700,
-    height: 400,
-  };
 
   if (!imgInfo) {
     return <div />;
@@ -96,6 +95,7 @@ const PointCloud2DView = ({ imgInfo }: IProps) => {
     return <div />;
   }
 
+  console.log('render', annotations2d);
   return (
     <PointCloudContainer
       className={getClassName('point-cloud-2d-container')}
@@ -119,7 +119,7 @@ const PointCloud2DView = ({ imgInfo }: IProps) => {
         />
       }
     >
-      <div className={getClassName('point-cloud-2d-image')}>
+      <div className={getClassName('point-cloud-2d-image')} ref={ref}>
         <AnnotationView src={mappingData?.url ?? ''} annotations={annotations2d} size={size} />
       </div>
     </PointCloudContainer>

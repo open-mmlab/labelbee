@@ -1,5 +1,5 @@
 /**
- * @file Unified management of pointCloud & pointCloud2dOperation
+ * @file Unified management of pointCloud & pointCloud2dOperation (Three views => Top & Side & Back)
  * @createDate 2022-07-18
  * @author Ron <ron.f.luo@gmail.com>
  */
@@ -44,14 +44,7 @@ export class PointCloudAnnotation implements IPointCloudAnnotationOperation {
   public canvasScheduler: CanvasScheduler;
 
   constructor({ size, container, pcdPath, polygonOperationProps }: IPointCloudAnnotationProps) {
-    const defaultOrthographic = {
-      left: -size.width / 2,
-      right: size.width / 2,
-      top: size.height / 2,
-      bottom: -size.height / 2,
-      near: 100,
-      far: -100,
-    };
+    const defaultOrthographic = this.getDefaultOrthographic(size);
 
     const imgSrc = createEmptyImage(size);
 
@@ -95,6 +88,48 @@ export class PointCloudAnnotation implements IPointCloudAnnotationOperation {
     this.pointCloud2dOperation = polygonOperation;
     this.pointCloudInstance = pointCloud;
     this.canvasScheduler = canvasScheduler;
+  }
+
+  /**
+   * Get default boundary by size.
+   * @param size
+   * @returns
+   */
+  public getDefaultOrthographic(size: ISize) {
+    return {
+      left: -size.width / 2,
+      right: size.width / 2,
+      top: size.height / 2,
+      bottom: -size.height / 2,
+      near: 100,
+      far: -100,
+    };
+  }
+
+  /**
+   * Init size when the viewport updated.
+   * @param size
+   */
+  public initSize(size: ISize) {
+    // PointCloud camera init.
+    this.pointCloudInstance.initOrthographicCamera(this.getDefaultOrthographic(size));
+    this.pointCloudInstance.init();
+    this.pointCloudInstance.initCamera();
+    this.pointCloudInstance.render();
+
+    const imgSrc = createEmptyImage(size);
+    const image = new Image();
+    image.src = imgSrc;
+    image.onload = () => {
+      /**
+       * Update the polygonOperation.
+       * Notice. It needs to update polygon if it shows polygon.
+       * (Like `ptCtx.topViewInstance.updatePolygonList(ptCtx.pointCloudBoxList);`)
+       */
+      this.pointCloud2dOperation.setImgNode(image);
+      this.pointCloud2dOperation.setCanvasSize(size);
+      this.pointCloud2dOperation.initImgPos();
+    };
   }
 
   public addPolygonListOnTopView(result: string) {

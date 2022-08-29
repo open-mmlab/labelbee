@@ -7,7 +7,7 @@ import { getClassName } from '@/utils/dom';
 import { FooterDivider } from '@/views/MainView/toolFooter';
 import { ZoomController } from '@/views/MainView/toolFooter/ZoomController';
 import { DownSquareOutlined, UpSquareOutlined } from '@ant-design/icons';
-import { cTool, PointCloud, PointCloudAnnotation } from '@labelbee/lb-annotation';
+import { cTool, PointCloudAnnotation } from '@labelbee/lb-annotation';
 import { IPolygonData } from '@labelbee/lb-utils';
 import React, { useEffect, useRef, useState } from 'react';
 import { PointCloudContext } from './PointCloudContext';
@@ -20,6 +20,7 @@ import { Slider } from 'antd';
 import { aMapStateToProps, IAnnotationStateProps } from '@/store/annotation/map';
 import { connect } from 'react-redux';
 import { usePointCloudViews } from './hooks/usePointCloudViews';
+import useSize from '@/hooks/useSize';
 
 const { EPolygonPattern } = cTool;
 
@@ -125,11 +126,10 @@ const ZAxisSlider = ({
 const PointCloudTopView: React.FC<IAnnotationStateProps> = ({ currentData }) => {
   const ref = useRef<HTMLDivElement>(null);
   const ptCtx = React.useContext(PointCloudContext);
-  const pointCloudRef = useRef<PointCloud | null>();
+  const size = useSize(ref);
+
   const { addPolygon, deletePolygon } = usePolygon();
   const { deletePointCloudBox } = useSingleBox();
-
-  const [size, setSize] = useState<{ width: number; height: number } | null>(null);
   const [zAxisLimit, setZAxisLimit] = useState<number>(10);
 
   const pointCloudViews = usePointCloudViews();
@@ -160,39 +160,6 @@ const PointCloudTopView: React.FC<IAnnotationStateProps> = ({ currentData }) => 
       pointCloudAnnotation.addPolygonListOnTopView(currentData.result);
 
       ptCtx.setTopViewInstance(pointCloudAnnotation);
-
-      const pointCloud = pointCloudAnnotation.pointCloudInstance;
-      const polygonOperation = pointCloudAnnotation.pointCloud2dOperation;
-
-      pointCloudRef.current = pointCloud;
-
-      /**
-       * Synchronized 3d point cloud view displacement operations
-       *
-       * Change Orthographic Camera size
-       */
-      polygonOperation.singleOn('renderZoom', (zoom: number, currentPos: any) => {
-        const { offsetX, offsetY } = TransferCanvas2WorldOffset(currentPos, size, zoom);
-        pointCloud.camera.zoom = zoom;
-        if (currentPos) {
-          const { x, y, z } = pointCloud.initCameraPosition;
-          pointCloud.camera.position.set(x + offsetY, y - offsetX, z);
-        }
-
-        pointCloud.camera.updateProjectionMatrix();
-        pointCloud.render();
-      });
-
-      // Synchronized 3d point cloud view displacement operations
-      polygonOperation.singleOn('dragMove', ({ currentPos, zoom }) => {
-        const { offsetX, offsetY } = TransferCanvas2WorldOffset(currentPos, size, zoom);
-        pointCloud.camera.zoom = zoom;
-        const { x, y, z } = pointCloud.initCameraPosition;
-        pointCloud.camera.position.set(x + offsetY, y - offsetX, z);
-        pointCloud.render();
-      });
-
-      setSize(size);
     }
   }, [currentData]);
 
@@ -235,9 +202,47 @@ const PointCloudTopView: React.FC<IAnnotationStateProps> = ({ currentData }) => 
   }, [ptCtx, size, currentData, pointCloudViews]);
 
   useEffect(() => {
-    if (pointCloudRef.current) {
-      pointCloudRef.current.applyZAxisPoints(zAxisLimit);
+    if (!size?.width || !ptCtx.topViewInstance) {
+      return;
     }
+
+    // 1. Update Size
+    ptCtx.topViewInstance.initSize(size);
+    ptCtx.topViewInstance.updatePolygonList(ptCtx.pointCloudBoxList);
+
+    const {
+      topViewInstance: { pointCloudInstance: pointCloud, pointCloud2dOperation: polygonOperation },
+    } = ptCtx;
+
+    /**
+     * Synchronized 3d point cloud view displacement operations
+     *
+     * Change Orthographic Camera size
+     */
+    polygonOperation.singleOn('renderZoom', (zoom: number, currentPos: any) => {
+      const { offsetX, offsetY } = TransferCanvas2WorldOffset(currentPos, size, zoom);
+      pointCloud.camera.zoom = zoom;
+      if (currentPos) {
+        const { x, y, z } = pointCloud.initCameraPosition;
+        pointCloud.camera.position.set(x + offsetY, y - offsetX, z);
+      }
+
+      pointCloud.camera.updateProjectionMatrix();
+      pointCloud.render();
+    });
+
+    // Synchronized 3d point cloud view displacement operations
+    polygonOperation.singleOn('dragMove', ({ currentPos, zoom }) => {
+      const { offsetX, offsetY } = TransferCanvas2WorldOffset(currentPos, size, zoom);
+      pointCloud.camera.zoom = zoom;
+      const { x, y, z } = pointCloud.initCameraPosition;
+      pointCloud.camera.position.set(x + offsetY, y - offsetX, z);
+      pointCloud.render();
+    });
+  }, [size]);
+
+  useEffect(() => {
+    ptCtx.topViewInstance?.pointCloudInstance?.applyZAxisPoints(zAxisLimit);
   }, [zAxisLimit]);
 
   useEffect(() => {
