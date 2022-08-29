@@ -54,7 +54,9 @@ export const useSingleBox = () => {
       const { pointCloud2dOperation } = topViewInstance;
 
       const newSelectedIDs = pointCloud2dOperation.switchToNextPolygon(sort);
-      setSelectedIDs(newSelectedIDs);
+      if (newSelectedIDs) {
+        setSelectedIDs(newSelectedIDs);
+      }
     },
     [topViewInstance],
   );
