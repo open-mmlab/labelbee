@@ -481,6 +481,8 @@ export default class MathUtils {
 
   /**
    * Get the radius from quadrangle under top-view
+   *
+   * Return Range  [0 , 2PI]
    * @param points
    * @returns
    */
@@ -498,7 +500,7 @@ export default class MathUtils {
 
     // Key Point
     if (x > 0) {
-      return -radius;
+      return Math.PI * 2 - radius;
     }
 
     return radius;

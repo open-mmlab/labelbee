@@ -4,7 +4,7 @@
  * @createdate 2022-07-13
  */
 
-import { EPerspectiveView } from '@labelbee/lb-utils';
+import { EPerspectiveView, PointCloudUtils } from '@labelbee/lb-utils';
 import React from 'react';
 import { PointCloudContext } from './PointCloudContext';
 import { UnitUtils } from '@labelbee/lb-annotation';
@@ -54,11 +54,12 @@ export const BoxInfos = () => {
   const box = pointCloudBoxList.find((i) => i.id === selectedID);
 
   if (selectedID && box) {
-    const { width, depth, height, rotation } = box;
+    const { length, width, height, rotation_y } = PointCloudUtils.transferBox2Kitti(box);
+
     const infos = [
       {
         label: '长',
-        value: height.toFixed(DECIMAL_PLACES),
+        value: length.toFixed(DECIMAL_PLACES),
       },
       {
         label: '宽',
@@ -66,11 +67,11 @@ export const BoxInfos = () => {
       },
       {
         label: '高',
-        value: depth.toFixed(DECIMAL_PLACES),
+        value: height.toFixed(DECIMAL_PLACES),
       },
       {
         label: '朝向角',
-        value: UnitUtils.rad2deg(rotation).toFixed(DECIMAL_PLACES),
+        value: UnitUtils.rad2deg(rotation_y).toFixed(DECIMAL_PLACES),
       },
       // TODO: 需要将结果存入到标注信息
       {

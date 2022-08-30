@@ -223,6 +223,62 @@ class PointCloudUtils {
       })),
     ];
   }
+
+  /**
+   * Transform Box to Kitti format.
+   *
+   * Kitti format Information
+   * 1. Position.
+   *
+   * height: The height of car
+   * length: It means the Length of car front facing
+   * width: It means the car's width;
+   *
+   * 2. rotate
+   *
+   * rotation_y:
+   *
+   *
+   * 3. Link
+   * https://blog.csdn.net/Solomon1558/article/details/70173223
+   * @param boxParams
+   * @returns
+   */
+  public static transferBox2Kitti(boxParams: IPointCloudBox) {
+    return {
+      height: boxParams.depth,
+      length: boxParams.width,
+      width: boxParams.height,
+      
+      rotation_y: this.transferRotation2KittiRotation_y(boxParams.rotation),
+    };
+  }
+
+  /**
+   * Restrict angle range to [0 - 2PI]
+   * @param rotation
+   */
+  public static restrictAngleRange(rotation: number) {
+    const standardRange = Math.PI * 2;
+    let updatedRotation = rotation % standardRange;
+
+    if (updatedRotation < 0) {
+      return standardRange + updatedRotation;
+    }
+
+    return updatedRotation;
+  }
+
+  /**
+   * rotation range = [0, 2Pi]
+   * @param rotation
+   */
+  public static transferRotation2KittiRotation_y(rotation: number) {
+    if (rotation < 0) {
+      return -rotation;
+    }
+    return 2 * Math.PI - rotation;
+  }
 }
 
 export default PointCloudUtils;
