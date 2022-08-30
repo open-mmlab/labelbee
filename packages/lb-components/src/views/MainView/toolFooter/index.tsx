@@ -108,17 +108,17 @@ const ToolFooter: React.FC<IProps> = (props: IProps) => {
       <span>{t('curItems', { current: basicIndex + 1, total: basicResultList.length })}</span>
     ) : null;
 
-  if (stepInfo.tool === EPointCloudName.PointCloud) {
-    return (
-      <div className={`${footerCls}`} style={props.style}>
-        <FooterTips />
-        <div style={{ flex: 1 }} />
-        {pagination}
-      </div>
-    );
-  }
-
   if (typeof footer === 'function') {
+    if (footer === renderFooter && stepInfo.tool === EPointCloudName.PointCloud) {
+      return (
+        <div className={`${footerCls}`} style={props.style}>
+          <FooterTips />
+          <div style={{ flex: 1 }} />
+          {pagination}
+        </div>
+      );
+    }
+
     return (
       <div className={`${footerCls}`} style={props.style}>
         {footer({

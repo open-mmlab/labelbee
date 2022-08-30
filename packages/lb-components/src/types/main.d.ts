@@ -39,6 +39,10 @@ export type Sider = ({
   tagToolSideBar: React.ReactNode;
   textToolSideBar: React.ReactNode;
   horizontal: React.ReactNode;
+
+  // PointCloud
+  pointCloudToolSidebar : React.ReactNode;
+  pointCloudOperation: React.ReactNode;
 }) => React.ReactNode | React.ReactNode;
 
 interface IFooter {
