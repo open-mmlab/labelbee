@@ -167,6 +167,15 @@ export function UpdateRotate(): AnnotationActionTypes {
   };
 }
 
+export function UpdateSkipBeforePageTurning(skipBeforePageTurning: (pageTurning: Function) => {}): AnnotationActionTypes {
+  return {
+    type: ANNOTATION_ACTIONS.SKIP_BEFORE_PAGE_TURNING,
+    payload: {
+      skipBeforePageTurning,
+    },
+  };
+}
+
 export function CopyBackWordResult(): AnnotationActionTypes {
   return {
     type: ANNOTATION_ACTIONS.COPY_BACKWARD_RESULT,
@@ -187,6 +196,7 @@ export function InitTaskData({
   loadFileList,
   step,
   stepList,
+  skipBeforePageTurning
 }: any): any {
   const tasks: any[] = [];
 
@@ -214,6 +224,10 @@ export function InitTaskData({
 
   if (pageSize) {
     tasks.push(UpdatePageSize(pageSize));
+  }
+
+  if (skipBeforePageTurning) {
+    tasks.push(UpdateSkipBeforePageTurning(skipBeforePageTurning));
   }
 
   tasks.push(SetTaskConfig({ stepList, step }));
@@ -473,6 +487,7 @@ export const DispatcherTurning = async (
         return;
       }
     }
+    
     annotationStore.onPageChange?.(fileIndex);
     const index =
       submitType === ESubmitType.Backward

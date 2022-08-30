@@ -60,6 +60,9 @@ export interface AppProps {
   defaultLang: 'en' | 'cn'; // 国际化设置
   leftSider?: () => React.ReactNode | React.ReactNode;
 
+  // data Correction
+  skipBeforePageTurning?: (pageTurning: Function) => void;
+
   drawLayerSlot?: (props: {
     zoom: number;
     currentPos: { x: number; y: number };
@@ -91,6 +94,7 @@ const App: React.FC<AppProps> = (props) => {
     pageSize = 10,
     loadFileList,
     defaultLang = 'cn',
+    skipBeforePageTurning,
   } = props;
 
   useEffect(() => {
@@ -105,6 +109,7 @@ const App: React.FC<AppProps> = (props) => {
         onSave,
         onPageChange,
         onStepChange,
+        skipBeforePageTurning,
       }),
     );
 
