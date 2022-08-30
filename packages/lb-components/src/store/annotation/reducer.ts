@@ -525,6 +525,13 @@ export const annotationReducer = (
       };
     }
 
+    case ANNOTATION_ACTIONS.SKIP_BEFORE_PAGE_TURNING: {
+      return {
+        ...state,
+        skipBeforePageTurning: action.payload.skipBeforePageTurning,
+      };
+    }
+
     case ANNOTATION_ACTIONS.SET_FILE_DATA: {
       const { fileData, index } = action.payload;
       const { imgList } = state;

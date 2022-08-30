@@ -33,6 +33,7 @@ interface CommonActions {
   payload?: any;
 }
 
+
 export interface AnnotationState {
   toolInstance: ToolInstance | null;
   annotationEngine: AnnotationEngine | null;
@@ -57,6 +58,8 @@ export interface AnnotationState {
   loading: boolean; // 用于图片加载
   /** 阻止文件切换后的事件 */
   triggerEventAfterIndexChanged: boolean;
+
+  skipBeforePageTurning?: (pageTurning: Function) => void;
 }
 
 interface UpdateToolInstance {

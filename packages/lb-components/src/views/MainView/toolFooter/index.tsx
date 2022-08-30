@@ -28,6 +28,8 @@ interface IProps {
   basicIndex: number;
   mode?: FooterTheme; // 后面通过 context 的形式进行编写
   footer?: RenderFooter;
+
+  skipBeforePageTurning?: (pageTurning: Function) => void;
 }
 
 export const footerCls = `${prefix}-footer`;
@@ -72,6 +74,7 @@ const ToolFooter: React.FC<IProps> = (props: IProps) => {
     basicIndex,
     mode = 'light',
     footer = renderFooter,
+    skipBeforePageTurning,
   } = props;
 
   const dispatch = useDispatch();
@@ -80,10 +83,19 @@ const ToolFooter: React.FC<IProps> = (props: IProps) => {
   const hasSourceStep = !!stepInfo.dataSourceStep;
 
   const pageBackward = () => {
+    if (skipBeforePageTurning) {
+      skipBeforePageTurning(() => dispatch(PageBackward()));
+      return;
+    }
+
     dispatch(PageBackward());
   };
 
   const pageForward = () => {
+    if (skipBeforePageTurning) {
+      skipBeforePageTurning(() => dispatch(PageForward()));
+      return;
+    }
     dispatch(PageForward());
   };
 
@@ -144,6 +156,7 @@ const mapStateToProps = (state: AppState) => ({
   step: state.annotation.step,
   basicIndex: state.annotation.basicIndex,
   basicResultList: state.annotation.basicResultList,
+  skipBeforePageTurning: state.annotation.skipBeforePageTurning,
 });
 
 export default connect(mapStateToProps)(ToolFooter);
