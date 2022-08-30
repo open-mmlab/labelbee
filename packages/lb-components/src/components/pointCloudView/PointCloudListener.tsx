@@ -19,8 +19,9 @@ const PointCloudListener: React.FC<IAnnotationStateProps> = ({ currentData }) =>
   const { changeSelectedBoxValid, selectNextBox, selectPrevBox, updateSelectedBox } =
     useSingleBox();
   const { clearAllResult } = useStatus();
+  const basicInfo = jsonParser(currentData.result);
   const { copySelectedBoxes, pasteSelectedBoxes, copiedBoxes } = useBoxes();
-  const { toolInstanceRef } = useCustomToolInstance();
+  const { toolInstanceRef } = useCustomToolInstance({ basicInfo });
   const { updateRotate } = useRotate({ currentData });
 
   const keydownEvents = (lowerCaseKey: string) => {
@@ -220,10 +221,15 @@ const PointCloudListener: React.FC<IAnnotationStateProps> = ({ currentData }) =>
   }, [ptCtx.pointCloudBoxList, ptCtx.selectedID, ptCtx.valid, ptCtx.polygonList]);
 
   useEffect(() => {
-    toolInstanceRef.current.setValid = () => {
-      ptCtx.setPointCloudValid(!ptCtx.valid);
+    toolInstanceRef.current.setValid = (valid: boolean) => {
+      toolInstanceRef.current.valid = valid;
+
+      // Avoid triggering SetState operations in the reducer phase
+      setTimeout(() => {
+        ptCtx.setPointCloudValid(valid);
+      });
     };
-  }, [ptCtx.valid]);
+  }, []);
 
   return null;
 };

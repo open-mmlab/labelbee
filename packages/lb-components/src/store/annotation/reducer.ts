@@ -228,7 +228,6 @@ export const annotationReducer = (
         stepList,
       );
 
-
       if (onSubmit) {
         onSubmit([imgList[imgIndex]], action.payload?.submitType, imgIndex);
       }
@@ -372,6 +371,10 @@ export const annotationReducer = (
 
       if (imgNode && imgError !== true) {
         annotationEngine?.setImgNode(imgNode, basicImgInfo);
+      } else {
+        // Non-graphical tools to initialize base data
+
+        toolInstance?.setValid(basicImgInfo.valid);
       }
 
       const stepConfig = getStepConfig(stepList, step);

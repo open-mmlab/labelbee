@@ -5,9 +5,11 @@ import copyBackStepSvg from '@/assets/annotation/common/icon_invalid.svg';
 import copyBackStepASvg from '@/assets/annotation/common/icon_invalid_a.svg';
 import { StopOutlined } from '@ant-design/icons';
 import { useTranslation } from 'react-i18next';
-import React, { useMemo } from 'react';
+import React, { useMemo, useState } from 'react';
 import { CopyBackWordResult } from '@/store/annotation/actionCreators';
 import { store } from '@/index';
+import { useSelector } from 'react-redux';
+import { AppState } from '@/store';
 
 /**
  * Hooks for sidebar common operations' config
@@ -15,7 +17,16 @@ import { store } from '@/index';
  * @returns
  */
 const useOperationList = (toolInstance: any) => {
+  const [updateNum, forceRender] = useState(0);
   const { t } = useTranslation();
+  const { currentData } = useSelector((state: AppState) => {
+    const { imgList, imgIndex } = state.annotation;
+
+    return {
+      currentData: imgList[imgIndex],
+    };
+  });
+
   const iconStyle = {
     height: '25px',
     lineHeight: '25px',
@@ -41,12 +52,15 @@ const useOperationList = (toolInstance: any) => {
    * Set set validity for current file
    */
   const setValidity: IOperationConfig = {
-    name: t(toolInstance?.valid === true ? 'SetAsInvalid' : 'SetAsValid'),
+    name: t(toolInstance?.valid === false ? 'SetAsValid' : 'SetAsInvalid'),
     key: 'setValidity',
     imgSvg: <StopOutlined style={iconStyle} />,
     hoverSvg: <StopOutlined style={{ color: '#666fff', ...iconStyle }} />,
     onClick: () => {
       toolInstance.setValid(!toolInstance.valid);
+      setTimeout(() => {
+        forceRender((v) => v + 1);
+      });
     },
   };
 
@@ -69,7 +83,7 @@ const useOperationList = (toolInstance: any) => {
       setValidity,
       copyPrevious,
     };
-  }, [toolInstance]);
+  }, [toolInstance, updateNum, currentData]);
 };
 
 export default useOperationList;

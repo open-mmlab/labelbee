@@ -409,6 +409,11 @@ class BasicToolOperation extends EventListener {
     this.render();
   }
 
+  /**
+   * Notice. It needs to set the default imgInfo. Because it will needs to create info when it doesn't have
+   * @param imgNode
+   * @param basicImgInfo
+   */
   public setImgNode(imgNode: HTMLImageElement, basicImgInfo: Partial<{ valid: boolean; rotate: number }> = {}) {
     this.imgNode = imgNode;
 
