@@ -449,7 +449,7 @@ export const usePointCloudViews = () => {
       }
     });
     mainViewGenBox(boxParams);
-    mainViewInstance?.hightLightOriginPointCloud(boxParams);
+    mainViewInstance?.highlightOriginPointCloud(boxParams);
   };
 
   const pointCloudBoxListUpdated = (newBoxes: IPointCloudBox[]) => {

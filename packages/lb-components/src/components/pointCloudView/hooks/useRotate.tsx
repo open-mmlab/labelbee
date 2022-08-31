@@ -3,9 +3,7 @@ import { IAnnotationStateProps } from '@/store/annotation/map';
 import { synchronizeBackView, synchronizeSideView } from './usePointCloudViews';
 import { useSingleBox } from './useSingleBox';
 import { PointCloudContext } from '../PointCloudContext';
-import { cAnnotation, UnitUtils } from '@labelbee/lb-annotation';
-import { PointCloudUtils } from '@labelbee/lb-utils';
-import { useThrottleFn } from 'ahooks';
+import { cAnnotation } from '@labelbee/lb-annotation';
 
 const { ERotateDirection } = cAnnotation;
 
@@ -16,7 +14,8 @@ const { ERotateDirection } = cAnnotation;
 export const useRotate = ({ currentData }: IAnnotationStateProps) => {
   const ptCtx = useContext(PointCloudContext);
   const { selectedBox, updateSelectedBox } = useSingleBox();
-  const { run: updateRotate } = useThrottleFn(
+
+  const updateRotate = useCallback(
     (angle: number) => {
       const { topViewInstance, mainViewInstance } = ptCtx;
       if (!topViewInstance || !mainViewInstance) {
@@ -32,18 +31,14 @@ export const useRotate = ({ currentData }: IAnnotationStateProps) => {
       }
 
       updateSelectedBox({
-        // rotation: PointCloudUtils.restrictAngleRange(
-        //   selectedPointCloudBox.rotation + Number(Math.PI * angle) / 180,
-        // ),
-        rotation: PointCloudUtils.restrictAngleRange(
-          selectedPointCloudBox.rotation + UnitUtils.deg2rad(angle),
-        ),
+        rotation: selectedPointCloudBox.rotation + Number(Math.PI * angle) / 180,
       });
 
       TopPointCloudPolygonOperation.rotatePolygon(angle, ERotateDirection.Anticlockwise);
       const selectedPolygon = TopPointCloudPolygonOperation.selectedPolygon;
 
       mainViewInstance.generateBox(selectedPointCloudBox);
+      mainViewInstance.highlightOriginPointCloud(selectedPointCloudBox);
       synchronizeSideView(
         selectedPointCloudBox,
         selectedPolygon,
@@ -56,15 +51,15 @@ export const useRotate = ({ currentData }: IAnnotationStateProps) => {
         ptCtx.backViewInstance,
         currentData.url,
       );
-
-      // TODO. High-performance computing that can be processed asynchronously
-      mainViewInstance.hightLightOriginPointCloud(selectedPointCloudBox);
+      mainViewInstance.render();
     },
-    /**
-     * conservative strategy
-     *
-     */
-    { wait: 100 },
+    [
+      ptCtx.selectedID,
+      ptCtx.pointCloudBoxList,
+      ptCtx.setPointCloudResult,
+      ptCtx.topViewInstance,
+      currentData,
+    ],
   );
 
   return { updateRotate };

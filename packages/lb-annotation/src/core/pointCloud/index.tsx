@@ -19,6 +19,7 @@ import {
   TMatrix13Tuple,
 } from '@labelbee/lb-utils';
 import { PointsMaterial, Shader } from 'three';
+import HighlightWorker from 'web-worker:./highlightWorker.js';
 import { isInPolygon } from '@/utils/tool/polygonTool';
 import { IPolygonPoint } from '@/types/tool/polygon';
 import uuid from '@/utils/uuid';
@@ -44,6 +45,7 @@ interface IProps {
 }
 
 const DEFAULT_DISTANCE = 30;
+const highlightWorker = new HighlightWorker();
 
 export class PointCloud {
   public renderer: THREE.WebGLRenderer;
@@ -515,39 +517,6 @@ export class PointCloud {
     return geometry;
   }
 
-  /**
-   * For pcd points & Update Color
-   *
-   * Notice. It will directly update the parameter(color)
-   * @param boxParams
-   * @param points
-   * @param color
-   * @returns
-   */
-  public filterPointsColor(boxParams: IPointCloudBox, points: number[], color: number[]) {
-    const { zMin, zMax, polygonPointList } = this.getCuboidFromPointCloudBox(boxParams);
-
-    for (let i = 0; i < points.length; i += 3) {
-      const x = points[i];
-      const y = points[i + 1];
-      const z = points[i + 2];
-
-      const inPolygon = isInPolygon({ x, y }, polygonPointList);
-
-      if (inPolygon && z >= zMin && z <= zMax) {
-        color[i] = 0;
-        color[i + 1] = 1;
-        color[i + 2] = 1;
-      } else {
-        // DEFAULT COLOR RENDERc
-        const [r, g, b] = PointCloudUtils.getStandardColorByCoord(x, y, z);
-        color[i] = r;
-        color[i + 1] = g;
-        color[i + 2] = b;
-      }
-    }
-  }
-
   public getCameraVector(
     centerPoint: I3DSpaceCoord,
     rotationZ: number,
@@ -689,19 +658,32 @@ export class PointCloud {
    * @param boxParams
    * @returns
    */
-  public hightLightOriginPointCloud(boxParams: IPointCloudBox) {
+  public highlightOriginPointCloud(boxParams: IPointCloudBox) {
     const oldPointCloud: any = this.scene.getObjectByName(this.pointCloudObjectName);
     if (!oldPointCloud) {
       return;
     }
 
-    this.filterPointsColor(
-      boxParams,
-      oldPointCloud.geometry.attributes.position.array,
-      oldPointCloud.geometry.attributes.color.array,
-    );
-    oldPointCloud.geometry.attributes.color.needsUpdate = true;
-    this.render();
+    if (window.Worker) {
+      const { zMin, zMax, polygonPointList } = this.getCuboidFromPointCloudBox(boxParams);
+
+      const params = {
+        boxParams,
+        zMin,
+        zMax,
+        polygonPointList,
+        position: oldPointCloud.geometry.attributes.position.array,
+        color: oldPointCloud.geometry.attributes.color.array,
+      };
+
+      highlightWorker.postMessage(params);
+      highlightWorker.onmessage = (e: any) => {
+        const { color } = e.data;
+        oldPointCloud.geometry.attributes.color.array = color;
+        oldPointCloud.geometry.attributes.color.needsUpdate = true;
+        this.render();
+      };
+    }
   }
 
   /**
