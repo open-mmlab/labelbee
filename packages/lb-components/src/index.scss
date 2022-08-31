@@ -1589,10 +1589,14 @@ $headerHeight: 40px;
         display: flex;
         justify-content: center;
         align-items: center;
+        flex-direction:  column;
         font-size: 16px;
         z-index: 20;
         height: calc(100% - $headerHeight);
         width: 100%;
+        .#{$ptPrefix}-container__empty-page__text {
+          margin-top: 13px;
+        }
       }
 
       .#{$ptPrefix}-container__side-view {

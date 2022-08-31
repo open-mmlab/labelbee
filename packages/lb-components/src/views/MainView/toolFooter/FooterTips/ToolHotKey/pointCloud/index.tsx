@@ -44,7 +44,8 @@ const rotateRoundCenter: IShortcut = {
 const Drag3D = {
   name: '点云平移',
   icon: dragIcon,
-  shortCut: ['Shift', leftClick],
+  shortCut: [rightClick],
+  noticeInfo: '拖动',
 };
 
 const DragTopView = {

@@ -14,6 +14,8 @@ import { connect } from 'react-redux';
 import { aMapStateToProps, IAnnotationStateProps } from '@/store/annotation/map';
 import { usePointCloudViews } from './hooks/usePointCloudViews';
 import { useSingleBox } from './hooks/useSingleBox';
+import EmptyPage from './components/EmptyPage';
+
 import useSize from '@/hooks/useSize';
 
 /**
@@ -150,9 +152,7 @@ const PointCloudSideView: React.FC<IAnnotationStateProps> = ({ currentData }) =>
     >
       <div className={getClassName('point-cloud-container', 'bottom-view-content')}>
         <div className={getClassName('point-cloud-container', 'core-instance')} ref={ref} />
-        {!selectedBox && (
-          <div className={getClassName('point-cloud-container', 'empty-page')}>暂无数据</div>
-        )}
+        {!selectedBox && <EmptyPage />}
       </div>
     </PointCloudContainer>
   );

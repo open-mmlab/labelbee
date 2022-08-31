@@ -16,6 +16,7 @@ import { connect } from 'react-redux';
 import { aMapStateToProps, IAnnotationStateProps } from '@/store/annotation/map';
 import { synchronizeSideView, synchronizeTopView } from './hooks/usePointCloudViews';
 import useSize from '@/hooks/useSize';
+import EmptyPage from './components/EmptyPage';
 
 /**
  * 统一一下，将其拓展为 二维转换为 三维坐标的转换
@@ -185,11 +186,7 @@ const PointCloudSideView = ({ currentData }: IAnnotationStateProps) => {
     >
       <div className={getClassName('point-cloud-container', 'bottom-view-content')}>
         <div className={getClassName('point-cloud-container', 'core-instance')} ref={ref} />
-        {!selectedBox && (
-          <div style={{ ...size }} className={getClassName('point-cloud-container', 'empty-page')}>
-            暂无数据
-          </div>
-        )}
+        {!selectedBox && <EmptyPage />}
       </div>
     </PointCloudContainer>
   );
