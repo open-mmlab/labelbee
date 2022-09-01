@@ -53,6 +53,10 @@ const PointCloud2DView = ({ imgInfo }: IProps) => {
   const mappingData = imgInfo?.mappingImgList?.[mappingIndex];
 
   useEffect(() => {
+    setMappingIndex(0);
+  }, [imgInfo]);
+
+  useEffect(() => {
     if (topViewInstance && mappingData) {
       const { pointCloudInstance } = topViewInstance;
       const defaultViewStyle = {
@@ -95,7 +99,6 @@ const PointCloud2DView = ({ imgInfo }: IProps) => {
     return <div />;
   }
 
-  console.log('render', annotations2d);
   return (
     <PointCloudContainer
       className={getClassName('point-cloud-2d-container')}
