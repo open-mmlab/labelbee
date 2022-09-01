@@ -1,26 +1,3 @@
-class PointCloudUtils {
-  static genColorByCoord(x, y, z) {
-    if (z <= 0) {
-      return [128, 128, 128];
-    }
-
-    if (z < 5) {
-      return [255, 0, 0];
-    }
-
-    if (z < 10) {
-      return [0, 255, 0];
-    }
-
-    return [0, 0, 255];
-  }
-
-  static getStandardColorByCoord(x, y, z) {
-    const pdColor = this.genColorByCoord(x, y, z);
-    return pdColor.map((hex) => hex / 255);
-  }
-}
-
 export function isInPolygon(checkPoint, polygonPoints, lineType = 0) {
   let counter = 0;
   let i;
@@ -65,9 +42,12 @@ export function isInPolygon(checkPoint, polygonPoints, lineType = 0) {
 
 onmessage = function onmessage(e) {
   const { zMin, zMax, polygonPointList, position: points, color } = e.data;
-  let num = 0;
 
   //  Loop to determine if it is in range
+  const newPosition = [];
+  const newColor = [];
+  let num = 0;
+
   for (let i = 0; i < points.length; i += 3) {
     const x = points[i];
     const y = points[i + 1];
@@ -76,18 +56,15 @@ onmessage = function onmessage(e) {
     const inPolygon = isInPolygon({ x, y }, polygonPointList);
 
     if (inPolygon && z >= zMin && z <= zMax) {
+      newPosition.push(x);
+      newPosition.push(y);
+      newPosition.push(z);
+      newColor.push(color[i]);
+      newColor.push(color[i + 1]);
+      newColor.push(color[i + 2]);
       num++;
-      color[i] = 0;
-      color[i + 1] = 1;
-      color[i + 2] = 1;
-    } else {
-      // DEFAULT COLOR RENDERc
-      const [r, g, b] = PointCloudUtils.getStandardColorByCoord(x, y, z);
-      color[i] = r;
-      color[i + 1] = g;
-      color[i + 2] = b;
     }
   }
 
-  postMessage({ points, color, num });
+  this.postMessage({ position: newPosition, color: newColor, num });
 };

@@ -20,6 +20,7 @@ import {
 } from '@labelbee/lb-utils';
 import { PointsMaterial, Shader } from 'three';
 import HighlightWorker from 'web-worker:./highlightWorker.js';
+import FilterBoxWorker from 'web-worker:./filterBoxWorker.js';
 import { isInPolygon } from '@/utils/tool/polygonTool';
 import { IPolygonPoint } from '@/types/tool/polygon';
 import uuid from '@/utils/uuid';
@@ -487,34 +488,51 @@ export class PointCloud {
    * @param color
    * @returns
    */
-  public filterPointsByBox(boxParams: IPointCloudBox, points: number[], color: number[]) {
-    const newPosition = [];
-    const newColor = [];
+  public filterPointsByBox(
+    boxParams: IPointCloudBox,
+    points?: THREE.Points,
+  ): Promise<{ geometry: any; num: number } | undefined> {
+    if (!points) {
+      const originPoints = this.scene.getObjectByName(this.pointCloudObjectName);
 
-    const { zMin, zMax, polygonPointList } = this.getCuboidFromPointCloudBox(boxParams);
-
-    for (let i = 0; i < points.length; i += 3) {
-      const x = points[i];
-      const y = points[i + 1];
-      const z = points[i + 2];
-
-      const inPolygon = isInPolygon({ x, y }, polygonPointList);
-
-      if (inPolygon && z >= zMin && z <= zMax) {
-        newPosition.push(x);
-        newPosition.push(y);
-        newPosition.push(z);
-        newColor.push(color[i]);
-        newColor.push(color[i + 1]);
-        newColor.push(color[i + 2]);
+      if (!originPoints) {
+        console.error('There is no corresponding point cloud object');
+        return Promise.resolve(undefined);
       }
+
+      points = originPoints as THREE.Points;
     }
 
-    const geometry = new THREE.BufferGeometry();
-    geometry.setAttribute('position', new THREE.Float32BufferAttribute(newPosition, 3));
-    geometry.setAttribute('color', new THREE.Float32BufferAttribute(newColor, 3));
-    geometry.computeBoundingSphere();
-    return geometry;
+    if (window.Worker) {
+      const { zMin, zMax, polygonPointList } = this.getCuboidFromPointCloudBox(boxParams);
+      const position = points.geometry.attributes.position.array;
+      const color = points.geometry.attributes.color.array;
+      const params = {
+        boxParams,
+        zMin,
+        zMax,
+        polygonPointList,
+        color,
+        position,
+      };
+
+      return new Promise((resolve) => {
+        const filterBoxWorker = new FilterBoxWorker();
+        filterBoxWorker.postMessage(params);
+        filterBoxWorker.onmessage = (e: any) => {
+          const { color: newColor, position: newPosition, num } = e.data;
+
+          const geometry = new THREE.BufferGeometry();
+          geometry.setAttribute('position', new THREE.Float32BufferAttribute(newPosition, 3));
+          geometry.setAttribute('color', new THREE.Float32BufferAttribute(newColor, 3));
+          geometry.computeBoundingSphere();
+
+          resolve({ geometry, num });
+        };
+      });
+    }
+
+    return Promise.resolve(undefined);
   }
 
   public getCameraVector(
@@ -697,26 +715,26 @@ export class PointCloud {
     boxParams: IPointCloudBox,
     scope?: Partial<{ width: number; height: number; depth: number }>,
   ) => {
-    this.clearPointCloud();
-
-    const cb = (points: any) => {
-      points.material.size = 1;
-
+    const cb = async (points: THREE.Points) => {
       const { width = 0, height = 0, depth = 0 } = scope ?? {};
 
       // TODO. Speed can be optimized.
-      const newGeometry = this.filterPointsByBox(
+      const filterData = await this.filterPointsByBox(
         {
           ...boxParams,
           width: boxParams.width + width,
           height: boxParams.height + height,
           depth: boxParams.depth + depth,
         },
-        points.geometry.attributes.position.array,
-        points.geometry.attributes.color.array,
+        points,
       );
+      if (!filterData) {
+        console.error('filter Error');
+        return;
+      }
 
-      const newPoints = new THREE.Points(newGeometry, points.material);
+      this.clearPointCloud();
+      const newPoints = new THREE.Points(filterData.geometry, points.material);
       newPoints.name = this.pointCloudObjectName;
       this.scene.add(newPoints);
       this.render();

@@ -5,9 +5,10 @@
  */
 
 import { EPerspectiveView, PointCloudUtils } from '@labelbee/lb-utils';
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import { PointCloudContext } from './PointCloudContext';
 import { UnitUtils } from '@labelbee/lb-annotation';
+import { useSingleBox } from './hooks/useSingleBox';
 
 const DECIMAL_PLACES = 2;
 
@@ -50,13 +51,19 @@ export const SizeInfoForView = ({ perspectiveView }: { perspectiveView: EPerspec
  */
 export const BoxInfos = () => {
   const ptCtx = React.useContext(PointCloudContext);
-  const { selectedID, pointCloudBoxList } = ptCtx;
-  const box = pointCloudBoxList.find((i) => i.id === selectedID);
+  const { selectedBox } = useSingleBox();
+  const [infos, setInfos] = useState<Array<{ label: string; value: string }>>([]);
 
-  if (selectedID && box) {
-    const { length, width, height, rotation_y } = PointCloudUtils.transferBox2Kitti(box);
+  useEffect(() => {
+    if (!selectedBox) {
+      return;
+    }
 
-    const infos = [
+    const { length, width, height, rotation_y } = PointCloudUtils.transferBox2Kitti(
+      selectedBox.info,
+    );
+
+    let infos = [
       {
         label: '长',
         value: length.toFixed(DECIMAL_PLACES),
@@ -73,13 +80,24 @@ export const BoxInfos = () => {
         label: '朝向角',
         value: UnitUtils.rad2deg(rotation_y).toFixed(DECIMAL_PLACES),
       },
-      // TODO: 需要将结果存入到标注信息
-      {
-        label: '点数',
-        value: 1000,
-      },
     ];
 
+    // Get Point Count.
+    ptCtx.mainViewInstance?.filterPointsByBox(selectedBox.info).then((data) => {
+      if (!data) {
+        setInfos(infos);
+        return;
+      }
+
+      infos.push({
+        label: '点数',
+        value: `${data.num}`,
+      });
+      setInfos(infos);
+    });
+  }, [selectedBox]);
+
+  if (selectedBox) {
     return (
       <div
         style={{
