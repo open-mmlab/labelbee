@@ -9,9 +9,9 @@ import { Spin } from 'antd/es';
 
 interface IProps {
   src: string; // 图片路径
-  size: {
-    width: number;
-    height: number;
+  size?: {
+    width?: number;
+    height?: number;
   };
   style?: {
     color?: string;
@@ -31,9 +31,24 @@ const DEFAULT_SIZE = {
   height: 720,
 };
 
+const sizeInitialized = (size?: { width?: number; height?: number }) => {
+  if (!size) {
+    return DEFAULT_SIZE;
+  }
+
+  if (!size.width) {
+    size.width = DEFAULT_SIZE.width;
+  }
+
+  if (!size.height) {
+    size.height = DEFAULT_SIZE.height;
+  }
+
+  return size;
+};
+
 const AnnotationView = (props: IProps, ref: any) => {
   const {
-    size = DEFAULT_SIZE,
     src,
     annotations = [],
     style = {
@@ -45,6 +60,7 @@ const AnnotationView = (props: IProps, ref: any) => {
     onChange,
     showLoading = false,
   } = props;
+  const size = sizeInitialized(props.size);
   const [loading, setLoading] = useState(false);
   const annotationRef = useRef<HTMLDivElement>(null);
   const viewOperation = useRef<ViewOperation>();

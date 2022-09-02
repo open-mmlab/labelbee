@@ -33,6 +33,8 @@ const initialState: AnnotationState = {
   stepProgress: 0,
   loading: false,
   triggerEventAfterIndexChanged: false,
+
+  pointCloudLoading: false,
 };
 
 /**
@@ -211,12 +213,14 @@ export const annotationReducer = (
 
       const oldResultString = imgList[imgIndex]?.result || '';
       const [, basicImgInfo] = toolInstance?.exportData() ?? [];
+      const customObject = toolInstance?.exportCustomData?.() ?? {};
 
       const resultWithBasicInfo = composeResultWithBasicImgInfo(oldResultString, basicImgInfo);
       const newResultString = composeResult(
         resultWithBasicInfo,
         { step, stepList },
         { rect: resultList },
+        customObject,
       );
 
       imgList[imgIndex].result = AnnotationDataUtils.dataCorrection(
@@ -248,8 +252,8 @@ export const annotationReducer = (
 
     /**
      * For data storage in dependent states
-     * 
-     * Features: 
+     *
+     * Features:
      * 1. Get Data from ToolInstance (If it use toolInstance)
      * 2. Filter Data By BasicResultList
      */
@@ -369,6 +373,10 @@ export const annotationReducer = (
 
       if (imgNode && imgError !== true) {
         annotationEngine?.setImgNode(imgNode, basicImgInfo);
+      } else {
+        // Non-graphical tools to initialize base data
+
+        toolInstance?.setValid(basicImgInfo.valid);
       }
 
       const stepConfig = getStepConfig(stepList, step);
@@ -522,14 +530,22 @@ export const annotationReducer = (
       };
     }
 
+    case ANNOTATION_ACTIONS.SKIP_BEFORE_PAGE_TURNING: {
+      return {
+        ...state,
+        skipBeforePageTurning: action.payload.skipBeforePageTurning,
+      };
+    }
+
     case ANNOTATION_ACTIONS.SET_FILE_DATA: {
       const { fileData, index } = action.payload;
       const { imgList } = state;
-      imgList[index] = { ...imgList[index], ...fileData };
+      const newImgList = [...imgList];
+      newImgList[index] = { ...newImgList[index], ...fileData };
 
       return {
         ...state,
-        imgList,
+        imgList: newImgList,
       };
     }
 
@@ -560,7 +576,10 @@ export const annotationReducer = (
         step,
         imgList[imgIndex].result ?? '',
       );
-      imgList[imgIndex].result = newResult;
+      imgList[imgIndex] = {
+        ...imgList[imgIndex],
+        result: newResult,
+      };
 
       // 更新当前的结果
       const fileResult = jsonParser(newResult);
@@ -600,6 +619,15 @@ export const annotationReducer = (
       return {
         ...state,
         loading: !!loading,
+      };
+    }
+
+    case ANNOTATION_ACTIONS.SET_POINT_CLOUD_LOADING: {
+      const { pointCloudLoading } = action.payload;
+
+      return {
+        ...state,
+        pointCloudLoading: !!pointCloudLoading,
       };
     }
 

@@ -1,4 +1,4 @@
-import { IPointCloudBox, IPointCloudBoxList } from '@labelbee/lb-utils';
+import { IPointCloudBox, IPointCloudBoxList, IPolygonData } from '@labelbee/lb-utils';
 import { PointCloud, PointCloudAnnotation } from '@labelbee/lb-annotation';
 import React, { useMemo, useState } from 'react';
 
@@ -25,10 +25,14 @@ export interface IPointCloudContext extends IPointCloudContextInstances {
   selectedAllBoxes: () => void;
   selectedID: string;
   addPointCloudBox: (boxParams: IPointCloudBox) => void;
+
+  polygonList: IPolygonData[];
+  setPolygonList: (polygonList: IPolygonData[]) => void;
 }
 
 export const PointCloudContext = React.createContext<IPointCloudContext>({
   pointCloudBoxList: [],
+  polygonList: [],
   selectedID: '',
   selectedIDs: [],
   valid: true,
@@ -42,10 +46,12 @@ export const PointCloudContext = React.createContext<IPointCloudContext>({
   addSelectedID: () => {},
   selectedAllBoxes: () => {},
   addPointCloudBox: () => {},
+  setPolygonList: () => {},
 });
 
 export const PointCloudProvider: React.FC<{}> = ({ children }) => {
   const [pointCloudBoxList, setPointCloudResult] = useState<IPointCloudBoxList>([]);
+  const [polygonList, setPolygonList] = useState<IPolygonData[]>([]);
   const [selectedIDs, setSelectedIDsState] = useState<string[]>([]);
   const [valid, setValid] = useState<boolean>(true);
   const [topViewInstance, setTopViewInstance] = useState<PointCloudAnnotation>();
@@ -119,11 +125,14 @@ export const PointCloudProvider: React.FC<{}> = ({ children }) => {
       setBackViewInstance,
       mainViewInstance,
       setMainViewInstance,
+      polygonList,
+      setPolygonList,
     };
   }, [
     valid,
     selectedIDs,
     pointCloudBoxList,
+    polygonList,
     topViewInstance,
     sideViewInstance,
     backViewInstance,

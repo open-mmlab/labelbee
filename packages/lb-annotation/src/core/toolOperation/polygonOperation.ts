@@ -28,7 +28,7 @@ import TextAttributeClass from './textAttributeClass';
 
 const TEXT_MAX_WIDTH = 164;
 
-interface IPolygonOperationProps extends IBasicToolOperationProps {}
+export interface IPolygonOperationProps extends IBasicToolOperationProps {}
 
 class PolygonOperation extends BasicToolOperation {
   public config: IPolygonConfig;
@@ -68,6 +68,8 @@ class PolygonOperation extends BasicToolOperation {
   public isAlt: boolean; // 当前是否按住了 alt
 
   public _textAttributInstance?: TextAttributeClass;
+
+  public forbidAddNewPolygonFuc?: (e: MouseEvent) => boolean;
 
   constructor(props: IPolygonOperationProps) {
     super(props);
@@ -260,6 +262,10 @@ class PolygonOperation extends BasicToolOperation {
 
   public addPointInDrawing(e: MouseEvent) {
     if (!this.imgInfo) {
+      return;
+    }
+
+    if (this.forbidAddNewPolygonFuc && this.forbidAddNewPolygonFuc(e)) {
       return;
     }
 

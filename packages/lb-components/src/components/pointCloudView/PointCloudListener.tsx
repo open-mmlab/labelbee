@@ -7,8 +7,10 @@ import { cTool } from '@labelbee/lb-annotation';
 import { message } from 'antd';
 import { connect } from 'react-redux';
 import { aMapStateToProps, IAnnotationStateProps } from '@/store/annotation/map';
-import { IPointCloudBox, PointCloudUtils } from '@labelbee/lb-utils';
 import { useCustomToolInstance } from '@/hooks/annotation';
+import { useStatus } from './hooks/useStatus';
+import { jsonParser } from '@/utils';
+import { usePointCloudViews } from './hooks/usePointCloudViews';
 
 const { EPolygonPattern } = cTool;
 
@@ -16,9 +18,12 @@ const PointCloudListener: React.FC<IAnnotationStateProps> = ({ currentData }) =>
   const ptCtx = useContext(PointCloudContext);
   const { changeSelectedBoxValid, selectNextBox, selectPrevBox, updateSelectedBox } =
     useSingleBox();
+  const { clearAllResult } = useStatus();
+  const basicInfo = jsonParser(currentData.result);
   const { copySelectedBoxes, pasteSelectedBoxes, copiedBoxes } = useBoxes();
-  const { toolInstanceRef } = useCustomToolInstance();
+  const { toolInstanceRef } = useCustomToolInstance({ basicInfo });
   const { updateRotate } = useRotate({ currentData });
+  const { updatePointCloudData } = usePointCloudViews();
 
   const keydownEvents = (lowerCaseKey: string) => {
     const { topViewInstance, mainViewInstance } = ptCtx;
@@ -142,39 +147,18 @@ const PointCloudListener: React.FC<IAnnotationStateProps> = ({ currentData }) =>
 
   // Page switch data initialization
   useEffect(() => {
-    const pointCloud = ptCtx.mainViewInstance;
-    if (currentData?.url && pointCloud) {
-      pointCloud.loadPCDFile(currentData.url);
-
-      // Clear All Data
-      ptCtx.pointCloudBoxList.forEach((v) => {
-        pointCloud?.removeObjectByName(v.id);
-      });
-
-      if (currentData.result) {
-        const boxParamsList = PointCloudUtils.getBoxParamsFromResultList(currentData.result);
-
-        // Add Init Box
-        boxParamsList.forEach((v: IPointCloudBox) => {
-          pointCloud?.generateBox(v);
-        });
-
-        ptCtx.setPointCloudResult(boxParamsList);
-      } else {
-        ptCtx.setPointCloudResult([]);
-      }
-
-      pointCloud.updateTopCamera();
-
-      // Clear other view data during initialization
-      ptCtx.sideViewInstance?.clearAllData();
-      ptCtx.backViewInstance?.clearAllData();
-    }
+    updatePointCloudData?.();
   }, [currentData, ptCtx.mainViewInstance]);
 
   useEffect(() => {
     toolInstanceRef.current.exportData = () => {
-      return [ptCtx.pointCloudBoxList, {}];
+      return [ptCtx.pointCloudBoxList, { valid: ptCtx.valid }];
+    };
+
+    toolInstanceRef.current.exportCustomData = () => {
+      return {
+        renderPolygon: ptCtx.polygonList ?? [],
+      };
     };
 
     toolInstanceRef.current.setDefaultAttribute = (newAttribute: string) => {
@@ -199,7 +183,21 @@ const PointCloudListener: React.FC<IAnnotationStateProps> = ({ currentData }) =>
         updateSelectedBox(selectBox);
       }
     };
-  }, [ptCtx.pointCloudBoxList, ptCtx.selectedID]);
+    toolInstanceRef.current.clearResult = () => {
+      clearAllResult?.();
+    };
+  }, [ptCtx.pointCloudBoxList, ptCtx.selectedID, ptCtx.valid, ptCtx.polygonList]);
+
+  useEffect(() => {
+    toolInstanceRef.current.setValid = (valid: boolean) => {
+      toolInstanceRef.current.valid = valid;
+
+      // Avoid triggering SetState operations in the reducer phase
+      setTimeout(() => {
+        ptCtx.setPointCloudValid(valid);
+      });
+    };
+  }, []);
 
   return null;
 };

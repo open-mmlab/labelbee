@@ -251,7 +251,7 @@ export default class AnnotationEngine {
   public get firstToolInstance() {
     return this.toolScheduler.getFirstToolOperation();
   }
-  
+
   /**
    * 自定义样式渲染
    * @param customRenderStyle

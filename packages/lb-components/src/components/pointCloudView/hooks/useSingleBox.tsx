@@ -15,6 +15,7 @@ export const useSingleBox = () => {
     selectedIDs,
     selectedID,
     mainViewInstance,
+    setSelectedIDs,
   } = useContext(PointCloudContext);
 
   /** Returns { info: selected box, index: selected box index } */
@@ -52,7 +53,10 @@ export const useSingleBox = () => {
 
       const { pointCloud2dOperation } = topViewInstance;
 
-      pointCloud2dOperation.switchToNextPolygon(sort);
+      const newSelectedIDs = pointCloud2dOperation.switchToNextPolygon(sort);
+      if (newSelectedIDs) {
+        setSelectedIDs(newSelectedIDs);
+      }
     },
     [topViewInstance],
   );

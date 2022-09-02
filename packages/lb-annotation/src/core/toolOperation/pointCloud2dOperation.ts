@@ -14,10 +14,26 @@ import CommonToolUtils from '@/utils/tool/CommonToolUtils';
 import DrawUtils from '@/utils/tool/DrawUtils';
 import PolygonUtils from '@/utils/tool/PolygonUtils';
 import StyleUtils from '@/utils/tool/StyleUtils';
-import PolygonOperation from './polygonOperation';
+import PolygonOperation, { IPolygonOperationProps } from './polygonOperation';
+
+interface IPointCloud2dOperationProps {
+  showDirectionLine?: boolean;
+  forbidAddNew?: boolean;
+}
 
 class PointCloud2dOperation extends PolygonOperation {
+  public showDirectionLine: boolean;
+
+  public forbidAddNew: boolean;
+
   private selectedIDs: string[] = [];
+
+  constructor(props: IPolygonOperationProps & IPointCloud2dOperationProps) {
+    super(props);
+
+    this.showDirectionLine = props.showDirectionLine ?? true;
+    this.forbidAddNew = props.forbidAddNew ?? false;
+  }
 
   get getSelectedIDs() {
     return this.selectedIDs;
@@ -103,7 +119,7 @@ class PointCloud2dOperation extends PolygonOperation {
         });
 
         // Only the rectangle shows the direction.
-        if (polygon.isRect === true) {
+        if (polygon.isRect === true && this.showDirectionLine === true) {
           this.renderRectPolygonDirection(transformPointList);
         }
       });
@@ -138,7 +154,7 @@ class PointCloud2dOperation extends PolygonOperation {
       });
 
       // Only the rectangle shows the direction.
-      if (selectedPolygon.isRect === true) {
+      if (selectedPolygon.isRect === true && this.showDirectionLine === true) {
         this.renderRectPolygonDirection(polygon);
       }
     }
@@ -205,9 +221,10 @@ class PointCloud2dOperation extends PolygonOperation {
 
     const nextSelectedResult = CommonToolUtils.getNextSelectedRectID(sortList, sort, this.selectedID);
     if (nextSelectedResult) {
-      this.setSelectedID(nextSelectedResult.id);
+      this.setSelectedIDs([nextSelectedResult.id]);
+      this.render();
+      return [nextSelectedResult.id];
     }
-    this.render();
   }
 
   /**
@@ -239,9 +256,42 @@ class PointCloud2dOperation extends PolygonOperation {
     }
 
     this.selectedID = newID;
+    this.render();
+  }
 
+  public addPointInDrawing(e: MouseEvent) {
+    if (this.forbidAddNew) {
+      return;
+    }
+    super.addPointInDrawing(e);
+  }
+
+  /**
+   * Update canvas size directly
+   * @param size
+   */
+  public setCanvasSize(size: ISize) {
+    const pixel = this.pixelRatio;
+
+    // Init Data
+    this.size = size;
+    this.setImgInfo(size);
+
+    // Update canvas size.
+    this.updateCanvasBasicStyle(this.basicCanvas, size, 0);
+    this.updateCanvasBasicStyle(this.canvas, size, 10);
+    this.ctx?.scale(pixel, pixel);
+    this.basicCtx?.scale(pixel, pixel);
+
+    // Restore to the initialization position
+    this.initImgPos();
+
+    // Render
+    this.renderBasicCanvas();
     this.render();
   }
 }
 
 export default PointCloud2dOperation;
+
+export { IPointCloud2dOperationProps };

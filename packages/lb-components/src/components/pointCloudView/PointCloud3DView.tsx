@@ -9,12 +9,16 @@ import { getClassName } from '@/utils/dom';
 import { PointCloud } from '@labelbee/lb-annotation';
 import { EPerspectiveView, IPointCloudBox, PointCloudUtils } from '@labelbee/lb-utils';
 import classNames from 'classnames';
-import React, { useContext, useEffect, useMemo, useRef } from 'react';
+import React, { useContext, useEffect, useMemo, useRef, useState } from 'react';
 import { PointCloudContainer } from './PointCloudLayout';
 import { PointCloudContext } from './PointCloudContext';
 import { aMapStateToProps, IAnnotationStateProps } from '@/store/annotation/map';
 import { connect } from 'react-redux';
 import { jsonParser } from '@/utils';
+import { useSingleBox } from './hooks/useSingleBox';
+import { Switch } from 'antd';
+import useSize from '@/hooks/useSize';
+import { usePointCloudViews } from './hooks/usePointCloudViews';
 
 const pointCloudID = 'LABELBEE-POINTCLOUD';
 const PointCloud3DContext = React.createContext<{
@@ -74,15 +78,21 @@ const PointCloud3DSideBar = () => {
 
 const PointCloud3D: React.FC<IAnnotationStateProps> = ({ currentData }) => {
   const ptCtx = useContext(PointCloudContext);
+  const [showDirection, setShowDirection] = useState(true);
   const ref = useRef<HTMLDivElement>(null);
-  const { selectedID, pointCloudBoxList } = useContext(PointCloudContext);
+  const { initPointCloud3d } = usePointCloudViews();
+  const size = useSize(ref);
 
-  const hasSelectedBox = selectedID;
+  useEffect(() => {
+    if (!ptCtx.mainViewInstance) {
+      return;
+    }
+    initPointCloud3d?.();
+  }, [size]);
+  const { selectedBox } = useSingleBox();
 
   const setTarget3DView = (perspectiveView: EPerspectiveView) => {
-    const box = hasSelectedBox
-      ? pointCloudBoxList.find((i: IPointCloudBox) => i.id === selectedID)
-      : undefined;
+    const box = selectedBox?.info;
 
     if (box) {
       ptCtx.mainViewInstance?.updateCameraByBox(box, perspectiveView);
@@ -117,23 +127,41 @@ const PointCloud3D: React.FC<IAnnotationStateProps> = ({ currentData }) => {
 
       ptCtx.setMainViewInstance(pointCloud);
     }
-  }, []);
+  }, [currentData]);
 
   /**
    *  Observe selectedID and reset camera to target top-view
    */
   useEffect(() => {
-    if (selectedID) {
+    if (selectedBox) {
       setTarget3DView(EPerspectiveView.Top);
     }
-  }, [selectedID]);
+  }, [selectedBox]);
 
   const ptCloud3DCtx = useMemo(() => {
-    return { reset3DView, setTarget3DView, isActive: !!selectedID };
-  }, [selectedID]);
+    return { reset3DView, setTarget3DView, isActive: !!selectedBox };
+  }, [selectedBox]);
+
+  const PointCloud3DTitle = (
+    <div>
+      <span style={{ marginRight: 8 }}>显示箭头</span>
+      <Switch
+        size='small'
+        checked={showDirection}
+        onChange={(showDirection) => {
+          setShowDirection(showDirection);
+          ptCtx.mainViewInstance?.setShowDirection(showDirection);
+        }}
+      />
+    </div>
+  );
 
   return (
-    <PointCloudContainer className={getClassName('point-cloud-3d-container')} title='3D视图'>
+    <PointCloudContainer
+      className={getClassName('point-cloud-3d-container')}
+      title='3D视图'
+      toolbar={PointCloud3DTitle}
+    >
       <div className={getClassName('point-cloud-3d-content')}>
         <PointCloud3DContext.Provider value={ptCloud3DCtx}>
           <PointCloud3DSideBar />

@@ -103,6 +103,10 @@ const Sidebar: React.FC<IProps> = ({ sider }) => {
 
   const horizontal = <div className={`${sidebarCls}__horizontal`} />;
 
+  const pointCloudToolSidebar = <PointCloudToolSidebar />;
+
+  const pointCloudOperation = <PointCloudOperation />;
+
   if (sider) {
     if (typeof sider === 'function') {
       return (
@@ -117,6 +121,9 @@ const Sidebar: React.FC<IProps> = ({ sider }) => {
             tagToolSideBar,
             textToolSideBar,
             horizontal,
+
+            pointCloudToolSidebar,
+            pointCloudOperation,
           })}
         </div>
       );

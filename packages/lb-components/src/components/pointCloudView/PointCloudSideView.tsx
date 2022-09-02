@@ -6,13 +6,17 @@
 import { PointCloud, PointCloudAnnotation } from '@labelbee/lb-annotation';
 import { getClassName } from '@/utils/dom';
 import { PointCloudContainer } from './PointCloudLayout';
-import React, { useEffect, useRef, useState } from 'react';
+import React, { useEffect, useRef } from 'react';
 import { EPerspectiveView, IPointCloudBox } from '@labelbee/lb-utils';
 import { PointCloudContext } from './PointCloudContext';
 import { SizeInfoForView } from './PointCloudInfos';
 import { connect } from 'react-redux';
 import { aMapStateToProps, IAnnotationStateProps } from '@/store/annotation/map';
 import { usePointCloudViews } from './hooks/usePointCloudViews';
+import { useSingleBox } from './hooks/useSingleBox';
+import EmptyPage from './components/EmptyPage';
+
+import useSize from '@/hooks/useSize';
 
 /**
  * Get the offset from canvas2d-coordinate to world coordinate
@@ -67,10 +71,11 @@ const updateSideViewByCanvas2D = (
 
 const PointCloudSideView: React.FC<IAnnotationStateProps> = ({ currentData }) => {
   const ptCtx = React.useContext(PointCloudContext);
-  const [size, setSize] = useState<{ width: number; height: number } | null>(null);
   const { sideViewUpdateBox } = usePointCloudViews();
+  const { selectedBox } = useSingleBox();
 
   const ref = useRef<HTMLDivElement>(null);
+  const size = useSize(ref);
 
   useEffect(() => {
     if (ref.current) {
@@ -79,9 +84,12 @@ const PointCloudSideView: React.FC<IAnnotationStateProps> = ({ currentData }) =>
         height: ref.current.clientHeight,
       };
 
-      const pointCloudAnnotation = new PointCloudAnnotation({ container: ref.current, size });
+      const pointCloudAnnotation = new PointCloudAnnotation({
+        container: ref.current,
+        size,
+        polygonOperationProps: { showDirectionLine: false, forbidAddNew: true },
+      });
       ptCtx.setSideViewInstance(pointCloudAnnotation);
-      setSize(size);
       // };
     }
   }, []);
@@ -93,6 +101,7 @@ const PointCloudSideView: React.FC<IAnnotationStateProps> = ({ currentData }) =>
     }
 
     const { pointCloud2dOperation, pointCloudInstance } = ptCtx.sideViewInstance;
+
     /**
      * Synchronized 3d point cloud view displacement operations
      *
@@ -130,22 +139,21 @@ const PointCloudSideView: React.FC<IAnnotationStateProps> = ({ currentData }) =>
     });
   }, [ptCtx, size]);
 
+  useEffect(() => {
+    // Update Size
+    ptCtx?.sideViewInstance?.initSize(size);
+  }, [size]);
+
   return (
     <PointCloudContainer
       className={getClassName('point-cloud-container', 'side-view')}
       title='侧视图'
       toolbar={<SizeInfoForView perspectiveView={EPerspectiveView.Left} />}
     >
-      <div style={{ width: '100%', height: 300 }} ref={ref} />
-      <div
-        style={{
-          position: 'absolute',
-          right: 0,
-          top: 0,
-          width: 200,
-          color: 'white',
-        }}
-      />
+      <div className={getClassName('point-cloud-container', 'bottom-view-content')}>
+        <div className={getClassName('point-cloud-container', 'core-instance')} ref={ref} />
+        {!selectedBox && <EmptyPage />}
+      </div>
     </PointCloudContainer>
   );
 };

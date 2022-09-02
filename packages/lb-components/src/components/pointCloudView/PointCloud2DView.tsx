@@ -1,5 +1,5 @@
 import { getClassName } from '@/utils/dom';
-import React, { useContext, useEffect, useState } from 'react';
+import React, { useContext, useEffect, useRef, useState } from 'react';
 import { PointCloudContainer } from './PointCloudLayout';
 import AnnotationView from '@/components/AnnotationView';
 import { PointCloudContext } from './PointCloudContext';
@@ -7,6 +7,7 @@ import { AppState } from '@/store';
 import { connect } from 'react-redux';
 import { IFileItem } from '@/types/data';
 import { LeftOutlined, RightOutlined } from '@ant-design/icons';
+import useSize from '@/hooks/useSize';
 
 interface IProps {
   imgInfo: IFileItem;
@@ -46,51 +47,47 @@ const PointCloud2DView = ({ imgInfo }: IProps) => {
   const [annotations2d, setAnnotations2d] = useState<IAnnotationDataTemporarily[]>([]);
   const { pointCloudBoxList, topViewInstance } = useContext(PointCloudContext);
   const [mappingIndex, setMappingIndex] = useState(0);
+  const ref = useRef(null);
+  const size = useSize(ref);
+
   const mappingData = imgInfo?.mappingImgList?.[mappingIndex];
+
+  useEffect(() => {
+    setMappingIndex(0);
+  }, [imgInfo]);
 
   useEffect(() => {
     if (topViewInstance && mappingData) {
       const { pointCloudInstance } = topViewInstance;
-      const newAnnotations2d: IAnnotationDataTemporarily[] = [];
       const defaultViewStyle = {
         fill: 'transparent',
         color: 'green',
       };
-      pointCloudBoxList.forEach((pointCloudBox) => {
-        const viewDataPointList = pointCloudInstance.lidar2image(pointCloudBox, mappingData.calib);
-        viewDataPointList.forEach((v: any) => {
-          switch (v.type) {
-            case 'polygon':
-              newAnnotations2d.push({
-                type: 'polygon',
+      const newAnnotations2d: IAnnotationDataTemporarily[] = pointCloudBoxList.reduce(
+        (acc: IAnnotationDataTemporarily[], pointCloudBox) => {
+          const viewDataPointList = pointCloudInstance.pointCloudLidar2image(
+            pointCloudBox,
+            mappingData.calib,
+          );
+          return [
+            ...acc,
+            ...viewDataPointList.map((v: any) => {
+              return {
+                type: v.type,
                 annotation: {
                   pointList: v.pointList,
                   ...defaultViewStyle,
                 },
-              });
+              };
+            }),
+          ];
+        },
+        [],
+      );
 
-              break;
-            case 'line':
-              newAnnotations2d.push({
-                type: 'line',
-                annotation: {
-                  pointList: v.pointList,
-                  ...defaultViewStyle,
-                },
-              });
-
-              break;
-          }
-        });
-      });
       setAnnotations2d(newAnnotations2d);
     }
   }, [pointCloudBoxList, mappingData]);
-
-  const size = {
-    width: 700,
-    height: 400,
-  };
 
   if (!imgInfo) {
     return <div />;
@@ -111,15 +108,21 @@ const PointCloud2DView = ({ imgInfo }: IProps) => {
           imgIndex={mappingIndex}
           imgLength={mappingImgList.length}
           onNext={() => {
+            if (mappingIndex >= mappingImgList.length - 1) {
+              return;
+            }
             setMappingIndex((v) => v + 1);
           }}
           onPrev={() => {
+            if (mappingIndex <= 0) {
+              return;
+            }
             setMappingIndex((v) => v - 1);
           }}
         />
       }
     >
-      <div className={getClassName('point-cloud-2d-image')}>
+      <div className={getClassName('point-cloud-2d-image')} ref={ref}>
         <AnnotationView src={mappingData?.url ?? ''} annotations={annotations2d} size={size} />
       </div>
     </PointCloudContainer>
@@ -129,7 +132,6 @@ const PointCloud2DView = ({ imgInfo }: IProps) => {
 const mapStateToProps = (state: AppState) => {
   const { imgList, imgIndex } = state.annotation;
 
-  console.log('imgList[imgIndex]', imgList[imgIndex], imgList);
   return {
     imgInfo: imgList[imgIndex],
   };

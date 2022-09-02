@@ -4,14 +4,17 @@
  * @createdate 2022-08-17
  */
 import { PointCloudAnnotation, PointCloud, MathUtils } from '@labelbee/lb-annotation';
-import { IPointCloudBox, EPerspectiveView } from '@labelbee/lb-utils';
+import { IPointCloudBox, EPerspectiveView, PointCloudUtils } from '@labelbee/lb-utils';
 import { useContext } from 'react';
 import { PointCloudContext } from '../PointCloudContext';
 import { useSingleBox } from './useSingleBox';
 import { ISize } from '@/types/main';
 import _ from 'lodash';
-import { useSelector } from 'react-redux';
+import { useDispatch, useSelector } from 'react-redux';
 import { AppState } from '@/store';
+import StepUtils from '@/utils/StepUtils';
+import { jsonParser } from '@/utils';
+import { SetPointCloudLoading } from '@/store/annotation/actionCreators';
 
 const DEFAULT_SCOPE = 5;
 
@@ -44,6 +47,7 @@ export const topViewPolygon2PointCloud = (
   size: ISize,
   pointCloud?: PointCloud,
   selectedPointCloud?: IPointCloudBox,
+  defaultValue?: { [v: string]: any },
 ) => {
   const [point1, point2, point3, point4] = newPolygon.pointList.map((v: any) =>
     transferCanvas2World(v, size),
@@ -81,6 +85,10 @@ export const topViewPolygon2PointCloud = (
     attribute: '',
     valid: true,
   };
+
+  if (defaultValue) {
+    Object.assign(boxParams, defaultValue);
+  }
 
   return boxParams;
 };
@@ -279,6 +287,7 @@ export const synchronizeTopView = (
 };
 
 export const usePointCloudViews = () => {
+  const ptCtx = useContext(PointCloudContext);
   const {
     topViewInstance,
     sideViewInstance,
@@ -288,12 +297,18 @@ export const usePointCloudViews = () => {
     setSelectedIDs,
     selectedIDs,
     pointCloudBoxList,
-  } = useContext(PointCloudContext);
+    setPointCloudResult,
+  } = ptCtx;
   const { updateSelectedBox } = useSingleBox();
+  const { currentData, config } = useSelector((state: AppState) => {
+    const { stepList, step, imgList, imgIndex } = state.annotation;
 
-  const currentData = useSelector(
-    (state: AppState) => state.annotation.imgList[state.annotation.imgIndex],
-  );
+    return {
+      currentData: imgList[imgIndex],
+      config: jsonParser(StepUtils.getCurrentStepInfo(step, stepList).config),
+    };
+  });
+  const dispatch = useDispatch();
 
   const { selectedBox } = useSingleBox();
 
@@ -326,7 +341,9 @@ export const usePointCloudViews = () => {
 
   /** Top-view create box from 2D */
   const topViewAddBox = (newPolygon: any, size: ISize) => {
-    const newParams = topViewPolygon2PointCloud(newPolygon, size, topViewPointCloud);
+    const newParams = topViewPolygon2PointCloud(newPolygon, size, topViewPointCloud, undefined, {
+      attribute: config?.attributeList?.[0]?.value ?? '',
+    });
     const polygonOperation = topViewInstance?.pointCloud2dOperation;
 
     const boxParams: IPointCloudBox = Object.assign(newParams, {
@@ -434,12 +451,87 @@ export const usePointCloudViews = () => {
       }
     });
     mainViewGenBox(boxParams);
-    mainViewInstance?.hightLightOriginPointCloud(boxParams);
+    mainViewInstance?.highlightOriginPointCloud(boxParams);
   };
 
   const pointCloudBoxListUpdated = (newBoxes: IPointCloudBox[]) => {
     topViewInstance.updatePolygonList(newBoxes);
     mainViewInstance?.generateBoxes(newBoxes);
+  };
+
+  const clearAllResult = () => {
+    // Clear All PointView Data
+    pointCloudBoxList.forEach((v) => {
+      mainViewInstance?.removeObjectByName(v.id);
+    });
+    mainViewInstance?.render();
+
+    setPointCloudResult([]);
+    topViewInstance.pointCloud2dOperation.clearActiveStatus();
+    topViewInstance.pointCloud2dOperation.clearResult();
+  };
+
+  const initPointCloud3d = () => {
+    if (!mainViewInstance) {
+      return;
+    }
+
+    mainViewInstance.initPerspectiveCamera();
+    mainViewInstance.initRenderer();
+    mainViewInstance.render();
+  };
+
+  /**
+   * Update the data of pointCloudView when the page change.
+   * @returns
+   */
+  const updatePointCloudData = async () => {
+    if (!currentData?.url || !mainViewInstance) {
+      return;
+    }
+
+    SetPointCloudLoading(dispatch, true);
+    await mainViewInstance.loadPCDFile(currentData.url);
+
+    // Clear All Data
+    pointCloudBoxList.forEach((v) => {
+      mainViewInstance?.removeObjectByName(v.id);
+    });
+
+    if (currentData.result) {
+      const boxParamsList = PointCloudUtils.getBoxParamsFromResultList(currentData.result);
+      const polygonList = PointCloudUtils.getPolygonListFromResultList(currentData.result);
+
+      // Add Init Box
+      boxParamsList.forEach((v: IPointCloudBox) => {
+        mainViewInstance?.generateBox(v);
+      });
+
+      ptCtx.setPointCloudResult(boxParamsList);
+      ptCtx.setPolygonList(polygonList);
+    } else {
+      ptCtx.setPointCloudResult([]);
+      ptCtx.setPolygonList([]);
+    }
+
+    mainViewInstance.updateTopCamera();
+
+    const valid = jsonParser(currentData.result)?.valid ?? true;
+    ptCtx.setPointCloudValid(valid);
+
+    // Clear other view data during initialization
+    ptCtx.sideViewInstance?.clearAllData();
+    ptCtx.backViewInstance?.clearAllData();
+
+    // TopView Data Update
+    /**
+     * Listen to flip
+     * 1. Init
+     * 2. Reload PointCloud
+     * 3. Clear Polygon
+     */
+    topViewInstance.updateData(currentData.url, currentData.result);
+    SetPointCloudLoading(dispatch, false);
   };
 
   return {
@@ -449,5 +541,8 @@ export const usePointCloudViews = () => {
     sideViewUpdateBox,
     backViewUpdateBox,
     pointCloudBoxListUpdated,
+    clearAllResult,
+    initPointCloud3d,
+    updatePointCloudData,
   };
 };

@@ -1356,6 +1356,7 @@ $hotkey-container-padding: 7px;
 /** PointCloud样式 start */
 $pointCloudBg: #4c4c4c;
 $ptPrefix: #{$prefix}-point-cloud;
+$headerHeight: 40px;
 
 @mixin icon($size: 36px) {
   display: inline-block;
@@ -1389,7 +1390,7 @@ $ptPrefix: #{$prefix}-point-cloud;
     &__header {
       background-color: #444;
       color: white;
-      height: 40px;
+      height: $headerHeight;
       padding: 0 16px;
       line-height: 40px;
       display: flex;
@@ -1529,7 +1530,7 @@ $ptPrefix: #{$prefix}-point-cloud;
             &__left {
               background-position-y: -88px;
             }
-            
+
             &__back {
               background-position-y: -132px;
             }
@@ -1537,7 +1538,6 @@ $ptPrefix: #{$prefix}-point-cloud;
             &__right {
               background-position-y: -176px;
             }
-            
 
             &__bottom {
               background-position-y: -220px;
@@ -1579,6 +1579,25 @@ $ptPrefix: #{$prefix}-point-cloud;
       flex: 1;
       display: flex;
       overflow: hidden;
+      .#{$ptPrefix}-container__empty-page {
+        position: absolute;
+        left: 0;
+        top: $headerHeight;
+        flex: 1;
+        background: black;
+        color: #666666;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        flex-direction:  column;
+        font-size: 16px;
+        z-index: 20;
+        height: calc(100% - $headerHeight);
+        width: 100%;
+        .#{$ptPrefix}-container__empty-page__text {
+          margin-top: 13px;
+        }
+      }
 
       .#{$ptPrefix}-container__side-view {
         border-right: 1px solid white;
@@ -1586,8 +1605,19 @@ $ptPrefix: #{$prefix}-point-cloud;
 
       .#{$ptPrefix}-container__side-view,
       .#{$ptPrefix}-container__back-view {
+        position: relative;
         flex: 1;
+        display: flex;
         background: black;
+        flex-direction: column;
+        .#{$ptPrefix}-container__bottom-view-content {
+          flex: 1;
+          .#{$ptPrefix}-container__core-instance {
+            position: relative;
+            width: 100%;
+            height: 100%;
+          }
+        }
       }
     }
   }

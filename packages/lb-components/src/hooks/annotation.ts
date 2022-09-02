@@ -8,12 +8,17 @@ import { useDispatch } from 'react-redux';
 import { ANNOTATION_ACTIONS } from '@/store/Actions';
 
 export interface ICustomToolInstance {
+  valid: boolean;
   exportData: () => [any[], {}];
+  exportCustomData: () => {};
   singleOn: () => void;
+  clearResult: () => void;
   on: () => void;
   setResult: () => void;
+  setValid: (valid: boolean) => void;
   history: {
     initRecord: () => void;
+    pushHistory: () => void;
   };
   setDefaultAttribute: (attribute: string) => void;
 
@@ -21,16 +26,25 @@ export interface ICustomToolInstance {
   setSubAttribute: (key: string, value: string) => void;
 }
 
+export interface ICustomToolInstanceProps {
+  basicInfo?: { [v: string]: any };
+}
+
 /**
- * Custom an empty toolInstance to adapt old use.
  * @returns
+ * Custom an empty toolInstance to adapt old use.
  */
-const useCustomToolInstance = () => {
+const useCustomToolInstance = ({ basicInfo }: ICustomToolInstanceProps = {}) => {
   const dispatch = useDispatch();
   const toolInstanceRef = useRef<ICustomToolInstance>({
+    valid: basicInfo?.valid ?? true,
     exportData: () => {
       return [[], {}];
     },
+    exportCustomData: () => {
+      return {};
+    },
+    clearResult: () => {},
     singleOn: () => {},
     on: () => {},
     setResult: () => {
@@ -38,11 +52,13 @@ const useCustomToolInstance = () => {
     },
     history: {
       initRecord: () => {},
+      pushHistory: () => {},
     },
     setDefaultAttribute: (attribute: string) => {},
 
     // PointCloud Exclusive function
     setSubAttribute: (key: string, value: string) => {},
+    setValid: () => {},
   });
 
   const onMounted = (instance: any) => {

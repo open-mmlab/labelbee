@@ -1,3 +1,4 @@
+import { isNumber } from 'lodash';
 import { styleDefaultConfig } from '@/constant/defaultConfig';
 import { EToolName } from '@/constant/tool';
 import { IPolygonConfig, IPolygonData } from '@/types/tool/polygon';
@@ -6,7 +7,6 @@ import AxisUtils, { CoordinateUtils } from '@/utils/tool/AxisUtils';
 import CanvasUtils from '@/utils/tool/CanvasUtils';
 import CommonToolUtils from '@/utils/tool/CommonToolUtils';
 import LineToolUtils from '@/utils/tool/LineToolUtils';
-import { isNumber } from 'lodash';
 import { EDragStatus, EGrowthMode, ELang } from '../../constant/annotation';
 import EKeyCode from '../../constant/keyCode';
 import { BASE_ICON, COLORS_ARRAY } from '../../constant/style';
@@ -341,34 +341,33 @@ class BasicToolOperation extends EventListener {
     this.eventUnbinding();
   }
 
+  public updateCanvasBasicStyle(canvas: HTMLCanvasElement, size: ISize, zIndex: number) {
+    const pixel = this.pixelRatio;
+    canvas.style.position = 'absolute';
+    canvas.width = size.width * pixel;
+    canvas.height = size.height * pixel;
+    canvas.style.width = `${size.width}px`;
+    canvas.style.height = `${size.height}px`;
+    canvas.style.left = '0';
+    canvas.style.top = '0';
+    canvas.style.zIndex = `${zIndex} `;
+  }
+
   public createCanvas(size: ISize, isAppend = true) {
     // TODO 后续需要将 canvas 抽离出来，迭代器叠加
-    const basicCanvas = document.createElement('canvas');
     const pixel = this.pixelRatio;
 
-    basicCanvas.width = size.width * pixel;
-    basicCanvas.height = size.height * pixel;
-    basicCanvas.style.width = `${size.width}px`;
-    basicCanvas.style.height = `${size.height}px`;
-    basicCanvas.style.left = '0';
-    basicCanvas.style.top = '0';
-    basicCanvas.style.zIndex = '0';
+    const basicCanvas = document.createElement('canvas');
+    this.updateCanvasBasicStyle(basicCanvas, size, 0);
 
     this.basicCanvas = basicCanvas;
 
     const canvas = document.createElement('canvas');
-    canvas.style.position = 'absolute';
-    canvas.style.left = '0';
-    canvas.style.top = '0';
-    canvas.style.zIndex = '10';
-    canvas.style.width = `${size.width}px`;
-    canvas.style.height = `${size.height}px`;
-
-    canvas.width = size.width * pixel;
-    canvas.height = size.height * pixel;
+    this.updateCanvasBasicStyle(canvas, size, 10);
 
     // set Attribute
-    this.container.style.position = 'relative';
+    // this.container.style.position = 'relative';
+
     if (isAppend) {
       if (this.container.hasChildNodes()) {
         this.container.insertBefore(canvas, this.container.childNodes[0]);
@@ -410,6 +409,11 @@ class BasicToolOperation extends EventListener {
     this.render();
   }
 
+  /**
+   * Notice. It needs to set the default imgInfo. Because it will needs to create info when it doesn't have
+   * @param imgNode
+   * @param basicImgInfo
+   */
   public setImgNode(imgNode: HTMLImageElement, basicImgInfo: Partial<{ valid: boolean; rotate: number }> = {}) {
     this.imgNode = imgNode;
 
@@ -863,6 +867,14 @@ class BasicToolOperation extends EventListener {
         break;
       }
     }
+  }
+
+  /**
+   * 导出自定义数据
+   * @returns
+   */
+  public exportCustomData() {
+    return {};
   }
 
   // 按鼠标位置放大缩小

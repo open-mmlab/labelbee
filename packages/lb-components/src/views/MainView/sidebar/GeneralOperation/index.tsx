@@ -52,7 +52,11 @@ export const PointCloudOperation: ConnectedComponent<
   >
 > = connect(mapStateToProps)(({ toolInstance, stepInfo }) => {
   const operationList = useOperationList(toolInstance);
-  const allOperation: IOperationConfig[] = [operationList.copyPrevious, operationList.empty];
+  const allOperation: IOperationConfig[] = [
+    operationList.copyPrevious,
+    operationList.empty,
+    operationList.setValidity,
+  ];
   return <ActionsConfirm allOperation={allOperation} />;
 });
 

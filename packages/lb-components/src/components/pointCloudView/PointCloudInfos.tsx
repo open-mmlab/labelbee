@@ -4,10 +4,11 @@
  * @createdate 2022-07-13
  */
 
-import { EPerspectiveView } from '@labelbee/lb-utils';
-import React from 'react';
+import { EPerspectiveView, PointCloudUtils } from '@labelbee/lb-utils';
+import React, { useEffect, useState } from 'react';
 import { PointCloudContext } from './PointCloudContext';
 import { UnitUtils } from '@labelbee/lb-annotation';
+import { useSingleBox } from './hooks/useSingleBox';
 
 const DECIMAL_PLACES = 2;
 
@@ -50,15 +51,22 @@ export const SizeInfoForView = ({ perspectiveView }: { perspectiveView: EPerspec
  */
 export const BoxInfos = () => {
   const ptCtx = React.useContext(PointCloudContext);
-  const { selectedID, pointCloudBoxList } = ptCtx;
-  const box = pointCloudBoxList.find((i) => i.id === selectedID);
+  const { selectedBox } = useSingleBox();
+  const [infos, setInfos] = useState<Array<{ label: string; value: string }>>([]);
 
-  if (selectedID && box) {
-    const { width, depth, height, rotation } = box;
-    const infos = [
+  useEffect(() => {
+    if (!selectedBox) {
+      return;
+    }
+
+    const { length, width, height, rotation_y } = PointCloudUtils.transferBox2Kitti(
+      selectedBox.info,
+    );
+
+    let infos = [
       {
         label: '长',
-        value: height.toFixed(DECIMAL_PLACES),
+        value: length.toFixed(DECIMAL_PLACES),
       },
       {
         label: '宽',
@@ -66,19 +74,30 @@ export const BoxInfos = () => {
       },
       {
         label: '高',
-        value: depth.toFixed(DECIMAL_PLACES),
+        value: height.toFixed(DECIMAL_PLACES),
       },
       {
         label: '朝向角',
-        value: UnitUtils.rad2deg(rotation).toFixed(DECIMAL_PLACES),
-      },
-      // TODO: 需要将结果存入到标注信息
-      {
-        label: '点数',
-        value: 1000,
+        value: UnitUtils.rad2deg(rotation_y).toFixed(DECIMAL_PLACES),
       },
     ];
 
+    // Get Point Count.
+    ptCtx.mainViewInstance?.filterPointsByBox(selectedBox.info).then((data) => {
+      if (!data) {
+        setInfos(infos);
+        return;
+      }
+
+      infos.push({
+        label: '点数',
+        value: `${data.num}`,
+      });
+      setInfos(infos);
+    });
+  }, [selectedBox]);
+
+  if (selectedBox) {
     return (
       <div
         style={{
@@ -110,11 +129,12 @@ export const PointCloudValidity = () => {
       <div
         style={{
           position: 'absolute',
-          backgroundColor: 'red',
+          backgroundColor: 'rgb(242, 101, 73)',
+          color: 'white',
           left: 0,
           top: 0,
-          fontSize: 24,
-          padding: 8,
+          fontSize: 20,
+          padding: '8px 16px',
           zIndex: 20,
         }}
       >

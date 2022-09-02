@@ -13,6 +13,9 @@ import HiddenTips from './HiddenTips';
 import PageNumber from './PageNumber';
 import ZoomController from './ZoomController';
 import { Pagination } from './Pagination';
+import { cTool } from '@labelbee/lb-annotation';
+
+const { EPointCloudName } = cTool;
 
 export type FooterTheme = 'light' | 'dark';
 interface IProps {
@@ -25,6 +28,8 @@ interface IProps {
   basicIndex: number;
   mode?: FooterTheme; // 后面通过 context 的形式进行编写
   footer?: RenderFooter;
+
+  skipBeforePageTurning?: (pageTurning: Function) => void;
 }
 
 export const footerCls = `${prefix}-footer`;
@@ -69,6 +74,7 @@ const ToolFooter: React.FC<IProps> = (props: IProps) => {
     basicIndex,
     mode = 'light',
     footer = renderFooter,
+    skipBeforePageTurning,
   } = props;
 
   const dispatch = useDispatch();
@@ -77,10 +83,19 @@ const ToolFooter: React.FC<IProps> = (props: IProps) => {
   const hasSourceStep = !!stepInfo.dataSourceStep;
 
   const pageBackward = () => {
+    if (skipBeforePageTurning) {
+      skipBeforePageTurning(() => dispatch(PageBackward()));
+      return;
+    }
+
     dispatch(PageBackward());
   };
 
   const pageForward = () => {
+    if (skipBeforePageTurning) {
+      skipBeforePageTurning(() => dispatch(PageForward()));
+      return;
+    }
     dispatch(PageForward());
   };
 
@@ -106,6 +121,16 @@ const ToolFooter: React.FC<IProps> = (props: IProps) => {
     ) : null;
 
   if (typeof footer === 'function') {
+    if (footer === renderFooter && stepInfo.tool === EPointCloudName.PointCloud) {
+      return (
+        <div className={`${footerCls}`} style={props.style}>
+          <FooterTips />
+          <div style={{ flex: 1 }} />
+          {pagination}
+        </div>
+      );
+    }
+
     return (
       <div className={`${footerCls}`} style={props.style}>
         {footer({
@@ -119,9 +144,9 @@ const ToolFooter: React.FC<IProps> = (props: IProps) => {
         })}
       </div>
     );
-  } else {
-    return footer;
   }
+
+  return footer;
 };
 
 const mapStateToProps = (state: AppState) => ({
@@ -131,6 +156,7 @@ const mapStateToProps = (state: AppState) => ({
   step: state.annotation.step,
   basicIndex: state.annotation.basicIndex,
   basicResultList: state.annotation.basicResultList,
+  skipBeforePageTurning: state.annotation.skipBeforePageTurning,
 });
 
 export default connect(mapStateToProps)(ToolFooter);

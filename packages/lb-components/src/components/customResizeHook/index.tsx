@@ -29,7 +29,12 @@ export const viewportContext = React.createContext<{
 });
 
 export const ViewportProviderComponent = (props: any) => {
-  const { children, dispatch } = props;
+  const {
+    children,
+    dispatch,
+    annotation: { skipBeforePageTurning },
+  } = props;
+  console.log('viewport', props);
   const [width] = useState(window.innerWidth);
   const [height] = useState(window.innerHeight);
 
@@ -40,10 +45,19 @@ export const ViewportProviderComponent = (props: any) => {
 
     if (!e.shiftKey || !e.ctrlKey) {
       if (e.keyCode === EKeyCode.A) {
+        if (skipBeforePageTurning) {
+          skipBeforePageTurning(() => dispatch(PageBackward()));
+          return;
+        }
+
         dispatch(PageBackward());
       }
 
       if (e.keyCode === EKeyCode.D) {
+        if (skipBeforePageTurning) {
+          skipBeforePageTurning(() => dispatch(PageForward()));
+          return;
+        }
         dispatch(PageForward());
       }
       if (e.keyCode === EKeyCode.R) {
@@ -77,7 +91,7 @@ export const ViewportProviderComponent = (props: any) => {
     return () => {
       window.removeEventListener('keydown', keydown);
     };
-  }, [props.annotation.annotationEngine]);
+  }, [props.annotation.annotationEngine, props.annotation.skipBeforePageTurning]);
 
   const size = useMemo(() => ({ width, height }), [width, height]);
 

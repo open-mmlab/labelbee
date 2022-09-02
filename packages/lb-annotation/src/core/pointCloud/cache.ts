@@ -33,12 +33,12 @@ export class PointCloudCache {
     return this.instance;
   }
 
-  public loadPCDFile = (src: string) => {
+  public loadPCDFile = (src: string): Promise<THREE.Points> => {
     return new Promise((resolve, reject) => {
-      // Cached
-      if (this.pointsMap.get(src)) {
-        const clonePoints = this.pointsMap.get(src)?.clone();
+      const clonePoints = this.pointsMap.get(src)?.clone();
 
+      // Cached
+      if (clonePoints) {
         resolve(clonePoints);
         return;
       }

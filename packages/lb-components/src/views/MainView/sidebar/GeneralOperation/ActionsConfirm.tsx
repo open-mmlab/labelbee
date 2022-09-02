@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Col, Popconfirm } from 'antd/es';
+import { Col, Popconfirm } from 'antd';
 import { useTranslation } from 'react-i18next';
 
 export interface IOperationConfig {
@@ -47,7 +47,6 @@ const ActionsConfirm: React.FC<{ allOperation: IOperationConfig[] }> = ({ allOpe
           >
             <Popconfirm
               title={<PopconfirmTitle info={info} />}
-              disabled={!info.key.startsWith('sure')}
               placement='topRight'
               okText={t('Confirm')}
               cancelText={t('Cancel')}
