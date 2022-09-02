@@ -689,31 +689,35 @@ export class PointCloud {
    * @returns
    */
   public highlightOriginPointCloud(boxParams: IPointCloudBox) {
-    const oldPointCloud: any = this.scene.getObjectByName(this.pointCloudObjectName);
-    if (!oldPointCloud) {
-      return;
+    if (boxParams && highlightWorker) {
+      // Temporarily turn off highlighting
     }
 
-    if (window.Worker) {
-      const { zMin, zMax, polygonPointList } = this.getCuboidFromPointCloudBox(boxParams);
+    // const oldPointCloud: any = this.scene.getObjectByName(this.pointCloudObjectName);
+    // if (!oldPointCloud) {
+    //   return;
+    // }
 
-      const params = {
-        boxParams,
-        zMin,
-        zMax,
-        polygonPointList,
-        position: oldPointCloud.geometry.attributes.position.array,
-        color: oldPointCloud.geometry.attributes.color.array,
-      };
+    // if (window.Worker) {
+    //   const { zMin, zMax, polygonPointList } = this.getCuboidFromPointCloudBox(boxParams);
 
-      highlightWorker.postMessage(params);
-      highlightWorker.onmessage = (e: any) => {
-        const { color } = e.data;
-        oldPointCloud.geometry.attributes.color.array = color;
-        oldPointCloud.geometry.attributes.color.needsUpdate = true;
-        this.render();
-      };
-    }
+    //   const params = {
+    //     boxParams,
+    //     zMin,
+    //     zMax,
+    //     polygonPointList,
+    //     position: oldPointCloud.geometry.attributes.position.array,
+    //     color: oldPointCloud.geometry.attributes.color.array,
+    //   };
+
+    //   highlightWorker.postMessage(params);
+    //   highlightWorker.onmessage = (e: any) => {
+    //     const { color } = e.data;
+    //     oldPointCloud.geometry.attributes.color.array = color;
+    //     oldPointCloud.geometry.attributes.color.needsUpdate = true;
+    //     this.render();
+    //   };
+    // }
   }
 
   /**
