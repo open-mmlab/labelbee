@@ -538,11 +538,12 @@ export const annotationReducer = (
     case ANNOTATION_ACTIONS.SET_FILE_DATA: {
       const { fileData, index } = action.payload;
       const { imgList } = state;
-      imgList[index] = { ...imgList[index], ...fileData };
+      const newImgList = [...imgList];
+      newImgList[index] = { ...newImgList[index], ...fileData };
 
       return {
         ...state,
-        imgList,
+        imgList: newImgList,
       };
     }
 
