@@ -74,10 +74,10 @@ export const DEFAULT_TEXT_OFFSET = {
  * 默认文本阴影
  */
 export const DEFAULT_TEXT_SHADOW = {
-  shadowColor: 'rgba(0,0,0,0.6)',
-  shadowOffsetX: 0,
-  shadowOffsetY: 2,
-  shadowBlur: 4,
+  shadowColor: 'rgba(0, 0, 0, 1)',
+  shadowOffsetX: 1,
+  shadowOffsetY: 1,
+  shadowBlur: 0,
 };
 
 // 文本展示的偏移
