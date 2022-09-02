@@ -43,7 +43,7 @@
   },
   "dependencies": {
     "@ant-design/icons": "^4.6.2",
-    "@labelbee/lb-annotation": "^1.8.0",
+    "@labelbee/lb-annotation": "^1.8.1-alpha.0",
     "@labelbee/lb-utils": "^1.2.0",
     "ahooks": "^3.4.0",
     "classnames": "^2.3.0",
