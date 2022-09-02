@@ -17,6 +17,7 @@ import { jsonParser } from '@/utils';
 import { SetPointCloudLoading } from '@/store/annotation/actionCreators';
 
 const DEFAULT_SCOPE = 5;
+const DEFAULT_RADIUS = 90;
 
 const PointCloudView = {
   '3D': '3D',
@@ -309,7 +310,6 @@ export const usePointCloudViews = () => {
     };
   });
   const dispatch = useDispatch();
-
   const { selectedBox } = useSingleBox();
 
   const selectedPointCloudBox = selectedBox?.info;
@@ -491,7 +491,7 @@ export const usePointCloudViews = () => {
     }
 
     SetPointCloudLoading(dispatch, true);
-    await mainViewInstance.loadPCDFile(currentData.url);
+    await mainViewInstance.loadPCDFile(currentData.url, config?.radius ?? DEFAULT_RADIUS);
 
     // Clear All Data
     pointCloudBoxList.forEach((v) => {
@@ -530,7 +530,9 @@ export const usePointCloudViews = () => {
      * 2. Reload PointCloud
      * 3. Clear Polygon
      */
-    topViewInstance.updateData(currentData.url, currentData.result);
+    topViewInstance.updateData(currentData.url, currentData.result, {
+      radius: config?.radius ?? DEFAULT_RADIUS,
+    });
     SetPointCloudLoading(dispatch, false);
   };
 
