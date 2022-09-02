@@ -645,9 +645,20 @@ export class PointCloud {
 
     this.filterZAxisPoints(points);
 
+    const originPointCloud = this.scene.getObjectByName(this.pointCloudObjectName) as THREE.Points | undefined;
+
+    if (originPointCloud) {
+      originPointCloud.geometry.attributes.color = points.geometry.attributes.color;
+      originPointCloud.geometry.attributes.position = points.geometry.attributes.position;
+      originPointCloud.geometry.attributes.color.needsUpdate = true;
+      originPointCloud.geometry.attributes.position.needsUpdate = true;
+      originPointCloud.uuid = points.uuid;
+      this.render();
+
+      return;
+    }
     this.scene.add(points);
     this.scene.add(circle);
-
     this.render();
   }
 
@@ -661,7 +672,6 @@ export class PointCloud {
   }
 
   public loadPCDFile = async (src: string, cb?: () => void) => {
-    this.clearPointCloud();
     const points = (await this.cacheInstance.loadPCDFile(src)) as THREE.Points;
     points.name = this.pointCloudObjectName;
 

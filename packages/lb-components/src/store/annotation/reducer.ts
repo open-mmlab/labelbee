@@ -33,6 +33,8 @@ const initialState: AnnotationState = {
   stepProgress: 0,
   loading: false,
   triggerEventAfterIndexChanged: false,
+
+  pointCloudLoading: false,
 };
 
 /**
@@ -617,6 +619,15 @@ export const annotationReducer = (
       return {
         ...state,
         loading: !!loading,
+      };
+    }
+
+    case ANNOTATION_ACTIONS.SET_POINT_CLOUD_LOADING: {
+      const { pointCloudLoading } = action.payload;
+
+      return {
+        ...state,
+        pointCloudLoading: !!pointCloudLoading,
       };
     }
 

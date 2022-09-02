@@ -60,6 +60,8 @@ export interface AnnotationState {
   triggerEventAfterIndexChanged: boolean;
 
   skipBeforePageTurning?: (pageTurning: Function) => void;
+
+  pointCloudLoading: boolean;
 }
 
 interface UpdateToolInstance {

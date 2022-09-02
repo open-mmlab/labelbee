@@ -143,12 +143,8 @@ const PointCloudTopView: React.FC<IAnnotationStateProps> = ({ currentData }) => 
 
       if (ptCtx.topViewInstance) {
         /**
-         * Listen to flip
-         * 1. Init
-         * 2. Reload PointCloud
-         * 3. Clear Polygon
+         * Unified Update by PointCloudListener.
          */
-        ptCtx.topViewInstance.updateData(currentData.url, currentData.result);
         return;
       }
 
