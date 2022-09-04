@@ -15,7 +15,7 @@ import { ChangeSave } from '@/store/annotation/actionCreators';
 import { IStepInfo } from '@/types/step';
 import { useTranslation } from 'react-i18next';
 import { cTool } from '@labelbee/lb-annotation';
-const { EVideoToolName } = cTool;
+const { EVideoToolName, EPointCloudName } = cTool;
 
 interface IProps {
   isBegin?: boolean;
@@ -41,6 +41,7 @@ const HeaderOption: React.FC<IProps> = (props) => {
 
   const isTagTool = [EToolName.Tag, EVideoToolName.VideoTagTool].includes(stepInfo?.tool as any);
   const isVideo = [EVideoToolName.VideoTagTool].includes(stepInfo?.tool as any);
+  const isPointCloud = [EPointCloudName.PointCloud].includes(stepInfo?.tool as any);
 
   const isBegin = props.isBegin || isTagTool;
 
@@ -64,7 +65,7 @@ const HeaderOption: React.FC<IProps> = (props) => {
     toolInstance?.redo();
   }, [toolInstance]);
 
-  const commonOptionList: any = [
+  let commonOptionList: any = [
     {
       toolName: 'save',
       title: 'Save',
@@ -138,6 +139,11 @@ const HeaderOption: React.FC<IProps> = (props) => {
       },
     },
   ];
+
+  // PointCloudTool temporarily removes "restore" & "redo"
+  if (isPointCloud) {
+    commonOptionList = commonOptionList.slice(0, 1);
+  }
 
   return (
     <div className={`${prefix}-header__hotKey`}>
