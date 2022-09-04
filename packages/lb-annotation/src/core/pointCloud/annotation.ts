@@ -163,12 +163,12 @@ export class PointCloudAnnotation implements IPointCloudAnnotationOperation {
    * @param result
    * @returns
    */
-  public updateData(pcdPath: string, result: string) {
+  public updateData(pcdPath: string, result: string, config?: { radius?: number }) {
     if (!this.pointCloud2dOperation || !this.pointCloudInstance) {
       return;
     }
 
-    this.pointCloudInstance.loadPCDFile(pcdPath);
+    this.pointCloudInstance.loadPCDFile(pcdPath, config?.radius);
     this.addPolygonListOnTopView(result);
   }
 

@@ -626,7 +626,7 @@ export class PointCloud {
     );
   };
 
-  public renderPointCloud(points: THREE.Points) {
+  public renderPointCloud(points: THREE.Points, radius?: number) {
     // @ts-ignore
     points.material.size = 1;
     points.name = this.pointCloudObjectName;
@@ -637,12 +637,14 @@ export class PointCloud {
 
     pointsMaterial.onBeforeCompile = this.overridePointShader;
 
-    // @ts-ignore
-    const circle = this.createRange(points.geometry.boundingSphere.radius * 2);
+    if (radius) {
+      // @ts-ignore
+      const circle = this.createRange(radius);
+      this.scene.add(circle);
+    }
+
     this.pointsUuid = points.uuid;
-
     points.material = pointsMaterial;
-
     this.filterZAxisPoints(points);
 
     const originPointCloud = this.scene.getObjectByName(this.pointCloudObjectName) as THREE.Points | undefined;
@@ -653,12 +655,10 @@ export class PointCloud {
       originPointCloud.geometry.attributes.color.needsUpdate = true;
       originPointCloud.geometry.attributes.position.needsUpdate = true;
       originPointCloud.uuid = points.uuid;
-      this.render();
-
-      return;
+    } else {
+      this.scene.add(points);
     }
-    this.scene.add(points);
-    this.scene.add(circle);
+
     this.render();
   }
 
@@ -671,14 +671,16 @@ export class PointCloud {
     this.render();
   }
 
-  public loadPCDFile = async (src: string, cb?: () => void) => {
+  /**
+   *
+   * @param src
+   * @param radius Render the range of circle
+   */
+  public loadPCDFile = async (src: string, radius?: number) => {
     const points = (await this.cacheInstance.loadPCDFile(src)) as THREE.Points;
     points.name = this.pointCloudObjectName;
 
-    this.renderPointCloud(points);
-    if (cb) {
-      cb();
-    }
+    this.renderPointCloud(points, radius);
   };
 
   /**
@@ -687,31 +689,35 @@ export class PointCloud {
    * @returns
    */
   public highlightOriginPointCloud(boxParams: IPointCloudBox) {
-    const oldPointCloud: any = this.scene.getObjectByName(this.pointCloudObjectName);
-    if (!oldPointCloud) {
-      return;
+    if (boxParams && highlightWorker) {
+      // Temporarily turn off highlighting
     }
 
-    if (window.Worker) {
-      const { zMin, zMax, polygonPointList } = this.getCuboidFromPointCloudBox(boxParams);
+    // const oldPointCloud: any = this.scene.getObjectByName(this.pointCloudObjectName);
+    // if (!oldPointCloud) {
+    //   return;
+    // }
 
-      const params = {
-        boxParams,
-        zMin,
-        zMax,
-        polygonPointList,
-        position: oldPointCloud.geometry.attributes.position.array,
-        color: oldPointCloud.geometry.attributes.color.array,
-      };
+    // if (window.Worker) {
+    //   const { zMin, zMax, polygonPointList } = this.getCuboidFromPointCloudBox(boxParams);
 
-      highlightWorker.postMessage(params);
-      highlightWorker.onmessage = (e: any) => {
-        const { color } = e.data;
-        oldPointCloud.geometry.attributes.color.array = color;
-        oldPointCloud.geometry.attributes.color.needsUpdate = true;
-        this.render();
-      };
-    }
+    //   const params = {
+    //     boxParams,
+    //     zMin,
+    //     zMax,
+    //     polygonPointList,
+    //     position: oldPointCloud.geometry.attributes.position.array,
+    //     color: oldPointCloud.geometry.attributes.color.array,
+    //   };
+
+    //   highlightWorker.postMessage(params);
+    //   highlightWorker.onmessage = (e: any) => {
+    //     const { color } = e.data;
+    //     oldPointCloud.geometry.attributes.color.array = color;
+    //     oldPointCloud.geometry.attributes.color.needsUpdate = true;
+    //     this.render();
+    //   };
+    // }
   }
 
   /**
