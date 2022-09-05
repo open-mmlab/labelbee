@@ -16,6 +16,7 @@ import { useSingleBox } from './hooks/useSingleBox';
 import { PointCloudContainer } from './PointCloudLayout';
 import { BoxInfos, PointCloudValidity } from './PointCloudInfos';
 import { usePolygon } from './hooks/usePolygon';
+import { useZoom } from './hooks/useZoom';
 import { Slider } from 'antd';
 import { aMapStateToProps, IAnnotationStateProps } from '@/store/annotation/map';
 import { connect } from 'react-redux';
@@ -55,8 +56,10 @@ const TransferCanvas2WorldOffset = (
 };
 
 const TopViewToolbar = ({ currentData }: IAnnotationStateProps) => {
+  const { zoom, zoomIn, zoomOut, initialPosition } = useZoom();
   const { selectNextBox, selectPrevBox } = useSingleBox();
   const { updateRotate } = useRotate({ currentData });
+
   const ratio = 2;
 
   const clockwiseRotate = () => {
@@ -92,7 +95,12 @@ const TopViewToolbar = ({ currentData }: IAnnotationStateProps) => {
         className={getClassName('point-cloud', 'next')}
       />
       <FooterDivider />
-      <ZoomController />
+      <ZoomController
+        initialPosition={initialPosition}
+        zoomIn={zoomIn}
+        zoomOut={zoomOut}
+        zoom={zoom}
+      />
     </>
   );
 };
@@ -127,6 +135,7 @@ const PointCloudTopView: React.FC<IAnnotationStateProps> = ({ currentData }) => 
   const ref = useRef<HTMLDivElement>(null);
   const ptCtx = React.useContext(PointCloudContext);
   const size = useSize(ref);
+  const { setZoom } = useZoom();
 
   const { addPolygon, deletePolygon } = usePolygon();
   const { deletePointCloudBox } = useSingleBox();
@@ -225,6 +234,8 @@ const PointCloudTopView: React.FC<IAnnotationStateProps> = ({ currentData }) => 
 
       pointCloud.camera.updateProjectionMatrix();
       pointCloud.render();
+
+      setZoom(zoom);
     });
 
     // Synchronized 3d point cloud view displacement operations
