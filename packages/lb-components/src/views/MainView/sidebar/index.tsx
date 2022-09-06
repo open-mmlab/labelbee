@@ -20,6 +20,7 @@ import TagSidebar, { expandIconFuc } from './TagSidebar';
 import TextToolSidebar from './TextToolSidebar';
 import ToolStyle from './ToolStyle';
 import { cTool } from '@labelbee/lb-annotation';
+import ScribbleSidebar from './ScribbleSidebar';
 
 const { EVideoToolName } = cTool;
 
@@ -140,8 +141,15 @@ const Sidebar: React.FC<IProps> = ({ sider }) => {
 
   const textToolSideBar = <TextToolSidebar />;
 
-  const horizontal = <div className={`${sidebarCls}__horizontal`} />;
+  const scribbleSidebar = (
+    <ScribbleSidebar
+      onChange={(t, i) => {
+        // 接收
+      }}
+    />
+  );
 
+  const horizontal = <div className={`${sidebarCls}__horizontal`} />;
   if (sider) {
     if (typeof sider === 'function') {
       return (
@@ -178,6 +186,7 @@ const Sidebar: React.FC<IProps> = ({ sider }) => {
     return (
       <div className={`${sidebarCls}`}>
         {toolIcon}
+        {scribbleSidebar}
         {horizontal}
         {attributeList}
         {annotationText}

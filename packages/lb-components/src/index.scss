@@ -521,6 +521,31 @@ $prefix: bee;
       );
     }
   }
+  .#{$prefix}-scribble {
+    padding: 20px;
+    width: 100%;
+    &__select {
+      display: flex;
+      justify-content: center;
+      cursor: pointer;
+      img {
+        width: 12px;
+        margin: 0px 10px;
+      }
+    }
+    &__silder {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    &__circle {
+      display: block;
+      width: 5px;
+      height: 5px;
+      background: #d9d9d9;
+      border-radius: 50%;
+    }
+  }
 }
 
 .#{$prefix}-tips {
