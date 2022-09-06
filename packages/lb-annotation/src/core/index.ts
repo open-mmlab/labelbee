@@ -125,7 +125,7 @@ export default class AnnotationEngine {
       this.toolInstance.destroy();
     }
 
-    const ToolOperation: any = getCurrentOperation(this.toolName);
+    const ToolOperation: any = getCurrentOperation(EToolName.Point);
     if (!ToolOperation) {
       return;
     }
