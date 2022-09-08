@@ -9,6 +9,7 @@ interface IProps {
   list: Array<{
     label: string;
     value: string;
+    color?: string;
   }>;
   selectedAttribute: string;
   attributeChanged: (v: string) => void;
@@ -38,7 +39,7 @@ const AttributeList = React.forwardRef((props: IProps, ref) => {
   return (
     <div className={className}>
       <Radio.Group
-        name="radiogroup"
+        name='radiogroup'
         defaultValue={props?.selectedAttribute}
         value={props?.selectedAttribute}
         onChange={(e) => props.attributeChanged(e.target.value)}
@@ -57,28 +58,22 @@ const AttributeList = React.forwardRef((props: IProps, ref) => {
             hotKey = '-';
           }
 
+          let color =
+            index > 8 && !props.forbidDefault
+              ? COLORS_ARRAY[(index - 1) % COLORS_ARRAY.length]
+              : NEW_ATTRIBUTE_COLORS[index % NEW_ATTRIBUTE_COLORS.length];
+
+          if (i?.color) {
+            color = i.color;
+          }
+
           return (
-            <Radio
-              value={i.value}
-              ref={radioRef}
-              key={index}
-            >
-              <span className="sensebee-radio-label" title={i.label}>
-                {!props?.forbidColor && (
-                  <ColorTag
-                    color={
-                      index > 8 && !props.forbidDefault
-                        ? COLORS_ARRAY[(index - 1) % COLORS_ARRAY.length]
-                        : NEW_ATTRIBUTE_COLORS[
-                          index % NEW_ATTRIBUTE_COLORS.length
-                        ]
-                    }
-                    style={{ marginRight: '8px' }}
-                  />
-                )}
+            <Radio value={i.value} ref={radioRef} key={index}>
+              <span className='sensebee-radio-label' title={i.label}>
+                {!props?.forbidColor && <ColorTag color={color} style={{ marginRight: '8px' }} />}
                 {i.label}
               </span>
-              <span className="sensebee-radio-num">{hotKey}</span>
+              <span className='sensebee-radio-num'>{hotKey}</span>
             </Radio>
           );
         })}

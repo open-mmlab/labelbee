@@ -6,6 +6,9 @@ import pen from '@/assets/attributeIcon/pen.svg';
 import eraserActivate from '@/assets/attributeIcon/eraser_a.svg';
 import eraser from '@/assets/attributeIcon/eraser.svg';
 import { getClassName } from '@/utils/dom';
+import { useSelector } from 'react-redux';
+import { AppState } from '@/store';
+import { EScribblePattern } from '@/data/enums/ToolType';
 
 interface IProps {
   // toolInstance?: GraphToolInstance;
@@ -13,18 +16,12 @@ interface IProps {
   onChange: (tool: number, values: number) => void;
 }
 
-enum ESwitchTool {
-  Pen = 1, // 笔
-  Ereser = 2, // 橡皮刷
-}
-
 const ScribbleSidebar: React.FC<IProps> = (props) => {
   const { onChange } = props;
   // 查看时候默认值
-  // const initValue = toolInstance?.weight || 20;
-  // const initTool = toolInstance?.brushTool || ESwitchTool.Pen;
+  const toolInstance = useSelector((state: AppState) => state.annotation.toolInstance);
   const [silderValue, setSilderValue] = useState(20);
-  const [selectTool, setSelectTool] = useState(ESwitchTool.Pen);
+  const [selectTool, setSelectTool] = useState(EScribblePattern.Scribble);
 
   const changeValue = () => {
     onChange(selectTool, silderValue);
@@ -34,18 +31,21 @@ const ScribbleSidebar: React.FC<IProps> = (props) => {
     <div className={getClassName('scribble')}>
       <div className={getClassName('scribble', 'select')}>
         <img
-          src={selectTool === ESwitchTool.Pen ? penActivate : pen}
+          src={selectTool === EScribblePattern.Scribble ? penActivate : pen}
           onClick={() => {
             setSilderValue(20);
-            setSelectTool(ESwitchTool.Pen);
+            setSelectTool(EScribblePattern.Scribble);
+            toolInstance?.setPattern(EScribblePattern.Scribble);
             changeValue();
           }}
         />
         <img
-          src={selectTool === ESwitchTool.Ereser ? eraserActivate : eraser}
+          src={selectTool === EScribblePattern.Erase ? eraserActivate : eraser}
           onClick={() => {
             setSilderValue(20);
-            setSelectTool(ESwitchTool.Ereser);
+            setSelectTool(EScribblePattern.Erase);
+            toolInstance?.setPattern(EScribblePattern.Erase);
+
             changeValue();
           }}
         />
@@ -56,6 +56,7 @@ const ScribbleSidebar: React.FC<IProps> = (props) => {
           onChange={(v) => {
             setSilderValue(v);
             changeValue();
+            toolInstance?.setPenSize(v);
           }}
           min={1}
           max={50}

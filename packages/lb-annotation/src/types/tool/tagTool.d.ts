@@ -16,6 +16,7 @@ declare interface IInputList {
   value: string;
   isMulti?: boolean;
   subSelected?: IInfoList[];
+  color?: string; // Custom Color for scribbleTool
 }
 
 interface IInfoList {

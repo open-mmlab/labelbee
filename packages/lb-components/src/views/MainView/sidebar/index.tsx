@@ -227,6 +227,15 @@ const Sidebar: React.FC<IProps> = ({ sider }) => {
     );
   }
 
+  if (toolName === EToolName.ScribbleTool) {
+    return (
+      <div className={`${sidebarCls}`}>
+        {scribbleSidebar}
+        {attributeList}
+      </div>
+    );
+  }
+
   return null;
 };
 

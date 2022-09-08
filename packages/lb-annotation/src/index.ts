@@ -7,6 +7,7 @@ import PolygonOperation from './core/toolOperation/polygonOperation';
 import MeasureOperation from './core/toolOperation/measureOperation';
 import { BasicToolOperation } from './core/toolOperation/basicToolOperation';
 import ViewOperation from './core/toolOperation/ViewOperation';
+import ScribbleTool from './core/toolOperation/ScribbleTool';
 
 // Constant
 import * as cAnnotation from './constant/annotation';
@@ -64,4 +65,5 @@ export {
   ImgUtils,
   MathUtils,
   AnnotationEngine,
+  ScribbleTool,
 };
