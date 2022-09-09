@@ -164,6 +164,7 @@ const Sidebar: React.FC<IProps> = ({ sider }) => {
             tagToolSideBar,
             textToolSideBar,
             horizontal,
+            scribbleSidebar,
           })}
         </div>
       );
