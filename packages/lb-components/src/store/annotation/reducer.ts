@@ -98,7 +98,7 @@ export const LoadFileAndFileData =
 
     SetAnnotationLoading(dispatch, true);
 
-    dispatch(TryGetFileDataByAPI(nextIndex));
+    await dispatch(TryGetFileDataByAPI(nextIndex));
 
     if (currentIsVideo) {
       dispatch(AfterVideoLoaded(nextIndex));
@@ -204,7 +204,7 @@ export const annotationReducer = (
       }
 
       const oldResultString = imgList[imgIndex]?.result || '';
-      const [, basicImgInfo] = toolInstance?.exportData() ?? [];
+      const [, basicImgInfo, extraData] = toolInstance?.exportData() ?? [];
 
       const resultWithBasicInfo = composeResultWithBasicImgInfo(oldResultString, basicImgInfo);
       const newResultString = composeResult(
@@ -219,6 +219,13 @@ export const annotationReducer = (
         step,
         stepList,
       );
+
+      if (extraData) {
+        imgList[imgIndex] = {
+          ...imgList[imgIndex],
+          ...extraData
+        } 
+      }
 
       if (onSubmit) {
         onSubmit([imgList[imgIndex]], action.payload?.submitType, imgIndex);
