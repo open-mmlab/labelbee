@@ -74,7 +74,7 @@ class TagOperation extends BasicToolOperation {
   }
 
   public onKeyDown(e: KeyboardEvent) {
-    if (!CommonToolUtils.hotkeyFilter(e)) {
+    if (!CommonToolUtils.hotkeyFilter(e) || super.onKeyDown(e) === false) {
       return;
     }
 
