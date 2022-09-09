@@ -58,6 +58,7 @@ class ScribbleTool extends BasicToolOperation {
     // Only has one layer
     const { url } = data?.[0] ?? {};
 
+    this.clearResult();
     if (!url) {
       this.render();
       return;
