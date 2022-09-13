@@ -1,5 +1,6 @@
 import { isObject } from 'lodash';
 import { ECheckModel, EToolName } from '@/constant/tool';
+import ScribbleTool from '@/core/toolOperation/scribbleTool';
 import { IPolygonPoint } from '../../types/tool/polygon';
 import { ESortDirection, EStepType } from '../../constant/annotation';
 import CheckOperation from '../../core/toolOperation/checkOperation';
@@ -9,7 +10,6 @@ import TagOperation from '../../core/toolOperation/tagOperation';
 import LineToolOperation from '../../core/toolOperation/LineToolOperation';
 import PointOperation from '../../core/toolOperation/pointOperation';
 import TextToolOperation from '../../core/toolOperation/TextToolOperation';
-import ScribbleTool from '@/core/toolOperation/scribbleTool';
 
 type point = {
   id: string;

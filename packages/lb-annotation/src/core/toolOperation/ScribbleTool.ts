@@ -1,10 +1,10 @@
 import { ImgConversionUtils } from '@labelbee/lb-utils';
 import AxisUtils from '@/utils/tool/AxisUtils';
 import DrawUtils from '@/utils/tool/DrawUtils';
-import { BasicToolOperation, IBasicToolOperationProps } from './basicToolOperation';
 import { EScribblePattern, EToolName } from '@/constant/tool';
 import CommonToolUtils from '@/utils/tool/CommonToolUtils';
 import AttributeUtils from '@/utils/tool/AttributeUtils';
+import { BasicToolOperation, IBasicToolOperationProps } from './basicToolOperation';
 
 interface IProps extends IBasicToolOperationProps {}
 
@@ -34,6 +34,10 @@ class ScribbleTool extends BasicToolOperation {
 
   public get color() {
     return this?.defaultAttributeInfo?.color ?? DEFAULT_COLOR;
+  }
+
+  public get penSizeWithZoom() {
+    return this.penSize / this.zoom;
   }
 
   public getOriginCoordinate = (e: MouseEvent) => {
@@ -141,20 +145,6 @@ class ScribbleTool extends BasicToolOperation {
     this.action = pattern;
   };
 
-  public onScribbleStart(e: MouseEvent) {
-    if (this.cacheContext) {
-      this.cacheContext.save();
-      this.cacheContext.beginPath();
-      this.cacheContext.strokeStyle = this.color;
-      this.cacheContext.lineWidth = this.penSize;
-      this.cacheContext.lineCap = 'round';
-      this.cacheContext.lineJoin = 'round';
-
-      const originCoordinate = AxisUtils.changePointByZoom(this.getCoordinateUnderZoom(e), 1 / this.zoom);
-      this.cacheContext.moveTo(originCoordinate.x, originCoordinate.y);
-    }
-  }
-
   public setDefaultAttribute(attributeValue: string) {
     const attributeInfo = this.config.attributeList.find((v) => v.value === attributeValue);
 
@@ -164,6 +154,19 @@ class ScribbleTool extends BasicToolOperation {
       //  触发侧边栏同步
       this.emit('changeAttributeSidebar');
       this.render();
+    }
+  }
+
+  public onScribbleStart(e: MouseEvent) {
+    if (this.cacheContext) {
+      this.cacheContext.save();
+      this.cacheContext.beginPath();
+      this.cacheContext.strokeStyle = this.color;
+      this.cacheContext.lineWidth = this.penSizeWithZoom;
+      this.cacheContext.lineCap = 'round';
+      this.cacheContext.lineJoin = 'round';
+      const originCoordinate = AxisUtils.changePointByZoom(this.getCoordinateUnderZoom(e), 1 / this.zoom);
+      this.cacheContext.moveTo(originCoordinate.x, originCoordinate.y);
     }
   }
 
@@ -178,6 +181,7 @@ class ScribbleTool extends BasicToolOperation {
   }
 
   public onScribbleEnd() {
+    this.cacheContext?.closePath();
     this.cacheContext?.restore();
   }
 
@@ -186,7 +190,7 @@ class ScribbleTool extends BasicToolOperation {
       const originCoordinate = this.getOriginCoordinate(e);
       this.cacheContext.save();
       this.cacheContext.beginPath();
-      this.cacheContext.arc(originCoordinate.x, originCoordinate.y, this.penSize / 2, 0, Math.PI * 2, false);
+      this.cacheContext.arc(originCoordinate.x, originCoordinate.y, this.penSizeWithZoom / 2, 0, Math.PI * 2, false);
       this.cacheContext.clip();
       // TODO
       this.cacheContext.clearRect(0, 0, this.cacheContext.canvas.width, this.cacheContext.canvas.height);
@@ -212,7 +216,7 @@ class ScribbleTool extends BasicToolOperation {
   public onEraseEnd() {}
 
   public exportData() {
-    const imgBase64 = this.cacheCanvas?.toDataURL();
+    const imgBase64 = this.cacheCanvas?.toDataURL('image/png', 0);
 
     return [[], this.basicImgInfo, { imgBase64 }];
   }
@@ -229,12 +233,15 @@ class ScribbleTool extends BasicToolOperation {
   public render() {
     super.render();
 
-    if (this.cacheCanvas) {
+    if (this.cacheCanvas && this.ctx) {
+      this.ctx.save();
+      this.ctx.globalAlpha = 0.5;
       DrawUtils.drawImg(this.canvas, this.cacheCanvas, {
         zoom: this.zoom,
         currentPos: this.currentPos,
         rotate: this.rotate,
       });
+      this.ctx.restore();
     }
     this.renderPoint(this.penSize / 2);
   }
