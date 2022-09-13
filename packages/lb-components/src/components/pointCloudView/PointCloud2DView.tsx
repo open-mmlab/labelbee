@@ -89,41 +89,43 @@ const PointCloud2DView = ({ imgInfo }: IProps) => {
     }
   }, [pointCloudBoxList, mappingData]);
 
-  if (!imgInfo) {
-    return <div />;
-  }
+  const hiddenData = !imgInfo || !imgInfo?.mappingImgList || !(imgInfo?.mappingImgList?.length > 0);
 
-  const { mappingImgList } = imgInfo;
-
-  if (!mappingImgList) {
-    return <div />;
-  }
+  const annotationView = (
+    <AnnotationView src={mappingData?.url ?? ''} annotations={annotations2d} size={size} />
+  );
 
   return (
     <PointCloudContainer
       className={getClassName('point-cloud-2d-container')}
       title='2D视图'
       toolbar={
-        <Toolbar
-          imgIndex={mappingIndex}
-          imgLength={mappingImgList.length}
-          onNext={() => {
-            if (mappingIndex >= mappingImgList.length - 1) {
-              return;
-            }
-            setMappingIndex((v) => v + 1);
-          }}
-          onPrev={() => {
-            if (mappingIndex <= 0) {
-              return;
-            }
-            setMappingIndex((v) => v - 1);
-          }}
-        />
+        hiddenData ? undefined : (
+          <Toolbar
+            imgIndex={mappingIndex}
+            imgLength={imgInfo.mappingImgList?.length ?? 0}
+            onNext={() => {
+              if (!imgInfo || !imgInfo?.mappingImgList) {
+                return;
+              }
+
+              if (mappingIndex >= imgInfo?.mappingImgList?.length - 1) {
+                return;
+              }
+              setMappingIndex((v) => v + 1);
+            }}
+            onPrev={() => {
+              if (mappingIndex <= 0) {
+                return;
+              }
+              setMappingIndex((v) => v - 1);
+            }}
+          />
+        )
       }
     >
       <div className={getClassName('point-cloud-2d-image')} ref={ref}>
-        <AnnotationView src={mappingData?.url ?? ''} annotations={annotations2d} size={size} />
+        {hiddenData ? null : annotationView}
       </div>
     </PointCloudContainer>
   );
