@@ -9,7 +9,7 @@ import { ZoomController } from '@/views/MainView/toolFooter/ZoomController';
 import { DownSquareOutlined, UpSquareOutlined } from '@ant-design/icons';
 import { cTool, PointCloudAnnotation } from '@labelbee/lb-annotation';
 import { IPolygonData } from '@labelbee/lb-utils';
-import React, { useEffect, useRef, useState } from 'react';
+import React, { useEffect, useLayoutEffect, useRef, useState } from 'react';
 import { PointCloudContext } from './PointCloudContext';
 import { useRotate } from './hooks/useRotate';
 import { useSingleBox } from './hooks/useSingleBox';
@@ -143,30 +143,23 @@ const PointCloudTopView: React.FC<IAnnotationStateProps> = ({ currentData }) => 
 
   const pointCloudViews = usePointCloudViews();
 
-  useEffect(() => {
+  useLayoutEffect(() => {
     if (ref.current && currentData?.url && currentData?.result) {
       const size = {
         width: ref.current.clientWidth,
         height: ref.current.clientHeight,
       };
 
-      if (ptCtx.topViewInstance) {
-        /**
-         * Unified Update by PointCloudListener.
-         */
-        return;
-      }
+      console.error("asd'");
 
       const pointCloudAnnotation = new PointCloudAnnotation({
         container: ref.current,
         size,
         pcdPath: currentData.url,
       });
-      pointCloudAnnotation.addPolygonListOnTopView(currentData.result);
-
       ptCtx.setTopViewInstance(pointCloudAnnotation);
     }
-  }, [currentData]);
+  }, []);
 
   useEffect(() => {
     if (!size || !ptCtx.topViewInstance || !ptCtx.sideViewInstance) {

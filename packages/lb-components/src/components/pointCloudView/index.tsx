@@ -35,7 +35,7 @@ const PointCloudView: React.FC<IProps> = ({ imgList }) => {
   return (
     <>
       <PointCloudListener />
-      <div className={getClassName('point-cloud-layout')}>
+      <div className={getClassName('point-cloud-layout')} onContextMenu={(e) => e.preventDefault()}>
         <div className={getClassName('point-cloud-wrapper')}>
           <div className={getClassName('point-cloud-container', 'left')}>
             <PointCloud2DView />

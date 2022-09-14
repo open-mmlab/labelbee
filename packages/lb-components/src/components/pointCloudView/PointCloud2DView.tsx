@@ -8,6 +8,8 @@ import { connect } from 'react-redux';
 import { IFileItem } from '@/types/data';
 import { LeftOutlined, RightOutlined } from '@ant-design/icons';
 import useSize from '@/hooks/useSize';
+import { useSingleBox } from './hooks/useSingleBox';
+import { ViewOperation } from '@labelbee/lb-annotation';
 
 interface IProps {
   imgInfo: IFileItem;
@@ -48,6 +50,8 @@ const PointCloud2DView = ({ imgInfo }: IProps) => {
   const { pointCloudBoxList, topViewInstance } = useContext(PointCloudContext);
   const [mappingIndex, setMappingIndex] = useState(0);
   const ref = useRef(null);
+  const viewRef = useRef<{ toolInstance: ViewOperation }>();
+  const { selectedBox } = useSingleBox();
   const size = useSize(ref);
 
   const mappingData = imgInfo?.mappingImgList?.[mappingIndex];
@@ -75,6 +79,7 @@ const PointCloud2DView = ({ imgInfo }: IProps) => {
               return {
                 type: v.type,
                 annotation: {
+                  id: pointCloudBox.id,
                   pointList: v.pointList,
                   ...defaultViewStyle,
                 },
@@ -91,9 +96,15 @@ const PointCloud2DView = ({ imgInfo }: IProps) => {
 
   const hiddenData = !imgInfo || !imgInfo?.mappingImgList || !(imgInfo?.mappingImgList?.length > 0);
 
-  const annotationView = (
-    <AnnotationView src={mappingData?.url ?? ''} annotations={annotations2d} size={size} />
-  );
+  useEffect(() => {
+    const toolInstance = viewRef.current?.toolInstance;
+
+    if (!selectedBox || !toolInstance) {
+      return;
+    }
+    const selected2data = annotations2d.find((v) => v.annotation.id === selectedBox.info.id);
+    toolInstance.focusPositionByPointList(selected2data?.annotation.pointList);
+  }, [selectedBox, viewRef.current, annotations2d]);
 
   return (
     <PointCloudContainer
@@ -123,9 +134,16 @@ const PointCloud2DView = ({ imgInfo }: IProps) => {
           />
         )
       }
+      style={{ display: hiddenData ? 'none' : 'flex' }}
     >
       <div className={getClassName('point-cloud-2d-image')} ref={ref}>
-        {hiddenData ? null : annotationView}
+        <AnnotationView
+          src={mappingData?.url ?? ''}
+          annotations={annotations2d}
+          size={size}
+          ref={viewRef}
+          globalStyle={{ display: hiddenData ? 'none' : 'block' }}
+        />
       </div>
     </PointCloudContainer>
   );

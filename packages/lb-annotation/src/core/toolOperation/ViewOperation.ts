@@ -13,6 +13,7 @@ import RenderDomClass from '@/utils/tool/RenderDomClass';
 import { DEFAULT_FONT, ELineTypes, SEGMENT_NUMBER } from '@/constant/tool';
 import { DEFAULT_TEXT_SHADOW, DEFAULT_TEXT_OFFSET, TEXT_ATTRIBUTE_OFFSET } from '@/constant/annotation';
 import { BasicToolOperation, IBasicToolOperationProps } from './basicToolOperation';
+import ImgPosUtils from '@/utils/tool/ImgPosUtils';
 
 const newScope = 3;
 const DEFAULT_RADIUS = 3;
@@ -210,6 +211,40 @@ export default class ViewOperation extends BasicToolOperation {
 
   public getReferenceOptions(isReference?: boolean): { lineCap?: CanvasLineCap; lineDash?: number[] } {
     return isReference ? { lineCap: 'butt', lineDash: [20, 20] } : {};
+  }
+
+  /**
+   * Focus on the selected lang.
+   * @param pointList
+   */
+  public focusPositionByPointList(pointList: ICoordinate[]) {
+    const basicZone = MathUtils.calcViewportBoundaries(pointList);
+    const newBoundary = {
+      x: basicZone.left,
+      y: basicZone.top,
+      width: basicZone.right - basicZone.left,
+      height: basicZone.bottom - basicZone.top,
+    } as IRect;
+    const pos = ImgPosUtils.getBasicRecPos(this.imgNode, newBoundary, this.size, 0.5);
+    if (pos) {
+      this.setCurrentPos(pos.currentPos);
+      this.setCurrentPosStorage(pos.currentPos);
+      const { imgInfo } = this;
+      const { innerZoom } = this.innerPosAndZoom;
+      if (imgInfo) {
+        this.setImgInfo({
+          ...imgInfo,
+          width: (imgInfo.width / innerZoom) * pos.innerZoom,
+          height: (imgInfo.height / innerZoom) * pos.innerZoom,
+        });
+      }
+
+      // 需要加载下更改当前的 imgInfo
+      this.setZoom(pos.innerZoom);
+
+      this.render();
+      this.renderBasicCanvas();
+    }
   }
 
   public render() {

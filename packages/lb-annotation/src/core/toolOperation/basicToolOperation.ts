@@ -266,6 +266,13 @@ class BasicToolOperation extends EventListener {
     return [];
   }
 
+  get innerPosAndZoom() {
+    return {
+      innerZoom: this.innerZoom,
+      currentPosStorage: this.currentPosStorage,
+    };
+  }
+
   /**
    * 是否含有列表标注
    */
@@ -290,6 +297,10 @@ class BasicToolOperation extends EventListener {
 
   public setImgInfo(size: ISize) {
     this.imgInfo = size;
+  }
+
+  public setCurrentPosStorage(currentPosStorage: ICoordinate) {
+    this.currentPosStorage = currentPosStorage;
   }
 
   /**

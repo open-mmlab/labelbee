@@ -24,6 +24,7 @@ interface IProps {
   onChange?: (type: 'hover' | 'selected', ids: string[]) => void;
 
   showLoading?: boolean;
+  globalStyle?: React.CSSProperties; // Custom global style.
 }
 
 const DEFAULT_SIZE = {
@@ -66,6 +67,7 @@ const AnnotationView = (props: IProps, ref: any) => {
     backgroundStyle = {},
     onChange,
     showLoading = false,
+    globalStyle,
   } = props;
   const size = sizeInitialized(props.size);
   const [loading, setLoading] = useState(false);
@@ -168,7 +170,7 @@ const AnnotationView = (props: IProps, ref: any) => {
   );
 
   return (
-    <Spin spinning={showLoading || loading} delay={300}>
+    <Spin spinning={showLoading || loading} delay={300} style={globalStyle}>
       {mainRender}
     </Spin>
   );
