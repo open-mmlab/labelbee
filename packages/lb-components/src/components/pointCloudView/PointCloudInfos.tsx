@@ -22,15 +22,28 @@ export const SizeInfoForView = ({ perspectiveView }: { perspectiveView: EPerspec
   const box = pointCloudBoxList.find((i) => i.id === selectedID);
 
   if (selectedID && box) {
+    const { length, width, height } = PointCloudUtils.transferBox2Kitti(box);
     const infos =
       perspectiveView === EPerspectiveView.Back
         ? [
-            { label: '宽', value: box.width },
-            { label: '高', value: box.depth },
+            {
+              label: '宽',
+              value: width,
+            },
+            {
+              label: '高',
+              value: height,
+            },
           ]
         : [
-            { label: '长', value: box.height },
-            { label: '宽', value: box.width },
+            {
+              label: '长',
+              value: length,
+            },
+            {
+              label: '宽',
+              value: width,
+            },
           ];
 
     return (

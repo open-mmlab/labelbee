@@ -150,8 +150,6 @@ const PointCloudTopView: React.FC<IAnnotationStateProps> = ({ currentData }) => 
         height: ref.current.clientHeight,
       };
 
-      console.error("asd'");
-
       const pointCloudAnnotation = new PointCloudAnnotation({
         container: ref.current,
         size,
