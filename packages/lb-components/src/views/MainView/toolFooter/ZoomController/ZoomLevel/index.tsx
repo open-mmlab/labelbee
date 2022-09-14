@@ -6,9 +6,10 @@ import useSafeState from '@/hooks/useSafeSate';
 
 interface IProps {
   toolInstance: ToolInstance;
+  zoom?: number;
 }
 
-const ZoomLevel: React.FC<IProps> = ({ toolInstance }) => {
+const ZoomLevel: React.FC<IProps> = ({ toolInstance, zoom: basicZoom }) => {
   const [, forceRender] = useSafeState<number>(0);
   useEffect(() => {
     if (toolInstance) {
@@ -19,7 +20,7 @@ const ZoomLevel: React.FC<IProps> = ({ toolInstance }) => {
     }
   }, [toolInstance]);
 
-  const zoom = toolInstance?.zoom ?? 1;
+  const zoom = basicZoom ?? toolInstance?.zoom ?? 1;
 
   return <span className='zoomValue'>{(zoom * 100).toFixed(1)}%</span>;
 };

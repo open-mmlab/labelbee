@@ -6,9 +6,10 @@ export const PointCloudContainer: React.FC<{
   title: string;
   toolbar?: React.ReactElement;
   className?: string;
-}> = ({ title, toolbar, children, className }) => {
+  style?: React.CSSProperties;
+}> = ({ title, toolbar, children, className, style }) => {
   return (
-    <div className={classNames([className, getClassName('point-cloud-container')])}>
+    <div className={classNames([className, getClassName('point-cloud-container')])} style={style}>
       <div className={getClassName('point-cloud-container', 'header')}>
         <span className={getClassName('point-cloud-container', 'header-title')}>{title}</span>
 

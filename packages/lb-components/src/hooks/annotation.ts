@@ -24,6 +24,8 @@ export interface ICustomToolInstance {
 
   // PointCloud Exclusive function
   setSubAttribute: (key: string, value: string) => void;
+
+  updateRotate: () => void;
 }
 
 export interface ICustomToolInstanceProps {
@@ -59,6 +61,7 @@ const useCustomToolInstance = ({ basicInfo }: ICustomToolInstanceProps = {}) => 
     // PointCloud Exclusive function
     setSubAttribute: (key: string, value: string) => {},
     setValid: () => {},
+    updateRotate: () => {},
   });
 
   const onMounted = (instance: any) => {

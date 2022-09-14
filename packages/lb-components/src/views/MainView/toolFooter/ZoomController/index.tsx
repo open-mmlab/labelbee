@@ -13,6 +13,7 @@ interface IZoomControllerProps {
   initialPosition?: () => void;
   zoomIn?: () => void;
   zoomOut?: () => void;
+  zoom?: number; // Allow to show zoom directly
 }
 
 export const ZoomController: React.FC<IZoomControllerProps> = ({
@@ -20,6 +21,7 @@ export const ZoomController: React.FC<IZoomControllerProps> = ({
   initialPosition,
   zoomOut,
   zoomIn,
+  zoom,
 }) => {
   const defaultIcon = mode === 'light' ? adaptIcon : adaptIconBlack;
   return (
@@ -38,7 +40,7 @@ export const ZoomController: React.FC<IZoomControllerProps> = ({
           }}
         >
           <img src={defaultIcon} className='adaptIcon' />
-          <ZoomLevel />
+          <ZoomLevel zoom={zoom} />
         </span>
         <PlusOutlined
           className={`${footerCls}__highlight`}

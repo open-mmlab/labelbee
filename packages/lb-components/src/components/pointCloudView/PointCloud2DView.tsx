@@ -8,6 +8,8 @@ import { connect } from 'react-redux';
 import { IFileItem } from '@/types/data';
 import { LeftOutlined, RightOutlined } from '@ant-design/icons';
 import useSize from '@/hooks/useSize';
+import { useSingleBox } from './hooks/useSingleBox';
+import { ViewOperation } from '@labelbee/lb-annotation';
 
 interface IProps {
   imgInfo: IFileItem;
@@ -48,6 +50,8 @@ const PointCloud2DView = ({ imgInfo }: IProps) => {
   const { pointCloudBoxList, topViewInstance } = useContext(PointCloudContext);
   const [mappingIndex, setMappingIndex] = useState(0);
   const ref = useRef(null);
+  const viewRef = useRef<{ toolInstance: ViewOperation }>();
+  const { selectedBox } = useSingleBox();
   const size = useSize(ref);
 
   const mappingData = imgInfo?.mappingImgList?.[mappingIndex];
@@ -75,6 +79,7 @@ const PointCloud2DView = ({ imgInfo }: IProps) => {
               return {
                 type: v.type,
                 annotation: {
+                  id: pointCloudBox.id,
                   pointList: v.pointList,
                   ...defaultViewStyle,
                 },
@@ -89,41 +94,59 @@ const PointCloud2DView = ({ imgInfo }: IProps) => {
     }
   }, [pointCloudBoxList, mappingData]);
 
-  if (!imgInfo) {
-    return <div />;
-  }
+  const hiddenData = !imgInfo || !imgInfo?.mappingImgList || !(imgInfo?.mappingImgList?.length > 0);
 
-  const { mappingImgList } = imgInfo;
+  useEffect(() => {
+    const toolInstance = viewRef.current?.toolInstance;
 
-  if (!mappingImgList) {
-    return <div />;
-  }
+    if (!selectedBox || !toolInstance) {
+      return;
+    }
+    const selected2data = annotations2d.find((v) => v.annotation.id === selectedBox.info.id);
+
+    if (selected2data?.annotation.pointList?.length > 0) {
+      toolInstance.focusPositionByPointList(selected2data?.annotation.pointList);
+    }
+  }, [selectedBox, viewRef.current, annotations2d]);
 
   return (
     <PointCloudContainer
       className={getClassName('point-cloud-2d-container')}
       title='2D视图'
       toolbar={
-        <Toolbar
-          imgIndex={mappingIndex}
-          imgLength={mappingImgList.length}
-          onNext={() => {
-            if (mappingIndex >= mappingImgList.length - 1) {
-              return;
-            }
-            setMappingIndex((v) => v + 1);
-          }}
-          onPrev={() => {
-            if (mappingIndex <= 0) {
-              return;
-            }
-            setMappingIndex((v) => v - 1);
-          }}
-        />
+        hiddenData ? undefined : (
+          <Toolbar
+            imgIndex={mappingIndex}
+            imgLength={imgInfo.mappingImgList?.length ?? 0}
+            onNext={() => {
+              if (!imgInfo || !imgInfo?.mappingImgList) {
+                return;
+              }
+
+              if (mappingIndex >= imgInfo?.mappingImgList?.length - 1) {
+                return;
+              }
+              setMappingIndex((v) => v + 1);
+            }}
+            onPrev={() => {
+              if (mappingIndex <= 0) {
+                return;
+              }
+              setMappingIndex((v) => v - 1);
+            }}
+          />
+        )
       }
+      style={{ display: hiddenData ? 'none' : 'flex' }}
     >
       <div className={getClassName('point-cloud-2d-image')} ref={ref}>
-        <AnnotationView src={mappingData?.url ?? ''} annotations={annotations2d} size={size} />
+        <AnnotationView
+          src={mappingData?.url ?? ''}
+          annotations={annotations2d}
+          size={size}
+          ref={viewRef}
+          globalStyle={{ display: hiddenData ? 'none' : 'block' }}
+        />
       </div>
     </PointCloudContainer>
   );
