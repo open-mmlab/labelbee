@@ -527,6 +527,7 @@ export class PointCloud {
           geometry.setAttribute('color', new THREE.Float32BufferAttribute(newColor, 3));
           geometry.computeBoundingSphere();
 
+          filterBoxWorker.terminate();
           resolve({ geometry, num });
         };
       });
