@@ -73,6 +73,15 @@ export function UpdateAnnotationConfig(config: string): AnnotationActionTypes {
   };
 }
 
+export function SetTaskStepList({ stepList }: { stepList: IStepInfo[] }): AnnotationActionTypes {
+  return {
+    type: ANNOTATION_ACTIONS.SET_TASK_STEP_LIST,
+    payload: {
+      stepList,
+    },
+  };
+}
+
 export function SetTaskConfig({
   stepList,
   step,
@@ -202,7 +211,7 @@ export function InitTaskData({
   if (loadFileList) {
     tasks.push(UpdateGetFileList(loadFileList));
   }
-  
+
   if (pageSize) {
     tasks.push(UpdatePageSize(pageSize));
   }
@@ -216,6 +225,53 @@ export function InitTaskData({
   tasks.push({
     type: ANNOTATION_ACTIONS.INIT_TOOL,
   });
+
+  return (dispatch: any) => dispatchTasks(dispatch, tasks);
+}
+
+/**
+ * 初始化任务数据
+ * @param param0
+ */
+export function UpdateInjectFunc({
+  onSubmit,
+  onSave,
+  onPageChange,
+  onStepChange,
+  getFileData,
+  pageSize,
+  loadFileList,
+  stepList,
+}: any): any {
+  const tasks: any[] = [];
+
+  if (onSubmit) {
+    tasks.push(UpdateOnSubmit(onSubmit));
+  }
+  if (onSave) {
+    tasks.push(UpdateOnSave(onSave));
+  }
+  if (onPageChange) {
+    tasks.push(UpdateOnPageChange(onPageChange));
+  }
+
+  if (onStepChange) {
+    tasks.push(UpdateOnStepChange(onStepChange));
+  }
+
+  if (getFileData) {
+    tasks.push(UpdateGetFileData(getFileData));
+  }
+
+  if (loadFileList) {
+    tasks.push(UpdateGetFileList(loadFileList));
+  }
+
+  if (pageSize) {
+    tasks.push(UpdatePageSize(pageSize));
+  }
+
+  tasks.push(SetTaskStepList({ stepList }));
 
   return (dispatch: any) => dispatchTasks(dispatch, tasks);
 }

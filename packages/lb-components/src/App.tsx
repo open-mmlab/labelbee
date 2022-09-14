@@ -5,7 +5,7 @@ import { connect } from 'react-redux';
 import { store } from '.';
 import { AppState } from './store';
 import { ANNOTATION_ACTIONS } from './store/Actions';
-import { InitTaskData, loadImgList } from './store/annotation/actionCreators';
+import { InitTaskData, loadImgList, UpdateInjectFunc } from './store/annotation/actionCreators';
 import { LoadFileAndFileData } from './store/annotation/reducer';
 import { ToolInstance } from './store/annotation/types';
 import {
@@ -107,6 +107,33 @@ const App: React.FC<AppProps> = (props) => {
     // 初始化国际化语言
     i18n.changeLanguage(defaultLang);
   }, []);
+
+  useEffect(() => {
+    store.dispatch(
+      UpdateInjectFunc({
+        onSubmit,
+        stepList,
+        getFileData,
+        pageSize,
+        loadFileList,
+        onSave,
+        onPageChange,
+        onStepChange,
+      }),
+    );
+
+    i18n.changeLanguage(defaultLang);
+  }, [
+    onSubmit,
+    stepList,
+    getFileData,
+    pageSize,
+    loadFileList,
+    onSave,
+    onPageChange,
+    onStepChange,
+    defaultLang,
+  ]);
 
   useEffect(() => {
     setToolInstance?.(toolInstance);

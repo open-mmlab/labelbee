@@ -48,11 +48,8 @@ const SwitchAttributeList: React.FC<IProps> = (props) => {
     return null;
   }
 
-  if (
-    (toolInstance?.config.attributeConfigurable === true || isScribbleTool) &&
-    toolInstance?.config?.attributeList
-  ) {
-    const list = toolInstance.config.attributeList.map((i: any) => ({
+  if ((config.attributeConfigurable === true || isScribbleTool) && config?.attributeList) {
+    const list = config.attributeList.map((i: any) => ({
       label: i.key,
       value: i.value,
       color: i?.color,

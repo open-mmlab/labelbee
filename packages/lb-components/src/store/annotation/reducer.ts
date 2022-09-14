@@ -421,6 +421,14 @@ export const annotationReducer = (
       };
     }
 
+    case ANNOTATION_ACTIONS.SET_TASK_STEP_LIST: {
+      const { stepList } = action.payload;
+      return {
+        ...state,
+        stepList,
+      };
+    }
+    
     case ANNOTATION_ACTIONS.SET_TASK_CONFIG: {
       const { stepList, step } = action.payload;
       return {
