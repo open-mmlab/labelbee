@@ -266,13 +266,16 @@ export class PointCloud {
     const { P, R, T } = cameraMatrix;
     const { composeMatrix4 } = this.transferKitti2Matrix(P, R, T);
 
-    const transferViewData = allViewData.map((viewData) => ({
-      type: viewData.type,
-      pointList: viewData.pointList
-        .map((point) => this.rotatePoint(point, boxParams.center, boxParams.rotation))
-        .map((point) => this.lidar2image(point, composeMatrix4))
-        .filter((v) => v !== undefined),
-    }));
+    const transferViewData = allViewData
+      .map((viewData) => ({
+        type: viewData.type,
+        pointList: viewData.pointList
+          .map((point) => this.rotatePoint(point, boxParams.center, boxParams.rotation))
+          .map((point) => this.lidar2image(point, composeMatrix4))
+          .filter((v) => v !== undefined),
+      }))
+      // Clear Empty PointList
+      .filter((v) => v.pointList.length !== 0);
 
     return transferViewData;
   }

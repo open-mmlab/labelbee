@@ -103,7 +103,10 @@ const PointCloud2DView = ({ imgInfo }: IProps) => {
       return;
     }
     const selected2data = annotations2d.find((v) => v.annotation.id === selectedBox.info.id);
-    toolInstance.focusPositionByPointList(selected2data?.annotation.pointList);
+
+    if (selected2data?.annotation.pointList?.length > 0) {
+      toolInstance.focusPositionByPointList(selected2data?.annotation.pointList);
+    }
   }, [selectedBox, viewRef.current, annotations2d]);
 
   return (
