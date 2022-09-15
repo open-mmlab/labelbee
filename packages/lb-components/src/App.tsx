@@ -60,6 +60,11 @@ export interface AppProps {
   defaultLang: 'en' | 'cn'; // 国际化设置
   leftSider?: () => React.ReactNode | React.ReactNode;
 
+  drawLayerSlot?: (props: {
+    zoom: number;
+    currentPos: { x: number; y: number };
+  }) => React.ReactNode;
+
   // 标注信息扩展的功能
   dataInjectionAtCreation: (annotationData: any) => {};
   // 渲染增强

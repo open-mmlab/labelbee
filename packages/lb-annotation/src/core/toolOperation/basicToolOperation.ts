@@ -520,7 +520,7 @@ class BasicToolOperation extends EventListener {
     this.renderBasicCanvas();
 
     this.emit('dependRender');
-    this.emit('renderZoom', zoom);
+    this.emit('renderZoom', zoom, currentPos);
   };
 
   /**
@@ -908,7 +908,7 @@ class BasicToolOperation extends EventListener {
     this.currentPosStorage = newCurrentPos;
     this.imgInfo = imgInfo;
     zoomInfo.ratio = ratio;
-    this.emit('renderZoom', zoom, currentPos);
+    this.emit('renderZoom', zoom, newCurrentPos);
   };
 
   /**

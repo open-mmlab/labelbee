@@ -38,11 +38,11 @@ const AnnotationOperation: React.FC<IProps> = (props: IProps) => {
     renderEnhance,
     stepList,
     step,
+    drawLayerSlot,
   } = props;
+  const [annotationPos, setAnnotationPos] = useState({ zoom: 1, currentPos: { x: 0, y: 0 } });
   const annotationRef = useRef<HTMLDivElement>(null);
   const containerRef = useRef<HTMLDivElement>(null);
-  // const windowSize = useContext(viewportContext);
-  // const canvasSize = getFormatSize(windowSize);
   const size = useSize(annotationRef);
 
   useEffect(() => {
@@ -70,6 +70,14 @@ const AnnotationOperation: React.FC<IProps> = (props: IProps) => {
   }, [annotationEngine, dataInjectionAtCreation, renderEnhance]);
 
   useEffect(() => {
+    const renderZoom = (zoom: number, currentPos: { x: number; y: number }) => {
+      setAnnotationPos({ zoom, currentPos });
+    };
+
+    const dragMove = (props: { currentPos: { x: number; y: number }; zoom: number }) => {
+      setAnnotationPos(props);
+    };
+
     if (toolInstance) {
       toolInstance.singleOn('messageError', (error: string) => {
         message.error(error);
@@ -82,7 +90,17 @@ const AnnotationOperation: React.FC<IProps> = (props: IProps) => {
       toolInstance.singleOn('changeAnnotationShow', () => {
         forceRender((s) => s + 1);
       });
+
+      toolInstance.on('renderZoom', renderZoom);
+      toolInstance.on('dragMove', dragMove);
     }
+
+    return () => {
+      if (toolInstance) {
+        toolInstance.unbind('renderZoom', renderZoom);
+        toolInstance.unbind('dragMove', dragMove);
+      }
+    };
   }, [toolInstance]);
 
   useEffect(() => {
@@ -135,7 +153,9 @@ const AnnotationOperation: React.FC<IProps> = (props: IProps) => {
 
   return (
     <div ref={annotationRef} className='annotationOperation'>
-      <div className='canvas' ref={containerRef} style={size} id='toolContainer' />
+      <div className='canvas' ref={containerRef} style={size} id='toolContainer'>
+        {drawLayerSlot?.(annotationPos)}
+      </div>
       {toolInstance?.isImgError === true && (
         <FileError
           {...size}
