@@ -20,11 +20,9 @@ const AnnotationTips = ({ tips }: IProps) => {
 
   return (
     <div className={`${prefix}-tips`}>
-      <div className=''>
-        <Tooltip placement='bottomRight' title={tips}>
-          <span className=''>{tips}</span>
-        </Tooltip>
-      </div>
+      <Tooltip placement='bottomRight' title={tips}>
+        <span className={`${prefix}-tips__path`}>{tips}</span>
+      </Tooltip>
     </div>
   );
 };

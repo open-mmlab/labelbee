@@ -81,7 +81,7 @@ const mapStateToProps = ({ annotation }: AppState) => {
   const { imgList, loading } = annotation;
   const imgInfo = imgList[annotation.imgIndex] ?? {};
   return {
-    path: imgInfo?.url ?? imgInfo?.path ?? '', // 将当前路径的数据注入
+    path: imgInfo?.path ?? imgInfo?.url ?? '', // 将当前路径的数据注入
     loading,
   };
 };

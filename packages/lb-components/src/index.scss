@@ -33,6 +33,7 @@ $prefix: bee;
   }
 
   &__content {
+    position: relative;
     display: flex;
     flex-direction: column;
   }
@@ -558,10 +559,16 @@ $prefix: bee;
   height: 40px;
   padding: 0 30px;
   width: 100%;
-  text-overflow: ellipsis;
   overflow: hidden;
   white-space: nowrap;
-  cursor: text;
+
+  .#{$prefix}-tips__path {
+    max-width: 40%;
+    margin-left: 20px;
+    text-overflow: ellipsis;
+    overflow: hidden;
+    white-space: nowrap;
+  }
 }
 
 //
