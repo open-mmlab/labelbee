@@ -26,6 +26,8 @@ class ScribbleTool extends BasicToolOperation {
 
   private penSize;
 
+  private startPoint?: ICoordinate; // Origin Coordinate
+
   constructor(props: IProps) {
     super(props);
 
@@ -157,21 +159,34 @@ class ScribbleTool extends BasicToolOperation {
     }
   }
 
+  public clearStatusAfterLeave() {
+    this.onScribbleEnd();
+    this.startPoint = undefined;
+  }
+
+  public onMouseLeave(): void {
+    super.onMouseLeave();
+    this.clearStatusAfterLeave();
+  }
+
   public onScribbleStart(e: MouseEvent) {
-    if (this.cacheContext) {
-      this.cacheContext.save();
-      this.cacheContext.beginPath();
-      this.cacheContext.strokeStyle = this.color;
-      this.cacheContext.lineWidth = this.penSizeWithZoom;
-      this.cacheContext.lineCap = 'round';
-      this.cacheContext.lineJoin = 'round';
-      const originCoordinate = AxisUtils.changePointByZoom(this.getCoordinateUnderZoom(e), 1 / this.zoom);
-      this.cacheContext.moveTo(originCoordinate.x, originCoordinate.y);
+    if (!this.cacheContext) {
+      return;
     }
+
+    this.cacheContext.save();
+    this.cacheContext.beginPath();
+    this.cacheContext.strokeStyle = this.color;
+    this.cacheContext.lineWidth = this.penSizeWithZoom;
+    this.cacheContext.lineCap = 'round';
+    this.cacheContext.lineJoin = 'round';
+    const originCoordinate = AxisUtils.changePointByZoom(this.getCoordinateUnderZoom(e), 1 / this.zoom);
+    this.cacheContext.moveTo(originCoordinate.x, originCoordinate.y);
+    this.startPoint = originCoordinate;
   }
 
   public onScribbleMove(e: MouseEvent) {
-    if (e.buttons === 1 && this.cacheContext) {
+    if (e.buttons === 1 && this.cacheContext && this.startPoint) {
       // this.cacheContext.lineTo(e.offsetX, e.offsetY);
       const originCoordinate = this.getOriginCoordinate(e);
       this.cacheContext.lineTo(originCoordinate.x, originCoordinate.y);
@@ -181,8 +196,11 @@ class ScribbleTool extends BasicToolOperation {
   }
 
   public onScribbleEnd() {
-    this.cacheContext?.closePath();
-    this.cacheContext?.restore();
+    if (this.startPoint) {
+      this.cacheContext?.closePath();
+      this.cacheContext?.restore();
+      this.startPoint = undefined;
+    }
   }
 
   public eraseArc(e: MouseEvent) {
