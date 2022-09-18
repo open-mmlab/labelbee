@@ -60,27 +60,32 @@ class ScribbleTool extends BasicToolOperation {
     this.cacheContext = ctx;
   }
 
-  public setResult(data: IScribbleData[]) {
-    // Only has one layer
-    const { url } = data?.[0] ?? {};
-
-    this.clearResult();
-    if (!url) {
-      this.render();
-      return;
-    }
-
+  public updateUrl2CacheContext(url: string) {
     ImgConversionUtils.createImgDom(url).then((img) => {
       if (!this.cacheContext) {
         this.createCacheCanvas(img);
       }
       if (this.cacheContext) {
         this.cacheContext.save();
+        this.cacheContext.clearRect(0, 0, img.width, img.height);
         this.cacheContext.drawImage(img, 0, 0, img.width, img.height);
         this.cacheContext.restore();
         this.render();
       }
     });
+  }
+
+  public setResult(data: IScribbleData[]) {
+    // Only has one layer
+    const { url } = data?.[0] ?? {};
+
+    this.history.initRecord([url], !!url);
+    this.clearResult();
+    if (!url) {
+      this.render();
+      return;
+    }
+    this.updateUrl2CacheContext(url);
   }
 
   public onKeyDown(e: KeyboardEvent): boolean | void {
@@ -200,6 +205,7 @@ class ScribbleTool extends BasicToolOperation {
       this.cacheContext?.closePath();
       this.cacheContext?.restore();
       this.startPoint = undefined;
+      this.history.pushHistory(this.cacheCanvas?.toDataURL('image/png', 0));
     }
   }
 
@@ -269,6 +275,22 @@ class ScribbleTool extends BasicToolOperation {
       return;
     }
     this.renderPoint(this.penSize / 2);
+  }
+
+  /** 撤销 */
+  public undo() {
+    const url = this.history.undo();
+
+    if (url && this.cacheCanvas) {
+      this.updateUrl2CacheContext(url);
+    }
+  }
+
+  public redo() {
+    const url = this.history.redo();
+    if (url && this.cacheCanvas) {
+      this.updateUrl2CacheContext(url);
+    }
   }
 }
 
