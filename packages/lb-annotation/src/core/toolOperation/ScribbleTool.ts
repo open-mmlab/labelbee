@@ -50,7 +50,7 @@ class ScribbleTool extends BasicToolOperation {
     this.penSize = size;
   }
 
-  public createCacheCanvas(imgNode?: HTMLImageElement) {
+  public initCacheCanvas(imgNode?: HTMLImageElement) {
     if (this.cacheCanvas || !imgNode) {
       return;
     }
@@ -60,19 +60,35 @@ class ScribbleTool extends BasicToolOperation {
     this.cacheContext = ctx;
   }
 
+  public updateCacheCanvasSize(imgNode: HTMLImageElement) {
+    if (this.cacheCanvas) {
+      this.cacheCanvas.width = imgNode.width;
+      this.cacheCanvas.height = imgNode.height;
+    }
+  }
+
   public updateUrl2CacheContext(url: string) {
     ImgConversionUtils.createImgDom(url).then((img) => {
       if (!this.cacheContext) {
-        this.createCacheCanvas(img);
+        this.initCacheCanvas(img);
       }
       if (this.cacheContext) {
         this.cacheContext.save();
-        this.cacheContext.clearRect(0, 0, img.width, img.height);
+        this.clearResult();
         this.cacheContext.drawImage(img, 0, 0, img.width, img.height);
         this.cacheContext.restore();
         this.render();
       }
     });
+  }
+
+  public setImgNode(imgNode: HTMLImageElement, basicImgInfo?: Partial<{ valid: boolean; rotate: number }>): void {
+    super.setImgNode(imgNode, basicImgInfo);
+    if (this.cacheCanvas) {
+      this.updateCacheCanvasSize(imgNode);
+    } else {
+      this.initCacheCanvas(imgNode);
+    }
   }
 
   public setResult(data: IScribbleData[]) {
@@ -112,7 +128,7 @@ class ScribbleTool extends BasicToolOperation {
     }
 
     // Init Image
-    this.createCacheCanvas(this.imgNode);
+    this.initCacheCanvas(this.imgNode);
     this.mouseEvents('onMouseDown').call(this, e);
   };
 
@@ -245,9 +261,13 @@ class ScribbleTool extends BasicToolOperation {
     return [[], this.basicImgInfo, { imgBase64 }];
   }
 
-  public clearResult() {
+  public clearCacheCanvas() {
     this.cacheContext?.clearRect(0, 0, this.cacheContext.canvas.width, this.cacheContext.canvas.height);
     this.render();
+  }
+
+  public clearResult() {
+    this.clearCacheCanvas();
   }
 
   public renderPoint(radius: number) {
