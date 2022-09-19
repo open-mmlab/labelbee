@@ -777,10 +777,10 @@ export class PointCloud {
     this.render();
   }
 
-  public generateBoxArrow = ({ width, depth }: IPointCloudBox) => {
+  public generateBoxArrow = ({ width }: IPointCloudBox) => {
     const dir = new THREE.Vector3(1, 0, 0);
-    const origin = new THREE.Vector3(-width / 2, 0, -depth / 2);
-    const arrowLen = width;
+    const origin = new THREE.Vector3(width / 2, 0, 0);
+    const arrowLen = 2;
     const hex = 0xffff00;
     const arrowHelper = new THREE.ArrowHelper(dir, origin, arrowLen, hex);
     arrowHelper.visible = this.showDirection;
