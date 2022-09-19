@@ -44,8 +44,8 @@ export const SizeInfoForView = ({ perspectiveView }: { perspectiveView: EPerspec
               value: length,
             },
             {
-              label: t('Width'),
-              value: width,
+              label: t('Height'),
+              value: height,
             },
           ];
 
