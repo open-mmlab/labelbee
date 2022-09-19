@@ -17,8 +17,9 @@ import rectSvg from '@/assets/annotation/rectTool/icon_rect.svg';
 import rectASvg from '@/assets/annotation/rectTool/icon_rect_a.svg';
 import { cTool } from '@labelbee/lb-annotation';
 import classnames from 'classnames';
+import { useTranslation } from 'react-i18next';
 
-const { EPointCloudName, TOOL_NAME } = cTool;
+const { EPointCloudName, TOOL_NAME, TOOL_NAME_EN } = cTool;
 
 const toolList = [
   {
@@ -43,6 +44,13 @@ const toolList = [
   },
 ];
 
+const getToolNameVersion = (lang: string) => {
+  if (lang === 'en') {
+    return TOOL_NAME_EN;
+  }
+  return TOOL_NAME;
+};
+
 export const ToolIcons = ({
   toolName,
   selectedToolName,
@@ -52,6 +60,7 @@ export const ToolIcons = ({
   selectedToolName?: string;
   onChange: (toolName: EToolName) => void;
 }) => {
+  const { i18n } = useTranslation();
   const renderTools = toolList?.filter((item) => {
     if (toolName === (EPointCloudName.PointCloud as unknown as EToolName)) {
       return [EToolName.Polygon, EToolName.Rect].includes(item?.toolName);
@@ -81,7 +90,7 @@ export const ToolIcons = ({
                 [`${sidebarCls}__toolOption__selected`]: isSelected,
               })}
             >
-              {TOOL_NAME[tool.toolName]}
+              {getToolNameVersion(i18n.language)[tool.toolName]}
             </span>
           </span>
         );

@@ -18,7 +18,7 @@ import { AppState } from '@/store';
  */
 const useOperationList = (toolInstance: any) => {
   const [updateNum, forceRender] = useState(0);
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
   const { currentData } = useSelector((state: AppState) => {
     const { imgList, imgIndex } = state.annotation;
 
@@ -83,7 +83,7 @@ const useOperationList = (toolInstance: any) => {
       setValidity,
       copyPrevious,
     };
-  }, [toolInstance, updateNum, currentData]);
+  }, [toolInstance, updateNum, currentData, i18n.language]);
 };
 
 export default useOperationList;

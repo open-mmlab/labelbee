@@ -22,6 +22,7 @@ import { aMapStateToProps, IAnnotationStateProps } from '@/store/annotation/map'
 import { connect } from 'react-redux';
 import { usePointCloudViews } from './hooks/usePointCloudViews';
 import useSize from '@/hooks/useSize';
+import { useTranslation } from 'react-i18next';
 
 const { EPolygonPattern } = cTool;
 
@@ -140,7 +141,7 @@ const PointCloudTopView: React.FC<IAnnotationStateProps> = ({ currentData }) => 
   const { addPolygon, deletePolygon } = usePolygon();
   const { deletePointCloudBox } = useSingleBox();
   const [zAxisLimit, setZAxisLimit] = useState<number>(10);
-
+  const { t } = useTranslation();
   const pointCloudViews = usePointCloudViews();
 
   useLayoutEffect(() => {
@@ -250,7 +251,7 @@ const PointCloudTopView: React.FC<IAnnotationStateProps> = ({ currentData }) => 
   return (
     <PointCloudContainer
       className={getClassName('point-cloud-container', 'top-view')}
-      title='俯视图'
+      title={t('TopView')}
       toolbar={<TopViewToolbar currentData={currentData} />}
     >
       <div style={{ position: 'relative', flex: 1 }}>

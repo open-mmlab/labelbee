@@ -9,6 +9,7 @@ import React, { useEffect, useState } from 'react';
 import { PointCloudContext } from './PointCloudContext';
 import { UnitUtils } from '@labelbee/lb-annotation';
 import { useSingleBox } from './hooks/useSingleBox';
+import { useTranslation } from 'react-i18next';
 
 const DECIMAL_PLACES = 2;
 
@@ -20,6 +21,8 @@ const DECIMAL_PLACES = 2;
 export const SizeInfoForView = ({ perspectiveView }: { perspectiveView: EPerspectiveView }) => {
   const { pointCloudBoxList, selectedID } = React.useContext(PointCloudContext);
   const box = pointCloudBoxList.find((i) => i.id === selectedID);
+  const trans = useTranslation();
+  const { t } = trans;
 
   if (selectedID && box) {
     const { length, width, height } = PointCloudUtils.transferBox2Kitti(box);
@@ -27,22 +30,22 @@ export const SizeInfoForView = ({ perspectiveView }: { perspectiveView: EPerspec
       perspectiveView === EPerspectiveView.Back
         ? [
             {
-              label: '宽',
+              label: t('Width'),
               value: width,
             },
             {
-              label: '高',
+              label: t('Height'),
               value: height,
             },
           ]
         : [
             {
-              label: '长',
+              label: t('Length'),
               value: length,
             },
             {
-              label: '宽',
-              value: width,
+              label: t('Height'),
+              value: height,
             },
           ];
 
@@ -66,6 +69,8 @@ export const BoxInfos = () => {
   const ptCtx = React.useContext(PointCloudContext);
   const { selectedBox } = useSingleBox();
   const [infos, setInfos] = useState<Array<{ label: string; value: string }>>([]);
+  const trans = useTranslation();
+  const { t, i18n } = trans;
 
   useEffect(() => {
     if (!selectedBox) {
@@ -78,19 +83,19 @@ export const BoxInfos = () => {
 
     let infos = [
       {
-        label: '长',
+        label: t('Length'),
         value: length.toFixed(DECIMAL_PLACES),
       },
       {
-        label: '宽',
+        label: t('Width'),
         value: width.toFixed(DECIMAL_PLACES),
       },
       {
-        label: '高',
+        label: t('Height'),
         value: height.toFixed(DECIMAL_PLACES),
       },
       {
-        label: '朝向角',
+        label: t('Rotation_y'),
         value: UnitUtils.rad2deg(rotation_y).toFixed(DECIMAL_PLACES),
       },
     ];
@@ -103,12 +108,12 @@ export const BoxInfos = () => {
       }
 
       infos.push({
-        label: '点数',
+        label: t('PointCount'),
         value: `${data.num}`,
       });
       setInfos(infos);
     });
-  }, [selectedBox]);
+  }, [selectedBox, i18n.language]);
 
   if (selectedBox) {
     return (
@@ -136,6 +141,7 @@ export const BoxInfos = () => {
 
 export const PointCloudValidity = () => {
   const ptCtx = React.useContext(PointCloudContext);
+  const { t } = useTranslation();
 
   if (ptCtx.valid === false) {
     return (
@@ -151,7 +157,7 @@ export const PointCloudValidity = () => {
           zIndex: 20,
         }}
       >
-        无效
+        {t('Invalid')}
       </div>
     );
   }

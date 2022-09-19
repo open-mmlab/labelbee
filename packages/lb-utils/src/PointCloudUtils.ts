@@ -249,7 +249,7 @@ class PointCloudUtils {
       height: boxParams.depth,
       length: boxParams.width,
       width: boxParams.height,
-      
+
       rotation_y: this.transferRotation2KittiRotation_y(boxParams.rotation),
     };
   }
@@ -271,12 +271,20 @@ class PointCloudUtils {
 
   /**
    * rotation range = [0, 2Pi]
+   * kitti rotation_y range = [-PI, PI]
    * @param rotation
    */
   public static transferRotation2KittiRotation_y(rotation: number) {
     if (rotation < 0) {
       return -rotation;
     }
+
+    const newRotation = 2 * Math.PI - rotation;
+
+    if (newRotation > Math.PI && newRotation < 2 * Math.PI) {
+      return -1 * rotation;
+    }
+
     return 2 * Math.PI - rotation;
   }
 }

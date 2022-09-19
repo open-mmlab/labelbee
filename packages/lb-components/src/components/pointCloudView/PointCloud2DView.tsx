@@ -10,6 +10,7 @@ import { LeftOutlined, RightOutlined } from '@ant-design/icons';
 import useSize from '@/hooks/useSize';
 import { useSingleBox } from './hooks/useSingleBox';
 import { ViewOperation } from '@labelbee/lb-annotation';
+import { useTranslation } from 'react-i18next';
 
 interface IProps {
   imgInfo: IFileItem;
@@ -53,6 +54,7 @@ const PointCloud2DView = ({ imgInfo }: IProps) => {
   const viewRef = useRef<{ toolInstance: ViewOperation }>();
   const { selectedBox } = useSingleBox();
   const size = useSize(ref);
+  const { t } = useTranslation();
 
   const mappingData = imgInfo?.mappingImgList?.[mappingIndex];
 
@@ -112,7 +114,7 @@ const PointCloud2DView = ({ imgInfo }: IProps) => {
   return (
     <PointCloudContainer
       className={getClassName('point-cloud-2d-container')}
-      title='2D视图'
+      title={t('2DView')}
       toolbar={
         hiddenData ? undefined : (
           <Toolbar

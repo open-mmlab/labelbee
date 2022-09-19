@@ -326,11 +326,13 @@ export class PointCloud {
     const cube = new THREE.Mesh(geometry, material);
     const box = new THREE.BoxHelper(cube, color);
     const arrow = this.generateBoxArrow(boxParams);
-    const boxID = this.generateBoxTrackID(boxParams);
+
+    // Temporarily hide
+    // const boxID = this.generateBoxTrackID(boxParams);
+    // group.add(boxID);
 
     group.add(box);
     group.add(arrow);
-    group.add(boxID);
     group.position.set(center.x, center.y, center.z);
 
     group.rotation.set(0, 0, rotation);
@@ -777,10 +779,10 @@ export class PointCloud {
     this.render();
   }
 
-  public generateBoxArrow = ({ width, depth }: IPointCloudBox) => {
+  public generateBoxArrow = ({ width }: IPointCloudBox) => {
     const dir = new THREE.Vector3(1, 0, 0);
-    const origin = new THREE.Vector3(-width / 2, 0, -depth / 2);
-    const arrowLen = width;
+    const origin = new THREE.Vector3(width / 2, 0, 0);
+    const arrowLen = 2;
     const hex = 0xffff00;
     const arrowHelper = new THREE.ArrowHelper(dir, origin, arrowLen, hex);
     arrowHelper.visible = this.showDirection;
@@ -789,6 +791,10 @@ export class PointCloud {
   };
 
   public generateBoxTrackID = (boxParams: IPointCloudBox) => {
+    if (!boxParams.trackID) {
+      return;
+    }
+
     const texture = new THREE.Texture(this.getTextCanvas(boxParams.trackID.toString()));
     texture.needsUpdate = true;
     const sprite = new THREE.SpriteMaterial({ map: texture, depthWrite: false });

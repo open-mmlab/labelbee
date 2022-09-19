@@ -324,14 +324,15 @@ export const usePointCloudViews = () => {
 
   const { pointCloudInstance: topViewPointCloud } = topViewInstance;
 
-  const getNextTrackID = () => {
-    if (pointCloudBoxList.length > 0) {
-      const sortedPcList = pointCloudBoxList.sort((a, b) => a.trackID - b.trackID);
-      return sortedPcList.slice(-1)[0]?.trackID + 1;
-    }
+  // Temporarily hide
+  // const getNextTrackID = () => {
+  //   if (pointCloudBoxList.length > 0) {
+  //     const sortedPcList = pointCloudBoxList.sort((a, b) => a.trackID - b.trackID);
+  //     return sortedPcList.slice(-1)[0]?.trackID + 1;
+  //   }
 
-    return 1;
-  };
+  //   return 1;
+  // };
 
   const mainViewGenBox = (boxParams: IPointCloudBox) => {
     mainViewInstance?.generateBox(boxParams);
@@ -346,9 +347,11 @@ export const usePointCloudViews = () => {
     });
     const polygonOperation = topViewInstance?.pointCloud2dOperation;
 
-    const boxParams: IPointCloudBox = Object.assign(newParams, {
-      trackID: getNextTrackID(),
-    });
+    // Temporarily hide
+    // const boxParams: IPointCloudBox = Object.assign(newParams, {
+    //   trackID: getNextTrackID(),
+    // });
+    const boxParams: IPointCloudBox = newParams;
 
     polygonOperation.setSelectedIDs([newPolygon.id]);
     setSelectedIDs(boxParams.id);
