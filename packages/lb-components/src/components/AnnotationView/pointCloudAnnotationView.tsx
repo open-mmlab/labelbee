@@ -54,6 +54,12 @@ const PointCloudAnnotationView = (props: IProps) => {
         instance.current?.generateBox(v, v.id);
       });
     }
+    return () => {
+      const boxParamsList = PointCloudUtils.getBoxParamsFromResultList(result);
+      boxParamsList.forEach((v: IPointCloudBox) => {
+        instance.current?.removeObjectByName(v.id);
+      });
+    };
   }, [result]);
 
   return <div style={size} ref={refCallback} />;
