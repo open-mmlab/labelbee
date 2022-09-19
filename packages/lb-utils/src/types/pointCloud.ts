@@ -76,8 +76,8 @@ export interface IPointCloudBox extends IVolume {
   center: I3DSpaceCoord;
   id: string;
   rotation: number;
-  trackID: number;
   valid: boolean;
+  trackID?: number; // It can be deleted.
   subAttribute?: {
     [k: string]: string;
   };

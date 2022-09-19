@@ -44,7 +44,7 @@ const toolList = [
   },
 ];
 
-const getToolNameVersion = (lang: 'en' | 'cn') => {
+const getToolNameVersion = (lang: string) => {
   if (lang === 'en') {
     return TOOL_NAME_EN;
   }
