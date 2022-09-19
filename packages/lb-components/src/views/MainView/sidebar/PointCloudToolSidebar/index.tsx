@@ -183,36 +183,39 @@ const AttributeUpdater = ({
         </Col>
       </Row>
       <div style={titleStyle}> {t('SubAttribute')}</div>
-      {subAttributeList.map((subAttribute) => (
-        <Row key={subAttribute.value} style={{ marginBottom: 18 }}>
-          <Col
-            span={9}
-            style={{
-              color: '#999999',
-              display: 'flex',
-              justifyContent: 'flex-start',
-              alignItems: 'center',
-            }}
-          >
-            {subAttribute.key}
-          </Col>
-          <Col span={15}>
-            <Select
-              style={{ width: '100%' }}
-              bordered={false}
-              value={ptx.selectedPointCloudBox?.subAttribute?.[subAttribute.value]}
-              placeholder={t('PleaseSelect')}
-              onChange={(value) => setSubAttribute(subAttribute.value, value)}
-            >
-              {subAttribute.subSelected.map((sub: any) => (
-                <Select.Option key={sub.value} value={sub.value}>
-                  {sub.key}
-                </Select.Option>
-              ))}
-            </Select>
-          </Col>
-        </Row>
-      ))}
+      {subAttributeList.map(
+        (subAttribute) =>
+          subAttribute?.subSelected && (
+            <Row key={subAttribute.value} style={{ marginBottom: 18 }}>
+              <Col
+                span={9}
+                style={{
+                  color: '#999999',
+                  display: 'flex',
+                  justifyContent: 'flex-start',
+                  alignItems: 'center',
+                }}
+              >
+                {subAttribute.key}
+              </Col>
+              <Col span={15}>
+                <Select
+                  style={{ width: '100%' }}
+                  bordered={false}
+                  value={ptx.selectedPointCloudBox?.subAttribute?.[subAttribute.value]}
+                  placeholder={t('PleaseSelect')}
+                  onChange={(value) => setSubAttribute(subAttribute.value, value)}
+                >
+                  {subAttribute.subSelected.map((sub: any) => (
+                    <Select.Option key={sub.value} value={sub.value}>
+                      {sub.key}
+                    </Select.Option>
+                  ))}
+                </Select>
+              </Col>
+            </Row>
+          ),
+      )}
     </div>
   );
 };
