@@ -19,6 +19,7 @@ import { useSingleBox } from './hooks/useSingleBox';
 import { Switch } from 'antd';
 import useSize from '@/hooks/useSize';
 import { usePointCloudViews } from './hooks/usePointCloudViews';
+import { useTranslation } from 'react-i18next';
 
 const pointCloudID = 'LABELBEE-POINTCLOUD';
 const PointCloud3DContext = React.createContext<{
@@ -82,6 +83,7 @@ const PointCloud3D: React.FC<IAnnotationStateProps> = ({ currentData }) => {
   const ref = useRef<HTMLDivElement>(null);
   const { initPointCloud3d } = usePointCloudViews();
   const size = useSize(ref);
+  const { t } = useTranslation();
 
   useEffect(() => {
     if (!ptCtx.mainViewInstance) {
@@ -144,7 +146,7 @@ const PointCloud3D: React.FC<IAnnotationStateProps> = ({ currentData }) => {
 
   const PointCloud3DTitle = (
     <div>
-      <span style={{ marginRight: 8 }}>显示箭头</span>
+      <span style={{ marginRight: 8 }}>{t('ShowArrows')}</span>
       <Switch
         size='small'
         checked={showDirection}
@@ -159,7 +161,7 @@ const PointCloud3D: React.FC<IAnnotationStateProps> = ({ currentData }) => {
   return (
     <PointCloudContainer
       className={getClassName('point-cloud-3d-container')}
-      title='3D视图'
+      title={t('3DView')}
       toolbar={PointCloud3DTitle}
       style={{
         height:

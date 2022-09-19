@@ -15,9 +15,8 @@ import { aMapStateToProps, IAnnotationStateProps } from '@/store/annotation/map'
 import { usePointCloudViews } from './hooks/usePointCloudViews';
 import { useSingleBox } from './hooks/useSingleBox';
 import EmptyPage from './components/EmptyPage';
-
 import useSize from '@/hooks/useSize';
-
+import { useTranslation } from 'react-i18next';
 /**
  * Get the offset from canvas2d-coordinate to world coordinate
  * @param currentPos
@@ -73,9 +72,9 @@ const PointCloudSideView: React.FC<IAnnotationStateProps> = ({ currentData }) =>
   const ptCtx = React.useContext(PointCloudContext);
   const { sideViewUpdateBox } = usePointCloudViews();
   const { selectedBox } = useSingleBox();
-
   const ref = useRef<HTMLDivElement>(null);
   const size = useSize(ref);
+  const { t } = useTranslation();
 
   useEffect(() => {
     if (ref.current) {
@@ -147,7 +146,7 @@ const PointCloudSideView: React.FC<IAnnotationStateProps> = ({ currentData }) =>
   return (
     <PointCloudContainer
       className={getClassName('point-cloud-container', 'side-view')}
-      title='侧视图'
+      title={t('SideView')}
       toolbar={<SizeInfoForView perspectiveView={EPerspectiveView.Left} />}
     >
       <div className={getClassName('point-cloud-container', 'bottom-view-content')}>

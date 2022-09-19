@@ -17,6 +17,7 @@ import { aMapStateToProps, IAnnotationStateProps } from '@/store/annotation/map'
 import { synchronizeSideView, synchronizeTopView } from './hooks/usePointCloudViews';
 import useSize from '@/hooks/useSize';
 import EmptyPage from './components/EmptyPage';
+import { useTranslation } from 'react-i18next';
 
 /**
  * 统一一下，将其拓展为 二维转换为 三维坐标的转换
@@ -74,6 +75,7 @@ const PointCloudSideView = ({ currentData }: IAnnotationStateProps) => {
   const ref = useRef<HTMLDivElement>(null);
   const size = useSize(ref);
   const { updateSelectedBox, selectedBox } = useSingleBox();
+  const { t } = useTranslation();
 
   useEffect(() => {
     if (ref.current) {
@@ -181,7 +183,7 @@ const PointCloudSideView = ({ currentData }: IAnnotationStateProps) => {
   return (
     <PointCloudContainer
       className={getClassName('point-cloud-container', 'back-view')}
-      title='背视图'
+      title={t('BackView')}
       toolbar={<SizeInfoForView perspectiveView={EPerspectiveView.Back} />}
     >
       <div className={getClassName('point-cloud-container', 'bottom-view-content')}>

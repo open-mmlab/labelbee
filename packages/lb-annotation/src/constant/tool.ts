@@ -93,6 +93,29 @@ export const TOOL_NAME: { [a: string]: string } = {
   [EPointCloudName.PointCloud]: '点云',
 };
 
+export const TOOL_NAME_EN: { [a: string]: string } = {
+  [EToolName.Rect]: 'Rect',
+  [EToolName.Tag]: 'Tag',
+  [EToolName.Point]: 'Point',
+  [EToolName.PointMarker]: 'PointMarker',
+  [EToolName.Segmentation]: 'Segmentation',
+  [EToolName.Filter]: 'Filter',
+  [EToolName.Text]: 'Text',
+  [EToolName.Polygon]: 'Polygon',
+  [EToolName.Line]: 'Line',
+  [EToolName.LineMarker]: 'LineMarker',
+  [EToolName.FolderTag]: 'FolderTag',
+  [EToolName.RectTrack]: 'RectTrack',
+  [EToolName.Face]: 'Face',
+  [EToolName.ClientAttribute]: 'ClientAttribute',
+  [EToolName.OCRRelation]: 'OCRRelation',
+  [EToolName.SegmentByRect]: 'SegmentByRect',
+  [EVideoToolName.VideoTextTool]: 'VideoTextTool',
+  [EVideoToolName.VideoTagTool]: 'VideoTagTool',
+  [EVideoToolName.VideoClipTool]: 'VideoClipTool',
+  [EPointCloudName.PointCloud]: 'PointCloud',
+};
+
 export enum EDependPattern {
   'noDepend' = 1, // 无依赖对象
   'dependOrigin', // 依赖原题

@@ -11,6 +11,7 @@ import { jsonParser } from '@/utils';
 import { ICustomToolInstance } from '@/hooks/annotation';
 import { useStatus } from '@/components/pointCloudView/hooks/useStatus';
 import { useSingleBox } from '@/components/pointCloudView/hooks/useSingleBox';
+import { useTranslation } from 'react-i18next';
 
 interface IProps {
   stepInfo: IStepInfo;
@@ -144,6 +145,7 @@ const AttributeUpdater = ({
   subAttributeList: any[]; // TODO
 }) => {
   const ptx = useContext(PointCloudContext);
+  const { t } = useTranslation();
 
   const titleStyle = {
     fontWeight: 400,
@@ -161,12 +163,12 @@ const AttributeUpdater = ({
 
   return (
     <div style={{ padding: 24, borderBottom: '1px solid #eee' }}>
-      <div style={{ marginBottom: 20, fontSize: 14, fontWeight: 500 }}>标签</div>
+      <div style={{ marginBottom: 20, fontSize: 14, fontWeight: 500 }}>{t('Tag')}</div>
       <Row style={{ marginBottom: 12 }}>
-        <Col span={10} style={titleStyle}>
-          主属性
+        <Col span={9} style={titleStyle}>
+          {t('Attribute')}
         </Col>
-        <Col span={14}>
+        <Col span={15}>
           <Radio.Group
             style={{ width: '100%' }}
             value={ptx.selectedPointCloudBox?.attribute}
@@ -180,18 +182,26 @@ const AttributeUpdater = ({
           </Radio.Group>
         </Col>
       </Row>
-      <div style={titleStyle}>副属性</div>
+      <div style={titleStyle}> {t('SubAttribute')}</div>
       {subAttributeList.map((subAttribute) => (
         <Row key={subAttribute.value} style={{ marginBottom: 18 }}>
-          <Col span={10} style={{ color: '#999999' }}>
+          <Col
+            span={9}
+            style={{
+              color: '#999999',
+              display: 'flex',
+              justifyContent: 'flex-start',
+              alignItems: 'center',
+            }}
+          >
             {subAttribute.key}
           </Col>
-          <Col span={14}>
+          <Col span={15}>
             <Select
               style={{ width: '100%' }}
               bordered={false}
               value={ptx.selectedPointCloudBox?.subAttribute?.[subAttribute.value]}
-              placeholder='请填写~'
+              placeholder={t('PleaseSelect')}
               onChange={(value) => setSubAttribute(subAttribute.value, value)}
             >
               {subAttribute.subSelected.map((sub: any) => (
