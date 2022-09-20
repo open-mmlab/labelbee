@@ -28,7 +28,6 @@ export const ViewportProviderComponent = (props: any) => {
     dispatch,
     annotation: { skipBeforePageTurning },
   } = props;
-  console.log('viewport', props);
   const [width] = useState(window.innerWidth);
   const [height] = useState(window.innerHeight);
 

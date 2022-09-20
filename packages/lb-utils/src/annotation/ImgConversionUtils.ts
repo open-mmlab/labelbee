@@ -146,12 +146,12 @@ class ImgConversionUtils {
 
             // If pixel edge is the same with the customColor with the scope of 2.
             if (
-              MathUtils.isInRange(r, [v.rgb.r - scope, v.rgb.r + scope]) &&
-              MathUtils.isInRange(g, [v.rgb.g - scope, v.rgb.g + scope]) &&
-              MathUtils.isInRange(b, [v.rgb.b - scope, v.rgb.b + scope])
-              // r >= v.rgb.r - scope && r <= v.rgb.r + scope && 
-              // g >= v.rgb.g - scope && g <= v.rgb.g + scope && 
-              // b >= v.rgb.b - scope && b <= v.rgb.r + scope 
+              r >= v.rgb.r - scope &&
+              r <= v.rgb.r + scope &&
+              g >= v.rgb.g - scope &&
+              g <= v.rgb.g + scope &&
+              b >= v.rgb.b - scope &&
+              b <= v.rgb.b + scope
             ) {
               color = `rgb(${v.channel},${v.channel},${v.channel})`;
               return true;
@@ -194,7 +194,6 @@ class ImgConversionUtils {
     size: { width: number; height: number };
     getColor: ({ r, g, b, a }: IColor) => string;
   }) {
-    debugger;
     for (let i = 0; i < imgData.data.length / 4; i++) {
       const index = i * 4;
       const r = imgData.data[index];
@@ -206,12 +205,10 @@ class ImgConversionUtils {
       if (!color) {
         continue;
       }
-      ctx.save();
       ctx.fillStyle = color;
       const x = Math.floor(i % size.width);
       const y = Math.floor(i / size.width);
       ctx.fillRect(x, y, 1, 1);
-      ctx.restore();
     }
   }
 
