@@ -1,5 +1,5 @@
 import { cTool } from '@labelbee/lb-annotation';
-const { EVideoToolName, EToolName } = cTool;
+const { EVideoToolName, EToolName, EPointCloudName } = cTool;
 
 const rectToolConfig = {
   showConfirm: false,
@@ -149,6 +149,51 @@ const polygonConfig = {
   customFormat: '',
 };
 
+const pointCloudConfig = {
+  // 主属性
+  attributeList: [
+    {
+      key: '类别1',
+      value: 'class-1',
+    },
+    {
+      key: '类别Iq',
+      value: 'class-Iq',
+    },
+  ],
+  // 标注半径范围
+  radius: 90,
+  // 副属性配置开关
+  secondaryAttributeConfigurable: true,
+  // 副属性
+  inputList: [
+    {
+      key: '类别1',
+      value: 'class1',
+      subSelected: [
+        { key: '选项1-1', value: 'option1' },
+        { key: '选项1-2', value: 'option2' },
+      ],
+    },
+    {
+      key: '类别v0',
+      value: 'class-v0',
+      subSelected: [
+        { key: '选项2-1', value: 'option2-1' },
+        { key: '选项2-2', value: 'option2-2' },
+        { key: '选项2-3', value: 'option2-3' },
+      ],
+    },
+    {
+      key: '类别Rt',
+      value: 'class-Rt',
+      subSelected: [{ key: '选项3-1', value: 'option3-1' }],
+    },
+  ],
+  // 框内点数下限
+  lowerLimitPointsNumInBox: 5,
+};
+
 export const getConfig = (tool) => {
   if (tool === EToolName.Line) {
     return lineToolConfig;
@@ -174,6 +219,10 @@ export const getConfig = (tool) => {
     return tagToolConfig;
   }
 
+  if (tool === EPointCloudName.PointCloud) {
+    return pointCloudConfig;
+  }
+
   if (tool === EToolName.ScribbleTool) {
     return scribbleToolConfig;
   }
@@ -186,11 +235,20 @@ export const getStepList = (tool, sourceStep, step) => {
 };
 
 const getStepConfig = (tool, step, sourceStep) => {
+  let toolList = tool ?? EToolName.Rect;
+  let toolName = tool;
+
+  const splitChar = ' ';
+  if (toolList.indexOf(splitChar) > -1) {
+    toolList = tool.split(splitChar);
+    toolName = toolList[toolList.length - 1];
+  }
+
   return {
     step: step ?? 1,
     dataSourceStep: sourceStep || 0,
-    tool: tool ?? EToolName.Rect,
-    config: JSON.stringify(getConfig(tool)),
+    tool: toolList,
+    config: JSON.stringify(getConfig(toolName)),
   };
 };
 

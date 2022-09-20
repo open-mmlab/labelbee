@@ -1,15 +1,17 @@
 import { isNumber } from 'lodash';
+import { styleDefaultConfig } from '@/constant/defaultConfig';
+import { EToolName } from '@/constant/tool';
+import { IPolygonConfig, IPolygonData } from '@/types/tool/polygon';
+import MathUtils from '@/utils/MathUtils';
+import AxisUtils, { CoordinateUtils } from '@/utils/tool/AxisUtils';
 import CanvasUtils from '@/utils/tool/CanvasUtils';
 import CommonToolUtils from '@/utils/tool/CommonToolUtils';
-import MathUtils from '@/utils/MathUtils';
-import { styleDefaultConfig } from '@/constant/defaultConfig';
-import AxisUtils, { CoordinateUtils } from '@/utils/tool/AxisUtils';
-import { EToolName } from '@/constant/tool';
 import LineToolUtils from '@/utils/tool/LineToolUtils';
-import { IPolygonConfig, IPolygonData } from '@/types/tool/polygon';
 import { EDragStatus, EGrowthMode, ELang } from '../../constant/annotation';
 import EKeyCode from '../../constant/keyCode';
 import { BASE_ICON, COLORS_ARRAY } from '../../constant/style';
+import locale from '../../locales';
+import { EMessage } from '../../locales/constants';
 import ActionsHistory from '../../utils/ActionsHistory';
 import AttributeUtils from '../../utils/tool/AttributeUtils';
 import DblClickEventListener from '../../utils/tool/DblClickEventListener';
@@ -18,8 +20,6 @@ import ImgPosUtils from '../../utils/tool/ImgPosUtils';
 import RenderDomUtils from '../../utils/tool/RenderDomUtils';
 import ZoomUtils from '../../utils/tool/ZoomUtils';
 import EventListener from './eventListener';
-import locale from '../../locales';
-import { EMessage } from '../../locales/constants';
 
 interface IBasicToolOperationProps {
   container: HTMLElement;
@@ -38,6 +38,9 @@ interface IBasicToolOperationProps {
   showDefaultCursor?: boolean; // 默认会展示为 none
 
   forbidBasicResultRender?: boolean;
+
+  isAppend?: boolean; // 用于 canvas 层次的关闭
+  hiddenImg?: boolean; // 隐藏图片渲染
 }
 
 /**
@@ -128,10 +131,14 @@ class BasicToolOperation extends EventListener {
 
   public renderEnhance?: IRenderEnhance;
 
+  public customRenderStyle?: (
+    data: IRect | IPolygonData | IPoint | ILine | ITagResult | IBasicText,
+  ) => IAnnotationStyle;
+
   // 拖拽 - 私有变量
   private _firstClickCoordinate?: ICoordinate; // 存储第一次点击的坐标
 
-  private innerZoom = 1; // 用于内外 zoom 事件的变量
+  private innerZoom = 1; // 用于内外 zoom 事件的变量，缓存 zoom 变换前的数据
 
   private currentPosStorage?: ICoordinate; // 存储当前点击的平移位置
 
@@ -151,6 +158,8 @@ class BasicToolOperation extends EventListener {
 
   private showDefaultCursor: boolean; // 是否展示默认的 cursor
 
+  private hiddenImg: boolean;
+
   public coordUtils: CoordinateUtils;
 
   constructor(props: IBasicToolOperationProps) {
@@ -160,7 +169,7 @@ class BasicToolOperation extends EventListener {
     this.showDefaultCursor = props.showDefaultCursor || false;
 
     this.destroyCanvas();
-    this.createCanvas(props.size);
+    this.createCanvas(props.size, props.isAppend);
     this.imgNode = props.imgNode;
     this.isImgError = !props.imgNode;
     this.basicImgInfo = {
@@ -220,6 +229,8 @@ class BasicToolOperation extends EventListener {
     this.dblClickListener = new DblClickEventListener(this.container, 200);
     this.coordUtils = new CoordinateUtils(this);
     this.coordUtils.setBasicImgInfo(this.basicImgInfo);
+
+    this.hiddenImg = props.hiddenImg || false;
   }
 
   public onContextmenu(e: MouseEvent) {
@@ -256,6 +267,13 @@ class BasicToolOperation extends EventListener {
     return [];
   }
 
+  get innerPosAndZoom() {
+    return {
+      innerZoom: this.innerZoom,
+      currentPosStorage: this.currentPosStorage,
+    };
+  }
+
   /**
    * 是否含有列表标注
    */
@@ -265,6 +283,7 @@ class BasicToolOperation extends EventListener {
 
   public setZoom(zoom: number) {
     this.zoom = zoom;
+    this.innerZoom = zoom;
     this.coordUtils.setZoomAndCurrentPos(this.zoom, this.currentPos);
   }
 
@@ -275,6 +294,14 @@ class BasicToolOperation extends EventListener {
 
   public setReferenceData(referenceData: IReferenceData) {
     this.referenceData = referenceData;
+  }
+
+  public setImgInfo(size: ISize) {
+    this.imgInfo = size;
+  }
+
+  public setCurrentPosStorage(currentPosStorage: ICoordinate) {
+    this.currentPosStorage = currentPosStorage;
   }
 
   /**
@@ -289,7 +316,6 @@ class BasicToolOperation extends EventListener {
     this.setZoom(zoom);
     this.setCurrentPos(currentPos);
     this.currentPosStorage = currentPos;
-    this.innerZoom = zoom;
 
     this.renderBasicCanvas();
     this.render();
@@ -310,7 +336,8 @@ class BasicToolOperation extends EventListener {
 
   // 是否限制鼠标操作
   public get forbidMouseOperation() {
-    return this.forbidOperation || this.valid === false;
+    // return this.forbidOperation || this.valid === false;
+    return false;
   }
 
   public get pixelRatio() {
@@ -330,38 +357,41 @@ class BasicToolOperation extends EventListener {
     this.eventUnbinding();
   }
 
-  public createCanvas(size: ISize) {
+  public updateCanvasBasicStyle(canvas: HTMLCanvasElement, size: ISize, zIndex: number) {
+    const pixel = this.pixelRatio;
+    canvas.style.position = 'absolute';
+    canvas.width = size.width * pixel;
+    canvas.height = size.height * pixel;
+    canvas.style.width = `${size.width}px`;
+    canvas.style.height = `${size.height}px`;
+    canvas.style.left = '0';
+    canvas.style.top = '0';
+    canvas.style.zIndex = `${zIndex} `;
+  }
+
+  public createCanvas(size: ISize, isAppend = true) {
     // TODO 后续需要将 canvas 抽离出来，迭代器叠加
-    const basicCanvas = document.createElement('canvas');
     const pixel = this.pixelRatio;
 
-    basicCanvas.width = size.width * pixel;
-    basicCanvas.height = size.height * pixel;
-    basicCanvas.style.width = `${size.width}px`;
-    basicCanvas.style.height = `${size.height}px`;
-    basicCanvas.style.left = '0';
-    basicCanvas.style.top = '0';
-    basicCanvas.style.zIndex = '0';
+    const basicCanvas = document.createElement('canvas');
+    this.updateCanvasBasicStyle(basicCanvas, size, 0);
 
     this.basicCanvas = basicCanvas;
 
     const canvas = document.createElement('canvas');
-    canvas.style.position = 'absolute';
-    canvas.style.left = '0';
-    canvas.style.top = '0';
-    canvas.style.zIndex = '10';
-    canvas.style.width = `${size.width}px`;
-    canvas.style.height = `${size.height}px`;
+    this.updateCanvasBasicStyle(canvas, size, 10);
 
-    canvas.width = size.width * pixel;
-    canvas.height = size.height * pixel;
+    // set Attribute
+    // this.container.style.position = 'relative';
 
-    if (this.container.hasChildNodes()) {
-      this.container.insertBefore(canvas, this.container.childNodes[0]);
-      this.container.insertBefore(basicCanvas, this.container.childNodes[0]);
-    } else {
-      this.container.appendChild(basicCanvas);
-      this.container.appendChild(canvas);
+    if (isAppend) {
+      if (this.container.hasChildNodes()) {
+        this.container.insertBefore(canvas, this.container.childNodes[0]);
+        this.container.insertBefore(basicCanvas, this.container.childNodes[0]);
+      } else {
+        this.container.appendChild(basicCanvas);
+        this.container.appendChild(canvas);
+      }
     }
 
     this.canvas = canvas;
@@ -395,6 +425,11 @@ class BasicToolOperation extends EventListener {
     this.render();
   }
 
+  /**
+   * Notice. It needs to set the default imgInfo. Because it will needs to create info when it doesn't have
+   * @param imgNode
+   * @param basicImgInfo
+   */
   public setImgNode(imgNode: HTMLImageElement, basicImgInfo: Partial<{ valid: boolean; rotate: number }> = {}) {
     this.imgNode = imgNode;
 
@@ -445,6 +480,7 @@ class BasicToolOperation extends EventListener {
 
   public setForbidOperation(forbidOperation: boolean) {
     this.forbidOperation = forbidOperation;
+    this.setShowDefaultCursor(true);
     this.render();
   }
 
@@ -511,16 +547,14 @@ class BasicToolOperation extends EventListener {
     this.setCurrentPos(currentPos);
 
     this.currentPosStorage = currentPos;
-    this.imgInfo = imgInfo;
+    this.setImgInfo(imgInfo);
     this.setZoom(zoom);
-
-    this.innerZoom = zoom;
-
     this.render();
     this.renderBasicCanvas();
 
     this.emit('dependRender');
-    this.emit('renderZoom', zoom, currentPos);
+
+    this.emit('renderZoom', zoom, currentPos, imgInfo);
   };
 
   /**
@@ -566,12 +600,11 @@ class BasicToolOperation extends EventListener {
         if (pos) {
           this.setCurrentPos(pos.currentPos);
           this.currentPosStorage = this.currentPos;
-          this.imgInfo = {
+          this.setImgInfo({
             ...imgInfo,
             width: (imgInfo.width / this.innerZoom) * pos.innerZoom,
             height: (imgInfo.height / this.innerZoom) * pos.innerZoom,
-          };
-          this.innerZoom = pos.innerZoom;
+          });
 
           // 需要加载下更改当前的 imgInfo
           this.setZoom(pos.innerZoom);
@@ -665,6 +698,13 @@ class BasicToolOperation extends EventListener {
     this.forbidCursorLine = false;
   }
 
+  public clearCursorLine() {
+    this.coord = {
+      x: -1,
+      y: -1,
+    };
+  }
+
   public onMouseDown(e: MouseEvent): void | boolean {
     // e.stopPropagation();
     if (!this.canvas || this.isImgError) {
@@ -723,7 +763,7 @@ class BasicToolOperation extends EventListener {
         this.emit('dependRender');
 
         // 拖拽信息触发
-        this.emit('dragMove', { currentPos, zoom: this.zoom });
+        this.emit('dragMove', { currentPos, zoom: this.zoom, imgInfo: this.imgInfo });
       }
 
       this.render();
@@ -845,6 +885,14 @@ class BasicToolOperation extends EventListener {
     }
   }
 
+  /**
+   * 导出自定义数据
+   * @returns
+   */
+  public exportCustomData() {
+    return {};
+  }
+
   // 按鼠标位置放大缩小
   public onWheel(e: any, isRender = true): boolean | void {
     if (!this.imgNode || !this.coord) {
@@ -902,13 +950,14 @@ class BasicToolOperation extends EventListener {
     }
 
     const { currentPos: newCurrentPos, ratio, zoom, imgInfo } = pos;
-    this.innerZoom = zoom;
     this.setZoom(zoom);
     this.setCurrentPos(newCurrentPos);
     this.currentPosStorage = newCurrentPos;
-    this.imgInfo = imgInfo;
+    this.setImgInfo(imgInfo);
+
     zoomInfo.ratio = ratio;
-    this.emit('renderZoom', zoom, newCurrentPos);
+
+    this.emit('renderZoom', zoom, newCurrentPos, imgInfo);
   };
 
   /**
@@ -922,8 +971,19 @@ class BasicToolOperation extends EventListener {
     this.renderBasicCanvas();
   };
 
+  /**
+   *  Update by center.
+   *
+   * @param newZoom
+   */
+  public zoomChangeOnCenter = (newZoom: number) => {
+    this.wheelChangePos(this.getGetCenterCoordinate(), 0, newZoom);
+    this.render();
+    this.renderBasicCanvas();
+  };
+
   public renderCursorLine(lineColor = this.style.lineColor[0] ?? '') {
-    if (!this.ctx || this.forbidCursorLine) {
+    if (!this.ctx || this.forbidCursorLine || this.forbidOperation) {
       return;
     }
 
@@ -934,7 +994,7 @@ class BasicToolOperation extends EventListener {
   }
 
   public drawImg = () => {
-    if (!this.imgNode) return;
+    if (!this.imgNode || this.hiddenImg === true) return;
 
     DrawUtils.drawImg(this.basicCanvas, this.imgNode, {
       zoom: this.zoom,
@@ -1024,6 +1084,12 @@ class BasicToolOperation extends EventListener {
 
   public setRenderEnhance(renderEnhance: IRenderEnhance) {
     this.renderEnhance = renderEnhance;
+  }
+
+  public setCustomRenderStyle(
+    customRenderStyle: (data: IRect | IPolygonData | IPoint | ILine | ITagResult | IBasicText) => IAnnotationStyle,
+  ) {
+    this.customRenderStyle = customRenderStyle;
   }
 
   /**

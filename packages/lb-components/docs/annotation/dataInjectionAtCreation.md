@@ -1,20 +1,20 @@
 ## DataInjectionAtCreation
 
-
 ### 功能
 
 在用户创建标注数据时数据注入
 
-
 ### 定义
 
+<span id='TDataInjectionAtCreateion' ></span>
+
 ```ts
-declare type TDataInjectionAtCreateion = (data: IRect | IPolygon | IPoint | ILine | ITagResult | IBasicText) => {
+declare type TDataInjectionAtCreateion = (
+  data: IRect | IPolygon | IPoint | ILine | ITagResult | IBasicText,
+) => {
   [a: string]: any;
 };
-
 ```
-
 
 ### 示例
 
@@ -53,7 +53,7 @@ const App = () => {
 
   const dataInjectionAtCreation = (data) => {
     // data 判断注入数据
-    
+
     return {
       testDataInjection: 1,
     };

@@ -1,15 +1,6 @@
 import { isObject } from 'lodash';
-import { ECheckModel, EToolName } from '@/constant/tool';
-import ScribbleTool from '@/core/toolOperation/scribbleTool';
 import { IPolygonPoint } from '../../types/tool/polygon';
 import { ESortDirection, EStepType } from '../../constant/annotation';
-import CheckOperation from '../../core/toolOperation/checkOperation';
-import PolygonOperation from '../../core/toolOperation/polygonOperation';
-import RectOperationAsNewName from '../../core/toolOperation/rectOperation';
-import TagOperation from '../../core/toolOperation/tagOperation';
-import LineToolOperation from '../../core/toolOperation/LineToolOperation';
-import PointOperation from '../../core/toolOperation/pointOperation';
-import TextToolOperation from '../../core/toolOperation/TextToolOperation';
 
 type point = {
   id: string;
@@ -108,34 +99,6 @@ export default class CommonToolUtils {
       flag = false;
     }
     return flag;
-  }
-
-  /**
-   * 筛选当前的步骤配置
-   * @param toolName
-   */
-  public static getCurrentOperation(toolName: EToolName | ECheckModel) {
-    switch (toolName) {
-      case EToolName.Rect:
-      case EToolName.RectTrack:
-        return RectOperationAsNewName;
-      case EToolName.Tag:
-        return TagOperation;
-      case EToolName.Polygon:
-        return PolygonOperation;
-      case ECheckModel.Check:
-        return CheckOperation;
-      case EToolName.Line:
-        return LineToolOperation;
-      case EToolName.Point:
-        return PointOperation;
-      case EToolName.Text:
-        return TextToolOperation;
-      case EToolName.ScribbleTool:
-        return ScribbleTool;
-      default:
-        throw new Error('not match tool');
-    }
   }
 
   public static getNextSelectedRectID(

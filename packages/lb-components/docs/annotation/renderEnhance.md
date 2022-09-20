@@ -1,11 +1,12 @@
 ## RenderEnhance
 
-
 ### 功能
 
 在原有渲染的基础上进行渲染增强，适配更多的业务场景的扩展
 
 ### 定义
+
+<span id='IRenderEnhance' ></span>
 
 ```ts
 /**
@@ -26,7 +27,6 @@ declare interface IRenderEnhance {
   selectedRender?: (canvas: HTMLCanvasElement, data: any, style: IAnnotationStyle) => void;
   creatingRender?: (canvas: HTMLCanvasElement, data: any, style: IAnnotationStyle) => void;
 }
-
 ```
 
 ### 示例
@@ -70,7 +70,9 @@ const App = () => {
       DrawUtils.drawRectWithFill(canvas, rect, { color: style.fillColor });
     },
     selectedRender: (canvas, rect, style) => {
-      DrawUtils.drawText(canvas, { x: rect.x, y: rect.y - 10 }, 'I am text', { color: style.textColor });
+      DrawUtils.drawText(canvas, { x: rect.x, y: rect.y - 10 }, 'I am text', {
+        color: style.textColor,
+      });
       DrawUtils.drawRectWithFill(canvas, rect, { color: 'blue' });
     },
     creatingRender: (canvas, rect, style) => {

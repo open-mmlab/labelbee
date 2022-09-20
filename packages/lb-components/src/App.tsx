@@ -10,14 +10,14 @@ import { LoadFileAndFileData } from './store/annotation/reducer';
 import { ToolInstance } from './store/annotation/types';
 import {
   GetFileData,
-  OnSave,
-  OnSubmit,
   IFileItem,
-  OnPageChange,
-  OnStepChange,
   LoadFileList,
+  OnPageChange,
+  OnSave,
+  OnStepChange,
+  OnSubmit,
 } from './types/data';
-import { Footer, Header, Sider } from './types/main';
+import { Header, RenderFooter, Sider } from './types/main';
 import { IStepInfo } from './types/step';
 
 interface IAnnotationStyle {
@@ -46,7 +46,7 @@ export interface AppProps {
   className?: string;
   toolInstance: ToolInstance;
   header?: Header;
-  footer?: Footer;
+  footer?: RenderFooter;
   sider?: Sider;
   style?: {
     layout?: { [key: string]: any };
@@ -76,6 +76,7 @@ export interface AppProps {
     selectedRender?: (canvas: HTMLCanvasElement, data: any, style: IAnnotationStyle) => void;
     creatingRender?: (canvas: HTMLCanvasElement, data: any, style: IAnnotationStyle) => void;
   };
+  customRenderStyle?: (data: any) => IAnnotationStyle;
 }
 
 const App: React.FC<AppProps> = (props) => {

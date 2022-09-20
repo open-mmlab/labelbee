@@ -240,6 +240,12 @@ export default class PolygonUtils {
     return polygonList.find((p) => p.id === id);
   }
 
+  public static getPolygonByIDs(polygonList: IPolygonData[], ids?: string[]) {
+    if (ids && ids?.length > 0) {
+      return polygonList.filter((p) => ids.includes(p.id));
+    }
+  }
+
   public static getHoverEdgeIndex(
     checkPoint: ICoordinate,
     pointList: IPolygonPoint[],

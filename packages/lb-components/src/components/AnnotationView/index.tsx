@@ -9,31 +9,54 @@ import { Spin } from 'antd/es';
 
 interface IProps {
   src: string; // 图片路径
-  size: {
-    width: number;
-    height: number;
+  size?: {
+    width?: number;
+    height?: number;
   };
-  style: {
+  style?: {
     color?: string;
     fill?: string;
     thickness?: number;
   };
   annotations: any[]; // TODO
   zoomChange?: (zoom: number) => void;
-  backgroundStyle: React.CSSProperties;
+  backgroundStyle?: React.CSSProperties;
   onChange?: (type: 'hover' | 'selected', ids: string[]) => void;
 
   showLoading?: boolean;
+  globalStyle?: React.CSSProperties; // Custom global style.
 }
 
 const DEFAULT_SIZE = {
-  width: 1280,
-  height: 720,
+  width: 500,
+  height: 100, // Most Important, If the outer size is smaller than this will not take effect by default
+};
+
+const sizeInitialized = (size?: { width?: number; height?: number }) => {
+  if (!size) {
+    return DEFAULT_SIZE;
+  }
+  if (size.width && size.height) {
+    return size;
+  }
+
+  const newSize = {
+    ...size,
+  };
+
+  if (!newSize.width) {
+    newSize.width = DEFAULT_SIZE.width;
+  }
+
+  if (!newSize.height) {
+    newSize.height = DEFAULT_SIZE.height;
+  }
+
+  return newSize;
 };
 
 const AnnotationView = (props: IProps, ref: any) => {
   const {
-    size = DEFAULT_SIZE,
     src,
     annotations = [],
     style = {
@@ -44,7 +67,9 @@ const AnnotationView = (props: IProps, ref: any) => {
     backgroundStyle = {},
     onChange,
     showLoading = false,
+    globalStyle,
   } = props;
+  const size = sizeInitialized(props.size);
   const [loading, setLoading] = useState(false);
   const annotationRef = useRef<HTMLDivElement>(null);
   const viewOperation = useRef<ViewOperation>();
@@ -118,8 +143,9 @@ const AnnotationView = (props: IProps, ref: any) => {
 
     if (toolInstance?.setSize) {
       toolInstance.setSize(size);
+      toolInstance.initPosition();
     }
-  }, [size?.width, size?.height]);
+  }, [props.size?.width, props.size?.height]);
 
   useEffect(() => {
     if (viewOperation.current) {
@@ -144,7 +170,7 @@ const AnnotationView = (props: IProps, ref: any) => {
   );
 
   return (
-    <Spin spinning={showLoading || loading} delay={300}>
+    <Spin spinning={showLoading || loading} delay={300} style={globalStyle}>
       {mainRender}
     </Spin>
   );

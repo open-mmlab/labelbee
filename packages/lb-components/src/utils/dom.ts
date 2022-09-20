@@ -35,5 +35,5 @@ export function getTargetElement(
  * @param elm
  * @param modify
  */
-export const getClassName = (elm: string, modify?: string) =>
-  `${prefix}-${elm}${modify ? '__' + modify : ''}`;
+export const getClassName = (block: string, elm?: string, modify?: string) =>
+  `${prefix}-${block}${elm ? '__' + elm : ''}${modify ? '__' + modify : ''}`;

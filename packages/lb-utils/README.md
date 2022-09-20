@@ -130,15 +130,19 @@ ImgConversionUtils.getColorMapBySingleChannelMask(
 Show by labelbee
 
 ```ts
+import React, { useEffect, useState } from 'react';
 import { AnnotationView } from '@labelbee/lb-components';
 import { ImgConversionUtils } from '@labelbee/lb-utils';
+
+const maskSrc = 'http://10.152.32.16:8080/ADE_val_00001993.png';
+const basicImgSrc = 'http://10.152.32.16:8080/ADE_val_00001993.jpg';
 
 const App = () => {
   const [imgSrc, setImgSrc] = useState(maskSrc);
   useEffect(() => {
     ImgConversionUtils.getColorMapBySingleChannelMask({
       maskSrc,
-      basicImgSrc: basicImgSrc,
+      basicImgSrc,
     }).then((newSrc) => {
       setImgSrc(newSrc);
     });

@@ -39,6 +39,8 @@ export enum EToolName {
   ClientAttribute = 'clientAttributeTool',
   /** OCR关联关系工具 */
   OCRRelation = 'OCRRelationTool',
+  /** 算法分割辅助工具 */
+  SegmentByRect = 'segmentByRectTool',
 }
 
 

@@ -6,13 +6,13 @@ import AnnotationDataUtils from '@/utils/AnnotationDataUtils';
 import { ConfigUtils } from '@/utils/ConfigUtils';
 import { composeResult, composeResultWithBasicImgInfo } from '@/utils/data';
 import StepUtils from '@/utils/StepUtils';
-import { AnnotationEngine, CommonToolUtils, ImgUtils, cTool } from '@labelbee/lb-annotation';
+import ToolUtils from '@/utils/ToolUtils';
+import { AnnotationEngine, CommonToolUtils, ImgUtils } from '@labelbee/lb-annotation';
 import { i18n } from '@labelbee/lb-utils';
 import { message } from 'antd/es';
 import _ from 'lodash';
 import { SetAnnotationLoading } from './actionCreators';
 import { AnnotationActionTypes, AnnotationState } from './types';
-const { EVideoToolName } = cTool;
 
 export const getStepConfig = (stepList: any[], step: number) =>
   stepList.find((i) => i.step === step);
@@ -33,6 +33,8 @@ const initialState: AnnotationState = {
   stepProgress: 0,
   loading: false,
   triggerEventAfterIndexChanged: false,
+
+  pointCloudLoading: false,
 };
 
 /**
@@ -62,7 +64,12 @@ const updateToolInstance = (annotation: AnnotationState, imgNode: HTMLImageEleme
   const config = ConfigUtils.jsonParser(stepConfig.config);
 
   // 视频工具不支持实例化
-  if ((Object.values(EVideoToolName) as string[]).includes(stepConfig.tool)) {
+  if (ToolUtils.isVideoTool(stepConfig?.tool)) {
+    return;
+  }
+
+  // TODO: 点云实例化对接
+  if (ToolUtils.isPointCloudTool(stepConfig?.tool)) {
     return;
   }
 
@@ -95,12 +102,13 @@ export const LoadFileAndFileData =
   async (dispatch: any, getState: any) => {
     const { stepList, step } = getState().annotation;
     const currentIsVideo = StepUtils.currentToolIsVideo(step, stepList);
+    const currentIsPointCloud = StepUtils.currentToolIsPointCloud(step, stepList);
 
     SetAnnotationLoading(dispatch, true);
 
     await dispatch(TryGetFileDataByAPI(nextIndex));
 
-    if (currentIsVideo) {
+    if (currentIsVideo || currentIsPointCloud) {
       dispatch(AfterVideoLoaded(nextIndex));
       return;
     }
@@ -205,12 +213,14 @@ export const annotationReducer = (
 
       const oldResultString = imgList[imgIndex]?.result || '';
       const [, basicImgInfo, extraData] = toolInstance?.exportData() ?? [];
+      const customObject = toolInstance?.exportCustomData?.() ?? {};
 
       const resultWithBasicInfo = composeResultWithBasicImgInfo(oldResultString, basicImgInfo);
       const newResultString = composeResult(
         resultWithBasicInfo,
         { step, stepList },
         { rect: resultList },
+        customObject,
       );
 
       imgList[imgIndex].result = AnnotationDataUtils.dataCorrection(
@@ -247,6 +257,13 @@ export const annotationReducer = (
       };
     }
 
+    /**
+     * For data storage in dependent states
+     *
+     * Features:
+     * 1. Get Data from ToolInstance (If it use toolInstance)
+     * 2. Filter Data By BasicResultList
+     */
     case ANNOTATION_ACTIONS.SUBMIT_RESULT: {
       const { imgList, basicIndex, resultList, toolInstance, basicResultList } = state;
       if (!toolInstance) {
@@ -342,7 +359,7 @@ export const annotationReducer = (
        * The roles of toolInstance and annotationEngine need to be clearly distinguished
        */
       if (!toolInstance) {
-        return state;
+        return { ...state, imgIndex: action.payload.nextIndex };
       }
 
       const currentStepInfo = StepUtils.getCurrentStepInfo(step, stepList);
@@ -363,6 +380,10 @@ export const annotationReducer = (
 
       if (imgNode && imgError !== true) {
         annotationEngine?.setImgNode(imgNode, basicImgInfo);
+      } else {
+        // Non-graphical tools to initialize base data
+
+        toolInstance?.setValid(basicImgInfo.valid);
       }
 
       const stepConfig = getStepConfig(stepList, step);
@@ -534,11 +555,12 @@ export const annotationReducer = (
     case ANNOTATION_ACTIONS.SET_FILE_DATA: {
       const { fileData, index } = action.payload;
       const { imgList } = state;
-      imgList[index] = { ...imgList[index], ...fileData };
+      const newImgList = [...imgList];
+      newImgList[index] = { ...newImgList[index], ...fileData };
 
       return {
         ...state,
-        imgList,
+        imgList: newImgList,
       };
     }
 
@@ -569,7 +591,10 @@ export const annotationReducer = (
         step,
         imgList[imgIndex].result ?? '',
       );
-      imgList[imgIndex].result = newResult;
+      imgList[imgIndex] = {
+        ...imgList[imgIndex],
+        result: newResult,
+      };
 
       // 更新当前的结果
       const fileResult = jsonParser(newResult);
@@ -609,6 +634,15 @@ export const annotationReducer = (
       return {
         ...state,
         loading: !!loading,
+      };
+    }
+
+    case ANNOTATION_ACTIONS.SET_POINT_CLOUD_LOADING: {
+      const { pointCloudLoading } = action.payload;
+
+      return {
+        ...state,
+        pointCloudLoading: !!pointCloudLoading,
       };
     }
 

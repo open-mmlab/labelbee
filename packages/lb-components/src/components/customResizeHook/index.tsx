@@ -9,8 +9,14 @@ import { cKeyCode, toolUtils } from '@labelbee/lb-annotation';
 import React, { useContext, useEffect, useMemo, useState } from 'react';
 import { connect } from 'react-redux';
 import { AppState } from '@/store';
-import { UpdateRotate, PageBackward, PageForward } from '@/store/annotation/actionCreators';
+import {
+  UpdateRotate,
+  PageBackward,
+  PageForward,
+  UpdateToolInstance,
+} from '@/store/annotation/actionCreators';
 import { ISize } from '@/types/main';
+import { message } from 'antd';
 
 const EKeyCode = cKeyCode.default;
 
@@ -53,10 +59,28 @@ export const ViewportProviderComponent = (props: any) => {
         }
         dispatch(PageForward());
       }
-
       if (e.keyCode === EKeyCode.R) {
         dispatch(UpdateRotate());
       }
+    }
+
+    /**
+     * Hidden Feature
+     *
+     * User: Software Engineer
+     */
+    if (
+      e.shiftKey === true &&
+      e.ctrlKey === true &&
+      e.altKey === true &&
+      e.keyCode === EKeyCode.C
+    ) {
+      message.success('DEVELOPMENT TESTING - Switch Last Two Canvas');
+      const newInstance = props.annotation?.annotationEngine.switchLastTwoCanvas();
+      if (!newInstance) {
+        return;
+      }
+      dispatch(UpdateToolInstance(newInstance));
     }
   };
 

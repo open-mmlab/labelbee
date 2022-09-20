@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect, useRef, useCallback } from 'react';
 import { connect } from 'react-redux';
 import { AppState } from 'src/store';
 import { GraphToolInstance } from 'src/store/annotation/types';
@@ -36,6 +36,14 @@ const SwitchAttributeList: React.FC<IProps> = (props) => {
       toolInstance.unbindAll('changeAttributeSidebar');
     };
   }, [toolInstance, listRef]);
+
+  const attributeChanged = useCallback(
+    (v: string) => {
+      toolInstance.setDefaultAttribute(v);
+      forceRender((s) => s + 1);
+    },
+    [toolInstance],
+  );
 
   if (!props.stepInfo) {
     return null;
