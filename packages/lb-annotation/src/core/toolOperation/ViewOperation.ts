@@ -23,6 +23,18 @@ type IViewOperationProps = {
   annotations: IAnnotationData[];
 } & IBasicToolOperationProps;
 
+export interface ISpecificStyle {
+  stroke: string;
+  thickness: number;
+  fill: string;
+  radius: number;
+}
+
+export interface IFontStyle {
+  fontFamily: string;
+  fontSize: number;
+}
+
 export default class ViewOperation extends BasicToolOperation {
   public style: IBasicStyle = {};
 
@@ -34,6 +46,8 @@ export default class ViewOperation extends BasicToolOperation {
 
   private renderDomInstance: RenderDomClass;
 
+  private connectionPoints: ICoordinate[] = [];
+
   constructor(props: IViewOperationProps) {
     super({ ...props, showDefaultCursor: true });
     this.style = props.style ?? { stroke: DEFAULT_STROKE_COLOR, thickness: 3 };
@@ -43,6 +57,15 @@ export default class ViewOperation extends BasicToolOperation {
       container: this.container,
       height: this.canvas.height,
     });
+  }
+
+  /**
+   * Get the connection points in annotationData.
+   * @param newAnnotations
+   */
+  public checkConnectionPoints(newAnnotations: IAnnotationData[] = this.annotations) {
+    const { connectionPoints } = MathUtils.getCollectionPointByAnnotationData(newAnnotations);
+    this.connectionPoints = connectionPoints;
   }
 
   public setLoading(loading: boolean) {
@@ -170,6 +193,29 @@ export default class ViewOperation extends BasicToolOperation {
   }
 
   /**
+   * Get font rendering style
+   * @param obj
+   * @param style
+   * @returns
+   */
+  private getFontStyle(obj: { [a: string]: any }, style: ISpecificStyle) {
+    const fontSize = obj?.fontSize ?? 14;
+    const fontFamily = obj?.fontFamily ?? 'Arial';
+    return {
+      ...DEFAULT_TEXT_SHADOW,
+      color: style.stroke,
+      font: `normal normal 600 ${fontSize}px ${fontFamily}`,
+    };
+  }
+
+  /**
+   *  Append Draw offset
+   */
+  public appendOffset({ x, y }: ICoordinate) {
+    return { x: x + DEFAULT_TEXT_OFFSET.offsetX, y: y + DEFAULT_TEXT_OFFSET.offsetY };
+  }
+
+  /**
    * 获取当前展示的文本
    * @param result
    * @returns
@@ -212,6 +258,15 @@ export default class ViewOperation extends BasicToolOperation {
     return isReference ? { lineCap: 'butt', lineDash: [20, 20] } : {};
   }
 
+  public renderConnectionPoints() {
+    this.connectionPoints.forEach((point) => {
+      const renderPoint = AxisUtils.changePointByZoom(point, this.zoom, this.currentPos);
+
+      DrawUtils.drawCircleWithFill(this.canvas, renderPoint, 4, { color: '#fff' });
+      DrawUtils.drawCircleWithFill(this.canvas, renderPoint, 2, { color: '#000' });
+    });
+  }
+
   public render() {
     try {
       super.render();
@@ -223,6 +278,9 @@ export default class ViewOperation extends BasicToolOperation {
       );
 
       this.annotations.forEach((annotation) => {
+        const style = this.getSpecificStyle(annotation.annotation);
+        const fontStyle = this.getFontStyle(annotation.annotation, style);
+
         switch (annotation.type) {
           case 'rect': {
             const rect: any = annotation.annotation;
@@ -231,7 +289,6 @@ export default class ViewOperation extends BasicToolOperation {
             const renderRect = AxisUtils.changeRectByZoom(rect, this.zoom, this.currentPos);
 
             const { x, y, width, height } = renderRect;
-            const style = this.getSpecificStyle(rect);
 
             if (rect.id === this.mouseHoverID || style.fill) {
               const fillArr = rgba(style?.fill ?? style?.stroke ?? DEFAULT_STROKE_COLOR);
@@ -250,10 +307,8 @@ export default class ViewOperation extends BasicToolOperation {
             if (headerText) {
               // 框体上方展示
               DrawUtils.drawText(this.canvas, { x, y: y - 6 }, headerText, {
-                color: style.stroke,
-                font: 'normal normal 900 14px SourceHanSansCN-Regular',
-                ...DEFAULT_TEXT_SHADOW,
                 textMaxWidth: 300,
+                ...fontStyle,
               });
             }
 
@@ -261,21 +316,20 @@ export default class ViewOperation extends BasicToolOperation {
             const rectSize = `${Math.round(width / zoom)} * ${Math.round(height / zoom)}`;
             const textSizeWidth = rectSize.length * 7;
             if (!hiddenText) {
-              DrawUtils.drawText(this.canvas, { x: x + width - textSizeWidth, y: y + height + 15 }, rectSize, {
-                color: style.stroke,
-                font: 'normal normal 600 14px Arial',
-                ...DEFAULT_TEXT_SHADOW,
-              });
+              DrawUtils.drawText(
+                this.canvas,
+                { x: x + width - textSizeWidth, y: y + height + 15 },
+                rectSize,
+                fontStyle,
+              );
             }
 
             if (bottomText) {
               const marginTop = 20;
               const textWidth = Math.max(20, width - textSizeWidth);
               DrawUtils.drawText(this.canvas, { x, y: y + height + marginTop }, rect.textAttribute, {
-                color: style.stroke,
-                font: 'italic normal 900 14px Arial',
                 textMaxWidth: textWidth,
-                ...DEFAULT_TEXT_SHADOW,
+                ...fontStyle,
               });
             }
 
@@ -289,7 +343,6 @@ export default class ViewOperation extends BasicToolOperation {
 
             const { lineType = ELineTypes.Line } = polygon;
             const renderPolygon = AxisUtils.changePointListByZoom(polygon?.pointList ?? [], this.zoom, this.currentPos);
-            const style = this.getSpecificStyle(polygon);
             if (polygon.id === this.mouseHoverID || style.fill) {
               const fillArr = rgba(style?.fill ?? style?.stroke ?? DEFAULT_STROKE_COLOR);
               const fill = `rgba(${fillArr[0]}, ${fillArr[1]}, ${fillArr[2]},${fillArr[3] * 0.8})`;
@@ -338,22 +391,16 @@ export default class ViewOperation extends BasicToolOperation {
             // 文本渲染
             const { headerText, bottomText } = this.getRenderText(polygon, polygon?.hiddenText);
             if (headerText) {
-              DrawUtils.drawText(this.canvas, renderPolygon[0], headerText, {
-                color: style.stroke,
-                ...DEFAULT_TEXT_OFFSET,
-              });
+              DrawUtils.drawText(this.canvas, this.appendOffset(renderPolygon[0]), headerText, fontStyle);
             }
             if (bottomText) {
               const endPoint = renderPolygon[renderPolygon.length - 1];
 
               DrawUtils.drawText(
                 this.canvas,
-                { x: endPoint.x + TEXT_ATTRIBUTE_OFFSET.x, y: endPoint.y + TEXT_ATTRIBUTE_OFFSET.y },
+                this.appendOffset({ x: endPoint.x + TEXT_ATTRIBUTE_OFFSET.x, y: endPoint.y + TEXT_ATTRIBUTE_OFFSET.y }),
                 bottomText,
-                {
-                  color: style.stroke,
-                  ...DEFAULT_TEXT_OFFSET,
-                },
+                fontStyle,
               );
             }
 
@@ -373,7 +420,6 @@ export default class ViewOperation extends BasicToolOperation {
               this.currentPos,
             );
 
-            const style = this.getSpecificStyle(line);
             const newPointList = DrawUtils.drawPolygon(this.canvas, renderLine, {
               ...style,
               ...this.getReferenceOptions(line?.isReference),
@@ -405,22 +451,16 @@ export default class ViewOperation extends BasicToolOperation {
             // 文本渲染
             const { headerText, bottomText } = this.getRenderText(line, line?.hiddenText);
             if (headerText) {
-              DrawUtils.drawText(this.canvas, renderLine[0], headerText, {
-                color: style.stroke,
-                ...DEFAULT_TEXT_OFFSET,
-              });
+              DrawUtils.drawText(this.canvas, this.appendOffset(renderLine[0]), headerText, fontStyle);
             }
             if (bottomText) {
               const endPoint = renderLine[renderLine.length - 1];
 
               DrawUtils.drawText(
                 this.canvas,
-                { x: endPoint.x + TEXT_ATTRIBUTE_OFFSET.x, y: endPoint.y + TEXT_ATTRIBUTE_OFFSET.y },
+                this.appendOffset({ x: endPoint.x + TEXT_ATTRIBUTE_OFFSET.x, y: endPoint.y + TEXT_ATTRIBUTE_OFFSET.y }),
                 bottomText,
-                {
-                  color: style.stroke,
-                  ...DEFAULT_TEXT_OFFSET,
-                },
+                fontStyle,
               );
             }
             break;
@@ -430,7 +470,6 @@ export default class ViewOperation extends BasicToolOperation {
             const point = annotation.annotation;
 
             const renderPoint = AxisUtils.changePointByZoom(point, this.zoom, this.currentPos);
-            const style = this.getSpecificStyle(point);
 
             const radius = style.radius ?? DEFAULT_RADIUS;
             DrawUtils.drawCircle(this.canvas, renderPoint, radius, style);
@@ -444,19 +483,16 @@ export default class ViewOperation extends BasicToolOperation {
                 headerText,
                 {
                   textAlign: 'center',
-                  color: style.stroke,
+                  ...fontStyle,
                 },
               );
             }
             if (bottomText) {
               DrawUtils.drawText(
                 this.canvas,
-                { x: renderPoint.x + radius, y: renderPoint.y + radius + 24 },
+                this.appendOffset({ x: renderPoint.x + radius, y: renderPoint.y + radius + 24 }),
                 bottomText,
-                {
-                  color: style.stroke,
-                  ...DEFAULT_TEXT_OFFSET,
-                },
+                fontStyle,
               );
             }
             break;
@@ -540,6 +576,8 @@ export default class ViewOperation extends BasicToolOperation {
           toolInstance: this,
         });
       });
+
+      this.renderConnectionPoints();
     } catch (e) {
       console.error('ViewOperation Render Error', e);
     }
