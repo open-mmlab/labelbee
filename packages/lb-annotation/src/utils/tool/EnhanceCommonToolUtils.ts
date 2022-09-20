@@ -14,6 +14,7 @@ import PointOperation from '../../core/toolOperation/pointOperation';
 import TextToolOperation from '../../core/toolOperation/TextToolOperation';
 import SegmentByRect from '../../core/toolOperation/segmentByRect';
 import CommonToolUtils from './CommonToolUtils';
+import ScribbleTool from '@/core/toolOperation/ScribbleTool';
 
 const getCurrentOperation = (toolName: EToolName | ECheckModel) => {
   switch (toolName) {
@@ -34,6 +35,8 @@ const getCurrentOperation = (toolName: EToolName | ECheckModel) => {
       return PointOperation;
     case EToolName.Text:
       return TextToolOperation;
+    case EToolName.ScribbleTool:
+      return ScribbleTool;
     default:
       throw new Error('not match tool');
   }

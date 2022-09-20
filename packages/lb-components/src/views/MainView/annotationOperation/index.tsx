@@ -12,7 +12,6 @@ import useSize from '@/hooks/useSize';
 import { InitToolStyleConfig } from '@/store/toolStyle/actionCreators';
 import { AnnotationEngine, ImgUtils } from '@labelbee/lb-annotation';
 import { i18n } from '@labelbee/lb-utils';
-import { AppProps } from '@/App';
 import { IStepInfo } from '@/types/step';
 import StepUtils from '@/utils/StepUtils';
 

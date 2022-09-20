@@ -17,8 +17,6 @@ import { cTool } from '@labelbee/lb-annotation';
 
 const { EPointCloudName } = cTool;
 
-const { EPointCloudName } = cTool;
-
 export type FooterTheme = 'light' | 'dark';
 interface IProps {
   totalPage: number;
