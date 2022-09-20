@@ -53,7 +53,7 @@ const ScribbleSidebar: React.FC<IProps> = (props) => {
       <div className={getClassName('scribble', 'silder')}>
         <span className={getClassName('scribble', 'circle')} />
         <Slider
-          onChange={(v) => {
+          onChange={(v: number) => {
             setSilderValue(v);
             changeValue();
             toolInstance?.setPenSize(v);

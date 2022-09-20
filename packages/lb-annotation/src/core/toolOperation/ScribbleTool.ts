@@ -32,6 +32,12 @@ class ScribbleTool extends BasicToolOperation {
     super(props);
 
     this.penSize = DEFAULT_PEN_SIZE;
+
+    // Init defaultAttributeInfo
+    if (this.config.attributeList?.length > 0) {
+      const firstAttributeInfo = this.config.attributeList[0];
+      this.setDefaultAttribute(firstAttributeInfo.value);
+    }
   }
 
   public get color() {
