@@ -10,7 +10,7 @@ export const aMapStateToProps = (state: AppState) => {
   const {
     annotation: { imgList, imgIndex },
   } = state;
-  const currentData = imgList[imgIndex];
+  const currentData = imgList[imgIndex] ?? {};
 
   return {
     currentData,

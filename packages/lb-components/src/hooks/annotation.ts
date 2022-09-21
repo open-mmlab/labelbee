@@ -14,6 +14,7 @@ export interface ICustomToolInstance {
   singleOn: () => void;
   clearResult: () => void;
   on: () => void;
+  unbind: () => void;
   setResult: () => void;
   setValid: (valid: boolean) => void;
   history: {
@@ -49,6 +50,7 @@ const useCustomToolInstance = ({ basicInfo }: ICustomToolInstanceProps = {}) => 
     clearResult: () => {},
     singleOn: () => {},
     on: () => {},
+    unbind: () => {},
     setResult: () => {
       // Rerender Data
     },
