@@ -20,6 +20,8 @@ import { AppState } from '@/store';
 import StepUtils from '@/utils/StepUtils';
 import { jsonParser } from '@/utils';
 import { SetPointCloudLoading } from '@/store/annotation/actionCreators';
+import { message } from 'antd';
+import { useTranslation } from 'react-i18next';
 
 const DEFAULT_SCOPE = 5;
 const DEFAULT_RADIUS = 90;
@@ -73,7 +75,7 @@ export const topViewPolygon2PointCloud = (
     z = (zInfo.maxZ + zInfo.minZ) / 2;
     depth = zInfo.maxZ - zInfo.minZ;
     extraData = {
-      count: zInfo.count,
+      count: zInfo.zCount,
     };
   }
 
@@ -323,6 +325,7 @@ export const usePointCloudViews = () => {
   });
   const dispatch = useDispatch();
   const { selectedBox } = useSingleBox();
+  const { t } = useTranslation();
 
   const selectedPointCloudBox = selectedBox?.info;
 
@@ -364,6 +367,17 @@ export const usePointCloudViews = () => {
     //   trackID: getNextTrackID(),
     // });
     const boxParams: IPointCloudBox = newParams;
+
+    // If the count is less than lowerLimitPointsNumInBox, needs to delete it
+    if (
+      config?.lowerLimitPointsNumInBox &&
+      typeof newParams.count === 'number' &&
+      newParams.count < config.lowerLimitPointsNumInBox
+    ) {
+      message.info(t('LowerLimitPointsNumInBox', { num: config.lowerLimitPointsNumInBox }));
+      polygonOperation.deletePolygon(newParams.id);
+      return;
+    }
 
     polygonOperation.setSelectedIDs([newPolygon.id]);
     setSelectedIDs(boxParams.id);

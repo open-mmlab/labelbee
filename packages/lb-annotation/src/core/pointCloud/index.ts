@@ -823,8 +823,8 @@ export class PointCloud {
     const points = this.scene.children.find((i) => i.uuid === this.pointsUuid) as THREE.Points;
     let minZ = 0;
     let maxZ = 0;
-    let count = 0;
-    let zCount = 0;
+    let count = 0; // The count of scope
+    let zCount = 0; // The Count of Polygon range
 
     if (points && points?.geometry) {
       const pointPosArray = points?.geometry.attributes.position;

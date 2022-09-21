@@ -145,7 +145,8 @@
     "PleaseSelect": "Please Select",
     "CopyEmptyInPointCloud": "The copy content is empty, please select the corresponding point cloud data",
     "PasteEmptyInPointCloud": "Please copy the pointCloud data before pasting",
-    "HasDuplicateID": "Duplicate ID exists, copy failed"
+    "HasDuplicateID": "Duplicate ID exists, copy failed",
+    "LowerLimitPointsNumInBox": "The number of points in the box must not be less than {{num}}"
   },
   "cn": {
     "TextInput": "文本输入",
@@ -293,6 +294,7 @@
     "PleaseSelect": "请选择",
     "CopyEmptyInPointCloud": "复制内容为空，请选择对应的点云数据",
     "PasteEmptyInPointCloud": "请先复制需要的点云数据再进行粘贴",
-    "HasDuplicateID": "存在重复ID,复制失败"
+    "HasDuplicateID": "存在重复ID,复制失败",
+    "LowerLimitPointsNumInBox": "框体内点数不允许低于 {{num}} 个"
   }
 }
