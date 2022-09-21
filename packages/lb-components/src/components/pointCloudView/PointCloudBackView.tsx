@@ -18,6 +18,7 @@ import { synchronizeSideView, synchronizeTopView } from './hooks/usePointCloudVi
 import useSize from '@/hooks/useSize';
 import EmptyPage from './components/EmptyPage';
 import { useTranslation } from 'react-i18next';
+import { LabelBeeContext } from '@/store/ctx';
 
 /**
  * 统一一下，将其拓展为 二维转换为 三维坐标的转换
@@ -194,4 +195,6 @@ const PointCloudSideView = ({ currentData }: IAnnotationStateProps) => {
   );
 };
 
-export default connect(aMapStateToProps)(PointCloudSideView);
+export default connect(aMapStateToProps, null, null, { context: LabelBeeContext })(
+  PointCloudSideView,
+);

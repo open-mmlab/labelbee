@@ -3,6 +3,7 @@ import { AppState } from '@/store';
 import { ToolInstance } from '@/store/annotation/types';
 import { connect } from 'react-redux';
 import useSafeState from '@/hooks/useSafeSate';
+import { LabelBeeContext } from '@/store/ctx';
 
 interface IProps {
   toolInstance: ToolInstance;
@@ -36,4 +37,4 @@ const mapStateToProps = (state: AppState) => ({
   toolInstance: state.annotation.toolInstance,
 });
 
-export default connect(mapStateToProps)(ZoomLevel);
+export default connect(mapStateToProps, null, null, { context: LabelBeeContext })(ZoomLevel);

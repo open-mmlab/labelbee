@@ -23,6 +23,7 @@ import { connect } from 'react-redux';
 import { usePointCloudViews } from './hooks/usePointCloudViews';
 import useSize from '@/hooks/useSize';
 import { useTranslation } from 'react-i18next';
+import { LabelBeeContext } from '@/store/ctx';
 
 const { EPolygonPattern } = cTool;
 
@@ -265,4 +266,6 @@ const PointCloudTopView: React.FC<IAnnotationStateProps> = ({ currentData }) => 
   );
 };
 
-export default connect(aMapStateToProps)(PointCloudTopView);
+export default connect(aMapStateToProps, null, null, { context: LabelBeeContext })(
+  PointCloudTopView,
+);

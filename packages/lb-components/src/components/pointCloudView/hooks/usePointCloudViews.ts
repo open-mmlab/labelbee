@@ -10,7 +10,7 @@ import { PointCloudContext } from '../PointCloudContext';
 import { useSingleBox } from './useSingleBox';
 import { ISize } from '@/types/main';
 import _ from 'lodash';
-import { useDispatch, useSelector } from 'react-redux';
+import { useDispatch, useSelector } from '@/store/ctx';
 import { AppState } from '@/store';
 import StepUtils from '@/utils/StepUtils';
 import { jsonParser } from '@/utils';

@@ -1,7 +1,7 @@
 import React from 'react';
 import ToolHotKey from './ToolHotKey';
-import { useSelector } from 'react-redux';
 import StepUtils from '@/utils/StepUtils';
+import { useSelector } from '@/store/ctx';
 
 const FooterTips: React.FC = () => {
   // @ts-ignore

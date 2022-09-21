@@ -4,7 +4,7 @@
  * @author Ron <ron.f.luo@gmail.com>
  */
 import { useEffect, useRef } from 'react';
-import { useDispatch } from 'react-redux';
+import { useDispatch } from '@/store/ctx';
 import { ANNOTATION_ACTIONS } from '@/store/Actions';
 
 export interface ICustomToolInstance {

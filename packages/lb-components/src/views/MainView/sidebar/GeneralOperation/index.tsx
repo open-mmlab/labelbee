@@ -8,6 +8,7 @@ import { jsonParser } from '@/utils';
 import { AnnotationFileList } from '@/types/data';
 import ActionsConfirm, { IOperationConfig } from './ActionsConfirm';
 import useOperationList from './useOperationList';
+import { LabelBeeContext } from '@/store/ctx';
 
 const mapStateToProps = (state: AppState) => {
   const stepInfo = StepUtils.getCurrentStepInfo(state.annotation?.step, state.annotation?.stepList);
@@ -60,4 +61,4 @@ export const PointCloudOperation: ConnectedComponent<
   return <ActionsConfirm allOperation={allOperation} />;
 });
 
-export default connect(mapStateToProps)(GeneralOperation);
+export default connect(mapStateToProps, null, null, { context: LabelBeeContext })(GeneralOperation);

@@ -4,6 +4,7 @@ import { connect } from 'react-redux';
 import { ToolInstance } from '@/store/annotation/types';
 import { Divider } from 'antd/es';
 import { useTranslation } from 'react-i18next';
+import { LabelBeeContext } from '@/store/ctx';
 
 interface IProps {
   toolInstance: ToolInstance;
@@ -46,4 +47,4 @@ const mapStateToProps = (state: AppState) => {
   };
 };
 
-export default connect(mapStateToProps)(HiddenTips);
+export default connect(mapStateToProps, null, null, { context: LabelBeeContext })(HiddenTips);

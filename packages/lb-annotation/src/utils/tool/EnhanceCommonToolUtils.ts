@@ -5,6 +5,7 @@
  */
 
 import { ECheckModel, EToolName } from '@/constant/tool';
+import ScribbleTool from '@/core/toolOperation/ScribbleTool';
 import CheckOperation from '../../core/toolOperation/checkOperation';
 import PolygonOperation from '../../core/toolOperation/polygonOperation';
 import RectOperationAsNewName from '../../core/toolOperation/rectOperation';
@@ -14,7 +15,6 @@ import PointOperation from '../../core/toolOperation/pointOperation';
 import TextToolOperation from '../../core/toolOperation/TextToolOperation';
 import SegmentByRect from '../../core/toolOperation/segmentByRect';
 import CommonToolUtils from './CommonToolUtils';
-import ScribbleTool from '@/core/toolOperation/ScribbleTool';
 
 const getCurrentOperation = (toolName: EToolName | ECheckModel) => {
   switch (toolName) {

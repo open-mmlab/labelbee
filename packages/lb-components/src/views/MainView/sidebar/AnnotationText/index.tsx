@@ -5,6 +5,7 @@ import { TextUtils } from '@/utils/TextUtils';
 import { AppState } from '@/store';
 import { GraphToolInstance } from '@/store/annotation/types';
 import { connect } from 'react-redux';
+import { LabelBeeContext } from '@/store/ctx';
 
 interface IProps {
   toolInstance: GraphToolInstance;
@@ -53,4 +54,4 @@ function mapStateToProps(state: AppState) {
   return { toolInstance: state.annotation.toolInstance };
 }
 
-export default connect(mapStateToProps)(AnnotationText);
+export default connect(mapStateToProps, null, null, { context: LabelBeeContext })(AnnotationText);

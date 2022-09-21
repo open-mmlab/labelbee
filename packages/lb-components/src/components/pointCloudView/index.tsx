@@ -22,6 +22,7 @@ import PointCloudListener from './PointCloudListener';
 import { AppState } from '@/store';
 import { connect } from 'react-redux';
 import { IFileItem } from '@/types/data';
+import { LabelBeeContext } from '@/store/ctx';
 
 interface IProps {
   imgList: IFileItem[];
@@ -59,4 +60,4 @@ const mapStateToProps = (state: AppState) => ({
   imgList: state.annotation.imgList,
 });
 
-export default connect(mapStateToProps)(PointCloudView);
+export default connect(mapStateToProps, null, null, { context: LabelBeeContext })(PointCloudView);

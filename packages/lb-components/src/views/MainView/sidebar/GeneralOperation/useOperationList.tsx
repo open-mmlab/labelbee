@@ -8,8 +8,8 @@ import { useTranslation } from 'react-i18next';
 import React, { useMemo, useState } from 'react';
 import { CopyBackWordResult } from '@/store/annotation/actionCreators';
 import { store } from '@/index';
-import { useSelector } from 'react-redux';
 import { AppState } from '@/store';
+import { useSelector } from '@/store/ctx';
 
 /**
  * Hooks for sidebar common operations' config

@@ -19,6 +19,7 @@ import ToolUtils from '@/utils/ToolUtils';
 import PointCloudView from '@/components/pointCloudView';
 import { getClassName } from '@/utils/dom';
 import { classnames } from '@/utils';
+import { LabelBeeContext } from '@/store/ctx';
 
 interface IProps {
   path: string;
@@ -109,4 +110,4 @@ const mapStateToProps = ({ annotation }: AppState) => {
   };
 };
 
-export default connect(mapStateToProps)(MainView);
+export default connect(mapStateToProps, null, null, { context: LabelBeeContext })(MainView);
