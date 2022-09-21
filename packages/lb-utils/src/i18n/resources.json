@@ -142,7 +142,10 @@
     "Tag": "Tag",
     "Attribute": "Attribute",
     "SubAttribute": "SubAttribute",
-    "PleaseSelect": "Please Select"
+    "PleaseSelect": "Please Select",
+    "CopyEmptyInPointCloud": "The copy content is empty, please select the corresponding point cloud data",
+    "PasteEmptyInPointCloud": "Please copy the pointCloud data before pasting",
+    "HasDuplicateID": "Duplicate ID exists, copy failed"
   },
   "cn": {
     "TextInput": "文本输入",
@@ -287,6 +290,9 @@
     "Tag": "标签",
     "Attribute": "主属性",
     "SubAttribute": "副属性",
-    "PleaseSelect": "请选择"
+    "PleaseSelect": "请选择",
+    "CopyEmptyInPointCloud": "复制内容为空，请选择对应的点云数据",
+    "PasteEmptyInPointCloud": "请先复制需要的点云数据再进行粘贴",
+    "HasDuplicateID": "存在重复ID,复制失败"
   }
 }
