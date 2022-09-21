@@ -146,6 +146,10 @@ const PointCloudTopView: React.FC<IAnnotationStateProps> = ({ currentData }) => 
   const pointCloudViews = usePointCloudViews();
 
   useLayoutEffect(() => {
+    if (ptCtx.topViewInstance) {
+      return;
+    }
+
     if (ref.current && currentData?.url && currentData?.result) {
       const size = {
         width: ref.current.clientWidth,
@@ -159,7 +163,7 @@ const PointCloudTopView: React.FC<IAnnotationStateProps> = ({ currentData }) => 
       });
       ptCtx.setTopViewInstance(pointCloudAnnotation);
     }
-  }, []);
+  }, [currentData]);
 
   useEffect(() => {
     if (!size || !ptCtx.topViewInstance || !ptCtx.sideViewInstance) {
