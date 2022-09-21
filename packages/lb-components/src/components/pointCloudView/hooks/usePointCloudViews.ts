@@ -4,7 +4,12 @@
  * @createdate 2022-08-17
  */
 import { PointCloudAnnotation, PointCloud, MathUtils } from '@labelbee/lb-annotation';
-import { IPointCloudBox, EPerspectiveView, PointCloudUtils } from '@labelbee/lb-utils';
+import {
+  IPointCloudBox,
+  EPerspectiveView,
+  PointCloudUtils,
+  IPolygonPoint,
+} from '@labelbee/lb-utils';
 import { useContext } from 'react';
 import { PointCloudContext } from '../PointCloudContext';
 import { useSingleBox } from './useSingleBox';
@@ -47,7 +52,7 @@ export const topViewPolygon2PointCloud = (
   newPolygon: any,
   size: ISize,
   pointCloud?: PointCloud,
-  selectedPointCloud?: IPointCloudBox,
+  selectedPointCloudBox?: IPointCloudBox,
   defaultValue?: { [v: string]: any },
 ) => {
   const [point1, point2, point3, point4] = newPolygon.pointList.map((v: any) =>
@@ -60,15 +65,21 @@ export const topViewPolygon2PointCloud = (
   const rotation = MathUtils.getRadiusFromQuadrangle(newPolygon.pointList);
   let z = 0;
   let depth = 1;
+  let extraData = {};
+
+  // Init PointCloud Data
   if (pointCloud) {
     const zInfo = pointCloud.getSensesPointZAxisInPolygon([point1, point2, point3, point4]);
     z = (zInfo.maxZ + zInfo.minZ) / 2;
     depth = zInfo.maxZ - zInfo.minZ;
+    extraData = {
+      count: zInfo.count,
+    };
   }
 
-  if (selectedPointCloud) {
-    z = selectedPointCloud.center.z;
-    depth = selectedPointCloud.depth;
+  if (selectedPointCloudBox) {
+    z = selectedPointCloudBox.center.z;
+    depth = selectedPointCloudBox.depth;
   }
 
   /** TrackID will append before it pushed */
@@ -85,6 +96,7 @@ export const topViewPolygon2PointCloud = (
     id: newPolygon.id,
     attribute: '',
     valid: true,
+    ...extraData,
   };
 
   if (defaultValue) {
@@ -381,12 +393,28 @@ export const usePointCloudViews = () => {
    */
   const viewUpdateBox = (newPolygon: any, originPolygon: any, fromView: string) => {
     if (selectedPointCloudBox) {
-      const newBoxParams = sideViewPolygon2PointCloud(
+      let newBoxParams = sideViewPolygon2PointCloud(
         newPolygon,
         originPolygon,
         selectedPointCloudBox,
         sideViewInstance.pointCloudInstance,
       );
+      // Update count
+      if (mainViewInstance) {
+        const { count } = mainViewInstance.getSensesPointZAxisInPolygon(
+          mainViewInstance.getCuboidFromPointCloudBox(newBoxParams)
+            .polygonPointList as IPolygonPoint[],
+          [
+            newBoxParams.center.z - newBoxParams.depth / 2,
+            newBoxParams.center.z + newBoxParams.depth / 2,
+          ],
+        );
+
+        newBoxParams = {
+          ...newBoxParams,
+          count,
+        };
+      }
 
       updateSelectedBox(newBoxParams);
       syncPointCloudViews(fromView, newPolygon, newBoxParams);
@@ -411,7 +439,7 @@ export const usePointCloudViews = () => {
       const newBoxParams = topViewPolygon2PointCloud(
         polygon,
         size,
-        undefined,
+        topViewInstance.pointCloudInstance,
         selectedPointCloudBox,
       );
 

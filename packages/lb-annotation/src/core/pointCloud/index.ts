@@ -454,19 +454,19 @@ export class PointCloud {
     const polygonPointList = [
       {
         x: center.x + width / 2,
-        y: center.y + height / 2,
+        y: center.y - height / 2,
       },
       {
         x: center.x + width / 2,
-        y: center.y - height / 2,
-      },
-      {
-        x: center.x - width / 2,
-        y: center.y - height / 2,
+        y: center.y + height / 2,
       },
       {
         x: center.x - width / 2,
         y: center.y + height / 2,
+      },
+      {
+        x: center.x - width / 2,
+        y: center.y - height / 2,
       },
     ].map((v) => {
       const vector = this.rotatePoint(v, center, rotation);
@@ -819,10 +819,12 @@ export class PointCloud {
     return canvas;
   }
 
-  public getSensesPointZAxisInPolygon(polygon: IPolygonPoint[]) {
+  public getSensesPointZAxisInPolygon(polygon: IPolygonPoint[], zScope?: [number, number]) {
     const points = this.scene.children.find((i) => i.uuid === this.pointsUuid) as THREE.Points;
     let minZ = 0;
     let maxZ = 0;
+    let count = 0;
+    let zCount = 0;
 
     if (points && points?.geometry) {
       const pointPosArray = points?.geometry.attributes.position;
@@ -838,11 +840,19 @@ export class PointCloud {
         if (inPolygon && z) {
           maxZ = Math.max(z, maxZ);
           minZ = Math.min(z, minZ);
+
+          zCount++;
+
+          if (zScope) {
+            if (z >= zScope[0] && z <= zScope[1]) {
+              count++;
+            }
+          }
         }
       }
     }
 
-    return { maxZ, minZ };
+    return { maxZ, minZ, count, zCount };
   }
 
   /**
