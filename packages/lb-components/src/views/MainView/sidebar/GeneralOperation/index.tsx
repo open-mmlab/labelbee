@@ -51,14 +51,16 @@ export const PointCloudOperation: ConnectedComponent<
     },
     'toolInstance' | 'stepInfo' | 'imgList' | 'imgIndex'
   >
-> = connect(mapStateToProps)(({ toolInstance, stepInfo }) => {
-  const operationList = useOperationList(toolInstance);
-  const allOperation: IOperationConfig[] = [
-    operationList.copyPrevious,
-    operationList.empty,
-    operationList.setValidity,
-  ];
-  return <ActionsConfirm allOperation={allOperation} />;
-});
+> = connect(mapStateToProps, null, null, { context: LabelBeeContext })(
+  ({ toolInstance, stepInfo }) => {
+    const operationList = useOperationList(toolInstance);
+    const allOperation: IOperationConfig[] = [
+      operationList.copyPrevious,
+      operationList.empty,
+      operationList.setValidity,
+    ];
+    return <ActionsConfirm allOperation={allOperation} />;
+  },
+);
 
 export default connect(mapStateToProps, null, null, { context: LabelBeeContext })(GeneralOperation);
