@@ -67,7 +67,7 @@ export class PointCloud {
    */
   public zAxisLimit: number = 10;
 
-  public initCameraPosition = new THREE.Vector3(-1, 0, 10); // It will init when the camera position be set
+  public initCameraPosition = this.DEFAULT_INIT_CAMERA_POSITION; // It will init when the camera position be set
 
   private container: HTMLElement;
 
@@ -127,6 +127,10 @@ export class PointCloud {
     this.init();
 
     this.cacheInstance = PointCloudCache.getInstance();
+  }
+
+  get DEFAULT_INIT_CAMERA_POSITION() {
+    return new THREE.Vector3(-1, 0, 10);
   }
 
   get containerWidth() {
@@ -193,13 +197,20 @@ export class PointCloud {
 
   public initControls() {
     const { controls } = this;
+    controls.addEventListener('change', () => {
+      this.render();
+    }); // use if there is no animation loop
+    this.setDefaultControls();
+  }
+
+  public setDefaultControls() {
+    const { controls } = this;
     const centerPoint = [0, 0, 0];
     controls.target = new THREE.Vector3(...centerPoint); // Camera watching?
     controls.addEventListener('change', () => {
       this.render();
     }); // use if there is no animation loop
     controls.maxPolarAngle = Math.PI / 2; // Forbid orbit vertically over 90°
-
     controls.update();
   }
 
@@ -403,9 +414,10 @@ export class PointCloud {
    * Initialize the camera to the initial position
    */
   public updateTopCamera() {
+    this.setInitCameraPosition(this.DEFAULT_INIT_CAMERA_POSITION);
     this.camera.zoom = 1;
     this.initCamera();
-    this.initControls();
+    this.setDefaultControls();
     this.camera.updateProjectionMatrix();
     this.render();
   }
