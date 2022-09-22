@@ -6,7 +6,6 @@ import StepUtils from '@/utils/StepUtils';
 import { Collapse } from 'antd/es';
 import React from 'react';
 import { useTranslation } from 'react-i18next';
-import { useSelector } from 'react-redux';
 import AnnotationText from './AnnotationText';
 import ClearIcon from './ClearIcon';
 import GeneralOperation, { PointCloudOperation } from './GeneralOperation';
@@ -17,7 +16,9 @@ import TextToolSidebar from './TextToolSidebar';
 import PointCloudToolSidebar from './PointCloudToolSidebar';
 import ToolStyle from './ToolStyle';
 import { cTool } from '@labelbee/lb-annotation';
+import ScribbleSidebar from './ScribbleSidebar';
 import { ToolIcons } from './ToolIcons';
+import { useSelector } from '@/store/ctx';
 
 const { EVideoToolName, EPointCloudName } = cTool;
 
@@ -101,6 +102,14 @@ const Sidebar: React.FC<IProps> = ({ sider }) => {
 
   const textToolSideBar = <TextToolSidebar />;
 
+  const scribbleSidebar = (
+    <ScribbleSidebar
+      onChange={(t, i) => {
+        // 接收
+      }}
+    />
+  );
+
   const horizontal = <div className={`${sidebarCls}__horizontal`} />;
 
   const pointCloudToolSidebar = <PointCloudToolSidebar />;
@@ -124,6 +133,7 @@ const Sidebar: React.FC<IProps> = ({ sider }) => {
 
             pointCloudToolSidebar,
             pointCloudOperation,
+            scribbleSidebar,
           })}
         </div>
       );
@@ -193,6 +203,15 @@ const Sidebar: React.FC<IProps> = ({ sider }) => {
           <PointCloudToolSidebar />
         </div>
         <PointCloudOperation />
+      </div>
+    );
+  }
+
+  if (toolName === EToolName.ScribbleTool) {
+    return (
+      <div className={`${sidebarCls}`}>
+        {scribbleSidebar}
+        {attributeList}
       </div>
     );
   }

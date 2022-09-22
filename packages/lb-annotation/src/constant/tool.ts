@@ -48,6 +48,8 @@ export enum EToolName {
   FolderTag = 'folderTagTool',
   /** 拉框跟踪工具 */
   RectTrack = 'rectTrackTool',
+  /** 涂抹工具 */
+  ScribbleTool = 'scribbleTool',
   /** 人脸106工具 */
   Face = 'faceTool',
   /** 客户端属性工具 */
@@ -254,4 +256,9 @@ export const edgeAdsorptionScope = 10;
 export enum EPolygonPattern {
   Normal,
   Rect,
+}
+
+export enum EScribblePattern {
+  Scribble = 1, // 涂抹操作
+  Erase = 2, // 橡皮刷
 }

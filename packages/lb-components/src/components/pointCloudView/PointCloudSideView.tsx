@@ -17,6 +17,7 @@ import { useSingleBox } from './hooks/useSingleBox';
 import EmptyPage from './components/EmptyPage';
 import useSize from '@/hooks/useSize';
 import { useTranslation } from 'react-i18next';
+import { LabelBeeContext } from '@/store/ctx';
 /**
  * Get the offset from canvas2d-coordinate to world coordinate
  * @param currentPos
@@ -157,4 +158,6 @@ const PointCloudSideView: React.FC<IAnnotationStateProps> = ({ currentData }) =>
   );
 };
 
-export default connect(aMapStateToProps)(PointCloudSideView);
+export default connect(aMapStateToProps, null, null, { context: LabelBeeContext })(
+  PointCloudSideView,
+);

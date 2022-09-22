@@ -5,6 +5,7 @@
  */
 
 import { ECheckModel, EToolName } from '@/constant/tool';
+import ScribbleTool from '@/core/toolOperation/ScribbleTool';
 import CheckOperation from '../../core/toolOperation/checkOperation';
 import PolygonOperation from '../../core/toolOperation/polygonOperation';
 import RectOperationAsNewName from '../../core/toolOperation/rectOperation';
@@ -34,6 +35,8 @@ const getCurrentOperation = (toolName: EToolName | ECheckModel) => {
       return PointOperation;
     case EToolName.Text:
       return TextToolOperation;
+    case EToolName.ScribbleTool:
+      return ScribbleTool;
     default:
       throw new Error('not match tool');
   }

@@ -10,7 +10,7 @@ import { PointCloudContainer } from './PointCloudLayout';
 import React, { useEffect, useRef } from 'react';
 import { PointCloudContext } from './PointCloudContext';
 import { useSingleBox } from './hooks/useSingleBox';
-import { EPerspectiveView, IPointCloudBox } from '@labelbee/lb-utils';
+import { EPerspectiveView, IPointCloudBox, IPolygonPoint } from '@labelbee/lb-utils';
 import { SizeInfoForView } from './PointCloudInfos';
 import { connect } from 'react-redux';
 import { aMapStateToProps, IAnnotationStateProps } from '@/store/annotation/map';
@@ -18,6 +18,7 @@ import { synchronizeSideView, synchronizeTopView } from './hooks/usePointCloudVi
 import useSize from '@/hooks/useSize';
 import EmptyPage from './components/EmptyPage';
 import { useTranslation } from 'react-i18next';
+import { LabelBeeContext } from '@/store/ctx';
 
 /**
  * 统一一下，将其拓展为 二维转换为 三维坐标的转换
@@ -160,12 +161,29 @@ const PointCloudSideView = ({ currentData }: IAnnotationStateProps) => {
         const oldWidth = MathUtils.getLineLength(op2, op3);
         const offsetWidth = width - oldWidth; // 3D width
 
-        const { newBoxParams } = backPointCloud.getNewBoxByBackUpdate(
+        let { newBoxParams } = backPointCloud.getNewBoxByBackUpdate(
           offsetCenterPoint,
           offsetWidth,
           offsetHeight,
           ptCtx.selectedPointCloudBox,
         );
+
+        // Update count
+        if (ptCtx.mainViewInstance) {
+          const { count } = ptCtx.mainViewInstance.getSensesPointZAxisInPolygon(
+            ptCtx.mainViewInstance.getCuboidFromPointCloudBox(newBoxParams)
+              .polygonPointList as IPolygonPoint[],
+            [
+              newBoxParams.center.z - newBoxParams.depth / 2,
+              newBoxParams.center.z + newBoxParams.depth / 2,
+            ],
+          );
+
+          newBoxParams = {
+            ...newBoxParams,
+            count,
+          };
+        }
 
         synchronizeTopView(newBoxParams, newPolygon, ptCtx.topViewInstance, ptCtx.mainViewInstance);
         synchronizeSideView(newBoxParams, newPolygon, ptCtx.sideViewInstance, currentData.url);
@@ -194,4 +212,6 @@ const PointCloudSideView = ({ currentData }: IAnnotationStateProps) => {
   );
 };
 
-export default connect(aMapStateToProps)(PointCloudSideView);
+export default connect(aMapStateToProps, null, null, { context: LabelBeeContext })(
+  PointCloudSideView,
+);

@@ -24,6 +24,21 @@ const rectToolConfig = {
   customFormat: '',
 };
 
+const scribbleToolConfig = {
+  attributeList: [
+    { key: '类别1', value: '类别1', color: 'rgba(128, 12, 249, 1)' },
+    { key: '类别bm', value: 'class-bm', color: 'rgba(0, 255, 48, 1)' },
+    { key: '类别eg', value: 'class-eg', color: 'rgba(255, 136, 247, 1)' },
+    { key: '类别vj', value: 'class-vj', color: 'rgba(255, 226, 50, 1)' },
+    { key: '类别0x', value: 'class-0x', color: 'rgba(153, 66, 23, 1)' },
+    { key: '类别GR', value: 'class-GR', color: 'rgba(2, 130, 250, 1)' },
+    { key: '类别2c', value: 'class-2c', color: 'rgba(220,94,94,1)' },
+    { key: '类别Bj', value: 'class-Bj', color: 'rgba(0, 255, 234, 1)' },
+  ],
+  showConfirm: true,
+  showDirection: false,
+  skipWhileNoDependencies: false,
+};
 const tagToolConfig = {
   showConfirm: true,
   skipWhileNoDependencies: false,
@@ -206,6 +221,10 @@ export const getConfig = (tool) => {
 
   if (tool === EPointCloudName.PointCloud) {
     return pointCloudConfig;
+  }
+
+  if (tool === EToolName.ScribbleTool) {
+    return scribbleToolConfig;
   }
 
   return rectToolConfig;

@@ -14,8 +14,9 @@ import classNames from 'classnames';
 import { last } from 'lodash';
 import React, { useReducer, useRef } from 'react';
 import { useTranslation } from 'react-i18next';
-import { connect, useDispatch } from 'react-redux';
-import { store } from 'src';
+import { connect } from 'react-redux';
+import { useDispatch, LabelBeeContext } from '@/store/ctx';
+import { store } from '@/index';
 import ExportData from './ExportData';
 import HeaderOption from './headerOption';
 import StepSwitch from './StepSwitch';
@@ -224,4 +225,4 @@ const mapStateToProps = (state: AppState) => ({
   step: state.annotation.step,
 });
 
-export default connect(mapStateToProps)(ToolHeader);
+export default connect(mapStateToProps, null, null, { context: LabelBeeContext })(ToolHeader);

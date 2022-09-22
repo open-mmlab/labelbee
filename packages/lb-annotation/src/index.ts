@@ -13,6 +13,7 @@ import PolygonOperation from './core/toolOperation/polygonOperation';
 import MeasureOperation from './core/toolOperation/measureOperation';
 import { BasicToolOperation } from './core/toolOperation/basicToolOperation';
 import ViewOperation from './core/toolOperation/ViewOperation';
+import ScribbleTool from './core/toolOperation/ScribbleTool';
 import PointCloud2dOperation from './core/toolOperation/pointCloud2dOperation';
 
 // Constant
@@ -77,6 +78,7 @@ export {
   ImgUtils,
   MathUtils,
   AnnotationEngine,
+  ScribbleTool,
   PointCloud,
   UnitUtils,
 };

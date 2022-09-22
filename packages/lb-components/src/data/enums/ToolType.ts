@@ -1,13 +1,8 @@
-export enum ETextType {
-  AnyString, // 任意字符
-  Order, // 序号
-  EnglishOnly, // 仅英文
-  NumberOnly, // 仅数字
-  CustomFormat, // 自定义文本格式
+// TODO, Temporarily Copy
+export enum EScribblePattern {
+  Scribble = 1, // 涂抹操作
+  Erase = 2, // 橡皮刷
 }
-
-/** 文本标注字数上限 */
-export const TEXT_ATTRIBUTE_MAX_LENGTH = 1000;
 
 export enum EToolName {
   /** 拉框工具 */
@@ -36,6 +31,8 @@ export enum EToolName {
   FolderTag = 'folderTagTool',
   /** 拉框跟踪工具 */
   RectTrack = 'rectTrackTool',
+  /** 涂抹工具 */
+  ScribbleTool = 'scribbleTool',
   /** 人脸106工具 */
   Face = 'faceTool',
   /** 客户端属性工具 */
@@ -45,3 +42,16 @@ export enum EToolName {
   /** 算法分割辅助工具 */
   SegmentByRect = 'segmentByRectTool',
 }
+
+
+// 文本标注类型
+export enum ETextType {
+  AnyString, // 任意字符
+  Order, // 序号
+  EnglishOnly, // 仅英文
+  NumberOnly, // 仅数字
+  CustomFormat, // 自定义文本格式
+}
+
+/** 文本标注字数上限 */
+export const TEXT_ATTRIBUTE_MAX_LENGTH = 1000;

@@ -53,7 +53,7 @@ export default class EventListener {
    * @param eventName 需要解绑的事件名字
    * @param callback 需要解绑的方法
    */
-  public unbind(eventName: string, callback: (params?: any) => void) {
+  public unbind(eventName: string, callback: (...params: any[]) => void) {
     const existEvents: any[] | undefined = this._events.get(eventName);
     if (existEvents) {
       this._events.set(

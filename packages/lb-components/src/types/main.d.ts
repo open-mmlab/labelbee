@@ -29,6 +29,7 @@ export type Sider = ({
   tagToolSideBar,
   textToolSideBar,
   horizontal,
+  scribbleSidebar
 }: {
   toolIcon: React.ReactNode;
   attributeList: React.ReactNode;
@@ -39,6 +40,7 @@ export type Sider = ({
   tagToolSideBar: React.ReactNode;
   textToolSideBar: React.ReactNode;
   horizontal: React.ReactNode;
+  scribbleSidebar: React.ReactNode;
 
   // PointCloud
   pointCloudToolSidebar : React.ReactNode;

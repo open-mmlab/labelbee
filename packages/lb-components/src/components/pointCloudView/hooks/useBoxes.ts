@@ -4,6 +4,7 @@ import _ from 'lodash';
 import { message } from 'antd';
 import { usePointCloudViews } from './usePointCloudViews';
 import { PointCloudContext } from '../PointCloudContext';
+import { useTranslation } from 'react-i18next';
 
 /**
  * Actions for selected boxes
@@ -12,6 +13,7 @@ export const useBoxes = () => {
   const { selectedIDs, pointCloudBoxList, setPointCloudResult } = useContext(PointCloudContext);
   const [copiedBoxes, setCopiedBoxes] = useState<IPointCloudBoxList>([]);
   const { pointCloudBoxListUpdated } = usePointCloudViews();
+  const { t, i18n} = useTranslation();
 
   const hasDuplicateID = (checkBoxList: IPointCloudBoxList) => {
     return pointCloudBoxList.some((item) => {
@@ -28,27 +30,27 @@ export const useBoxes = () => {
       setCopiedBoxes(_.cloneDeep(selectedBoxes));
     } else {
       setCopiedBoxes([]);
-      message.error('复制内容为空，请选择对应的点云数据');
+      message.error(t("CopyEmptyInPointCloud"));
     }
-  }, [selectedIDs, pointCloudBoxList]);
+  }, [selectedIDs, pointCloudBoxList, i18n.language]);
 
   const pasteSelectedBoxes = useCallback(() => {
     if (copiedBoxes.length === 0) {
-      message.error('选者对应的点云数据并进行复制');
+      message.error(t("PasteEmptyInPointCloud"));
       return;
     }
 
     const hasDuplicate = hasDuplicateID(copiedBoxes);
 
     if (hasDuplicate) {
-      message.error('存在重复ID,复制失败');
+      message.error(t("HasDuplicateID"));
     } else {
       /** Paste succeed and empty */
       setPointCloudResult(copiedBoxes);
       pointCloudBoxListUpdated?.(copiedBoxes);
       setCopiedBoxes([]);
     }
-  }, [copiedBoxes, pointCloudBoxList]);
+  }, [copiedBoxes, pointCloudBoxList, i18n.language]);
 
   return { copySelectedBoxes, pasteSelectedBoxes, copiedBoxes, selectedBoxes };
 };

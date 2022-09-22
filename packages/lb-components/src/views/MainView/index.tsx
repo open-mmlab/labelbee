@@ -19,6 +19,7 @@ import ToolUtils from '@/utils/ToolUtils';
 import PointCloudView from '@/components/pointCloudView';
 import { getClassName } from '@/utils/dom';
 import { classnames } from '@/utils';
+import { LabelBeeContext } from '@/store/ctx';
 
 interface IProps {
   path: string;
@@ -104,9 +105,9 @@ const mapStateToProps = ({ annotation }: AppState) => {
   const { imgList, loading } = annotation;
   const imgInfo = imgList[annotation.imgIndex] ?? {};
   return {
-    path: imgInfo?.url ?? imgInfo?.path ?? '', // 将当前路径的数据注入
+    path: imgInfo?.path ?? imgInfo?.url ?? '', // 将当前路径的数据注入
     loading,
   };
 };
 
-export default connect(mapStateToProps)(MainView);
+export default connect(mapStateToProps, null, null, { context: LabelBeeContext })(MainView);

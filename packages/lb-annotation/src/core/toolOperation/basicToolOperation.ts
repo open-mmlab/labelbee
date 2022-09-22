@@ -165,6 +165,7 @@ class BasicToolOperation extends EventListener {
   constructor(props: IBasicToolOperationProps) {
     super();
     this.container = props.container;
+    this.config = CommonToolUtils.jsonParser(props.config);
     this.showDefaultCursor = props.showDefaultCursor || false;
 
     this.destroyCanvas();
@@ -327,6 +328,10 @@ class BasicToolOperation extends EventListener {
   public setShowDefaultCursor(showDefaultCursor: boolean) {
     this.showDefaultCursor = showDefaultCursor;
     this.container.style.cursor = this.defaultCursor;
+  }
+
+  public setCustomCursor(cursor: string) {
+    this.container.style.cursor = cursor;
   }
 
   // 是否限制鼠标操作

@@ -5,6 +5,7 @@ import React, { useEffect } from 'react';
 import { ImgAttributeState } from '@/store/imgAttribute/types';
 import ImgAttribute from '@/store/imgAttribute/actionCreators';
 import { store } from '@/index';
+import { LabelBeeContext } from '@/store/ctx';
 
 import saturationSvg from '@/assets/annotation/image/saturation.svg';
 import contrastSvg from '@/assets/annotation/image/contrast.svg';
@@ -139,4 +140,4 @@ function mapStateToProps({ imgAttribute }: any) {
   return { imgAttribute };
 }
 
-export default connect(mapStateToProps)(ImgAttributeInfo);
+export default connect(mapStateToProps, null, null, { context: LabelBeeContext })(ImgAttributeInfo);

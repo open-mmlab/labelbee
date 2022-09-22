@@ -17,6 +17,7 @@ import {
 } from '@/store/annotation/actionCreators';
 import { ISize } from '@/types/main';
 import { message } from 'antd';
+import { LabelBeeContext } from '@/store/ctx';
 
 const EKeyCode = cKeyCode.default;
 
@@ -96,10 +97,14 @@ export const ViewportProviderComponent = (props: any) => {
 
   return <viewportContext.Provider value={size}>{children}</viewportContext.Provider>;
 };
-
-export const ViewportProvider = connect((state: AppState) => ({
-  annotation: state.annotation,
-}))(ViewportProviderComponent);
+export const ViewportProvider = connect(
+  (state: AppState) => ({
+    annotation: state.annotation,
+  }),
+  null,
+  null,
+  { context: LabelBeeContext },
+)(ViewportProviderComponent);
 
 export const useViewport = () => {
   const { width, height } = useContext(viewportContext);

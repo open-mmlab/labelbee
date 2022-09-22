@@ -483,6 +483,8 @@ class PolygonOperation extends BasicToolOperation {
       lowerLimitPointNum = 3;
     }
 
+    let createPolygon: IPolygonData | undefined;
+
     if (this.drawingPointList.length < lowerLimitPointNum) {
       // 小于下线点无法闭合, 直接清除数据
       this.drawingPointList = [];
@@ -536,8 +538,7 @@ class PolygonOperation extends BasicToolOperation {
       }
 
       polygonList.push(newPolygon);
-
-      this.emit('polygonCreated', newPolygon, this.zoom, this.currentPos);
+      createPolygon = newPolygon;
 
       this.setSelectedIdAfterAddingDrawing(id);
     }
@@ -545,8 +546,11 @@ class PolygonOperation extends BasicToolOperation {
     this.setPolygonList(polygonList);
     this.isCtrl = false;
     this.drawingPointList = [];
-
     this.history.pushHistory(polygonList);
+
+    if (createPolygon) {
+      this.emit('polygonCreated', createPolygon, this.zoom, this.currentPos);
+    }
   }
 
   public setSelectedIdAfterAddingDrawing(newID: string) {

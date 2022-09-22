@@ -106,7 +106,7 @@ export const LoadFileAndFileData =
 
     SetAnnotationLoading(dispatch, true);
 
-    dispatch(TryGetFileDataByAPI(nextIndex));
+    await dispatch(TryGetFileDataByAPI(nextIndex));
 
     if (currentIsVideo || currentIsPointCloud) {
       dispatch(AfterVideoLoaded(nextIndex));
@@ -212,7 +212,7 @@ export const annotationReducer = (
       }
 
       const oldResultString = imgList[imgIndex]?.result || '';
-      const [, basicImgInfo] = toolInstance?.exportData() ?? [];
+      const [, basicImgInfo, extraData] = toolInstance?.exportData() ?? [];
       const customObject = toolInstance?.exportCustomData?.() ?? {};
 
       const resultWithBasicInfo = composeResultWithBasicImgInfo(oldResultString, basicImgInfo);
@@ -229,6 +229,13 @@ export const annotationReducer = (
         step,
         stepList,
       );
+
+      if (extraData) {
+        imgList[imgIndex] = {
+          ...imgList[imgIndex],
+          ...extraData
+        } 
+      }
 
       if (onSubmit) {
         onSubmit([imgList[imgIndex]], action.payload?.submitType, imgIndex);
@@ -435,6 +442,14 @@ export const annotationReducer = (
       };
     }
 
+    case ANNOTATION_ACTIONS.SET_TASK_STEP_LIST: {
+      const { stepList } = action.payload;
+      return {
+        ...state,
+        stepList,
+      };
+    }
+    
     case ANNOTATION_ACTIONS.SET_TASK_CONFIG: {
       const { stepList, step } = action.payload;
       return {

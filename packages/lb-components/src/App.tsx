@@ -3,9 +3,10 @@ import { i18n } from '@labelbee/lb-utils';
 import React, { useEffect } from 'react';
 import { connect } from 'react-redux';
 import { store } from '.';
+import { LabelBeeContext } from '@/store/ctx';
 import { AppState } from './store';
 import { ANNOTATION_ACTIONS } from './store/Actions';
-import { InitTaskData, loadImgList } from './store/annotation/actionCreators';
+import { InitTaskData, loadImgList, UpdateInjectFunc } from './store/annotation/actionCreators';
 import { LoadFileAndFileData } from './store/annotation/reducer';
 import { ToolInstance } from './store/annotation/types';
 import {
@@ -63,6 +64,11 @@ export interface AppProps {
   // data Correction
   skipBeforePageTurning?: (pageTurning: Function) => void;
 
+  drawLayerSlot?: (props: {
+    zoom: number;
+    currentPos: { x: number; y: number };
+  }) => React.ReactNode;
+
   // 标注信息扩展的功能
   dataInjectionAtCreation: (annotationData: any) => {};
   // 渲染增强
@@ -115,6 +121,33 @@ const App: React.FC<AppProps> = (props) => {
   }, []);
 
   useEffect(() => {
+    store.dispatch(
+      UpdateInjectFunc({
+        onSubmit,
+        stepList,
+        getFileData,
+        pageSize,
+        loadFileList,
+        onSave,
+        onPageChange,
+        onStepChange,
+      }),
+    );
+
+    i18n.changeLanguage(defaultLang);
+  }, [
+    onSubmit,
+    stepList,
+    getFileData,
+    pageSize,
+    loadFileList,
+    onSave,
+    onPageChange,
+    onStepChange,
+    defaultLang,
+  ]);
+
+  useEffect(() => {
     setToolInstance?.(toolInstance);
   }, [toolInstance]);
 
@@ -148,4 +181,4 @@ const mapStateToProps = (state: AppState) => ({
   toolInstance: state.annotation.toolInstance,
 });
 
-export default connect(mapStateToProps)(App);
+export default connect(mapStateToProps, null, null, { context: LabelBeeContext })(App);

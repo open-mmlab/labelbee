@@ -2,9 +2,10 @@
  * 各类的数学运算
  */
 
-import { DEFAULT_FONT, DEFAULT_TEXT_MAX_WIDTH, SEGMENT_NUMBER } from '@/constant/tool';
-import { IPolygonPoint } from '@/types/tool/polygon';
+import { DEFAULT_FONT, DEFAULT_TEXT_MAX_WIDTH, ELineTypes, SEGMENT_NUMBER } from '@/constant/tool';
+import { IPolygonData, IPolygonPoint } from '@/types/tool/polygon';
 import { createSmoothCurvePointsFromPointList } from './tool/polygonTool';
+import PolygonUtils from './tool/PolygonUtils';
 import Vector from './VectorUtils';
 
 /**
@@ -504,5 +505,68 @@ export default class MathUtils {
     }
 
     return radius;
+  }
+
+  public static getCollectionPointByAnnotationData(annotations: IAnnotationData[]) {
+    const connectionPoints: ICoordinate[] = [];
+    const cacheSet = new Set<string>();
+
+    const points = annotations.filter((v) => v.type === 'point').map((v) => v.annotation);
+    const backgroundList = annotations
+      .filter((v) => {
+        if (['polygon', 'line'].includes(v.type)) {
+          return true;
+        }
+        return false;
+      })
+      .map((v) => {
+        const { annotation } = v;
+        if (v.type === 'polygon') {
+          return {
+            ...annotation,
+            pointList: PolygonUtils.concatBeginAndEnd(annotation.pointList),
+          };
+        }
+
+        return annotation;
+      });
+
+    const judgeIsConnectPoint = (point: ICoordinate, polygonList: Array<any | IPolygonData>) => {
+      const { dropFoot } = PolygonUtils.getClosestPoint(point, polygonList, ELineTypes.Line, 1, { isClose: false });
+
+      if (dropFoot !== point) {
+        const s = `${dropFoot.x} + ${dropFoot.y}`;
+        // Filter the same point.
+        if (!cacheSet.has(s)) {
+          connectionPoints.push(point);
+        }
+
+        cacheSet.add(s);
+      }
+    };
+
+    // Point & BackgroundList;
+    points.forEach((point) => {
+      judgeIsConnectPoint(point, backgroundList);
+    });
+
+    backgroundList.forEach((v) => {
+      let traverseID = '';
+      traverseID = v.id;
+
+      backgroundList.forEach((annotation, i) => {
+        if (annotation.id === traverseID) {
+          return;
+        }
+
+        const newPolygonList = [...backgroundList];
+        newPolygonList.splice(i, 1);
+
+        annotation.pointList.forEach((point) => {
+          judgeIsConnectPoint(point, newPolygonList);
+        });
+      });
+    });
+    return { connectionPoints };
   }
 }
