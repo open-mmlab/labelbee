@@ -13,13 +13,13 @@ export const useBoxes = () => {
   const { selectedIDs, pointCloudBoxList, setPointCloudResult } = useContext(PointCloudContext);
   const [copiedBoxes, setCopiedBoxes] = useState<IPointCloudBoxList>([]);
   const { pointCloudBoxListUpdated } = usePointCloudViews();
-  const { t, i18n} = useTranslation();
+  const { t, i18n } = useTranslation();
 
-  const hasDuplicateID = (checkBoxList: IPointCloudBoxList) => {
-    return pointCloudBoxList.some((item) => {
-      return checkBoxList.some((i) => i.id === item.id);
-    });
-  };
+  // const hasDuplicateID = (checkBoxList: IPointCloudBoxList) => {
+  //   return pointCloudBoxList.some((item) => {
+  //     return checkBoxList.some((i) => i.id === item.id);
+  //   });
+  // };
 
   const selectedBoxes = useMemo(() => {
     return pointCloudBoxList.filter((i) => selectedIDs.includes(i.id));
@@ -30,24 +30,27 @@ export const useBoxes = () => {
       setCopiedBoxes(_.cloneDeep(selectedBoxes));
     } else {
       setCopiedBoxes([]);
-      message.error(t("CopyEmptyInPointCloud"));
+      message.error(t('CopyEmptyInPointCloud'));
     }
   }, [selectedIDs, pointCloudBoxList, i18n.language]);
 
   const pasteSelectedBoxes = useCallback(() => {
     if (copiedBoxes.length === 0) {
-      message.error(t("PasteEmptyInPointCloud"));
+      message.error(t('PasteEmptyInPointCloud'));
       return;
     }
 
-    const hasDuplicate = hasDuplicateID(copiedBoxes);
+    // const hasDuplicate = hasDuplicateID(copiedBoxes);
+    const hasDuplicate = false; // Temporarily hide the duplicate check;
 
     if (hasDuplicate) {
-      message.error(t("HasDuplicateID"));
+      message.error(t('HasDuplicateID'));
     } else {
       /** Paste succeed and empty */
-      setPointCloudResult(copiedBoxes);
-      pointCloudBoxListUpdated?.(copiedBoxes);
+      const newPointCloudResult = [...pointCloudBoxList, ...copiedBoxes];
+
+      setPointCloudResult(newPointCloudResult);
+      pointCloudBoxListUpdated?.(newPointCloudResult);
       setCopiedBoxes([]);
     }
   }, [copiedBoxes, pointCloudBoxList, i18n.language]);
