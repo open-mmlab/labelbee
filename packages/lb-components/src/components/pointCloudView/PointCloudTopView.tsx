@@ -243,7 +243,7 @@ const PointCloudTopView: React.FC<IAnnotationStateProps> = ({ currentData }) => 
       pointCloud.camera.position.set(x + offsetY, y - offsetX, z);
       pointCloud.render();
     });
-  }, [size]);
+  }, [size, ptCtx.topViewInstance]);
 
   useEffect(() => {
     ptCtx.topViewInstance?.pointCloudInstance?.applyZAxisPoints(zAxisLimit);
