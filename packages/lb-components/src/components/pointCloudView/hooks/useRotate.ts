@@ -4,6 +4,7 @@ import { synchronizeBackView, synchronizeSideView } from './usePointCloudViews';
 import { useSingleBox } from './useSingleBox';
 import { PointCloudContext } from '../PointCloudContext';
 import { cAnnotation } from '@labelbee/lb-annotation';
+import { PointCloudUtils } from '@labelbee/lb-utils';
 
 const { ERotateDirection } = cAnnotation;
 
@@ -31,7 +32,9 @@ export const useRotate = ({ currentData }: IAnnotationStateProps) => {
       }
 
       updateSelectedBox({
-        rotation: selectedPointCloudBox.rotation + Number(Math.PI * angle) / 180,
+        rotation: PointCloudUtils.restrictAngleRange(
+          selectedPointCloudBox.rotation + Number(Math.PI * angle) / 180,
+        ),
       });
 
       TopPointCloudPolygonOperation.rotatePolygon(angle, ERotateDirection.Anticlockwise);
