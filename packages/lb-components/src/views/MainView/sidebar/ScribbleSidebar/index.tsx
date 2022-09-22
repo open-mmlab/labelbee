@@ -6,9 +6,9 @@ import pen from '@/assets/attributeIcon/pen.svg';
 import eraserActivate from '@/assets/attributeIcon/eraser_a.svg';
 import eraser from '@/assets/attributeIcon/eraser.svg';
 import { getClassName } from '@/utils/dom';
-import { useSelector } from 'react-redux';
 import { AppState } from '@/store';
 import { EScribblePattern } from '@/data/enums/ToolType';
+import { useSelector } from '@/store/ctx';
 
 interface IProps {
   // toolInstance?: GraphToolInstance;

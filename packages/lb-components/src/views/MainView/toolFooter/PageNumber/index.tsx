@@ -4,6 +4,7 @@ import { connect } from 'react-redux';
 import { GraphToolInstance } from '@/store/annotation/types';
 import { Divider } from 'antd/es';
 import { useTranslation } from 'react-i18next';
+import { LabelBeeContext } from '@/store/ctx';
 
 interface IProps {
   toolInstance: GraphToolInstance;
@@ -44,4 +45,4 @@ const mapStateToProps = (state: AppState) => {
   };
 };
 
-export default connect(mapStateToProps)(PageNumber);
+export default connect(mapStateToProps, null, null, { context: LabelBeeContext })(PageNumber);

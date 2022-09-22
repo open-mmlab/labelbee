@@ -12,6 +12,7 @@ import { ICustomToolInstance } from '@/hooks/annotation';
 import { useStatus } from '@/components/pointCloudView/hooks/useStatus';
 import { useSingleBox } from '@/components/pointCloudView/hooks/useSingleBox';
 import { useTranslation } from 'react-i18next';
+import { LabelBeeContext } from '@/store/ctx';
 
 interface IProps {
   stepInfo: IStepInfo;
@@ -259,4 +260,6 @@ const mapStateToProps = (state: AppState) => {
   };
 };
 
-export default connect(mapStateToProps)(PointCloudToolSidebar);
+export default connect(mapStateToProps, null, null, { context: LabelBeeContext })(
+  PointCloudToolSidebar,
+);

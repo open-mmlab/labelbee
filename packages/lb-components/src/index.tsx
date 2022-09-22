@@ -14,6 +14,7 @@ import { VideoTagTool } from '@/components/videoPlayer/TagToolInstanceAdaptorI18
 import './index.scss';
 import { PointCloudProvider } from './components/pointCloudView/PointCloudContext';
 import { AppState } from './store';
+import { LabelBeeContext } from '@/store/ctx';
 
 export const store = configureStore();
 
@@ -39,7 +40,7 @@ const OutputApp = (props: AppProps, ref: any) => {
   );
 
   return (
-    <Provider store={store}>
+    <Provider store={store} context={LabelBeeContext}>
       <I18nextProvider i18n={i18n}>
         <PointCloudProvider>
           <App {...props} setToolInstance={setToolInstance} />

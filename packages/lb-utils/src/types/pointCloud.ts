@@ -81,6 +81,7 @@ export interface IPointCloudBox extends IVolume {
   subAttribute?: {
     [k: string]: string;
   };
+  count?: number;
 }
 
 export type IPointCloudBoxList = IPointCloudBox[];

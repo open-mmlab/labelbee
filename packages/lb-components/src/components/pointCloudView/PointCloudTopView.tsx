@@ -23,6 +23,7 @@ import { connect } from 'react-redux';
 import { usePointCloudViews } from './hooks/usePointCloudViews';
 import useSize from '@/hooks/useSize';
 import { useTranslation } from 'react-i18next';
+import { LabelBeeContext } from '@/store/ctx';
 
 const { EPolygonPattern } = cTool;
 
@@ -145,6 +146,10 @@ const PointCloudTopView: React.FC<IAnnotationStateProps> = ({ currentData }) => 
   const pointCloudViews = usePointCloudViews();
 
   useLayoutEffect(() => {
+    if (ptCtx.topViewInstance) {
+      return;
+    }
+
     if (ref.current && currentData?.url && currentData?.result) {
       const size = {
         width: ref.current.clientWidth,
@@ -158,7 +163,7 @@ const PointCloudTopView: React.FC<IAnnotationStateProps> = ({ currentData }) => 
       });
       ptCtx.setTopViewInstance(pointCloudAnnotation);
     }
-  }, []);
+  }, [currentData]);
 
   useEffect(() => {
     if (!size || !ptCtx.topViewInstance || !ptCtx.sideViewInstance) {
@@ -265,4 +270,6 @@ const PointCloudTopView: React.FC<IAnnotationStateProps> = ({ currentData }) => 
   );
 };
 
-export default connect(aMapStateToProps)(PointCloudTopView);
+export default connect(aMapStateToProps, null, null, { context: LabelBeeContext })(
+  PointCloudTopView,
+);

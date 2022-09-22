@@ -6,7 +6,6 @@ import StepUtils from '@/utils/StepUtils';
 import { Collapse } from 'antd/es';
 import React from 'react';
 import { useTranslation } from 'react-i18next';
-import { useSelector } from 'react-redux';
 import AnnotationText from './AnnotationText';
 import ClearIcon from './ClearIcon';
 import GeneralOperation, { PointCloudOperation } from './GeneralOperation';
@@ -19,6 +18,7 @@ import ToolStyle from './ToolStyle';
 import { cTool } from '@labelbee/lb-annotation';
 import ScribbleSidebar from './ScribbleSidebar';
 import { ToolIcons } from './ToolIcons';
+import { useSelector } from '@/store/ctx';
 
 const { EVideoToolName, EPointCloudName } = cTool;
 

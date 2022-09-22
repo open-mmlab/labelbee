@@ -20,6 +20,7 @@ import { Switch } from 'antd';
 import useSize from '@/hooks/useSize';
 import { usePointCloudViews } from './hooks/usePointCloudViews';
 import { useTranslation } from 'react-i18next';
+import { LabelBeeContext } from '@/store/ctx';
 
 const pointCloudID = 'LABELBEE-POINTCLOUD';
 const PointCloud3DContext = React.createContext<{
@@ -178,4 +179,4 @@ const PointCloud3D: React.FC<IAnnotationStateProps> = ({ currentData }) => {
   );
 };
 
-export default connect(aMapStateToProps)(PointCloud3D);
+export default connect(aMapStateToProps, null, null, { context: LabelBeeContext })(PointCloud3D);

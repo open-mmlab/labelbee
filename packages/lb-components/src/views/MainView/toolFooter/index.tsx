@@ -7,7 +7,8 @@ import { IStepInfo } from '@/types/step';
 import { Divider } from 'antd/es';
 import React from 'react';
 import { useTranslation } from 'react-i18next';
-import { connect, useDispatch } from 'react-redux';
+import { connect } from 'react-redux';
+import { useDispatch, LabelBeeContext } from '@/store/ctx';
 import FooterTips from './FooterTips';
 import HiddenTips from './HiddenTips';
 import PageNumber from './PageNumber';
@@ -159,4 +160,4 @@ const mapStateToProps = (state: AppState) => ({
   skipBeforePageTurning: state.annotation.skipBeforePageTurning,
 });
 
-export default connect(mapStateToProps)(ToolFooter);
+export default connect(mapStateToProps, null, null, { context: LabelBeeContext })(ToolFooter);

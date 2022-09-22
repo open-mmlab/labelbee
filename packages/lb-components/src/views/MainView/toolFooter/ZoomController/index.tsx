@@ -7,6 +7,7 @@ import { ToolInstance } from '@/store/annotation/types';
 import { connect } from 'react-redux';
 import ZoomLevel from './ZoomLevel';
 import { footerCls, FooterTheme } from '../index';
+import { LabelBeeContext } from '@/store/ctx';
 
 interface IZoomControllerProps {
   mode?: FooterTheme;
@@ -72,6 +73,11 @@ const ZoomControllerWithToolInstance: React.FC<{
   return <ZoomController initialPosition={initialPosition} zoomIn={zoomIn} zoomOut={zoomOut} />;
 };
 
-export default connect((state: AppState) => ({
-  toolInstance: state.annotation.toolInstance,
-}))(ZoomControllerWithToolInstance);
+export default connect(
+  (state: AppState) => ({
+    toolInstance: state.annotation.toolInstance,
+  }),
+  null,
+  null,
+  { context: LabelBeeContext },
+)(ZoomControllerWithToolInstance);

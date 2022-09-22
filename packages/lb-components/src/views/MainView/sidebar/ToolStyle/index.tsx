@@ -8,6 +8,7 @@ import fillOpacitySvg from '@/assets/toolStyle/icon_opacityFill.svg';
 import { connect } from 'react-redux';
 import { UpdateToolStyleConfig } from '@/store/toolStyle/actionCreators';
 import { store } from '@/index';
+import { LabelBeeContext } from '@/store/ctx';
 import { AppState } from '@/store';
 import { ToolStyleState } from '@/store/toolStyle/types';
 import { useTranslation } from 'react-i18next';
@@ -176,4 +177,4 @@ const mapStateToProps = ({ toolStyle, annotation }: AppState) => ({
   toolStyle,
   config: annotation.toolInstance.config,
 });
-export default connect(mapStateToProps)(ToolStyle);
+export default connect(mapStateToProps, null, null, { context: LabelBeeContext })(ToolStyle);
