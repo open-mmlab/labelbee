@@ -26,7 +26,7 @@ const PointCloudListener: React.FC<IAnnotationStateProps> = ({ currentData }) =>
   const { updateRotate } = useRotate({ currentData });
   const { updatePointCloudData } = usePointCloudViews();
 
-  const keydownEvents = (lowerCaseKey: string) => {
+  const keydownEvents = (lowerCaseKey: string, e: KeyboardEvent) => {
     const { topViewInstance, mainViewInstance } = ptCtx;
     if (!topViewInstance) {
       return;
@@ -88,12 +88,12 @@ const PointCloudListener: React.FC<IAnnotationStateProps> = ({ currentData }) =>
         ptCtx.setPointCloudValid(!ptCtx.valid);
         break;
 
-      case 'z':
+      case 'tab':
+        if (e.shiftKey) {
+          selectPrevBox();
+          break;
+        }
         selectNextBox();
-        break;
-
-      case 'c':
-        selectPrevBox();
         break;
 
       case 'f':
@@ -130,7 +130,7 @@ const PointCloudListener: React.FC<IAnnotationStateProps> = ({ currentData }) =>
       return;
     }
 
-    keydownEvents(lowerCaseKey);
+    keydownEvents(lowerCaseKey, e);
   };
 
   useEffect(() => {

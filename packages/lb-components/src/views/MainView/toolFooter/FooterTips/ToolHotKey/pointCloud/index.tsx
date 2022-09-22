@@ -88,13 +88,13 @@ const RightRotate = {
 const PrevBox = {
   name: '上一框',
   icon: prevBox,
-  shortCut: ['Z'],
+  shortCut: ['Shift', 'Tab'],
 };
 
 const NextBox = {
   name: '下一框',
   icon: nextBox,
-  shortCut: ['C'],
+  shortCut: ['Tab'],
 };
 
 const Rotate180 = {
