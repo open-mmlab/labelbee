@@ -455,9 +455,10 @@ class PolygonOperation extends BasicToolOperation {
 
     const newPolygonList = this.polygonList.map((polygon) => {
       if (polygon.id === id) {
+        const valid = polygon?.valid ?? true; // Valid Default is True.
         return {
           ...polygon,
-          valid: !polygon.valid,
+          valid: !valid,
         };
       }
 

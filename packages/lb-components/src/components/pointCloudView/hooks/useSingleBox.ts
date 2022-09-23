@@ -12,6 +12,8 @@ export const useSingleBox = () => {
     pointCloudBoxList,
     setPointCloudResult,
     topViewInstance,
+    backViewInstance,
+    sideViewInstance,
     selectedIDs,
     selectedID,
     mainViewInstance,
@@ -37,12 +39,58 @@ export const useSingleBox = () => {
     [selectedID, pointCloudBoxList],
   );
 
+  /** Use Partial<IPointCloudBox> to update box by ID  */
+  const updateBoxByID = useCallback(
+    (params: Partial<IPointCloudBox>, id: string) => {
+      const boxIndex = pointCloudBoxList.findIndex((v) => v.id === id);
+
+      if (boxIndex > -1) {
+        pointCloudBoxList.splice(boxIndex, 1, _.merge(pointCloudBoxList[boxIndex], params));
+        setPointCloudResult(_.cloneDeep(pointCloudBoxList));
+      }
+    },
+    [pointCloudBoxList],
+  );
+
+  /**
+   * Change all polygonView Valid.
+   */
+  const changePolygonViewValid = useCallback(
+    (id: string) => {
+      topViewInstance?.pointCloud2dOperation.setPolygonValidAndRender(id, true);
+      sideViewInstance?.pointCloud2dOperation.setPolygonValidAndRender(id, true);
+      backViewInstance?.pointCloud2dOperation.setPolygonValidAndRender(id, true);
+    },
+    [topViewInstance, sideViewInstance, backViewInstance],
+  );
+
   /** Toggle selected box‘s validity  */
   const changeSelectedBoxValid = useCallback(() => {
     if (selectedBox?.info) {
-      updateSelectedBox({ valid: !selectedBox.info.valid });
+      const { id, valid = true } = selectedBox.info;
+
+      // PointCloud
+      updateSelectedBox({ valid: !valid });
+
+      changePolygonViewValid(id);
     }
-  }, [selectedID]);
+  }, [changePolygonViewValid, selectedBox]);
+
+  const changeBoxValidByID = useCallback(
+    (id: string) => {
+      const boxInfo = pointCloudBoxList.find((v) => v.id === id);
+
+      if (boxInfo) {
+        const { id, valid = true } = boxInfo;
+
+        // PointCloud
+        updateBoxByID({ valid: !valid }, id);
+
+        changePolygonViewValid(id);
+      }
+    },
+    [changePolygonViewValid, pointCloudBoxList],
+  );
 
   /** PointCloud select next/prev one */
   const switchToNextBox = useCallback(
@@ -76,6 +124,7 @@ export const useSingleBox = () => {
     selectedBox,
     updateSelectedBox,
     changeSelectedBoxValid,
+    changeBoxValidByID,
     selectNextBox: switchToNextBox,
     selectPrevBox,
     deletePointCloudBox,

@@ -290,6 +290,24 @@ class PointCloud2dOperation extends PolygonOperation {
     this.renderBasicCanvas();
     this.render();
   }
+
+  /**
+   * If the operation is triggered internally, it will emit validUpdate.
+   *
+   * The Invalid update needs to be added a params.
+   * @override
+   * @param id
+   * @param forbidEmit
+   * @returns
+   */
+  public setPolygonValidAndRender(id: string, isUpdate = false) {
+    if (isUpdate) {
+      super.setPolygonValidAndRender(id);
+      return;
+    }
+
+    this.emit('validUpdate', id);
+  }
 }
 
 export default PointCloud2dOperation;

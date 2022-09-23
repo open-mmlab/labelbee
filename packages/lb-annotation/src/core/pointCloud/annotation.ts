@@ -155,6 +155,7 @@ export class PointCloudAnnotation implements IPointCloudAnnotationOperation {
         sourceID: '',
         pointList,
         isRect: true,
+        valid: v.valid ?? true,
       };
     }) as IPolygonData[];
 

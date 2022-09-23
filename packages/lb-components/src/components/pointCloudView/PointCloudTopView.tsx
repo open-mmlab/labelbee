@@ -140,7 +140,7 @@ const PointCloudTopView: React.FC<IAnnotationStateProps> = ({ currentData }) => 
   const { setZoom } = useZoom();
 
   const { addPolygon, deletePolygon } = usePolygon();
-  const { deletePointCloudBox } = useSingleBox();
+  const { deletePointCloudBox, changeBoxValidByID } = useSingleBox();
   const [zAxisLimit, setZAxisLimit] = useState<number>(10);
   const { t } = useTranslation();
   const pointCloudViews = usePointCloudViews();
@@ -201,6 +201,16 @@ const PointCloudTopView: React.FC<IAnnotationStateProps> = ({ currentData }) => 
     TopView2dOperation.singleOn('updatePolygonByDrag', ({ newPolygon }: any) => {
       pointCloudViews.topViewUpdateBox?.(newPolygon, size);
     });
+
+    const validUpdate = (id: string) => {
+      changeBoxValidByID(id);
+    };
+
+    TopView2dOperation.on('validUpdate', validUpdate);
+
+    return () => {
+      TopView2dOperation.unbind('validUpdate', validUpdate);
+    };
   }, [ptCtx, size, currentData, pointCloudViews]);
 
   useEffect(() => {
