@@ -665,17 +665,7 @@ export class PointCloud {
     points.material = pointsMaterial;
     this.filterZAxisPoints(points);
 
-    const originPointCloud = this.scene.getObjectByName(this.pointCloudObjectName) as THREE.Points | undefined;
-
-    if (originPointCloud) {
-      originPointCloud.geometry.attributes.color = points.geometry.attributes.color;
-      originPointCloud.geometry.attributes.position = points.geometry.attributes.position;
-      originPointCloud.geometry.attributes.color.needsUpdate = true;
-      originPointCloud.geometry.attributes.position.needsUpdate = true;
-      originPointCloud.uuid = points.uuid;
-    } else {
-      this.scene.add(points);
-    }
+    this.scene.add(points);
 
     this.render();
   }
@@ -695,6 +685,7 @@ export class PointCloud {
    * @param radius Render the range of circle
    */
   public loadPCDFile = async (src: string, radius?: number) => {
+    this.clearPointCloud();
     const points = (await this.cacheInstance.loadPCDFile(src)) as THREE.Points;
     points.name = this.pointCloudObjectName;
 
