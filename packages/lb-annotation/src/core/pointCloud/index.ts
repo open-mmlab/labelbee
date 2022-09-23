@@ -839,13 +839,12 @@ export class PointCloud {
     let zCount = 0; // The Count of Polygon range
 
     if (points && points?.geometry) {
-      const pointPosArray = points?.geometry.attributes.position;
+      const pointPosArray = points?.geometry.attributes.position.array;
 
-      for (let idx = 0; idx < pointPosArray.count; idx++) {
-        const cur = idx * 3;
-        const x = pointPosArray.getX(cur);
-        const y = pointPosArray.getY(cur);
-        const z = pointPosArray.getZ(cur);
+      for (let idx = 0; idx < pointPosArray.length; idx += 3) {
+        const x = pointPosArray[idx];
+        const y = pointPosArray[idx + 1];
+        const z = pointPosArray[idx + 2];
 
         const inPolygon = isInPolygon({ x, y }, polygon);
 
