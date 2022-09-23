@@ -14,6 +14,7 @@ import {
   PageBackward,
   PageForward,
   UpdateToolInstance,
+  CopyBackWordResult,
 } from '@/store/annotation/actionCreators';
 import { ISize } from '@/types/main';
 import { message } from 'antd';
@@ -43,7 +44,7 @@ export const ViewportProviderComponent = (props: any) => {
       return;
     }
 
-    if (!e.shiftKey || !e.ctrlKey) {
+    if (!e.shiftKey && !e.ctrlKey) {
       if (e.keyCode === EKeyCode.A) {
         if (skipBeforePageTurning) {
           skipBeforePageTurning(() => dispatch(PageBackward()));
@@ -62,6 +63,10 @@ export const ViewportProviderComponent = (props: any) => {
       }
       if (e.keyCode === EKeyCode.R) {
         dispatch(UpdateRotate());
+      }
+
+      if (e.keyCode === EKeyCode.C && e.altKey === true) {
+        dispatch(CopyBackWordResult());
       }
     }
 

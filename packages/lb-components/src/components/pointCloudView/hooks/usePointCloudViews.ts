@@ -199,6 +199,7 @@ export const synchronizeSideView = (
     [
       {
         id: newPolygon.id,
+        valid: boxParams.valid,
         pointList: polygon2d,
         textAttribute: '',
         isRect: true,
@@ -252,6 +253,7 @@ export const synchronizeBackView = (
     [
       {
         id: newPolygon.id,
+        valid: boxParams.valid,
         pointList: polygon2d,
         textAttribute: '',
         isRect: true,
@@ -295,6 +297,7 @@ export const synchronizeTopView = (
       pointList: polygon2d,
       textAttribute: '',
       isRect: true,
+      valid: newBoxParams.valid ?? true
     });
   }
 

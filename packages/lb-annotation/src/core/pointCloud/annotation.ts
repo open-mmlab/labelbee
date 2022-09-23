@@ -112,9 +112,17 @@ export class PointCloudAnnotation implements IPointCloudAnnotationOperation {
    */
   public initSize(size: ISize) {
     // PointCloud camera init.
+
+    // Init the camera
+    this.pointCloudInstance.updateTopCamera();
+    this.pointCloudInstance.setDefaultControls();
+
+    // Update Canvas Size
+    this.pointCloudInstance.initRenderer();
+
+    // Update range of orthographicCamera.
     this.pointCloudInstance.initOrthographicCamera(this.getDefaultOrthographic(size));
-    this.pointCloudInstance.init();
-    this.pointCloudInstance.initCamera();
+
     this.pointCloudInstance.render();
 
     const imgSrc = createEmptyImage(size);
@@ -147,6 +155,7 @@ export class PointCloudAnnotation implements IPointCloudAnnotationOperation {
         sourceID: '',
         pointList,
         isRect: true,
+        valid: v.valid ?? true,
       };
     }) as IPolygonData[];
 

@@ -206,6 +206,7 @@ const AttributeUpdater = ({
                   value={ptx.selectedPointCloudBox?.subAttribute?.[subAttribute.value]}
                   placeholder={t('PleaseSelect')}
                   onChange={(value) => setSubAttribute(subAttribute.value, value)}
+                  allowClear={true}
                 >
                   {subAttribute.subSelected.map((sub: any) => (
                     <Select.Option key={sub.value} value={sub.value}>
