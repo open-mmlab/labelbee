@@ -6,7 +6,7 @@ import rightClick from '@/assets/annotation/toolHotKeyIcon/icon_mouse_right_kj.s
 import changePointCloudValid from '@/assets/annotation/pointCloudTool/changePointCloudValid.svg';
 import copy from '@/assets/annotation/pointCloudTool/copy.svg';
 import nextBox from '@/assets/annotation/pointCloudTool/nextBox.svg';
-import patse from '@/assets/annotation/pointCloudTool/patse.svg';
+import paste from '@/assets/annotation/pointCloudTool/patse.svg';
 import prevBox from '@/assets/annotation/pointCloudTool/prevBox.svg';
 import rotate180_black from '@/assets/annotation/pointCloudTool/rotate180_black.svg';
 import selectAll from '@/assets/annotation/pointCloudTool/selectAll.svg';
@@ -18,7 +18,7 @@ import React from 'react';
 import { ReloadOutlined, RotateLeftOutlined, RotateRightOutlined } from '@ant-design/icons';
 
 const changePointSize: IShortcut = {
-  name: '点的显示粗细',
+  name: 'PointThickness',
   icon: (
     <span
       style={{
@@ -35,102 +35,102 @@ const changePointSize: IShortcut = {
 };
 
 const rotateRoundCenter: IShortcut = {
-  name: '绕中心点旋转画面',
+  name: 'RotateAroundCenterPoint',
   icon: <ReloadOutlined />,
   shortCut: [leftClick],
-  noticeInfo: '拖动',
+  noticeInfo: 'DragOperation',
 };
 
 const Drag3D = {
-  name: '点云平移',
+  name: 'PointCloudViewTranslate',
   icon: dragIcon,
   shortCut: [rightClick],
-  noticeInfo: '拖动',
+  noticeInfo: 'Drag',
 };
 
 const DragTopView = {
-  name: '俯视图平移',
+  name: 'TopViewTranslate',
   icon: dragIcon,
   shortCut: [rightClick],
-  noticeInfo: '拖动',
+  noticeInfo: 'Drag',
 };
 
 const ChangeInvalid = {
-  name: '切换点云有效性',
+  name: 'ChangePointCloudValid',
   icon: changePointCloudValid,
   shortCut: ['V'],
 };
 
 const CopyBox = {
-  name: '复制框',
+  name: 'CopyBox',
   icon: copy,
   shortCut: ['Ctrl', 'C'],
 };
 
 const PasteBox = {
-  name: '粘贴框',
-  icon: patse,
+  name: 'PasteBox',
+  icon: paste,
   shortCut: ['Ctrl', 'V'],
 };
 
 const LeftRotate = {
-  name: '向左旋转微调',
+  name: 'RotateLeft',
   icon: <RotateLeftOutlined />,
   shortCut: ['Q'],
 };
 
 const RightRotate = {
-  name: '向右旋转微调',
+  name: 'RotateRight',
   icon: <RotateRightOutlined />,
   shortCut: ['E'],
 };
 
 const PrevBox = {
-  name: '上一框',
+  name: 'PreviousBox',
   icon: prevBox,
   shortCut: ['Shift', 'Tab'],
 };
 
 const NextBox = {
-  name: '下一框',
+  name: 'NextBox',
   icon: nextBox,
   shortCut: ['Tab'],
 };
 
 const Rotate180 = {
-  name: '旋转180°',
+  name: 'Rotate180',
   icon: rotate180_black,
   shortCut: ['G'],
-  noticeInfo: '选中时',
+  noticeInfo: 'SelectedStatus',
 };
 
 const CopyPrevPage = {
-  name: '复制上一页',
+  name: 'CopyPrevPage',
   icon: copy,
   shortCut: ['Alt', 'C'],
 };
 
 const ChangeBoxInvalid = {
-  name: '切换标注框有效性',
+  name: 'ChangeBoxValid',
   icon: TabChangeSelectedSvg,
   shortCut: ['F'],
-  noticeInfo: '选中时',
+  noticeInfo: 'SelectedStatus',
 };
 
 const SelectMulti = {
-  name: '多选',
+  name: 'MultiSelect',
   icon: selectMultiple,
   shortCut: ['Ctrl', rightClick],
 };
 
 const SelectAll = {
-  name: '全选',
+  name: 'SelectAllBox',
   icon: selectAll,
   shortCut: ['Ctrl', 'A'],
 };
 
 const pointCloudShortCutTable: IShortcut[] = [
-  { name: '通用' },
+  { name: 'GeneralOperation' },
   backward,
   forward,
   changePointSize,
@@ -139,7 +139,7 @@ const pointCloudShortCutTable: IShortcut[] = [
   Drag3D,
   DragTopView,
   ChangeInvalid,
-  { name: '拉框模式' },
+  { name: 'RectPattern' },
   CopyBox,
   PasteBox,
   LeftRotate,
