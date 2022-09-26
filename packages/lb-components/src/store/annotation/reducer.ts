@@ -369,7 +369,7 @@ export const annotationReducer = (
 
       const fileResult = jsonParser(imgList[nextIndex]?.result);
 
-      const stepResult = fileResult[`step_${step}`];
+      const stepResult = fileResult[`step_${currentStepInfo.step}`];
 
       const isInitData = !stepResult; // 是否为初始化数据
 
@@ -386,7 +386,7 @@ export const annotationReducer = (
         toolInstance?.setValid(basicImgInfo.valid);
       }
 
-      const stepConfig = getStepConfig(stepList, step);
+      const stepConfig = getStepConfig(stepList, currentStepInfo.step);
 
       const { dataSourceStep, tool } = stepConfig;
       const dependStepConfig = getStepConfig(stepList, dataSourceStep);
