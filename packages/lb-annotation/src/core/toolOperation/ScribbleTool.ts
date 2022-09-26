@@ -48,8 +48,9 @@ class ScribbleTool extends BasicToolOperation {
     return this.penSize / this.zoom;
   }
 
+
   public getOriginCoordinate = (e: MouseEvent) => {
-    return AxisUtils.changePointByZoom(this.getCoordinateUnderZoom(e), 1 / this.zoom);
+    return AxisUtils.changePointByZoom(this.getCoordinateUnderZoomByRotate(e), 1 / this.zoom);
   };
 
   public setPenSize(size: number) {
@@ -207,7 +208,7 @@ class ScribbleTool extends BasicToolOperation {
     this.cacheContext.lineWidth = this.penSizeWithZoom;
     this.cacheContext.lineCap = 'round';
     this.cacheContext.lineJoin = 'round';
-    const originCoordinate = AxisUtils.changePointByZoom(this.getCoordinateUnderZoom(e), 1 / this.zoom);
+    const originCoordinate = this.getOriginCoordinate(e);
     this.cacheContext.moveTo(originCoordinate.x, originCoordinate.y);
     this.startPoint = originCoordinate;
   }
