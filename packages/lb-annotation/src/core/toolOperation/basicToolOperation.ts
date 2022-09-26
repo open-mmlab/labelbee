@@ -522,6 +522,43 @@ class BasicToolOperation extends EventListener {
     };
   }
 
+  /**
+   * Get the coordinate based on zoom and rotate
+   *
+   *
+   * @param e
+   * @returns
+   */
+  public getCoordinateUnderZoomByRotate(e: MouseEvent) {
+    const { x, y } = this.getCoordinateUnderZoom(e);
+
+    if (this.basicImgInfo.rotate === 90) {
+      return {
+        x: y,
+        y: this.basicImgInfo.height * this.zoom - x,
+      };
+    }
+
+    if (this.basicImgInfo.rotate === 180) {
+      return {
+        x: this.basicImgInfo.width * this.zoom - x,
+        y: this.basicImgInfo.height * this.zoom - y,
+      };
+    }
+
+    if (this.basicImgInfo.rotate === 270) {
+      return {
+        x: this.basicImgInfo.width * this.zoom - y,
+        y: x,
+      };
+    }
+
+    return {
+      x,
+      y,
+    };
+  }
+
   public getGetCenterCoordinate() {
     return {
       x: this.size.width / 2,
