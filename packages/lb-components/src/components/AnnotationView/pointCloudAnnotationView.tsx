@@ -33,6 +33,9 @@ const PointCloudAnnotationView = (props: IProps) => {
       backgroundColor: '#ccc',
     });
     instance.current = pointCloud;
+    return () => {
+      instance.current.renderer?.forceContextLoss();
+    };
   }, []);
 
   useEffect(() => {
