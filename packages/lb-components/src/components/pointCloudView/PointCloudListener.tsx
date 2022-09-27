@@ -151,6 +151,7 @@ const PointCloudListener: React.FC<IAnnotationStateProps> = ({ currentData }) =>
     updatePointCloudData?.();
   }, [currentData, ptCtx.mainViewInstance]);
 
+  // Update the listener of toolInstance.
   useEffect(() => {
     toolInstanceRef.current.exportData = () => {
       return [ptCtx.pointCloudBoxList, { valid: ptCtx.valid }];
