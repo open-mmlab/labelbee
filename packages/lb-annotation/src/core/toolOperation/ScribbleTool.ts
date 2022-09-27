@@ -48,7 +48,6 @@ class ScribbleTool extends BasicToolOperation {
     return this.penSize / this.zoom;
   }
 
-
   public getOriginCoordinate = (e: MouseEvent) => {
     return AxisUtils.changePointByZoom(this.getCoordinateUnderZoomByRotate(e), 1 / this.zoom);
   };
@@ -81,7 +80,7 @@ class ScribbleTool extends BasicToolOperation {
       }
       if (this.cacheContext) {
         this.cacheContext.save();
-        this.clearResult();
+        this.clearCacheCanvas();
         this.cacheContext.drawImage(img, 0, 0, img.width, img.height);
         this.cacheContext.restore();
         this.render();
@@ -103,7 +102,7 @@ class ScribbleTool extends BasicToolOperation {
     const { url } = data?.[0] ?? {};
 
     this.history.initRecord([url], !!url);
-    this.clearResult();
+    this.clearCacheCanvas();
     if (!url) {
       this.render();
       return;
@@ -275,6 +274,9 @@ class ScribbleTool extends BasicToolOperation {
 
   public clearResult() {
     this.clearCacheCanvas();
+
+    // Need to add a record.
+    this.history.pushHistory(this.cacheCanvas?.toDataURL('image/png', 0));
   }
 
   public renderPoint(radius: number) {

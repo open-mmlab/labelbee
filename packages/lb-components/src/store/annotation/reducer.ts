@@ -233,8 +233,8 @@ export const annotationReducer = (
       if (extraData) {
         imgList[imgIndex] = {
           ...imgList[imgIndex],
-          ...extraData
-        } 
+          ...extraData,
+        };
       }
 
       if (onSubmit) {
@@ -422,8 +422,8 @@ export const annotationReducer = (
               CommonToolUtils.isSameSourceID(i.sourceID, sourceID),
             )
           : result;
-        toolInstance?.setResult(resultForBasicIndex);
         toolInstance?.history.initRecord(result, true);
+        toolInstance?.setResult(resultForBasicIndex);
       }
 
       return {
@@ -449,7 +449,7 @@ export const annotationReducer = (
         stepList,
       };
     }
-    
+
     case ANNOTATION_ACTIONS.SET_TASK_CONFIG: {
       const { stepList, step } = action.payload;
       return {
