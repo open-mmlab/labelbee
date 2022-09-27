@@ -102,6 +102,10 @@ const ToolFooter: React.FC<IProps> = (props: IProps) => {
 
   const toPageNumber = (page: string) => {
     const imgIndex = ~~page - 1;
+    if (skipBeforePageTurning) {
+      skipBeforePageTurning(() => dispatch(PageJump(imgIndex)));
+      return;
+    }
     dispatch(PageJump(imgIndex));
   };
 
