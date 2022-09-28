@@ -84,8 +84,7 @@ export const topViewPolygon2PointCloud = (
     depth = selectedPointCloudBox.depth;
   }
 
-  /** TrackID will append before it pushed */
-  const boxParams: Omit<IPointCloudBox, 'trackID'> = {
+  const newPosition = {
     center: {
       x: centerPoint.x,
       y: centerPoint.y,
@@ -94,12 +93,24 @@ export const topViewPolygon2PointCloud = (
     width,
     height,
     depth,
-    rotation: rotation,
+    rotation,
     id: newPolygon.id,
-    attribute: '',
-    valid: true,
-    ...extraData,
   };
+
+  /** TrackID will append before it pushed */
+  const boxParams: Omit<IPointCloudBox, 'trackID'> = selectedPointCloudBox
+    ? {
+        ...selectedPointCloudBox,
+        ...newPosition,
+        ...extraData,
+      }
+    : {
+        // Init Data
+        ...newPosition,
+        attribute: '',
+        valid: true,
+        ...extraData,
+      };
 
   if (defaultValue) {
     Object.assign(boxParams, defaultValue);
@@ -297,7 +308,7 @@ export const synchronizeTopView = (
       pointList: polygon2d,
       textAttribute: '',
       isRect: true,
-      valid: newBoxParams.valid ?? true
+      valid: newBoxParams.valid ?? true,
     });
   }
 
