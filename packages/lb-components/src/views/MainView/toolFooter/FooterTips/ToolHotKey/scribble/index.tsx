@@ -6,7 +6,7 @@ import {
   restore,
   revoke,
   rotate,
-  // setValid,
+  setValid,
   scale,
   // attributeClickLock,
   // attributeLock,
@@ -26,7 +26,7 @@ const scribbleShortCutTable = [
   backward,
   forward,
   dargWithRightClick,
-  // setValid,
+  setValid,
   // copyBackwardResult,
 ];
 
