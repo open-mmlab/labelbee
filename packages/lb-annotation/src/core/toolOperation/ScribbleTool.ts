@@ -40,6 +40,20 @@ class ScribbleTool extends BasicToolOperation {
     }
   }
 
+  public get cursorErase() {
+    const svgIcon = `<?xml version="1.0" encoding="UTF-8"?><svg width="24" heighst="24" viewBox="0 0 48 48" fill="none" xmlns="http://www.w3.org/2000/svg"><g clip-path="url(#icon-65e7e1747c11bad3)"><path d="M44.7818 24.1702L31.918 7.09935L14.1348 20.5L27.5 37L30.8556 34.6643L44.7818 24.1702Z" fill="#141414" stroke="#000000" stroke-width="4" stroke-linejoin="miter"/><path d="M27.4998 37L23.6613 40.0748L13.0978 40.074L10.4973 36.6231L4.06543 28.0876L14.4998 20.2248" stroke="#000000" stroke-width="4" stroke-linejoin="miter"/><path d="M13.2056 40.072L44.5653 40.072" stroke="#000000" stroke-width="4" stroke-linecap="round"/></g><defs><clipPath id="icon-65e7e1747c11bad3"><rect width="48" height="48" fill="#df4c4c"/></clipPath></defs></svg>`;
+    const iconUrl = `data:image/svg+xml;base64,${window.btoa(unescape(encodeURIComponent(svgIcon)))}`;
+    return `url(${iconUrl}) 0 0, auto`;
+  }
+
+  public get defaultCursor() {
+    if (this.action === EScribblePattern.Erase) {
+      return this.cursorErase;
+    }
+
+    return this.isShowDefaultCursor ? 'default' : 'none';
+  }
+
   public get color() {
     return this?.defaultAttributeInfo?.color ?? DEFAULT_COLOR;
   }
@@ -172,6 +186,18 @@ class ScribbleTool extends BasicToolOperation {
 
   public setPattern = (pattern: EScribblePattern) => {
     this.action = pattern;
+
+    switch (pattern) {
+      case EScribblePattern.Erase: {
+        this.setCustomCursor(this.cursorErase);
+        break;
+      }
+
+      default: {
+        this.setCustomCursor('none');
+        break;
+      }
+    }
   };
 
   public setDefaultAttribute(attributeValue: string) {
@@ -283,6 +309,10 @@ class ScribbleTool extends BasicToolOperation {
     DrawUtils.drawCircleWithFill(this.canvas, this.coord, radius, { color: this.color });
   }
 
+  public renderBorderPoint(radius: number) {
+    DrawUtils.drawCircle(this.canvas, this.coord, radius, { color: 'black' });
+  }
+
   public render() {
     super.render();
 
@@ -303,7 +333,13 @@ class ScribbleTool extends BasicToolOperation {
     if (this.forbidOperation || this.forbidCursorLine) {
       return;
     }
-    this.renderPoint(this.penSize / 2);
+    const radius = this.penSize / 2;
+
+    if (this.action === EScribblePattern.Erase) {
+      this.renderBorderPoint(radius);
+    } else {
+      this.renderPoint(radius);
+    }
   }
 
   /** 撤销 */

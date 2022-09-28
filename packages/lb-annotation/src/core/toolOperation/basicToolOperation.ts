@@ -258,7 +258,7 @@ class BasicToolOperation extends EventListener {
     return BASE_ICON[this.style.color];
   }
 
-  get defaultCursor() {
+  get defaultCursor(): string {
     return this.showDefaultCursor ? 'default' : 'none';
   }
 
@@ -272,6 +272,10 @@ class BasicToolOperation extends EventListener {
       innerZoom: this.innerZoom,
       currentPosStorage: this.currentPosStorage,
     };
+  }
+
+  get isShowDefaultCursor() {
+    return this.showDefaultCursor;
   }
 
   /**
@@ -480,7 +484,7 @@ class BasicToolOperation extends EventListener {
 
   public setForbidOperation(forbidOperation: boolean) {
     this.forbidOperation = forbidOperation;
-    this.setShowDefaultCursor(true);
+    this.setShowDefaultCursor(forbidOperation);
     this.render();
   }
 
