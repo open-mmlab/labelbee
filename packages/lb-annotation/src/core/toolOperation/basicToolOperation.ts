@@ -340,8 +340,7 @@ class BasicToolOperation extends EventListener {
 
   // 是否限制鼠标操作
   public get forbidMouseOperation() {
-    // return this.forbidOperation || this.valid === false;
-    return false;
+    return this.forbidOperation || this.valid === false;
   }
 
   public get pixelRatio() {
