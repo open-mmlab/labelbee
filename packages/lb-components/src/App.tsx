@@ -63,6 +63,7 @@ export interface AppProps {
 
   // data Correction
   skipBeforePageTurning?: (pageTurning: Function) => void;
+  beforeRotate?: () => boolean;
 
   drawLayerSlot?: (props: {
     zoom: number;
@@ -97,6 +98,7 @@ const App: React.FC<AppProps> = (props) => {
     loadFileList,
     defaultLang = 'cn',
     skipBeforePageTurning,
+    beforeRotate,
   } = props;
 
   useEffect(() => {
@@ -112,6 +114,7 @@ const App: React.FC<AppProps> = (props) => {
         onPageChange,
         onStepChange,
         skipBeforePageTurning,
+        beforeRotate,
       }),
     );
 
@@ -131,6 +134,7 @@ const App: React.FC<AppProps> = (props) => {
         onSave,
         onPageChange,
         onStepChange,
+        beforeRotate,
       }),
     );
 
@@ -145,6 +149,7 @@ const App: React.FC<AppProps> = (props) => {
     onPageChange,
     onStepChange,
     defaultLang,
+    beforeRotate,
   ]);
 
   useEffect(() => {

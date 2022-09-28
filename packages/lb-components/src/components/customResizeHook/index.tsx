@@ -15,6 +15,7 @@ import {
   PageForward,
   UpdateToolInstance,
   CopyBackWordResult,
+  UpdateValid,
 } from '@/store/annotation/actionCreators';
 import { ISize } from '@/types/main';
 import { message } from 'antd';
@@ -67,6 +68,10 @@ export const ViewportProviderComponent = (props: any) => {
 
       if (e.keyCode === EKeyCode.C && e.altKey === true) {
         dispatch(CopyBackWordResult());
+      }
+
+      if (e.keyCode === EKeyCode.Y) {
+        dispatch(UpdateValid());
       }
     }
 
