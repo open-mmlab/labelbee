@@ -581,7 +581,7 @@ export const annotationReducer = (
           return state;
         }
       }
-      
+
       toolInstance?.updateRotate();
       return state;
     }
@@ -592,12 +592,12 @@ export const annotationReducer = (
 
       Modal.destroyAll();
       Modal.confirm({
-        content: `是否确认${valid ? '标为无效' : '取消无效'}文件`,
+        content: i18n.t(valid ? 'updateValidFromValidToInValid' : 'updateValidFromInValidToValid'),
         onOk: () => {
           toolInstance?.setValid(!valid);
         },
-        okText: '确认',
-        cancelText: '取消',
+        okText: i18n.t("Confirm"),
+        cancelText: i18n.t("Cancel")
       });
 
       return state;
