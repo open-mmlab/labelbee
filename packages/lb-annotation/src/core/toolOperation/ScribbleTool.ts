@@ -62,6 +62,10 @@ class ScribbleTool extends BasicToolOperation {
     return this.penSize / this.zoom;
   }
 
+  public get cacheCanvasToDataUrl() {
+    return this.cacheCanvas?.toDataURL('image/png', 0);
+  }
+
   public getOriginCoordinate = (e: MouseEvent) => {
     return AxisUtils.changePointByZoom(this.getCoordinateUnderZoomByRotate(e), 1 / this.zoom);
   };
@@ -113,10 +117,16 @@ class ScribbleTool extends BasicToolOperation {
 
   public setResult(data: IScribbleData[]) {
     // Only has one layer
-    const { url } = data?.[0] ?? {};
+    let { url } = data?.[0] ?? {};
 
-    this.history.initRecord([url], !!url);
     this.clearCacheCanvas();
+
+    // Create an Empty Page when the result is empty.
+    if (!url) {
+      url = this.cacheCanvasToDataUrl ?? '';
+    }
+
+    this.history.initRecord([url], true);
     if (!url) {
       this.render();
       return;
@@ -253,7 +263,7 @@ class ScribbleTool extends BasicToolOperation {
       this.cacheContext?.closePath();
       this.cacheContext?.restore();
       this.startPoint = undefined;
-      this.history.pushHistory(this.cacheCanvas?.toDataURL('image/png', 0));
+      this.history.pushHistory(this.cacheCanvasToDataUrl);
     }
   }
 
@@ -288,7 +298,7 @@ class ScribbleTool extends BasicToolOperation {
   public onEraseEnd() {}
 
   public exportData() {
-    const imgBase64 = this.cacheCanvas?.toDataURL('image/png', 0);
+    const imgBase64 = this.cacheCanvasToDataUrl;
 
     return [[], this.basicImgInfo, { imgBase64 }];
   }
@@ -302,7 +312,7 @@ class ScribbleTool extends BasicToolOperation {
     this.clearCacheCanvas();
 
     // Need to add a record.
-    this.history.pushHistory(this.cacheCanvas?.toDataURL('image/png', 0));
+    this.history.pushHistory(this.cacheCanvasToDataUrl);
   }
 
   public renderPoint(radius: number) {
