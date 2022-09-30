@@ -1,6 +1,6 @@
 {
   "name": "@labelbee/lb-components",
-  "version": "1.6.0-alpha.17",
+  "version": "1.6.0-alpha.18",
   "description": "Provide a complete library of annotation components",
   "main": "./dist/index.js",
   "es": "./es/index.js",
