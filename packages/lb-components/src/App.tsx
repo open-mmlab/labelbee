@@ -58,6 +58,7 @@ export interface AppProps {
   setToolInstance?: (tool: ToolInstance) => void;
   mode?: 'light' | 'dark'; // 临时需求应用于 toolFooter 的操作
   showTips?: boolean; // 是否展示 tips
+  tips?: string; // Tips 具体内容
   defaultLang: 'en' | 'cn'; // 国际化设置
   leftSider?: () => React.ReactNode | React.ReactNode;
 

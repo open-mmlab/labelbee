@@ -558,7 +558,7 @@ $prefix: bee;
 
 .#{$prefix}-tips {
   display: flex;
-  justify-content: flex-end;
+  justify-content: space-between;
   background-color: #333;
   color: rgba(255, 255, 255, 0.4);
   line-height: 40px;
@@ -568,6 +568,12 @@ $prefix: bee;
   width: 100%;
   overflow: hidden;
   white-space: nowrap;
+  .#{$prefix}-tips__leftContent {
+    max-width: 60%;
+    text-overflow: ellipsis;
+    overflow: hidden;
+    white-space: nowrap;
+  }
 
   .#{$prefix}-tips__path {
     max-width: 40%;
