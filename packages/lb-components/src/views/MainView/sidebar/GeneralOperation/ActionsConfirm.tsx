@@ -47,7 +47,6 @@ const ActionsConfirm: React.FC<{ allOperation: IOperationConfig[] }> = ({ allOpe
           >
             <Popconfirm
               title={<PopconfirmTitle info={info} />}
-              placement='topRight'
               okText={t('Confirm')}
               cancelText={t('Cancel')}
               onConfirm={info.onClick}
