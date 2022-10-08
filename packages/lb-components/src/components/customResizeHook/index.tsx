@@ -15,7 +15,7 @@ import {
   PageForward,
   UpdateToolInstance,
   CopyBackWordResult,
-  UpdateValid,
+  // UpdateValid,
 } from '@/store/annotation/actionCreators';
 import { ISize } from '@/types/main';
 import { message } from 'antd';
