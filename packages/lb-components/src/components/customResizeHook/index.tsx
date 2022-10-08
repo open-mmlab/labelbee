@@ -70,9 +70,10 @@ export const ViewportProviderComponent = (props: any) => {
         dispatch(CopyBackWordResult());
       }
 
-      if (e.keyCode === EKeyCode.Y) {
-        dispatch(UpdateValid());
-      }
+      // Temporarily hide. Because there is something wrong with i18n.
+      // if (e.keyCode === EKeyCode.Y) {
+      //   dispatch(UpdateValid());
+      // }
     }
 
     /**
