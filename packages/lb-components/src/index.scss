@@ -1246,6 +1246,12 @@ $hotkey-container-padding: 7px;
   }
 }
 
+.#{$prefix}-pop-confirm {
+  .ant-popover-buttons {
+    min-width: 116px;
+  }
+}
+
 /** VideoPlayer样式 start */
 .#{$prefix}-video-wrapper {
   width: 100%;

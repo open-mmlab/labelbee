@@ -1,6 +1,7 @@
-import React, { useState } from 'react';
+import React, { useRef, useState } from 'react';
 import { Col, Popconfirm } from 'antd';
 import { useTranslation } from 'react-i18next';
+import { prefix } from '@/constant';
 
 export interface IOperationConfig {
   name: string;
@@ -27,12 +28,13 @@ const ActionIcon = ({ icon }: { icon: React.ReactElement | string }) => {
 };
 
 const ActionsConfirm: React.FC<{ allOperation: IOperationConfig[] }> = ({ allOperation }) => {
+  const ref = useRef<HTMLDivElement>(null);
   const [isHover, setHover] = useState<string | null>(null);
   const { t } = useTranslation();
   const annotationLength = Math.floor(24 / allOperation.length);
 
   return (
-    <div className='generalOperation'>
+    <div className='generalOperation' ref={ref}>
       {allOperation.map((info, index) => (
         <Col span={annotationLength} key={index}>
           <div
@@ -47,9 +49,12 @@ const ActionsConfirm: React.FC<{ allOperation: IOperationConfig[] }> = ({ allOpe
           >
             <Popconfirm
               title={<PopconfirmTitle info={info} />}
+              placement='topRight'
               okText={t('Confirm')}
               cancelText={t('Cancel')}
+              getPopupContainer={() => ref.current ?? document.body}
               onConfirm={info.onClick}
+              overlayClassName={`${prefix}-pop-confirm`}
             >
               <div className='icon'>
                 <ActionIcon icon={info.key === isHover ? info.hoverSvg : info.imgSvg} />
