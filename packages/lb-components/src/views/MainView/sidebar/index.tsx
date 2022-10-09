@@ -210,8 +210,11 @@ const Sidebar: React.FC<IProps> = ({ sider }) => {
   if (toolName === EToolName.ScribbleTool) {
     return (
       <div className={`${sidebarCls}`}>
-        {scribbleSidebar}
-        {attributeList}
+        <div className={`${sidebarCls}__content`}>
+          {scribbleSidebar}
+          {attributeList}
+        </div>
+        {operation}
       </div>
     );
   }
