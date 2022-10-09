@@ -13,6 +13,7 @@ import tagToolSingleShortCutTable from './tag';
 import textToolShortCutTable from './text';
 import videoToolShortCutTable from './videoTag';
 import pointCloudShortCutTable from './pointCloud';
+import scribbleShortCutTable from './scribble';
 
 import { footerCls } from '../../index';
 import { useTranslation } from 'react-i18next';
@@ -35,6 +36,7 @@ const shortCutTable: any = {
   [EToolName.Text]: textToolShortCutTable,
   [EVideoToolName.VideoTagTool]: videoToolShortCutTable,
   [EPointCloudName.PointCloud]: pointCloudShortCutTable,
+  [EToolName.ScribbleTool]: scribbleShortCutTable,
 };
 
 const ToolHotKeyIcon = ({ icon }: { icon: React.ReactElement | string }) => {

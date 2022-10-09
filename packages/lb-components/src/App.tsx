@@ -58,11 +58,13 @@ export interface AppProps {
   setToolInstance?: (tool: ToolInstance) => void;
   mode?: 'light' | 'dark'; // 临时需求应用于 toolFooter 的操作
   showTips?: boolean; // 是否展示 tips
+  tips?: string; // Tips 具体内容
   defaultLang: 'en' | 'cn'; // 国际化设置
   leftSider?: () => React.ReactNode | React.ReactNode;
 
   // data Correction
   skipBeforePageTurning?: (pageTurning: Function) => void;
+  beforeRotate?: () => boolean;
 
   drawLayerSlot?: (props: {
     zoom: number;
@@ -97,6 +99,7 @@ const App: React.FC<AppProps> = (props) => {
     loadFileList,
     defaultLang = 'cn',
     skipBeforePageTurning,
+    beforeRotate,
   } = props;
 
   useEffect(() => {
@@ -112,6 +115,7 @@ const App: React.FC<AppProps> = (props) => {
         onPageChange,
         onStepChange,
         skipBeforePageTurning,
+        beforeRotate,
       }),
     );
 
@@ -131,6 +135,7 @@ const App: React.FC<AppProps> = (props) => {
         onSave,
         onPageChange,
         onStepChange,
+        beforeRotate,
       }),
     );
 
@@ -145,6 +150,7 @@ const App: React.FC<AppProps> = (props) => {
     onPageChange,
     onStepChange,
     defaultLang,
+    beforeRotate,
   ]);
 
   useEffect(() => {

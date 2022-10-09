@@ -33,7 +33,6 @@ const ScribbleSidebar: React.FC<IProps> = (props) => {
         <img
           src={selectTool === EScribblePattern.Scribble ? penActivate : pen}
           onClick={() => {
-            setSilderValue(20);
             setSelectTool(EScribblePattern.Scribble);
             toolInstance?.setPattern(EScribblePattern.Scribble);
             changeValue();
@@ -42,7 +41,6 @@ const ScribbleSidebar: React.FC<IProps> = (props) => {
         <img
           src={selectTool === EScribblePattern.Erase ? eraserActivate : eraser}
           onClick={() => {
-            setSilderValue(20);
             setSelectTool(EScribblePattern.Erase);
             toolInstance?.setPattern(EScribblePattern.Erase);
 

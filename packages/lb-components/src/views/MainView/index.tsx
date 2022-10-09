@@ -33,7 +33,7 @@ const layoutCls = `${prefix}-layout`;
 const ImageAnnotate: React.FC<AppProps & IProps> = (props) => {
   return (
     <>
-      {props.showTips === true && <AnnotationTips tips={props.path} />}
+      {props.showTips === true && <AnnotationTips path={props.path} tips={props.tips} />}
       <AnnotationOperation {...props} />
       <ToolFooter style={props.style?.footer} mode={props.mode} footer={props?.footer} />
     </>

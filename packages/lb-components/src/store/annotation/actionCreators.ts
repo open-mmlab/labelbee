@@ -167,11 +167,26 @@ export function UpdateRotate(): AnnotationActionTypes {
   };
 }
 
+export function UpdateValid(): AnnotationActionTypes {
+  return {
+    type: ANNOTATION_ACTIONS.UPDATE_ANNOTATION_VALID,
+  };
+}
+
 export function UpdateSkipBeforePageTurning(skipBeforePageTurning: (pageTurning: Function) => {}): AnnotationActionTypes {
   return {
     type: ANNOTATION_ACTIONS.SKIP_BEFORE_PAGE_TURNING,
     payload: {
       skipBeforePageTurning,
+    },
+  };
+}
+
+export function UpdateBeforeRotate(beforeRotate: () => {}): AnnotationActionTypes {
+  return {
+    type: ANNOTATION_ACTIONS.UPDATE_BEFORE_ROTATE,
+    payload: {
+      beforeRotate,
     },
   };
 }
@@ -196,7 +211,8 @@ export function InitTaskData({
   loadFileList,
   step,
   stepList,
-  skipBeforePageTurning
+  skipBeforePageTurning,
+  beforeRotate
 }: any): any {
   const tasks: any[] = [];
 
@@ -230,6 +246,10 @@ export function InitTaskData({
     tasks.push(UpdateSkipBeforePageTurning(skipBeforePageTurning));
   }
 
+  if (beforeRotate) {
+    tasks.push(UpdateBeforeRotate(beforeRotate));
+  }
+
   tasks.push(SetTaskConfig({ stepList, step }));
 
   tasks.push({
@@ -256,6 +276,7 @@ export function UpdateInjectFunc({
   pageSize,
   loadFileList,
   stepList,
+  beforeRotate
 }: any): any {
   const tasks: any[] = [];
 
@@ -283,6 +304,10 @@ export function UpdateInjectFunc({
 
   if (pageSize) {
     tasks.push(UpdatePageSize(pageSize));
+  }
+
+  if (beforeRotate) {
+    tasks.push(UpdateBeforeRotate(beforeRotate));
   }
 
   tasks.push(SetTaskStepList({ stepList }));

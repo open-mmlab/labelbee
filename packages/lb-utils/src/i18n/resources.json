@@ -166,7 +166,9 @@
     "GeneralOperation": "General Operation",
     "RectPattern": "Rect Pattern",
     "DragOperation": "Drag",
-    "SelectedStatus": "Selected"
+    "SelectedStatus": "Selected",
+    "updateValidFromValidToInValid": "Confirm update as invalid page？",
+    "updateValidFromInValidToValid": "Confirm update as valid page？"
   },
   "cn": {
     "TextInput": "文本输入",
@@ -335,6 +337,8 @@
     "GeneralOperation": "通用",
     "RectPattern": "拉框模式",
     "DragOperation": "拖动",
-    "SelectedStatus": "选中时"
+    "SelectedStatus": "选中时",
+    "updateValidFromValidToInValid": "是否确认标为无效文件？",
+    "updateValidFromInValidToValid": "是否确认取消无效文件？"
   }
 }

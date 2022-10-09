@@ -9,6 +9,7 @@ import StepUtils from '@/utils/StepUtils';
 import ToolUtils from '@/utils/ToolUtils';
 import { AnnotationEngine, CommonToolUtils, ImgUtils } from '@labelbee/lb-annotation';
 import { i18n } from '@labelbee/lb-utils';
+import { Modal } from 'antd';
 import { message } from 'antd/es';
 import _ from 'lodash';
 import { SetAnnotationLoading } from './actionCreators';
@@ -233,8 +234,8 @@ export const annotationReducer = (
       if (extraData) {
         imgList[imgIndex] = {
           ...imgList[imgIndex],
-          ...extraData
-        } 
+          ...extraData,
+        };
       }
 
       if (onSubmit) {
@@ -422,8 +423,8 @@ export const annotationReducer = (
               CommonToolUtils.isSameSourceID(i.sourceID, sourceID),
             )
           : result;
-        toolInstance?.setResult(resultForBasicIndex);
         toolInstance?.history.initRecord(result, true);
+        toolInstance?.setResult(resultForBasicIndex);
       }
 
       return {
@@ -449,7 +450,7 @@ export const annotationReducer = (
         stepList,
       };
     }
-    
+
     case ANNOTATION_ACTIONS.SET_TASK_CONFIG: {
       const { stepList, step } = action.payload;
       return {
@@ -545,6 +546,13 @@ export const annotationReducer = (
       };
     }
 
+    case ANNOTATION_ACTIONS.UPDATE_BEFORE_ROTATE: {
+      return {
+        ...state,
+        beforeRotate: action.payload.beforeRotate,
+      };
+    }
+
     case ANNOTATION_ACTIONS.SKIP_BEFORE_PAGE_TURNING: {
       return {
         ...state,
@@ -565,8 +573,32 @@ export const annotationReducer = (
     }
 
     case ANNOTATION_ACTIONS.UPDATE_ROTATE: {
-      const { toolInstance } = state;
+      const { toolInstance, beforeRotate } = state;
+
+      // DataCheck before rotate.
+      if (beforeRotate) {
+        if (beforeRotate() === false) {
+          return state;
+        }
+      }
+
       toolInstance?.updateRotate();
+      return state;
+    }
+
+    case ANNOTATION_ACTIONS.UPDATE_ANNOTATION_VALID: {
+      const { toolInstance } = state;
+      const valid = toolInstance?.valid ?? true;
+
+      Modal.destroyAll();
+      Modal.confirm({
+        content: i18n.t(valid ? 'updateValidFromValidToInValid' : 'updateValidFromInValidToValid'),
+        onOk: () => {
+          toolInstance?.setValid(!valid);
+        },
+        okText: i18n.t("Confirm"),
+        cancelText: i18n.t("Cancel")
+      });
 
       return state;
     }

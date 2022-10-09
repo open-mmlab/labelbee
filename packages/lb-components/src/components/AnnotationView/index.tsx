@@ -6,6 +6,9 @@
 import React, { useEffect, useRef, useImperativeHandle, useState } from 'react';
 import { ViewOperation, ImgUtils } from '@labelbee/lb-annotation';
 import { Spin } from 'antd/es';
+import useRefCache from '@/hooks/useRefCache';
+
+type TAfterImgOnLoad = (img: HTMLImageElement) => void;
 
 interface IProps {
   src: string; // 图片路径
@@ -25,6 +28,8 @@ interface IProps {
 
   showLoading?: boolean;
   globalStyle?: React.CSSProperties; // Custom global style.
+
+  afterImgOnLoad?: TAfterImgOnLoad;
 }
 
 const DEFAULT_SIZE = {
@@ -68,11 +73,13 @@ const AnnotationView = (props: IProps, ref: any) => {
     onChange,
     showLoading = false,
     globalStyle,
+    afterImgOnLoad,
   } = props;
   const size = sizeInitialized(props.size);
   const [loading, setLoading] = useState(false);
   const annotationRef = useRef<HTMLDivElement>(null);
   const viewOperation = useRef<ViewOperation>();
+  const afterImgOnLoadRef = useRefCache<TAfterImgOnLoad | undefined>(afterImgOnLoad);
 
   useImperativeHandle(
     ref,
@@ -120,6 +127,10 @@ const AnnotationView = (props: IProps, ref: any) => {
           setLoading(false);
 
           viewOperation.current?.setImgNode(imgNode);
+
+          if (afterImgOnLoadRef.current) {
+            afterImgOnLoadRef.current(imgNode);
+          }
         })
         .catch(() => {
           viewOperation.current?.setLoading(false);
