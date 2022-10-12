@@ -1,56 +1,83 @@
 import React from 'react';
 import adaptIcon from '@/assets/annotation/common/icon_adapt.svg';
 import adaptIconBlack from '@/assets/annotation/common/icon_adapt_black.svg';
-import {
-  MinusOutlined,
-  PlusOutlined,
-} from '@ant-design/icons';
+import { MinusOutlined, PlusOutlined } from '@ant-design/icons';
 import { AppState } from '@/store';
 import { ToolInstance } from '@/store/annotation/types';
 import { connect } from 'react-redux';
 import ZoomLevel from './ZoomLevel';
-import { footerCls } from '../index';
+import { footerCls, FooterTheme } from '../index';
+import { LabelBeeContext } from '@/store/ctx';
 
-interface IProps {
-  toolInstance: ToolInstance
-  mode?: 'light' | 'dark'
+interface IZoomControllerProps {
+  mode?: FooterTheme;
+  initialPosition?: () => void;
+  zoomIn?: () => void;
+  zoomOut?: () => void;
+  zoom?: number; // Allow to show zoom directly
 }
 
-const ZoomController: React.FC<IProps> = ({ toolInstance, mode }) => {
+export const ZoomController: React.FC<IZoomControllerProps> = ({
+  mode,
+  initialPosition,
+  zoomOut,
+  zoomIn,
+  zoom,
+}) => {
+  const defaultIcon = mode === 'light' ? adaptIcon : adaptIconBlack;
+  return (
+    <div>
+      <span className={`${footerCls}__zoomController`}>
+        <MinusOutlined
+          className={`${footerCls}__highlight`}
+          onClick={() => {
+            zoomOut?.();
+          }}
+        />
+        <span
+          className={`${footerCls}__zoomText`}
+          onClick={() => {
+            initialPosition?.();
+          }}
+        >
+          <img src={defaultIcon} className='adaptIcon' />
+          <ZoomLevel zoom={zoom} />
+        </span>
+        <PlusOutlined
+          className={`${footerCls}__highlight`}
+          onClick={() => {
+            zoomIn?.();
+          }}
+        />
+      </span>
+    </div>
+  );
+};
+
+const ZoomControllerWithToolInstance: React.FC<{
+  toolInstance: ToolInstance;
+  mode: FooterTheme;
+}> = ({ toolInstance }) => {
   const initialPosition = () => {
     toolInstance.initImgPos();
   };
 
-  let defaultIcon = adaptIcon;
-  
-  if (mode === 'light') {
-    defaultIcon = adaptIconBlack;
-  }
+  const zoomOut = () => {
+    toolInstance.zoomChanged(false);
+  };
 
-  return <div>
-    <span className={`${footerCls}__zoomController`}>
-      <MinusOutlined
-        className={`${footerCls}__highlight`}
-        onClick={() => {
-          toolInstance.zoomChanged(false);
-        }}
-      />
-      <span className={`${footerCls}__zoomText`} onClick={initialPosition}>
-        <img src={defaultIcon} className='adaptIcon' />
-        <ZoomLevel />
-      </span>
-      <PlusOutlined
-        className={`${footerCls}__highlight`}
-        onClick={() => {
-          toolInstance.zoomChanged(true);
-        }}
-      />
-    </span>
-  </div>
-}
+  const zoomIn = () => {
+    toolInstance.zoomChanged(true);
+  };
 
-const mapStateToProps = (state: AppState) => ({
-  toolInstance: state.annotation.toolInstance,
-});
+  return <ZoomController initialPosition={initialPosition} zoomIn={zoomIn} zoomOut={zoomOut} />;
+};
 
-export default connect(mapStateToProps)(ZoomController);
+export default connect(
+  (state: AppState) => ({
+    toolInstance: state.annotation.toolInstance,
+  }),
+  null,
+  null,
+  { context: LabelBeeContext },
+)(ZoomControllerWithToolInstance);

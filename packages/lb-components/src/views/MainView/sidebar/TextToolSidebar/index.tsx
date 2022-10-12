@@ -10,6 +10,7 @@ import { ConfigUtils } from '@/utils/ConfigUtils';
 import { IStepInfo } from '@/types/step';
 import TextToolOperation from '@labelbee/lb-annotation/dist/types/core/toolOperation/TextToolOperation';
 import { useTranslation } from 'react-i18next';
+import { LabelBeeContext } from '@/store/ctx';
 
 const EKeyCode = cKeyCode.default;
 
@@ -269,4 +270,4 @@ function mapStateToProps(state: AppState) {
   };
 }
 
-export default connect(mapStateToProps)(TextToolSidebar);
+export default connect(mapStateToProps, null, null, { context: LabelBeeContext })(TextToolSidebar);

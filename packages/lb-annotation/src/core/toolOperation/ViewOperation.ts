@@ -12,6 +12,7 @@ import MathUtils from '@/utils/MathUtils';
 import RenderDomClass from '@/utils/tool/RenderDomClass';
 import { DEFAULT_FONT, ELineTypes, SEGMENT_NUMBER } from '@/constant/tool';
 import { DEFAULT_TEXT_SHADOW, DEFAULT_TEXT_OFFSET, TEXT_ATTRIBUTE_OFFSET } from '@/constant/annotation';
+import ImgPosUtils from '@/utils/tool/ImgPosUtils';
 import { BasicToolOperation, IBasicToolOperationProps } from './basicToolOperation';
 
 const newScope = 3;
@@ -258,6 +259,40 @@ export default class ViewOperation extends BasicToolOperation {
     return isReference ? { lineCap: 'butt', lineDash: [20, 20] } : {};
   }
 
+  /**
+   * Focus on the selected lang.
+   * @param pointList
+   */
+  public focusPositionByPointList(pointList: ICoordinate[]) {
+    const basicZone = MathUtils.calcViewportBoundaries(pointList);
+    const newBoundary = {
+      x: basicZone.left,
+      y: basicZone.top,
+      width: basicZone.right - basicZone.left,
+      height: basicZone.bottom - basicZone.top,
+    } as IRect;
+    const pos = ImgPosUtils.getBasicRecPos(this.imgNode, newBoundary, this.size, 0.5);
+    if (pos) {
+      this.setCurrentPos(pos.currentPos);
+      this.setCurrentPosStorage(pos.currentPos);
+      const { imgInfo } = this;
+      const { innerZoom } = this.innerPosAndZoom;
+      if (imgInfo) {
+        this.setImgInfo({
+          ...imgInfo,
+          width: (imgInfo.width / innerZoom) * pos.innerZoom,
+          height: (imgInfo.height / innerZoom) * pos.innerZoom,
+        });
+      }
+
+      // 需要加载下更改当前的 imgInfo
+      this.setZoom(pos.innerZoom);
+
+      this.render();
+      this.renderBasicCanvas();
+    }
+  }
+
   public renderConnectionPoints() {
     this.connectionPoints.forEach((point) => {
       const renderPoint = AxisUtils.changePointByZoom(point, this.zoom, this.currentPos);
@@ -284,7 +319,7 @@ export default class ViewOperation extends BasicToolOperation {
         switch (annotation.type) {
           case 'rect': {
             const rect: any = annotation.annotation;
-            const { hiddenText = false, isReference } = rect;
+            const { hiddenText = false, isReference, hiddenRectSize = false } = rect;
             const { zoom } = this;
             const renderRect = AxisUtils.changeRectByZoom(rect, this.zoom, this.currentPos);
 
@@ -315,7 +350,8 @@ export default class ViewOperation extends BasicToolOperation {
             // 框大小数值显示
             const rectSize = `${Math.round(width / zoom)} * ${Math.round(height / zoom)}`;
             const textSizeWidth = rectSize.length * 7;
-            if (!hiddenText) {
+
+            if (!hiddenText && !hiddenRectSize) {
               DrawUtils.drawText(
                 this.canvas,
                 { x: x + width - textSizeWidth, y: y + height + 15 },

@@ -73,6 +73,15 @@ export function UpdateAnnotationConfig(config: string): AnnotationActionTypes {
   };
 }
 
+export function SetTaskStepList({ stepList }: { stepList: IStepInfo[] }): AnnotationActionTypes {
+  return {
+    type: ANNOTATION_ACTIONS.SET_TASK_STEP_LIST,
+    payload: {
+      stepList,
+    },
+  };
+}
+
 export function SetTaskConfig({
   stepList,
   step,
@@ -158,6 +167,30 @@ export function UpdateRotate(): AnnotationActionTypes {
   };
 }
 
+export function UpdateValid(): AnnotationActionTypes {
+  return {
+    type: ANNOTATION_ACTIONS.UPDATE_ANNOTATION_VALID,
+  };
+}
+
+export function UpdateSkipBeforePageTurning(skipBeforePageTurning: (pageTurning: Function) => {}): AnnotationActionTypes {
+  return {
+    type: ANNOTATION_ACTIONS.SKIP_BEFORE_PAGE_TURNING,
+    payload: {
+      skipBeforePageTurning,
+    },
+  };
+}
+
+export function UpdateBeforeRotate(beforeRotate: () => {}): AnnotationActionTypes {
+  return {
+    type: ANNOTATION_ACTIONS.UPDATE_BEFORE_ROTATE,
+    payload: {
+      beforeRotate,
+    },
+  };
+}
+
 export function CopyBackWordResult(): AnnotationActionTypes {
   return {
     type: ANNOTATION_ACTIONS.COPY_BACKWARD_RESULT,
@@ -178,6 +211,8 @@ export function InitTaskData({
   loadFileList,
   step,
   stepList,
+  skipBeforePageTurning,
+  beforeRotate
 }: any): any {
   const tasks: any[] = [];
 
@@ -202,9 +237,17 @@ export function InitTaskData({
   if (loadFileList) {
     tasks.push(UpdateGetFileList(loadFileList));
   }
-  
+
   if (pageSize) {
     tasks.push(UpdatePageSize(pageSize));
+  }
+
+  if (skipBeforePageTurning) {
+    tasks.push(UpdateSkipBeforePageTurning(skipBeforePageTurning));
+  }
+
+  if (beforeRotate) {
+    tasks.push(UpdateBeforeRotate(beforeRotate));
   }
 
   tasks.push(SetTaskConfig({ stepList, step }));
@@ -216,6 +259,58 @@ export function InitTaskData({
   tasks.push({
     type: ANNOTATION_ACTIONS.INIT_TOOL,
   });
+
+  return (dispatch: any) => dispatchTasks(dispatch, tasks);
+}
+
+/**
+ * 初始化任务数据
+ * @param param0
+ */
+export function UpdateInjectFunc({
+  onSubmit,
+  onSave,
+  onPageChange,
+  onStepChange,
+  getFileData,
+  pageSize,
+  loadFileList,
+  stepList,
+  beforeRotate
+}: any): any {
+  const tasks: any[] = [];
+
+  if (onSubmit) {
+    tasks.push(UpdateOnSubmit(onSubmit));
+  }
+  if (onSave) {
+    tasks.push(UpdateOnSave(onSave));
+  }
+  if (onPageChange) {
+    tasks.push(UpdateOnPageChange(onPageChange));
+  }
+
+  if (onStepChange) {
+    tasks.push(UpdateOnStepChange(onStepChange));
+  }
+
+  if (getFileData) {
+    tasks.push(UpdateGetFileData(getFileData));
+  }
+
+  if (loadFileList) {
+    tasks.push(UpdateGetFileList(loadFileList));
+  }
+
+  if (pageSize) {
+    tasks.push(UpdatePageSize(pageSize));
+  }
+
+  if (beforeRotate) {
+    tasks.push(UpdateBeforeRotate(beforeRotate));
+  }
+
+  tasks.push(SetTaskStepList({ stepList }));
 
   return (dispatch: any) => dispatchTasks(dispatch, tasks);
 }
@@ -417,6 +512,7 @@ export const DispatcherTurning = async (
         return;
       }
     }
+    
     annotationStore.onPageChange?.(fileIndex);
     const index =
       submitType === ESubmitType.Backward
@@ -441,6 +537,16 @@ export const ChangeSave = (dispatch: Function) => {
 };
 
 export const SetAnnotationLoading = (dispatch: Function, loading: boolean) => {
+  dispatch({
+    type: ANNOTATION_ACTIONS.SET_LOADING,
+    payload: {
+      loading,
+    },
+  });
+};
+
+
+export const SetPointCloudLoading = (dispatch: Function, loading: boolean) => {
   dispatch({
     type: ANNOTATION_ACTIONS.SET_LOADING,
     payload: {

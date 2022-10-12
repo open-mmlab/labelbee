@@ -480,6 +480,33 @@ export default class MathUtils {
     return MathUtils.getQuadrangleFromTriangle([...pointList, newPoint]);
   }
 
+  /**
+   * Get the radius from quadrangle under top-view
+   *
+   * Return Range  [0 , 2PI]
+   * @param points
+   * @returns
+   */
+  public static getRadiusFromQuadrangle(points: [ICoordinate, ICoordinate, ICoordinate, ICoordinate]) {
+    const [, point2, point3] = points;
+
+    const y = point3.y - point2.y;
+    const x = point2.x - point3.x;
+
+    const len = this.getLineLength(point2, point3);
+
+    const cosX = y / len;
+
+    const radius = Math.acos(cosX);
+
+    // Key Point
+    if (x > 0) {
+      return Math.PI * 2 - radius;
+    }
+
+    return radius;
+  }
+
   public static getCollectionPointByAnnotationData(annotations: IAnnotationData[]) {
     const connectionPoints: ICoordinate[] = [];
     const cacheSet = new Set<string>();

@@ -9,8 +9,17 @@ import { cKeyCode, toolUtils } from '@labelbee/lb-annotation';
 import React, { useContext, useEffect, useMemo, useState } from 'react';
 import { connect } from 'react-redux';
 import { AppState } from '@/store';
-import { UpdateRotate, PageBackward, PageForward } from '@/store/annotation/actionCreators';
+import {
+  UpdateRotate,
+  PageBackward,
+  PageForward,
+  UpdateToolInstance,
+  CopyBackWordResult,
+  // UpdateValid,
+} from '@/store/annotation/actionCreators';
 import { ISize } from '@/types/main';
+import { message } from 'antd';
+import { LabelBeeContext } from '@/store/ctx';
 
 const EKeyCode = cKeyCode.default;
 
@@ -23,7 +32,11 @@ export const viewportContext = React.createContext<{
 });
 
 export const ViewportProviderComponent = (props: any) => {
-  const { children, dispatch } = props;
+  const {
+    children,
+    dispatch,
+    annotation: { skipBeforePageTurning },
+  } = props;
   const [width] = useState(window.innerWidth);
   const [height] = useState(window.innerHeight);
 
@@ -31,15 +44,55 @@ export const ViewportProviderComponent = (props: any) => {
     if (!toolUtils.hotkeyFilter(e)) {
       return;
     }
-    if (e.keyCode === EKeyCode.A) {
-      dispatch(PageBackward());
+
+    if (!e.shiftKey && !e.ctrlKey) {
+      if (e.keyCode === EKeyCode.A) {
+        if (skipBeforePageTurning) {
+          skipBeforePageTurning(() => dispatch(PageBackward()));
+          return;
+        }
+
+        dispatch(PageBackward());
+      }
+
+      if (e.keyCode === EKeyCode.D) {
+        if (skipBeforePageTurning) {
+          skipBeforePageTurning(() => dispatch(PageForward()));
+          return;
+        }
+        dispatch(PageForward());
+      }
+      if (e.keyCode === EKeyCode.R) {
+        dispatch(UpdateRotate());
+      }
+
+      if (e.keyCode === EKeyCode.C && e.altKey === true) {
+        dispatch(CopyBackWordResult());
+      }
+
+      // Temporarily hide. Because there is something wrong with i18n.
+      // if (e.keyCode === EKeyCode.Y) {
+      //   dispatch(UpdateValid());
+      // }
     }
 
-    if (e.keyCode === EKeyCode.D) {
-      dispatch(PageForward());
-    }
-    if (e.keyCode === EKeyCode.R) {
-      dispatch(UpdateRotate());
+    /**
+     * Hidden Feature
+     *
+     * User: Software Engineer
+     */
+    if (
+      e.shiftKey === true &&
+      e.ctrlKey === true &&
+      e.altKey === true &&
+      e.keyCode === EKeyCode.C
+    ) {
+      message.success('DEVELOPMENT TESTING - Switch Last Two Canvas');
+      const newInstance = props.annotation?.annotationEngine.switchLastTwoCanvas();
+      if (!newInstance) {
+        return;
+      }
+      dispatch(UpdateToolInstance(newInstance));
     }
   };
 
@@ -49,16 +102,20 @@ export const ViewportProviderComponent = (props: any) => {
     return () => {
       window.removeEventListener('keydown', keydown);
     };
-  }, []);
+  }, [props.annotation.annotationEngine, props.annotation.skipBeforePageTurning]);
 
   const size = useMemo(() => ({ width, height }), [width, height]);
 
   return <viewportContext.Provider value={size}>{children}</viewportContext.Provider>;
 };
-
-export const ViewportProvider = connect((state: AppState) => ({
-  annotation: state.annotation,
-}))(ViewportProviderComponent);
+export const ViewportProvider = connect(
+  (state: AppState) => ({
+    annotation: state.annotation,
+  }),
+  null,
+  null,
+  { context: LabelBeeContext },
+)(ViewportProviderComponent);
 
 export const useViewport = () => {
   const { width, height } = useContext(viewportContext);

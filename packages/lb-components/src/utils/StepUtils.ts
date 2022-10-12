@@ -1,8 +1,6 @@
 import { EStepType } from '@/constant';
 import { IStepInfo } from '@/types/step';
-import { cTool } from '@labelbee/lb-annotation';
-
-const { EVideoToolName } = cTool;
+import ToolUtils from './ToolUtils';
 
 export default class StepUtils {
   /**
@@ -45,6 +43,18 @@ export default class StepUtils {
    */
   public static currentToolIsVideo(step: number, stepList: IStepInfo[]) {
     const currentStepInfo = StepUtils.getCurrentStepInfo(step, stepList);
-    return (Object.values(EVideoToolName) as string[]).includes(currentStepInfo?.tool);
+    return ToolUtils.isVideoTool(currentStepInfo?.tool);
+  }
+
+
+  /**
+   * Check for PointCloud
+   * @param step 
+   * @param stepList 
+   * @returns 
+   */
+  public static currentToolIsPointCloud(step: number, stepList: IStepInfo[]) {
+    const currentStepInfo = StepUtils.getCurrentStepInfo(step, stepList);
+    return ToolUtils.isPointCloudTool(currentStepInfo?.tool);
   }
 }

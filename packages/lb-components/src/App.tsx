@@ -3,21 +3,22 @@ import { i18n } from '@labelbee/lb-utils';
 import React, { useEffect } from 'react';
 import { connect } from 'react-redux';
 import { store } from '.';
+import { LabelBeeContext } from '@/store/ctx';
 import { AppState } from './store';
 import { ANNOTATION_ACTIONS } from './store/Actions';
-import { InitTaskData, loadImgList } from './store/annotation/actionCreators';
+import { InitTaskData, loadImgList, UpdateInjectFunc } from './store/annotation/actionCreators';
 import { LoadFileAndFileData } from './store/annotation/reducer';
 import { ToolInstance } from './store/annotation/types';
 import {
   GetFileData,
-  OnSave,
-  OnSubmit,
   IFileItem,
-  OnPageChange,
-  OnStepChange,
   LoadFileList,
+  OnPageChange,
+  OnSave,
+  OnStepChange,
+  OnSubmit,
 } from './types/data';
-import { Footer, Header, Sider } from './types/main';
+import { Header, RenderFooter, Sider } from './types/main';
 import { IStepInfo } from './types/step';
 
 interface IAnnotationStyle {
@@ -46,7 +47,7 @@ export interface AppProps {
   className?: string;
   toolInstance: ToolInstance;
   header?: Header;
-  footer?: Footer;
+  footer?: RenderFooter;
   sider?: Sider;
   style?: {
     layout?: { [key: string]: any };
@@ -57,8 +58,18 @@ export interface AppProps {
   setToolInstance?: (tool: ToolInstance) => void;
   mode?: 'light' | 'dark'; // 临时需求应用于 toolFooter 的操作
   showTips?: boolean; // 是否展示 tips
+  tips?: string; // Tips 具体内容
   defaultLang: 'en' | 'cn'; // 国际化设置
   leftSider?: () => React.ReactNode | React.ReactNode;
+
+  // data Correction
+  skipBeforePageTurning?: (pageTurning: Function) => void;
+  beforeRotate?: () => boolean;
+
+  drawLayerSlot?: (props: {
+    zoom: number;
+    currentPos: { x: number; y: number };
+  }) => React.ReactNode;
 
   // 标注信息扩展的功能
   dataInjectionAtCreation: (annotationData: any) => {};
@@ -68,6 +79,7 @@ export interface AppProps {
     selectedRender?: (canvas: HTMLCanvasElement, data: any, style: IAnnotationStyle) => void;
     creatingRender?: (canvas: HTMLCanvasElement, data: any, style: IAnnotationStyle) => void;
   };
+  customRenderStyle?: (data: any) => IAnnotationStyle;
 }
 
 const App: React.FC<AppProps> = (props) => {
@@ -86,6 +98,8 @@ const App: React.FC<AppProps> = (props) => {
     pageSize = 10,
     loadFileList,
     defaultLang = 'cn',
+    skipBeforePageTurning,
+    beforeRotate,
   } = props;
 
   useEffect(() => {
@@ -100,6 +114,8 @@ const App: React.FC<AppProps> = (props) => {
         onSave,
         onPageChange,
         onStepChange,
+        skipBeforePageTurning,
+        beforeRotate,
       }),
     );
 
@@ -107,6 +123,35 @@ const App: React.FC<AppProps> = (props) => {
     // 初始化国际化语言
     i18n.changeLanguage(defaultLang);
   }, []);
+
+  useEffect(() => {
+    store.dispatch(
+      UpdateInjectFunc({
+        onSubmit,
+        stepList,
+        getFileData,
+        pageSize,
+        loadFileList,
+        onSave,
+        onPageChange,
+        onStepChange,
+        beforeRotate,
+      }),
+    );
+
+    i18n.changeLanguage(defaultLang);
+  }, [
+    onSubmit,
+    stepList,
+    getFileData,
+    pageSize,
+    loadFileList,
+    onSave,
+    onPageChange,
+    onStepChange,
+    defaultLang,
+    beforeRotate,
+  ]);
 
   useEffect(() => {
     setToolInstance?.(toolInstance);
@@ -142,4 +187,4 @@ const mapStateToProps = (state: AppState) => ({
   toolInstance: state.annotation.toolInstance,
 });
 
-export default connect(mapStateToProps)(App);
+export default connect(mapStateToProps, null, null, { context: LabelBeeContext })(App);

@@ -7,6 +7,8 @@ import StepUtils from '@/utils/StepUtils';
 import { IStepInfo } from '@/types/step';
 import { jsonParser } from '@/utils';
 import { useTranslation } from 'react-i18next';
+import { EToolName } from '@/data/enums/ToolType';
+import { LabelBeeContext } from '@/store/ctx';
 
 interface IProps {
   toolInstance: GraphToolInstance;
@@ -41,16 +43,23 @@ const SwitchAttributeList: React.FC<IProps> = (props) => {
   }
 
   const config = jsonParser(props.stepInfo.config);
-  if (config.attributeConfigurable !== true) {
+  const isScribbleTool = props.stepInfo.tool === EToolName.ScribbleTool;
+
+  if (config.attributeConfigurable !== true && !isScribbleTool) {
     return null;
   }
 
-  if (toolInstance?.config.attributeConfigurable === true && toolInstance?.config?.attributeList) {
-    const list = toolInstance.config.attributeList.map((i: any) => ({
+  if ((config.attributeConfigurable === true || isScribbleTool) && config?.attributeList) {
+    const list = config.attributeList.map((i: any) => ({
       label: i.key,
       value: i.value,
+      color: i?.color,
     }));
-    list.unshift({ label: t('NoAttribute'), value: '' });
+
+    if (!isScribbleTool) {
+      list.unshift({ label: t('NoAttribute'), value: '' });
+    }
+
     const attributeChanged = (v: string) => {
       toolInstance.setDefaultAttribute(v);
       forceRender((s) => s + 1);
@@ -63,6 +72,7 @@ const SwitchAttributeList: React.FC<IProps> = (props) => {
           attributeChanged={attributeChanged}
           selectedAttribute={toolInstance?.defaultAttribute ?? ''}
           ref={listRef}
+          forbidDefault={isScribbleTool}
         />
       </div>
     );
@@ -80,4 +90,6 @@ const mapStateToProps = (state: AppState) => {
   };
 };
 
-export default connect(mapStateToProps)(SwitchAttributeList);
+export default connect(mapStateToProps, null, null, { context: LabelBeeContext })(
+  SwitchAttributeList,
+);

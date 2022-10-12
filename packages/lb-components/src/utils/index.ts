@@ -15,9 +15,9 @@ export const getNewNode = <T>(newNode: T, oldNode: T): T => {
   return newNode || _.isNull(newNode) ? newNode : oldNode;
 };
 
-export const classnames = (className: { [key: string]: boolean } | string[]) => {
+export const classnames = (className: { [key: string]: boolean } | (string | undefined)[]) => {
   if (Array.isArray(className)) {
-    return className.join(' ');
+    return className.filter((i) => i).join(' ');
   }
 
   if (_.isObject(className)) {

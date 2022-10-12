@@ -1,23 +1,28 @@
-import React, { useEffect, useRef, useState } from 'react';
-import { message } from 'antd/es';
-import { AppState } from 'src/store';
-import { connect } from 'react-redux';
-import { ImgAttributeState } from 'src/store/imgAttribute/types';
-import _ from 'lodash';
 import { store } from '@/index';
+import { LabelBeeContext } from '@/store/ctx';
+import { message } from 'antd/es';
+import _ from 'lodash';
+import React, { useEffect, useRef, useState } from 'react';
+import { connect } from 'react-redux';
+import { AppState } from 'src/store';
+import { ImgAttributeState } from 'src/store/imgAttribute/types';
 
+import { AppProps } from '@/App';
+import FileError from '@/components/fileException/FileError';
 import useSize from '@/hooks/useSize';
 import { InitToolStyleConfig } from '@/store/toolStyle/actionCreators';
 import { AnnotationEngine, ImgUtils } from '@labelbee/lb-annotation';
-import FileError from '@/components/fileException/FileError';
 import { i18n } from '@labelbee/lb-utils';
-import { AppProps } from '@/App';
+import { IStepInfo } from '@/types/step';
+import StepUtils from '@/utils/StepUtils';
 
 interface IProps extends AppState, AppProps {
   imgAttribute: ImgAttributeState;
   imgIndex: number;
   annotationEngine: AnnotationEngine;
   loading: boolean;
+  stepList: IStepInfo[];
+  step: number;
 }
 
 const AnnotationOperation: React.FC<IProps> = (props: IProps) => {
@@ -32,11 +37,14 @@ const AnnotationOperation: React.FC<IProps> = (props: IProps) => {
     imgIndex,
     dataInjectionAtCreation,
     renderEnhance,
+    customRenderStyle,
+    stepList,
+    step,
+    drawLayerSlot,
   } = props;
+  const [annotationPos, setAnnotationPos] = useState({ zoom: 1, currentPos: { x: 0, y: 0 } });
   const annotationRef = useRef<HTMLDivElement>(null);
   const containerRef = useRef<HTMLDivElement>(null);
-  // const windowSize = useContext(viewportContext);
-  // const canvasSize = getFormatSize(windowSize);
   const size = useSize(annotationRef);
 
   useEffect(() => {
@@ -61,9 +69,20 @@ const AnnotationOperation: React.FC<IProps> = (props: IProps) => {
     }
     annotationEngine?.setDataInjectionAtCreation(dataInjectionAtCreation);
     annotationEngine?.setRenderEnhance(renderEnhance);
-  }, [annotationEngine, dataInjectionAtCreation, renderEnhance]);
+    if (customRenderStyle) {
+      annotationEngine?.setCustomRenderStyle(customRenderStyle);
+    }
+  }, [annotationEngine, dataInjectionAtCreation, renderEnhance, customRenderStyle]);
 
   useEffect(() => {
+    const renderZoom = (zoom: number, currentPos: { x: number; y: number }) => {
+      setAnnotationPos({ zoom, currentPos });
+    };
+
+    const dragMove = (props: { currentPos: { x: number; y: number }; zoom: number }) => {
+      setAnnotationPos(props);
+    };
+
     if (toolInstance) {
       toolInstance.singleOn('messageError', (error: string) => {
         message.error(error);
@@ -76,7 +95,17 @@ const AnnotationOperation: React.FC<IProps> = (props: IProps) => {
       toolInstance.singleOn('changeAnnotationShow', () => {
         forceRender((s) => s + 1);
       });
+
+      toolInstance.on('renderZoom', renderZoom);
+      toolInstance.on('dragMove', dragMove);
     }
+
+    return () => {
+      if (toolInstance) {
+        toolInstance.unbind('renderZoom', renderZoom);
+        toolInstance.unbind('dragMove', dragMove);
+      }
+    };
   }, [toolInstance]);
 
   useEffect(() => {
@@ -106,6 +135,12 @@ const AnnotationOperation: React.FC<IProps> = (props: IProps) => {
     }
   }, [size]);
 
+  useEffect(() => {
+    // Update StepList When it update by outside
+    const currentStepInfo = StepUtils.getCurrentStepInfo(step, stepList);
+    toolInstance?.setConfig(currentStepInfo.config);
+  }, [stepList]);
+
   /**
    * 重新加载图片，避免网络问题导致的图片无法加载
    * @returns
@@ -123,7 +158,9 @@ const AnnotationOperation: React.FC<IProps> = (props: IProps) => {
 
   return (
     <div ref={annotationRef} className='annotationOperation'>
-      <div className='canvas' ref={containerRef} style={size} id='toolContainer' />
+      <div className='canvas' ref={containerRef} style={size} id='toolContainer'>
+        {drawLayerSlot?.(annotationPos)}
+      </div>
       {toolInstance?.isImgError === true && (
         <FileError
           {...size}
@@ -155,4 +192,6 @@ const mapStateToProps = (state: AppState) => {
   };
 };
 
-export default connect(mapStateToProps)(AnnotationOperation);
+export default connect(mapStateToProps, null, null, { context: LabelBeeContext })(
+  AnnotationOperation,
+);

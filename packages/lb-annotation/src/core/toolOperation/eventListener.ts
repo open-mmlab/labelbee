@@ -1,3 +1,9 @@
+/*
+ * @Author: Laoluo luozefeng@sensetime.com
+ * @Date: 2022-01-12 13:15:33
+ * @LastEditors: Laoluo luozefeng@sensetime.com
+ * @LastEditTime: 2022-07-05 15:51:18
+ */
 export default class EventListener {
   private _events: Map<string, any[]>;
 
@@ -10,7 +16,7 @@ export default class EventListener {
    * @param eventName 事件名字
    * @param callback 事件回调
    */
-  public on(eventName: string, callback: (params?: any) => void) {
+  public on(eventName: string, callback: (...args: any[]) => void) {
     const existEvents = this._events.get(eventName) || [];
     if (!existEvents.some((fn) => fn === callback)) {
       this._events.set(eventName, existEvents.concat(callback));
@@ -22,7 +28,7 @@ export default class EventListener {
    * @param eventName
    * @param callback
    */
-  public singleOn(eventName: string, callback: (params?: any) => void) {
+  public singleOn(eventName: string, callback: (...args: any[]) => void) {
     this._events.set(eventName, [callback]);
   }
 
@@ -47,7 +53,7 @@ export default class EventListener {
    * @param eventName 需要解绑的事件名字
    * @param callback 需要解绑的方法
    */
-  public unbind(eventName: string, callback: (params?: any) => void) {
+  public unbind(eventName: string, callback: (...params: any[]) => void) {
     const existEvents: any[] | undefined = this._events.get(eventName);
     if (existEvents) {
       this._events.set(

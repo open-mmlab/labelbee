@@ -5,16 +5,16 @@ import { getTargetElement } from '../utils/dom';
 import useRafState from './useRafState';
 
 interface Size {
-  width?: number;
-  height?: number;
+  width: number;
+  height: number;
 }
 
 function useSize(target: BasicTarget): Size {
   const [state, setState] = useRafState<Size>(() => {
     const el = getTargetElement(target);
     return {
-      width: ((el || {}) as HTMLElement).clientWidth,
-      height: ((el || {}) as HTMLElement).clientHeight,
+      width: ((el || {}) as HTMLElement).clientWidth ?? 0,
+      height: ((el || {}) as HTMLElement).clientHeight ?? 0,
     };
   });
 
@@ -24,11 +24,11 @@ function useSize(target: BasicTarget): Size {
       return () => {};
     }
 
-    const resizeObserver = new ResizeObserver((entries) => {
-      entries.forEach((entry) => {
+    const resizeObserver = new ResizeObserver((entries: ResizeObserverEntry[]) => {
+      entries.forEach((entry: ResizeObserverEntry) => {
         setState({
-          width: entry.target.clientWidth,
-          height: entry.target.clientHeight,
+          width: entry.target.clientWidth ?? 0,
+          height: entry.target.clientHeight ?? 0,
         });
       });
     });

@@ -10,21 +10,25 @@ import { Tooltip } from 'antd';
 import { prefix } from '@/constant';
 
 interface IProps {
-  tips: string;
+  tips?: string;
+  path?: string;
 }
 
-const AnnotationTips = ({ tips }: IProps) => {
-  if (!tips) {
+const AnnotationTips = ({ path, tips }: IProps) => {
+  if (!path && !tips) {
     return null;
   }
 
   return (
     <div className={`${prefix}-tips`}>
-      <div className=''>
-        <Tooltip placement='bottomRight' title={tips}>
-          <span className=''>{tips}</span>
-        </Tooltip>
-      </div>
+      <Tooltip placement='bottomRight' title={tips}>
+        <span className={`${prefix}-tips__leftContent`} title={tips}>
+          {tips}
+        </span>
+      </Tooltip>
+      <Tooltip placement='bottomRight' title={path}>
+        <span className={`${prefix}-tips__path`}>{path}</span>
+      </Tooltip>
     </div>
   );
 };

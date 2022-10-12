@@ -1,6 +1,6 @@
+import MathUtils from '@/utils/MathUtils';
 import AxisUtils from '@/utils/tool/AxisUtils';
 import RectUtils from '@/utils/tool/RectUtils';
-import MathUtils from '@/utils/MathUtils';
 import { DEFAULT_TEXT_SHADOW, EDragStatus, ESortDirection } from '../../constant/annotation';
 import EKeyCode from '../../constant/keyCode';
 import { EDragTarget } from '../../constant/tool';
@@ -1290,6 +1290,10 @@ class RectOperation extends BasicToolOperation {
    * @returns
    */
   public getRenderStyle(rect: IRect) {
+    const customStyle = this.customRenderStyle && this.customRenderStyle(rect);
+    if (customStyle) {
+      return customStyle;
+    }
     const toolColor = this.getColor(rect.attribute);
     let strokeColor;
     let fillColor;

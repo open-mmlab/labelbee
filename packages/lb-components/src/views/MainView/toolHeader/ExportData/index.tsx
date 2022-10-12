@@ -8,6 +8,7 @@ import { ANNOTATION_ACTIONS } from '@/store/Actions';
 import { ESubmitType } from '@/constant';
 import { Dispatch } from 'redux';
 import { useTranslation } from 'react-i18next';
+import { LabelBeeContext } from '@/store/ctx';
 
 interface IProps {
   toolInstance: ToolInstance;
@@ -50,4 +51,4 @@ const mapStateToProps = (state: AppState) => ({
   onSubmit: state.annotation.onSubmit,
 });
 
-export default connect(mapStateToProps)(ExportData);
+export default connect(mapStateToProps, null, null, { context: LabelBeeContext })(ExportData);

@@ -20,6 +20,8 @@ export function getTargetElement(
   let targetElement: TargetElement | undefined | null;
 
   if (typeof target === 'function') {
+    // TODO. Maybe the new version of typescript is not allowed.
+    // @ts-ignore
     targetElement = target();
   } else if ('current' in target) {
     targetElement = target.current;
@@ -35,5 +37,5 @@ export function getTargetElement(
  * @param elm
  * @param modify
  */
-export const getClassName = (elm: string, modify?: string) =>
-  `${prefix}-${elm}${modify ? '__' + modify : ''}`;
+export const getClassName = (block: string, elm?: string, modify?: string) =>
+  `${prefix}-${block}${elm ? '__' + elm : ''}${modify ? '__' + modify : ''}`;

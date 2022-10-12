@@ -48,12 +48,16 @@ export enum EToolName {
   FolderTag = 'folderTagTool',
   /** 拉框跟踪工具 */
   RectTrack = 'rectTrackTool',
+  /** 涂抹工具 */
+  ScribbleTool = 'scribbleTool',
   /** 人脸106工具 */
   Face = 'faceTool',
   /** 客户端属性工具 */
   ClientAttribute = 'clientAttributeTool',
   /** OCR关联关系工具 */
   OCRRelation = 'OCRRelationTool',
+  /** 算法分割辅助工具 */
+  SegmentByRect = 'segmentByRectTool',
 }
 
 export enum ECheckModel {
@@ -84,10 +88,34 @@ export const TOOL_NAME: { [a: string]: string } = {
   [EToolName.Face]: '人脸106工具',
   [EToolName.ClientAttribute]: '客户端属性工具',
   [EToolName.OCRRelation]: 'OCR关联关系工具',
+  [EToolName.SegmentByRect]: '算法分割辅助工具',
   [EVideoToolName.VideoTextTool]: '视频文本',
   [EVideoToolName.VideoTagTool]: '视频标签',
   [EVideoToolName.VideoClipTool]: '视频截取',
   [EPointCloudName.PointCloud]: '点云',
+};
+
+export const TOOL_NAME_EN: { [a: string]: string } = {
+  [EToolName.Rect]: 'Rect',
+  [EToolName.Tag]: 'Tag',
+  [EToolName.Point]: 'Point',
+  [EToolName.PointMarker]: 'PointMarker',
+  [EToolName.Segmentation]: 'Segmentation',
+  [EToolName.Filter]: 'Filter',
+  [EToolName.Text]: 'Text',
+  [EToolName.Polygon]: 'Polygon',
+  [EToolName.Line]: 'Line',
+  [EToolName.LineMarker]: 'LineMarker',
+  [EToolName.FolderTag]: 'FolderTag',
+  [EToolName.RectTrack]: 'RectTrack',
+  [EToolName.Face]: 'Face',
+  [EToolName.ClientAttribute]: 'ClientAttribute',
+  [EToolName.OCRRelation]: 'OCRRelation',
+  [EToolName.SegmentByRect]: 'SegmentByRect',
+  [EVideoToolName.VideoTextTool]: 'VideoTextTool',
+  [EVideoToolName.VideoTagTool]: 'VideoTagTool',
+  [EVideoToolName.VideoClipTool]: 'VideoClipTool',
+  [EPointCloudName.PointCloud]: 'PointCloud',
 };
 
 export enum EDependPattern {
@@ -228,4 +256,9 @@ export const edgeAdsorptionScope = 10;
 export enum EPolygonPattern {
   Normal,
   Rect,
+}
+
+export enum EScribblePattern {
+  Scribble = 1, // 涂抹操作
+  Erase = 2, // 橡皮刷
 }

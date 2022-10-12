@@ -299,25 +299,28 @@ const App = () => {
 export default App;
 ```
 
-| Params       | Description                       | Required | Type         |
-| ------------ | --------------------------------- | -------- | ------------ |
-| imgList      | list of annotation                | 是       | IFileItem[]    |
-| step         | current step                      | 是       | Number       |
-| stepList     | the config of each step           | 是       | stepList     |
-| ref          | ForwardRef                        | 否       |              |
-| onSubmit     | listen the page turning or submit | 否       | onSubmit     |
-| onSave       | listen the click of save-button   | 否       | onSave       |
-| goBack       | listen the click of 'goBack'      | 否       | goBack       |
-| getFileData  | Support external file data        | 否       | getFileData  |
-| headerName   | headerName                        | 否       | string       |
-| initialIndex | initial Index in imgList          | 否       | number       |
-| exportData   | exportData                        | 否       | ReactNode    |
-| header       | header                            | 否       | ReactNode    |
-| footer       | footer                            | 否       | ReactNode    |
-| sider        | sider                             | 否       | ReactNode    |
-| style        | the style of annotation           | 否       | Object       |
-| className    | className                         | 否       | string       |
-| defaultLang  | default language                  | 否       | 'en' \| 'cn' |
+| Params                                                             | Description                       | Required | Type                                                                                           |
+| ------------------------------------------------------------------ | --------------------------------- | -------- | ---------------------------------------------------------------------------------------------- |
+| imgList                                                            | list of annotation                | 是       | IFileItem[]                                                                                    |
+| step                                                               | current step                      | 是       | Number                                                                                         |
+| stepList                                                           | the config of each step           | 是       | stepList                                                                                       |
+| ref                                                                | ForwardRef                        | 否       |                                                                                                |
+| onSubmit                                                           | listen the page turning or submit | 否       | onSubmit                                                                                       |
+| onSave                                                             | listen the click of save-button   | 否       | onSave                                                                                         |
+| goBack                                                             | listen the click of 'goBack'      | 否       | goBack                                                                                         |
+| getFileData                                                        | Support external file data        | 否       | getFileData                                                                                    |
+| headerName                                                         | headerName                        | 否       | string                                                                                         |
+| initialIndex                                                       | initial Index in imgList          | 否       | number                                                                                         |
+| exportData                                                         | exportData                        | 否       | ReactNode                                                                                      |
+| header                                                             | header                            | 否       | (headerDomObject) => React.ReactNode ｜ ReactNode                                              |
+| footer                                                             | footer                            | 否       | (footerDomObject) => React.ReactNode ｜ ReactNode                                              |
+| sider                                                              | sider                             | 否       | (siderDomObject) => React.ReactNode ｜ ReactNode                                               |
+| [renderEnhance](./annotation/renderEnhance.md)                     | 标注渲染样式                      | 否       | [IRenderEnhance](./annotation/renderEnhance.md#IRenderEnhance)                                 |
+| [dataInjectionAtCreation](./annotation/dataInjectionAtCreation.md) | 在用户创建标注数据时数据注入      | 否       | [TDataInjectionAtCreateion](./annotation/dataInjectionAtCreation.md#TDataInjectionAtCreateion) |
+| customRenderStyle                                                  | 自定义样式                        | 否       | (data) => return { strokeColor: 'red';fillColor: 'blue';textColor:'green';}                    |
+| style                                                              | the style of annotation           | 否       | Object                                                                                         |
+| className                                                          | className                         | 否       | string                                                                                         |
+| defaultLang                                                        | default language                  | 否       | 'en' \| 'cn'                                                                                   |
 
 ```ts
 /* 下方为不同工具配置, 为切换不同工具参考 */

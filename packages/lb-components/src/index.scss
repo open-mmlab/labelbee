@@ -19,8 +19,11 @@ $prefix: bee;
     max-height: $headerHeight;
   }
 
+  &__container {
+    flex-direction: row;
+  }
+
   &__side {
-    max-width: 440px;
     background: transparent;
     overflow: hidden;
     position: relative;
@@ -33,8 +36,10 @@ $prefix: bee;
   }
 
   &__content {
+    position: relative;
     display: flex;
     flex-direction: column;
+    flex: 1;
   }
 }
 
@@ -92,14 +97,9 @@ $prefix: bee;
     padding: 4px;
     border: 1px solid #cccccc;
   }
-
-  &__hotkey-content {
-    max-height: 70vh;
-    overflow-y: auto;
-  }
 }
 
-.pageInput {
+.#{$prefix}-page-input {
   margin: 0 5px;
   width: 50px;
   height: 24px;
@@ -124,7 +124,6 @@ $prefix: bee;
 }
 
 // 头部
-
 .#{$prefix}-header {
   &__title {
     color: rgba(153, 153, 153, 1);
@@ -226,11 +225,9 @@ $prefix: bee;
   }
 }
 
-//
-
 .#{$prefix}-sidebar {
   height: 100%;
-  width: 240px;
+  width: 100%;
   box-shadow: 0px 2px 14px 0px rgba(204, 204, 204, 0.5);
   background: #ffffff;
   overflow: hidden;
@@ -290,14 +287,25 @@ $prefix: bee;
   }
 
   &__level {
-    margin: 20px 20px 0 20px;
-  }
-
-  &__toolsOption {
+    padding: 28px;
+    border-bottom: 1px solid #eee;
     display: flex;
     justify-content: center;
+  }
+
+  &__toolOption {
+    display: inline-flex;
+    flex-direction: column;
+    align-items: center;
+    color: #999;
     cursor: pointer;
-    margin: 10px 0 30px;
+    &__selected {
+      color: #666fff;
+    }
+  }
+
+  &__toolOption + &__toolOption {
+    margin-left: 16px;
   }
 
   &__singleTool {
@@ -521,11 +529,36 @@ $prefix: bee;
       );
     }
   }
+  .#{$prefix}-scribble {
+    padding: 20px;
+    width: 100%;
+    &__select {
+      display: flex;
+      justify-content: center;
+      cursor: pointer;
+      img {
+        width: 12px;
+        margin: 0px 10px;
+      }
+    }
+    &__silder {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    &__circle {
+      display: block;
+      width: 5px;
+      height: 5px;
+      background: #d9d9d9;
+      border-radius: 50%;
+    }
+  }
 }
 
 .#{$prefix}-tips {
   display: flex;
-  justify-content: flex-end;
+  justify-content: space-between;
   background-color: #333;
   color: rgba(255, 255, 255, 0.4);
   line-height: 40px;
@@ -533,10 +566,22 @@ $prefix: bee;
   height: 40px;
   padding: 0 30px;
   width: 100%;
-  text-overflow: ellipsis;
   overflow: hidden;
   white-space: nowrap;
-  cursor: text;
+  .#{$prefix}-tips__leftContent {
+    max-width: 60%;
+    text-overflow: ellipsis;
+    overflow: hidden;
+    white-space: nowrap;
+  }
+
+  .#{$prefix}-tips__path {
+    max-width: 40%;
+    margin-left: 20px;
+    text-overflow: ellipsis;
+    overflow: hidden;
+    white-space: nowrap;
+  }
 }
 
 //
@@ -693,16 +738,15 @@ $prefix: bee;
 $hotkey-item-height: 46px;
 $hotkey-container-padding: 7px;
 
+.ant-popover.tool-hotkeys-popover .ant-popover-inner-content {
+  max-height: 70vh;
+  overflow-y: scroll;
+  padding: 0;
+}
+
 .tipsBar {
   display: flex;
   height: 100%;
-
-  :global {
-    .ant-popover.tool-hotkeys-popover .ant-popover-inner-content {
-      max-height: $hotkey-item-height * 10 + $hotkey-container-padding * 2;
-      overflow-y: auto;
-    }
-  }
 
   .hotKeyIconGray,
   .helpIconGray {
@@ -1202,6 +1246,12 @@ $hotkey-container-padding: 7px;
   }
 }
 
+.#{$prefix}-pop-confirm {
+  .ant-popover-buttons {
+    min-width: 116px;
+  }
+}
+
 /** VideoPlayer样式 start */
 .#{$prefix}-video-wrapper {
   width: 100%;
@@ -1346,3 +1396,265 @@ $hotkey-container-padding: 7px;
 }
 
 /** VideoPlayer样式 end */
+
+/** PointCloud样式 start */
+$pointCloudBg: #4c4c4c;
+$ptPrefix: #{$prefix}-point-cloud;
+$headerHeight: 40px;
+
+@mixin icon($size: 36px) {
+  display: inline-block;
+  height: $size;
+  width: $size;
+  background-repeat: no-repeat;
+  cursor: pointer;
+}
+
+.#{$ptPrefix}-footer {
+  height: 40px;
+}
+
+.#{$ptPrefix}-layout {
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  flex: 1;
+}
+
+.#{$ptPrefix}-wrapper {
+  display: flex;
+  height: 100%;
+  width: 100;
+  overflow: hidden;
+  flex: 1;
+
+  .#{$ptPrefix}-container {
+    position: relative;
+
+    &__header {
+      background-color: #444;
+      color: white;
+      height: $headerHeight;
+      padding: 0 16px;
+      line-height: 40px;
+      display: flex;
+      justify-content: space-between;
+    }
+    &__header-title {
+      flex: 1;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      font-weight: 700;
+    }
+    &__header-toolbar {
+      display: flex;
+      align-items: center;
+      font-size: 12px;
+
+      .#{$ptPrefix} {
+        @mixin iconMg {
+          margin-right: 16px;
+        }
+        &__rotate-reserve {
+          @include icon(24px);
+          @include iconMg;
+          background-image: url('./assets/annotation/pointCloudTool/rotateReserve.svg');
+          transform: rotateY(180deg);
+        }
+
+        &__rotate {
+          @include icon(24px);
+          @include iconMg;
+          background-image: url('./assets/annotation/pointCloudTool/rotateReserve.svg');
+        }
+
+        &__rotate-180 {
+          @include icon(24px);
+          background-image: url('./assets/annotation/pointCloudTool/rotate180.svg');
+        }
+
+        &__next {
+          font-size: 24px;
+          cursor: pointer;
+        }
+
+        &__prev {
+          font-size: 24px;
+          cursor: pointer;
+          @include iconMg;
+        }
+      }
+    }
+  }
+  .#{$ptPrefix}-container__left {
+    width: 40%;
+    display: flex;
+    flex-direction: column;
+    border-right: 1px solid #fff;
+    height: 100%;
+    overflow: hidden;
+    .#{$ptPrefix}-2d-container {
+      flex: 1;
+      flex-direction: column;
+      display: flex;
+      overflow: hidden;
+
+      .#{$ptPrefix}-2d-image {
+        flex: 1;
+        background-color: $pointCloudBg;
+      }
+    }
+
+    .#{$ptPrefix}-3d-container {
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+      min-height: 400px;
+
+      .#{$ptPrefix}-3d-content {
+        display: flex;
+        flex: 1;
+        overflow: hidden;
+
+        .#{$ptPrefix}-3d-sidebar {
+          padding-left: 16px;
+          height: 100%;
+          background-color: $pointCloudBg;
+          width: 36px;
+          box-sizing: content-box;
+          display: flex;
+          flex-direction: column;
+          justify-content: flex-end;
+
+          .#{$ptPrefix}-3d-view {
+            &__reset {
+              @include icon();
+              background-image: url('./assets/annotation/pointCloudTool/3DViewReset.svg');
+              margin: 16px 0;
+              font-size: 36px;
+              background-position: center;
+              background-color: #444;
+              border-radius: 4px;
+            }
+
+            &__top,
+            &__front,
+            &__left,
+            &__right,
+            &__back,
+            &__bottom,
+            &__lft,
+            &__rbt {
+              @include icon();
+              background-image: url('./assets/annotation/pointCloudTool/3DViews.png');
+              margin-bottom: 8px;
+
+              &.active {
+                background-image: url('./assets/annotation/pointCloudTool/3DViewsActive.png');
+              }
+            }
+
+            &__top {
+              background-position: 0 0;
+            }
+
+            &__front {
+              background-position-y: -44px;
+            }
+
+            &__left {
+              background-position-y: -88px;
+            }
+
+            &__back {
+              background-position-y: -132px;
+            }
+
+            &__right {
+              background-position-y: -176px;
+            }
+
+            &__bottom {
+              background-position-y: -220px;
+            }
+
+            &__lft {
+              background-position-y: -264px;
+            }
+
+            &__rbt {
+              background-position-y: -308px;
+              margin-bottom: 0px;
+            }
+          }
+        }
+
+        .#{$ptPrefix}-3d-view {
+          flex: 1;
+          overflow: hidden;
+        }
+      }
+    }
+  }
+
+  .#{$ptPrefix}-container__right {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+
+    .#{$ptPrefix}-container__top-view {
+      height: 62.5%;
+      border-bottom: 1px solid #fff;
+      overflow: hidden;
+      display: flex;
+      flex-direction: column;
+    }
+
+    .#{$ptPrefix}-container__right-bottom {
+      flex: 1;
+      display: flex;
+      overflow: hidden;
+      .#{$ptPrefix}-container__empty-page {
+        position: absolute;
+        left: 0;
+        top: $headerHeight;
+        flex: 1;
+        background: black;
+        color: #666666;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        flex-direction: column;
+        font-size: 16px;
+        z-index: 20;
+        height: calc(100% - $headerHeight);
+        width: 100%;
+        .#{$ptPrefix}-container__empty-page__text {
+          margin-top: 13px;
+        }
+      }
+
+      .#{$ptPrefix}-container__side-view {
+        border-right: 1px solid white;
+      }
+
+      .#{$ptPrefix}-container__side-view,
+      .#{$ptPrefix}-container__back-view {
+        position: relative;
+        flex: 1;
+        display: flex;
+        background: black;
+        flex-direction: column;
+        .#{$ptPrefix}-container__bottom-view-content {
+          flex: 1;
+          .#{$ptPrefix}-container__core-instance {
+            position: relative;
+            width: 100%;
+            height: 100%;
+          }
+        }
+      }
+    }
+  }
+}
+/** PointCloud样式 end */

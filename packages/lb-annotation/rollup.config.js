@@ -1,38 +1,23 @@
 import esbuild from 'rollup-plugin-esbuild';
-// 为了支持import xx from 'xxx'
 import resolve from '@rollup/plugin-node-resolve';
-// 读取package.json
-// 代码生成sourcemaps
-// import sourceMaps from 'rollup-plugin-sourcemaps'
-
-import pkg from './package.json';
 import svg from 'rollup-plugin-svg';
 import path from 'path';
 import alias from '@rollup/plugin-alias';
+import webWorkerLoader from 'rollup-plugin-web-worker-loader';
 
 const projectRootDir = path.resolve(__dirname);
 const customResolver = resolve({
   extensions: ['.tsx', '.ts', 'scss'],
 });
-const OUTPUT_DIR = 'dist';
+const CJS_OUTPUT_DIR = 'dist';
+const ES_OUTPUT_DIR = 'es';
 const isProd = process.env.NODE_ENV === 'production';
-
-// 代码头
-const banner = `
-  /* eslint-disable */
-  /*!
-  * sense-annotation v${pkg.version}
-  * (c) 2020-${new Date().getFullYear()}
-  * Released under the Apache-2.0 License.
-  */
-`;
-
-console.log('beehive- annotation isProd ', isProd);
 
 export default {
   input: ['./src/index.ts'],
   coverageDirectory: './dist/',
   plugins: [
+    webWorkerLoader(/* configuration */),
     alias({
       entries: [{ find: '@', replacement: path.resolve(projectRootDir, './src') }],
       customResolver,
@@ -59,14 +44,16 @@ export default {
   ],
   output: [
     {
-      format: 'cjs',
-      file: './dist/index.js',
-      banner,
+      format: 'es',
+      dir: ES_OUTPUT_DIR,
+      preserveModules: true,
+      preserveModulesRoot: 'src',
     },
     {
-      format: 'es',
-      file: './es/index.js',
-      banner,
+      format: 'cjs',
+      dir: CJS_OUTPUT_DIR,
+      preserveModules: true,
+      preserveModulesRoot: 'src',
     },
   ],
 };

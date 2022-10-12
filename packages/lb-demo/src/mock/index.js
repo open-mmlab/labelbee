@@ -2,6 +2,7 @@ import img1 from './images/10.jpg';
 import img2 from './images/19.jpg';
 import img3 from './images/20.jpg';
 import img4 from './images/66.jpg';
+import { pointCloudResult1 } from './pointCloud';
 
 // const MOCK_URL = 'http://bee-sdk-demo.sensebee.xyz/images/';
 // export const fileList = ['10', '19', '20', '66'].map((i) => `${MOCK_URL}${i}.jpg`);
@@ -13,19 +14,137 @@ export const videoList = [
   'http://127.0.0.1:8080/e.mp4',
 ];
 
-const data = Array(100)
-  .fill('')
-  .map((v, i) => ({
-    id: i + 1,
-    sourceID: '',
-    x: Math.random() * 1000,
-    y: Math.random() * 1000,
-    width: 20,
-    height: 20,
-    order: i + 1,
-    attribute: '',
-    valid: true,
-  }));
+export const pointCloudList = [
+  // 'http://10.53.25.142:8001/10837/1/total.pcd',
+  // 'http://127.0.0.1:8082/lidar/1651762642488711000.pcd',
+  'http://10.152.32.16:8080/top_center_lidar/2022-02-20-12-21-03-100.pcd',
+  'http://10.152.32.16:8080/top_center_lidar/2022-02-20-12-21-03-200.pcd',
+  'http://10.152.32.16:8080/top_center_lidar/2022-02-20-12-21-03-300.pcd',
+  'http://10.53.25.142:8001/10837/2/total.pcd',
+  'http://10.53.25.142:8001/10837/3/total.pcd',
+  'http://10.53.25.142:8001/10837/4/total.pcd',
+  'http://10.53.25.142:8001/10837/5/total.pcd',
+  'http://10.53.25.142:8001/10837/6/total.pcd',
+  'http://10.53.25.142:8001/10837/7/total.pcd',
+  'http://10.53.25.142:8001/10837/8/total.pcd',
+  'http://10.53.25.142:8001/10837/9/total.pcd',
+  'http://10.53.25.142:8001/10837/10/total.pcd',
+  'http://10.53.25.142:8001/10837/11/total.pcd',
+  'http://10.53.25.142:8001/10837/12/total.pcd',
+  'http://10.53.25.142:8001/10837/13/total.pcd',
+  'http://10.53.25.142:8001/10837/14/total.pcd',
+  'http://10.53.25.142:8001/10837/15/total.pcd',
+  'http://10.53.25.142:8001/10837/16/total.pcd',
+  'http://10.53.25.142:8001/10837/17/total.pcd',
+  'http://10.53.25.142:8001/10837/18/total.pcd',
+  'http://10.53.25.142:8001/10837/19/total.pcd',
+  'http://10.53.25.142:8001/10837/20/total.pcd',
+];
+
+export const pointCloudMappingImgList = [
+  {
+    url: 'http://10.152.32.16:8080/image_undistort/center_camera_fov120/2022-02-20-12-21-03-100.png',
+    calib: {
+      P: [
+        [664.2713623046875, 0.0, 966.8039735557395, 0],
+        [0.0, 673.2572021484375, 557.292600044435, 0],
+        [0.0, 0.0, 1.0, 0],
+      ],
+      R: [
+        [1, 0, 0],
+        [0, 1, 0],
+        [0, 0, 1],
+      ],
+      T: [
+        [-0.99986, 0.0138869, -0.009277, -0.18942],
+        [0.00942274, 0.0105122, -0.9999, -0.0724215],
+        [-0.0137894, -0.999848, -0.0106419, 0.420832],
+      ],
+    },
+  },
+  {
+    url: 'http://10.152.32.16:8080/image_undistort/center_camera_fov30/2022-02-20-12-21-03-100.png',
+    calib: {
+      P: [
+        [4454.6, 0, 954.3, 0],
+        [0, 4459.0, 616.6, 0],
+        [0.0, 0.0, 1.0, 0],
+      ],
+      R: [
+        [1, 0, 0],
+        [0, 1, 0],
+        [0, 0, 1],
+      ],
+      T: [
+        [-0.999925, -0.000707111, -0.0122273, 0.0962923],
+        [0.0122155, 0.0140593, -0.999826, -0.0991715],
+        [0.000877471, -0.9999, -0.0140499, 1.48935],
+      ],
+    },
+  },
+  {
+    url: 'http://10.152.32.16:8080/image_undistort/left_front_camera/2022-02-20-12-21-03-100.png',
+    calib: {
+      P: [
+        [1231.7, 0, 964.3, 0],
+        [0, 1234.6, 572.7, 0],
+        [0.0, 0.0, 1.0, 0],
+      ],
+      R: [
+        [1, 0, 0],
+        [0, 1, 0],
+        [0, 0, 1],
+      ],
+      T: [
+        [-0.604101, -0.796899, 0.00388006, -0.821921],
+        [-0.0384692, 0.024299, -0.998964, -1.0657],
+        [0.795979, -0.603624, -0.0453359, -1.45241],
+      ],
+    },
+  },
+  {
+    url: 'http://10.152.32.16:8080/image_undistort/left_rear_camera/2022-02-20-12-21-03-100.png',
+    calib: {
+      P: [
+        [1255.3, 0, 952.9, 0],
+        [0, 1257.3, 539.3, 0],
+        [0, 0, 1, 0],
+      ],
+      R: [
+        [1, 0, 0],
+        [0, 1, 0],
+        [0, 0, 1],
+      ],
+      T: [
+        [0.568373, -0.822005, -0.0354856, -1.73776],
+        [-0.0376153, 0.0171236, -0.999146, -1.39336],
+        [0.82191, 0.569223, -0.0211873, 0.583955],
+      ],
+    },
+  },
+  {
+    url: 'http://10.152.32.16:8080/image_undistort/rear_camera/2022-02-20-12-21-03-100.png',
+    calib: {
+      P: [
+        [2109.75, 0, 984.6, 0],
+        [0, 2365.9, 631.1, 0],
+        [0.0, 0.0, 1.0, 0],
+      ],
+      R: [
+        [1, 0, 0],
+        [0, 1, 0],
+        [0, 0, 1],
+      ],
+      T: [
+        [0.999947, -0.00513728, -0.00884364, -0.0994936],
+        [-0.00885675, -0.00250621, -0.999958, -0.388493],
+        [0.00511496, 0.999983, -0.00255124, 0.346432],
+      ],
+    },
+  },
+];
+
+const data = [];
 
 const polygonData = [];
 // Array(1)
@@ -85,6 +204,8 @@ export const videoTagDefaultResult = JSON.stringify({
   },
 });
 
+export const pointCloudResult = pointCloudResult1;
+
 export const getMockResult = (tool) => {
   if (tool === 'rectTool') {
     return rectDefaultResult;
@@ -99,6 +220,11 @@ export const getMockResult = (tool) => {
 
   if (tool === 'videoTagTool') {
     return videoTagDefaultResult;
+  }
+
+  if (tool === 'pointCloudTool') {
+    return '{}';
+    // return pointCloudResult;
   }
 
   return '';
@@ -224,8 +350,7 @@ export const DEFAULT_ANNOTATIONS = [
       y: 23,
       textMaxWidth: 416,
       color: 'yellow',
-      text:
-        '标签1: 测试1LoooooooooooooooooooooooooooooooooogLoooooooooooooooooooooooooooooooooogLoooooooooooooooooooooooooooooooooogLoooooooooooooooooooooooooooooooooogLoooooooooooooooooooooooooooooooooog\n标签2: 测试2sdasdas\n\n\n标签1: 测试1asdasdasd\n标签2: 测试2标签1: 测试1\n标签2: 测试2sdasdas\n标签1: 测试1asdasdasd\n标签2: 测试2标签1: 测试1\n标签2: 测试2sdasdas\n标签1: 测试1asdasdasd\n标签2: 测试2标签1: 测试1\n标签2: 测试2sdasdas\n标签1: 测试1asdasdasd\n标签2: 测试2标签1: 测试1\n标签2: 测试2sdasdas\n标签1: 测试1asdasdasd\n标签2: 测试2标签1: 测试1\n标签2: 测试2sdasdas\n标签1: 测试1asdasdasd\n标签2: 测试2',
+      text: '标签1: 测试1LoooooooooooooooooooooooooooooooooogLoooooooooooooooooooooooooooooooooogLoooooooooooooooooooooooooooooooooogLoooooooooooooooooooooooooooooooooogLoooooooooooooooooooooooooooooooooog\n标签2: 测试2sdasdas\n\n\n标签1: 测试1asdasdasd\n标签2: 测试2标签1: 测试1\n标签2: 测试2sdasdas\n标签1: 测试1asdasdasd\n标签2: 测试2标签1: 测试1\n标签2: 测试2sdasdas\n标签1: 测试1asdasdasd\n标签2: 测试2标签1: 测试1\n标签2: 测试2sdasdas\n标签1: 测试1asdasdasd\n标签2: 测试2标签1: 测试1\n标签2: 测试2sdasdas\n标签1: 测试1asdasdasd\n标签2: 测试2标签1: 测试1\n标签2: 测试2sdasdas\n标签1: 测试1asdasdasd\n标签2: 测试2',
     },
   },
   {
@@ -242,15 +367,15 @@ export const DEFAULT_ANNOTATIONS = [
   {
     type: 'rect',
     annotation: {
-      id: '1231999923999',
+      id: 'g5r2l7mcrv8',
       x: 60,
       y: 260,
       width: 100,
       height: 100,
       stroke: 'pink',
       name: 'Bag',
+      hiddenRectSize: true,
       renderEnhance: (params) => {
-        console.log(params);
         const {
           ctx,
           data: { annotation },

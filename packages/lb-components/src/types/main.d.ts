@@ -29,6 +29,7 @@ export type Sider = ({
   tagToolSideBar,
   textToolSideBar,
   horizontal,
+  scribbleSidebar
 }: {
   toolIcon: React.ReactNode;
   attributeList: React.ReactNode;
@@ -39,9 +40,31 @@ export type Sider = ({
   tagToolSideBar: React.ReactNode;
   textToolSideBar: React.ReactNode;
   horizontal: React.ReactNode;
+  scribbleSidebar: React.ReactNode;
+
+  // PointCloud
+  pointCloudToolSidebar : React.ReactNode;
+  pointCloudOperation: React.ReactNode;
 }) => React.ReactNode | React.ReactNode;
 
-export type Footer = ({
+interface IFooter {
+  /** 快捷键 (FooterTips) */
+  footerTips: React.ReactNode;
+  /** 标注隐藏中  (HiddenTips) */
+  hiddenTips: React.ReactNode;
+  /** 本页件数  */
+  pageNumber: React.ReactNode;
+  /** 页码切换 */
+  pagination: React.ReactNode;
+  /** 缩放切换 ZoomController */
+  zoomController: React.ReactNode;
+  /** 当前分页 */
+  curItems: React.ReactNode;
+  /** footer 分隔符 */
+  footerDivider: React.ReactNode;
+}
+
+export type RenderFooter = ({
   footerTips,
   hiddenTips,
   pageNumber,
@@ -49,15 +72,7 @@ export type Footer = ({
   zoomController,
   curItems,
   footerDivider,
-}: {
-  footerTips: React.ReactNode;
-  hiddenTips: React.ReactNode;
-  pageNumber: React.ReactNode;
-  pagination: React.ReactNode;
-  zoomController: React.ReactNode;
-  curItems: React.ReactNode;
-  footerDivider: React.ReactNode;
-}) => React.ReactNode | React.ReactNode;
+}: IFooter) => React.ReactNode;
 
 export type Header = ({
   backNode,
@@ -71,4 +86,4 @@ export type Header = ({
   stepListNode: React.ReactNode;
   headerOptionNode: React.ReactNode;
   langNode: React.ReactNode;
-}) => React.ReactNode | React.ReactNode;
+}) => React.ReactNode;

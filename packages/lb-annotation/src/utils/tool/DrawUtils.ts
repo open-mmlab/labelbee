@@ -28,7 +28,7 @@ export interface IDrawTextConfig {
 export default class DrawUtils {
   public static drawImg = (
     canvas: HTMLCanvasElement,
-    imgNode: HTMLImageElement,
+    imgNode: HTMLImageElement | HTMLCanvasElement,
     options: Partial<IOffsetCanvasPosition & { imgAttribute: IImageAttribute }> = {},
   ) => {
     const ctx = canvas.getContext('2d')!;

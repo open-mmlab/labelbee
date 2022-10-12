@@ -25,6 +25,7 @@ export const composeResult = (
     rect: any[];
     basicRectID?: string;
   },
+  customObject: Object,
 ) => {
   const { step, stepList } = pos;
   const { rect, basicRectID } = newData;
@@ -38,13 +39,17 @@ export const composeResult = (
 
     if (data[stepName]) {
       const info = data[stepName];
+      Object.assign(info, customObject);
+
       if (info.result) {
         if (JSON.stringify(info.result) === JSON.stringify(rect)) {
           return JSON.stringify(data);
         }
         if (basicRectID) {
           info.result = [
-            ...info.result.filter((v: { sourceID: string; }) => !(v.sourceID && v.sourceID === basicRectID)),
+            ...info.result.filter(
+              (v: { sourceID: string }) => !(v.sourceID && v.sourceID === basicRectID),
+            ),
             ...rect.filter((v) => v.sourceID && v.sourceID === basicRectID),
           ];
         } else {
@@ -56,6 +61,7 @@ export const composeResult = (
         ...data,
         [stepName]: {
           ...data[stepName],
+          ...customObject,
           result: rect,
         },
       });
@@ -65,6 +71,7 @@ export const composeResult = (
       ...data,
       [stepName]: {
         dataSourceStep,
+        ...customObject,
         toolName: stepList[step - 1].tool,
         result: rect,
       },
