@@ -4,24 +4,46 @@
  * @author Ron <ron.f.luo@gmail.com>
  */
 import { colorArr } from "../constant/color";
-import MathUtils from "./MathUtils";
 
-interface ICustomColor {
-  channel?: number; // 单通道的值
-  color?: string; // 传入颜色(传入rbg格式)
-  rgb?: {
-    r: number;
-    g: number;
-    b: number;
-  };
-}
-
-interface IColor {
+/**
+ * Notice！！
+ * 
+ * The number is from 0 to 255. Alpha is also in [0, 255]. It needs to distinguish it from rgba (a in rgba is [0 ,1])
+ */
+interface IColorRGBA {
   r: number;
   g: number;
   b: number;
   a: number;
 }
+
+interface ICustomColor {
+  channel?: number; // Single Channel Value.
+  color?: string; // You can use color to define it like 'red' | 'blue'
+  rgba?: IColorRGBA; // Priority over color.
+}
+
+const BLACK_BACKGROUND_RGBA = { 
+  r: 0,
+  g: 0,
+  b: 0,
+  a: 255
+}
+
+const BLACK_BACKGROUND_RGBA_WITH_OPACITY = { 
+  r: 0,
+  g: 0,
+  b: 0,
+  a: 125
+}
+
+const TRANSPARENCY_BACKGROUND_RGBA = {
+  r: 0,
+  g: 0,
+  b: 0,
+  a: 0
+}
+
 
 class ImgConversionUtils {
   public static createCanvas(imgNode: HTMLImageElement) {
@@ -63,44 +85,54 @@ class ImgConversionUtils {
   public static renderColorByMask({
     renderCanvas,
     imgData,
-    imgNode,
     customColor,
-    backgroundColor = "rgb(0, 0, 0)",
     hiddenUndefinedColor = false,
+    backgroundRGBA = BLACK_BACKGROUND_RGBA_WITH_OPACITY,
+    basicImgCanvas
   }: {
     renderCanvas: HTMLCanvasElement;
     imgData: ImageData;
     imgNode: HTMLImageElement;
     customColor?: ICustomColor[];
-    backgroundColor?: string;
     hiddenUndefinedColor?: boolean;
+    backgroundRGBA: IColorRGBA,
+    basicImgCanvas?: HTMLCanvasElement
   }) {
     const ctx = renderCanvas.getContext("2d");
 
     if (ctx) {
-      // 1. The default background color is black.
-      ctx.fillStyle = backgroundColor;
-      ctx.fillRect(0, 0, imgNode.width, imgNode.height);
-
       /**
-       * 2. Traversing image pixels
+       * 1. Traversing image pixels
        *
        * If no color is set then the default color is drawn (From 'constant/color', But is can be hidden by hiddenUndefinedColor)
        */
-      const getColor = ({ r }: IColor) => {
-        const colorByCustom = customColor?.find((i) => i?.channel === r)?.color; // use r to
+      const opacity = 0.3;
+      const getColor = ({ r }: IColorRGBA) => {
+        const colorByCustom = customColor?.find((i) => i?.channel === r)?.rgba; // use r to
         if (hiddenUndefinedColor === true && !colorByCustom) {
-          return "";
+          return undefined;
         }
-        return colorByCustom || colorArr[r].hexString;
+        return colorByCustom ?? {
+          ...colorArr[r].rgb,
+          a: Math.floor(255 * opacity),
+        };
       };
 
       ImgConversionUtils.renderPixelByImgData({
         ctx,
         imgData,
-        size: imgNode,
         getColor,
+        originBackgroundRGBA:  BLACK_BACKGROUND_RGBA,
+        backgroundRGBA
       });
+
+      if (basicImgCanvas) {
+        const basicCtx = basicImgCanvas.getContext('2d');
+        if (basicCtx) {
+          basicCtx.drawImage(renderCanvas, 0, 0);
+          return basicImgCanvas.toDataURL("image/png");
+        }
+      }
 
       // 3. Export Img
       const newImgSrc = renderCanvas.toDataURL("image/png");
@@ -118,42 +150,43 @@ class ImgConversionUtils {
     imgData,
     imgNode,
     customColor,
-    backgroundColor = "rgb(0, 0, 0)",
+    backgroundRGBA = BLACK_BACKGROUND_RGBA
   }: {
     renderCanvas: HTMLCanvasElement;
     imgData: ImageData;
     imgNode: HTMLImageElement;
     customColor?: ICustomColor[];
-    backgroundColor?: string;
+    backgroundRGBA?: IColorRGBA
   }) {
     const ctx = renderCanvas.getContext("2d");
     if (ctx) {
-      // 1. The default background color is black.
-      ctx.fillStyle = backgroundColor;
-      ctx.fillRect(0, 0, imgNode.width, imgNode.height);
-
       /**
-       * 2. Traversing image pixels
+       * Traversing image pixels
        *
        * If no color is set then the default color is drawn (From 'constant/color'
        */
-      const getColor = ({ r, g, b }: IColor) => {
-        let color = "";
+      const getColor = ({ r, g, b }: IColorRGBA) => {
+        let color = undefined;
 
         customColor?.some((v) => {
-          if (v.rgb) {
+          if (v.rgba) {
             const scope = 2;
 
             // If pixel edge is the same with the customColor with the scope of 2.
             if (
-              r >= v.rgb.r - scope &&
-              r <= v.rgb.r + scope &&
-              g >= v.rgb.g - scope &&
-              g <= v.rgb.g + scope &&
-              b >= v.rgb.b - scope &&
-              b <= v.rgb.b + scope
+              r >= v.rgba.r - scope &&
+              r <= v.rgba.r + scope &&
+              g >= v.rgba.g - scope &&
+              g <= v.rgba.g + scope &&
+              b >= v.rgba.b - scope &&
+              b <= v.rgba.b + scope
             ) {
-              color = `rgb(${v.channel},${v.channel},${v.channel})`;
+              color = {
+                r: v.channel,
+                g: v.channel,
+                b: v.channel,
+                a: 255,
+              }
               return true;
             }
             return false;
@@ -164,8 +197,9 @@ class ImgConversionUtils {
       ImgConversionUtils.renderPixelByImgData({
         ctx,
         imgData,
-        size: imgNode,
         getColor,
+        originBackgroundRGBA: TRANSPARENCY_BACKGROUND_RGBA,
+        backgroundRGBA,
       });
 
       // 3. Export Img
@@ -186,13 +220,17 @@ class ImgConversionUtils {
   public static renderPixelByImgData({
     ctx,
     imgData,
-    size,
     getColor,
+
+    originBackgroundRGBA,
+    backgroundRGBA
   }: {
     ctx: CanvasRenderingContext2D;
     imgData: ImageData;
-    size: { width: number; height: number };
-    getColor: ({ r, g, b, a }: IColor) => string;
+    getColor: ({ r, g, b, a }: IColorRGBA) => IColorRGBA | undefined;
+    
+    originBackgroundRGBA: IColorRGBA
+    backgroundRGBA: IColorRGBA
   }) {
     for (let i = 0; i < imgData.data.length / 4; i++) {
       const index = i * 4;
@@ -201,15 +239,26 @@ class ImgConversionUtils {
       const b = imgData.data[index + 2];
       const a = imgData.data[index + 3];
 
+      
+      
       const color = getColor({ r, g, b, a });
-      if (!color) {
+
+      const isOriginBackground = originBackgroundRGBA.r === r &&  originBackgroundRGBA.g === g && originBackgroundRGBA.b === b && originBackgroundRGBA.a === a
+      // If it is originBackgroundRGBA. It needs to update to backgroundRGBA
+      if (isOriginBackground || !color) {
+        imgData.data[index] =  backgroundRGBA.r;
+        imgData.data[index + 1] = backgroundRGBA.g;
+        imgData.data[index + 2] = backgroundRGBA.b;
+        imgData.data[index + 3] = backgroundRGBA.a;
         continue;
       }
-      ctx.fillStyle = color;
-      const x = Math.floor(i % size.width);
-      const y = Math.floor(i / size.width);
-      ctx.fillRect(x, y, 1, 1);
+      
+      imgData.data[index] = color.r;
+      imgData.data[index + 1] = color.g;
+      imgData.data[index + 2] = color.b;
+      imgData.data[index + 3] = color.a;
     }
+    ctx.putImageData(imgData, 0, 0);
   }
 
   /**
@@ -221,23 +270,22 @@ class ImgConversionUtils {
     maskSrc: string;
     basicImgSrc?: string;
     customColor?: ICustomColor[];
-    opacity?: number;
-    backgroundColor?: string;
+    backgroundRGBA: IColorRGBA;
     hiddenUndefinedColor?: boolean;
   }) => {
     const {
       maskSrc,
       customColor,
       basicImgSrc,
-      opacity = 0.3,
       hiddenUndefinedColor = false,
+      backgroundRGBA
     } = params;
     try {
       const imgNode = await this.createImgDom(maskSrc);
-      const { ctx: basicCtx } = this.createCanvas(imgNode);
+      const { canvas: maskCanvas, ctx: basicCtx } = this.createCanvas(imgNode);
       basicCtx.drawImage(imgNode, 0, 0, imgNode.width, imgNode.height);
 
-      const { canvas: renderCanvas, ctx: renderCtx } =
+      const { canvas: basicImgCanvas, ctx: basicImgRenderCtx } =
         this.createCanvas(imgNode);
 
       /**
@@ -245,10 +293,7 @@ class ImgConversionUtils {
        */
       if (basicImgSrc) {
         const basicImg = await this.createImgDom(basicImgSrc);
-        renderCtx.drawImage(basicImg, 0, 0);
-
-        // It needs to set transparency.
-        renderCtx.globalAlpha = opacity;
+        basicImgRenderCtx.drawImage(basicImg, 0, 0);
       }
 
       /**
@@ -262,16 +307,19 @@ class ImgConversionUtils {
         imgNode.height
       );
       const newImgSrc = this.renderColorByMask({
-        renderCanvas,
+        renderCanvas: maskCanvas,
         imgData,
         imgNode,
         customColor,
-        backgroundColor: params.backgroundColor,
         hiddenUndefinedColor,
+        basicImgCanvas,
+        backgroundRGBA,
       });
+
+
       return newImgSrc;
     } catch (e) {
-      console.error("Failed to load image");
+      console.error("Failed to load image", e);
     }
   };
 
