@@ -137,12 +137,12 @@ const sideViewPolygon2PointCloud = (
     y: newCenterPoint.y - oldCenterPoint.y,
   };
 
-  const cos = Math.cos(selectedPointCloudBox.rotation);
-  const sin = Math.sin(selectedPointCloudBox.rotation);
-
+  /**
+   * The key of sideView change is x & z, y isn't used.
+   */
   const offsetCenterPoint = {
     x: offset.x,
-    y: offset.x * sin + offset.y * cos,
+    y: 0,
     z: newCenterPoint.y - oldCenterPoint.y,
   };
 

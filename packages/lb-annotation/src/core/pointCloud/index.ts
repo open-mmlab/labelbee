@@ -1036,17 +1036,31 @@ export class PointCloud {
     }
   }
 
+  /**
+   * Box to 2d Coordinate.
+   *
+   * Flow:
+   * 1. Model Translation
+   * 2. View Translation
+   * 3. Projection Translation
+   * 4. Viewport Translation
+   *
+   *
+   * @param boxParams
+   * @param perspectiveView
+   * @returns
+   */
   public getBoxPolygon2DCoordinate(boxParams: IPointCloudBox, perspectiveView: EPerspectiveView) {
     const vectorList = this.boxParams2ViewPolygon(boxParams, perspectiveView);
     const { width, height } = boxParams;
     const projectMatrix = new THREE.Matrix4()
-      .premultiply(this.camera.matrixWorldInverse)
-      .premultiply(this.camera.projectionMatrix);
+      .premultiply(this.camera.matrixWorldInverse) // View / Camera Translation
+      .premultiply(this.camera.projectionMatrix); // Projection Translation
 
     const boxSideMatrix = new THREE.Matrix4()
-      .premultiply(this.getModelTransformationMatrix(boxParams)) // need to update every times
-      .premultiply(projectMatrix)
-      .premultiply(this.basicCoordinate2CanvasMatrix4);
+      .premultiply(this.getModelTransformationMatrix(boxParams)) // Model Translation
+      .premultiply(projectMatrix) // View Translation + Projection Translation
+      .premultiply(this.basicCoordinate2CanvasMatrix4); // Viewport Translation
     this.sideMatrix = boxSideMatrix;
 
     const polygon2d = vectorList
@@ -1094,12 +1108,14 @@ export class PointCloud {
   }
 
   public getNewBoxBySideUpdate(
-    offsetCenterPoint: { x: number; y: number; z: number },
+    offsetCenterPoint: { x: number; y: number; z: number }, // Just use x now.
     offsetWidth: number,
     offsetDepth: number,
     selectedPointCloudBox: IPointCloudBox,
   ) {
     const Rz = new THREE.Matrix4().makeRotationZ(selectedPointCloudBox.rotation);
+
+    // Because the positive direction of 2DView is -x, but the positive direction of 2DView is x.
     const offsetVector = new THREE.Vector3(-offsetCenterPoint.x, 0, 0).applyMatrix4(Rz);
 
     // need to Change offset to world side
@@ -1107,7 +1123,7 @@ export class PointCloud {
     newBoxParams.center = {
       x: newBoxParams.center.x + offsetVector.x,
       y: newBoxParams.center.y + offsetVector.y,
-      z: newBoxParams.center.z - offsetCenterPoint.z,
+      z: newBoxParams.center.z - offsetCenterPoint.z, // It is the same with moving.
     };
 
     newBoxParams = {
