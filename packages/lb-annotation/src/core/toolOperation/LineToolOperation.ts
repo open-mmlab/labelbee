@@ -258,8 +258,15 @@ class LineToolOperation extends BasicToolOperation {
     return this.config.enableOutOfTarget;
   }
 
+  /**
+   * Judgement of showing Order.
+   *
+   * Origin Config of LineTool: showOrder.
+   * Configurable of other tools: isShowOrder.
+   */
+
   get showOrder() {
-    return this.config.showOrder;
+    return this.config.showOrder ?? this.config.isShowOrder;
   }
 
   get edgeAdsorption() {
