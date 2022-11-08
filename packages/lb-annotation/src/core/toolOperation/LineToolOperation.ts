@@ -73,7 +73,20 @@ class LineToolOperation extends BasicToolOperation {
     }
     const color = this.getLineColorByAttribute({ attribute: this.defaultAttribute, valid: !!isActiveLineValid });
 
-    activeLine.map((point) => Object.assign(point, this.coordUtils.getRenderCoord(point)));
+    activeLine.map((point) =>
+      Object.assign(
+        point,
+        {
+          actual: { x: point.x, y: point.y }, // Keep The Origin Coordinate.
+        },
+        this.coordUtils.getRenderCoord(point),
+      ),
+    );
+
+    if (this.isActive) {
+      this.drawLineLength(activeLine, color);
+    }
+
     this.updateActiveArea();
     this.drawLine(activeLine, coord, color, true, true);
     this.drawLineNumber(activeLine[0], order, color, '', this.defaultAttribute, isActiveLineValid);
@@ -628,7 +641,9 @@ class LineToolOperation extends BasicToolOperation {
           return;
         }
         if (line.pointList) {
-          line.pointList.map((i) => Object.assign(i, this.coordUtils.getRenderCoord(i)));
+          line.pointList.map((i) =>
+            Object.assign(i, { actual: { x: i.x, y: i.y } }, this.coordUtils.getRenderCoord(i)),
+          );
           const { order, label } = line;
           const displayOrder = order;
           const color = line && this.getLineColorByAttribute(line);
@@ -638,6 +653,7 @@ class LineToolOperation extends BasicToolOperation {
 
           if (line.id !== this.textEditingID) {
             this.drawLineTextAttribute(line.pointList[1], color, line?.textAttribute);
+            this.drawLineLength(line.pointList, color);
           }
         }
       });
@@ -712,6 +728,26 @@ class LineToolOperation extends BasicToolOperation {
   public drawLineTextAttribute(coord: ICoordinate, color: string, text?: string) {
     if (coord && text) {
       return this.drawText(coord, text, color, 200);
+    }
+  }
+
+  /**
+   * Draw the text of lineLength
+   *
+   * It will be controlled by showLineLength.
+   */
+  public drawLineLength(pointList: ILinePoint[], color: string) {
+    if (this.config?.showLineLength && pointList) {
+      const length = pointList.reduce((pre, next, index) => {
+        if (index <= 0 || !pointList[index - 1].actual || !next.actual) {
+          return pre;
+        }
+
+        return pre + LineToolUtils.calcDistance(pointList[index - 1].actual as IPoint, next.actual);
+      }, 0);
+
+      const renderPos = pointList[pointList.length - 1];
+      this.drawText(renderPos, `l = ${length.toFixed(2)}`, color);
     }
   }
 
