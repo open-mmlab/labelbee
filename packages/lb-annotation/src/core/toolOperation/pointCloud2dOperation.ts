@@ -256,6 +256,8 @@ class PointCloud2dOperation extends PolygonOperation {
     }
 
     this.selectedID = newID;
+    this.selectedIDs = newID ? [newID] : [];
+
     this.render();
   }
 

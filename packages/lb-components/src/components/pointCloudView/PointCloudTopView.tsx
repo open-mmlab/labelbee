@@ -175,6 +175,7 @@ const PointCloudTopView: React.FC<IAnnotationStateProps> = ({ currentData }) => 
     TopView2dOperation.singleOn('polygonCreated', (polygon: IPolygonData) => {
       if (TopView2dOperation.pattern === EPolygonPattern.Normal || !currentData?.url) {
         addPolygon(polygon);
+        ptCtx.setSelectedIDs(polygon.id);
         return;
       }
 

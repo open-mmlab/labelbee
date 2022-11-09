@@ -1,6 +1,6 @@
 import { IPointCloudBox, IPointCloudBoxList, IPolygonData } from '@labelbee/lb-utils';
-import { PointCloud, PointCloudAnnotation } from '@labelbee/lb-annotation';
-import React, { useMemo, useState } from 'react';
+import { PointCloud, PointCloudAnnotation, ActionsHistory } from '@labelbee/lb-annotation';
+import React, { useMemo, useRef, useState } from 'react';
 
 interface IPointCloudContextInstances {
   topViewInstance?: PointCloudAnnotation;
@@ -31,6 +31,8 @@ export interface IPointCloudContext extends IPointCloudContextInstances {
 
   zoom: number;
   setZoom: (zoom: number) => void;
+
+  history: ActionsHistory; // Operation History
 }
 
 export const PointCloudContext = React.createContext<IPointCloudContext>({
@@ -53,6 +55,7 @@ export const PointCloudContext = React.createContext<IPointCloudContext>({
 
   zoom: 1,
   setZoom: () => {},
+  history: new ActionsHistory(),
 });
 
 export const PointCloudProvider: React.FC<{}> = ({ children }) => {
@@ -65,6 +68,7 @@ export const PointCloudProvider: React.FC<{}> = ({ children }) => {
   const [sideViewInstance, setSideViewInstance] = useState<PointCloudAnnotation>();
   const [backViewInstance, setBackViewInstance] = useState<PointCloudAnnotation>();
   const [mainViewInstance, setMainViewInstance] = useState<PointCloud>();
+  const history = useRef(new ActionsHistory()).current;
 
   const selectedID = useMemo(() => {
     return selectedIDs.length === 1 ? selectedIDs[0] : '';
@@ -136,6 +140,7 @@ export const PointCloudProvider: React.FC<{}> = ({ children }) => {
       setPolygonList,
       zoom,
       setZoom,
+      history,
     };
   }, [
     valid,

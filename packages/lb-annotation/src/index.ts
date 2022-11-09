@@ -33,6 +33,7 @@ import AxisUtils from './utils/tool/AxisUtils';
 import DrawUtils from './utils/tool/DrawUtils';
 import ImgUtils from './utils/ImgUtils';
 import MathUtils from './utils/MathUtils';
+import ActionsHistory from './utils/ActionsHistory';
 
 // ToolListener
 import DblClickEventListener from './utils/tool/DblClickEventListener'; // temporarily supports the use of external tools in this way
@@ -81,6 +82,8 @@ export {
   ScribbleTool,
   PointCloud,
   UnitUtils,
+  // 其他特殊基础功能
+  ActionsHistory,
 };
 
 export * from './newCore';

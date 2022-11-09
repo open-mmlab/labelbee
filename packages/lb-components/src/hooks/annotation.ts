@@ -18,8 +18,8 @@ export interface ICustomToolInstance {
   setResult: () => void;
   setValid: (valid: boolean) => void;
   history: {
-    initRecord: () => void;
-    pushHistory: () => void;
+    initRecord: (action: any) => void;
+    pushHistory: (action: any) => void;
   };
   setDefaultAttribute: (attribute: string) => void;
 

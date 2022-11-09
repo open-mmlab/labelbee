@@ -12,6 +12,7 @@ import { useStatus } from './hooks/useStatus';
 import { jsonParser } from '@/utils';
 import { usePointCloudViews } from './hooks/usePointCloudViews';
 import { LabelBeeContext } from '@/store/ctx';
+import { useHistory } from './hooks/useHistory';
 
 const { EPolygonPattern } = cTool;
 
@@ -25,6 +26,7 @@ const PointCloudListener: React.FC<IAnnotationStateProps> = ({ currentData }) =>
   const { toolInstanceRef } = useCustomToolInstance({ basicInfo });
   const { updateRotate } = useRotate({ currentData });
   const { updatePointCloudData } = usePointCloudViews();
+  const { redo, undo, pushHistoryWithList } = useHistory();
 
   const keydownEvents = (lowerCaseKey: string, e: KeyboardEvent) => {
     const { topViewInstance, mainViewInstance } = ptCtx;
@@ -106,7 +108,7 @@ const PointCloudListener: React.FC<IAnnotationStateProps> = ({ currentData }) =>
     }
   };
 
-  const ctrlKeydownEvents = (lowerCaseKey: string) => {
+  const ctrlKeydownEvents = (lowerCaseKey: string, e: KeyboardEvent) => {
     switch (lowerCaseKey) {
       case 'c':
         copySelectedBoxes();
@@ -117,6 +119,15 @@ const PointCloudListener: React.FC<IAnnotationStateProps> = ({ currentData }) =>
       case 'a':
         ptCtx.selectedAllBoxes();
         break;
+      case 'z': {
+        if (e.shiftKey) {
+          redo();
+        } else {
+          undo();
+        }
+        break;
+      }
+
       default:
         break;
     }
@@ -126,7 +137,7 @@ const PointCloudListener: React.FC<IAnnotationStateProps> = ({ currentData }) =>
     const lowerCaseKey = e.key.toLocaleLowerCase();
 
     if (e.ctrlKey) {
-      ctrlKeydownEvents(lowerCaseKey);
+      ctrlKeydownEvents(lowerCaseKey, e);
       return;
     }
 
@@ -198,6 +209,15 @@ const PointCloudListener: React.FC<IAnnotationStateProps> = ({ currentData }) =>
       setTimeout(() => {
         ptCtx.setPointCloudValid(valid);
       });
+    };
+    toolInstanceRef.current.history = {
+      // Origin Result
+      pushHistory: (result: any[]) => {
+        // Rewrite
+        // TODO, The polygon is out of range.
+        pushHistoryWithList({ pointCloudBoxList: result });
+      },
+      initRecord: () => {},
     };
   }, []);
 

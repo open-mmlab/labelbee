@@ -113,6 +113,8 @@ const lineToolConfig = {
   preReferenceStep: 0,
   skipWhileNoDependencies: false,
   filterData: ['valid', 'invalid'],
+
+  showLineLength: true,
 };
 
 const textToolConfig = {

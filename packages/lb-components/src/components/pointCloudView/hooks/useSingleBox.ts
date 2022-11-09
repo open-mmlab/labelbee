@@ -3,6 +3,7 @@ import { useCallback, useContext, useMemo } from 'react';
 import _ from 'lodash';
 import { PointCloudContext } from '../PointCloudContext';
 import { cAnnotation } from '@labelbee/lb-annotation';
+import { useHistory } from './useHistory';
 
 const { ESortDirection } = cAnnotation;
 
@@ -20,6 +21,8 @@ export const useSingleBox = () => {
     setSelectedIDs,
   } = useContext(PointCloudContext);
 
+  const { pushHistoryWithList } = useHistory();
+
   /** Returns { info: selected box, index: selected box index } */
   const selectedBox = useMemo(() => {
     const boxIndex = pointCloudBoxList.findIndex((i: { id: string }) => i.id === selectedID);
@@ -33,7 +36,9 @@ export const useSingleBox = () => {
     (params: Partial<IPointCloudBox>) => {
       if (selectedBox?.info) {
         pointCloudBoxList.splice(selectedBox.index, 1, _.merge(selectedBox.info, params));
-        setPointCloudResult(_.cloneDeep(pointCloudBoxList));
+        const newPointCloudBoxList = _.cloneDeep(pointCloudBoxList)
+        setPointCloudResult(newPointCloudBoxList);
+        pushHistoryWithList({ pointCloudBoxList: newPointCloudBoxList });
       }
     },
     [selectedID, pointCloudBoxList],
