@@ -219,6 +219,14 @@ const PointCloudListener: React.FC<IAnnotationStateProps> = ({ currentData }) =>
       },
       initRecord: () => {},
     };
+
+    toolInstanceRef.current.redo = () => {
+      redo();
+    };
+
+    toolInstanceRef.current.undo = () => {
+      undo();
+    };
   }, []);
 
   return null;
