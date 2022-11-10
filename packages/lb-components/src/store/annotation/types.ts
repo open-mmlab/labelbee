@@ -167,6 +167,15 @@ interface CopyBackWordResult extends CommonActions {
   type: typeof ANNOTATION_ACTIONS.COPY_BACKWARD_RESULT;
 }
 
+interface BatchUpdateTrackID {
+  type: typeof ANNOTATION_ACTIONS.BATCH_UPDATE_TRACK_ID,
+  payload: {
+    id: number;
+    newID: number;
+    range: [number, number],
+  }
+}
+
 export type AnnotationActionTypes =
   | UpdateToolInstance
   | UpdateImgList
@@ -182,4 +191,5 @@ export type AnnotationActionTypes =
   | UpdatePageSize
   | UpdateGetFileList
   | CopyBackWordResult
-  | UpdateOnSave;
+  | UpdateOnSave
+  | BatchUpdateTrackID;

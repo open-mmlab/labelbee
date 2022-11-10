@@ -24,6 +24,7 @@ import { message } from 'antd';
 import { useTranslation } from 'react-i18next';
 import { useHistory } from './useHistory';
 import { usePolygon } from './usePolygon';
+import { IFileItem } from '@/types/data';
 
 const DEFAULT_SCOPE = 5;
 const DEFAULT_RADIUS = 90;
@@ -374,9 +375,20 @@ export const usePointCloudViews = () => {
   };
 
   /** Top-view create box from 2D */
-  const topViewAddBox = (newPolygon: any, size: ISize) => {
+  const topViewAddBox = ({
+    newPolygon,
+    size,
+    imgList,
+  }: {
+    newPolygon: any;
+    size: ISize;
+    imgList: IFileItem[];
+  }) => {
+    const newImgList = imgList as any[];
+    
     const newParams = topViewPolygon2PointCloud(newPolygon, size, topViewPointCloud, undefined, {
       attribute: config?.attributeList?.[0]?.value ?? '',
+      trackID: PointCloudUtils.getNextTrackID({ imgList: newImgList, extraBoxList: pointCloudBoxList }),
     });
     const polygonOperation = topViewInstance?.pointCloud2dOperation;
 

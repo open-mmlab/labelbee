@@ -1,8 +1,9 @@
-import React, { useContext } from 'react';
+import React, { useContext, useState, useEffect } from 'react';
+import { EditFilled } from '@ant-design/icons';
 import { ToolIcons } from '../ToolIcons';
 import { cTool } from '@labelbee/lb-annotation';
 import { PointCloudContext } from '@/components/pointCloudView/PointCloudContext';
-import { Col, Radio, Row, Select } from 'antd';
+import { Col, Radio, Row, Select, Tag, message, Input } from 'antd';
 import { AppState } from '@/store';
 import StepUtils from '@/utils/StepUtils';
 import { connect } from 'react-redux';
@@ -13,128 +14,169 @@ import { useStatus } from '@/components/pointCloudView/hooks/useStatus';
 import { useSingleBox } from '@/components/pointCloudView/hooks/useSingleBox';
 import { useTranslation } from 'react-i18next';
 import { LabelBeeContext } from '@/store/ctx';
+import BatchUpdateModal from './components/batchUpdateModal';
+import { IFileItem } from '@/types/data';
+import { PointCloudUtils } from '@labelbee/lb-utils';
 
 interface IProps {
   stepInfo: IStepInfo;
   toolInstance: ICustomToolInstance; // Created by useCustomToolInstance.
+  imgList: IFileItem[];
+  imgIndex: number;
 }
 
 // Temporarily hidden, this feature does not support the function for the time being.
-// const AnnotatedBox = () => {
-//   const ptCtx = useContext(PointCloudContext);
-//   const { pointCloudBoxList } = ptCtx;
+const AnnotatedBox = ({ imgList, imgIndex }: { imgList: IFileItem[]; imgIndex: number }) => {
+  const ptCtx = useContext(PointCloudContext);
+  const [showIDs, setShowIds] = useState<number[]>([]);
 
-//   return (
-//     <div style={{ padding: 24, borderBottom: '1px solid #eee' }}>
-//       <div style={{ marginBottom: 16 }}>所有已标注的框ID</div>
-//       <div>
-//         {pointCloudBoxList
-//           .sort((a, b) => a.trackID - b.trackID)
-//           .map((i) => (
-//             <Tag color='#F3F4FF' key={i.trackID} style={{ color: '#666', marginBottom: 8 }}>
-//               {i.trackID}
-//             </Tag>
-//           ))}
-//       </div>
-//     </div>
-//   );
-// };
+  useEffect(() => {
+    const newImgList = imgList as Array<{ result: string }>;
+    let trackMap = new Map();
+    setShowIds(
+      PointCloudUtils.getAllPointCloudResult({
+        imgList: newImgList,
+        extraBoxList: pointCloudBoxList,
+        ignoreIndexList: [imgIndex],
+      })
+        .filter((v) => {
+          if (!v.trackID) {
+            return false;
+          }
 
-// const BoxTrackIDInput = () => {
-//   const [isEdit, setIsEdit] = useState(false);
-//   const { pointCloudBoxList } = useContext(PointCloudContext);
-//   const { selectedBox, updateSelectedBox } = useSingleBox();
-//   const [inputValue, setInputValue] = useState('');
+          if (trackMap.get(v.trackID)) {
+            return false;
+          }
+          trackMap.set(v.trackID, true);
+          return true;
+        })
+        .sort((a, b) => {
+          const aTrackID = a?.trackID ?? 0;
+          const bTrackID = b?.trackID ?? 0;
 
-//   const selectedBoxTrackID = selectedBox?.info.trackID;
+          return aTrackID - bTrackID;
+        })
+        .map((v) => v?.trackID ?? 0),
+    );
+  }, [ptCtx.pointCloudBoxList, imgList]);
 
-//   const hasDuplicateTrackID = (trackID: number) => {
-//     const duplicateBox = pointCloudBoxList.find((i) => i.trackID === selectedBoxTrackID);
-//     return duplicateBox && duplicateBox.id !== selectedBox?.info.id;
-//   };
+  const { pointCloudBoxList } = ptCtx;
 
-//   const applyInputValue = (isBlurEvent = false) => {
-//     const newTrackID = parseInt(inputValue, 10);
+  return (
+    <div style={{ padding: 24, borderBottom: '1px solid #eee' }}>
+      <div style={{ marginBottom: 16 }}>所有已标注的框ID</div>
+      <div>
+        {showIDs.map((id) => (
+          <Tag color='#F3F4FF' key={id} style={{ color: '#666', marginBottom: 8 }}>
+            {id}
+          </Tag>
+        ))}
+      </div>
+    </div>
+  );
+};
 
-//     if (isBlurEvent) {
-//       setIsEdit(false);
-//     }
+const BoxTrackIDInput = () => {
+  const [isEdit, setIsEdit] = useState(false);
+  const { pointCloudBoxList } = useContext(PointCloudContext);
+  const { selectedBox, updateSelectedBox } = useSingleBox();
+  const [inputValue, setInputValue] = useState('');
 
-//     if (inputValue.indexOf('.') > -1) {
-//       message.error('输入trackID不允许包含小数点');
-//       return;
-//     }
+  const selectedBoxTrackID = selectedBox?.info.trackID;
 
-//     if (hasDuplicateTrackID(newTrackID)) {
-//       message.error('存在重复的trackID');
-//       return;
-//     }
+  const hasDuplicateTrackID = (trackID: number) => {
+    const duplicateBox = pointCloudBoxList.find((i) => i.trackID === selectedBoxTrackID);
+    return duplicateBox && duplicateBox.id !== selectedBox?.info.id;
+  };
 
-//     if (!(newTrackID > 0)) {
-//       message.error('输入trackID必须为正整数!');
-//     }
+  const applyInputValue = (isBlurEvent = false) => {
+    const newTrackID = parseInt(inputValue, 10);
 
-//     updateSelectedBox({ trackID: ~~inputValue });
-//   };
+    if (isBlurEvent) {
+      setIsEdit(false);
+    }
 
-//   useEffect(() => {
-//     setIsEdit(false);
-//   }, [selectedBoxTrackID]);
+    if (isNaN(newTrackID)) {
+      message.error('请输入正整数');
+      return;
+    }
 
-//   return (
-//     <div style={{ padding: 24 }}>
-//       <div
-//         style={{
-//           marginBottom: 16,
-//           display: 'flex',
-//           justifyContent: 'space-between',
-//           alignItems: 'center',
-//         }}
-//       >
-//         <span>当前标注框ID</span>
-//         <span>批量修改</span>
-//       </div>
-//       <div
-//         style={{
-//           display: 'flex',
-//           justifyContent: 'space-between',
-//           alignItems: 'center',
-//         }}
-//       >
-//         {isEdit && selectedBoxTrackID ? (
-//           <Input
-//             defaultValue={selectedBoxTrackID}
-//             onChange={(e) => {
-//               setInputValue(e.target.value);
-//             }}
-//             disabled={!selectedBoxTrackID}
-//             size='small'
-//             onBlur={() => {
-//               applyInputValue();
-//             }}
-//             onPressEnter={() => {
-//               applyInputValue(true);
-//             }}
-//           />
-//         ) : (
-//           <span>{selectedBoxTrackID}</span>
-//         )}
-//         <EditFilled
-//           style={{
-//             color: '#999',
-//             marginLeft: 16,
-//             cursor: selectedBoxTrackID ? 'pointer' : 'not-allowed',
-//           }}
-//           onClick={() => {
-//             if (selectedBoxTrackID) {
-//               setIsEdit(!isEdit);
-//             }
-//           }}
-//         />
-//       </div>
-//     </div>
-//   );
-// };
+    if (inputValue.indexOf('.') > -1) {
+      message.error('输入trackID不允许包含小数点');
+      return;
+    }
+
+    if (hasDuplicateTrackID(newTrackID)) {
+      message.error('存在重复的trackID');
+      return;
+    }
+
+    if (!(newTrackID > 0)) {
+      message.error('输入trackID必须为正整数!');
+      return;
+    }
+
+    updateSelectedBox({ trackID: newTrackID });
+  };
+
+  useEffect(() => {
+    setIsEdit(false);
+  }, [selectedBoxTrackID]);
+
+  return (
+    <div style={{ padding: 24 }}>
+      <div
+        style={{
+          marginBottom: 16,
+          display: 'flex',
+          justifyContent: 'space-between',
+          alignItems: 'center',
+        }}
+      >
+        <span>当前标注框ID</span>
+        {selectedBoxTrackID && <BatchUpdateModal id={selectedBoxTrackID} />}
+      </div>
+      <div
+        style={{
+          display: 'flex',
+          justifyContent: 'space-between',
+          alignItems: 'center',
+        }}
+      >
+        {isEdit && selectedBoxTrackID ? (
+          <Input
+            defaultValue={selectedBoxTrackID}
+            onChange={(e) => {
+              setInputValue(e.target.value);
+            }}
+            disabled={!selectedBoxTrackID}
+            size='small'
+            onBlur={() => {
+              applyInputValue();
+            }}
+            onPressEnter={() => {
+              applyInputValue(true);
+            }}
+          />
+        ) : (
+          <span>{selectedBoxTrackID}</span>
+        )}
+        <EditFilled
+          style={{
+            color: '#999',
+            marginLeft: 16,
+            cursor: typeof selectedBoxTrackID !== 'undefined' ? 'pointer' : 'not-allowed',
+          }}
+          onClick={() => {
+            if (selectedBoxTrackID) {
+              setIsEdit(!isEdit);
+            }
+          }}
+        />
+      </div>
+    </div>
+  );
+};
 
 const AttributeUpdater = ({
   attributeList,
@@ -222,7 +264,7 @@ const AttributeUpdater = ({
   );
 };
 
-const PointCloudToolSidebar: React.FC<IProps> = ({ stepInfo, toolInstance }) => {
+const PointCloudToolSidebar: React.FC<IProps> = ({ stepInfo, toolInstance, imgList, imgIndex }) => {
   const { selectedBox } = useSingleBox();
   const { updatePointCloudPattern, pointCloudPattern } = useStatus();
 
@@ -238,8 +280,8 @@ const PointCloudToolSidebar: React.FC<IProps> = ({ stepInfo, toolInstance }) => 
         selectedToolName={pointCloudPattern}
         onChange={(v) => updatePointCloudPattern?.(v)}
       />
-      {/* <AnnotatedBox />
-      <BoxTrackIDInput /> */}
+      <AnnotatedBox imgList={imgList} imgIndex={imgIndex} />
+      <BoxTrackIDInput />
       {selectedBox && (
         <AttributeUpdater
           toolInstance={toolInstance}
@@ -258,6 +300,8 @@ const mapStateToProps = (state: AppState) => {
   return {
     stepInfo,
     toolInstance,
+    imgList: state.annotation.imgList,
+    imgIndex: state.annotation.imgIndex,
   };
 };
 

@@ -173,7 +173,9 @@ export function UpdateValid(): AnnotationActionTypes {
   };
 }
 
-export function UpdateSkipBeforePageTurning(skipBeforePageTurning: (pageTurning: Function) => {}): AnnotationActionTypes {
+export function UpdateSkipBeforePageTurning(
+  skipBeforePageTurning: (pageTurning: Function) => {},
+): AnnotationActionTypes {
   return {
     type: ANNOTATION_ACTIONS.SKIP_BEFORE_PAGE_TURNING,
     payload: {
@@ -197,6 +199,21 @@ export function CopyBackWordResult(): AnnotationActionTypes {
   };
 }
 
+export function BatchUpdateTrackID(
+  id: number,
+  newID: number,
+  rangeIndex: [number, number],
+): AnnotationActionTypes {
+  return {
+    type: ANNOTATION_ACTIONS.BATCH_UPDATE_TRACK_ID,
+    payload: {
+      id,
+      newID,
+      rangeIndex,
+    },
+  };
+}
+
 /**
  * 初始化任务数据
  * @param param0
@@ -212,7 +229,7 @@ export function InitTaskData({
   step,
   stepList,
   skipBeforePageTurning,
-  beforeRotate
+  beforeRotate,
 }: any): any {
   const tasks: any[] = [];
 
@@ -276,7 +293,7 @@ export function UpdateInjectFunc({
   pageSize,
   loadFileList,
   stepList,
-  beforeRotate
+  beforeRotate,
 }: any): any {
   const tasks: any[] = [];
 
@@ -512,7 +529,7 @@ export const DispatcherTurning = async (
         return;
       }
     }
-    
+
     annotationStore.onPageChange?.(fileIndex);
     const index =
       submitType === ESubmitType.Backward
@@ -544,7 +561,6 @@ export const SetAnnotationLoading = (dispatch: Function, loading: boolean) => {
     },
   });
 };
-
 
 export const SetPointCloudLoading = (dispatch: Function, loading: boolean) => {
   dispatch({

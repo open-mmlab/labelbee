@@ -18,7 +18,7 @@ import { BoxInfos, PointCloudValidity } from './PointCloudInfos';
 import { usePolygon } from './hooks/usePolygon';
 import { useZoom } from './hooks/useZoom';
 import { Slider } from 'antd';
-import { aMapStateToProps, IAnnotationStateProps } from '@/store/annotation/map';
+import { a2MapStateToProps, IA2MapStateProps, IAnnotationStateProps } from '@/store/annotation/map';
 import { connect } from 'react-redux';
 import { usePointCloudViews } from './hooks/usePointCloudViews';
 import useSize from '@/hooks/useSize';
@@ -133,7 +133,7 @@ const ZAxisSlider = ({
   );
 };
 
-const PointCloudTopView: React.FC<IAnnotationStateProps> = ({ currentData }) => {
+const PointCloudTopView: React.FC<IA2MapStateProps> = ({ currentData, imgList }) => {
   const ref = useRef<HTMLDivElement>(null);
   const ptCtx = React.useContext(PointCloudContext);
   const size = useSize(ref);
@@ -179,7 +179,7 @@ const PointCloudTopView: React.FC<IAnnotationStateProps> = ({ currentData }) => 
         return;
       }
 
-      pointCloudViews.topViewAddBox(polygon, size);
+      pointCloudViews.topViewAddBox({ newPolygon: polygon, size, imgList });
     });
 
     TopView2dOperation.singleOn('deletedObject', ({ id }) => {
@@ -281,6 +281,6 @@ const PointCloudTopView: React.FC<IAnnotationStateProps> = ({ currentData }) => 
   );
 };
 
-export default connect(aMapStateToProps, null, null, { context: LabelBeeContext })(
+export default connect(a2MapStateToProps, null, null, { context: LabelBeeContext })(
   PointCloudTopView,
 );

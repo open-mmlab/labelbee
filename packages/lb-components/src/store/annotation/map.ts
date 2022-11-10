@@ -20,3 +20,19 @@ export const aMapStateToProps = (state: AppState) => {
 export interface IAnnotationStateProps {
   currentData: IFileItem;
 }
+
+export interface IA2MapStateProps extends IAnnotationStateProps {
+  imgList: IFileItem[];
+}
+
+export const a2MapStateToProps = (state: AppState) => {
+  const {
+    annotation: { imgList, imgIndex },
+  } = state;
+  const currentData = imgList[imgIndex] ?? {};
+
+  return {
+    currentData,
+    imgList,
+  };
+};

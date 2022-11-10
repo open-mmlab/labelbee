@@ -7,8 +7,8 @@ import { ConfigUtils } from '@/utils/ConfigUtils';
 import { composeResult, composeResultWithBasicImgInfo } from '@/utils/data';
 import StepUtils from '@/utils/StepUtils';
 import ToolUtils from '@/utils/ToolUtils';
-import { AnnotationEngine, CommonToolUtils, ImgUtils } from '@labelbee/lb-annotation';
-import { i18n } from '@labelbee/lb-utils';
+import { AnnotationEngine, CommonToolUtils, ImgUtils, MathUtils } from '@labelbee/lb-annotation';
+import { i18n, PointCloudUtils } from '@labelbee/lb-utils';
 import { Modal } from 'antd';
 import { message } from 'antd/es';
 import _ from 'lodash';
@@ -596,8 +596,8 @@ export const annotationReducer = (
         onOk: () => {
           toolInstance?.setValid(!valid);
         },
-        okText: i18n.t("Confirm"),
-        cancelText: i18n.t("Cancel")
+        okText: i18n.t('Confirm'),
+        cancelText: i18n.t('Cancel'),
       });
 
       return state;
@@ -675,6 +675,25 @@ export const annotationReducer = (
       return {
         ...state,
         pointCloudLoading: !!pointCloudLoading,
+      };
+    }
+
+    case ANNOTATION_ACTIONS.BATCH_UPDATE_TRACK_ID: {
+      const { id, newID, rangeIndex } = action.payload;
+      const { imgList } = state;
+      const newImgList = imgList.map((v, i) => {
+        if (MathUtils.isInRange(i, rangeIndex)) {
+          return {
+            ...v,
+            result: PointCloudUtils.batchUpdateTrackID({ id, newID, result: v.result }),
+          };
+        }
+        return v;
+      });
+
+      return {
+        ...state,
+        imgList: newImgList,
       };
     }
 

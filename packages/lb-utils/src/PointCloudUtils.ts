@@ -287,6 +287,94 @@ class PointCloudUtils {
 
     return 2 * Math.PI - rotation;
   }
+
+  /**
+   * Get the pointCloud result from imgList
+   * @param param0 
+   * @returns 
+   */
+  public static getAllPointCloudResult({
+    imgList,
+    step = 1,
+    extraBoxList,
+    ignoreIndexList = [],
+  }: {
+    imgList: Array<{ result: string }>;
+    step?: number;
+    extraBoxList: IPointCloudBox[];
+    ignoreIndexList?: number[];
+  }) {
+    const resultList = imgList
+      .filter((_, i) => !ignoreIndexList?.includes(i))
+      .map((v) => this.jsonParser(v.result));
+    const DEFAULT_STEP_NAME = `step_${step}`;
+
+    let boxList: IPointCloudBox[] = [];
+
+    resultList.forEach((result) => {
+      if (result?.[DEFAULT_STEP_NAME]?.['result']?.length > 0) {
+        boxList = boxList.concat(result[DEFAULT_STEP_NAME]['result']);
+      }
+    });
+
+    if (extraBoxList) {
+      boxList = boxList.concat(extraBoxList);
+    }
+
+    return boxList;
+  }
+
+  public static getNextTrackID({
+    imgList,
+    step = 1,
+    extraBoxList,
+  }: {
+    imgList: Array<{ result: string }>;
+    step?: number;
+    extraBoxList: IPointCloudBox[];
+  }) {
+    let trackID = 1;
+    const boxList = this.getAllPointCloudResult({ imgList, step, extraBoxList });
+
+    boxList.forEach((data: IPointCloudBox) => {
+      if (typeof data?.trackID === 'number' && data.trackID >= trackID) {
+        trackID = data.trackID + 1;
+      }
+    });
+
+    return trackID;
+  }
+
+  public static batchUpdateTrackID({
+    id,
+    newID,
+    result,
+    step = 1,
+  }: {
+    id: number;
+    newID: number;
+    result?: string;
+    step?: number;
+  }) {
+    const DEFAULT_STEP_NAME = `step_${step}`;
+    const originResult = this.jsonParser(result);
+    const dataList = originResult?.[DEFAULT_STEP_NAME]?.result; // PointCloudData1
+
+    if (!dataList) {
+      return result;
+    }
+
+    dataList.forEach((v: IPointCloudBox) => {
+      if (v?.trackID === id) {
+        // Side Effect Update
+        v.trackID = newID;
+      }
+
+      return v;
+    });
+
+    return JSON.stringify(originResult);
+  }
 }
 
 export default PointCloudUtils;
