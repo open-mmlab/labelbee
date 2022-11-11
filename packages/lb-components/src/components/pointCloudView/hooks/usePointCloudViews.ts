@@ -358,16 +358,6 @@ export const usePointCloudViews = () => {
 
   const { pointCloudInstance: topViewPointCloud } = topViewInstance;
 
-  // Temporarily hide
-  // const getNextTrackID = () => {
-  //   if (pointCloudBoxList.length > 0) {
-  //     const sortedPcList = pointCloudBoxList.sort((a, b) => a.trackID - b.trackID);
-  //     return sortedPcList.slice(-1)[0]?.trackID + 1;
-  //   }
-
-  //   return 1;
-  // };
-
   const mainViewGenBox = (boxParams: IPointCloudBox) => {
     mainViewInstance?.generateBox(boxParams);
     mainViewInstance?.controls.update();
@@ -379,23 +369,31 @@ export const usePointCloudViews = () => {
     newPolygon,
     size,
     imgList,
+    trackConfigurable,
   }: {
     newPolygon: any;
     size: ISize;
     imgList: IFileItem[];
+    trackConfigurable?: boolean;
   }) => {
     const newImgList = imgList as any[];
-    
-    const newParams = topViewPolygon2PointCloud(newPolygon, size, topViewPointCloud, undefined, {
+
+    const extraData = {
       attribute: config?.attributeList?.[0]?.value ?? '',
-      trackID: PointCloudUtils.getNextTrackID({ imgList: newImgList, extraBoxList: pointCloudBoxList }),
-    });
+    };
+
+    if (trackConfigurable === true) {
+      Object.assign(extraData, {
+        trackID: PointCloudUtils.getNextTrackID({
+          imgList: newImgList,
+          extraBoxList: pointCloudBoxList,
+        }),
+      });
+    }
+
+    const newParams = topViewPolygon2PointCloud(newPolygon, size, topViewPointCloud, undefined, extraData);
     const polygonOperation = topViewInstance?.pointCloud2dOperation;
 
-    // Temporarily hide
-    // const boxParams: IPointCloudBox = Object.assign(newParams, {
-    //   trackID: getNextTrackID(),
-    // });
     const boxParams: IPointCloudBox = newParams;
 
     // If the count is less than lowerLimitPointsNumInBox, needs to delete it

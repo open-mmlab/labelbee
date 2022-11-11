@@ -24,6 +24,7 @@ import { usePointCloudViews } from './hooks/usePointCloudViews';
 import useSize from '@/hooks/useSize';
 import { useTranslation } from 'react-i18next';
 import { LabelBeeContext } from '@/store/ctx';
+import { jsonParser } from '@/utils';
 
 const { EPolygonPattern } = cTool;
 
@@ -133,10 +134,11 @@ const ZAxisSlider = ({
   );
 };
 
-const PointCloudTopView: React.FC<IA2MapStateProps> = ({ currentData, imgList }) => {
+const PointCloudTopView: React.FC<IA2MapStateProps> = ({ currentData, imgList, stepInfo }) => {
   const ref = useRef<HTMLDivElement>(null);
   const ptCtx = React.useContext(PointCloudContext);
   const size = useSize(ref);
+  const config = jsonParser(stepInfo.config);
   const { setZoom } = useZoom();
 
   const { addPolygon, deletePolygon } = usePolygon();
@@ -179,7 +181,12 @@ const PointCloudTopView: React.FC<IA2MapStateProps> = ({ currentData, imgList })
         return;
       }
 
-      pointCloudViews.topViewAddBox({ newPolygon: polygon, size, imgList });
+      pointCloudViews.topViewAddBox({
+        newPolygon: polygon,
+        size,
+        imgList,
+        trackConfigurable: config.trackConfigurable,
+      });
     });
 
     TopView2dOperation.singleOn('deletedObject', ({ id }) => {

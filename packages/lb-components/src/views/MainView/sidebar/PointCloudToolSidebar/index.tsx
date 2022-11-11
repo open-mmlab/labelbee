@@ -280,8 +280,12 @@ const PointCloudToolSidebar: React.FC<IProps> = ({ stepInfo, toolInstance, imgLi
         selectedToolName={pointCloudPattern}
         onChange={(v) => updatePointCloudPattern?.(v)}
       />
-      <AnnotatedBox imgList={imgList} imgIndex={imgIndex} />
-      <BoxTrackIDInput />
+      {config?.trackConfigurable === true && (
+        <>
+          <AnnotatedBox imgList={imgList} imgIndex={imgIndex} />
+          <BoxTrackIDInput />
+        </>
+      )}
       {selectedBox && (
         <AttributeUpdater
           toolInstance={toolInstance}

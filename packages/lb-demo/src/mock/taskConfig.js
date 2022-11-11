@@ -194,6 +194,7 @@ const pointCloudConfig = {
   ],
   // 框内点数下限
   lowerLimitPointsNumInBox: 5,
+  trackConfigurable: true,
 };
 
 export const getConfig = (tool) => {

@@ -340,7 +340,9 @@ export class PointCloud {
 
     // Temporarily hide
     // const boxID = this.generateBoxTrackID(boxParams);
-    // group.add(boxID);
+    // if (boxID) {
+    //   group.add(boxID);
+    // }
 
     group.add(box);
     group.add(arrow);
