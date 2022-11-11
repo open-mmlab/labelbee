@@ -1,4 +1,5 @@
 import { getFormatSize } from '@/components/customResizeHook';
+import { ESubmitType } from '@/constant';
 import styleString from '@/constant/styleString';
 import { ANNOTATION_ACTIONS } from '@/store/Actions';
 import { jsonParser } from '@/utils';
@@ -238,8 +239,16 @@ export const annotationReducer = (
         };
       }
 
+      // Just for sync imgList
+      if (action.payload?.submitType === ESubmitType.SyncImgList) {
+        return {
+          ...state,
+          imgList,
+        }
+      }
+      
       if (onSubmit) {
-        onSubmit([imgList[imgIndex]], action.payload?.submitType, imgIndex);
+        onSubmit([imgList[imgIndex]], action.payload?.submitType, imgIndex, imgList);
       }
 
       const stepProgress = calcStepProgress(imgList, step);
@@ -680,7 +689,7 @@ export const annotationReducer = (
 
     case ANNOTATION_ACTIONS.BATCH_UPDATE_TRACK_ID: {
       const { id, newID, rangeIndex } = action.payload;
-      const { imgList } = state;
+      const { imgList, imgIndex, onSubmit } = state;
       const newImgList = imgList.map((v, i) => {
         if (MathUtils.isInRange(i, rangeIndex)) {
           return {
@@ -690,6 +699,11 @@ export const annotationReducer = (
         }
         return v;
       });
+
+      // Notify external data changes.
+      if (onSubmit) {
+        onSubmit([newImgList[imgIndex]], ESubmitType.BatchUpdateTrackID, imgIndex, newImgList);
+      }
 
       return {
         ...state,

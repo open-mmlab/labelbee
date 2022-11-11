@@ -42,9 +42,9 @@ const Annotation = (props) => {
     });
   }, []);
 
-  const onSubmit = (data) => {
+  const onSubmit = (data, type, imgIndex, imgList) => {
     // 翻页时触发当前页面数据的输出
-    console.log('submitData', data);
+    console.log('submitData', data, type, imgIndex, imgList);
   };
 
   const onSave = (data, imgList, index) => {

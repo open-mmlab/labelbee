@@ -28,7 +28,9 @@ export type OnSubmit = (
   data: AnnotationFileList,
   submitType: ESubmitType,
   imgIndex: number,
+  imgList: IFileItem[]
 ) => void;
+
 export type OnSave = (data: IFileItem, imgIndex: number, imgList: AnnotationFileList) => void;
 export type OnPageChange = (imgIndex: number) => void;
 export type OnStepChange = (step: number) => void;

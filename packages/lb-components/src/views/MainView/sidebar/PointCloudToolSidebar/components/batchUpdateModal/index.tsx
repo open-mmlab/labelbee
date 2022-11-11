@@ -57,7 +57,7 @@ const BatchUpdateModal = ({ id }: IProps) => {
   const [form] = Form.useForm();
 
   const onFinish = (values: any) => {
-    dispatch(ToSubmitFileData(ESubmitType.BatchUpdateTrackID));
+    dispatch(ToSubmitFileData(ESubmitType.SyncImgList));
     dispatch(BatchUpdateTrackID(id, values.newID, [values.prevPage - 1, values.nextPage - 1]));
     setVisible(false);
   };
