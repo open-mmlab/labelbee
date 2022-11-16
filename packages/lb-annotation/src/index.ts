@@ -87,3 +87,4 @@ export {
 };
 
 export * from './newCore';
+export * from './constant/tool';

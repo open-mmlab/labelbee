@@ -262,3 +262,11 @@ export enum EScribblePattern {
   Scribble = 1, // 涂抹操作
   Erase = 2, // 橡皮刷
 }
+
+/**
+ * RectOperation - Experimental
+ */
+export enum EOperationMode {
+  General = 1, // Common
+  MultiMove = 2, // Experimental
+}

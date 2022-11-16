@@ -2,8 +2,8 @@ import MathUtils from '@/utils/MathUtils';
 import AxisUtils from '@/utils/tool/AxisUtils';
 import RectUtils from '@/utils/tool/RectUtils';
 import { DEFAULT_TEXT_SHADOW, EDragStatus, ESortDirection } from '../../constant/annotation';
+import { EDragTarget, EOperationMode } from '../../constant/tool';
 import EKeyCode from '../../constant/keyCode';
-import { EDragTarget } from '../../constant/tool';
 import locale from '../../locales';
 import { EMessage } from '../../locales/constants';
 import AttributeUtils from '../../utils/tool/AttributeUtils';
@@ -49,13 +49,16 @@ class RectOperation extends BasicToolOperation {
 
   public markerIndex: number; // 用于列表标签定位
 
+  public operationMode: EOperationMode = EOperationMode.General;
+
   private _textAttributInstance?: TextAttributeClass;
 
   private dragInfo?: {
     dragStartCoord: ICoordinate;
     dragTarget: EDragTarget;
     changePointIndex?: number[]; // 用于存储拖拽点 / 边的下标
-    firstRect: IRect; // 最初的框
+    firstRect?: IRect; // 最初的框
+    originRectList?: IRect[];
     startTime: number;
   };
 
@@ -138,6 +141,10 @@ class RectOperation extends BasicToolOperation {
     return this.selectedRect?.textAttribute;
   }
 
+  public get isMultiMoveMode() {
+    return this.operationMode === EOperationMode.MultiMove;
+  }
+
   get dataList() {
     return this.rectList;
   }
@@ -193,6 +200,10 @@ class RectOperation extends BasicToolOperation {
       [],
     );
     return showingRect;
+  }
+
+  public setOperationMode(operationMode: EOperationMode) {
+    this.operationMode = operationMode;
   }
 
   public setSelectedID(newID?: string) {
@@ -376,10 +387,34 @@ class RectOperation extends BasicToolOperation {
     );
   }
 
+  public multiMoveMouseDown(e: MouseEvent) {
+    const dragStartCoord = this.getCoordinateUnderZoom(e);
+    const hoverRectID = this.getHoverRectID(e);
+
+    if (this.isMultiMoveMode && hoverRectID && e.button === 0) {
+      this.dragInfo = {
+        dragStartCoord,
+        dragTarget: EDragTarget.Plane,
+        startTime: +new Date(),
+        originRectList: this.rectList,
+      };
+      this.dragStatus = EDragStatus.Start;
+
+      return true;
+    }
+
+    return false;
+  }
+
   public onMouseDown(e: MouseEvent) {
     if (super.onMouseDown(e) || this.forbidMouseOperation || e.ctrlKey === true) {
       return;
     }
+
+    if (this.multiMoveMouseDown(e)) {
+      return;
+    }
+
     // e.stopPropagation();
     // 仅有在选中模式才能进行拖动
     const dragStartCoord = this.getCoordinateUnderZoom(e);
@@ -442,20 +477,52 @@ class RectOperation extends BasicToolOperation {
     return undefined;
   }
 
+  /**
+   * Offset is under zooming.
+   * @param offset
+   */
+  public onDragMoveAll(offset: ICoordinate) {
+    if (!this.dragInfo?.originRectList?.length) {
+      return;
+    }
+    this.setRectList(
+      this.dragInfo.originRectList.map((rect) => {
+        const newRect = {
+          ...rect,
+          x: rect.x + offset.x / this.zoom,
+          y: rect.y + offset.y / this.zoom,
+        };
+
+        return newRect;
+      }),
+    );
+
+    this.render();
+  }
+
   public onDragMove(coordinate: ICoordinate) {
     if (!this.dragInfo) {
       return;
     }
-
-    this.dragStatus = EDragStatus.Move;
-
-    // 选中后的操作
-    const dragRect = RectUtils.getRectUnderZoom(this.dragInfo.firstRect, this.zoom);
-    const { x, y, width, height } = dragRect;
     const offset = {
       x: coordinate.x - this.dragInfo.dragStartCoord.x,
       y: coordinate.y - this.dragInfo.dragStartCoord.y,
     }; // 缩放后的偏移
+
+    this.dragStatus = EDragStatus.Move;
+
+    if (this.isMultiMoveMode) {
+      this.onDragMoveAll(offset);
+      return;
+    }
+
+    if (!this.dragInfo.firstRect) {
+      return;
+    }
+
+    // 选中后的操作
+    const dragRect = RectUtils.getRectUnderZoom(this.dragInfo.firstRect, this.zoom);
+    const { x, y, width, height } = dragRect;
 
     let selectedRect = this.rectList.filter((v) => v.id === this.selectedRectID)[0];
 
@@ -712,7 +779,7 @@ class RectOperation extends BasicToolOperation {
       this.zoom,
     );
 
-    if (this.selectedRectID && this.dragInfo) {
+    if ((this.selectedRectID || this.isMultiMoveMode) && this.dragInfo) {
       this.onDragMove(coordinate);
       return;
     }
@@ -1085,6 +1152,13 @@ class RectOperation extends BasicToolOperation {
       return;
     }
 
+    /**
+     * If the code reach here, needs to update to general mode
+     */
+    if (this.isMultiMoveMode) {
+      this.setOperationMode(EOperationMode.General);
+    }
+
     // shift + 右键操作
     if (e.button === 2 && e.shiftKey === true) {
       this.shiftRightMouseUp(e);
@@ -1353,14 +1427,13 @@ class RectOperation extends BasicToolOperation {
   }
 
   public renderSelectedRect(rect?: IRect) {
-    const { selectedRect } = this;
-    if (!this.ctx || !rect || !selectedRect) {
+    if (!this.ctx || !rect) {
       return;
     }
 
     const { ctx } = this;
     let radius = 10;
-    const pointList = RectUtils.getRectPointList(selectedRect);
+    const pointList = RectUtils.getRectPointList(rect);
     const len = pointList.length;
     const toolColor = this.getColor(rect.attribute);
 
@@ -1455,7 +1528,7 @@ class RectOperation extends BasicToolOperation {
 
       const lineWidth = this.style?.width ?? 2;
 
-      if (rect.id === this.hoverRectID || rect.id === this.selectedRectID) {
+      if (rect.id === this.hoverRectID || rect.id === this.selectedRectID || this.isMultiMoveMode) {
         DrawUtils.drawRectWithFill(this.canvas, transformRect, { color: fillColor });
       }
 
@@ -1501,6 +1574,21 @@ class RectOperation extends BasicToolOperation {
         );
       }
     }
+  }
+
+  /**
+   * Experiment. Render the multiSelected Rect
+   *
+   */
+  public renderMultiSelectedRect() {
+    if (this.operationMode !== EOperationMode.MultiMove) {
+      return;
+    }
+
+    this.rectList.forEach((rect) => {
+      this.renderDrawingRect(rect);
+      this.renderSelectedRect(rect);
+    });
   }
 
   /**
@@ -1576,8 +1664,16 @@ class RectOperation extends BasicToolOperation {
    * 渲染矩形框体
    */
   public renderRect() {
-    this.renderStaticRect();
-    this.renderCreatingRect();
+    switch (this.operationMode) {
+      case EOperationMode.MultiMove:
+        this.renderMultiSelectedRect();
+        break;
+
+      default: {
+        this.renderStaticRect();
+        this.renderCreatingRect();
+      }
+    }
   }
 
   public render() {
@@ -1657,6 +1753,7 @@ class RectOperation extends BasicToolOperation {
     this.dragInfo = undefined;
     this.dragStatus = EDragStatus.Wait;
     this.setSelectedRectID(undefined);
+    this.setOperationMode(EOperationMode.General);
   }
 
   public clearResult(sendMessage = true) {
