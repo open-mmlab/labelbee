@@ -3,7 +3,7 @@ import { EditFilled } from '@ant-design/icons';
 import { ToolIcons } from '../ToolIcons';
 import { cTool } from '@labelbee/lb-annotation';
 import { PointCloudContext } from '@/components/pointCloudView/PointCloudContext';
-import { Col, Radio, Row, Select, Tag, message, Input } from 'antd';
+import { Select, Tag, message, Input, Divider } from 'antd';
 import { AppState } from '@/store';
 import StepUtils from '@/utils/StepUtils';
 import { connect } from 'react-redux';
@@ -17,6 +17,8 @@ import { LabelBeeContext } from '@/store/ctx';
 import BatchUpdateModal from './components/batchUpdateModal';
 import { IFileItem } from '@/types/data';
 import { PointCloudUtils } from '@labelbee/lb-utils';
+import AttributeList from '@/components/attributeList';
+import { IInputList } from '@/types/main';
 
 interface IProps {
   stepInfo: IStepInfo;
@@ -187,13 +189,21 @@ const AttributeUpdater = ({
   attributeList: any[]; // TODO
   subAttributeList: any[]; // TODO
 }) => {
+  const { selectedBox } = useSingleBox();
   const ptx = useContext(PointCloudContext);
   const { t } = useTranslation();
 
   const titleStyle = {
-    fontWeight: 400,
+    fontWeight: 500,
     fontSize: 14,
-    marginBottom: 14,
+    margin: '12px 0 8px 20px',
+  };
+
+  const subTitleStyle = {
+    margin: '12px 20px 8px',
+    fontSize: 14,
+    fontWeight: 500,
+    wordWrap: 'break-word' as any, // WordWrap Type ?
   };
 
   const setAttribute = (attribute: string) => {
@@ -204,68 +214,72 @@ const AttributeUpdater = ({
     toolInstance.setSubAttribute(key, value);
   };
 
+  const list = attributeList.map((i: any) => ({
+    label: i.key,
+    value: i.value,
+    color: i?.color,
+  }));
+
   return (
-    <div style={{ padding: 24, borderBottom: '1px solid #eee' }}>
-      <div style={{ marginBottom: 20, fontSize: 14, fontWeight: 500 }}>{t('Tag')}</div>
-      <Row style={{ marginBottom: 12 }}>
-        <Col span={9} style={titleStyle}>
-          {t('Attribute')}
-        </Col>
-        <Col span={15}>
-          <Radio.Group
-            style={{ width: '100%' }}
-            value={ptx.selectedPointCloudBox?.attribute}
-            onChange={(e) => setAttribute(e.target.value)}
-          >
-            {attributeList.map((v) => (
-              <Radio key={v.value} value={v.value} style={{ marginBottom: 16 }}>
-                {v.key}
-              </Radio>
-            ))}
-          </Radio.Group>
-        </Col>
-      </Row>
-      <div style={titleStyle}> {t('SubAttribute')}</div>
-      {subAttributeList.map(
-        (subAttribute) =>
-          subAttribute?.subSelected && (
-            <Row key={subAttribute.value} style={{ marginBottom: 18 }}>
-              <Col
-                span={9}
-                style={{
-                  color: '#999999',
-                  display: 'flex',
-                  justifyContent: 'flex-start',
-                  alignItems: 'center',
-                }}
-              >
-                {subAttribute.key}
-              </Col>
-              <Col span={15}>
-                <Select
-                  style={{ width: '100%' }}
-                  bordered={false}
-                  value={ptx.selectedPointCloudBox?.subAttribute?.[subAttribute.value]}
-                  placeholder={t('PleaseSelect')}
-                  onChange={(value) => setSubAttribute(subAttribute.value, value)}
-                  allowClear={true}
-                >
-                  {subAttribute.subSelected.map((sub: any) => (
-                    <Select.Option key={sub.value} value={sub.value}>
-                      {sub.key}
-                    </Select.Option>
-                  ))}
-                </Select>
-              </Col>
-            </Row>
-          ),
+    <div>
+      <div style={titleStyle}>{t('Attribute')}</div>
+      <AttributeList
+        list={list}
+        forbidDefault={true}
+        selectedAttribute={ptx.selectedPointCloudBox?.attribute ?? ''}
+        attributeChanged={(attribute: string) => setAttribute(attribute)}
+      />
+      <Divider style={{ margin: 0 }} />
+      {selectedBox && (
+        <>
+          {subAttributeList.map(
+            (subAttribute) =>
+              subAttribute?.subSelected && (
+                <div style={{ marginTop: 12 }}>
+                  <div style={subTitleStyle}>
+                    {t('SubAttribute')}-{subAttribute.key}
+                  </div>
+                  {subAttribute.subSelected?.length < 5 ? (
+                    <AttributeList
+                      list={subAttribute.subSelected.map((v: IInputList) => ({
+                        label: v.key,
+                        value: v.value,
+                      }))}
+                      selectedAttribute={
+                        ptx.selectedPointCloudBox?.subAttribute?.[subAttribute.value]
+                      }
+                      num='-'
+                      forbidColor={true}
+                      forbidDefault={true}
+                      attributeChanged={(value) => setSubAttribute(subAttribute.value, value)}
+                      style={{ marginBottom: 12 }}
+                    />
+                  ) : (
+                    <Select
+                      style={{ margin: '0px 21px 17px 16px', width: '87%' }}
+                      value={ptx.selectedPointCloudBox?.subAttribute?.[subAttribute.value]}
+                      placeholder={t('PleaseSelect')}
+                      onChange={(value) => setSubAttribute(subAttribute.value, value)}
+                      allowClear={true}
+                    >
+                      {subAttribute.subSelected.map((sub: any) => (
+                        <Select.Option key={sub.value} value={sub.value}>
+                          {sub.key}
+                        </Select.Option>
+                      ))}
+                    </Select>
+                  )}
+                  <Divider style={{ margin: 0 }} />
+                </div>
+              ),
+          )}
+        </>
       )}
     </div>
   );
 };
 
 const PointCloudToolSidebar: React.FC<IProps> = ({ stepInfo, toolInstance, imgList, imgIndex }) => {
-  const { selectedBox } = useSingleBox();
   const { updatePointCloudPattern, pointCloudPattern } = useStatus();
 
   const config = jsonParser(stepInfo.config);
@@ -284,15 +298,14 @@ const PointCloudToolSidebar: React.FC<IProps> = ({ stepInfo, toolInstance, imgLi
         <>
           <AnnotatedBox imgList={imgList} imgIndex={imgIndex} />
           <BoxTrackIDInput />
+          <Divider style={{ margin: 0 }} />
         </>
       )}
-      {selectedBox && (
-        <AttributeUpdater
-          toolInstance={toolInstance}
-          attributeList={attributeList}
-          subAttributeList={subAttributeList}
-        />
-      )}
+      <AttributeUpdater
+        toolInstance={toolInstance}
+        attributeList={attributeList}
+        subAttributeList={subAttributeList}
+      />
     </>
   );
 };
