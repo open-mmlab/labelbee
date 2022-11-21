@@ -17,6 +17,8 @@ import {
   PointCloudUtils,
   TMatrix14Tuple,
   TMatrix13Tuple,
+  IPointCloudConfig,
+  toolStyleConverter,
 } from '@labelbee/lb-utils';
 import { PointsMaterial, Shader } from 'three';
 import HighlightWorker from 'web-worker:./highlightWorker.js';
@@ -43,6 +45,8 @@ interface IProps {
   isOrthographicCamera?: boolean;
   orthographicParams?: IOrthographicCamera;
   backgroundColor?: string;
+
+  config?: IPointCloudConfig;
 }
 
 const DEFAULT_DISTANCE = 30;
@@ -61,6 +65,8 @@ export class PointCloud {
   public axesHelper: THREE.AxesHelper;
 
   public pcdLoader: PCDLoader;
+
+  public config?: IPointCloudConfig;
 
   /**
    * zAxis Limit for filter point over a value
@@ -87,10 +93,18 @@ export class PointCloud {
 
   private showDirection: boolean = true; // Whether to display the direction of box
 
-  constructor({ container, noAppend, isOrthographicCamera, orthographicParams, backgroundColor = 'black' }: IProps) {
+  constructor({
+    container,
+    noAppend,
+    isOrthographicCamera,
+    orthographicParams,
+    backgroundColor = 'black',
+    config,
+  }: IProps) {
     this.container = container;
     this.renderer = new THREE.WebGLRenderer({ antialias: true });
     this.backgroundColor = backgroundColor;
+    this.config = config;
 
     // TODO
     if (isOrthographicCamera && orthographicParams) {
@@ -315,7 +329,17 @@ export class PointCloud {
    * @param color
    */
   public generateBox(boxParams: IPointCloudBox, color = 0xffffff) {
-    this.AddBoxToSense(boxParams, color);
+    let newColor = color;
+    if (this.config?.attributeList && this.config?.attributeList?.length > 0 && boxParams.attribute) {
+      newColor =
+        toolStyleConverter.getColorFromConfig(
+          { attribute: boxParams.attribute },
+          { ...this.config, attributeConfigurable: true },
+          {},
+        )?.hex ?? color;
+    }
+
+    this.AddBoxToSense(boxParams, newColor);
     this.render();
   }
 

@@ -162,6 +162,7 @@ const PointCloudTopView: React.FC<IA2MapStateProps> = ({ currentData, imgList, s
         container: ref.current,
         size,
         pcdPath: currentData.url,
+        config,
       });
       ptCtx.setTopViewInstance(pointCloudAnnotation);
     }

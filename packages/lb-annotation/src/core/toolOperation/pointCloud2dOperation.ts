@@ -6,6 +6,7 @@
  * @author Ron <ron.f.luo@gmail.com>
  */
 
+import { IPointCloudConfig, toolStyleConverter } from '@labelbee/lb-utils';
 import { ESortDirection } from '@/constant/annotation';
 import { EPolygonPattern } from '@/constant/tool';
 import { IPolygonData, IPolygonPoint } from '@/types/tool/polygon';
@@ -13,8 +14,8 @@ import AxisUtils from '@/utils/tool/AxisUtils';
 import CommonToolUtils from '@/utils/tool/CommonToolUtils';
 import DrawUtils from '@/utils/tool/DrawUtils';
 import PolygonUtils from '@/utils/tool/PolygonUtils';
-import StyleUtils from '@/utils/tool/StyleUtils';
 import PolygonOperation, { IPolygonOperationProps } from './polygonOperation';
+import { polygonConfig } from '@/constant/defaultConfig';
 
 interface IPointCloud2dOperationProps {
   showDirectionLine?: boolean;
@@ -26,6 +27,8 @@ class PointCloud2dOperation extends PolygonOperation {
 
   public forbidAddNew: boolean;
 
+  public pointCloudConfig: IPointCloudConfig;
+
   private selectedIDs: string[] = [];
 
   constructor(props: IPolygonOperationProps & IPointCloud2dOperationProps) {
@@ -33,6 +36,15 @@ class PointCloud2dOperation extends PolygonOperation {
 
     this.showDirectionLine = props.showDirectionLine ?? true;
     this.forbidAddNew = props.forbidAddNew ?? false;
+    this.pointCloudConfig = CommonToolUtils.jsonParser(props.config) ?? {};
+
+    // Set the default
+    this.config = {
+      ...polygonConfig,
+      textConfigurable: false,
+      attributeConfigurable: true,
+      attributeList: this.pointCloudConfig?.attributeList ?? [],
+    };
   }
 
   get getSelectedIDs() {
@@ -93,6 +105,15 @@ class PointCloud2dOperation extends PolygonOperation {
     return 'rgba(0, 255, 255, 0.5)';
   }
 
+  /** 获取当前属性颜色 */
+  public getPointCloudLineColor(attribute = '') {
+    return toolStyleConverter.getColorFromConfig(
+      { attribute },
+      { ...this.pointCloudConfig, attributeConfigurable: true },
+      {},
+    ).stroke;
+  }
+
   /**
    * Add direction
    * @override
@@ -104,13 +125,12 @@ class PointCloud2dOperation extends PolygonOperation {
           return;
         }
         const { attribute } = polygon;
-        const toolColor = this.getColor(attribute);
-        const toolData = StyleUtils.getStrokeAndFill(toolColor, polygon.valid);
+        const lineColor = this.getPointCloudLineColor(attribute);
         const transformPointList = AxisUtils.changePointListByZoom(polygon.pointList || [], this.zoom, this.currentPos);
 
         DrawUtils.drawPolygonWithFillAndLine(this.canvas, transformPointList, {
           fillColor: 'transparent',
-          strokeColor: toolData.stroke,
+          strokeColor: lineColor,
           pointColor: 'white',
           thickness: this.style?.width ?? 2,
           lineCap: 'round',
@@ -138,14 +158,14 @@ class PointCloud2dOperation extends PolygonOperation {
 
   public renderSingleSelectedPolygon = (selectedPolygon: IPolygonData) => {
     if (this.selectedPolygons) {
-      const toolColor = this.getColor(selectedPolygon.attribute);
-      const toolData = StyleUtils.getStrokeAndFill(toolColor, selectedPolygon.valid, { isSelected: true });
+      const color = this.getPointCloudLineColor(selectedPolygon.attribute);
+      // const toolData = StyleUtils.getStrokeAndFill(toolColor, selectedPolygon.valid, { isSelected: true });
 
       const polygon = AxisUtils.changePointListByZoom(selectedPolygon.pointList, this.zoom, this.currentPos);
 
       DrawUtils.drawSelectedPolygonWithFillAndLine(this.canvas, polygon, {
         fillColor: 'transparent',
-        strokeColor: toolData.stroke,
+        strokeColor: color,
         pointColor: 'white',
         thickness: 2,
         lineCap: 'round',
@@ -166,8 +186,9 @@ class PointCloud2dOperation extends PolygonOperation {
     }
 
     DrawUtils.drawLine(this.canvas, polygon[0], polygon[1], {
-      color: 'red',
+      color: 'white',
       thickness: 3,
+      lineDash: [6],
     });
   }
 

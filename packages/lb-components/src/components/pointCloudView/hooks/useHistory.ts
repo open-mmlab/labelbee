@@ -126,7 +126,6 @@ export const useHistory = () => {
       setPolygonList(newPolygonList);
     }
 
-    console.log('asd', newPointCloudBoxList, newPolygonList);
     topViewInstance?.updatePolygonList(newPointCloudBoxList ?? [], newPolygonList ?? []);
   };
 

@@ -91,7 +91,7 @@ const textToolConfig = {
   filterData: ['valid', 'invalid'],
 };
 
-const polygonConfig = {
+export const polygonConfig = {
   lineType: 0,
   lineColor: 0,
   lowerLimitPointNum: 3,

@@ -7,6 +7,7 @@ import { AppState } from '../index';
 import { IFileItem } from '@/types/data';
 import StepUtils from '@/utils/StepUtils';
 import { IStepInfo } from '@/types/step';
+import { jsonParser } from '@/utils';
 
 export const aMapStateToProps = (state: AppState) => {
   const {
@@ -26,6 +27,7 @@ export interface IAnnotationStateProps {
 export interface IA2MapStateProps extends IAnnotationStateProps {
   imgList: IFileItem[];
   stepInfo: IStepInfo;
+  config: any;
 }
 
 export const a2MapStateToProps = (state: AppState) => {
@@ -39,5 +41,6 @@ export const a2MapStateToProps = (state: AppState) => {
     currentData,
     imgList,
     stepInfo,
+    config: jsonParser(stepInfo?.config),
   };
 };

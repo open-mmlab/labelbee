@@ -4,7 +4,7 @@
  * @author Ron <ron.f.luo@gmail.com>
  */
 
-import { IPointCloudBox, PointCloudUtils } from '@labelbee/lb-utils';
+import { IPointCloudBox, PointCloudUtils, IPointCloudConfig } from '@labelbee/lb-utils';
 import { EPolygonPattern } from '@/constant/tool';
 import { CanvasScheduler } from '@/newCore';
 import { IPolygonData } from '@/types/tool/polygon';
@@ -21,6 +21,8 @@ interface IPointCloudAnnotationProps {
 
   pcdPath?: string;
   polygonOperationProps?: IPointCloud2dOperationProps;
+
+  config: IPointCloudConfig;
 }
 
 const createEmptyImage = (size: { width: number; height: number }) => {
@@ -43,7 +45,9 @@ export class PointCloudAnnotation implements IPointCloudAnnotationOperation {
 
   public canvasScheduler: CanvasScheduler;
 
-  constructor({ size, container, pcdPath, polygonOperationProps }: IPointCloudAnnotationProps) {
+  public config: IPointCloudConfig;
+
+  constructor({ size, container, pcdPath, polygonOperationProps, config }: IPointCloudAnnotationProps) {
     const defaultOrthographic = this.getDefaultOrthographic(size);
 
     const imgSrc = createEmptyImage(size);
@@ -69,7 +73,7 @@ export class PointCloudAnnotation implements IPointCloudAnnotationOperation {
     const defaultPolygonProps = {
       container,
       size,
-      config: '{ "textConfigurable": false }',
+      config: JSON.stringify(config),
       imgNode: image,
       isAppend: false,
     };
@@ -82,12 +86,17 @@ export class PointCloudAnnotation implements IPointCloudAnnotationOperation {
     polygonOperation.eventBinding();
     polygonOperation.setPattern(EPolygonPattern.Rect);
 
+    // Set the DefaultAttribute.
+    polygonOperation.setDefaultAttribute(config?.attributeList?.[0]?.value);
+
     canvasScheduler.createCanvas(polygonOperation.canvas, { size });
 
     // 3. Data record
     this.pointCloud2dOperation = polygonOperation;
     this.pointCloudInstance = pointCloud;
     this.canvasScheduler = canvasScheduler;
+
+    this.config = config;
   }
 
   /**
@@ -156,6 +165,7 @@ export class PointCloudAnnotation implements IPointCloudAnnotationOperation {
         pointList,
         isRect: true,
         valid: v.valid ?? true,
+        attribute: v.attribute,
       };
     }) as IPolygonData[];
 

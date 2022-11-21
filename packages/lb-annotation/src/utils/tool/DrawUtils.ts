@@ -79,15 +79,20 @@ export default class DrawUtils {
       color: string;
       thickness: number;
       lineCap: CanvasLineCap;
+      lineDash: number[];
     }> = {},
   ): void {
     const ctx: CanvasRenderingContext2D = canvas.getContext('2d')!;
-    const { color = DEFAULT_COLOR, thickness = 1, lineCap = 'round' } = options;
+    const { color = DEFAULT_COLOR, thickness = 1, lineCap = 'round', lineDash } = options;
 
     ctx.save();
     ctx.strokeStyle = color;
     ctx.lineWidth = thickness;
     ctx.lineCap = lineCap;
+
+    if (lineDash) {
+      ctx.setLineDash(lineDash);
+    }
     ctx.beginPath();
 
     ctx.moveTo(startPoint.x, startPoint.y);

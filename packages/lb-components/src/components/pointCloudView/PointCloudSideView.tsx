@@ -11,13 +11,14 @@ import { EPerspectiveView, IPointCloudBox } from '@labelbee/lb-utils';
 import { PointCloudContext } from './PointCloudContext';
 import { SizeInfoForView } from './PointCloudInfos';
 import { connect } from 'react-redux';
-import { aMapStateToProps, IAnnotationStateProps } from '@/store/annotation/map';
+import { a2MapStateToProps, IA2MapStateProps } from '@/store/annotation/map';
 import { usePointCloudViews } from './hooks/usePointCloudViews';
 import { useSingleBox } from './hooks/useSingleBox';
 import EmptyPage from './components/EmptyPage';
 import useSize from '@/hooks/useSize';
 import { useTranslation } from 'react-i18next';
 import { LabelBeeContext } from '@/store/ctx';
+import { jsonParser } from '@/utils';
 /**
  * Get the offset from canvas2d-coordinate to world coordinate
  * @param currentPos
@@ -69,7 +70,7 @@ const updateSideViewByCanvas2D = (
   SidePointCloud.render();
 };
 
-const PointCloudSideView: React.FC<IAnnotationStateProps> = ({ currentData }) => {
+const PointCloudSideView: React.FC<IA2MapStateProps> = ({ config }) => {
   const ptCtx = React.useContext(PointCloudContext);
   const { sideViewUpdateBox } = usePointCloudViews();
   const { selectedBox } = useSingleBox();
@@ -88,6 +89,7 @@ const PointCloudSideView: React.FC<IAnnotationStateProps> = ({ currentData }) =>
         container: ref.current,
         size,
         polygonOperationProps: { showDirectionLine: false, forbidAddNew: true },
+        config,
       });
       ptCtx.setSideViewInstance(pointCloudAnnotation);
       // };
@@ -158,6 +160,6 @@ const PointCloudSideView: React.FC<IAnnotationStateProps> = ({ currentData }) =>
   );
 };
 
-export default connect(aMapStateToProps, null, null, { context: LabelBeeContext })(
+export default connect(a2MapStateToProps, null, null, { context: LabelBeeContext })(
   PointCloudSideView,
 );

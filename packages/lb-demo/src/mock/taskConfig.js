@@ -156,11 +156,39 @@ const pointCloudConfig = {
   attributeList: [
     {
       key: '类别1',
-      value: 'class-1',
+      value: '类别1',
     },
     {
-      key: '类别Iq',
-      value: 'class-Iq',
+      key: '类别8f',
+      value: 'class-8f',
+    },
+    {
+      key: '类别My',
+      value: 'class-My',
+    },
+    {
+      key: '类别cN',
+      value: 'class-cN',
+    },
+    {
+      key: '类别4H',
+      value: 'class-4H',
+    },
+    {
+      key: '类别Au',
+      value: 'class-Au',
+    },
+    {
+      key: '类别FM',
+      value: 'class-FM',
+    },
+    {
+      key: '类别Nj',
+      value: 'class-Nj',
+    },
+    {
+      key: '类别CP',
+      value: 'class-CP',
     },
   ],
   // 标注半径范围
@@ -184,6 +212,9 @@ const pointCloudConfig = {
         { key: '选项2-1', value: 'option2-1' },
         { key: '选项2-2', value: 'option2-2' },
         { key: '选项2-3', value: 'option2-3' },
+        { key: '选项2-4', value: 'option2-4' },
+        { key: '选项2-5', value: 'option2-5' },
+        { key: '选项2-6', value: 'option2-6' },
       ],
     },
     {

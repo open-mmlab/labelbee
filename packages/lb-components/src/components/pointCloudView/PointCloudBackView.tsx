@@ -13,7 +13,7 @@ import { useSingleBox } from './hooks/useSingleBox';
 import { EPerspectiveView, IPointCloudBox, IPolygonPoint } from '@labelbee/lb-utils';
 import { SizeInfoForView } from './PointCloudInfos';
 import { connect } from 'react-redux';
-import { aMapStateToProps, IAnnotationStateProps } from '@/store/annotation/map';
+import { a2MapStateToProps, IA2MapStateProps } from '@/store/annotation/map';
 import { synchronizeSideView, synchronizeTopView } from './hooks/usePointCloudViews';
 import useSize from '@/hooks/useSize';
 import EmptyPage from './components/EmptyPage';
@@ -71,7 +71,7 @@ const updateBackViewByCanvas2D = (
   backPointCloud.render();
 };
 
-const PointCloudSideView = ({ currentData }: IAnnotationStateProps) => {
+const PointCloudSideView = ({ currentData, config }: IA2MapStateProps) => {
   const ptCtx = React.useContext(PointCloudContext);
   const ref = useRef<HTMLDivElement>(null);
   const size = useSize(ref);
@@ -89,6 +89,7 @@ const PointCloudSideView = ({ currentData }: IAnnotationStateProps) => {
         container: ref.current,
         size,
         polygonOperationProps: { showDirectionLine: false, forbidAddNew: true },
+        config,
       });
       ptCtx.setBackViewInstance(pointCloudAnnotation);
     }
@@ -212,6 +213,6 @@ const PointCloudSideView = ({ currentData }: IAnnotationStateProps) => {
   );
 };
 
-export default connect(aMapStateToProps, null, null, { context: LabelBeeContext })(
+export default connect(a2MapStateToProps, null, null, { context: LabelBeeContext })(
   PointCloudSideView,
 );

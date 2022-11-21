@@ -217,6 +217,7 @@ export const synchronizeSideView = (
         pointList: polygon2d,
         textAttribute: '',
         isRect: true,
+        attribute: boxParams.attribute,
       },
     ],
     newPolygon.id,
@@ -271,6 +272,7 @@ export const synchronizeBackView = (
         pointList: polygon2d,
         textAttribute: '',
         isRect: true,
+        attribute: boxParams.attribute,
       },
     ],
     newPolygon.id,
@@ -379,7 +381,7 @@ export const usePointCloudViews = () => {
     const newImgList = imgList as any[];
 
     const extraData = {
-      attribute: config?.attributeList?.[0]?.value ?? '',
+      attribute: topViewInstance.pointCloud2dOperation.defaultAttribute ?? ''
     };
 
     if (trackConfigurable === true) {
@@ -391,7 +393,13 @@ export const usePointCloudViews = () => {
       });
     }
 
-    const newParams = topViewPolygon2PointCloud(newPolygon, size, topViewPointCloud, undefined, extraData);
+    const newParams = topViewPolygon2PointCloud(
+      newPolygon,
+      size,
+      topViewPointCloud,
+      undefined,
+      extraData,
+    );
     const polygonOperation = topViewInstance?.pointCloud2dOperation;
 
     const boxParams: IPointCloudBox = newParams;

@@ -13,6 +13,7 @@ import { jsonParser } from '@/utils';
 import { usePointCloudViews } from './hooks/usePointCloudViews';
 import { LabelBeeContext } from '@/store/ctx';
 import { useHistory } from './hooks/useHistory';
+import { useAttribute } from './hooks/useAttribute';
 
 const { EPolygonPattern } = cTool;
 
@@ -27,6 +28,7 @@ const PointCloudListener: React.FC<IAnnotationStateProps> = ({ currentData }) =>
   const { updateRotate } = useRotate({ currentData });
   const { updatePointCloudData } = usePointCloudViews();
   const { redo, undo, pushHistoryWithList } = useHistory();
+  const { syncThreeViewsAttribute, updateDefaultAttribute } = useAttribute();
 
   const keydownEvents = (lowerCaseKey: string, e: KeyboardEvent) => {
     const { topViewInstance, mainViewInstance } = ptCtx;
@@ -180,7 +182,10 @@ const PointCloudListener: React.FC<IAnnotationStateProps> = ({ currentData }) =>
         selectBox.attribute = newAttribute;
 
         updateSelectedBox(selectBox);
+        syncThreeViewsAttribute(newAttribute);
       }
+
+      updateDefaultAttribute(newAttribute);
     };
 
     toolInstanceRef.current.setSubAttribute = (key: string, value: string) => {
@@ -198,6 +203,14 @@ const PointCloudListener: React.FC<IAnnotationStateProps> = ({ currentData }) =>
     };
     toolInstanceRef.current.clearResult = () => {
       clearAllResult?.();
+    };
+
+    toolInstanceRef.current.redo = () => {
+      redo();
+    };
+
+    toolInstanceRef.current.undo = () => {
+      undo();
     };
   }, [ptCtx.pointCloudBoxList, ptCtx.selectedID, ptCtx.valid, ptCtx.polygonList]);
 
@@ -218,14 +231,6 @@ const PointCloudListener: React.FC<IAnnotationStateProps> = ({ currentData }) =>
         pushHistoryWithList({ pointCloudBoxList: result });
       },
       initRecord: () => {},
-    };
-
-    toolInstanceRef.current.redo = () => {
-      redo();
-    };
-
-    toolInstanceRef.current.undo = () => {
-      undo();
     };
   }, []);
 
