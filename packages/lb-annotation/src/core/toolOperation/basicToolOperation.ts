@@ -9,7 +9,7 @@ import CommonToolUtils from '@/utils/tool/CommonToolUtils';
 import LineToolUtils from '@/utils/tool/LineToolUtils';
 import { EDragStatus, EGrowthMode, ELang } from '../../constant/annotation';
 import EKeyCode from '../../constant/keyCode';
-import { BASE_ICON, COLORS_ARRAY } from '../../constant/style';
+import { BASE_ICON, COLORS_ARRAY, styleString } from '../../constant/style';
 import locale from '../../locales';
 import { EMessage } from '../../locales/constants';
 import ActionsHistory from '../../utils/ActionsHistory';
@@ -204,7 +204,7 @@ class BasicToolOperation extends EventListener {
     };
     this.attributeLockList = [];
     this.history = new ActionsHistory();
-    this.style = props.style ?? {};
+    this.style = props.style ?? CommonToolUtils.jsonParser(styleString);
     this._imgAttribute = props.imgAttribute ?? {};
     this.isHidden = false;
     this.dragStatus = EDragStatus.Wait;
