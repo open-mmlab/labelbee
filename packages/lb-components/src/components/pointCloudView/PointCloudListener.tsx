@@ -212,17 +212,22 @@ const PointCloudListener: React.FC<IAnnotationStateProps> = ({ currentData }) =>
     toolInstanceRef.current.undo = () => {
       undo();
     };
-  }, [ptCtx.pointCloudBoxList, ptCtx.selectedID, ptCtx.valid, ptCtx.polygonList]);
 
-  useEffect(() => {
     toolInstanceRef.current.setValid = (valid: boolean) => {
       toolInstanceRef.current.valid = valid;
 
       // Avoid triggering SetState operations in the reducer phase
       setTimeout(() => {
         ptCtx.setPointCloudValid(valid);
+
+        if (valid === false) {
+          clearAllResult();
+        }
       });
     };
+  }, [ptCtx.pointCloudBoxList, ptCtx.selectedID, ptCtx.valid, ptCtx.polygonList]);
+
+  useEffect(() => {
     toolInstanceRef.current.history = {
       // Origin Result
       pushHistory: (result: any[]) => {

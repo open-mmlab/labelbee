@@ -150,11 +150,17 @@ export const PointCloudValidity = () => {
           position: 'absolute',
           backgroundColor: 'rgb(242, 101, 73)',
           color: 'white',
+          opacity: 0.7,
           left: 0,
           top: 0,
-          fontSize: 20,
+          fontSize: 30,
           padding: '8px 16px',
           zIndex: 20,
+          width: '100%',
+          height: '100%',
+          display: 'flex',
+          justifyContent: 'center',
+          alignItems: 'center',
         }}
       >
         {t('Invalid')}
