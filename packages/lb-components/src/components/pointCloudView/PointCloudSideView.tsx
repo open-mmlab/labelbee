@@ -18,7 +18,6 @@ import EmptyPage from './components/EmptyPage';
 import useSize from '@/hooks/useSize';
 import { useTranslation } from 'react-i18next';
 import { LabelBeeContext } from '@/store/ctx';
-import { jsonParser } from '@/utils';
 /**
  * Get the offset from canvas2d-coordinate to world coordinate
  * @param currentPos

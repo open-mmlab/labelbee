@@ -15,6 +15,7 @@ import PageNumber from './PageNumber';
 import ZoomController from './ZoomController';
 import { Pagination } from './Pagination';
 import { cTool } from '@labelbee/lb-annotation';
+import { shortCutTable, ToolHotKeyCom } from './FooterTips/ToolHotKey';
 
 const { EPointCloudName } = cTool;
 
@@ -146,6 +147,8 @@ const ToolFooter: React.FC<IProps> = (props: IProps) => {
           zoomController: <ZoomController mode={mode} />,
           curItems,
           footerDivider: <FooterDivider />,
+          shortCutTable,
+          ToolHotKeyCom,
         })}
       </div>
     );

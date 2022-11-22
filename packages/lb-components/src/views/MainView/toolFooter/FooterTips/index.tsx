@@ -10,11 +10,7 @@ const FooterTips: React.FC = () => {
     StepUtils.getCurrentStepInfo(state?.annotation?.step, state.annotation?.stepList),
   );
 
-  return (
-    <div className='tipsBar'>
-      <ToolHotKey toolName={stepInfo?.tool} />
-    </div>
-  );
+  return <ToolHotKey toolName={stepInfo?.tool} />;
 };
 
 export default FooterTips;

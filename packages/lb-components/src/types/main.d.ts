@@ -62,6 +62,14 @@ interface IFooter {
   curItems: React.ReactNode;
   /** footer 分隔符 */
   footerDivider: React.ReactNode;
+  
+  /** 快捷键组件 */
+  ToolHotKeyCom: React.ReactNode; 
+
+  /** 快捷键列表 */
+  shortCutTable: {
+    [a: string]: any
+  }
 }
 
 export type RenderFooter = ({
@@ -72,6 +80,8 @@ export type RenderFooter = ({
   zoomController,
   curItems,
   footerDivider,
+  ToolHotKeyCom,
+  shortCutTable
 }: IFooter) => React.ReactNode;
 
 export type Header = ({

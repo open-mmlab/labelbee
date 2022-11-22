@@ -14,8 +14,8 @@ import AxisUtils from '@/utils/tool/AxisUtils';
 import CommonToolUtils from '@/utils/tool/CommonToolUtils';
 import DrawUtils from '@/utils/tool/DrawUtils';
 import PolygonUtils from '@/utils/tool/PolygonUtils';
-import PolygonOperation, { IPolygonOperationProps } from './polygonOperation';
 import { polygonConfig } from '@/constant/defaultConfig';
+import PolygonOperation, { IPolygonOperationProps } from './polygonOperation';
 
 interface IPointCloud2dOperationProps {
   showDirectionLine?: boolean;
