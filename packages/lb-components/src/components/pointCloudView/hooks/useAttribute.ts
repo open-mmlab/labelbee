@@ -1,8 +1,9 @@
+import { IPointCloudBox } from '@labelbee/lb-utils';
 import { useContext } from 'react';
 import { PointCloudContext } from '../PointCloudContext';
 
 export const useAttribute = () => {
-  const { topViewInstance, sideViewInstance, backViewInstance } = useContext(PointCloudContext);
+  const { topViewInstance, sideViewInstance, backViewInstance, mainViewInstance } = useContext(PointCloudContext);
 
   const syncThreeViewsAttribute = (attribute?: string) => {
     [
@@ -17,9 +18,15 @@ export const useAttribute = () => {
   const updateDefaultAttribute = (attribute?: string) => {
     topViewInstance?.pointCloud2dOperation.setDefaultAttribute(attribute);
   };
+  
+  const reRenderPointCloud3DBox = (newBox: IPointCloudBox) => {
+    mainViewInstance?.generateBox(newBox);
+  }
 
+  
   return {
     syncThreeViewsAttribute,
     updateDefaultAttribute,
+    reRenderPointCloud3DBox
   };
 };

@@ -28,7 +28,7 @@ const PointCloudListener: React.FC<IAnnotationStateProps> = ({ currentData }) =>
   const { updateRotate } = useRotate({ currentData });
   const { updatePointCloudData } = usePointCloudViews();
   const { redo, undo, pushHistoryWithList } = useHistory();
-  const { syncThreeViewsAttribute, updateDefaultAttribute } = useAttribute();
+  const { syncThreeViewsAttribute, reRenderPointCloud3DBox } = useAttribute();
 
   const keydownEvents = (lowerCaseKey: string, e: KeyboardEvent) => {
     const { topViewInstance, mainViewInstance } = ptCtx;
@@ -183,9 +183,8 @@ const PointCloudListener: React.FC<IAnnotationStateProps> = ({ currentData }) =>
 
         updateSelectedBox(selectBox);
         syncThreeViewsAttribute(newAttribute);
+        reRenderPointCloud3DBox(selectBox);
       }
-
-      updateDefaultAttribute(newAttribute);
     };
 
     toolInstanceRef.current.setSubAttribute = (key: string, value: string) => {
