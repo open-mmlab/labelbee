@@ -170,7 +170,7 @@ class ToolStyleConverter {
 
       return {
         ...ToolStyleUtils.getToolStrokeAndFill(color, defaultStatus),
-        hex: COLORS_ARRAY_MULTI[attributeIndex % colorList.length].hex
+        hex: COLORS_ARRAY_MULTI[attributeIndex % colorList.length]?.hex ?? ''
       };
     }
 
