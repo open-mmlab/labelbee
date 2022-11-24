@@ -3,6 +3,7 @@ import { BatchUpdateTrackID, ToSubmitFileData } from '@/store/annotation/actionC
 import { useDispatch } from '@/store/ctx';
 import { Form, InputNumber, Modal } from 'antd';
 import React, { useState } from 'react';
+import { useTranslation } from 'react-i18next';
 
 const layout = {
   labelCol: { span: 8 },
@@ -55,6 +56,7 @@ const BatchUpdateModal = ({ id }: IProps) => {
   const dispatch = useDispatch();
   const [visible, setVisible] = useState(false);
   const [form] = Form.useForm();
+  const { t } = useTranslation();
 
   const onFinish = (values: any) => {
     dispatch(ToSubmitFileData(ESubmitType.SyncImgList));
@@ -62,24 +64,31 @@ const BatchUpdateModal = ({ id }: IProps) => {
     setVisible(false);
   };
 
+  const onCancel = () => setVisible(false);
+
+  const onOk = () => form.submit();
+
   return (
     <>
-      <span onClick={() => setVisible(true)}>批量修改</span>
+      <a style={{ color: '#666FFF' }} onClick={() => setVisible(true)}>
+        {t('BatchUpdateText')}
+      </a>
       <Modal
-        title='批量修改ID'
+        title={t('BatchUpdateTrackID')}
         visible={visible}
-        onCancel={() => setVisible(false)}
-        onOk={() => form.submit()}
+        onCancel={onCancel}
+        onOk={onOk}
+        wrapClassName='labelbee-custom-modal'
       >
         <Form {...layout} form={form} onFinish={onFinish}>
-          <Form.Item name='id' label='当前标注框ID'>
+          <Form.Item name='id' label={t('CurrentBoxTrackIDs')}>
             {id}
           </Form.Item>
 
-          <Form.Item name='newID' label='统一标注框ID为' rules={defaultNumberRules}>
+          <Form.Item name='newID' label={t('TrackIDUnifiedAs')} rules={defaultNumberRules}>
             <InputNumber />
           </Form.Item>
-          <Form.Item label='统一ID范围' required={true}>
+          <Form.Item label={t('UnifiedTrackIDRange')} required={true}>
             <Form.Item
               style={{ display: 'inline-block', width: 'calc(50% - 24px)' }}
               rules={defaultNumberRules}
@@ -112,7 +121,7 @@ const BatchUpdateModal = ({ id }: IProps) => {
                 textAlign: 'center',
               }}
             >
-              页
+              {t('Page')}
             </span>
           </Form.Item>
         </Form>

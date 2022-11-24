@@ -31,6 +31,7 @@ interface IProps {
 const AnnotatedBox = ({ imgList, imgIndex }: { imgList: IFileItem[]; imgIndex: number }) => {
   const ptCtx = useContext(PointCloudContext);
   const [showIDs, setShowIds] = useState<number[]>([]);
+  const { t } = useTranslation();
 
   useEffect(() => {
     const newImgList = imgList as Array<{ result: string }>;
@@ -66,7 +67,7 @@ const AnnotatedBox = ({ imgList, imgIndex }: { imgList: IFileItem[]; imgIndex: n
 
   return (
     <div style={{ padding: 24, borderBottom: '1px solid #eee' }}>
-      <div style={{ marginBottom: 16 }}>所有已标注的框ID</div>
+      <div style={{ marginBottom: 16 }}>{t('AllTrackIDs')}</div>
       <div>
         {showIDs.map((id) => (
           <Tag color='#F3F4FF' key={id} style={{ color: '#666', marginBottom: 8 }}>
@@ -83,12 +84,15 @@ const BoxTrackIDInput = () => {
   const { pointCloudBoxList } = useContext(PointCloudContext);
   const { selectedBox, updateSelectedBox } = useSingleBox();
   const [inputValue, setInputValue] = useState('');
+  const { t } = useTranslation();
 
   const selectedBoxTrackID = selectedBox?.info.trackID;
 
   const hasDuplicateTrackID = (trackID: number) => {
-    const duplicateBox = pointCloudBoxList.find((i) => i.trackID === selectedBoxTrackID);
-    return duplicateBox && duplicateBox.id !== selectedBox?.info.id;
+    const duplicateBox = pointCloudBoxList.find(
+      (v) => v.trackID === trackID && v.id !== selectedBox?.info.id,
+    );
+    return !!duplicateBox;
   };
 
   const applyInputValue = (isBlurEvent = false) => {
@@ -99,22 +103,22 @@ const BoxTrackIDInput = () => {
     }
 
     if (isNaN(newTrackID)) {
-      message.error('请输入正整数');
+      message.error(t('PositiveIntegerCheck'));
       return;
     }
 
     if (inputValue.indexOf('.') > -1) {
-      message.error('输入trackID不允许包含小数点');
+      message.error(t('NotAllowDecimalPointsInTrackID'));
       return;
     }
 
     if (hasDuplicateTrackID(newTrackID)) {
-      message.error('存在重复的trackID');
+      message.error(t('DuplicateTrackIDsExist'));
       return;
     }
 
     if (!(newTrackID > 0)) {
-      message.error('输入trackID必须为正整数!');
+      message.error(t('PositiveIntegerCheck'));
       return;
     }
 
@@ -135,7 +139,7 @@ const BoxTrackIDInput = () => {
           alignItems: 'center',
         }}
       >
-        <span>当前标注框ID</span>
+        <span>{t('CurrentBoxTrackIDs')}</span>
         {selectedBoxTrackID && <BatchUpdateModal id={selectedBoxTrackID} />}
       </div>
       <div
@@ -228,6 +232,7 @@ const AttributeUpdater = ({
         forbidDefault={true}
         selectedAttribute={ptx.selectedPointCloudBox?.attribute ?? ''}
         attributeChanged={(attribute: string) => setAttribute(attribute)}
+        num='-'
       />
       <Divider style={{ margin: 0 }} />
       {selectedBox && (

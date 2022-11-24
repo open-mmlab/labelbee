@@ -1,6 +1,6 @@
 import MainView from '@/views/MainView';
 import { i18n } from '@labelbee/lb-utils';
-import React, { useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
 import { connect } from 'react-redux';
 import { store } from '.';
 import { LabelBeeContext } from '@/store/ctx';
@@ -20,6 +20,9 @@ import {
 } from './types/data';
 import { Header, RenderFooter, Sider } from './types/main';
 import { IStepInfo } from './types/step';
+import { ConfigProvider } from 'antd/es';
+import zhCN from 'antd/es/locale/zh_CN';
+import enUS from 'antd/es/locale/en_US';
 
 interface IAnnotationStyle {
   strokeColor: string;
@@ -83,6 +86,7 @@ export interface AppProps {
 }
 
 const App: React.FC<AppProps> = (props) => {
+  const [_, forceRender] = useState(0);
   const {
     imgList,
     step = 1,
@@ -122,6 +126,15 @@ const App: React.FC<AppProps> = (props) => {
     initImgList();
     // 初始化国际化语言
     i18n.changeLanguage(defaultLang);
+
+    const i18nLanguageChangedFunc = () => {
+      forceRender((v) => v + 1);
+    };
+
+    i18n.on('languageChanged', i18nLanguageChangedFunc);
+    return () => {
+      i18n.off('languageChanged', i18nLanguageChangedFunc);
+    };
   }, []);
 
   useEffect(() => {
@@ -178,7 +191,9 @@ const App: React.FC<AppProps> = (props) => {
 
   return (
     <div>
-      <MainView {...props} />
+      <ConfigProvider locale={i18n.language === 'en' ? enUS : zhCN}>
+        <MainView {...props} />
+      </ConfigProvider>
     </div>
   );
 };

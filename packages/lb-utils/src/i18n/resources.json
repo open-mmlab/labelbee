@@ -168,7 +168,19 @@
     "DragOperation": "Drag",
     "SelectedStatus": "Selected",
     "updateValidFromValidToInValid": "Confirm update as invalid page？",
-    "updateValidFromInValidToValid": "Confirm update as valid page？"
+    "updateValidFromInValidToValid": "Confirm update as valid page？",
+    "AllTrackIDs": "All TrackIDs",
+    "CurrentBoxTrackIDs": "Current TrackID",
+    "PositiveIntegerCheck": "Please enter a positive integer",
+    "NotAllowDecimalPointsInTrackID": "TrackID is not allowed to be decimal",
+    "DuplicateTrackIDsExist": "Duplicate trackIDs exits",
+    "BatchUpdateText": "Batch Update",
+    "BatchUpdateTrackID": "Batch update trackIDs",
+    "TrackIDUnifiedAs": "TrackID is unified as",
+    "UnifiedTrackIDRange": "Unified TrackID Range",
+    "Page": "Page",
+    "OkText": "OK",
+    "CancelText": "Cancel"
   },
   "cn": {
     "TextInput": "文本输入",
@@ -339,6 +351,18 @@
     "DragOperation": "拖动",
     "SelectedStatus": "选中时",
     "updateValidFromValidToInValid": "是否确认标为无效文件？",
-    "updateValidFromInValidToValid": "是否确认取消无效文件？"
+    "updateValidFromInValidToValid": "是否确认取消无效文件？",
+    "AllTrackIDs": "所有已标注的框ID",
+    "CurrentBoxTrackIDs": "当前标注框ID",
+    "PositiveIntegerCheck": "请输入正整数",
+    "NotAllowDecimalPointsInTrackID": "输入trackID不允许包含小数点",
+    "DuplicateTrackIDsExist": "存在重复的trackID",
+    "BatchUpdateText": "批量修改",
+    "BatchUpdateTrackID": "批量修改ID",
+    "TrackIDUnifiedAs": "统一标注框ID为",
+    "UnifiedTrackIDRange": "统一ID范围",
+    "Page": "页",
+    "OkText": "确认",
+    "CancelText": "取消"
   }
 }
