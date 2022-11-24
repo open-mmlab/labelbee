@@ -33,6 +33,7 @@ import AxisUtils from './utils/tool/AxisUtils';
 import DrawUtils from './utils/tool/DrawUtils';
 import ImgUtils from './utils/ImgUtils';
 import MathUtils from './utils/MathUtils';
+import AttributeUtils from './utils/tool/AttributeUtils';
 import ActionsHistory from './utils/ActionsHistory';
 
 // ToolListener
@@ -78,6 +79,7 @@ export {
   DrawUtils,
   ImgUtils,
   MathUtils,
+  AttributeUtils,
   AnnotationEngine,
   ScribbleTool,
   PointCloud,

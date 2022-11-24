@@ -194,7 +194,6 @@ const AttributeUpdater = ({
   attributeList: any[]; // TODO
   subAttributeList: any[]; // TODO
 }) => {
-  const [_, forceRender] = useState(0);
   const { selectedBox } = useSingleBox();
   const ptx = useContext(PointCloudContext);
   const { t } = useTranslation();
@@ -215,7 +214,6 @@ const AttributeUpdater = ({
 
   const setAttribute = (attribute: string) => {
     toolInstance.setDefaultAttribute(attribute);
-    forceRender((v) => v + 1);
   };
 
   const setSubAttribute = (key: string, value: string) => {
@@ -236,7 +234,6 @@ const AttributeUpdater = ({
         forbidDefault={true}
         selectedAttribute={ptx.selectedPointCloudBox?.attribute ?? defaultAttribute ?? ''}
         attributeChanged={(attribute: string) => setAttribute(attribute)}
-        num='-'
       />
       <Divider style={{ margin: 0 }} />
       {selectedBox && (

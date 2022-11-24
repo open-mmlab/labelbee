@@ -3,10 +3,10 @@ import { useRotate } from './hooks/useRotate';
 import { useBoxes } from './hooks/useBoxes';
 import { useSingleBox } from './hooks/useSingleBox';
 import React, { useContext, useEffect } from 'react';
-import { cTool } from '@labelbee/lb-annotation';
+import { cTool, AttributeUtils } from '@labelbee/lb-annotation';
 import { message } from 'antd';
 import { connect } from 'react-redux';
-import { aMapStateToProps, IAnnotationStateProps } from '@/store/annotation/map';
+import { a2MapStateToProps, IA2MapStateProps } from '@/store/annotation/map';
 import { useCustomToolInstance } from '@/hooks/annotation';
 import { useStatus } from './hooks/useStatus';
 import { jsonParser } from '@/utils';
@@ -17,7 +17,7 @@ import { useAttribute } from './hooks/useAttribute';
 
 const { EPolygonPattern } = cTool;
 
-const PointCloudListener: React.FC<IAnnotationStateProps> = ({ currentData }) => {
+const PointCloudListener: React.FC<IA2MapStateProps> = ({ currentData, config }) => {
   const ptCtx = useContext(PointCloudContext);
   const { changeSelectedBoxValid, selectNextBox, selectPrevBox, updateSelectedBox } =
     useSingleBox();
@@ -105,6 +105,16 @@ const PointCloudListener: React.FC<IAnnotationStateProps> = ({ currentData }) =>
         break;
 
       default: {
+        if (config.attributeList?.length > 0) {
+          const keyCode2Attribute = AttributeUtils.getAttributeByKeycode(
+            e.keyCode,
+            config.attributeList,
+          );
+
+          if (keyCode2Attribute !== undefined) {
+            toolInstanceRef.current.setDefaultAttribute(keyCode2Attribute);
+          }
+        }
         return;
       }
     }
@@ -157,7 +167,7 @@ const PointCloudListener: React.FC<IAnnotationStateProps> = ({ currentData }) =>
     return () => {
       window.removeEventListener('keydown', onKeyDown);
     };
-  }, [ptCtx, copiedBoxes]);
+  }, [ptCtx, copiedBoxes, config]);
 
   // Page switch data initialization
   useEffect(() => {
@@ -270,6 +280,6 @@ const PointCloudListener: React.FC<IAnnotationStateProps> = ({ currentData }) =>
   return null;
 };
 
-export default connect(aMapStateToProps, null, null, { context: LabelBeeContext })(
+export default connect(a2MapStateToProps, null, null, { context: LabelBeeContext })(
   PointCloudListener,
 );
