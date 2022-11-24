@@ -21,4 +21,5 @@ export enum EMessage {
   UnableToReannotation = 'unableToReannotation',
   ForbiddenCreationOutsideBoundary = 'ForbiddenCreationOutsideBoundary',
   SuccessfulEdgeAdsorption = 'SuccessfulEdgeAdsorption',
+  ForbidAddNewPoint = 'ForbidAddNewPoint',
 }
