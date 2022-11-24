@@ -24,6 +24,5 @@ const message: Record<string, string> = {
   [EMessage.ForbiddenCreationOutsideBoundary]: '边界外禁止创建',
   [EMessage.SuccessfulEdgeAdsorption]: '边缘吸附成功',
   [EMessage.ForbidAddNewPoint]: '框体无法添加点',
-
 };
 export default message;
