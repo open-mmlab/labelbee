@@ -177,12 +177,12 @@ const PointCloudListener: React.FC<IAnnotationStateProps> = ({ currentData }) =>
     };
 
     toolInstanceRef.current.setDefaultAttribute = (newAttribute: string) => {
+      syncThreeViewsAttribute(newAttribute);
       const selectBox = ptCtx.selectedPointCloudBox;
       if (selectBox) {
         selectBox.attribute = newAttribute;
 
         updateSelectedBox(selectBox);
-        syncThreeViewsAttribute(newAttribute);
         reRenderPointCloud3DBox(selectBox);
       }
     };

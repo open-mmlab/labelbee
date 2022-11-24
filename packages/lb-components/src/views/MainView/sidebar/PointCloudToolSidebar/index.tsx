@@ -19,6 +19,7 @@ import { IFileItem } from '@/types/data';
 import { PointCloudUtils } from '@labelbee/lb-utils';
 import AttributeList from '@/components/attributeList';
 import { IInputList } from '@/types/main';
+import { useAttribute } from '@/components/pointCloudView/hooks/useAttribute';
 
 interface IProps {
   stepInfo: IStepInfo;
@@ -193,9 +194,11 @@ const AttributeUpdater = ({
   attributeList: any[]; // TODO
   subAttributeList: any[]; // TODO
 }) => {
+  const [_, forceRender] = useState(0);
   const { selectedBox } = useSingleBox();
   const ptx = useContext(PointCloudContext);
   const { t } = useTranslation();
+  const { defaultAttribute } = useAttribute();
 
   const titleStyle = {
     fontWeight: 500,
@@ -212,6 +215,7 @@ const AttributeUpdater = ({
 
   const setAttribute = (attribute: string) => {
     toolInstance.setDefaultAttribute(attribute);
+    forceRender((v) => v + 1);
   };
 
   const setSubAttribute = (key: string, value: string) => {
@@ -230,7 +234,7 @@ const AttributeUpdater = ({
       <AttributeList
         list={list}
         forbidDefault={true}
-        selectedAttribute={ptx.selectedPointCloudBox?.attribute ?? ''}
+        selectedAttribute={ptx.selectedPointCloudBox?.attribute ?? defaultAttribute ?? ''}
         attributeChanged={(attribute: string) => setAttribute(attribute)}
         num='-'
       />
