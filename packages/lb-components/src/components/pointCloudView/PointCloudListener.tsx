@@ -239,15 +239,31 @@ const PointCloudListener: React.FC<IAnnotationStateProps> = ({ currentData }) =>
   }, []);
 
   useEffect(() => {
+    const toolInstance = ptCtx.topViewInstance?.pointCloud2dOperation;
+
+    if (!toolInstance) {
+      return;
+    }
     // TopViewOperation Emitter
     const syncAttribute = (newAttribute: string) => {
       syncThreeViewsAttribute(newAttribute);
     };
 
-    ptCtx.topViewInstance?.pointCloud2dOperation.on('syncAttribute', syncAttribute);
+    const messageError = (error: string) => {
+      message.error(error);
+    };
+    const messageInfo = (info: string) => {
+      message.info(info);
+    };
+
+    toolInstance.on('syncAttribute', syncAttribute);
+    toolInstance.on('messageError', messageError);
+    toolInstance.on('messageInfo', messageInfo);
 
     return () => {
-      ptCtx.topViewInstance?.pointCloud2dOperation.unbind('syncAttribute', syncAttribute);
+      toolInstance.unbind('syncAttribute', syncAttribute);
+      toolInstance.unbind('messageError', messageError);
+      toolInstance.unbind('messageInfo', messageInfo);
     };
   }, [ptCtx.topViewInstance]);
 
