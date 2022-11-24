@@ -83,6 +83,11 @@ class PointCloud2dOperation extends PolygonOperation {
     } else {
       this.emit('setSelectedIDs', this.hoverID);
     }
+
+    const hoverAttribute = this.hoverPolygon?.attribute;
+    if (hoverAttribute && hoverAttribute !== this.defaultAttribute) {
+      this.emit('syncAttribute', hoverAttribute);
+    }
   };
 
   public get selectedPolygons() {

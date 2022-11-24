@@ -238,6 +238,19 @@ const PointCloudListener: React.FC<IAnnotationStateProps> = ({ currentData }) =>
     };
   }, []);
 
+  useEffect(() => {
+    // TopViewOperation Emitter
+    const syncAttribute = (newAttribute: string) => {
+      syncThreeViewsAttribute(newAttribute);
+    };
+
+    ptCtx.topViewInstance?.pointCloud2dOperation.on('syncAttribute', syncAttribute);
+
+    return () => {
+      ptCtx.topViewInstance?.pointCloud2dOperation.unbind('syncAttribute', syncAttribute);
+    };
+  }, [ptCtx.topViewInstance]);
+
   return null;
 };
 
