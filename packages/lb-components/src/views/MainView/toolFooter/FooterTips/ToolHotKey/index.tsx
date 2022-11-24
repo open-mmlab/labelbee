@@ -143,6 +143,7 @@ export const ToolHotKeyCom: React.FC<IComponentsProps> = ({ title, style, shortC
           </span>
         );
       }
+
       if (typeof item === 'number') {
         return (
           <span key={index} style={wrapperStyle}>
@@ -150,7 +151,7 @@ export const ToolHotKeyCom: React.FC<IComponentsProps> = ({ title, style, shortC
           </span>
         );
       }
-      if (item?.startsWith('data')) {
+      if (item?.startsWith?.('data')) {
         return (
           <span className='shortCutButton' key={index} style={{ marginRight: '3px' }}>
             <img width={16} height={23} src={item} />
