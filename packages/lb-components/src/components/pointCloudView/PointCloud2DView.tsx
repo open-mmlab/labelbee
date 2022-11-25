@@ -7,7 +7,7 @@ import { connect } from 'react-redux';
 import { LeftOutlined, RightOutlined } from '@ant-design/icons';
 import useSize from '@/hooks/useSize';
 import { useSingleBox } from './hooks/useSingleBox';
-import { ViewOperation } from '@labelbee/lb-annotation';
+import { ViewOperation, pointCloudLidar2image } from '@labelbee/lb-annotation';
 import { useTranslation } from 'react-i18next';
 import { LabelBeeContext } from '@/store/ctx';
 import { a2MapStateToProps, IA2MapStateProps } from '@/store/annotation/map';
@@ -61,7 +61,6 @@ const PointCloud2DView = ({ currentData, config }: IA2MapStateProps) => {
 
   useEffect(() => {
     if (topViewInstance && mappingData) {
-      const { pointCloudInstance } = topViewInstance;
       const defaultViewStyle = {
         fill: 'transparent',
         color: 'green',
@@ -69,10 +68,7 @@ const PointCloud2DView = ({ currentData, config }: IA2MapStateProps) => {
 
       const newAnnotations2d: IAnnotationDataTemporarily[] = pointCloudBoxList.reduce(
         (acc: IAnnotationDataTemporarily[], pointCloudBox) => {
-          const viewDataPointList = pointCloudInstance.pointCloudLidar2image(
-            pointCloudBox,
-            mappingData.calib,
-          );
+          const viewDataPointList = pointCloudLidar2image(pointCloudBox, mappingData.calib);
 
           const stroke = toolStyleConverter.getColorFromConfig(
             { attribute: pointCloudBox.attribute },

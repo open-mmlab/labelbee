@@ -41,8 +41,6 @@ import DblClickEventListener from './utils/tool/DblClickEventListener'; // tempo
 
 import AnnotationEngine from './core';
 
-import { PointCloud } from './core/pointCloud';
-import { PointCloudAnnotation } from './core/pointCloud/annotation';
 import UnitUtils from './utils/tool/UnitUtils';
 
 const CommonToolUtils = EnhanceCommonToolUtils;
@@ -60,7 +58,6 @@ export {
   MeasureOperation,
   ViewOperation,
   PointCloud2dOperation,
-  PointCloudAnnotation,
   // 固定操作
   cAnnotation,
   cAnnotationTask,
@@ -69,9 +66,9 @@ export {
   cTool,
   // 工具包
   toolUtils,
-  uuid,
   DblClickEventListener,
   CommonToolUtils,
+  uuid,
   MarkerUtils,
   RectUtils,
   AxisUtils,
@@ -82,7 +79,6 @@ export {
   AttributeUtils,
   AnnotationEngine,
   ScribbleTool,
-  PointCloud,
   UnitUtils,
   // 其他特殊基础功能
   ActionsHistory,
@@ -90,3 +86,4 @@ export {
 
 export * from './newCore';
 export * from './constant/tool';
+export * from './core/pointCloud';
