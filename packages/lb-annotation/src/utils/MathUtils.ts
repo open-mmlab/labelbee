@@ -2,6 +2,7 @@
  * 各类的数学运算
  */
 
+import { IBasicLine, IBasicPoint, TAnnotationViewData } from '@labelbee/lb-utils';
 import { DEFAULT_FONT, DEFAULT_TEXT_MAX_WIDTH, ELineTypes, SEGMENT_NUMBER } from '@/constant/tool';
 import { IPolygonData, IPolygonPoint } from '@/types/tool/polygon';
 import { createSmoothCurvePointsFromPointList } from './tool/polygonTool';
@@ -507,11 +508,11 @@ export default class MathUtils {
     return radius;
   }
 
-  public static getCollectionPointByAnnotationData(annotations: IAnnotationData[]) {
+  public static getCollectionPointByAnnotationData(annotations: TAnnotationViewData[]) {
     const connectionPoints: ICoordinate[] = [];
     const cacheSet = new Set<string>();
 
-    const points = annotations.filter((v) => v.type === 'point').map((v) => v.annotation);
+    const points = annotations.filter((v) => v.type === 'point').map((v) => v.annotation) as IBasicPoint[];
     const backgroundList = annotations
       .filter((v) => {
         if (['polygon', 'line'].includes(v.type)) {
@@ -520,16 +521,15 @@ export default class MathUtils {
         return false;
       })
       .map((v) => {
-        const { annotation } = v;
         if (v.type === 'polygon') {
           return {
-            ...annotation,
-            pointList: PolygonUtils.concatBeginAndEnd(annotation.pointList),
+            ...v.annotation,
+            pointList: PolygonUtils.concatBeginAndEnd(v.annotation.pointList),
           };
         }
 
-        return annotation;
-      });
+        return v.annotation;
+      }) as IBasicLine[];
 
     const judgeIsConnectPoint = (point: ICoordinate, polygonList: Array<any | IPolygonData>) => {
       const { dropFoot } = PolygonUtils.getClosestPoint(point, polygonList, ELineTypes.Line, 1, { isClose: false });
