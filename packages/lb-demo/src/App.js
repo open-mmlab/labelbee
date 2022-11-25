@@ -88,6 +88,10 @@ const App = () => {
               stroke: 'blue',
               thickness: 3,
             }}
+            size={{
+              width: 1280,
+              height: 720,
+            }}
             onChange={onChange}
           />
         </div>

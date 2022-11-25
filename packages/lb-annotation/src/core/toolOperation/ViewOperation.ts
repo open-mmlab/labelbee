@@ -2,6 +2,14 @@
  * 查看模式 - 支持简单数据注入查看
  */
 
+import {
+  TAnnotationViewData,
+  IBasicText,
+  TAnnotationViewLine,
+  TAnnotationViewPolygon,
+  TAnnotationViewBox3d,
+  IBasicStyle,
+} from '@labelbee/lb-utils';
 import _ from 'lodash';
 import rgba from 'color-rgba';
 import DrawUtils from '@/utils/tool/DrawUtils';
@@ -14,6 +22,7 @@ import { DEFAULT_FONT, ELineTypes, SEGMENT_NUMBER } from '@/constant/tool';
 import { DEFAULT_TEXT_SHADOW, DEFAULT_TEXT_OFFSET, TEXT_ATTRIBUTE_OFFSET } from '@/constant/annotation';
 import ImgPosUtils from '@/utils/tool/ImgPosUtils';
 import { BasicToolOperation, IBasicToolOperationProps } from './basicToolOperation';
+import { pointCloudLidar2image } from '../pointCloud/matrix';
 
 const newScope = 3;
 const DEFAULT_RADIUS = 3;
@@ -21,7 +30,7 @@ const DEFAULT_STROKE_COLOR = '#6371FF';
 
 type IViewOperationProps = {
   style: IBasicStyle;
-  annotations: IAnnotationData[];
+  annotations: TAnnotationViewData[];
 } & IBasicToolOperationProps;
 
 export interface ISpecificStyle {
@@ -39,7 +48,7 @@ export interface IFontStyle {
 export default class ViewOperation extends BasicToolOperation {
   public style: IBasicStyle = {};
 
-  public annotations: IAnnotationData[] = [];
+  public annotations: TAnnotationViewData[] = [];
 
   private mouseHoverID?: string;
 
@@ -64,7 +73,7 @@ export default class ViewOperation extends BasicToolOperation {
    * Get the connection points in annotationData.
    * @param newAnnotations
    */
-  public checkConnectionPoints(newAnnotations: IAnnotationData[] = this.annotations) {
+  public checkConnectionPoints(newAnnotations: TAnnotationViewData[] = this.annotations) {
     const { connectionPoints } = MathUtils.getCollectionPointByAnnotationData(newAnnotations);
     this.connectionPoints = connectionPoints;
   }
@@ -165,7 +174,7 @@ export default class ViewOperation extends BasicToolOperation {
     return id;
   };
 
-  public updateData(annotations: IAnnotationData[]) {
+  public updateData(annotations: TAnnotationViewData[]) {
     this.annotations = annotations;
     this.render();
   }
@@ -302,15 +311,210 @@ export default class ViewOperation extends BasicToolOperation {
     });
   }
 
+  public getRenderStyle(annotation: TAnnotationViewData) {
+    const style = this.getSpecificStyle(annotation.annotation);
+    const fontStyle = this.getFontStyle(annotation.annotation, style);
+
+    return {
+      style,
+      fontStyle,
+    };
+  }
+
+  public renderLine(annotation: TAnnotationViewLine) {
+    if (annotation.type !== 'line') {
+      return;
+    }
+
+    const { style, fontStyle } = this.getRenderStyle(annotation);
+
+    const line = annotation.annotation;
+    if (!(line?.pointList?.length >= 2)) {
+      return;
+    }
+
+    const { lineType = ELineTypes.Line } = line;
+    const renderLineWithZoom = AxisUtils.changePointListByZoom(
+      (line?.pointList as IPoint[]) ?? [],
+      this.zoom,
+      this.currentPos,
+    );
+
+    const newPointList = DrawUtils.drawPolygon(this.canvas, renderLineWithZoom, {
+      ...style,
+      ...this.getReferenceOptions(line?.isReference),
+      lineType,
+    });
+
+    const isShowDirection = line?.showDirection === true && line?.pointList?.length > 2;
+
+    // 是否展示方向
+    if (isShowDirection) {
+      let startPoint = renderLineWithZoom[0];
+      let endPoint = MathUtils.getLineCenterPoint([renderLineWithZoom[0], renderLineWithZoom[1]]);
+
+      if (lineType === ELineTypes.Curve) {
+        const pos = Math.floor(SEGMENT_NUMBER / 2);
+        startPoint = newPointList[pos];
+        endPoint = newPointList[pos + 1];
+      }
+      DrawUtils.drawArrowByCanvas(this.canvas, startPoint, endPoint, {
+        color: style.stroke,
+        thickness: style.thickness,
+      });
+      DrawUtils.drawCircle(this.canvas, renderLineWithZoom[0], style.thickness + 6, {
+        color: style.stroke,
+        thickness: style.thickness,
+      });
+    }
+
+    // 文本渲染
+    const { headerText, bottomText } = this.getRenderText(line, line?.hiddenText);
+    if (headerText) {
+      DrawUtils.drawText(this.canvas, this.appendOffset(renderLineWithZoom[0]), headerText, fontStyle);
+    }
+    if (bottomText) {
+      const endPoint = renderLineWithZoom[renderLineWithZoom.length - 1];
+
+      DrawUtils.drawText(
+        this.canvas,
+        this.appendOffset({ x: endPoint.x + TEXT_ATTRIBUTE_OFFSET.x, y: endPoint.y + TEXT_ATTRIBUTE_OFFSET.y }),
+        bottomText,
+        fontStyle,
+      );
+    }
+  }
+
+  public renderPolygon(annotation: TAnnotationViewPolygon) {
+    if (annotation.type !== 'polygon') {
+      return;
+    }
+    const { style, fontStyle } = this.getRenderStyle(annotation);
+
+    const polygon = annotation.annotation;
+    if (!(polygon?.pointList?.length >= 3)) {
+      return;
+    }
+
+    const { lineType = ELineTypes.Line } = polygon;
+    const renderPolygon = AxisUtils.changePointListByZoom(polygon?.pointList ?? [], this.zoom, this.currentPos);
+    if (polygon.id === this.mouseHoverID || style.fill) {
+      const fillArr = rgba(style?.fill ?? style?.stroke ?? DEFAULT_STROKE_COLOR);
+      const fill = `rgba(${fillArr[0]}, ${fillArr[1]}, ${fillArr[2]},${fillArr[3] * 0.8})`;
+      DrawUtils.drawPolygonWithFill(this.canvas, renderPolygon, { color: fill, lineType });
+    }
+
+    const polygonRenderOptions = {
+      ...style,
+      isClose: true,
+      ...this.getReferenceOptions(polygon?.isReference),
+      lineType,
+      strokeColor: style.stroke,
+    };
+
+    let newPointList = [];
+
+    // 是否展示关键点
+    if (polygon.showKeyPoint) {
+      newPointList = DrawUtils.drawPolygonWithKeyPoint(this.canvas, renderPolygon, polygonRenderOptions);
+    } else {
+      newPointList = DrawUtils.drawPolygon(this.canvas, renderPolygon, polygonRenderOptions);
+    }
+
+    const isShowDirection = polygon?.showDirection === true && polygon?.pointList?.length > 2;
+
+    // 是否展示方向
+    if (isShowDirection) {
+      let startPoint = renderPolygon[0];
+      let endPoint = MathUtils.getLineCenterPoint([renderPolygon[0], renderPolygon[1]]);
+
+      if (lineType === ELineTypes.Curve) {
+        const pos = Math.floor(SEGMENT_NUMBER / 2);
+        startPoint = newPointList[pos];
+        endPoint = newPointList[pos + 1];
+      }
+      DrawUtils.drawArrowByCanvas(this.canvas, startPoint, endPoint, {
+        color: style.stroke,
+        thickness: style.thickness,
+      });
+      DrawUtils.drawCircle(this.canvas, renderPolygon[0], style.thickness + 6, {
+        color: style.stroke,
+        thickness: style.thickness,
+      });
+    }
+
+    // 文本渲染
+    const { headerText, bottomText } = this.getRenderText(polygon, polygon?.hiddenText);
+    if (headerText) {
+      DrawUtils.drawText(this.canvas, this.appendOffset(renderPolygon[0]), headerText, fontStyle);
+    }
+    if (bottomText) {
+      const endPoint = renderPolygon[renderPolygon.length - 1];
+
+      DrawUtils.drawText(
+        this.canvas,
+        this.appendOffset({ x: endPoint.x + TEXT_ATTRIBUTE_OFFSET.x, y: endPoint.y + TEXT_ATTRIBUTE_OFFSET.y }),
+        bottomText,
+        fontStyle,
+      );
+    }
+  }
+
+  public renderBox3d(annotation: TAnnotationViewBox3d) {
+    if (annotation.type !== 'box3d') {
+      return;
+    }
+
+    const data = annotation.annotation;
+    const viewDataPointList = pointCloudLidar2image(data as any, data.calib);
+    const defaultViewStyle = {
+      fill: 'transparent',
+      // stroke: style.stroke,
+    };
+
+    const extraData = _.pick(data, ['stroke', 'thickness']);
+
+    viewDataPointList.forEach((v, i) => {
+      const newAnnotation = {
+        ...extraData,
+        id: `${annotation.annotation.id}-${i}`,
+        pointList: v.pointList,
+        ...defaultViewStyle,
+      };
+
+      switch (v.type) {
+        case 'line':
+          this.renderLine({
+            type: 'line',
+            annotation: newAnnotation,
+          });
+          break;
+        case 'polygon':
+          this.renderPolygon({
+            type: 'polygon',
+            annotation: newAnnotation,
+          });
+          break;
+
+        default: {
+          break;
+        }
+      }
+    });
+  }
+
   public render() {
     try {
       super.render();
       if (this.loading === true) {
         return;
       }
-      this.renderDomInstance.render(
-        this.annotations.filter((v) => v.type === 'text' && v.annotation.position === 'rt').map((v) => v.annotation),
-      );
+
+      const globalDomTextAnnotation = this.annotations
+        .filter((v) => v.type === 'text' && v.annotation.position === 'rt')
+        .map((v) => v.annotation) as IBasicText[];
+
+      this.renderDomInstance.render(globalDomTextAnnotation);
 
       this.annotations.forEach((annotation) => {
         const style = this.getSpecificStyle(annotation.annotation);
@@ -372,133 +576,12 @@ export default class ViewOperation extends BasicToolOperation {
             break;
           }
           case 'polygon': {
-            const polygon = annotation.annotation;
-            if (!(polygon?.pointList?.length >= 3)) {
-              return;
-            }
-
-            const { lineType = ELineTypes.Line } = polygon;
-            const renderPolygon = AxisUtils.changePointListByZoom(polygon?.pointList ?? [], this.zoom, this.currentPos);
-            if (polygon.id === this.mouseHoverID || style.fill) {
-              const fillArr = rgba(style?.fill ?? style?.stroke ?? DEFAULT_STROKE_COLOR);
-              const fill = `rgba(${fillArr[0]}, ${fillArr[1]}, ${fillArr[2]},${fillArr[3] * 0.8})`;
-              DrawUtils.drawPolygonWithFill(this.canvas, renderPolygon, { color: fill, lineType });
-            }
-
-            const polygonRenderOptions = {
-              ...style,
-              isClose: true,
-              ...this.getReferenceOptions(polygon?.isReference),
-              lineType,
-              strokeColor: style.stroke,
-            };
-
-            let newPointList = [];
-
-            // 是否展示关键点
-            if (polygon.showKeyPoint) {
-              newPointList = DrawUtils.drawPolygonWithKeyPoint(this.canvas, renderPolygon, polygonRenderOptions);
-            } else {
-              newPointList = DrawUtils.drawPolygon(this.canvas, renderPolygon, polygonRenderOptions);
-            }
-
-            const isShowDirection = polygon?.showDirection === true && polygon?.pointList?.length > 2;
-
-            // 是否展示方向
-            if (isShowDirection) {
-              let startPoint = renderPolygon[0];
-              let endPoint = MathUtils.getLineCenterPoint([renderPolygon[0], renderPolygon[1]]);
-
-              if (lineType === ELineTypes.Curve) {
-                const pos = Math.floor(SEGMENT_NUMBER / 2);
-                startPoint = newPointList[pos];
-                endPoint = newPointList[pos + 1];
-              }
-              DrawUtils.drawArrowByCanvas(this.canvas, startPoint, endPoint, {
-                color: style.stroke,
-                thickness: style.thickness,
-              });
-              DrawUtils.drawCircle(this.canvas, renderPolygon[0], style.thickness + 6, {
-                color: style.stroke,
-                thickness: style.thickness,
-              });
-            }
-
-            // 文本渲染
-            const { headerText, bottomText } = this.getRenderText(polygon, polygon?.hiddenText);
-            if (headerText) {
-              DrawUtils.drawText(this.canvas, this.appendOffset(renderPolygon[0]), headerText, fontStyle);
-            }
-            if (bottomText) {
-              const endPoint = renderPolygon[renderPolygon.length - 1];
-
-              DrawUtils.drawText(
-                this.canvas,
-                this.appendOffset({ x: endPoint.x + TEXT_ATTRIBUTE_OFFSET.x, y: endPoint.y + TEXT_ATTRIBUTE_OFFSET.y }),
-                bottomText,
-                fontStyle,
-              );
-            }
-
+            this.renderPolygon(annotation);
             break;
           }
 
           case 'line': {
-            const line = annotation.annotation;
-            if (!(line?.pointList?.length >= 2)) {
-              return;
-            }
-
-            const { lineType = ELineTypes.Line } = line;
-            const renderLine = AxisUtils.changePointListByZoom(
-              (line?.pointList as IPoint[]) ?? [],
-              this.zoom,
-              this.currentPos,
-            );
-
-            const newPointList = DrawUtils.drawPolygon(this.canvas, renderLine, {
-              ...style,
-              ...this.getReferenceOptions(line?.isReference),
-              lineType,
-            });
-
-            const isShowDirection = line?.showDirection === true && line?.pointList?.length > 2;
-
-            // 是否展示方向
-            if (isShowDirection) {
-              let startPoint = renderLine[0];
-              let endPoint = MathUtils.getLineCenterPoint([renderLine[0], renderLine[1]]);
-
-              if (lineType === ELineTypes.Curve) {
-                const pos = Math.floor(SEGMENT_NUMBER / 2);
-                startPoint = newPointList[pos];
-                endPoint = newPointList[pos + 1];
-              }
-              DrawUtils.drawArrowByCanvas(this.canvas, startPoint, endPoint, {
-                color: style.stroke,
-                thickness: style.thickness,
-              });
-              DrawUtils.drawCircle(this.canvas, renderLine[0], style.thickness + 6, {
-                color: style.stroke,
-                thickness: style.thickness,
-              });
-            }
-
-            // 文本渲染
-            const { headerText, bottomText } = this.getRenderText(line, line?.hiddenText);
-            if (headerText) {
-              DrawUtils.drawText(this.canvas, this.appendOffset(renderLine[0]), headerText, fontStyle);
-            }
-            if (bottomText) {
-              const endPoint = renderLine[renderLine.length - 1];
-
-              DrawUtils.drawText(
-                this.canvas,
-                this.appendOffset({ x: endPoint.x + TEXT_ATTRIBUTE_OFFSET.x, y: endPoint.y + TEXT_ATTRIBUTE_OFFSET.y }),
-                bottomText,
-                fontStyle,
-              );
-            }
+            this.renderLine(annotation);
             break;
           }
 
@@ -599,10 +682,16 @@ export default class ViewOperation extends BasicToolOperation {
             break;
           }
 
+          case 'box3d': {
+            this.renderBox3d(annotation);
+            break;
+          }
+
           default: {
-            //
+            break;
           }
         }
+
         annotation.annotation?.renderEnhance?.({
           ctx: this.ctx,
           canvas: this.canvas,

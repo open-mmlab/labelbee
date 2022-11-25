@@ -27,45 +27,6 @@ export interface IGraphicsBasicConfig extends IBasicStyle {
   isReference?: boolean; // 是否进行的参考显示
   renderEnhance?: (params: IRenderEnhanceParams) => void;
 }
-
-export type TAnnotationViewRect = {
-  type: 'rect';
-  annotation: IBasicRect;
-};
-
-export type TAnnotationViewPolygon = {
-  type: 'polygon';
-  annotation: IBasicPolygon;
-};
-
-export type TAnnotationViewPoint = {
-  type: 'point';
-  annotation: IBasicPoint;
-};
-
-export type TAnnotationViewBox3d = {
-  type: 'box3d';
-  annotation: IBasicBox3d;
-};
-
-export type TAnnotationViewLine = {
-  type: 'line';
-  annotation: IBasicLine;
-};
-
-export type TAnnotationViewText = {
-  type: 'text';
-  annotation: IBasicText;
-};
-
-export type TAnnotationViewData =
-  | TAnnotationViewRect
-  | TAnnotationViewPolygon
-  | TAnnotationViewPoint
-  | TAnnotationViewBox3d
-  | TAnnotationViewLine
-  | TAnnotationViewText;
-
 export interface IBasicRect extends IGraphicsBasicConfig {
   id: string;
   x: number;
@@ -125,3 +86,41 @@ export interface IBasicBox3d extends IGraphicsBasicConfig {
   rotation: number; // Right-handed system, angle of rotation around Z-Axis, Range: [0, 2 * Pi]
   calib: ICalib; // Calibration parameters of the current picture.
 }
+
+export type TAnnotationViewRect = {
+  type: 'rect';
+  annotation: IBasicRect;
+};
+
+export type TAnnotationViewPolygon = {
+  type: 'polygon';
+  annotation: IBasicPolygon;
+};
+
+export type TAnnotationViewPoint = {
+  type: 'point';
+  annotation: IBasicPoint;
+};
+
+export type TAnnotationViewBox3d = {
+  type: 'box3d';
+  annotation: IBasicBox3d;
+};
+
+export type TAnnotationViewLine = {
+  type: 'line';
+  annotation: IBasicLine;
+};
+
+export type TAnnotationViewText = {
+  type: 'text';
+  annotation: IBasicText;
+};
+
+export type TAnnotationViewData =
+  | TAnnotationViewRect
+  | TAnnotationViewPolygon
+  | TAnnotationViewPoint
+  | TAnnotationViewBox3d
+  | TAnnotationViewLine
+  | TAnnotationViewText;
