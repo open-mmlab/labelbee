@@ -89,6 +89,7 @@ export interface IBasicStyle {
   thickness?: number; // 当前图形宽度
 }
 
+
 export interface IRenderEnhanceParams {
   ctx: CanvasRenderingContext2D | null;
   canvas: HTMLCanvasElement | null;
@@ -145,6 +146,12 @@ export interface IBasicText extends IGraphicsBasicConfig {
   lineHeight?: number;
   font?: string; // canvas-font https://developer.mozilla.org/en-US/docs/Web/API/CanvasRenderingContext2D/font
   style?: StyleSheetList;
+}
+
+export interface ICalib {
+  P: [TMatrix14Tuple, TMatrix14Tuple, TMatrix14Tuple]; // 3x4 Camera Intrinsic matrix
+  R: [TMatrix13Tuple, TMatrix13Tuple, TMatrix13Tuple]; // 3x3 rotation matrix
+  T: [TMatrix14Tuple, TMatrix14Tuple, TMatrix14Tuple]; // 3x4 Lidar to camera matrix
 }
 
 export interface IBasicBox3d extends IGraphicsBasicConfig {
