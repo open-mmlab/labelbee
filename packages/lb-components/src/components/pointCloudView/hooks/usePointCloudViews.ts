@@ -3,7 +3,7 @@
  * @author Glenfiddish <edwinlee0927@hotmail.com>
  * @createdate 2022-08-17
  */
-import { PointCloudAnnotation, PointCloud, MathUtils } from '@labelbee/lb-annotation';
+import { PointCloudAnnotation, PointCloud, MathUtils, getCuboidFromPointCloudBox } from '@labelbee/lb-annotation';
 import {
   IPointCloudBox,
   EPerspectiveView,
@@ -453,7 +453,7 @@ export const usePointCloudViews = () => {
       // Update count
       if (mainViewInstance) {
         const { count } = mainViewInstance.getSensesPointZAxisInPolygon(
-          mainViewInstance.getCuboidFromPointCloudBox(newBoxParams)
+          getCuboidFromPointCloudBox(newBoxParams)
             .polygonPointList as IPolygonPoint[],
           [
             newBoxParams.center.z - newBoxParams.depth / 2,

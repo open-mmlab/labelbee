@@ -4,7 +4,12 @@
  * @LastEditors: Laoluo luozefeng@sensetime.com
  * @LastEditTime: 2022-07-08 11:08:02
  */
-import { PointCloud, MathUtils, PointCloudAnnotation } from '@labelbee/lb-annotation';
+import {
+  PointCloud,
+  MathUtils,
+  PointCloudAnnotation,
+  getCuboidFromPointCloudBox,
+} from '@labelbee/lb-annotation';
 import { getClassName } from '@/utils/dom';
 import { PointCloudContainer } from './PointCloudLayout';
 import React, { useEffect, useRef } from 'react';
@@ -172,8 +177,7 @@ const PointCloudSideView = ({ currentData, config }: IA2MapStateProps) => {
         // Update count
         if (ptCtx.mainViewInstance) {
           const { count } = ptCtx.mainViewInstance.getSensesPointZAxisInPolygon(
-            ptCtx.mainViewInstance.getCuboidFromPointCloudBox(newBoxParams)
-              .polygonPointList as IPolygonPoint[],
+            getCuboidFromPointCloudBox(newBoxParams).polygonPointList as IPolygonPoint[],
             [
               newBoxParams.center.z - newBoxParams.depth / 2,
               newBoxParams.center.z + newBoxParams.depth / 2,
