@@ -126,7 +126,7 @@ export const ToolHotKeyCom: React.FC<IComponentsProps> = ({ title, style, shortC
           );
         }
 
-        if (item?.startsWith('data')) {
+        if (item?.startsWith?.('data')) {
           return (
             <span key={index} style={wrapperStyle}>
               <span className='shortCutButton' style={{ marginRight: '3px' }}>
