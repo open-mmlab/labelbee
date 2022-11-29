@@ -1,4 +1,4 @@
-import { edgeAdsorptionScope, ELineTypes, EToolName } from '@/constant/tool';
+import { edgeAdsorptionScope, ELineTypes, EOperationMode, EToolName } from '@/constant/tool';
 import RectUtils from '@/utils/tool/RectUtils';
 import PolygonUtils from '@/utils/tool/PolygonUtils';
 import MarkerUtils from '@/utils/tool/MarkerUtils';
@@ -35,6 +35,11 @@ class PointOperation extends BasicToolOperation {
   public selectedID?: string;
 
   public markerIndex: number; // 用于列表标签定位
+
+  public dragInfo?: {
+    dragStartCoord: ICoordinate;
+    originPointList: IPointUnit[];
+  };
 
   private _textAttributInstance?: TextAttributeClass;
 
@@ -113,6 +118,7 @@ class PointOperation extends BasicToolOperation {
     this.clearActiveStatus();
     this.setPointList(pointList);
     this.setNextMarker(pointList);
+    this.recoverOperationMode();
     this.render();
   }
 
@@ -263,6 +269,29 @@ class PointOperation extends BasicToolOperation {
     this.clearActiveStatus();
   }
 
+  /**
+   * Offset is under zooming.
+   * @param offset
+   */
+  public onDragMoveAll(offset: ICoordinate) {
+    if (!this.dragInfo?.originPointList?.length) {
+      return;
+    }
+    this.setPointList(
+      this.dragInfo.originPointList.map((point: IPointUnit) => {
+        const newRect = {
+          ...point,
+          x: point.x + offset.x / this.zoom,
+          y: point.y + offset.y / this.zoom,
+        };
+
+        return newRect;
+      }),
+    );
+
+    this.render();
+  }
+
   public onMouseDown(e: MouseEvent) {
     if (super.onMouseDown(e) || this.forbidMouseOperation) {
       return;
@@ -270,13 +299,28 @@ class PointOperation extends BasicToolOperation {
 
     // 当前目标下没有 hoverId 才进行标注
     if (e.button === 0 && !this.hoverID) {
+      this.recoverOperationMode();
       this.createPoint(e);
       this.render();
+
       return;
     }
-    // 有选中的点时 才能进行拖拽
-    if (this.hoverID === this.selectedID && e.button === 0) {
+
+    /**
+     * Drag precondition
+     *
+     * 1. hoverID === Selected ID
+     * 2. It's multiMoveMode & Hover a point.
+     */
+    if ((this.hoverID === this.selectedID || (this.isMultiMoveMode && this.hoverID)) && e.button === 0) {
       this.dragStatus = EDragStatus.Start;
+      if (this.isMultiMoveMode) {
+        this.dragInfo = {
+          dragStartCoord: this.getCoordinateUnderZoom(e),
+          originPointList: this.pointList,
+        };
+      }
+      return;
     }
 
     this.render();
@@ -287,6 +331,7 @@ class PointOperation extends BasicToolOperation {
     if (super.onMouseMove(e) || this.forbidMouseOperation || !this.imgInfo) {
       return;
     }
+
     this.hoverID = this.getHoverId();
     // 拖拽中
     if (this.dragStatus === EDragStatus.Start || this.dragStatus === EDragStatus.Move) {
@@ -310,6 +355,7 @@ class PointOperation extends BasicToolOperation {
     // 拖拽停止
     if (this.dragStatus === EDragStatus.Move) {
       this.history.pushHistory(this.pointList);
+      this.dragInfo = undefined;
     }
     this.dragStatus = EDragStatus.Wait;
     this.render();
@@ -319,6 +365,15 @@ class PointOperation extends BasicToolOperation {
     if (!this.imgInfo) return;
     this.dragStatus = EDragStatus.Move;
     const coordinateZoom = this.getCoordinateUnderZoom(e);
+
+    if (this.isMultiMoveMode && this.dragInfo) {
+      const offset = {
+        x: coordinateZoom.x - this.dragInfo.dragStartCoord.x,
+        y: coordinateZoom.y - this.dragInfo.dragStartCoord.y,
+      };
+      this.onDragMoveAll(offset);
+      return;
+    }
     // 缩放后的坐标
     const zoomCoordinate = AxisUtils.changeDrawOutsideTarget(
       coordinateZoom,
@@ -542,6 +597,8 @@ class PointOperation extends BasicToolOperation {
   }
 
   public rightMouseUp() {
+    this.recoverOperationMode();
+
     // 删除操作
     if (this.selectedID === this.hoverID) {
       const pointList = this.pointList.filter((point) => point.id !== this.selectedID);
@@ -744,9 +801,9 @@ class PointOperation extends BasicToolOperation {
   /**
    * 绘制标点
    */
-  public renderPoint(point: IPointUnit) {
+  public renderPoint(point: IPointUnit, isSelected = false) {
     const { textAttribute = '', attribute } = point;
-    const selected = point.id === this.selectedID;
+    const selected = isSelected || point.id === this.selectedID;
     const toolColor = this.getColor(attribute);
 
     const transformPoint = AxisUtils.changePointByZoom(point, this.zoom, this.currentPos);
@@ -807,22 +864,40 @@ class PointOperation extends BasicToolOperation {
     }
   }
 
-  public renderPointList() {
-    const [showingPointList, selectedPoint] = CommonToolUtils.getRenderResultList<IPointUnit>(
-      this.pointList,
-      CommonToolUtils.getSourceID(this.basicResult),
-      this.attributeLockList,
-      this.selectedID,
-    );
-
-    if (!this.isHidden) {
-      showingPointList.forEach((point) => {
-        this.renderPoint(point);
-      });
+  public renderMultiSelectedPoint() {
+    if (!this.isMultiMoveMode) {
+      return;
     }
 
-    if (selectedPoint) {
-      this.renderPoint(selectedPoint);
+    this.pointList.forEach((point) => {
+      this.renderPoint(point, true);
+    });
+  }
+
+  public renderPointList() {
+    switch (this.operationMode) {
+      case EOperationMode.MultiMove:
+        this.renderMultiSelectedPoint();
+        break;
+
+      default: {
+        const [showingPointList, selectedPoint] = CommonToolUtils.getRenderResultList<IPointUnit>(
+          this.pointList,
+          CommonToolUtils.getSourceID(this.basicResult),
+          this.attributeLockList,
+          this.selectedID,
+        );
+
+        if (!this.isHidden) {
+          showingPointList.forEach((point) => {
+            this.renderPoint(point);
+          });
+        }
+
+        if (selectedPoint) {
+          this.renderPoint(selectedPoint);
+        }
+      }
     }
   }
 
