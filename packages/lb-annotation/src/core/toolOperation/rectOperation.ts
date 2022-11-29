@@ -49,8 +49,6 @@ class RectOperation extends BasicToolOperation {
 
   public markerIndex: number; // 用于列表标签定位
 
-  public operationMode: EOperationMode = EOperationMode.General;
-
   private _textAttributInstance?: TextAttributeClass;
 
   private dragInfo?: {
@@ -141,10 +139,6 @@ class RectOperation extends BasicToolOperation {
     return this.selectedRect?.textAttribute;
   }
 
-  public get isMultiMoveMode() {
-    return this.operationMode === EOperationMode.MultiMove;
-  }
-
   get dataList() {
     return this.rectList;
   }
@@ -200,10 +194,6 @@ class RectOperation extends BasicToolOperation {
       [],
     );
     return showingRect;
-  }
-
-  public setOperationMode(operationMode: EOperationMode) {
-    this.operationMode = operationMode;
   }
 
   public setSelectedID(newID?: string) {
@@ -1581,7 +1571,7 @@ class RectOperation extends BasicToolOperation {
    *
    */
   public renderMultiSelectedRect() {
-    if (this.operationMode !== EOperationMode.MultiMove) {
+    if (!this.isMultiMoveMode) {
       return;
     }
 
