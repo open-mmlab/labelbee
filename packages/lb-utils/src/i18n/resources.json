@@ -176,11 +176,14 @@
     "DuplicateTrackIDsExist": "Duplicate trackIDs exits",
     "BatchUpdateText": "Batch Update",
     "BatchUpdateTrackID": "Batch update trackIDs",
-    "TrackIDUnifiedAs": "TrackID is unified as",
-    "UnifiedTrackIDRange": "Unified TrackID Range",
+    "TrackIDUnifyAs": "TrackID is Unify as",
+    "UnifyTrackIDRange": "Unify TrackID Range",
     "Page": "Page",
     "OkText": "OK",
-    "CancelText": "Cancel"
+    "CancelText": "Cancel",
+    "UnifyParams": "Unify Params",
+    "UnifySize": "Unify Size",
+    "UnifyTag": "Unify Tag"
   },
   "cn": {
     "TextInput": "文本输入",
@@ -359,10 +362,13 @@
     "DuplicateTrackIDsExist": "存在重复的trackID",
     "BatchUpdateText": "批量修改",
     "BatchUpdateTrackID": "批量修改ID",
-    "TrackIDUnifiedAs": "统一标注框ID为",
-    "UnifiedTrackIDRange": "统一ID范围",
+    "TrackIDUnifyAs": "统一标注框ID为",
+    "UnifyTrackIDRange": "统一ID范围",
     "Page": "页",
     "OkText": "确认",
-    "CancelText": "取消"
+    "CancelText": "取消",
+    "UnifyParams": "统一参数",
+    "UnifySize": "统一尺寸",
+    "UnifyTag": "统一标签"
   }
 }

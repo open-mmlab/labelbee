@@ -249,7 +249,6 @@ class PointCloudUtils {
       height: boxParams.depth,
       length: boxParams.width,
       width: boxParams.height,
-
       rotation_y: this.transferRotation2KittiRotation_y(boxParams.rotation),
     };
   }
@@ -290,8 +289,8 @@ class PointCloudUtils {
 
   /**
    * Get the pointCloud result from imgList
-   * @param param0 
-   * @returns 
+   * @param param0
+   * @returns
    */
   public static getAllPointCloudResult({
     imgList,
@@ -374,6 +373,97 @@ class PointCloudUtils {
     });
 
     return JSON.stringify(originResult);
+  }
+
+  public static batchUpdateResultByTrackID({
+    id,
+    newData,
+    result,
+    step = 1,
+  }: {
+    id: number;
+    newData: Partial<IPointCloudBox>;
+    result?: string;
+    step?: number;
+  }) {
+    const DEFAULT_STEP_NAME = `step_${step}`;
+    const originResult = this.jsonParser(result);
+    const dataList = originResult?.[DEFAULT_STEP_NAME]?.result; // PointCloudData1
+
+    if (!dataList) {
+      return result;
+    }
+
+    originResult[DEFAULT_STEP_NAME].result = dataList.map((v: IPointCloudBox) => {
+      if (v?.trackID === id) {
+        // SubAttribute needs to be incremental updating.
+
+        const updateResult = {
+          ...newData,
+        };
+        const newSubAttribute = updateResult.subAttribute;
+
+        if (newSubAttribute && v.subAttribute) {
+          Object.assign(updateResult, { subAttribute: { ...v.subAttribute, ...newSubAttribute } });
+        }
+
+        return {
+          ...v,
+          ...updateResult,
+        };
+      }
+
+      return v;
+    });
+
+    return JSON.stringify(originResult);
+  }
+
+  public static getMaxSizeFromBox({
+    trackID,
+    imgList,
+  }: {
+    trackID: number;
+    imgList: Array<{ result: string }>;
+  }) {
+    let basicSize: { width: number; height: number; depth: number } | undefined = undefined;
+
+    imgList.forEach((imgInfo) => {
+      const DEFAULT_STEP_NAME = `step_${1}`;
+      const originResult = this.jsonParser(imgInfo.result);
+      const dataList = originResult?.[DEFAULT_STEP_NAME]?.result; // PointCloudData1
+
+      if (!dataList) {
+        return;
+      }
+
+      dataList.forEach((v: IPointCloudBox) => {
+        if (v?.trackID === trackID) {
+          if (!basicSize) {
+            basicSize = {
+              width: v.width,
+              height: v.height,
+              depth: v.depth,
+            };
+            return;
+          }
+
+          if (v.width > basicSize.width) {
+            basicSize.width = v.width;
+          }
+
+          if (v.height > basicSize.height) {
+            basicSize.height = v.height;
+          }
+
+          if (v.depth > basicSize.depth) {
+            basicSize.depth = v.depth;
+          }
+        }
+      });
+    });
+
+    return basicSize;
   }
 }
 

@@ -15,6 +15,7 @@ import { ESubmitType } from '@/constant';
 import { EPageTurningOperation } from '@/data/enums/AnnotationSize';
 import PageOperator from '@/utils/PageOperator';
 import { jsonParser } from '@/utils';
+import { IPointCloudBox } from '@labelbee/lb-utils';
 
 const dispatchTasks = (dispatch: any, tasks: any[]) => tasks.map((task) => dispatch(task));
 
@@ -209,6 +210,22 @@ export function BatchUpdateTrackID(
     payload: {
       id,
       newID,
+      rangeIndex,
+    },
+  };
+}
+
+
+export function BatchUpdateResultByTrackID(
+  id: number, // originData
+  newData: Partial<IPointCloudBox>,
+  rangeIndex: [number, number],
+): AnnotationActionTypes {
+  return {
+    type: ANNOTATION_ACTIONS.BATCH_UPDATE_RESULT_BY_TRACK_ID,
+    payload: {
+      id,
+      newData,
       rangeIndex,
     },
   };

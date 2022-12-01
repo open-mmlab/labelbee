@@ -241,7 +241,7 @@ const AttributeUpdater = ({
           {subAttributeList.map(
             (subAttribute) =>
               subAttribute?.subSelected && (
-                <div style={{ marginTop: 12 }}>
+                <div style={{ marginTop: 12 }} key={subAttribute.value}>
                   <div style={subTitleStyle}>
                     {t('SubAttribute')}-{subAttribute.key}
                   </div>

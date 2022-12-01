@@ -85,10 +85,10 @@ const BatchUpdateModal = ({ id }: IProps) => {
             {id}
           </Form.Item>
 
-          <Form.Item name='newID' label={t('TrackIDUnifiedAs')} rules={defaultNumberRules}>
+          <Form.Item name='newID' label={t('TrackIDUnifyAs')} rules={defaultNumberRules}>
             <InputNumber />
           </Form.Item>
-          <Form.Item label={t('UnifiedTrackIDRange')} required={true}>
+          <Form.Item label={t('UnifyTrackIDRange')} required={true}>
             <Form.Item
               style={{ display: 'inline-block', width: 'calc(50% - 24px)' }}
               rules={defaultNumberRules}

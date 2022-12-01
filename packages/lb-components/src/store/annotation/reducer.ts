@@ -711,6 +711,30 @@ export const annotationReducer = (
       };
     }
 
+    case ANNOTATION_ACTIONS.BATCH_UPDATE_RESULT_BY_TRACK_ID: {
+      const { id, newData, rangeIndex } = action.payload;
+      const { imgList, imgIndex, onSubmit } = state;
+      const newImgList = imgList.map((v, i) => {
+        if (MathUtils.isInRange(i, rangeIndex)) {
+          return {
+            ...v,
+            result: PointCloudUtils.batchUpdateResultByTrackID({ id, newData, result: v.result }),
+          };
+        }
+        return v;
+      });
+
+      // Notify external data changes.
+      if (onSubmit) {
+        onSubmit([newImgList[imgIndex]], ESubmitType.BatchUpdateTrackID, imgIndex, newImgList);
+      }
+
+      return {
+        ...state,
+        imgList: newImgList,
+      };
+    }
+
     // eslint-disable-next-line no-fallthrough
     default:
       return state;

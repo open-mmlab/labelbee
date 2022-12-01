@@ -17,6 +17,7 @@ enum ESubmitType {
   Save = 7,
   BatchUpdateTrackID = 8,
   SyncImgList = 10001, 
+  SyncCurrentPageData = 10002, // 同步当页数据
 }
 
 interface IFileItem {

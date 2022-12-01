@@ -18,6 +18,7 @@ enum ESubmitType {
   Save = 7, // 点击保存
   BatchUpdateTrackID = 8, // 批量更改 TrackID (PointCloud)
   SyncImgList = 10001, // 仅更改数据
+  SyncCurrentPageData = 10002, // 同步当页数据
 }
 
 // 结果类型
@@ -519,6 +520,7 @@ enum ESubmitType {
   Save = 7, // 点击保存
   BatchUpdateTrackID = 8, // 批量更改 TrackID (PointCloud)
   SyncImgList = 10001, // 仅更改数据
+  SyncCurrentPageData = 10002, // 同步当页数据
 }
 
 

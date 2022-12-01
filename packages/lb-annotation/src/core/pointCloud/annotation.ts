@@ -1,5 +1,5 @@
 /**
- * @file Unified management of pointCloud & pointCloud2dOperation (Three views => Top & Side & Back)
+ * @file Unify management of pointCloud & pointCloud2dOperation (Three views => Top & Side & Back)
  * @createDate 2022-07-18
  * @author Ron <ron.f.luo@gmail.com>
  */

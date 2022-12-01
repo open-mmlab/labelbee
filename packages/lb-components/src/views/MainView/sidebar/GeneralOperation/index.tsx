@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useCallback, useState } from 'react';
 import { AppState } from '@/store';
 import { connect, ConnectedComponent } from 'react-redux';
 import { ToolInstance } from '@/store/annotation/types';
@@ -8,7 +8,15 @@ import { jsonParser } from '@/utils';
 import { AnnotationFileList } from '@/types/data';
 import ActionsConfirm, { IOperationConfig } from './ActionsConfirm';
 import useOperationList from './useOperationList';
-import { LabelBeeContext } from '@/store/ctx';
+import { LabelBeeContext, useDispatch } from '@/store/ctx';
+import UnifyParamsSvg from '@/assets/annotation/pointCloudTool/unitAttribute.svg';
+import UnifyParamsForbidSvg from '@/assets/annotation/pointCloudTool/unitAttributeForbid.svg';
+import UnifyParamsHoverSvg from '@/assets/annotation/pointCloudTool/unitAttributeHover.svg';
+import { useTranslation } from 'react-i18next';
+import UnifyParamsModal from '../../../../components/pointCloudView/components/UnifyParamsModal';
+import { useSingleBox } from '@/components/pointCloudView/hooks/useSingleBox';
+import { ToSubmitFileData } from '@/store/annotation/actionCreators';
+import { ESubmitType } from '@/constant';
 
 const mapStateToProps = (state: AppState) => {
   const stepInfo = StepUtils.getCurrentStepInfo(state.annotation?.step, state.annotation?.stepList);
@@ -53,13 +61,54 @@ export const PointCloudOperation: ConnectedComponent<
   >
 > = connect(mapStateToProps, null, null, { context: LabelBeeContext })(
   ({ toolInstance, stepInfo }) => {
+    const dispatch = useDispatch();
+    const { t } = useTranslation();
+    const { selectedBox } = useSingleBox();
     const operationList = useOperationList(toolInstance);
-    const allOperation: IOperationConfig[] = [
+    const [isShowModal, setShowModal] = useState(false);
+
+    const config = jsonParser(stepInfo.config);
+
+    let allOperation: IOperationConfig[] = [
       operationList.copyPrevious,
       operationList.empty,
       operationList.setValidity,
     ];
-    return <ActionsConfirm allOperation={allOperation} />;
+
+    if (config.trackConfigurable === true) {
+      const forbidOperation = !selectedBox;
+      const UnifyParams: IOperationConfig = {
+        name: t('UnifyParams'),
+        key: 'UnifyParams',
+        imgSvg: forbidOperation ? UnifyParamsForbidSvg : UnifyParamsSvg,
+        hoverSvg: UnifyParamsHoverSvg,
+        onClick: () => {
+          dispatch(ToSubmitFileData(ESubmitType.SyncCurrentPageData));
+          setShowModal(true);
+        },
+        forbidConfirm: true,
+        forbidOperation: forbidOperation,
+      };
+      allOperation.unshift(UnifyParams);
+    }
+
+    const onCancel = useCallback(() => {
+      setShowModal(false);
+    }, []);
+
+    const selectedBoxInfo = selectedBox?.info;
+
+    return (
+      <>
+        <ActionsConfirm allOperation={allOperation} />
+        <UnifyParamsModal
+          id={selectedBoxInfo?.trackID}
+          visible={isShowModal}
+          onCancel={onCancel}
+          config={config}
+        />
+      </>
+    );
   },
 );
 

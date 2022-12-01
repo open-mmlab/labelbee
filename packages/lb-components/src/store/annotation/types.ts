@@ -19,6 +19,7 @@ import {
   LoadFileList,
 } from '@/types/data';
 import { ESubmitType } from '@/constant';
+import { IPointCloudBox } from '@labelbee/lb-utils';
 
 export type GraphToolInstance =
   | RectOperation
@@ -176,6 +177,15 @@ interface BatchUpdateTrackID {
   }
 }
 
+interface BatchUpdateResultByTrackID {
+  type: typeof ANNOTATION_ACTIONS.BATCH_UPDATE_RESULT_BY_TRACK_ID,
+  payload: {
+    id: number;
+    newData: Partial<IPointCloudBox>;
+    range: [number, number],
+  }
+}
+
 export type AnnotationActionTypes =
   | UpdateToolInstance
   | UpdateImgList
@@ -192,4 +202,5 @@ export type AnnotationActionTypes =
   | UpdateGetFileList
   | CopyBackWordResult
   | UpdateOnSave
-  | BatchUpdateTrackID;
+  | BatchUpdateTrackID
+  | BatchUpdateResultByTrackID;
