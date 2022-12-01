@@ -340,11 +340,20 @@ export default class ViewOperation extends BasicToolOperation {
       this.currentPos,
     );
 
-    const newPointList = DrawUtils.drawPolygon(this.canvas, renderLineWithZoom, {
+    const lineRenderOptions = {
       ...style,
       ...this.getReferenceOptions(line?.isReference),
       lineType,
-    });
+      strokeColor: style.stroke,
+    };
+
+    let newPointList = [];
+    if (line.showKeyPoint) {
+      // Show the line key point.
+      newPointList = DrawUtils.drawPolygonWithKeyPoint(this.canvas, renderLineWithZoom, lineRenderOptions);
+    } else {
+      newPointList = DrawUtils.drawPolygon(this.canvas, renderLineWithZoom, lineRenderOptions);
+    }
 
     const isShowDirection = line?.showDirection === true && line?.pointList?.length > 2;
 
