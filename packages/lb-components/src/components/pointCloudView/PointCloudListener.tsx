@@ -3,7 +3,7 @@ import { useRotate } from './hooks/useRotate';
 import { useBoxes } from './hooks/useBoxes';
 import { useSingleBox } from './hooks/useSingleBox';
 import React, { useContext, useEffect } from 'react';
-import { cTool, AttributeUtils } from '@labelbee/lb-annotation';
+import { cTool, AttributeUtils, CommonToolUtils } from '@labelbee/lb-annotation';
 import { message } from 'antd';
 import { connect } from 'react-redux';
 import { a2MapStateToProps, IA2MapStateProps } from '@/store/annotation/map';
@@ -146,6 +146,10 @@ const PointCloudListener: React.FC<IA2MapStateProps> = ({ currentData, config })
   };
 
   const onKeyDown = (e: KeyboardEvent) => {
+    if (!CommonToolUtils.hotkeyFilter(e)) {
+      return;
+    }
+
     const lowerCaseKey = e.key.toLocaleLowerCase();
 
     if (e.ctrlKey) {
