@@ -268,7 +268,13 @@ class LineToolOperation extends BasicToolOperation {
   }
 
   get enableOutOfTarget() {
-    return this.config.enableOutOfTarget;
+    /**
+     * Judgement of showing Order.
+     *
+     * Origin Config of LineTool: enableOutOfTarget & outOfTarget.
+     * Configurable of other tools: drawOutsideTarget.
+     */
+    return this.config.enableOutOfTarget || this.config.outOfTarget || this.config.drawOutsideTarget;
   }
 
   /**
@@ -1040,7 +1046,7 @@ class LineToolOperation extends BasicToolOperation {
    */
   public getNextPoint(e: MouseEvent | KeyboardEvent | { altKey: boolean; shiftKey?: boolean }, nextPoint: ICoordinate) {
     const newPoint = this.getCoordByConfig(e, nextPoint) || nextPoint;
-    return this.enableOutOfTarget ? newPoint : this.getNextCoordByRenderCoord(newPoint);
+    return this.enableOutOfTarget ? this.coordUtils.getAbsCoord(newPoint) : this.getNextCoordByRenderCoord(newPoint);
   }
 
   // TODO: 渲染hover样式
