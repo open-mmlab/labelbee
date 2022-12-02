@@ -27,30 +27,13 @@ export const isInvalidNumber = (value: any, nonZero = false) => {
   return false;
 };
 
-export const decimalCheck = (rule: any, value: any, decimalNum = 0) => {
-  const intValue = Number(value);
-  if (isInvalidNumber(value)) {
-    return Promise.reject(new Error('请输入一个大于等于0的数字'));
-  }
-  const decimal = intValue.toString().split('.')[1];
-  if (decimal?.length > decimalNum) {
-    let errorText = `请输入一个小数位数不超过${decimalNum}位数的数字`;
-    if (decimalNum < 1) {
-      errorText = `请输入一个正整数`;
-    }
-    return Promise.reject(errorText);
-  }
-  return Promise.resolve();
-};
-
-const defaultNumberRules = [
-  { required: true, message: '请填写一个数字' },
-  { validator: (rule: any, value: any) => decimalCheck(rule, value, 0) },
-];
-
 interface IProps {
   id: number;
 }
+
+const inputStyle = {
+  width: '80px',
+};
 
 const BatchUpdateModal = ({ id }: IProps) => {
   const dispatch = useDispatch();
@@ -67,6 +50,7 @@ const BatchUpdateModal = ({ id }: IProps) => {
   const onCancel = () => setVisible(false);
 
   const onOk = () => form.submit();
+  const defaultNumberRules = [{ required: true, message: t('PositiveIntegerCheck') }];
 
   return (
     <>
@@ -86,38 +70,39 @@ const BatchUpdateModal = ({ id }: IProps) => {
           </Form.Item>
 
           <Form.Item name='newID' label={t('TrackIDUnifyAs')} rules={defaultNumberRules}>
-            <InputNumber />
+            <InputNumber precision={0} min={1} style={inputStyle} />
           </Form.Item>
           <Form.Item label={t('UnifyTrackIDRange')} required={true}>
             <Form.Item
-              style={{ display: 'inline-block', width: 'calc(50% - 24px)' }}
+              style={{ display: 'inline-block' }}
               rules={defaultNumberRules}
               name='prevPage'
+              noStyle={true}
             >
-              <InputNumber />
+              <InputNumber precision={0} min={1} style={inputStyle} />
             </Form.Item>
             <span
               style={{
                 display: 'inline-block',
                 width: '24px',
-                lineHeight: '32px',
                 textAlign: 'center',
               }}
             >
               -
             </span>
             <Form.Item
-              style={{ display: 'inline-block', width: 'calc(50% - 24px)' }}
+              style={{ display: 'inline-block' }}
               rules={defaultNumberRules}
               name='nextPage'
+              noStyle={true}
             >
-              <InputNumber />
+              <InputNumber precision={0} min={1} style={inputStyle} />
             </Form.Item>
             <span
               style={{
                 display: 'inline-block',
-                width: '24px',
-                lineHeight: '32px',
+                width: '40x',
+                marginLeft: '10px',
                 textAlign: 'center',
               }}
             >

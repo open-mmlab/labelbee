@@ -177,18 +177,23 @@ const UnifyParamsModal = ({ id, visible, onCancel, config, imgList, imgIndex }: 
       wrapClassName='labelbee-custom-modal'
     >
       <Form {...layout} form={form} onFinish={onFinish}>
-        <Form.Item name='id' label={t('CurrentBoxTrackIDs')}>
+        <Form.Item name='id' label={t('UnifyTrackID')}>
           {id}
         </Form.Item>
 
-        <Form.Item label={t('UnifyTrackIDRange')} required={true}>
+        <Form.Item label={t('UnifyAttributeRange')} required={true}>
           <Form.Item
             style={{ display: 'inline-block' }}
             rules={defaultNumberRules}
             name='prevPage'
             noStyle={true}
           >
-            <InputNumber min={1} style={{ width: '80px' }} onChange={() => recalculateSize()} />
+            <InputNumber
+              precision={0}
+              min={1}
+              style={{ width: '80px' }}
+              onChange={() => recalculateSize()}
+            />
           </Form.Item>
           <span
             style={{
@@ -205,7 +210,12 @@ const UnifyParamsModal = ({ id, visible, onCancel, config, imgList, imgIndex }: 
             name='nextPage'
             noStyle={true}
           >
-            <InputNumber min={1} style={{ width: '80px' }} onChange={() => recalculateSize()} />
+            <InputNumber
+              precision={0}
+              min={1}
+              style={{ width: '80px' }}
+              onChange={() => recalculateSize()}
+            />
           </Form.Item>
           <span
             style={{

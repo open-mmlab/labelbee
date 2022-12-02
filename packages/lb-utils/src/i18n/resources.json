@@ -182,6 +182,8 @@
     "OkText": "OK",
     "CancelText": "Cancel",
     "UnifyParams": "Unify Params",
+    "UnifyAttributeRange": "Unify Range",
+    "UnifyTrackID": "Unify TrackID",
     "UnifySize": "Unify Size",
     "UnifyTag": "Unify Tag"
   },
@@ -368,6 +370,8 @@
     "OkText": "确认",
     "CancelText": "取消",
     "UnifyParams": "统一参数",
+    "UnifyAttributeRange": "统一属性范围",
+    "UnifyTrackID": "统一标注框ID",
     "UnifySize": "统一尺寸",
     "UnifyTag": "统一标签"
   }
