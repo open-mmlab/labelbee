@@ -2,6 +2,8 @@
  * 各类的数学运算
  */
 
+// eslint-disable-next-line
+import MathUtilsWorker from 'web-worker:./MathUtilsWorker.js';
 import { IBasicLine, IBasicPoint, TAnnotationViewData } from '@labelbee/lb-utils';
 import { DEFAULT_FONT, DEFAULT_TEXT_MAX_WIDTH, ELineTypes, SEGMENT_NUMBER } from '@/constant/tool';
 import { IPolygonData, IPolygonPoint } from '@/types/tool/polygon';
@@ -506,6 +508,47 @@ export default class MathUtils {
     }
 
     return radius;
+  }
+
+  /**
+   * Rewrite the CollectionPoint Calculation (Diff`from getCollectionPointByAnnotationData)
+   * @param annotations
+   * @returns
+   */
+  public static getCollectionPointByAnnotationDataPromise(annotations: TAnnotationViewData[]) {
+    const points = annotations.filter((v) => v.type === 'point').map((v) => v.annotation) as IBasicPoint[];
+    const backgroundList = annotations
+      .filter((v) => {
+        if (['polygon', 'line'].includes(v.type)) {
+          return true;
+        }
+        return false;
+      })
+      .map((v) => {
+        if (v.type === 'polygon') {
+          return {
+            ...v.annotation,
+            pointList: PolygonUtils.concatBeginAndEnd(v.annotation.pointList),
+          };
+        }
+
+        return v.annotation;
+      }) as IBasicLine[];
+
+    const mathUtilsWorker = new MathUtilsWorker();
+
+    return {
+      promise: new Promise(function collectionPromise(resolve) {
+        mathUtilsWorker.postMessage({ points, backgroundList });
+        mathUtilsWorker.onmessage = (e: any) => {
+          resolve(e.data);
+          mathUtilsWorker.terminate();
+        };
+      }),
+      close: () => {
+        mathUtilsWorker.terminate();
+      },
+    };
   }
 
   public static getCollectionPointByAnnotationData(annotations: TAnnotationViewData[]) {

@@ -17,7 +17,7 @@ export default {
   input: ['./src/index.ts'],
   coverageDirectory: './dist/',
   plugins: [
-    webWorkerLoader(/* configuration */),
+    webWorkerLoader(/* configuration */ { targetPlatform: 'browser' }),
     alias({
       entries: [{ find: '@', replacement: path.resolve(projectRootDir, './src') }],
       customResolver,

@@ -16,3 +16,8 @@ declare module 'web-worker:./filterBoxWorker.js' {
   const content: any;
   export default content;
 }
+
+declare module 'web-worker:./MathUtilsWorker.js' {
+  const content: any;
+  export default content;
+}
