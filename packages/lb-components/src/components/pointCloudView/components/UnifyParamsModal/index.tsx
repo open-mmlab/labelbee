@@ -62,6 +62,9 @@ const UnifyParamsModal = ({ id, visible, onCancel, config, imgList, imgIndex }: 
       // Clear All Data
       form.resetFields();
       setSize(undefined);
+    } else {
+      // Init
+      recalculateSize();
     }
   }, [visible]);
 
@@ -187,6 +190,7 @@ const UnifyParamsModal = ({ id, visible, onCancel, config, imgList, imgIndex }: 
             rules={defaultNumberRules}
             name='prevPage'
             noStyle={true}
+            initialValue={1} // First Page 
           >
             <InputNumber
               precision={0}
@@ -209,6 +213,7 @@ const UnifyParamsModal = ({ id, visible, onCancel, config, imgList, imgIndex }: 
             rules={defaultNumberRules}
             name='nextPage'
             noStyle={true}
+            initialValue={imgList.length}  // Last Page 
           >
             <InputNumber
               precision={0}
