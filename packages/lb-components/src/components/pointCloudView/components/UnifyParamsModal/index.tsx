@@ -274,7 +274,6 @@ const UnifyParamsModal = ({ id, visible, onCancel, config, imgList, imgIndex }: 
 
 const mapStateToProps = (state: AppState) => {
   return {
-    imgList: state.annotation.imgList,
     imgIndex: state.annotation.imgIndex,
   };
 };

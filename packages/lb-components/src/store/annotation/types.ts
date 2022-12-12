@@ -174,6 +174,7 @@ interface BatchUpdateTrackID {
     id: number;
     newID: number;
     range: [number, number],
+    imgList: IFileItem[],
   }
 }
 

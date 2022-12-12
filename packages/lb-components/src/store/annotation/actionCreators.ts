@@ -200,21 +200,27 @@ export function CopyBackWordResult(): AnnotationActionTypes {
   };
 }
 
-export function BatchUpdateTrackID(
-  id: number,
-  newID: number,
-  rangeIndex: [number, number],
-): AnnotationActionTypes {
+export function BatchUpdateTrackID({
+  id,
+  newID,
+  rangeIndex,
+  imgList,
+}: {
+  id: number;
+  newID: number;
+  rangeIndex: [number, number];
+  imgList: IFileItem[];
+}): AnnotationActionTypes {
   return {
     type: ANNOTATION_ACTIONS.BATCH_UPDATE_TRACK_ID,
     payload: {
       id,
       newID,
       rangeIndex,
+      imgList,
     },
   };
 }
-
 
 export function BatchUpdateResultByTrackID(
   id: number, // originData

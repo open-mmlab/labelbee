@@ -1,9 +1,14 @@
-import { ESubmitType } from '@/constant';
-import { BatchUpdateTrackID, ToSubmitFileData } from '@/store/annotation/actionCreators';
-import { useDispatch } from '@/store/ctx';
+import { AppState } from '@/store';
+import { BatchUpdateTrackID } from '@/store/annotation/actionCreators';
+import { composeResultByToolInstance } from '@/store/annotation/reducer';
+import { ToolInstance } from '@/store/annotation/types';
+import { LabelBeeContext, useDispatch } from '@/store/ctx';
+import { AnnotationFileList } from '@/types/data';
+import { IStepInfo } from '@/types/step';
 import { Form, InputNumber, Modal } from 'antd';
 import React, { useState } from 'react';
 import { useTranslation } from 'react-i18next';
+import { connect } from 'react-redux';
 
 const layout = {
   labelCol: { span: 8 },
@@ -29,21 +34,33 @@ export const isInvalidNumber = (value: any, nonZero = false) => {
 
 interface IProps {
   id: number;
+  toolInstance: ToolInstance;
+  imgList: AnnotationFileList;
+  imgIndex: number;
+  stepList: IStepInfo[];
 }
 
 const inputStyle = {
   width: '80px',
 };
 
-const BatchUpdateModal = ({ id }: IProps) => {
+const BatchUpdateModal = ({ id, stepList, imgList, imgIndex, toolInstance }: IProps) => {
   const dispatch = useDispatch();
   const [visible, setVisible] = useState(false);
   const [form] = Form.useForm();
   const { t } = useTranslation();
 
   const onFinish = (values: any) => {
-    dispatch(ToSubmitFileData(ESubmitType.SyncImgList));
-    dispatch(BatchUpdateTrackID(id, values.newID, [values.prevPage - 1, values.nextPage - 1]));
+    // New ImgList without UpdateData
+    dispatch(
+      BatchUpdateTrackID({
+        id,
+        newID: values.newID,
+        rangeIndex: [values.prevPage - 1, values.nextPage - 1],
+        // TODO: Not to submit result, just to compose result.
+        imgList: composeResultByToolInstance({ toolInstance, imgList, imgIndex, stepList }),
+      }),
+    );
     setVisible(false);
   };
 
@@ -115,4 +132,13 @@ const BatchUpdateModal = ({ id }: IProps) => {
   );
 };
 
-export default BatchUpdateModal;
+const mapStateToProps = (state: AppState) => {
+  return {
+    toolInstance: state.annotation.toolInstance,
+    imgList: state.annotation.imgList,
+    imgIndex: state.annotation.imgIndex,
+    stepList: state.annotation.stepList,
+  };
+};
+
+export default connect(mapStateToProps, null, null, { context: LabelBeeContext })(BatchUpdateModal);
