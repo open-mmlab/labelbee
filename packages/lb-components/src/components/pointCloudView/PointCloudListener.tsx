@@ -238,6 +238,22 @@ const PointCloudListener: React.FC<IA2MapStateProps> = ({ currentData, config })
         }
       });
     };
+
+    /**
+     * TopView forbid all operations.
+     * @param forbidOperation
+     */
+    toolInstanceRef.current.setForbidOperation = (forbidOperation: boolean) => {
+      ptCtx.topViewInstance?.pointCloud2dOperation?.setForbidOperation(forbidOperation);
+      if (forbidOperation === true) {
+        // Clear Selected Status.
+        ptCtx.setSelectedIDs(undefined);
+      }
+    };
+
+    toolInstanceRef.current.setShowDefaultCursor = (showDefaultCursor: boolean) => {
+      ptCtx.topViewInstance?.pointCloud2dOperation?.setShowDefaultCursor(showDefaultCursor);
+    };
   }, [ptCtx.pointCloudBoxList, ptCtx.selectedID, ptCtx.valid, ptCtx.polygonList]);
 
   useEffect(() => {

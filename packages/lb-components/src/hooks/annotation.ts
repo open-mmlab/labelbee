@@ -22,6 +22,8 @@ export interface ICustomToolInstance {
     pushHistory: (action: any) => void;
   };
   setDefaultAttribute: (attribute: string) => void;
+  setForbidOperation: (forbidOperation: boolean) => void;
+  setShowDefaultCursor: (forbidOperation: boolean) => void;
 
   // PointCloud Exclusive function
   setSubAttribute: (key: string, value: string) => void;
@@ -62,6 +64,8 @@ const useCustomToolInstance = ({ basicInfo }: ICustomToolInstanceProps = {}) => 
       pushHistory: () => {},
     },
     setDefaultAttribute: (attribute: string) => {},
+    setForbidOperation: () => {},
+    setShowDefaultCursor: () => {},
 
     // PointCloud Exclusive function
     setSubAttribute: (key: string, value: string) => {},
