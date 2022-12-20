@@ -23,12 +23,14 @@ import { AppState } from '@/store';
 import { connect } from 'react-redux';
 import { IFileItem } from '@/types/data';
 import { LabelBeeContext } from '@/store/ctx';
+import { TDrawLayerSlot } from '@/types/main';
 
 interface IProps {
   imgList: IFileItem[];
+  drawLayerSlot?: TDrawLayerSlot;
 }
 
-const PointCloudView: React.FC<IProps> = ({ imgList }) => {
+const PointCloudView: React.FC<IProps> = ({ imgList, drawLayerSlot }) => {
   if (imgList.length === 0) {
     return null;
   }
@@ -44,7 +46,7 @@ const PointCloudView: React.FC<IProps> = ({ imgList }) => {
           </div>
 
           <div className={getClassName('point-cloud-container', 'right')}>
-            <PointCloudTopView />
+            <PointCloudTopView drawLayerSlot={drawLayerSlot} />
             <div className={getClassName('point-cloud-container', 'right-bottom')}>
               <PointCloudSideView />
               <PointCloudBackView />

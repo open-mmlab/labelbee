@@ -25,6 +25,7 @@ import useSize from '@/hooks/useSize';
 import { useTranslation } from 'react-i18next';
 import { LabelBeeContext } from '@/store/ctx';
 import { jsonParser } from '@/utils';
+import { TDrawLayerSlot } from '@/types/main';
 
 const { EPolygonPattern } = cTool;
 
@@ -134,7 +135,12 @@ const ZAxisSlider = ({
   );
 };
 
-const PointCloudTopView: React.FC<IA2MapStateProps> = ({ currentData, imgList, stepInfo }) => {
+interface IProps extends IA2MapStateProps {
+  drawLayerSlot?: TDrawLayerSlot
+}
+
+const PointCloudTopView: React.FC<IProps> = ({ currentData, imgList, stepInfo, drawLayerSlot }) => {
+  const [annotationPos, setAnnotationPos] = useState({ zoom: 1, currentPos: { x: 0, y: 0 } });
   const ref = useRef<HTMLDivElement>(null);
   const ptCtx = React.useContext(PointCloudContext);
   const size = useSize(ref);
@@ -252,6 +258,7 @@ const PointCloudTopView: React.FC<IA2MapStateProps> = ({ currentData, imgList, s
       pointCloud.render();
 
       setZoom(zoom);
+      setAnnotationPos({ zoom, currentPos });
     });
 
     // Synchronized 3d point cloud view displacement operations
@@ -261,6 +268,7 @@ const PointCloudTopView: React.FC<IA2MapStateProps> = ({ currentData, imgList, s
       const { x, y, z } = pointCloud.initCameraPosition;
       pointCloud.camera.position.set(x + offsetY, y - offsetX, z);
       pointCloud.render();
+      setAnnotationPos({ zoom, currentPos });
     });
   }, [size, ptCtx.topViewInstance]);
 
@@ -279,7 +287,9 @@ const PointCloudTopView: React.FC<IA2MapStateProps> = ({ currentData, imgList, s
       toolbar={<TopViewToolbar currentData={currentData} />}
     >
       <div style={{ position: 'relative', flex: 1 }}>
-        <div style={{ width: '100%', height: '100%' }} ref={ref} />
+        <div style={{ width: '100%', height: '100%' }} ref={ref}>
+          {drawLayerSlot?.(annotationPos)}
+        </div>
 
         <BoxInfos />
         <ZAxisSlider zAxisLimit={zAxisLimit} setZAxisLimit={setZAxisLimit} />
