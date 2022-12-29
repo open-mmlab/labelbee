@@ -924,6 +924,16 @@ class PolygonOperation extends BasicToolOperation {
       return;
     }
 
+    this.dragMouseDown(e);
+    return true;
+  }
+
+  /**
+   * Judgment of drag information during mousedown
+   * @param e 
+   * @returns 
+   */
+  public dragMouseDown(e: MouseEvent) {
     const firstPolygon = this.selectedPolygon;
 
     if (!firstPolygon || e.button !== 0) {
@@ -961,8 +971,6 @@ class PolygonOperation extends BasicToolOperation {
       changePointIndex,
       originPolygon: this.selectedPolygon,
     };
-
-    return true;
   }
 
   public segment() {

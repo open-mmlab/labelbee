@@ -32,6 +32,8 @@ export interface ICustomToolInstance {
 
   undo: () => void,
   redo: () => void,
+
+  [str: string]: any;
 }
 
 export interface ICustomToolInstanceProps {

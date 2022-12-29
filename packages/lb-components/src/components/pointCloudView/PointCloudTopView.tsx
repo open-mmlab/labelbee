@@ -137,9 +137,10 @@ const ZAxisSlider = ({
 
 interface IProps extends IA2MapStateProps {
   drawLayerSlot?: TDrawLayerSlot
+  checkMode?: boolean;
 }
 
-const PointCloudTopView: React.FC<IProps> = ({ currentData, imgList, stepInfo, drawLayerSlot }) => {
+const PointCloudTopView: React.FC<IProps> = ({ currentData, imgList, stepInfo, drawLayerSlot, checkMode }) => {
   const [annotationPos, setAnnotationPos] = useState({ zoom: 1, currentPos: { x: 0, y: 0 } });
   const ref = useRef<HTMLDivElement>(null);
   const ptCtx = React.useContext(PointCloudContext);
@@ -169,7 +170,9 @@ const PointCloudTopView: React.FC<IProps> = ({ currentData, imgList, stepInfo, d
         size,
         pcdPath: currentData.url,
         config,
+        checkMode
       });
+      
       ptCtx.setTopViewInstance(pointCloudAnnotation);
     }
   }, [currentData]);

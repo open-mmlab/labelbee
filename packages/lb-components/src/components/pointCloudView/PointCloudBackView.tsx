@@ -76,7 +76,11 @@ const updateBackViewByCanvas2D = (
   backPointCloud.render();
 };
 
-const PointCloudSideView = ({ currentData, config }: IA2MapStateProps) => {
+interface IProps {
+  checkMode?: boolean
+}
+
+const PointCloudSideView = ({ currentData, config, checkMode }: IA2MapStateProps & IProps) => {
   const ptCtx = React.useContext(PointCloudContext);
   const ref = useRef<HTMLDivElement>(null);
   const size = useSize(ref);
@@ -95,6 +99,7 @@ const PointCloudSideView = ({ currentData, config }: IA2MapStateProps) => {
         size,
         polygonOperationProps: { showDirectionLine: false, forbidAddNew: true },
         config,
+        checkMode
       });
       ptCtx.setBackViewInstance(pointCloudAnnotation);
     }

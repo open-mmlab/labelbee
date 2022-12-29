@@ -28,9 +28,10 @@ import { TDrawLayerSlot } from '@/types/main';
 interface IProps {
   imgList: IFileItem[];
   drawLayerSlot?: TDrawLayerSlot;
+  checkMode?: boolean;
 }
 
-const PointCloudView: React.FC<IProps> = ({ imgList, drawLayerSlot }) => {
+const PointCloudView: React.FC<IProps> = ({ imgList, drawLayerSlot, checkMode }) => {
   if (imgList.length === 0) {
     return null;
   }
@@ -46,10 +47,10 @@ const PointCloudView: React.FC<IProps> = ({ imgList, drawLayerSlot }) => {
           </div>
 
           <div className={getClassName('point-cloud-container', 'right')}>
-            <PointCloudTopView drawLayerSlot={drawLayerSlot} />
+            <PointCloudTopView drawLayerSlot={drawLayerSlot} checkMode={checkMode} />
             <div className={getClassName('point-cloud-container', 'right-bottom')}>
-              <PointCloudSideView />
-              <PointCloudBackView />
+              <PointCloudSideView checkMode={checkMode} />
+              <PointCloudBackView checkMode={checkMode} />
             </div>
           </div>
         </div>

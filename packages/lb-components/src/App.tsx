@@ -83,6 +83,8 @@ export interface AppProps {
     creatingRender?: (canvas: HTMLCanvasElement, data: any, style: IAnnotationStyle) => void;
   };
   customRenderStyle?: (data: any) => IAnnotationStyle;
+
+  checkMode?: boolean;
 }
 
 const App: React.FC<AppProps> = (props) => {

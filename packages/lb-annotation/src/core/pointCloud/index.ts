@@ -156,6 +156,10 @@ export class PointCloud {
     this.initCameraPosition = vector;
   }
 
+  public setConfig(config: IPointCloudConfig) {
+    this.config = config;
+  }
+
   /**
    * Init OrthographicCamera to default config by size
    * @param orthographicParams
@@ -554,8 +558,7 @@ export class PointCloud {
 
     if (radius) {
       // @ts-ignore
-      const circle = this.createRange(radius);
-      this.scene.add(circle);
+      this.generateRange(radius);
     }
 
     this.pointsUuid = points.uuid;
@@ -678,6 +681,11 @@ export class PointCloud {
     });
     this.render();
   }
+
+  public generateRange = (radius: number) => {
+    const circle = this.createRange(radius);
+    this.scene.add(circle);
+  };
 
   public generateBoxArrow = ({ width }: IPointCloudBox) => {
     const dir = new THREE.Vector3(1, 0, 0);

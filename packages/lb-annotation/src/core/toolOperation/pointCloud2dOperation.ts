@@ -20,6 +20,7 @@ import PolygonOperation, { IPolygonOperationProps } from './polygonOperation';
 interface IPointCloud2dOperationProps {
   showDirectionLine?: boolean;
   forbidAddNew?: boolean;
+  checkMode?: boolean; // Judgement of check Mode
 }
 
 class PointCloud2dOperation extends PolygonOperation {
@@ -29,6 +30,8 @@ class PointCloud2dOperation extends PolygonOperation {
 
   public pointCloudConfig: IPointCloudConfig;
 
+  private checkMode: boolean;
+
   private selectedIDs: string[] = [];
 
   constructor(props: IPolygonOperationProps & IPointCloud2dOperationProps) {
@@ -37,6 +40,12 @@ class PointCloud2dOperation extends PolygonOperation {
     this.showDirectionLine = props.showDirectionLine ?? true;
     this.forbidAddNew = props.forbidAddNew ?? false;
     this.pointCloudConfig = CommonToolUtils.jsonParser(props.config) ?? {};
+    this.checkMode = props.checkMode ?? false;
+
+    // Check Mode automatically opens forbidAddNew.
+    if (this.forbidAddNew === false && props.checkMode === true) {
+      this.forbidAddNew = true;
+    }
 
     // Set the default
     this.config = {
@@ -49,6 +58,39 @@ class PointCloud2dOperation extends PolygonOperation {
 
   get getSelectedIDs() {
     return this.selectedIDs;
+  }
+
+  public setConfig(config: string) {
+    const newConfig = CommonToolUtils.jsonParser(config);
+    this.pointCloudConfig = newConfig;
+    this.config = {
+      ...this.config,
+      attributeList: newConfig?.attributeList ?? [],
+    };
+  }
+
+  public dragMouseDown(e: MouseEvent) {
+    if (this.checkMode) {
+      return;
+    }
+
+    super.dragMouseDown(e);
+  }
+
+  public deletePolygon(id?: string) {
+    if (this.checkMode) {
+      return;
+    }
+
+    super.deletePolygon(id);
+  }
+
+  public deletePolygonPoint(index: number) {
+    if (this.checkMode) {
+      return;
+    }
+
+    super.deletePolygonPoint(index);
   }
 
   /**

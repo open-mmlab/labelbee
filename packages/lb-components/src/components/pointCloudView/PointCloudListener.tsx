@@ -14,6 +14,7 @@ import { usePointCloudViews } from './hooks/usePointCloudViews';
 import { LabelBeeContext } from '@/store/ctx';
 import { useHistory } from './hooks/useHistory';
 import { useAttribute } from './hooks/useAttribute';
+import { useConfig } from './hooks/useConfig';
 
 const { EPolygonPattern } = cTool;
 
@@ -29,6 +30,7 @@ const PointCloudListener: React.FC<IA2MapStateProps> = ({ currentData, config })
   const { updatePointCloudData } = usePointCloudViews();
   const { redo, undo, pushHistoryWithList } = useHistory();
   const { syncThreeViewsAttribute, reRenderPointCloud3DBox } = useAttribute();
+  const { syncAllViewsConfig, reRenderTopViewRange } = useConfig();
 
   const keydownEvents = (lowerCaseKey: string, e: KeyboardEvent) => {
     const { topViewInstance, mainViewInstance } = ptCtx;
@@ -172,6 +174,16 @@ const PointCloudListener: React.FC<IA2MapStateProps> = ({ currentData, config })
       window.removeEventListener('keydown', onKeyDown);
     };
   }, [ptCtx, copiedBoxes, config]);
+
+  useEffect(() => {
+    syncAllViewsConfig(config);
+  }, [config]);
+
+  useEffect(() => {
+    if (config?.radius) {
+      reRenderTopViewRange(config?.radius);
+    }
+  }, [config?.radius]);
 
   // Page switch data initialization
   useEffect(() => {

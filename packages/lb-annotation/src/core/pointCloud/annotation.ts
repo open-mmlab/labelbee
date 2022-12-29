@@ -23,6 +23,8 @@ interface IPointCloudAnnotationProps {
   polygonOperationProps?: IPointCloud2dOperationProps;
 
   config: IPointCloudConfig;
+
+  checkMode?: boolean;
 }
 
 const createEmptyImage = (size: { width: number; height: number }) => {
@@ -47,7 +49,7 @@ export class PointCloudAnnotation implements IPointCloudAnnotationOperation {
 
   public config: IPointCloudConfig;
 
-  constructor({ size, container, pcdPath, polygonOperationProps, config }: IPointCloudAnnotationProps) {
+  constructor({ size, container, pcdPath, polygonOperationProps, config, checkMode }: IPointCloudAnnotationProps) {
     const defaultOrthographic = this.getDefaultOrthographic(size);
 
     const imgSrc = createEmptyImage(size);
@@ -76,6 +78,9 @@ export class PointCloudAnnotation implements IPointCloudAnnotationOperation {
       config: JSON.stringify(config),
       imgNode: image,
       isAppend: false,
+      checkMode,
+      // forbidOperation: true,
+      // forbidOperation: !!checkMode,
     };
     if (polygonOperationProps) {
       Object.assign(defaultPolygonProps, polygonOperationProps);
@@ -97,6 +102,11 @@ export class PointCloudAnnotation implements IPointCloudAnnotationOperation {
     this.canvasScheduler = canvasScheduler;
 
     this.config = config;
+  }
+
+  public updateConfig(config: IPointCloudConfig) {
+    this.config = config;
+    this.pointCloud2dOperation.setConfig(JSON.stringify(config));
   }
 
   /**
