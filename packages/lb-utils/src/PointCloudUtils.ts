@@ -4,7 +4,7 @@
  * @author Ron <ron.f.luo@gmail.com>
  */
 
-import { IPointCloudBox } from './types/pointCloud';
+import { IPointCloudBox, IPointCloudConfig } from './types/pointCloud';
 
 class PointCloudUtils {
   public static genColorByCoord(x: number, y: number, z: number) {
@@ -464,6 +464,30 @@ class PointCloudUtils {
     });
 
     return basicSize;
+  }
+
+  public static getSubAttributeName(
+    subAttribute: { [key: string]: string },
+    config: IPointCloudConfig,
+  ) {
+    const subAttributeList = config.inputList;
+    return Object.entries(subAttribute).map(([label, value]) => {
+      const data = subAttributeList.find((v) => v.value === label);
+      if (data) {
+        const subValue = data?.subSelected?.find((v) => v.value === value);
+
+        if (subValue) {
+          return {
+            label: data.key,
+            value: subValue.key,
+          };
+        }
+      }
+      return {
+        label,
+        value,
+      };
+    });
   }
 }
 

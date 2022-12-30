@@ -930,8 +930,8 @@ class PolygonOperation extends BasicToolOperation {
 
   /**
    * Judgment of drag information during mousedown
-   * @param e 
-   * @returns 
+   * @param e
+   * @returns
    */
   public dragMouseDown(e: MouseEvent) {
     const firstPolygon = this.selectedPolygon;

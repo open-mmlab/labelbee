@@ -115,10 +115,16 @@ const TopViewToolbar = ({ currentData }: IAnnotationStateProps) => {
 const ZAxisSlider = ({
   setZAxisLimit,
   zAxisLimit,
+  checkMode,
 }: {
   setZAxisLimit: (value: number) => void;
   zAxisLimit: number;
+  checkMode?: boolean;
 }) => {
+  if (checkMode) {
+    return null;
+  }
+
   return (
     <div style={{ position: 'absolute', top: 128, right: 8, height: '50%', zIndex: 20 }}>
       <Slider
@@ -136,11 +142,17 @@ const ZAxisSlider = ({
 };
 
 interface IProps extends IA2MapStateProps {
-  drawLayerSlot?: TDrawLayerSlot
+  drawLayerSlot?: TDrawLayerSlot;
   checkMode?: boolean;
 }
 
-const PointCloudTopView: React.FC<IProps> = ({ currentData, imgList, stepInfo, drawLayerSlot, checkMode }) => {
+const PointCloudTopView: React.FC<IProps> = ({
+  currentData,
+  imgList,
+  stepInfo,
+  drawLayerSlot,
+  checkMode,
+}) => {
   const [annotationPos, setAnnotationPos] = useState({ zoom: 1, currentPos: { x: 0, y: 0 } });
   const ref = useRef<HTMLDivElement>(null);
   const ptCtx = React.useContext(PointCloudContext);
@@ -170,9 +182,9 @@ const PointCloudTopView: React.FC<IProps> = ({ currentData, imgList, stepInfo, d
         size,
         pcdPath: currentData.url,
         config,
-        checkMode
+        checkMode,
       });
-      
+
       ptCtx.setTopViewInstance(pointCloudAnnotation);
     }
   }, [currentData]);
@@ -294,8 +306,8 @@ const PointCloudTopView: React.FC<IProps> = ({ currentData, imgList, stepInfo, d
           {drawLayerSlot?.(annotationPos)}
         </div>
 
-        <BoxInfos />
-        <ZAxisSlider zAxisLimit={zAxisLimit} setZAxisLimit={setZAxisLimit} />
+        <BoxInfos checkMode={checkMode} config={config} />
+        <ZAxisSlider checkMode={checkMode} zAxisLimit={zAxisLimit} setZAxisLimit={setZAxisLimit} />
         <PointCloudValidity />
       </div>
     </PointCloudContainer>
