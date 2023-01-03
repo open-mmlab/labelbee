@@ -2,6 +2,49 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [1.10.0](https://github.com/open-mmlab/labelbee/compare/v1.9.0...v1.10.0) (2023-01-03)
+
+
+### Features
+
+* **annotation-view:** Support Box3d Rendering ([eb0e927](https://github.com/open-mmlab/labelbee/commit/eb0e927d134cb9d73962bfdc4231b8ba43b4be17))
+* **footer-tips:** Support shortCut render by ReactNode ([2e64135](https://github.com/open-mmlab/labelbee/commit/2e641355413101979044516e5ba0aad33ddc17f5))
+* **hotkey:** Exposure more information(ToolHotKeyCom & shortCutTable) ([84c7ae7](https://github.com/open-mmlab/labelbee/commit/84c7ae746dfbd8a29fd04d0f191036004bc45fb3))
+* **line-tool:** Add lineConfig type ([9c41b67](https://github.com/open-mmlab/labelbee/commit/9c41b67f246d33fb8843601e74091b120a3b1cf3))
+* **line-tool:** Add the render of lineLength ([940b9e1](https://github.com/open-mmlab/labelbee/commit/940b9e1db26a072ae99cf49293e5173518688bd5))
+* LineTool showOrder config needs to be compatible with isShowOrder ([3bee80a](https://github.com/open-mmlab/labelbee/commit/3bee80a0fa1932b7fec7ba915625dd2eb50ee27b))
+* **point-tool:** Support the multiMove mode ([06a86ea](https://github.com/open-mmlab/labelbee/commit/06a86eae15f83a496ab7b526a213201ce8f237a9))
+* **pointcloud-sidebar:** Update the style ([33c28d5](https://github.com/open-mmlab/labelbee/commit/33c28d51dd0fd6cdbc4cc510066cb6b7dbf2c942))
+* **pointcloud:** Add box color ([1e72cac](https://github.com/open-mmlab/labelbee/commit/1e72cace11a6d4c9663a6523dd7e9ec2e5c1387d))
+* **pointcloud:** Add i18n on trackID-view ([baee67e](https://github.com/open-mmlab/labelbee/commit/baee67e925b401f6b68f3aadb14ebd97dfc4f18f))
+* **pointcloud:** Add redo & undo ([d8316f9](https://github.com/open-mmlab/labelbee/commit/d8316f994bb4d2cb06f17a6e969fdd2b5afea6ea))
+* **pointcloud:** Add redo & undo icon in toolHeader ([bf09f1b](https://github.com/open-mmlab/labelbee/commit/bf09f1b9d59d700c3960727680bc41be8a80074b))
+* **pointcloud:** Add the feature of updating TrackID ([932760f](https://github.com/open-mmlab/labelbee/commit/932760fb82d305ae67121fa7682002bf10bc9a47))
+* **pointcloud:** Add the notification after batchUpdateTracking ([cf52566](https://github.com/open-mmlab/labelbee/commit/cf52566de368d8613e926bccb2adda2e192d5b67))
+* **pointcloud:** Clear result after setting the invalid page ([cefc164](https://github.com/open-mmlab/labelbee/commit/cefc1643a98ae52d213386d00329f29ce811e7b8))
+* **pointcloud:** ReRender 3dbox aftering changing attributes ([f75d169](https://github.com/open-mmlab/labelbee/commit/f75d169eaf214ae9199a958bd2a87b8abd0573a7))
+* **pointcloud:** Support messageInfo showing ([ea318d6](https://github.com/open-mmlab/labelbee/commit/ea318d6119ab6ba5d4766e6068c4dfb0b1ca1672))
+* **pointcloud:** Support the configurable of track ([168d785](https://github.com/open-mmlab/labelbee/commit/168d78537fe1fd36e72c335d646e926141ef995f))
+* **pointcloud:** Support Unifying Params ([8079b42](https://github.com/open-mmlab/labelbee/commit/8079b42e01224993f2071f4fa45c7b8c9c94555d))
+* **pointcloud:** Sync defaultAttribute after selecting new box by mouse ([17e4220](https://github.com/open-mmlab/labelbee/commit/17e4220e4060e6f941206acde56832f0085aedcf))
+* **pointcloud:** Update defaultAttribute by keyboard ([de95c7a](https://github.com/open-mmlab/labelbee/commit/de95c7a22951b752e3235e9d877411b1a8589571))
+* **pointcloud:** Update defaultAttribute without selecting box ([a0b31de](https://github.com/open-mmlab/labelbee/commit/a0b31de3ae26d5ad123c0a6adfc51eaf0a461616))
+* **pointcloud:** Update the batchUpdateModal from updateImgList to composeResult ([8bf127a](https://github.com/open-mmlab/labelbee/commit/8bf127a87b57dd1203b712f47e3774f2a4fe7153))
+* **pointcloud:** Update the form style && tips ([b61a1f3](https://github.com/open-mmlab/labelbee/commit/b61a1f3fe39db6f11543f82468db0ab5c4187ae7))
+* RectOperation adds multi-move operation ([725b8ca](https://github.com/open-mmlab/labelbee/commit/725b8ca6cfa23d55b6b743a5c439b0f6aa89331d))
+* UnidyParamsModal add initialValue page ([43f9ba5](https://github.com/open-mmlab/labelbee/commit/43f9ba50dc8156b90317ee5d366d0106e4c99f2c))
+* **viewoperation:** Line support rendering keypoint ([646df2d](https://github.com/open-mmlab/labelbee/commit/646df2d8739caee324ccf0f1978047feb4823f94))
+
+
+### Bug Fixes
+
+* **hotkey:** Support more status ([afa5b95](https://github.com/open-mmlab/labelbee/commit/afa5b956f21d75cc9fe7daa4c6bcac64e249c939))
+* **line-tool:** Fix the error render of drawOutsideTarget ([43f0e28](https://github.com/open-mmlab/labelbee/commit/43f0e28b142676c715528d6e8a25dc988fea9f1c))
+* **pointcloud:** PointCloud keydown filter the input ([27aebd4](https://github.com/open-mmlab/labelbee/commit/27aebd4af74b959bfd8d04875359713ca943b1ad))
+* **polygon-operation:** Rect-Polygon is forbidden to be added new point by double click ([8aa20cb](https://github.com/open-mmlab/labelbee/commit/8aa20cb2d892451c0c2e7ce9998706e7c930c5d5))
+* **style:** Update the defaultStyle ([892bb93](https://github.com/open-mmlab/labelbee/commit/892bb930109de104db4df5325120f7eb7321cba2))
+* Update the function of getCuboidFromPointCloudBox ([6fe8af4](https://github.com/open-mmlab/labelbee/commit/6fe8af4f657461365006f07beaee3a16ce46e3aa))
+
 ## [1.9.0](https://github.com/open-mmlab/labelbee/compare/v1.8.1...v1.9.0) (2022-10-12)
 
 
