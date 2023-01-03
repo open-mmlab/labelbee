@@ -1,12 +1,5 @@
 import { ESubmitType } from '@/constant';
-import { TMatrix13Tuple, TMatrix14Tuple } from '@labelbee/lb-utils';
-
-/** 标注文件对象 */
-export interface ICalib {
-  P: [TMatrix14Tuple, TMatrix14Tuple, TMatrix14Tuple];
-  R: [TMatrix13Tuple, TMatrix13Tuple, TMatrix13Tuple];
-  T: [TMatrix14Tuple, TMatrix14Tuple, TMatrix14Tuple];
-}
+import { TMatrix13Tuple, TMatrix14Tuple, ICalib } from '@labelbee/lb-utils';
 
 export interface IMappingImg {
   url: string;
@@ -28,7 +21,9 @@ export type OnSubmit = (
   data: AnnotationFileList,
   submitType: ESubmitType,
   imgIndex: number,
+  imgList: IFileItem[],
 ) => void;
+
 export type OnSave = (data: IFileItem, imgIndex: number, imgList: AnnotationFileList) => void;
 export type OnPageChange = (imgIndex: number) => void;
 export type OnStepChange = (step: number) => void;

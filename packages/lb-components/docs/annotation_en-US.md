@@ -13,6 +13,11 @@ enum ESubmitType {
   Jump = 3,
   Quit = 4,
   Export = 5,
+  StepChanged = 6,
+  Save = 7,
+  BatchUpdateTrackID = 8,
+  SyncImgList = 10001, 
+  SyncCurrentPageData = 10002, // 同步当页数据
 }
 
 interface IFileItem {

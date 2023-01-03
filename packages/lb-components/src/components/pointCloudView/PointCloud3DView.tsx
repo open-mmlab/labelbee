@@ -7,12 +7,17 @@
 
 import { getClassName } from '@/utils/dom';
 import { PointCloud } from '@labelbee/lb-annotation';
-import { EPerspectiveView, IPointCloudBox, PointCloudUtils } from '@labelbee/lb-utils';
+import {
+  EPerspectiveView,
+  IPointCloudBox,
+  PointCloudUtils,
+  toolStyleConverter,
+} from '@labelbee/lb-utils';
 import classNames from 'classnames';
 import React, { useContext, useEffect, useMemo, useRef, useState } from 'react';
 import { PointCloudContainer } from './PointCloudLayout';
 import { PointCloudContext } from './PointCloudContext';
-import { aMapStateToProps, IAnnotationStateProps } from '@/store/annotation/map';
+import { a2MapStateToProps, IA2MapStateProps } from '@/store/annotation/map';
 import { connect } from 'react-redux';
 import { jsonParser } from '@/utils';
 import { useSingleBox } from './hooks/useSingleBox';
@@ -78,7 +83,7 @@ const PointCloud3DSideBar = () => {
   );
 };
 
-const PointCloud3D: React.FC<IAnnotationStateProps> = ({ currentData }) => {
+const PointCloud3D: React.FC<IA2MapStateProps> = ({ currentData, config }) => {
   const ptCtx = useContext(PointCloudContext);
   const [showDirection, setShowDirection] = useState(true);
   const ref = useRef<HTMLDivElement>(null);
@@ -113,6 +118,7 @@ const PointCloud3D: React.FC<IAnnotationStateProps> = ({ currentData }) => {
         pointCloud = new PointCloud({
           container: ref.current,
           backgroundColor: '#4c4c4c',
+          config,
         });
       }
 
@@ -121,7 +127,13 @@ const PointCloud3D: React.FC<IAnnotationStateProps> = ({ currentData }) => {
 
         // Add Init Box
         boxParamsList.forEach((v: IPointCloudBox) => {
-          pointCloud?.generateBox(v);
+          const hex = toolStyleConverter.getColorFromConfig(
+            { attribute: v.attribute },
+            { ...config, attributeConfigurable: true },
+            {},
+          )?.hex;
+
+          pointCloud?.generateBox(v, hex);
         });
 
         ptCtx.setPointCloudResult(boxParamsList);
@@ -179,4 +191,4 @@ const PointCloud3D: React.FC<IAnnotationStateProps> = ({ currentData }) => {
   );
 };
 
-export default connect(aMapStateToProps, null, null, { context: LabelBeeContext })(PointCloud3D);
+export default connect(a2MapStateToProps, null, null, { context: LabelBeeContext })(PointCloud3D);

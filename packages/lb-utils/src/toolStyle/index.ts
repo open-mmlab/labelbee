@@ -2,39 +2,75 @@
  * Config2Color
  */
 
-import ToolStyleUtils from "./ToolStyleUtils";
+import ToolStyleUtils from './ToolStyleUtils';
 
 /**
  * 默认基础 5 配置
  */
 const DEFAULT_COLORS = [
-  "rgba(102, 111, 255, 1)",
-  "rgba(102, 230, 255, 1)",
-  "rgba(191, 255, 102, 1)",
-  "rgba(255, 230, 102, 1)",
-  "rgba(230, 102, 255, 1)",
+  'rgba(102, 111, 255, 1)',
+  'rgba(102, 230, 255, 1)',
+  'rgba(191, 255, 102, 1)',
+  'rgba(255, 230, 102, 1)',
+  'rgba(230, 102, 255, 1)',
 ];
 
 /**
  * 属性标注主颜色
  */
 export const ATTRIBUTE_COLORS = [
-  "rgba(128, 12, 249, 1)",
-  "rgba(0, 255, 48, 1)",
-  "rgba(255, 136, 247, 1)",
-  "rgba(255, 226, 50, 1)",
-  "rgba(153, 66, 23, 1)",
-  "rgba(2, 130, 250, 1)",
-  "rgba(255, 35, 35, 1)",
-  "rgba(0, 255, 234, 1)",
+  'rgba(128, 12, 249, 1)',
+  'rgba(0, 255, 48, 1)',
+  'rgba(255, 136, 247, 1)',
+  'rgba(255, 226, 50, 1)',
+  'rgba(153, 66, 23, 1)',
+  'rgba(2, 130, 250, 1)',
+  'rgba(255, 35, 35, 1)',
+  'rgba(0, 255, 234, 1)',
 ];
 
-export const INVALID_COLOR = "rgba(255, 51, 51, 1)";
-export const NULL_COLOR = "rgba(204, 204, 204, 1)";
+export const COLORS_ARRAY_MULTI = [
+  {
+    rgba: 'rgba(128, 12, 249, 1)',
+    hex: 0x800cf9,
+  },
+  {
+    rgba: 'rgba(0, 255, 48, 1)',
+    hex: 0x00ff30,
+  },
+  {
+    rgba: 'rgba(255, 136, 247, 1)',
+    hex: 0xff88f7,
+  },
+  {
+    rgba: 'rgba(255, 226, 50, 1)',
+    hex: 0xffe232,
+  },
+  {
+    rgba: 'rgba(153, 66, 23, 1)',
+    hex: 0x994217,
+  },
+  {
+    rgba: 'rgba(2, 130, 250, 1)',
+    hex: 0x0282fa,
+  },
+  {
+    rgba: 'rgba(255, 35, 35, 1)',
+    hex: 0xff2323,
+  },
+  {
+    rgba: 'rgba(0, 255, 234, 1)',
+    hex: 0x00ffea,
+  },
+];
+
+export const INVALID_COLOR = 'rgba(255, 51, 51, 1)';
+export const NULL_COLOR = 'rgba(204, 204, 204, 1)';
 
 interface IToolStyle {
   stroke: string;
   fill: string;
+  hex?: number;
 }
 
 interface IToolConfig {
@@ -72,30 +108,26 @@ class ToolStyleConverter {
   public getColorFromConfig(
     result: IResult,
     config: IToolConfig,
-    styleConfig: {
+    styleConfig: Partial<{
       borderOpacity: number; // 范围：[0, 1]
       fillOpacity: number; // 范围：[0, 1]
       colorIndex: number; // 范围：0 1 2 3 4
-    },
+    }>,
     options?: Partial<{
       hover: boolean;
       selected: boolean;
       multiColorIndex: number; // 循环使用
-    }>
+    }>,
   ): IToolStyle {
-    if (Object.prototype.toString.call(config) !== "[object Object]") {
-      throw "Config must be Object";
+    if (Object.prototype.toString.call(config) !== '[object Object]') {
+      throw 'Config must be Object';
     }
 
-    if (Object.prototype.toString.call(result) !== "[object Object]") {
-      throw "Result must be Object";
+    if (Object.prototype.toString.call(result) !== '[object Object]') {
+      throw 'Result must be Object';
     }
 
-    const {
-      borderOpacity = 1,
-      fillOpacity = 0.6,
-      colorIndex = 0,
-    } = styleConfig;
+    const { borderOpacity = 1, fillOpacity = 0.6, colorIndex = 0 } = styleConfig;
 
     if (!options) {
       options = {};
@@ -126,7 +158,7 @@ class ToolStyleConverter {
     if (config?.attributeConfigurable === true) {
       const attributeIndex = ToolStyleUtils.getAttributeIndex(
         result?.attribute,
-        config?.attributeList
+        config?.attributeList,
       );
 
       let color = colorList[attributeIndex % colorList.length];
@@ -136,21 +168,24 @@ class ToolStyleConverter {
         color = NULL_COLOR;
       }
 
-      return ToolStyleUtils.getToolStrokeAndFill(color, defaultStatus);
+      return {
+        ...ToolStyleUtils.getToolStrokeAndFill(color, defaultStatus),
+        hex: COLORS_ARRAY_MULTI[attributeIndex % colorList.length]?.hex ?? ''
+      };
     }
 
     // 多色
     if (multiColorIndex > -1) {
       return ToolStyleUtils.getToolStrokeAndFill(
         colorList[multiColorIndex % colorList.length],
-        defaultStatus
+        defaultStatus,
       );
     }
 
     // 默认属性
     return ToolStyleUtils.getToolStrokeAndFill(
       colorList[colorIndex % colorList.length],
-      defaultStatus
+      defaultStatus,
     );
   }
 }

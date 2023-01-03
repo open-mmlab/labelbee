@@ -4,7 +4,12 @@
  * @LastEditors: Laoluo luozefeng@sensetime.com
  * @LastEditTime: 2022-07-08 11:08:02
  */
-import { PointCloud, MathUtils, PointCloudAnnotation } from '@labelbee/lb-annotation';
+import {
+  PointCloud,
+  MathUtils,
+  PointCloudAnnotation,
+  getCuboidFromPointCloudBox,
+} from '@labelbee/lb-annotation';
 import { getClassName } from '@/utils/dom';
 import { PointCloudContainer } from './PointCloudLayout';
 import React, { useEffect, useRef } from 'react';
@@ -13,7 +18,7 @@ import { useSingleBox } from './hooks/useSingleBox';
 import { EPerspectiveView, IPointCloudBox, IPolygonPoint } from '@labelbee/lb-utils';
 import { SizeInfoForView } from './PointCloudInfos';
 import { connect } from 'react-redux';
-import { aMapStateToProps, IAnnotationStateProps } from '@/store/annotation/map';
+import { a2MapStateToProps, IA2MapStateProps } from '@/store/annotation/map';
 import { synchronizeSideView, synchronizeTopView } from './hooks/usePointCloudViews';
 import useSize from '@/hooks/useSize';
 import EmptyPage from './components/EmptyPage';
@@ -71,7 +76,7 @@ const updateBackViewByCanvas2D = (
   backPointCloud.render();
 };
 
-const PointCloudSideView = ({ currentData }: IAnnotationStateProps) => {
+const PointCloudSideView = ({ currentData, config }: IA2MapStateProps) => {
   const ptCtx = React.useContext(PointCloudContext);
   const ref = useRef<HTMLDivElement>(null);
   const size = useSize(ref);
@@ -89,6 +94,7 @@ const PointCloudSideView = ({ currentData }: IAnnotationStateProps) => {
         container: ref.current,
         size,
         polygonOperationProps: { showDirectionLine: false, forbidAddNew: true },
+        config,
       });
       ptCtx.setBackViewInstance(pointCloudAnnotation);
     }
@@ -171,8 +177,7 @@ const PointCloudSideView = ({ currentData }: IAnnotationStateProps) => {
         // Update count
         if (ptCtx.mainViewInstance) {
           const { count } = ptCtx.mainViewInstance.getSensesPointZAxisInPolygon(
-            ptCtx.mainViewInstance.getCuboidFromPointCloudBox(newBoxParams)
-              .polygonPointList as IPolygonPoint[],
+            getCuboidFromPointCloudBox(newBoxParams).polygonPointList as IPolygonPoint[],
             [
               newBoxParams.center.z - newBoxParams.depth / 2,
               newBoxParams.center.z + newBoxParams.depth / 2,
@@ -212,6 +217,6 @@ const PointCloudSideView = ({ currentData }: IAnnotationStateProps) => {
   );
 };
 
-export default connect(aMapStateToProps, null, null, { context: LabelBeeContext })(
+export default connect(a2MapStateToProps, null, null, { context: LabelBeeContext })(
   PointCloudSideView,
 );

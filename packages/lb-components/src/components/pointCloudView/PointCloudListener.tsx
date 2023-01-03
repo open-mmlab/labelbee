@@ -3,19 +3,21 @@ import { useRotate } from './hooks/useRotate';
 import { useBoxes } from './hooks/useBoxes';
 import { useSingleBox } from './hooks/useSingleBox';
 import React, { useContext, useEffect } from 'react';
-import { cTool } from '@labelbee/lb-annotation';
+import { cTool, AttributeUtils, CommonToolUtils } from '@labelbee/lb-annotation';
 import { message } from 'antd';
 import { connect } from 'react-redux';
-import { aMapStateToProps, IAnnotationStateProps } from '@/store/annotation/map';
+import { a2MapStateToProps, IA2MapStateProps } from '@/store/annotation/map';
 import { useCustomToolInstance } from '@/hooks/annotation';
 import { useStatus } from './hooks/useStatus';
 import { jsonParser } from '@/utils';
 import { usePointCloudViews } from './hooks/usePointCloudViews';
 import { LabelBeeContext } from '@/store/ctx';
+import { useHistory } from './hooks/useHistory';
+import { useAttribute } from './hooks/useAttribute';
 
 const { EPolygonPattern } = cTool;
 
-const PointCloudListener: React.FC<IAnnotationStateProps> = ({ currentData }) => {
+const PointCloudListener: React.FC<IA2MapStateProps> = ({ currentData, config }) => {
   const ptCtx = useContext(PointCloudContext);
   const { changeSelectedBoxValid, selectNextBox, selectPrevBox, updateSelectedBox } =
     useSingleBox();
@@ -25,6 +27,8 @@ const PointCloudListener: React.FC<IAnnotationStateProps> = ({ currentData }) =>
   const { toolInstanceRef } = useCustomToolInstance({ basicInfo });
   const { updateRotate } = useRotate({ currentData });
   const { updatePointCloudData } = usePointCloudViews();
+  const { redo, undo, pushHistoryWithList } = useHistory();
+  const { syncThreeViewsAttribute, reRenderPointCloud3DBox } = useAttribute();
 
   const keydownEvents = (lowerCaseKey: string, e: KeyboardEvent) => {
     const { topViewInstance, mainViewInstance } = ptCtx;
@@ -101,12 +105,22 @@ const PointCloudListener: React.FC<IAnnotationStateProps> = ({ currentData }) =>
         break;
 
       default: {
+        if (config.attributeList?.length > 0) {
+          const keyCode2Attribute = AttributeUtils.getAttributeByKeycode(
+            e.keyCode,
+            config.attributeList,
+          );
+
+          if (keyCode2Attribute !== undefined) {
+            toolInstanceRef.current.setDefaultAttribute(keyCode2Attribute);
+          }
+        }
         return;
       }
     }
   };
 
-  const ctrlKeydownEvents = (lowerCaseKey: string) => {
+  const ctrlKeydownEvents = (lowerCaseKey: string, e: KeyboardEvent) => {
     switch (lowerCaseKey) {
       case 'c':
         copySelectedBoxes();
@@ -117,16 +131,29 @@ const PointCloudListener: React.FC<IAnnotationStateProps> = ({ currentData }) =>
       case 'a':
         ptCtx.selectedAllBoxes();
         break;
+      case 'z': {
+        if (e.shiftKey) {
+          redo();
+        } else {
+          undo();
+        }
+        break;
+      }
+
       default:
         break;
     }
   };
 
   const onKeyDown = (e: KeyboardEvent) => {
+    if (!CommonToolUtils.hotkeyFilter(e)) {
+      return;
+    }
+
     const lowerCaseKey = e.key.toLocaleLowerCase();
 
     if (e.ctrlKey) {
-      ctrlKeydownEvents(lowerCaseKey);
+      ctrlKeydownEvents(lowerCaseKey, e);
       return;
     }
 
@@ -144,7 +171,7 @@ const PointCloudListener: React.FC<IAnnotationStateProps> = ({ currentData }) =>
     return () => {
       window.removeEventListener('keydown', onKeyDown);
     };
-  }, [ptCtx, copiedBoxes]);
+  }, [ptCtx, copiedBoxes, config]);
 
   // Page switch data initialization
   useEffect(() => {
@@ -164,11 +191,13 @@ const PointCloudListener: React.FC<IAnnotationStateProps> = ({ currentData }) =>
     };
 
     toolInstanceRef.current.setDefaultAttribute = (newAttribute: string) => {
+      syncThreeViewsAttribute(newAttribute);
       const selectBox = ptCtx.selectedPointCloudBox;
       if (selectBox) {
         selectBox.attribute = newAttribute;
 
         updateSelectedBox(selectBox);
+        reRenderPointCloud3DBox(selectBox);
       }
     };
 
@@ -188,22 +217,73 @@ const PointCloudListener: React.FC<IAnnotationStateProps> = ({ currentData }) =>
     toolInstanceRef.current.clearResult = () => {
       clearAllResult?.();
     };
-  }, [ptCtx.pointCloudBoxList, ptCtx.selectedID, ptCtx.valid, ptCtx.polygonList]);
 
-  useEffect(() => {
+    toolInstanceRef.current.redo = () => {
+      redo();
+    };
+
+    toolInstanceRef.current.undo = () => {
+      undo();
+    };
+
     toolInstanceRef.current.setValid = (valid: boolean) => {
       toolInstanceRef.current.valid = valid;
 
       // Avoid triggering SetState operations in the reducer phase
       setTimeout(() => {
         ptCtx.setPointCloudValid(valid);
+
+        if (valid === false) {
+          clearAllResult();
+        }
       });
     };
+  }, [ptCtx.pointCloudBoxList, ptCtx.selectedID, ptCtx.valid, ptCtx.polygonList]);
+
+  useEffect(() => {
+    toolInstanceRef.current.history = {
+      // Origin Result
+      pushHistory: (result: any[]) => {
+        // Rewrite
+        // TODO, The polygon is out of range.
+        pushHistoryWithList({ pointCloudBoxList: result });
+      },
+      initRecord: () => {},
+    };
   }, []);
+
+  useEffect(() => {
+    const toolInstance = ptCtx.topViewInstance?.pointCloud2dOperation;
+
+    if (!toolInstance) {
+      return;
+    }
+    // TopViewOperation Emitter
+    const syncAttribute = (newAttribute: string) => {
+      syncThreeViewsAttribute(newAttribute);
+    };
+
+    const messageError = (error: string) => {
+      message.error(error);
+    };
+    const messageInfo = (info: string) => {
+      message.info(info);
+    };
+
+    toolInstance.on('syncAttribute', syncAttribute);
+    toolInstance.on('messageError', messageError);
+    toolInstance.on('messageInfo', messageInfo);
+
+    return () => {
+      toolInstance.unbind('syncAttribute', syncAttribute);
+      toolInstance.unbind('messageError', messageError);
+      toolInstance.unbind('messageInfo', messageInfo);
+    };
+  }, [ptCtx.topViewInstance]);
 
   return null;
 };
 
-export default connect(aMapStateToProps, null, null, { context: LabelBeeContext })(
+export default connect(a2MapStateToProps, null, null, { context: LabelBeeContext })(
   PointCloudListener,
 );

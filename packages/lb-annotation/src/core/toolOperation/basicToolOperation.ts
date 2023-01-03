@@ -1,6 +1,7 @@
+import { IBasicText } from '@labelbee/lb-utils';
 import { isNumber } from 'lodash';
 import { styleDefaultConfig } from '@/constant/defaultConfig';
-import { EToolName } from '@/constant/tool';
+import { EOperationMode, EToolName } from '@/constant/tool';
 import { IPolygonConfig, IPolygonData } from '@/types/tool/polygon';
 import MathUtils from '@/utils/MathUtils';
 import AxisUtils, { CoordinateUtils } from '@/utils/tool/AxisUtils';
@@ -9,7 +10,7 @@ import CommonToolUtils from '@/utils/tool/CommonToolUtils';
 import LineToolUtils from '@/utils/tool/LineToolUtils';
 import { EDragStatus, EGrowthMode, ELang } from '../../constant/annotation';
 import EKeyCode from '../../constant/keyCode';
-import { BASE_ICON, COLORS_ARRAY } from '../../constant/style';
+import { BASE_ICON, COLORS_ARRAY, styleString } from '../../constant/style';
 import locale from '../../locales';
 import { EMessage } from '../../locales/constants';
 import ActionsHistory from '../../utils/ActionsHistory';
@@ -135,6 +136,8 @@ class BasicToolOperation extends EventListener {
     data: IRect | IPolygonData | IPoint | ILine | ITagResult | IBasicText,
   ) => IAnnotationStyle;
 
+  public operationMode: EOperationMode = EOperationMode.General;
+
   // 拖拽 - 私有变量
   private _firstClickCoordinate?: ICoordinate; // 存储第一次点击的坐标
 
@@ -204,7 +207,7 @@ class BasicToolOperation extends EventListener {
     };
     this.attributeLockList = [];
     this.history = new ActionsHistory();
-    this.style = props.style ?? {};
+    this.style = props.style ?? CommonToolUtils.jsonParser(styleString);
     this._imgAttribute = props.imgAttribute ?? {};
     this.isHidden = false;
     this.dragStatus = EDragStatus.Wait;
@@ -278,6 +281,10 @@ class BasicToolOperation extends EventListener {
     return this.showDefaultCursor;
   }
 
+  public get isMultiMoveMode() {
+    return this.operationMode === EOperationMode.MultiMove;
+  }
+
   /**
    * 是否含有列表标注
    */
@@ -306,6 +313,16 @@ class BasicToolOperation extends EventListener {
 
   public setCurrentPosStorage(currentPosStorage: ICoordinate) {
     this.currentPosStorage = currentPosStorage;
+  }
+
+  public setOperationMode(operationMode: EOperationMode) {
+    this.operationMode = operationMode;
+  }
+
+  public recoverOperationMode() {
+    if (this.operationMode === EOperationMode.MultiMove) {
+      this.setOperationMode(EOperationMode.General);
+    }
   }
 
   /**

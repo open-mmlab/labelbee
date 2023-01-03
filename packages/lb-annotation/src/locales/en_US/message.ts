@@ -17,5 +17,6 @@ const message: Record<string, string> = {
   [EMessage.UnableToReannotation]: 'Unabled to reannotation',
   [EMessage.ForbiddenCreationOutsideBoundary]: 'Fobid creation outside boundary',
   [EMessage.SuccessfulEdgeAdsorption]: 'Successful edge adsorption',
+  [EMessage.ForbidAddNewPoint]: 'Forbid to add new point in rect-polygon',
 };
 export default message;

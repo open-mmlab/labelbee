@@ -6,6 +6,8 @@
  * @LastEditTime: 2022-06-16 19:32:15
  */
 
+import { IInputList } from "./base";
+
 export type TMatrix4Tuple = [
   number,
   number,
@@ -85,3 +87,20 @@ export interface IPointCloudBox extends IVolume {
 }
 
 export type IPointCloudBoxList = IPointCloudBox[];
+
+export interface IPointCloudConfig {
+    // 多边形持有
+    attributeList: IInputList[];
+    radius: number;
+    secondaryAttributeConfigurable: boolean;
+    inputList: IInputList[];
+  
+    lowerLimitPointsNumInBox: number;
+    trackConfigurable: boolean;
+}
+
+export interface ICalib {
+  P: [TMatrix14Tuple, TMatrix14Tuple, TMatrix14Tuple]; // 3x4 Camera Intrinsic matrix
+  R: [TMatrix13Tuple, TMatrix13Tuple, TMatrix13Tuple]; // 3x3 rotation matrix
+  T: [TMatrix14Tuple, TMatrix14Tuple, TMatrix14Tuple]; // 3x4 Lidar to camera matrix
+}

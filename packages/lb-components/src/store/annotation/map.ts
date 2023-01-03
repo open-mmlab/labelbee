@@ -5,6 +5,9 @@
  */
 import { AppState } from '../index';
 import { IFileItem } from '@/types/data';
+import StepUtils from '@/utils/StepUtils';
+import { IStepInfo } from '@/types/step';
+import { jsonParser } from '@/utils';
 
 export const aMapStateToProps = (state: AppState) => {
   const {
@@ -20,3 +23,24 @@ export const aMapStateToProps = (state: AppState) => {
 export interface IAnnotationStateProps {
   currentData: IFileItem;
 }
+
+export interface IA2MapStateProps extends IAnnotationStateProps {
+  imgList: IFileItem[];
+  stepInfo: IStepInfo;
+  config: any;
+}
+
+export const a2MapStateToProps = (state: AppState) => {
+  const {
+    annotation: { imgList, imgIndex },
+  } = state;
+  const currentData = imgList[imgIndex] ?? {};
+  const stepInfo = StepUtils.getCurrentStepInfo(state.annotation?.step, state.annotation?.stepList);
+
+  return {
+    currentData,
+    imgList,
+    stepInfo,
+    config: jsonParser(stepInfo?.config),
+  };
+};

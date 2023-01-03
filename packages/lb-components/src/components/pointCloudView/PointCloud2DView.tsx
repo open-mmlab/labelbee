@@ -3,19 +3,15 @@ import React, { useCallback, useContext, useEffect, useRef, useState } from 'rea
 import { PointCloudContainer } from './PointCloudLayout';
 import AnnotationView from '@/components/AnnotationView';
 import { PointCloudContext } from './PointCloudContext';
-import { AppState } from '@/store';
 import { connect } from 'react-redux';
-import { IFileItem } from '@/types/data';
 import { LeftOutlined, RightOutlined } from '@ant-design/icons';
 import useSize from '@/hooks/useSize';
 import { useSingleBox } from './hooks/useSingleBox';
-import { ViewOperation } from '@labelbee/lb-annotation';
+import { ViewOperation, pointCloudLidar2image } from '@labelbee/lb-annotation';
 import { useTranslation } from 'react-i18next';
 import { LabelBeeContext } from '@/store/ctx';
-
-interface IProps {
-  imgInfo: IFileItem;
-}
+import { a2MapStateToProps, IA2MapStateProps } from '@/store/annotation/map';
+import { toolStyleConverter } from '@labelbee/lb-utils';
 
 const Toolbar = ({
   onNext,
@@ -47,7 +43,7 @@ interface IAnnotationDataTemporarily {
   annotation: any;
 }
 
-const PointCloud2DView = ({ imgInfo }: IProps) => {
+const PointCloud2DView = ({ currentData, config }: IA2MapStateProps) => {
   const [annotations2d, setAnnotations2d] = useState<IAnnotationDataTemporarily[]>([]);
   const { pointCloudBoxList, topViewInstance } = useContext(PointCloudContext);
   const [mappingIndex, setMappingIndex] = useState(0);
@@ -57,25 +53,32 @@ const PointCloud2DView = ({ imgInfo }: IProps) => {
   const size = useSize(ref);
   const { t } = useTranslation();
 
-  const mappingData = imgInfo?.mappingImgList?.[mappingIndex];
+  const mappingData = currentData?.mappingImgList?.[mappingIndex];
 
   useEffect(() => {
     setMappingIndex(0);
-  }, [imgInfo]);
+  }, [currentData]);
 
   useEffect(() => {
     if (topViewInstance && mappingData) {
-      const { pointCloudInstance } = topViewInstance;
       const defaultViewStyle = {
         fill: 'transparent',
         color: 'green',
       };
+
       const newAnnotations2d: IAnnotationDataTemporarily[] = pointCloudBoxList.reduce(
         (acc: IAnnotationDataTemporarily[], pointCloudBox) => {
-          const viewDataPointList = pointCloudInstance.pointCloudLidar2image(
-            pointCloudBox,
-            mappingData.calib,
-          );
+          const viewDataPointList = pointCloudLidar2image(pointCloudBox, mappingData.calib);
+
+          const stroke = toolStyleConverter.getColorFromConfig(
+            { attribute: pointCloudBox.attribute },
+            {
+              ...config,
+              attributeConfigurable: true,
+            },
+            {},
+          )?.stroke;
+
           return [
             ...acc,
             ...viewDataPointList.map((v: any) => {
@@ -85,6 +88,7 @@ const PointCloud2DView = ({ imgInfo }: IProps) => {
                   id: pointCloudBox.id,
                   pointList: v.pointList,
                   ...defaultViewStyle,
+                  stroke,
                 },
               };
             }),
@@ -97,7 +101,8 @@ const PointCloud2DView = ({ imgInfo }: IProps) => {
     }
   }, [pointCloudBoxList, mappingData]);
 
-  const hiddenData = !imgInfo || !imgInfo?.mappingImgList || !(imgInfo?.mappingImgList?.length > 0);
+  const hiddenData =
+    !currentData || !currentData?.mappingImgList || !(currentData?.mappingImgList?.length > 0);
 
   const afterImgOnLoad = useCallback(() => {
     const toolInstance = viewRef.current?.toolInstance;
@@ -127,13 +132,13 @@ const PointCloud2DView = ({ imgInfo }: IProps) => {
         hiddenData ? undefined : (
           <Toolbar
             imgIndex={mappingIndex}
-            imgLength={imgInfo.mappingImgList?.length ?? 0}
+            imgLength={currentData.mappingImgList?.length ?? 0}
             onNext={() => {
-              if (!imgInfo || !imgInfo?.mappingImgList) {
+              if (!currentData || !currentData?.mappingImgList) {
                 return;
               }
 
-              if (mappingIndex >= imgInfo?.mappingImgList?.length - 1) {
+              if (mappingIndex >= currentData?.mappingImgList?.length - 1) {
                 return;
               }
               setMappingIndex((v) => v + 1);
@@ -163,12 +168,6 @@ const PointCloud2DView = ({ imgInfo }: IProps) => {
   );
 };
 
-const mapStateToProps = (state: AppState) => {
-  const { imgList, imgIndex } = state.annotation;
-
-  return {
-    imgInfo: imgList[imgIndex],
-  };
-};
-
-export default connect(mapStateToProps, null, null, { context: LabelBeeContext })(PointCloud2DView);
+export default connect(a2MapStateToProps, null, null, { context: LabelBeeContext })(
+  PointCloud2DView,
+);

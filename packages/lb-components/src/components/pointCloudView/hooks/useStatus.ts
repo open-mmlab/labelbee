@@ -7,13 +7,20 @@
 import { useContext, useState } from 'react';
 import { PointCloudContext } from '../PointCloudContext';
 import { cTool } from '@labelbee/lb-annotation';
+import { useHistory } from './useHistory';
 
 const { EToolName, EPolygonPattern } = cTool;
 
 export const useStatus = () => {
-  const { topViewInstance, mainViewInstance, pointCloudBoxList, setPointCloudResult } =
-    useContext(PointCloudContext);
+  const {
+    topViewInstance,
+    mainViewInstance,
+    pointCloudBoxList,
+    setPointCloudResult,
+    setPolygonList,
+  } = useContext(PointCloudContext);
   const [pointCloudPattern, setPointCloudPattern] = useState(EToolName.Rect);
+  const { pushHistoryWithList } = useHistory();
 
   // Clear All PointView Data
   const clearAllResult = () => {
@@ -23,8 +30,13 @@ export const useStatus = () => {
     mainViewInstance?.render();
 
     setPointCloudResult([]);
+    setPolygonList([]);
+
     topViewInstance?.pointCloud2dOperation.clearActiveStatus();
     topViewInstance?.pointCloud2dOperation.clearResult();
+
+    // Add History
+    pushHistoryWithList({ pointCloudBoxList: [], polygonList: [] });
   };
 
   const updatePointCloudPattern = (toolName: any) => {

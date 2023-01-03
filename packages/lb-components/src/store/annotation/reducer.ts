@@ -1,14 +1,17 @@
 import { getFormatSize } from '@/components/customResizeHook';
+import { ESubmitType } from '@/constant';
 import styleString from '@/constant/styleString';
 import { ANNOTATION_ACTIONS } from '@/store/Actions';
+import { IFileItem } from '@/types/data';
+import { IStepInfo } from '@/types/step';
 import { jsonParser } from '@/utils';
 import AnnotationDataUtils from '@/utils/AnnotationDataUtils';
 import { ConfigUtils } from '@/utils/ConfigUtils';
 import { composeResult, composeResultWithBasicImgInfo } from '@/utils/data';
 import StepUtils from '@/utils/StepUtils';
 import ToolUtils from '@/utils/ToolUtils';
-import { AnnotationEngine, CommonToolUtils, ImgUtils } from '@labelbee/lb-annotation';
-import { i18n } from '@labelbee/lb-utils';
+import { AnnotationEngine, CommonToolUtils, ImgUtils, MathUtils } from '@labelbee/lb-annotation';
+import { i18n, PointCloudUtils } from '@labelbee/lb-utils';
 import { Modal } from 'antd';
 import { message } from 'antd/es';
 import _ from 'lodash';
@@ -176,6 +179,45 @@ const AfterImageLoaded =
       });
   };
 
+export const composeResultByToolInstance = ({
+  toolInstance,
+  imgList,
+  imgIndex,
+  stepList,
+  step = 1,
+}: {
+  toolInstance: any;
+  imgList: IFileItem[];
+  imgIndex: number;
+  stepList: IStepInfo[];
+  step?: number;
+}) => {
+  const oldResultString = imgList[imgIndex]?.result || '';
+  const [resultList, basicImgInfo, extraData] = toolInstance?.exportData() ?? [];
+  const customObject = toolInstance?.exportCustomData?.() ?? {};
+
+  const resultWithBasicInfo = composeResultWithBasicImgInfo(oldResultString, basicImgInfo);
+  const newResultString = composeResult(
+    resultWithBasicInfo,
+    { step, stepList },
+    { rect: resultList },
+    customObject,
+  );
+
+  return imgList.map((v, i) => {
+    if (i === imgIndex) {
+      return {
+        ...v,
+        result: newResultString,
+        ...extraData,
+      };
+    }
+    return {
+      ...v,
+    };
+  });
+};
+
 export const annotationReducer = (
   state = initialState,
   action: AnnotationActionTypes,
@@ -224,29 +266,42 @@ export const annotationReducer = (
         customObject,
       );
 
-      imgList[imgIndex].result = AnnotationDataUtils.dataCorrection(
-        newResultString,
-        oldResultString,
-        step,
-        stepList,
-      );
+      const newImgList = state.imgList.map((v, i) => {
+        if (i === imgIndex) {
+          // Update Result
+          const newResult = AnnotationDataUtils.dataCorrection(
+            newResultString,
+            oldResultString,
+            step,
+            stepList,
+          );
 
-      if (extraData) {
-        imgList[imgIndex] = {
-          ...imgList[imgIndex],
-          ...extraData,
+          return {
+            ...v,
+            result: newResult,
+            ...extraData,
+          };
+        }
+        return v;
+      });
+
+      // Just for sync imgList
+      if (action.payload?.submitType === ESubmitType.SyncImgList) {
+        return {
+          ...state,
+          imgList: newImgList,
         };
       }
 
       if (onSubmit) {
-        onSubmit([imgList[imgIndex]], action.payload?.submitType, imgIndex);
+        onSubmit([newImgList[imgIndex]], action.payload?.submitType, imgIndex, newImgList);
       }
 
-      const stepProgress = calcStepProgress(imgList, step);
+      const stepProgress = calcStepProgress(newImgList, step);
       return {
         ...state,
         stepProgress,
-        imgList,
+        imgList: newImgList,
       };
     }
 
@@ -596,8 +651,8 @@ export const annotationReducer = (
         onOk: () => {
           toolInstance?.setValid(!valid);
         },
-        okText: i18n.t("Confirm"),
-        cancelText: i18n.t("Cancel")
+        okText: i18n.t('Confirm'),
+        cancelText: i18n.t('Cancel'),
       });
 
       return state;
@@ -675,6 +730,54 @@ export const annotationReducer = (
       return {
         ...state,
         pointCloudLoading: !!pointCloudLoading,
+      };
+    }
+
+    case ANNOTATION_ACTIONS.BATCH_UPDATE_TRACK_ID: {
+      const { id, newID, rangeIndex, imgList } = action.payload;
+      const { imgIndex, onSubmit } = state;
+      const newImgList = imgList.map((v: IFileItem, i: number) => {
+        if (MathUtils.isInRange(i, rangeIndex)) {
+          return {
+            ...v,
+            result: PointCloudUtils.batchUpdateTrackID({ id, newID, result: v.result }),
+          };
+        }
+        return v;
+      });
+
+      // Notify external data changes.
+      if (onSubmit) {
+        onSubmit([newImgList[imgIndex]], ESubmitType.BatchUpdateTrackID, imgIndex, newImgList);
+      }
+
+      return {
+        ...state,
+        imgList: newImgList,
+      };
+    }
+
+    case ANNOTATION_ACTIONS.BATCH_UPDATE_RESULT_BY_TRACK_ID: {
+      const { id, newData, rangeIndex } = action.payload;
+      const { imgList, imgIndex, onSubmit } = state;
+      const newImgList = imgList.map((v, i) => {
+        if (MathUtils.isInRange(i, rangeIndex)) {
+          return {
+            ...v,
+            result: PointCloudUtils.batchUpdateResultByTrackID({ id, newData, result: v.result }),
+          };
+        }
+        return v;
+      });
+
+      // Notify external data changes.
+      if (onSubmit) {
+        onSubmit([newImgList[imgIndex]], ESubmitType.BatchUpdateTrackID, imgIndex, newImgList);
+      }
+
+      return {
+        ...state,
+        imgList: newImgList,
       };
     }
 

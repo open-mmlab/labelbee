@@ -1,59 +1,12 @@
-English | [简体中文](./annotationView.md)
+/*
+ * @Author: Laoluo luozefeng@sensetime.com
+ * @Date: 2022-02-15 16:41:44
+ * @LastEditors: Laoluo luozefeng@sensetime.com
+ * @LastEditTime: 2022-05-17 17:10:30
+ */
+import { ICoordinate, ELineTypes } from './common';
+import { ICalib } from './pointCloud';
 
-# AnnotationView
-
-Integrate basic annotation rendering, and only need simple configuration to render the required annotation information.
-
-## Examples
-
-```ts
-import { AnnotationView } from '@labelbee/lb-components';
-
-const src = ''; // 可访问的图片路径
-
-const DefaultComponent = () => {
-  return (
-    <AnnotationView
-     src={src}
-   />
-  )
-}
-
-export default DefaultComponent;
-```
-
-## API
-
-| Params          | Description                     | Require | Type                                                  |           default           |
-| --------------- | ------------------------------- | ------- | ----------------------------------------------------- | :-------------------------: |
-| src             | img path                        | Yes     | string                                                |              -              |
-| size            | size of canvas                  | No      | ISize                                                 | {width: 1280, height: 720,} |
-| annotations     | the set of annotations          | No      | TAnnotationViewData[]                                     |             []              |
-| style           | annotation style                | No      | IBasicStyle                                           |             {}              |
-| zoomChange      | listen the change of zoom       | No      | (zoom: number) => void                                |              -              |
-| backgroundStyle | canvas background Style         | No      | CSSProperties                                         |             {}              |
-| onChange        | listen the change of annotation | No      | (type: 'hover' \| 'selected', ids: string[]) => void; |              -              |
-| showLoading     | show loading                    | No      | boolean                                               |            false            |
-
-
-### Type
-
-```ts
-interface ISize {
-  width: number;
-  height: number;
-}
-
-export interface ICoordinate {
-  x: number;
-  y: number;
-}
-
-/** 线条类型 */
-export enum ELineTypes {
-  Line,
-  Curve,
-}
 export interface IBasicStyle {
   stroke?: string; // 边框颜色
   fill?: string; // 填充颜色
@@ -118,12 +71,6 @@ export interface IBasicText extends IGraphicsBasicConfig {
   style?: StyleSheetList;
 }
 
-export interface ICalib {
-  P: [TMatrix14Tuple, TMatrix14Tuple, TMatrix14Tuple]; // 3x4 Camera Intrinsic matrix
-  R: [TMatrix13Tuple, TMatrix13Tuple, TMatrix13Tuple]; // 3x3 rotation matrix
-  T: [TMatrix14Tuple, TMatrix14Tuple, TMatrix14Tuple]; // 3x4 Lidar to camera matrix
-}
-
 export interface IBasicBox3d extends IGraphicsBasicConfig {
   id: string;
   // Box3d centerPoint
@@ -177,5 +124,3 @@ export type TAnnotationViewData =
   | TAnnotationViewBox3d
   | TAnnotationViewLine
   | TAnnotationViewText;
-
-```

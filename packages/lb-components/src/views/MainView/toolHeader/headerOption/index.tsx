@@ -142,7 +142,7 @@ const HeaderOption: React.FC<IProps> = (props) => {
 
   // PointCloudTool temporarily removes "restore" & "redo"
   if (isPointCloud) {
-    commonOptionList = commonOptionList.slice(0, 1);
+    commonOptionList = commonOptionList.slice(0, 3);
   }
 
   return (

@@ -14,6 +14,9 @@ export enum ESubmitType {
   Export = 5, // 数据导出时
   StepChanged = 6, // 切换步骤
   Save = 7, // 点击保存
+  BatchUpdateTrackID = 8, // 批量更改 TrackID (PointCloud)
+  SyncImgList = 10001, // 仅更改数据
+  SyncCurrentPageData = 10002, // 同步当页数据
 }
 // css 命名前缀
 export const prefix = 'bee';

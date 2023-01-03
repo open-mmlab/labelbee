@@ -249,7 +249,6 @@ class PointCloudUtils {
       height: boxParams.depth,
       length: boxParams.width,
       width: boxParams.height,
-
       rotation_y: this.transferRotation2KittiRotation_y(boxParams.rotation),
     };
   }
@@ -286,6 +285,185 @@ class PointCloudUtils {
     }
 
     return 2 * Math.PI - rotation;
+  }
+
+  /**
+   * Get the pointCloud result from imgList
+   * @param param0
+   * @returns
+   */
+  public static getAllPointCloudResult({
+    imgList,
+    step = 1,
+    extraBoxList,
+    ignoreIndexList = [],
+  }: {
+    imgList: Array<{ result: string }>;
+    step?: number;
+    extraBoxList: IPointCloudBox[];
+    ignoreIndexList?: number[];
+  }) {
+    const resultList = imgList
+      .filter((_, i) => !ignoreIndexList?.includes(i))
+      .map((v) => this.jsonParser(v.result));
+    const DEFAULT_STEP_NAME = `step_${step}`;
+
+    let boxList: IPointCloudBox[] = [];
+
+    resultList.forEach((result) => {
+      if (result?.[DEFAULT_STEP_NAME]?.['result']?.length > 0) {
+        boxList = boxList.concat(result[DEFAULT_STEP_NAME]['result']);
+      }
+    });
+
+    if (extraBoxList) {
+      boxList = boxList.concat(extraBoxList);
+    }
+
+    return boxList;
+  }
+
+  public static getNextTrackID({
+    imgList,
+    step = 1,
+    extraBoxList,
+  }: {
+    imgList: Array<{ result: string }>;
+    step?: number;
+    extraBoxList: IPointCloudBox[];
+  }) {
+    let trackID = 1;
+    const boxList = this.getAllPointCloudResult({ imgList, step, extraBoxList });
+
+    boxList.forEach((data: IPointCloudBox) => {
+      if (typeof data?.trackID === 'number' && data.trackID >= trackID) {
+        trackID = data.trackID + 1;
+      }
+    });
+
+    return trackID;
+  }
+
+  public static batchUpdateTrackID({
+    id,
+    newID,
+    result,
+    step = 1,
+  }: {
+    id: number;
+    newID: number;
+    result?: string;
+    step?: number;
+  }) {
+    const DEFAULT_STEP_NAME = `step_${step}`;
+    const originResult = this.jsonParser(result);
+    const dataList = originResult?.[DEFAULT_STEP_NAME]?.result; // PointCloudData1
+
+    if (!dataList) {
+      return result;
+    }
+
+    dataList.forEach((v: IPointCloudBox) => {
+      if (v?.trackID === id) {
+        // Side Effect Update
+        v.trackID = newID;
+      }
+
+      return v;
+    });
+
+    return JSON.stringify(originResult);
+  }
+
+  public static batchUpdateResultByTrackID({
+    id,
+    newData,
+    result,
+    step = 1,
+  }: {
+    id: number;
+    newData: Partial<IPointCloudBox>;
+    result?: string;
+    step?: number;
+  }) {
+    const DEFAULT_STEP_NAME = `step_${step}`;
+    const originResult = this.jsonParser(result);
+    const dataList = originResult?.[DEFAULT_STEP_NAME]?.result; // PointCloudData1
+
+    if (!dataList) {
+      return result;
+    }
+
+    originResult[DEFAULT_STEP_NAME].result = dataList.map((v: IPointCloudBox) => {
+      if (v?.trackID === id) {
+        // SubAttribute needs to be incremental updating.
+
+        const updateResult = {
+          ...newData,
+        };
+        const newSubAttribute = updateResult.subAttribute;
+
+        if (newSubAttribute && v.subAttribute) {
+          Object.assign(updateResult, { subAttribute: { ...v.subAttribute, ...newSubAttribute } });
+        }
+
+        return {
+          ...v,
+          ...updateResult,
+        };
+      }
+
+      return v;
+    });
+
+    return JSON.stringify(originResult);
+  }
+
+  public static getMaxSizeFromBox({
+    trackID,
+    imgList,
+  }: {
+    trackID: number;
+    imgList: Array<{ result: string }>;
+  }) {
+    let basicSize: { width: number; height: number; depth: number } | undefined = undefined;
+
+    imgList.forEach((imgInfo) => {
+      const DEFAULT_STEP_NAME = `step_${1}`;
+      const originResult = this.jsonParser(imgInfo.result);
+      const dataList = originResult?.[DEFAULT_STEP_NAME]?.result; // PointCloudData1
+
+      if (!dataList) {
+        return;
+      }
+
+      dataList.forEach((v: IPointCloudBox) => {
+        if (v?.trackID === trackID) {
+          if (!basicSize) {
+            basicSize = {
+              width: v.width,
+              height: v.height,
+              depth: v.depth,
+            };
+            return;
+          }
+
+          if (v.width > basicSize.width) {
+            basicSize.width = v.width;
+          }
+
+          if (v.height > basicSize.height) {
+            basicSize.height = v.height;
+          }
+
+          if (v.depth > basicSize.depth) {
+            basicSize.depth = v.depth;
+          }
+        }
+      });
+    });
+
+    return basicSize;
   }
 }
 

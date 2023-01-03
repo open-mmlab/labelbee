@@ -856,6 +856,12 @@ class PolygonOperation extends BasicToolOperation {
         return;
       }
 
+      if (selectedPolygon.isRect === true) {
+        this.emit('messageInfo', `${locale.getMessagesByLocale(EMessage.ForbidAddNewPoint, this.lang)}`);
+        this.clearPolygonDrag();
+        return;
+      }
+
       const { dropFoot } = PolygonUtils.getClosestPoint(
         currentCoord,
         this.polygonListUnderZoom,

@@ -22,12 +22,25 @@ import { cTool } from '@labelbee/lb-annotation';
 const { EVideoToolName, EPointCloudName } = cTool;
 
 interface IProps {
+  toolName?: string;
   style?: any;
   title?: React.ReactElement<any>;
-  toolName?: string;
 }
 
-const shortCutTable: any = {
+interface IShortCutInfo {
+  name: string;
+  icon?: string;
+  shortCut?: string[];
+  noticeInfo?: string;
+}
+
+interface IComponentsProps {
+  style?: any;
+  title?: React.ReactElement<any>;
+  shortCutList: IShortCutInfo[];
+}
+
+export const shortCutTable: { [a: string]: IShortCutInfo[] } = {
   [EToolName.Rect]: rectToolShortcutTable,
   [EToolName.Tag]: tagToolSingleShortCutTable,
   [EToolName.Point]: pointToolShortcutTable,
@@ -51,13 +64,9 @@ const ToolHotKeyIcon = ({ icon }: { icon: React.ReactElement | string }) => {
   return null;
 };
 
-const ToolHotKey: React.FC<IProps> = ({ style, title, toolName }) => {
+export const ToolHotKeyCom: React.FC<IComponentsProps> = ({ title, style, shortCutList }) => {
   const [svgFlag, setFlag] = useState(false);
   const { t } = useTranslation();
-
-  if (!toolName) {
-    return null;
-  }
 
   const shortCutStyle = {
     width: 320,
@@ -117,7 +126,7 @@ const ToolHotKey: React.FC<IProps> = ({ style, title, toolName }) => {
           );
         }
 
-        if (item?.startsWith('data')) {
+        if (item?.startsWith?.('data')) {
           return (
             <span key={index} style={wrapperStyle}>
               <span className='shortCutButton' style={{ marginRight: '3px' }}>
@@ -134,6 +143,7 @@ const ToolHotKey: React.FC<IProps> = ({ style, title, toolName }) => {
           </span>
         );
       }
+
       if (typeof item === 'number') {
         return (
           <span key={index} style={wrapperStyle}>
@@ -141,7 +151,7 @@ const ToolHotKey: React.FC<IProps> = ({ style, title, toolName }) => {
           </span>
         );
       }
-      if (item?.startsWith('data')) {
+      if (item?.startsWith?.('data')) {
         return (
           <span className='shortCutButton' key={index} style={{ marginRight: '3px' }}>
             <img width={16} height={23} src={item} />
@@ -169,15 +179,10 @@ const ToolHotKey: React.FC<IProps> = ({ style, title, toolName }) => {
 
   const content = (
     <div className={`${footerCls}__hotkey-content`}>
-      {shortCutTable[toolName]?.map((info: any, index: number) => setHotKey(info, index))}
+      {shortCutList?.map((info: any, index: number) => setHotKey(info, index))}
     </div>
   );
   const containerStyle = style || { width: 100 };
-
-  // 不存在对应的工具则不展示的快捷键
-  if (!shortCutTable[toolName]) {
-    return null;
-  }
 
   return (
     // @ts-ignore
@@ -190,6 +195,7 @@ const ToolHotKey: React.FC<IProps> = ({ style, title, toolName }) => {
         setFlag(false);
       }}
       overlayClassName='tool-hotkeys-popover'
+      className='tipsBar'
       // visible={svgFlag}
     >
       <div
@@ -213,6 +219,25 @@ const ToolHotKey: React.FC<IProps> = ({ style, title, toolName }) => {
       </div>
     </Popover>
   );
+};
+
+const ToolHotKey: React.FC<IProps> = ({ style, title, toolName }) => {
+  if (!toolName) {
+    return null;
+  }
+
+  // 不存在对应的工具则不展示的快捷键
+  if (!shortCutTable[toolName]) {
+    return null;
+  }
+
+  const props = {
+    style,
+    title,
+    shortCutList: shortCutTable[toolName],
+  };
+
+  return <ToolHotKeyCom {...props} />;
 };
 
 export default ToolHotKey;

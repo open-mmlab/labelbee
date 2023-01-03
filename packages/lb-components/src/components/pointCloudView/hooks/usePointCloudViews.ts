@@ -3,7 +3,7 @@
  * @author Glenfiddish <edwinlee0927@hotmail.com>
  * @createdate 2022-08-17
  */
-import { PointCloudAnnotation, PointCloud, MathUtils } from '@labelbee/lb-annotation';
+import { PointCloudAnnotation, PointCloud, MathUtils, getCuboidFromPointCloudBox } from '@labelbee/lb-annotation';
 import {
   IPointCloudBox,
   EPerspectiveView,
@@ -22,6 +22,9 @@ import { jsonParser } from '@/utils';
 import { SetPointCloudLoading } from '@/store/annotation/actionCreators';
 import { message } from 'antd';
 import { useTranslation } from 'react-i18next';
+import { useHistory } from './useHistory';
+import { usePolygon } from './usePolygon';
+import { IFileItem } from '@/types/data';
 
 const DEFAULT_SCOPE = 5;
 const DEFAULT_RADIUS = 90;
@@ -214,6 +217,7 @@ export const synchronizeSideView = (
         pointList: polygon2d,
         textAttribute: '',
         isRect: true,
+        attribute: boxParams.attribute,
       },
     ],
     newPolygon.id,
@@ -268,6 +272,7 @@ export const synchronizeBackView = (
         pointList: polygon2d,
         textAttribute: '',
         isRect: true,
+        attribute: boxParams.attribute,
       },
     ],
     newPolygon.id,
@@ -326,8 +331,10 @@ export const usePointCloudViews = () => {
     setSelectedIDs,
     selectedIDs,
     pointCloudBoxList,
-    setPointCloudResult,
   } = ptCtx;
+  const { addHistory, initHistory, pushHistoryUnderUpdatePolygon } = useHistory();
+  const { selectedPolygon } = usePolygon();
+
   const { updateSelectedBox } = useSingleBox();
   const { currentData, config } = useSelector((state: AppState) => {
     const { stepList, step, imgList, imgIndex } = state.annotation;
@@ -353,16 +360,6 @@ export const usePointCloudViews = () => {
 
   const { pointCloudInstance: topViewPointCloud } = topViewInstance;
 
-  // Temporarily hide
-  // const getNextTrackID = () => {
-  //   if (pointCloudBoxList.length > 0) {
-  //     const sortedPcList = pointCloudBoxList.sort((a, b) => a.trackID - b.trackID);
-  //     return sortedPcList.slice(-1)[0]?.trackID + 1;
-  //   }
-
-  //   return 1;
-  // };
-
   const mainViewGenBox = (boxParams: IPointCloudBox) => {
     mainViewInstance?.generateBox(boxParams);
     mainViewInstance?.controls.update();
@@ -370,16 +367,41 @@ export const usePointCloudViews = () => {
   };
 
   /** Top-view create box from 2D */
-  const topViewAddBox = (newPolygon: any, size: ISize) => {
-    const newParams = topViewPolygon2PointCloud(newPolygon, size, topViewPointCloud, undefined, {
-      attribute: config?.attributeList?.[0]?.value ?? '',
-    });
+  const topViewAddBox = ({
+    newPolygon,
+    size,
+    imgList,
+    trackConfigurable,
+  }: {
+    newPolygon: any;
+    size: ISize;
+    imgList: IFileItem[];
+    trackConfigurable?: boolean;
+  }) => {
+    const newImgList = imgList as any[];
+
+    const extraData = {
+      attribute: topViewInstance.pointCloud2dOperation.defaultAttribute ?? ''
+    };
+
+    if (trackConfigurable === true) {
+      Object.assign(extraData, {
+        trackID: PointCloudUtils.getNextTrackID({
+          imgList: newImgList,
+          extraBoxList: pointCloudBoxList,
+        }),
+      });
+    }
+
+    const newParams = topViewPolygon2PointCloud(
+      newPolygon,
+      size,
+      topViewPointCloud,
+      undefined,
+      extraData,
+    );
     const polygonOperation = topViewInstance?.pointCloud2dOperation;
 
-    // Temporarily hide
-    // const boxParams: IPointCloudBox = Object.assign(newParams, {
-    //   trackID: getNextTrackID(),
-    // });
     const boxParams: IPointCloudBox = newParams;
 
     // If the count is less than lowerLimitPointsNumInBox, needs to delete it
@@ -397,6 +419,7 @@ export const usePointCloudViews = () => {
     setSelectedIDs(boxParams.id);
     syncPointCloudViews(PointCloudView.Top, newPolygon, boxParams);
     addPointCloudBox(boxParams);
+    addHistory({ newBoxParams: boxParams });
   };
 
   /** Top-view selected changed and render to other view */
@@ -430,7 +453,7 @@ export const usePointCloudViews = () => {
       // Update count
       if (mainViewInstance) {
         const { count } = mainViewInstance.getSensesPointZAxisInPolygon(
-          mainViewInstance.getCuboidFromPointCloudBox(newBoxParams)
+          getCuboidFromPointCloudBox(newBoxParams)
             .polygonPointList as IPolygonPoint[],
           [
             newBoxParams.center.z - newBoxParams.depth / 2,
@@ -463,6 +486,12 @@ export const usePointCloudViews = () => {
    * @param size
    */
   const topViewUpdateBox = (polygon: any, size: ISize) => {
+    // If the selected Object is Polygon.
+    if (selectedPolygon) {
+      pushHistoryUnderUpdatePolygon(polygon);
+      return;
+    }
+
     if (selectedPointCloudBox) {
       const newBoxParams = topViewPolygon2PointCloud(
         polygon,
@@ -518,18 +547,6 @@ export const usePointCloudViews = () => {
     mainViewInstance?.generateBoxes(newBoxes);
   };
 
-  const clearAllResult = () => {
-    // Clear All PointView Data
-    pointCloudBoxList.forEach((v) => {
-      mainViewInstance?.removeObjectByName(v.id);
-    });
-    mainViewInstance?.render();
-
-    setPointCloudResult([]);
-    topViewInstance.pointCloud2dOperation.clearActiveStatus();
-    topViewInstance.pointCloud2dOperation.clearResult();
-  };
-
   const initPointCloud3d = () => {
     if (!mainViewInstance) {
       return;
@@ -557,9 +574,11 @@ export const usePointCloudViews = () => {
       mainViewInstance?.removeObjectByName(v.id);
     });
 
+    let boxParamsList: any[] = [];
+    let polygonList = [];
     if (currentData.result) {
-      const boxParamsList = PointCloudUtils.getBoxParamsFromResultList(currentData.result);
-      const polygonList = PointCloudUtils.getPolygonListFromResultList(currentData.result);
+      boxParamsList = PointCloudUtils.getBoxParamsFromResultList(currentData.result);
+      polygonList = PointCloudUtils.getPolygonListFromResultList(currentData.result);
 
       // Add Init Box
       boxParamsList.forEach((v: IPointCloudBox) => {
@@ -572,6 +591,7 @@ export const usePointCloudViews = () => {
       ptCtx.setPointCloudResult([]);
       ptCtx.setPolygonList([]);
     }
+    initHistory({ pointCloudBoxList: boxParamsList, polygonList });
 
     mainViewInstance.updateTopCamera();
 
@@ -602,7 +622,6 @@ export const usePointCloudViews = () => {
     sideViewUpdateBox,
     backViewUpdateBox,
     pointCloudBoxListUpdated,
-    clearAllResult,
     initPointCloud3d,
     updatePointCloudData,
   };

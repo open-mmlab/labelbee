@@ -18,8 +18,8 @@ export interface ICustomToolInstance {
   setResult: () => void;
   setValid: (valid: boolean) => void;
   history: {
-    initRecord: () => void;
-    pushHistory: () => void;
+    initRecord: (action: any) => void;
+    pushHistory: (action: any) => void;
   };
   setDefaultAttribute: (attribute: string) => void;
 
@@ -27,6 +27,9 @@ export interface ICustomToolInstance {
   setSubAttribute: (key: string, value: string) => void;
 
   updateRotate: () => void;
+
+  undo: () => void,
+  redo: () => void,
 }
 
 export interface ICustomToolInstanceProps {
@@ -64,6 +67,8 @@ const useCustomToolInstance = ({ basicInfo }: ICustomToolInstanceProps = {}) => 
     setSubAttribute: (key: string, value: string) => {},
     setValid: () => {},
     updateRotate: () => {},
+    redo: () => {},
+    undo: () => {},
   });
 
   const onMounted = (instance: any) => {

@@ -14,6 +14,11 @@ enum ESubmitType {
   Jump = 3, // 分页器的跳页翻页
   Quit = 4, // 左上角后退触发
   Export = 5, // 数据导出时
+  StepChanged = 6, // 切换步骤
+  Save = 7, // 点击保存
+  BatchUpdateTrackID = 8, // 批量更改 TrackID (PointCloud)
+  SyncImgList = 10001, // 仅更改数据
+  SyncCurrentPageData = 10002, // 同步当页数据
 }
 
 // 结果类型
@@ -52,10 +57,11 @@ const stepList = [
 
 const App = () => {
   /**
-   * 监听数据提交操作： 翻页
+   * 监听数据提交操作： 翻页，提交，批量提交等操作
    * @param {IFileItem[]} data 当前提交的数据
    * @param {ESubmitType} submitType 触发 onSubmit 的方向判断
    * @param {number} imgIndex 提交结果的图片下标
+   * @param {IFileItem[]} imgList 当前整个序列的结果
    */
   const onSubmit = () => {};
 
@@ -510,7 +516,13 @@ enum ESubmitType {
   Jump = 3, // 分页器的跳页翻页
   Quit = 4, // 左上角后退触发
   Export = 5, // 数据导出时
+  StepChanged = 6, // 切换步骤
+  Save = 7, // 点击保存
+  BatchUpdateTrackID = 8, // 批量更改 TrackID (PointCloud)
+  SyncImgList = 10001, // 仅更改数据
+  SyncCurrentPageData = 10002, // 同步当页数据
 }
+
 
 interface IFileItem {
   id: number;

@@ -11,12 +11,13 @@ interface IProps {
     value: string;
     color?: string;
   }>;
-  selectedAttribute: string;
+  selectedAttribute?: string;
   attributeChanged: (v: string) => void;
   forbidDefault?: boolean;
   forbidColor?: boolean;
   noHeightLimit?: boolean;
-  num?: number;
+  num?: number | string;
+  style?: React.CSSProperties;
 }
 
 const AttributeList = React.forwardRef((props: IProps, ref) => {
@@ -37,7 +38,7 @@ const AttributeList = React.forwardRef((props: IProps, ref) => {
   }
 
   return (
-    <div className={className}>
+    <div className={className} style={props.style}>
       <Radio.Group
         name='radiogroup'
         defaultValue={props?.selectedAttribute}
@@ -48,7 +49,7 @@ const AttributeList = React.forwardRef((props: IProps, ref) => {
         {list.map((i: any, index: number) => {
           let hotKey: number | string = props?.num ?? index;
 
-          if (props.forbidDefault === true) {
+          if (props.forbidDefault === true && typeof hotKey === 'number') {
             // 禁止 default 将从 1 开始
             hotKey++;
           }

@@ -15,6 +15,7 @@ import { ESubmitType } from '@/constant';
 import { EPageTurningOperation } from '@/data/enums/AnnotationSize';
 import PageOperator from '@/utils/PageOperator';
 import { jsonParser } from '@/utils';
+import { IPointCloudBox } from '@labelbee/lb-utils';
 
 const dispatchTasks = (dispatch: any, tasks: any[]) => tasks.map((task) => dispatch(task));
 
@@ -173,7 +174,9 @@ export function UpdateValid(): AnnotationActionTypes {
   };
 }
 
-export function UpdateSkipBeforePageTurning(skipBeforePageTurning: (pageTurning: Function) => {}): AnnotationActionTypes {
+export function UpdateSkipBeforePageTurning(
+  skipBeforePageTurning: (pageTurning: Function) => {},
+): AnnotationActionTypes {
   return {
     type: ANNOTATION_ACTIONS.SKIP_BEFORE_PAGE_TURNING,
     payload: {
@@ -197,6 +200,43 @@ export function CopyBackWordResult(): AnnotationActionTypes {
   };
 }
 
+export function BatchUpdateTrackID({
+  id,
+  newID,
+  rangeIndex,
+  imgList,
+}: {
+  id: number;
+  newID: number;
+  rangeIndex: [number, number];
+  imgList: IFileItem[];
+}): AnnotationActionTypes {
+  return {
+    type: ANNOTATION_ACTIONS.BATCH_UPDATE_TRACK_ID,
+    payload: {
+      id,
+      newID,
+      rangeIndex,
+      imgList,
+    },
+  };
+}
+
+export function BatchUpdateResultByTrackID(
+  id: number, // originData
+  newData: Partial<IPointCloudBox>,
+  rangeIndex: [number, number],
+): AnnotationActionTypes {
+  return {
+    type: ANNOTATION_ACTIONS.BATCH_UPDATE_RESULT_BY_TRACK_ID,
+    payload: {
+      id,
+      newData,
+      rangeIndex,
+    },
+  };
+}
+
 /**
  * 初始化任务数据
  * @param param0
@@ -212,7 +252,7 @@ export function InitTaskData({
   step,
   stepList,
   skipBeforePageTurning,
-  beforeRotate
+  beforeRotate,
 }: any): any {
   const tasks: any[] = [];
 
@@ -276,7 +316,7 @@ export function UpdateInjectFunc({
   pageSize,
   loadFileList,
   stepList,
-  beforeRotate
+  beforeRotate,
 }: any): any {
   const tasks: any[] = [];
 
@@ -512,7 +552,7 @@ export const DispatcherTurning = async (
         return;
       }
     }
-    
+
     annotationStore.onPageChange?.(fileIndex);
     const index =
       submitType === ESubmitType.Backward
@@ -544,7 +584,6 @@ export const SetAnnotationLoading = (dispatch: Function, loading: boolean) => {
     },
   });
 };
-
 
 export const SetPointCloudLoading = (dispatch: Function, loading: boolean) => {
   dispatch({

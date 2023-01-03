@@ -18,12 +18,13 @@ import { BoxInfos, PointCloudValidity } from './PointCloudInfos';
 import { usePolygon } from './hooks/usePolygon';
 import { useZoom } from './hooks/useZoom';
 import { Slider } from 'antd';
-import { aMapStateToProps, IAnnotationStateProps } from '@/store/annotation/map';
+import { a2MapStateToProps, IA2MapStateProps, IAnnotationStateProps } from '@/store/annotation/map';
 import { connect } from 'react-redux';
 import { usePointCloudViews } from './hooks/usePointCloudViews';
 import useSize from '@/hooks/useSize';
 import { useTranslation } from 'react-i18next';
 import { LabelBeeContext } from '@/store/ctx';
+import { jsonParser } from '@/utils';
 
 const { EPolygonPattern } = cTool;
 
@@ -133,10 +134,11 @@ const ZAxisSlider = ({
   );
 };
 
-const PointCloudTopView: React.FC<IAnnotationStateProps> = ({ currentData }) => {
+const PointCloudTopView: React.FC<IA2MapStateProps> = ({ currentData, imgList, stepInfo }) => {
   const ref = useRef<HTMLDivElement>(null);
   const ptCtx = React.useContext(PointCloudContext);
   const size = useSize(ref);
+  const config = jsonParser(stepInfo.config);
   const { setZoom } = useZoom();
 
   const { addPolygon, deletePolygon } = usePolygon();
@@ -160,6 +162,7 @@ const PointCloudTopView: React.FC<IAnnotationStateProps> = ({ currentData }) => 
         container: ref.current,
         size,
         pcdPath: currentData.url,
+        config,
       });
       ptCtx.setTopViewInstance(pointCloudAnnotation);
     }
@@ -175,10 +178,16 @@ const PointCloudTopView: React.FC<IAnnotationStateProps> = ({ currentData }) => 
     TopView2dOperation.singleOn('polygonCreated', (polygon: IPolygonData) => {
       if (TopView2dOperation.pattern === EPolygonPattern.Normal || !currentData?.url) {
         addPolygon(polygon);
+        ptCtx.setSelectedIDs(polygon.id);
         return;
       }
 
-      pointCloudViews.topViewAddBox(polygon, size);
+      pointCloudViews.topViewAddBox({
+        newPolygon: polygon,
+        size,
+        imgList,
+        trackConfigurable: config.trackConfigurable,
+      });
     });
 
     TopView2dOperation.singleOn('deletedObject', ({ id }) => {
@@ -280,6 +289,6 @@ const PointCloudTopView: React.FC<IAnnotationStateProps> = ({ currentData }) => 
   );
 };
 
-export default connect(aMapStateToProps, null, null, { context: LabelBeeContext })(
+export default connect(a2MapStateToProps, null, null, { context: LabelBeeContext })(
   PointCloudTopView,
 );

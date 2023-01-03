@@ -44,7 +44,7 @@ declare interface IPolygonConfig extends IToolConfig {
   referenceFilterData?: string[]; // 存储参考展示的过滤数据对象
   preReferenceStep?: number; // 参考显示预标注步骤
 
-  segmentSupport: boolean; // 分割辅助
+  segmentSupport?: boolean; // 分割辅助
   showConfirm?: boolean;
-  panopticModel: string; // 分割模型
+  panopticModel?: string; // 分割模型
 }
