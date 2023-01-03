@@ -6,7 +6,12 @@ import { store } from '.';
 import { LabelBeeContext } from '@/store/ctx';
 import { AppState } from './store';
 import { ANNOTATION_ACTIONS } from './store/Actions';
-import { InitTaskData, loadImgList, UpdateInjectFunc } from './store/annotation/actionCreators';
+import {
+  InitAnnotationState,
+  InitTaskData,
+  loadImgList,
+  UpdateInjectFunc,
+} from './store/annotation/actionCreators';
 import { LoadFileAndFileData } from './store/annotation/reducer';
 import { ToolInstance } from './store/annotation/types';
 import {
@@ -136,6 +141,9 @@ const App: React.FC<AppProps> = (props) => {
     i18n.on('languageChanged', i18nLanguageChangedFunc);
     return () => {
       i18n.off('languageChanged', i18nLanguageChangedFunc);
+
+      // Init all annotation state after unmounting
+      InitAnnotationState(store.dispatch);
     };
   }, []);
 

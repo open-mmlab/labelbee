@@ -219,10 +219,17 @@ export const composeResultByToolInstance = ({
 };
 
 export const annotationReducer = (
-  state = initialState,
+  state = { ...initialState },
   action: AnnotationActionTypes,
 ): AnnotationState => {
   switch (action.type) {
+    case ANNOTATION_ACTIONS.INIT_ALL_STATE: {
+      return {
+        ...state,
+        ...initialState,
+      };
+    }
+
     case ANNOTATION_ACTIONS.UPDATE_TOOL_INSTANCE: {
       return {
         ...state,

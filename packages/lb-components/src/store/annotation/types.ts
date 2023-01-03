@@ -168,6 +168,9 @@ interface CopyBackWordResult extends CommonActions {
   type: typeof ANNOTATION_ACTIONS.COPY_BACKWARD_RESULT;
 }
 
+interface InitAnnotationState extends CommonActions {
+  type: typeof ANNOTATION_ACTIONS.INIT_ALL_STATE;
+}
 interface BatchUpdateTrackID {
   type: typeof ANNOTATION_ACTIONS.BATCH_UPDATE_TRACK_ID,
   payload: {
@@ -204,4 +207,5 @@ export type AnnotationActionTypes =
   | CopyBackWordResult
   | UpdateOnSave
   | BatchUpdateTrackID
-  | BatchUpdateResultByTrackID;
+  | BatchUpdateResultByTrackID
+  | InitAnnotationState;
