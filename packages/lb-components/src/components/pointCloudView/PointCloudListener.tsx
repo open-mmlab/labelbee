@@ -198,7 +198,7 @@ const PointCloudListener: React.FC<IA2MapStateProps> = ({ currentData, config })
 
     toolInstanceRef.current.exportCustomData = () => {
       return {
-        renderPolygon: ptCtx.polygonList ?? [],
+        resultPolygon: ptCtx.polygonList ?? [],
       };
     };
 

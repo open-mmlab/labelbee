@@ -55,7 +55,14 @@ class PointCloudUtils {
     const data = this.jsonParser(result);
 
     const DEFAULT_STEP = `step_1`;
-    const pointCloudDataList = data?.[DEFAULT_STEP]?.renderPolygon ?? [];
+
+    /**
+     * Notice.
+     *
+     * It needs to be compatible with the error data structure(`renderPolygon`), `resultPolygon` is the correct one.
+     */
+    const pointCloudDataList =
+      data?.[DEFAULT_STEP]?.resultPolygon ?? data?.[DEFAULT_STEP]?.renderPolygon ?? [];
 
     return pointCloudDataList;
   }
