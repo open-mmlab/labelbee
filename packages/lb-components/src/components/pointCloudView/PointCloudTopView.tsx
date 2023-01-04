@@ -8,7 +8,7 @@ import { FooterDivider } from '@/views/MainView/toolFooter';
 import { ZoomController } from '@/views/MainView/toolFooter/ZoomController';
 import { DownSquareOutlined, UpSquareOutlined } from '@ant-design/icons';
 import { cTool, PointCloudAnnotation } from '@labelbee/lb-annotation';
-import { IPolygonData } from '@labelbee/lb-utils';
+import { IPolygonData, PointCloudUtils } from '@labelbee/lb-utils';
 import React, { useEffect, useLayoutEffect, useRef, useState } from 'react';
 import { PointCloudContext } from './PointCloudContext';
 import { useRotate } from './hooks/useRotate';
@@ -198,7 +198,15 @@ const PointCloudTopView: React.FC<IProps> = ({
 
     TopView2dOperation.singleOn('polygonCreated', (polygon: IPolygonData) => {
       if (TopView2dOperation.pattern === EPolygonPattern.Normal || !currentData?.url) {
-        addPolygon(polygon);
+        /**
+         * Notice. The Polygon need to be converted to pointCloud coordinate system for storage.
+         */
+        const newPolygon = {
+          ...polygon,
+          pointList: polygon.pointList.map((v) => PointCloudUtils.transferCanvas2World(v, size)),
+        };
+
+        addPolygon(newPolygon);
         ptCtx.setSelectedIDs(polygon.id);
         return;
       }

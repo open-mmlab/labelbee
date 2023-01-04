@@ -180,7 +180,15 @@ export class PointCloudAnnotation implements IPointCloudAnnotationOperation {
     }) as IPolygonData[];
 
     if (extraList) {
-      polygonList = polygonList.concat(extraList);
+      // Convert extraList(polygonList) from PointCloud coordinate to Canvas Coordinate
+      polygonList = polygonList.concat(
+        extraList.map((v) => ({
+          ...v,
+          pointList: v?.pointList?.map((point) =>
+            PointCloudUtils.transferWorld2Canvas(point, this.pointCloud2dOperation.size),
+          ),
+        })),
+      );
     }
 
     this.pointCloud2dOperation.setResult(polygonList);

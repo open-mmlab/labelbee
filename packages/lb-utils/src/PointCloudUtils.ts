@@ -4,6 +4,7 @@
  * @author Ron <ron.f.luo@gmail.com>
  */
 
+import { IPolygonData } from './types';
 import { IPointCloudBox, IPointCloudConfig } from './types/pointCloud';
 
 class PointCloudUtils {
@@ -50,6 +51,42 @@ class PointCloudUtils {
 
     return pointCloudDataList;
   }
+
+  /**
+   * Get the coordinate from canvas2d-coordinate to world coordinate
+   */
+  public static transferCanvas2World = (
+    currentPos: { x: number; y: number },
+    size: { width: number; height: number },
+  ) => {
+    const { width: w, height: h } = size;
+    const { x, y, ...otherProps } = currentPos;
+
+    // x-Axis is the Positive Direction, so the x-coordinates need to be swapped with the y-coordinates
+    return {
+      x: -y + h / 2,
+      y: -(x - w / 2),
+      ...otherProps,
+    };
+  };
+
+  /**
+   * Get the coordinate from canvas2d-coordinate to world coordinate
+   */
+  public static transferWorld2Canvas = (
+    currentPos: { x: number; y: number },
+    size: { width: number; height: number },
+  ) => {
+    const { width: w, height: h } = size;
+    const { x, y, ...otherProps } = currentPos;
+
+    // x-Axis is the Positive Direction, so the x-coordinates need to be swapped with the y-coordinates
+    return {
+      x: -y + w / 2,
+      y: -x + h / 2,
+      ...otherProps,
+    };
+  };
 
   public static getPolygonListFromResultList(result: string): any[] {
     const data = this.jsonParser(result);
