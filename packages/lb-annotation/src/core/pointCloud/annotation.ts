@@ -154,9 +154,11 @@ export class PointCloudAnnotation implements IPointCloudAnnotationOperation {
        * (Like `ptCtx.topViewInstance.updatePolygonList(ptCtx.pointCloudBoxList);`)
        */
       this.pointCloud2dOperation.setImgNode(image);
-      this.pointCloud2dOperation.setCanvasSize(size);
       this.pointCloud2dOperation.initImgPos();
     };
+
+    // It need to update directly
+    this.pointCloud2dOperation.setCanvasSize(size);
   }
 
   public addPolygonListOnTopView(result: string) {

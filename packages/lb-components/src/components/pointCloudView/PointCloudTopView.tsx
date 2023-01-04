@@ -258,7 +258,7 @@ const PointCloudTopView: React.FC<IProps> = ({
 
     // 1. Update Size
     ptCtx.topViewInstance.initSize(size);
-    ptCtx.topViewInstance.updatePolygonList(ptCtx.pointCloudBoxList);
+    ptCtx.topViewInstance.updatePolygonList(ptCtx.pointCloudBoxList, ptCtx.polygonList);
 
     const {
       topViewInstance: { pointCloudInstance: pointCloud, pointCloud2dOperation: polygonOperation },
