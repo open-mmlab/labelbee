@@ -63,17 +63,19 @@ export const useHistory = () => {
     const selectedPolygon = polygonList.find((v) => v.id === polygon.id);
 
     if (selectedPolygon) {
+      const newPolygonList = polygonList.map((v) => {
+        if (v.id === polygon.id) {
+          return polygon;
+        }
+        return {
+          ...v,
+        };
+      });
       history.pushHistory({
         pointCloudBoxList,
-        polygonList: polygonList.map((v) => {
-          if (v.id === polygon.id) {
-            return polygon;
-          }
-          return {
-            ...v,
-          };
-        }),
+        polygonList: newPolygonList,
       });
+      setPolygonList(newPolygonList);
     }
   };
 
