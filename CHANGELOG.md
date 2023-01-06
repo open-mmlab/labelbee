@@ -2,6 +2,18 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [1.9.1](https://github.com/open-mmlab/labelbee/compare/v1.9.0...v1.9.1) (2023-01-06)
+
+
+### Features
+
+* **lb-annotation:** Add className in renderInvalidPage ([674e5d8](https://github.com/open-mmlab/labelbee/commit/674e5d8cc32b3bd86cdfa23ebdf685fdf8165f50))
+
+
+### Bug Fixes
+
+* **tool-schuduler:** Multi-Layer needs to unified setAttribute ([24c6f41](https://github.com/open-mmlab/labelbee/commit/24c6f41d33dcd4ee9371ed894e64e1d37d4a4a47))
+
 ## [1.9.0](https://github.com/open-mmlab/labelbee/compare/v1.8.1...v1.9.0) (2022-10-12)
 
 
