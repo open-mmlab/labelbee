@@ -101,6 +101,12 @@ export class ToolScheduler implements IToolSchedulerOperation {
     });
   }
 
+  public setImgAttribute(imgAttribute: IImageAttribute) {
+    this.toolOperationList.forEach((toolInstance) => {
+      toolInstance.setImgAttribute(imgAttribute);
+    });
+  }
+
   public setSize(size: ISize) {
     this.toolOperationList.forEach((toolInstance) => {
       toolInstance.setSize(size);

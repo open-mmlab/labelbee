@@ -4,7 +4,6 @@ All notable changes to this project will be documented in this file. See [standa
 
 ## [1.10.0](https://github.com/open-mmlab/labelbee/compare/v1.9.0...v1.10.0) (2023-01-03)
 
-
 ### Features
 
 * **annotation-view:** Support Box3d Rendering ([eb0e927](https://github.com/open-mmlab/labelbee/commit/eb0e927d134cb9d73962bfdc4231b8ba43b4be17))
@@ -35,7 +34,6 @@ All notable changes to this project will be documented in this file. See [standa
 * UnidyParamsModal add initialValue page ([43f9ba5](https://github.com/open-mmlab/labelbee/commit/43f9ba50dc8156b90317ee5d366d0106e4c99f2c))
 * **viewoperation:** Line support rendering keypoint ([646df2d](https://github.com/open-mmlab/labelbee/commit/646df2d8739caee324ccf0f1978047feb4823f94))
 
-
 ### Bug Fixes
 
 * **hotkey:** Support more status ([afa5b95](https://github.com/open-mmlab/labelbee/commit/afa5b956f21d75cc9fe7daa4c6bcac64e249c939))
@@ -44,6 +42,15 @@ All notable changes to this project will be documented in this file. See [standa
 * **polygon-operation:** Rect-Polygon is forbidden to be added new point by double click ([8aa20cb](https://github.com/open-mmlab/labelbee/commit/8aa20cb2d892451c0c2e7ce9998706e7c930c5d5))
 * **style:** Update the defaultStyle ([892bb93](https://github.com/open-mmlab/labelbee/commit/892bb930109de104db4df5325120f7eb7321cba2))
 * Update the function of getCuboidFromPointCloudBox ([6fe8af4](https://github.com/open-mmlab/labelbee/commit/6fe8af4f657461365006f07beaee3a16ce46e3aa))
+### [1.9.1](https://github.com/open-mmlab/labelbee/compare/v1.9.0...v1.9.1) (2023-01-06)
+
+### Features
+
+* **lb-annotation:** Add className in renderInvalidPage ([674e5d8](https://github.com/open-mmlab/labelbee/commit/674e5d8cc32b3bd86cdfa23ebdf685fdf8165f50))
+
+### Bug Fixes
+
+* **tool-schuduler:** Multi-Layer needs to unified setAttribute ([24c6f41](https://github.com/open-mmlab/labelbee/commit/24c6f41d33dcd4ee9371ed894e64e1d37d4a4a47))
 
 ## [1.9.0](https://github.com/open-mmlab/labelbee/compare/v1.8.1...v1.9.0) (2022-10-12)
 

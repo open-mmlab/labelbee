@@ -110,6 +110,10 @@ export default class AnnotationEngine {
     this.imgNode = imgNode;
   }
 
+  public setImgAttribute(imgAttribute: IImageAttribute) {
+    this.toolScheduler.setImgAttribute(imgAttribute);
+  }
+
   public setSize(size: ISize) {
     this.size = size;
     this.toolScheduler.setSize(size);

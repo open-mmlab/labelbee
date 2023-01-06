@@ -1,6 +1,8 @@
 import locale from '../../locales';
 import { EMessage } from '../../locales/constants';
 
+const INVALID_PAGE_CLASS_NAME = 'bee-invalid-page';
+
 export default class RenderDomUtils {
   public static renderInvalidPage(container: HTMLElement, size: ISize, lang: string) {
     const invalidDOM = document.createElement('div');
@@ -24,6 +26,7 @@ export default class RenderDomUtils {
       `,
     );
     invalidDOM.innerHTML = locale.getMessagesByLocale(EMessage.InvalidImage, lang);
+    invalidDOM.className = INVALID_PAGE_CLASS_NAME;
 
     container.appendChild(invalidDOM);
 
