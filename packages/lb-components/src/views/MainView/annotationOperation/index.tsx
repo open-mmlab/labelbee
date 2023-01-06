@@ -109,10 +109,13 @@ const AnnotationOperation: React.FC<IProps> = (props: IProps) => {
   }, [toolInstance]);
 
   useEffect(() => {
-    if (toolInstance) {
-      toolInstance.setImgAttribute(imgAttribute);
+    if (annotationEngine?.setImgAttribute) {
+      annotationEngine.setImgAttribute(imgAttribute);
+    } else {
+      // Old version.
+      toolInstance?.setImgAttribute?.(imgAttribute);
     }
-  }, [imgAttribute]);
+  }, [imgAttribute, annotationEngine]);
 
   /** 样式同步 */
   useEffect(() => {
