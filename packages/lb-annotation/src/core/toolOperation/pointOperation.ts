@@ -902,6 +902,59 @@ class PointOperation extends BasicToolOperation {
   }
 
   /**
+   * 渲染辅助线-需开启列表标注
+   */
+  public renderAuxiliaryLine() {
+    if (!this.config.markerConfigurable || !this.config.markerList?.length) {
+      return;
+    }
+
+    const [showingPointList, selectedPoint] = CommonToolUtils.getRenderResultList<IPointUnit>(
+      this.pointList,
+      CommonToolUtils.getSourceID(this.basicResult),
+      this.attributeLockList,
+      this.selectedID,
+    );
+
+    const pointList = showingPointList;
+
+    if (selectedPoint) {
+      pointList.push(selectedPoint);
+    }
+
+    if (pointList.length < 2) {
+      return;
+    }
+
+    const auxiliaryLines = MarkerUtils.getAuxiliaryLineByMarkerList(this.config.markerList, 'value');
+    const auxiliaryLinesCoord = MarkerUtils.getAuxiliaryLineCoord(auxiliaryLines, pointList);
+
+    auxiliaryLinesCoord.forEach((item) => {
+      const { start: startCoord, end: endCoord } = item;
+      DrawUtils.drawLine(
+        this.canvas,
+        AxisUtils.changePointByZoom(
+          {
+            ...startCoord,
+          },
+          this.zoom,
+          this.currentPos,
+        ),
+        AxisUtils.changePointByZoom(
+          {
+            ...endCoord,
+          },
+          this.zoom,
+          this.currentPos,
+        ),
+        {
+          color: '#C5C5C5',
+        },
+      );
+    });
+  }
+
+  /**
    * 顶层渲染图标
    */
   public renderTop() {
@@ -941,6 +994,7 @@ class PointOperation extends BasicToolOperation {
     if (!this.ctx) return;
 
     super.render();
+    this.renderAuxiliaryLine();
     this.renderPointList();
     this.renderTop();
   }
