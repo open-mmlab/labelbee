@@ -4,8 +4,8 @@
   "private": true,
   "dependencies": {
     "@labelbee/lb-annotation": "^1.9.1",
-    "@labelbee/lb-components": "^1.6.1",
-    "@labelbee/lb-utils": "^1.3.0",
+    "@labelbee/lb-components": "^1.6.2",
+    "@labelbee/lb-utils": "^1.3.2",
     "@testing-library/jest-dom": "^5.11.4",
     "@testing-library/react": "^11.1.0",
     "@testing-library/user-event": "^12.1.10",
