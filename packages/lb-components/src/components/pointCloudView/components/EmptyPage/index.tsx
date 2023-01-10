@@ -6,12 +6,17 @@
 import React from 'react';
 import NoDataSvg from '@/assets/annotation/pointCloudTool/nodata.svg';
 import { getClassName } from '@/utils/dom';
+import { useTranslation } from 'react-i18next';
 
 const EmptyPage = () => {
+  const { t } = useTranslation();
+
   return (
     <div className={getClassName('point-cloud-container', 'empty-page')}>
       <img src={NoDataSvg} />
-      <span className={getClassName('point-cloud-container', 'empty-page', 'text')}>暂无数据</span>
+      <span className={getClassName('point-cloud-container', 'empty-page', 'text')}>
+        {t('NoData')}
+      </span>
     </div>
   );
 };

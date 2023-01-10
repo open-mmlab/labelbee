@@ -33,6 +33,14 @@ All notable changes to this project will be documented in this file. See [standa
 * RectOperation adds multi-move operation ([725b8ca](https://github.com/open-mmlab/labelbee/commit/725b8ca6cfa23d55b6b743a5c439b0f6aa89331d))
 * UnidyParamsModal add initialValue page ([43f9ba5](https://github.com/open-mmlab/labelbee/commit/43f9ba50dc8156b90317ee5d366d0106e4c99f2c))
 * **viewoperation:** Line support rendering keypoint ([646df2d](https://github.com/open-mmlab/labelbee/commit/646df2d8739caee324ccf0f1978047feb4823f94))
+### [1.9.2](https://github.com/open-mmlab/labelbee/compare/v1.9.1...v1.9.2) (2023-01-10)
+
+
+### Bug Fixes
+
+* **i18n:** PointCloud NoData Page Adaptation ([23bd63e](https://github.com/open-mmlab/labelbee/commit/23bd63eff4a103c9f8ac02fcbcea5788106cafbd))
+
+### [1.9.1](https://github.com/open-mmlab/labelbee/compare/v1.9.0...v1.9.1) (2023-01-06)
 
 ### Bug Fixes
 
