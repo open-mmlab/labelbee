@@ -168,7 +168,8 @@
     "DragOperation": "Drag",
     "SelectedStatus": "Selected",
     "updateValidFromValidToInValid": "Confirm update as invalid page？",
-    "updateValidFromInValidToValid": "Confirm update as valid page？"
+    "updateValidFromInValidToValid": "Confirm update as valid page？",
+    "NoData": "No Data"
   },
   "cn": {
     "TextInput": "文本输入",
@@ -339,6 +340,7 @@
     "DragOperation": "拖动",
     "SelectedStatus": "选中时",
     "updateValidFromValidToInValid": "是否确认标为无效文件？",
-    "updateValidFromInValidToValid": "是否确认取消无效文件？"
+    "updateValidFromInValidToValid": "是否确认取消无效文件？",
+    "NoData": "暂无数据"
   }
 }
