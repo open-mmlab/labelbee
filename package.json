@@ -1,7 +1,7 @@
 {
   "name": "labelbee",
   "private": true,
-  "version": "1.9.1",
+  "version": "1.9.2",
   "scripts": {
     "start": "lerna run build:type && lerna run --parallel --stream start",
     "dev": "npm run start",
