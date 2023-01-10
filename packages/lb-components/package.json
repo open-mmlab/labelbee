@@ -1,6 +1,6 @@
 {
   "name": "@labelbee/lb-components",
-  "version": "1.7.0",
+  "version": "1.7.1",
   "description": "Provide a complete library of annotation components",
   "main": "./dist/index.js",
   "es": "./es/index.js",
@@ -41,8 +41,8 @@
   },
   "dependencies": {
     "@ant-design/icons": "^4.6.2",
-    "@labelbee/lb-annotation": "^1.10.0",
-    "@labelbee/lb-utils": "^1.4.0",
+    "@labelbee/lb-annotation": "^1.10.1",
+    "@labelbee/lb-utils": "^1.4.1",
     "ahooks": "^3.4.0",
     "classnames": "^2.3.0",
     "lodash": "^4.17.21",
