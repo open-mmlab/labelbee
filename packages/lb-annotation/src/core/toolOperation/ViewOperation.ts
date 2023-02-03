@@ -58,6 +58,11 @@ export default class ViewOperation extends BasicToolOperation {
 
   private connectionPoints: ICoordinate[] = [];
 
+  // Save the connect - async-calculation
+  private connectPointsStatus?: {
+    close: () => void;
+  };
+
   constructor(props: IViewOperationProps) {
     super({ ...props, showDefaultCursor: true });
     this.style = props.style ?? { stroke: DEFAULT_STROKE_COLOR, thickness: 3 };
@@ -69,13 +74,38 @@ export default class ViewOperation extends BasicToolOperation {
     });
   }
 
+  public clearConnectionPoints() {
+    this.connectionPoints = [];
+    this.render();
+  }
+
   /**
    * Get the connection points in annotationData.
    * @param newAnnotations
    */
   public checkConnectionPoints(newAnnotations: TAnnotationViewData[] = this.annotations) {
-    const { connectionPoints } = MathUtils.getCollectionPointByAnnotationData(newAnnotations);
-    this.connectionPoints = connectionPoints;
+    if (this.connectPointsStatus) {
+      // Clear the pre-Calculation
+      this.connectPointsStatus.close?.();
+    }
+
+    this.emit('connectionPointsStatusUpdate', () => {
+      return new Promise((resolve) => {
+        const { promise, close } = MathUtils.getCollectionPointByAnnotationDataPromise(newAnnotations);
+
+        this.connectPointsStatus = {
+          close,
+        };
+
+        promise.then((res: any) => {
+          this.connectionPoints = res.connectionPoints;
+          this.render();
+          this.connectPointsStatus = undefined;
+
+          resolve({ connectionPoints: res.connectionPoints });
+        });
+      });
+    });
   }
 
   public setLoading(loading: boolean) {
