@@ -902,6 +902,7 @@ class PointOperation extends BasicToolOperation {
   }
 
   /**
+   * render auxiliaryLine - markerConfigurable should be true
    * 渲染辅助线-需开启列表标注
    */
   public renderAuxiliaryLine() {
