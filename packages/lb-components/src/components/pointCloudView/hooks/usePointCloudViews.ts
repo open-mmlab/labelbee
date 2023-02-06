@@ -3,7 +3,12 @@
  * @author Glenfiddish <edwinlee0927@hotmail.com>
  * @createdate 2022-08-17
  */
-import { PointCloudAnnotation, PointCloud, MathUtils, getCuboidFromPointCloudBox } from '@labelbee/lb-annotation';
+import {
+  PointCloudAnnotation,
+  PointCloud,
+  MathUtils,
+  getCuboidFromPointCloudBox,
+} from '@labelbee/lb-annotation';
 import {
   IPointCloudBox,
   EPerspectiveView,
@@ -381,7 +386,7 @@ export const usePointCloudViews = () => {
     const newImgList = imgList as any[];
 
     const extraData = {
-      attribute: topViewInstance.pointCloud2dOperation.defaultAttribute ?? ''
+      attribute: topViewInstance.pointCloud2dOperation.defaultAttribute ?? '',
     };
 
     if (trackConfigurable === true) {
@@ -428,12 +433,17 @@ export const usePointCloudViews = () => {
     const polygonOperation = topViewInstance?.pointCloud2dOperation;
 
     polygonOperation.setSelectedIDs(selectedIDs);
-    if (!boxParams || !polygonOperation) {
+
+    if (selectedIDs.length === 0 || !polygonOperation) {
       return;
     }
 
     const polygon = polygonOperation.selectedPolygon;
-    syncPointCloudViews(PointCloudView.Top, polygon, boxParams);
+
+    if (selectedIDs.length === 1 && boxParams) {
+      syncPointCloudViews(PointCloudView.Top, polygon, boxParams!);
+      return;
+    }
   };
 
   /**
@@ -453,8 +463,7 @@ export const usePointCloudViews = () => {
       // Update count
       if (mainViewInstance) {
         const { count } = mainViewInstance.getSensesPointZAxisInPolygon(
-          getCuboidFromPointCloudBox(newBoxParams)
-            .polygonPointList as IPolygonPoint[],
+          getCuboidFromPointCloudBox(newBoxParams).polygonPointList as IPolygonPoint[],
           [
             newBoxParams.center.z - newBoxParams.depth / 2,
             newBoxParams.center.z + newBoxParams.depth / 2,
@@ -518,7 +527,6 @@ export const usePointCloudViews = () => {
    */
   const syncPointCloudViews = (omitView: string, polygon: any, boxParams: IPointCloudBox) => {
     const dataUrl = currentData?.url;
-
     const viewToBeUpdated = {
       [PointCloudView.Side]: () => {
         synchronizeSideView(boxParams, polygon, sideViewInstance, dataUrl);
