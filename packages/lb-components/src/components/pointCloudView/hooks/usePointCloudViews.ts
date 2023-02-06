@@ -3,12 +3,18 @@
  * @author Glenfiddish <edwinlee0927@hotmail.com>
  * @createdate 2022-08-17
  */
-import { PointCloudAnnotation, PointCloud, MathUtils, getCuboidFromPointCloudBox } from '@labelbee/lb-annotation';
+import {
+  PointCloudAnnotation,
+  PointCloud,
+  MathUtils,
+  getCuboidFromPointCloudBox,
+} from '@labelbee/lb-annotation';
 import {
   IPointCloudBox,
   EPerspectiveView,
   PointCloudUtils,
   IPolygonPoint,
+  IPolygonData,
 } from '@labelbee/lb-utils';
 import { useContext } from 'react';
 import { PointCloudContext } from '../PointCloudContext';
@@ -381,7 +387,7 @@ export const usePointCloudViews = () => {
     const newImgList = imgList as any[];
 
     const extraData = {
-      attribute: topViewInstance.pointCloud2dOperation.defaultAttribute ?? ''
+      attribute: topViewInstance.pointCloud2dOperation.defaultAttribute ?? '',
     };
 
     if (trackConfigurable === true) {
@@ -453,8 +459,7 @@ export const usePointCloudViews = () => {
       // Update count
       if (mainViewInstance) {
         const { count } = mainViewInstance.getSensesPointZAxisInPolygon(
-          getCuboidFromPointCloudBox(newBoxParams)
-            .polygonPointList as IPolygonPoint[],
+          getCuboidFromPointCloudBox(newBoxParams).polygonPointList as IPolygonPoint[],
           [
             newBoxParams.center.z - newBoxParams.depth / 2,
             newBoxParams.center.z + newBoxParams.depth / 2,
@@ -485,10 +490,17 @@ export const usePointCloudViews = () => {
    * @param polygon
    * @param size
    */
-  const topViewUpdateBox = (polygon: any, size: ISize) => {
+  const topViewUpdateBox = (polygon: IPolygonData, size: ISize) => {
     // If the selected Object is Polygon.
     if (selectedPolygon) {
-      pushHistoryUnderUpdatePolygon(polygon);
+      /**
+       * Notice. The Polygon need to be converted to pointCloud coordinate system for storage.
+       */
+      const newPolygon = {
+        ...polygon,
+        pointList: polygon.pointList.map((v) => PointCloudUtils.transferCanvas2World(v, size)),
+      };
+      pushHistoryUnderUpdatePolygon(newPolygon);
       return;
     }
 

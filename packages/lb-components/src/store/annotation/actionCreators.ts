@@ -593,3 +593,10 @@ export const SetPointCloudLoading = (dispatch: Function, loading: boolean) => {
     },
   });
 };
+
+export const InitAnnotationState = (dispatch: Function) => {
+  dispatch({
+    type: ANNOTATION_ACTIONS.INIT_ALL_STATE,
+    payload: {},
+  });
+};

@@ -8,7 +8,7 @@ import { FooterDivider } from '@/views/MainView/toolFooter';
 import { ZoomController } from '@/views/MainView/toolFooter/ZoomController';
 import { DownSquareOutlined, UpSquareOutlined } from '@ant-design/icons';
 import { cTool, PointCloudAnnotation } from '@labelbee/lb-annotation';
-import { IPolygonData } from '@labelbee/lb-utils';
+import { IPolygonData, PointCloudUtils } from '@labelbee/lb-utils';
 import React, { useEffect, useLayoutEffect, useRef, useState } from 'react';
 import { PointCloudContext } from './PointCloudContext';
 import { useRotate } from './hooks/useRotate';
@@ -25,6 +25,7 @@ import useSize from '@/hooks/useSize';
 import { useTranslation } from 'react-i18next';
 import { LabelBeeContext } from '@/store/ctx';
 import { jsonParser } from '@/utils';
+import { TDrawLayerSlot } from '@/types/main';
 
 const { EPolygonPattern } = cTool;
 
@@ -114,10 +115,16 @@ const TopViewToolbar = ({ currentData }: IAnnotationStateProps) => {
 const ZAxisSlider = ({
   setZAxisLimit,
   zAxisLimit,
+  checkMode,
 }: {
   setZAxisLimit: (value: number) => void;
   zAxisLimit: number;
+  checkMode?: boolean;
 }) => {
+  if (checkMode) {
+    return null;
+  }
+
   return (
     <div style={{ position: 'absolute', top: 128, right: 8, height: '50%', zIndex: 20 }}>
       <Slider
@@ -134,7 +141,19 @@ const ZAxisSlider = ({
   );
 };
 
-const PointCloudTopView: React.FC<IA2MapStateProps> = ({ currentData, imgList, stepInfo }) => {
+interface IProps extends IA2MapStateProps {
+  drawLayerSlot?: TDrawLayerSlot;
+  checkMode?: boolean;
+}
+
+const PointCloudTopView: React.FC<IProps> = ({
+  currentData,
+  imgList,
+  stepInfo,
+  drawLayerSlot,
+  checkMode,
+}) => {
+  const [annotationPos, setAnnotationPos] = useState({ zoom: 1, currentPos: { x: 0, y: 0 } });
   const ref = useRef<HTMLDivElement>(null);
   const ptCtx = React.useContext(PointCloudContext);
   const size = useSize(ref);
@@ -163,7 +182,9 @@ const PointCloudTopView: React.FC<IA2MapStateProps> = ({ currentData, imgList, s
         size,
         pcdPath: currentData.url,
         config,
+        checkMode,
       });
+
       ptCtx.setTopViewInstance(pointCloudAnnotation);
     }
   }, [currentData]);
@@ -177,7 +198,15 @@ const PointCloudTopView: React.FC<IA2MapStateProps> = ({ currentData, imgList, s
 
     TopView2dOperation.singleOn('polygonCreated', (polygon: IPolygonData) => {
       if (TopView2dOperation.pattern === EPolygonPattern.Normal || !currentData?.url) {
-        addPolygon(polygon);
+        /**
+         * Notice. The Polygon need to be converted to pointCloud coordinate system for storage.
+         */
+        const newPolygon = {
+          ...polygon,
+          pointList: polygon.pointList.map((v) => PointCloudUtils.transferCanvas2World(v, size)),
+        };
+
+        addPolygon(newPolygon);
         ptCtx.setSelectedIDs(polygon.id);
         return;
       }
@@ -229,7 +258,7 @@ const PointCloudTopView: React.FC<IA2MapStateProps> = ({ currentData, imgList, s
 
     // 1. Update Size
     ptCtx.topViewInstance.initSize(size);
-    ptCtx.topViewInstance.updatePolygonList(ptCtx.pointCloudBoxList);
+    ptCtx.topViewInstance.updatePolygonList(ptCtx.pointCloudBoxList, ptCtx.polygonList);
 
     const {
       topViewInstance: { pointCloudInstance: pointCloud, pointCloud2dOperation: polygonOperation },
@@ -252,6 +281,7 @@ const PointCloudTopView: React.FC<IA2MapStateProps> = ({ currentData, imgList, s
       pointCloud.render();
 
       setZoom(zoom);
+      setAnnotationPos({ zoom, currentPos });
     });
 
     // Synchronized 3d point cloud view displacement operations
@@ -261,6 +291,7 @@ const PointCloudTopView: React.FC<IA2MapStateProps> = ({ currentData, imgList, s
       const { x, y, z } = pointCloud.initCameraPosition;
       pointCloud.camera.position.set(x + offsetY, y - offsetX, z);
       pointCloud.render();
+      setAnnotationPos({ zoom, currentPos });
     });
   }, [size, ptCtx.topViewInstance]);
 
@@ -279,10 +310,12 @@ const PointCloudTopView: React.FC<IA2MapStateProps> = ({ currentData, imgList, s
       toolbar={<TopViewToolbar currentData={currentData} />}
     >
       <div style={{ position: 'relative', flex: 1 }}>
-        <div style={{ width: '100%', height: '100%' }} ref={ref} />
+        <div style={{ width: '100%', height: '100%' }} ref={ref}>
+          {drawLayerSlot?.(annotationPos)}
+        </div>
 
-        <BoxInfos />
-        <ZAxisSlider zAxisLimit={zAxisLimit} setZAxisLimit={setZAxisLimit} />
+        <BoxInfos checkMode={checkMode} config={config} />
+        <ZAxisSlider checkMode={checkMode} zAxisLimit={zAxisLimit} setZAxisLimit={setZAxisLimit} />
         <PointCloudValidity />
       </div>
     </PointCloudContainer>

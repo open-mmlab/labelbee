@@ -34,7 +34,7 @@ const SwitchAttributeList: React.FC<IProps> = (props) => {
       });
     }
     return () => {
-      toolInstance.unbindAll('changeAttributeSidebar');
+      toolInstance?.unbindAll('changeAttributeSidebar');
     };
   }, [toolInstance, listRef]);
 

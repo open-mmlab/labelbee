@@ -14,6 +14,8 @@ import { usePointCloudViews } from './hooks/usePointCloudViews';
 import { LabelBeeContext } from '@/store/ctx';
 import { useHistory } from './hooks/useHistory';
 import { useAttribute } from './hooks/useAttribute';
+import { useConfig } from './hooks/useConfig';
+import { usePolygon } from './hooks/usePolygon';
 
 const { EPolygonPattern } = cTool;
 
@@ -27,8 +29,10 @@ const PointCloudListener: React.FC<IA2MapStateProps> = ({ currentData, config })
   const { toolInstanceRef } = useCustomToolInstance({ basicInfo });
   const { updateRotate } = useRotate({ currentData });
   const { updatePointCloudData } = usePointCloudViews();
-  const { redo, undo, pushHistoryWithList } = useHistory();
+  const { redo, undo, pushHistoryWithList, pushHistoryUnderUpdatePolygon } = useHistory();
   const { syncThreeViewsAttribute, reRenderPointCloud3DBox } = useAttribute();
+  const { syncAllViewsConfig, reRenderTopViewRange } = useConfig();
+  const { selectedPolygon } = usePolygon();
 
   const keydownEvents = (lowerCaseKey: string, e: KeyboardEvent) => {
     const { topViewInstance, mainViewInstance } = ptCtx;
@@ -173,6 +177,16 @@ const PointCloudListener: React.FC<IA2MapStateProps> = ({ currentData, config })
     };
   }, [ptCtx, copiedBoxes, config]);
 
+  useEffect(() => {
+    syncAllViewsConfig(config);
+  }, [config]);
+
+  useEffect(() => {
+    if (config?.radius) {
+      reRenderTopViewRange(config?.radius);
+    }
+  }, [config?.radius]);
+
   // Page switch data initialization
   useEffect(() => {
     updatePointCloudData?.();
@@ -186,7 +200,7 @@ const PointCloudListener: React.FC<IA2MapStateProps> = ({ currentData, config })
 
     toolInstanceRef.current.exportCustomData = () => {
       return {
-        renderPolygon: ptCtx.polygonList ?? [],
+        resultPolygon: ptCtx.polygonList ?? [],
       };
     };
 
@@ -198,6 +212,9 @@ const PointCloudListener: React.FC<IA2MapStateProps> = ({ currentData, config })
 
         updateSelectedBox(selectBox);
         reRenderPointCloud3DBox(selectBox);
+      }
+      if (selectedPolygon) {
+        pushHistoryUnderUpdatePolygon({ ...selectedPolygon, attribute: newAttribute });
       }
     };
 
@@ -237,6 +254,22 @@ const PointCloudListener: React.FC<IA2MapStateProps> = ({ currentData, config })
           clearAllResult();
         }
       });
+    };
+
+    /**
+     * TopView forbid all operations.
+     * @param forbidOperation
+     */
+    toolInstanceRef.current.setForbidOperation = (forbidOperation: boolean) => {
+      ptCtx.topViewInstance?.pointCloud2dOperation?.setForbidOperation(forbidOperation);
+      if (forbidOperation === true) {
+        // Clear Selected Status.
+        ptCtx.setSelectedIDs(undefined);
+      }
+    };
+
+    toolInstanceRef.current.setShowDefaultCursor = (showDefaultCursor: boolean) => {
+      ptCtx.topViewInstance?.pointCloud2dOperation?.setShowDefaultCursor(showDefaultCursor);
     };
   }, [ptCtx.pointCloudBoxList, ptCtx.selectedID, ptCtx.valid, ptCtx.polygonList]);
 

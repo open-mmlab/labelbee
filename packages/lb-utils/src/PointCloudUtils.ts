@@ -4,7 +4,8 @@
  * @author Ron <ron.f.luo@gmail.com>
  */
 
-import { IPointCloudBox } from './types/pointCloud';
+import { IPolygonData } from './types';
+import { IPointCloudBox, IPointCloudConfig } from './types/pointCloud';
 
 class PointCloudUtils {
   public static genColorByCoord(x: number, y: number, z: number) {
@@ -51,11 +52,54 @@ class PointCloudUtils {
     return pointCloudDataList;
   }
 
+  /**
+   * Get the coordinate from canvas2d-coordinate to world coordinate
+   */
+  public static transferCanvas2World = (
+    currentPos: { x: number; y: number },
+    size: { width: number; height: number },
+  ) => {
+    const { width: w, height: h } = size;
+    const { x, y, ...otherProps } = currentPos;
+
+    // x-Axis is the Positive Direction, so the x-coordinates need to be swapped with the y-coordinates
+    return {
+      x: -y + h / 2,
+      y: -(x - w / 2),
+      ...otherProps,
+    };
+  };
+
+  /**
+   * Get the coordinate from canvas2d-coordinate to world coordinate
+   */
+  public static transferWorld2Canvas = (
+    currentPos: { x: number; y: number },
+    size: { width: number; height: number },
+  ) => {
+    const { width: w, height: h } = size;
+    const { x, y, ...otherProps } = currentPos;
+
+    // x-Axis is the Positive Direction, so the x-coordinates need to be swapped with the y-coordinates
+    return {
+      x: -y + w / 2,
+      y: -x + h / 2,
+      ...otherProps,
+    };
+  };
+
   public static getPolygonListFromResultList(result: string): any[] {
     const data = this.jsonParser(result);
 
     const DEFAULT_STEP = `step_1`;
-    const pointCloudDataList = data?.[DEFAULT_STEP]?.renderPolygon ?? [];
+
+    /**
+     * Notice.
+     *
+     * It needs to be compatible with the error data structure(`renderPolygon`), `resultPolygon` is the correct one.
+     */
+    const pointCloudDataList =
+      data?.[DEFAULT_STEP]?.resultPolygon ?? data?.[DEFAULT_STEP]?.renderPolygon ?? [];
 
     return pointCloudDataList;
   }
@@ -464,6 +508,30 @@ class PointCloudUtils {
     });
 
     return basicSize;
+  }
+
+  public static getSubAttributeName(
+    subAttribute: { [key: string]: string },
+    config: IPointCloudConfig,
+  ) {
+    const subAttributeList = config.inputList;
+    return Object.entries(subAttribute).map(([label, value]) => {
+      const data = subAttributeList.find((v) => v.value === label);
+      if (data) {
+        const subValue = data?.subSelected?.find((v) => v.value === value);
+
+        if (subValue) {
+          return {
+            label: data.key,
+            value: subValue.key,
+          };
+        }
+      }
+      return {
+        label,
+        value,
+      };
+    });
   }
 }
 
