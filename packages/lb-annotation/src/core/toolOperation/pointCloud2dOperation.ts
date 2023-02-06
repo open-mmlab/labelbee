@@ -7,7 +7,7 @@
  */
 
 import { IPointCloudConfig, toolStyleConverter } from '@labelbee/lb-utils';
-import { ESortDirection } from '@/constant/annotation';
+import { EDragTarget, ESortDirection } from '@/constant/annotation';
 import { EPolygonPattern } from '@/constant/tool';
 import { IPolygonData, IPolygonPoint } from '@/types/tool/polygon';
 import AxisUtils from '@/utils/tool/AxisUtils';
@@ -16,6 +16,7 @@ import DrawUtils from '@/utils/tool/DrawUtils';
 import PolygonUtils from '@/utils/tool/PolygonUtils';
 import { polygonConfig } from '@/constant/defaultConfig';
 import PolygonOperation, { IPolygonOperationProps } from './polygonOperation';
+import { BasicToolOperation } from './basicToolOperation';
 
 interface IPointCloud2dOperationProps {
   showDirectionLine?: boolean;
@@ -51,13 +52,21 @@ class PointCloud2dOperation extends PolygonOperation {
     return this.selectedIDs;
   }
 
+  get enableDrag() {
+    return Boolean(this.selectedIDs.length > 0 && this.dragInfo);
+  }
+
   /**
    * Update selectedIDs and rerender
    * @param selectedIDs
    */
   public setSelectedIDs(selectedIDs: string[]) {
     this.selectedIDs = selectedIDs;
-    this.setSelectedID(this.selectedIDs.length === 1 ? this.selectedIDs[0] : '');
+
+    if (this.selectedIDs.length < 2) {
+      this.setSelectedID(this.selectedIDs.length === 1 ? this.selectedIDs[0] : '');
+    }
+
     this.render();
   }
 
@@ -162,7 +171,7 @@ class PointCloud2dOperation extends PolygonOperation {
   }
 
   public renderSingleSelectedPolygon = (selectedPolygon: IPolygonData) => {
-    if (this.selectedPolygons) {
+    if (selectedPolygon) {
       const color = this.getPointCloudLineColor(selectedPolygon.attribute);
       // const toolData = StyleUtils.getStrokeAndFill(toolColor, selectedPolygon.valid, { isSelected: true });
 
@@ -265,11 +274,7 @@ class PointCloud2dOperation extends PolygonOperation {
     this.setSelectedID(newID);
   }
 
-  /**
-   * Overwrite and prevent selectedChange emit
-   * @override
-   */
-  public setSelectedID(newID?: string) {
+  public updateTextAttribute(newID?: string) {
     const oldID = this.selectedID;
     if (newID !== oldID && oldID) {
       // 触发文本切换的操作
@@ -280,7 +285,14 @@ class PointCloud2dOperation extends PolygonOperation {
     if (!newID) {
       this._textAttributInstance?.clearTextAttribute();
     }
+  }
 
+  /**
+   * Overwrite and prevent selectedChange emit
+   * @override
+   */
+  public setSelectedID(newID?: string) {
+    this.updateTextAttribute(newID);
     this.selectedID = newID;
     this.selectedIDs = newID ? [newID] : [];
 
@@ -335,6 +347,63 @@ class PointCloud2dOperation extends PolygonOperation {
     }
 
     this.emit('validUpdate', id);
+  }
+
+  public onDragMove(e: MouseEvent) {
+    const newPolygonList = this.polygonList.map((v) => {
+      if (this.selectedIDs.includes(v.id)) {
+        const selectedPointList = this.dragPolygon(e, v);
+
+        if (!selectedPointList) {
+          return v;
+        }
+
+        const newData = {
+          ...v,
+          pointList: selectedPointList as IPolygonPoint[],
+        };
+
+        // 非矩形模式下拖动，矩形模式下生成的框将会转换为非矩形框
+        if (v.isRect === true && this.pattern === EPolygonPattern.Normal) {
+          Object.assign(newData, { isRect: false });
+        }
+
+        return newData;
+      }
+
+      return v;
+    });
+
+    this.dragInfo!.dragPrevCoord = this.getCoordinateUnderZoom(e);
+
+    this.setPolygonList(newPolygonList);
+    this.render();
+  }
+
+  public onMouseDown(e: MouseEvent) {
+    if (
+      BasicToolOperation.prototype.onMouseDown.call(this, e) ||
+      this.forbidMouseOperation ||
+      e.ctrlKey === true ||
+      e.button !== 0
+    ) {
+      return;
+    }
+
+    if (this.selectedIDs.length < 2) {
+      return super.onMouseDown(e);
+    }
+
+    const dragStartCoord = this.getCoordinateUnderZoom(e);
+
+    this.dragInfo = {
+      dragStartCoord,
+      dragTarget: EDragTarget.Plane,
+      initPointList: [],
+      changePointIndex: [0],
+      originPolygon: this.selectedPolygon,
+      dragPrevCoord: dragStartCoord,
+    };
   }
 }
 

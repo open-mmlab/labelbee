@@ -25,6 +25,7 @@ import StyleUtils from '../../utils/tool/StyleUtils';
 import uuid from '../../utils/uuid';
 import { BasicToolOperation, IBasicToolOperationProps } from './basicToolOperation';
 import TextAttributeClass from './textAttributeClass';
+import _ from 'lodash';
 
 const TEXT_MAX_WIDTH = 164;
 
@@ -52,13 +53,14 @@ class PolygonOperation extends BasicToolOperation {
 
   public isCombined: boolean; // 是否开启合并操作
 
-  private dragInfo?: {
+  public dragInfo?: {
     dragStartCoord: ICoordinate;
     initPointList: IPolygonPoint[];
     changePointIndex?: number[]; // 用于存储拖拽点 / 边的下标
     dragTarget: EDragTarget;
 
     originPolygon?: IPolygonData; // For comparing data before and after drag and drop.
+    dragPrevCoord: ICoordinate;
   };
 
   private drawingHistory: ActionsHistory; // 用于正在编辑中的历史记录
@@ -116,6 +118,10 @@ class PolygonOperation extends BasicToolOperation {
 
   public get hoverPolygon() {
     return this.polygonList.find((v) => v.id === this.hoverID && v.id !== this.selectedID);
+  }
+
+  public get enableDrag() {
+    return Boolean(this.selectedID && this.dragInfo);
   }
 
   public get polygonListUnderZoom() {
@@ -960,6 +966,7 @@ class PolygonOperation extends BasicToolOperation {
       initPointList,
       changePointIndex,
       originPolygon: this.selectedPolygon,
+      dragPrevCoord: dragStartCoord,
     };
 
     return true;
@@ -1148,24 +1155,16 @@ class PolygonOperation extends BasicToolOperation {
     return false;
   }
 
-  public onDragMove(e: MouseEvent) {
-    if (!this.dragInfo || !this.selectedID) {
-      return;
-    }
-
-    const { selectedPolygon } = this;
-    let selectedPointList: IPolygonPoint[] | undefined = selectedPolygon?.pointList;
-    if (!selectedPointList) {
-      return;
-    }
-
-    const { initPointList, dragStartCoord, dragTarget, changePointIndex } = this.dragInfo;
+  /**
+   * According to the mode of dragTarget, get the offset when dragging
+   * @param e {MouseEvent}
+   * @param selectedPolygon {IPolygonData}
+   * @returns
+   */
+  public getDragOffset(e: MouseEvent, selectedPolygon: IPolygonData) {
     const coordinate = this.getCoordinateUnderZoom(e);
 
-    let offset = {
-      x: (coordinate.x - dragStartCoord.x) / this.zoom,
-      y: (coordinate.y - dragStartCoord.y) / this.zoom,
-    };
+    const { dragTarget, dragPrevCoord, changePointIndex, initPointList, dragStartCoord } = this.dragInfo!;
 
     /**
      * 矩形拖动
@@ -1183,12 +1182,36 @@ class PolygonOperation extends BasicToolOperation {
       const secondPointIndex = MathUtils.getArrayIndex(changePointIndex[0] - 1, 4);
       const basicLine: [ICoordinate, ICoordinate] = [initPointList[firstPointIndex], initPointList[secondPointIndex]];
 
-      offset = MathUtils.getRectPerpendicularOffset(dragStartCoord, coordinate, basicLine);
-      offset = {
-        x: offset.x / this.zoom,
-        y: offset.y / this.zoom,
+      const perpendicularOffset = MathUtils.getRectPerpendicularOffset(dragStartCoord, coordinate, basicLine);
+      return {
+        x: perpendicularOffset.x / this.zoom,
+        y: perpendicularOffset.y / this.zoom,
       };
     }
+
+    if (this.dragInfo?.dragTarget === EDragTarget.Plane) {
+      return {
+        x: (coordinate.x - dragPrevCoord.x) / this.zoom,
+        y: (coordinate.y - dragPrevCoord.y) / this.zoom,
+      };
+    }
+
+    return {
+      x: (coordinate.x - dragStartCoord.x) / this.zoom,
+      y: (coordinate.y - dragStartCoord.y) / this.zoom,
+    };
+  }
+
+  public dragPolygon(e: MouseEvent, selectedPolygon: IPolygonData) {
+    let selectedPointList: IPolygonPoint[] | undefined = _.cloneDeep(selectedPolygon?.pointList);
+
+    if (!selectedPointList || !this.dragInfo) {
+      return;
+    }
+
+    const { initPointList, dragTarget, changePointIndex } = this.dragInfo!;
+
+    const offset = this.getDragOffset(e, selectedPolygon);
 
     this.dragStatus = EDragStatus.Move;
 
@@ -1196,8 +1219,8 @@ class PolygonOperation extends BasicToolOperation {
       case EDragTarget.Plane:
         selectedPointList = selectedPointList.map((v, i) => ({
           ...v,
-          x: initPointList[i].x + offset.x,
-          y: initPointList[i].y + offset.y,
+          x: v.x + offset.x,
+          y: v.y + offset.y,
         }));
 
         break;
@@ -1245,8 +1268,22 @@ class PolygonOperation extends BasicToolOperation {
       }
     }
 
+    return selectedPointList;
+  }
+
+  /**
+   * Update polygon position while enableDrag is true
+   * @param e {MouseEvent}
+   */
+  public onDragMove(e: MouseEvent) {
     const newPolygonList = this.polygonList.map((v) => {
       if (v.id === this.selectedID) {
+        const selectedPointList = this.dragPolygon(e, v);
+
+        if (!selectedPointList) {
+          return v;
+        }
+
         const newData = {
           ...v,
           pointList: selectedPointList as IPolygonPoint[],
@@ -1263,6 +1300,8 @@ class PolygonOperation extends BasicToolOperation {
       return v;
     });
 
+    this.dragInfo!.dragPrevCoord = this.getCoordinateUnderZoom(e);
+
     this.setPolygonList(newPolygonList);
     this.render();
   }
@@ -1272,7 +1311,7 @@ class PolygonOperation extends BasicToolOperation {
       return;
     }
 
-    if (this.selectedID && this.dragInfo) {
+    if (this.enableDrag) {
       this.onDragMove(e);
       return;
     }
@@ -1519,48 +1558,59 @@ class PolygonOperation extends BasicToolOperation {
     }
   }
 
-  public renderSelectedPolygon() {
-    // 3. 选中多边形的渲染
-    if (this.selectedID) {
-      const selectdPolygon = this.selectedPolygon;
-
-      if (selectdPolygon) {
-        const toolColor = this.getColor(selectdPolygon.attribute);
-        const toolData = StyleUtils.getStrokeAndFill(toolColor, selectdPolygon.valid, { isSelected: true });
-
-        DrawUtils.drawSelectedPolygonWithFillAndLine(
-          this.canvas,
-          AxisUtils.changePointListByZoom(selectdPolygon.pointList, this.zoom, this.currentPos),
-          {
-            fillColor: toolData.fill,
-            strokeColor: toolData.stroke,
-            pointColor: 'white',
-            thickness: 2,
-            lineCap: 'round',
-            isClose: true,
-            lineType: this.config?.lineType,
-          },
-        );
-
-        let showText = `${
-          AttributeUtils.getAttributeShowText(selectdPolygon.attribute, this.config.attributeList) ?? ''
-        }`;
-        if (this.config?.isShowOrder && selectdPolygon?.order > 0) {
-          showText = `${selectdPolygon.order} ${showText}`;
-        }
-
-        DrawUtils.drawText(
-          this.canvas,
-          AxisUtils.changePointByZoom(selectdPolygon.pointList[0], this.zoom, this.currentPos),
-          showText,
-          {
-            color: toolData.stroke,
-            ...DEFAULT_TEXT_OFFSET,
-          },
-        );
-
-        this.renderTextAttribute();
+  /**
+   * Filter selected polygon and render(Implement for multiple selected)
+   * @param selectedPolygon
+   */
+  public renderSelectedPolygons() {
+    this.polygonList.forEach((polygon) => {
+      if (polygon.id === this.selectedID) {
+        this.renderSelectedPolygon(polygon);
       }
+    });
+  }
+
+  /**
+   * Render selected polygon
+   * @param selectedPolygon
+   */
+  public renderSelectedPolygon(selectedPolygon: IPolygonData) {
+    if (selectedPolygon) {
+      const toolColor = this.getColor(selectedPolygon.attribute);
+      const toolData = StyleUtils.getStrokeAndFill(toolColor, selectedPolygon.valid, { isSelected: true });
+
+      DrawUtils.drawSelectedPolygonWithFillAndLine(
+        this.canvas,
+        AxisUtils.changePointListByZoom(selectedPolygon.pointList, this.zoom, this.currentPos),
+        {
+          fillColor: toolData.fill,
+          strokeColor: toolData.stroke,
+          pointColor: 'white',
+          thickness: 2,
+          lineCap: 'round',
+          isClose: true,
+          lineType: this.config?.lineType,
+        },
+      );
+
+      let showText = `${
+        AttributeUtils.getAttributeShowText(selectedPolygon.attribute, this.config.attributeList) ?? ''
+      }`;
+      if (this.config?.isShowOrder && selectedPolygon?.order > 0) {
+        showText = `${selectedPolygon.order} ${showText}`;
+      }
+
+      DrawUtils.drawText(
+        this.canvas,
+        AxisUtils.changePointByZoom(selectedPolygon.pointList[0], this.zoom, this.currentPos),
+        showText,
+        {
+          color: toolData.stroke,
+          ...DEFAULT_TEXT_OFFSET,
+        },
+      );
+
+      this.renderTextAttribute();
     }
   }
 
