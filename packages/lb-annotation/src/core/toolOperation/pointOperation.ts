@@ -932,26 +932,10 @@ class PointOperation extends BasicToolOperation {
 
     auxiliaryLinesCoord.forEach((item) => {
       const { start: startCoord, end: endCoord } = item;
-      DrawUtils.drawLine(
-        this.canvas,
-        AxisUtils.changePointByZoom(
-          {
-            ...startCoord,
-          },
-          this.zoom,
-          this.currentPos,
-        ),
-        AxisUtils.changePointByZoom(
-          {
-            ...endCoord,
-          },
-          this.zoom,
-          this.currentPos,
-        ),
-        {
-          color: '#C5C5C5',
-        },
-      );
+      const pointListCoord = AxisUtils.changePointListByZoom([startCoord, endCoord], this.zoom, this.currentPos);
+      DrawUtils.drawLine(this.canvas, pointListCoord[0], pointListCoord[1], {
+        color: '#C5C5C5',
+      });
     });
   }
 
