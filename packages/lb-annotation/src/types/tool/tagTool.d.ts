@@ -19,6 +19,11 @@ declare interface IInputList {
   color?: string; // Custom Color for scribbleTool
 }
 
+/** v3.2.0 仅标点工具 列表标注 */
+declare interface IMarkerList extends IInputList {
+  target?: string[];
+}
+
 interface IInfoList {
   key: string;
   value: string;
