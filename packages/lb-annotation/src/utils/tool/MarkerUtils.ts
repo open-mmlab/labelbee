@@ -2,8 +2,8 @@ import { cloneDeep } from 'lodash';
 import AttributeUtils from './AttributeUtils';
 
 declare interface IAuxiliaryLine {
-  start: string;
-  end: string;
+  start: IPointUnit['label'];
+  end: IPointUnit['label'];
 }
 
 declare interface IAuxiliaryLineCoord {
