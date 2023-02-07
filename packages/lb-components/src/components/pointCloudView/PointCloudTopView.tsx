@@ -8,7 +8,7 @@ import { FooterDivider } from '@/views/MainView/toolFooter';
 import { ZoomController } from '@/views/MainView/toolFooter/ZoomController';
 import { DownSquareOutlined, UpSquareOutlined } from '@ant-design/icons';
 import { cTool, PointCloudAnnotation } from '@labelbee/lb-annotation';
-import { IPolygonData } from '@labelbee/lb-utils';
+import { IPolygonData, UpdatePolygonByDragList } from '@labelbee/lb-utils';
 import React, { useEffect, useLayoutEffect, useRef, useState } from 'react';
 import { PointCloudContext } from './PointCloudContext';
 import { useRotate } from './hooks/useRotate';
@@ -207,8 +207,8 @@ const PointCloudTopView: React.FC<IA2MapStateProps> = ({ currentData, imgList, s
       ptCtx.setSelectedIDs(selectedIDs);
     });
 
-    TopView2dOperation.singleOn('updatePolygonByDrag', ({ newPolygon }: any) => {
-      pointCloudViews.topViewUpdateBox?.(newPolygon, size);
+    TopView2dOperation.singleOn('updatePolygonByDrag', (updateList: UpdatePolygonByDragList) => {
+      pointCloudViews.topViewUpdateBox?.(updateList, size);
     });
 
     const validUpdate = (id: string) => {

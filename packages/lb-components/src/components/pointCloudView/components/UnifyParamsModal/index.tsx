@@ -9,7 +9,7 @@ import { IPointCloudConfig, PointCloudUtils } from '@labelbee/lb-utils';
 import { connect } from 'react-redux';
 import { AppState } from '@/store';
 import { AnnotationFileList } from '@/types/data';
-import { useSingleBox } from '../../hooks/useSingleBox';
+import { useSingleBox } from '../../hooks/useBoxes';
 import { MathUtils } from '@labelbee/lb-annotation';
 
 interface IProps {

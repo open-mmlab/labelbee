@@ -14,6 +14,8 @@ import {
   EPerspectiveView,
   PointCloudUtils,
   IPolygonPoint,
+  UpdatePolygonByDragList,
+  PartialIPointCloudBoxList,
 } from '@labelbee/lb-utils';
 import { useContext } from 'react';
 import { PointCloudContext } from '../PointCloudContext';
@@ -340,7 +342,7 @@ export const usePointCloudViews = () => {
   const { addHistory, initHistory, pushHistoryUnderUpdatePolygon } = useHistory();
   const { selectedPolygon } = usePolygon();
 
-  const { updateSelectedBox } = useSingleBox();
+  const { updateSelectedBox, updateSelectedBoxes, getPointCloudByID } = useSingleBox();
   const { currentData, config } = useSelector((state: AppState) => {
     const { stepList, step, imgList, imgIndex } = state.annotation;
 
@@ -494,28 +496,33 @@ export const usePointCloudViews = () => {
    * @param polygon
    * @param size
    */
-  const topViewUpdateBox = (polygon: any, size: ISize) => {
+  const topViewUpdateBox = (updateList: UpdatePolygonByDragList, size: ISize) => {
     // If the selected Object is Polygon.
     if (selectedPolygon) {
-      pushHistoryUnderUpdatePolygon(polygon);
+      pushHistoryUnderUpdatePolygon(updateList[0].newPolygon);
       return;
     }
 
-    if (selectedPointCloudBox) {
-      const newBoxParams = topViewPolygon2PointCloud(
-        polygon,
-        size,
-        topViewInstance.pointCloudInstance,
-        selectedPointCloudBox,
-      );
+    const updatePointCloudList: PartialIPointCloudBoxList = updateList.map(
+      ({ newPolygon: polygon }) => {
+        const pointCloudBox = getPointCloudByID(polygon.id);
 
-      Object.assign(
-        selectedPointCloudBox,
-        _.pickBy(newBoxParams, (v, k) => ['width', 'height', 'x', 'y']),
-      );
+        const newBoxParams = topViewPolygon2PointCloud(
+          polygon,
+          size,
+          topViewInstance.pointCloudInstance,
+          pointCloudBox,
+        );
 
-      updateSelectedBox(newBoxParams);
-      syncPointCloudViews(PointCloudView.Top, polygon, selectedPointCloudBox);
+        return newBoxParams;
+      },
+    );
+
+    updateSelectedBoxes(updatePointCloudList);
+
+    if (updatePointCloudList.length === 1) {
+      const { newPolygon: polygon } = updateList[0];
+      syncPointCloudViews(PointCloudView.Top, polygon, updatePointCloudList[0]);
     }
   };
 

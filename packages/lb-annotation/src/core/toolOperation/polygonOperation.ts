@@ -61,6 +61,7 @@ class PolygonOperation extends BasicToolOperation {
 
     originPolygon?: IPolygonData; // For comparing data before and after drag and drop.
     dragPrevCoord: ICoordinate;
+    originPolygonList: IPolygonData[];
   };
 
   private drawingHistory: ActionsHistory; // 用于正在编辑中的历史记录
@@ -967,6 +968,7 @@ class PolygonOperation extends BasicToolOperation {
       changePointIndex,
       originPolygon: this.selectedPolygon,
       dragPrevCoord: dragStartCoord,
+      originPolygonList: this.polygonList,
     };
 
     return true;
@@ -1348,6 +1350,17 @@ class PolygonOperation extends BasicToolOperation {
     }
   }
 
+  /**
+   * Emit updateList for views update
+   * @Emit updateList {UpdatePolygonByDragList}
+   */
+  public emitUpdatePolygonByDrag = () => {
+    if (this.dragInfo) {
+      const { originPolygon } = this.dragInfo;
+      this.emit('updatePolygonByDrag', [{ newPolygon: this.selectedPolygon, originPolygon }]);
+    }
+  };
+
   public leftMouseUp(e: MouseEvent) {
     const hoverID = this.getHoverID(e);
     if (this.drawingPointList.length === 0 && e.ctrlKey === true && hoverID) {
@@ -1382,17 +1395,17 @@ class PolygonOperation extends BasicToolOperation {
     }
 
     if (this.dragInfo && this.dragStatus === EDragStatus.Move) {
-      // 拖拽停止
-      const { originPolygon } = this.dragInfo;
-      this.dragInfo = undefined;
-      this.dragStatus = EDragStatus.Wait;
-      this.history.pushHistory(this.polygonList);
-
       // 同步 结果
       this.emit('updateResult');
 
       // Emit polygon.
-      this.emit('updatePolygonByDrag', { newPolygon: this.selectedPolygon, originPolygon });
+      this.emitUpdatePolygonByDrag();
+
+      // 拖拽停止
+      this.dragInfo = undefined;
+      this.dragStatus = EDragStatus.Wait;
+      this.history.pushHistory(this.polygonList);
+
       return;
     }
 
@@ -1559,22 +1572,11 @@ class PolygonOperation extends BasicToolOperation {
   }
 
   /**
-   * Filter selected polygon and render(Implement for multiple selected)
-   * @param selectedPolygon
-   */
-  public renderSelectedPolygons() {
-    this.polygonList.forEach((polygon) => {
-      if (polygon.id === this.selectedID) {
-        this.renderSelectedPolygon(polygon);
-      }
-    });
-  }
-
-  /**
    * Render selected polygon
    * @param selectedPolygon
    */
-  public renderSelectedPolygon(selectedPolygon: IPolygonData) {
+  public renderSelectedPolygon() {
+    const { selectedPolygon } = this;
     if (selectedPolygon) {
       const toolColor = this.getColor(selectedPolygon.attribute);
       const toolData = StyleUtils.getStrokeAndFill(toolColor, selectedPolygon.valid, { isSelected: true });
