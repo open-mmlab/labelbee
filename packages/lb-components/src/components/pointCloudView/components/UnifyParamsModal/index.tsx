@@ -9,7 +9,7 @@ import { IPointCloudConfig, PointCloudUtils } from '@labelbee/lb-utils';
 import { connect } from 'react-redux';
 import { AppState } from '@/store';
 import { AnnotationFileList } from '@/types/data';
-import { useSingleBox } from '../../hooks/useSingleBox';
+import { usePointCloudBoxes } from '../../hooks/usePointCloudBoxes';
 import { MathUtils } from '@labelbee/lb-annotation';
 
 interface IProps {
@@ -51,7 +51,7 @@ const PrefixTag: React.FC<{ text: string }> = ({ text }) => {
 
 const UnifyParamsModal = ({ id, visible, onCancel, config, imgList, imgIndex }: IProps) => {
   const dispatch = useDispatch();
-  const { selectedBox } = useSingleBox();
+  const { selectedBox } = usePointCloudBoxes();
   const [size, setSize] = useState<{ width: number; height: number; depth: number }>();
 
   const [form] = Form.useForm();

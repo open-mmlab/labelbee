@@ -20,7 +20,7 @@ import { PointCloudContext } from './PointCloudContext';
 import { a2MapStateToProps, IA2MapStateProps } from '@/store/annotation/map';
 import { connect } from 'react-redux';
 import { jsonParser } from '@/utils';
-import { useSingleBox } from './hooks/useSingleBox';
+import { usePointCloudBoxes } from './hooks/usePointCloudBoxes';
 import { Switch } from 'antd';
 import useSize from '@/hooks/useSize';
 import { usePointCloudViews } from './hooks/usePointCloudViews';
@@ -97,7 +97,7 @@ const PointCloud3D: React.FC<IA2MapStateProps> = ({ currentData, config }) => {
     }
     initPointCloud3d?.();
   }, [size]);
-  const { selectedBox } = useSingleBox();
+  const { selectedBox } = usePointCloudBoxes();
 
   const setTarget3DView = (perspectiveView: EPerspectiveView) => {
     const box = selectedBox?.info;

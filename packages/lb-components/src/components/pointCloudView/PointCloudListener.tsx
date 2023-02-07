@@ -1,7 +1,7 @@
 import { PointCloudContext } from './PointCloudContext';
 import { useRotate } from './hooks/useRotate';
 import { useBoxes } from './hooks/useBoxes';
-import { useSingleBox } from './hooks/useSingleBox';
+import { usePointCloudBoxes } from './hooks/usePointCloudBoxes';
 import React, { useContext, useEffect } from 'react';
 import { cTool, AttributeUtils, CommonToolUtils } from '@labelbee/lb-annotation';
 import { message } from 'antd';
@@ -20,7 +20,7 @@ const { EPolygonPattern } = cTool;
 const PointCloudListener: React.FC<IA2MapStateProps> = ({ currentData, config }) => {
   const ptCtx = useContext(PointCloudContext);
   const { changeSelectedBoxValid, selectNextBox, selectPrevBox, updateSelectedBox } =
-    useSingleBox();
+    usePointCloudBoxes();
   const { clearAllResult } = useStatus();
   const basicInfo = jsonParser(currentData.result);
   const { copySelectedBoxes, pasteSelectedBoxes, copiedBoxes } = useBoxes();

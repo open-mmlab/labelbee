@@ -7,8 +7,11 @@ import { useHistory } from './useHistory';
 
 const { ESortDirection } = cAnnotation;
 
-/** Actions for single selected box */
-export const useSingleBox = () => {
+/**
+ * Actions for selected boxes
+ * @returns
+ */
+export const usePointCloudBoxes = () => {
   const {
     pointCloudBoxList,
     setPointCloudResult,
@@ -36,7 +39,7 @@ export const useSingleBox = () => {
     (params: Partial<IPointCloudBox>) => {
       if (selectedBox?.info) {
         pointCloudBoxList.splice(selectedBox.index, 1, _.merge(selectedBox.info, params));
-        const newPointCloudBoxList = _.cloneDeep(pointCloudBoxList)
+        const newPointCloudBoxList = _.cloneDeep(pointCloudBoxList);
         setPointCloudResult(newPointCloudBoxList);
         pushHistoryWithList({ pointCloudBoxList: newPointCloudBoxList });
       }

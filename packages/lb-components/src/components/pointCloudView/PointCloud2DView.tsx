@@ -6,7 +6,7 @@ import { PointCloudContext } from './PointCloudContext';
 import { connect } from 'react-redux';
 import { LeftOutlined, RightOutlined } from '@ant-design/icons';
 import useSize from '@/hooks/useSize';
-import { useSingleBox } from './hooks/useSingleBox';
+import { usePointCloudBoxes } from './hooks/usePointCloudBoxes';
 import { ViewOperation, pointCloudLidar2image } from '@labelbee/lb-annotation';
 import { useTranslation } from 'react-i18next';
 import { LabelBeeContext } from '@/store/ctx';
@@ -49,7 +49,7 @@ const PointCloud2DView = ({ currentData, config }: IA2MapStateProps) => {
   const [mappingIndex, setMappingIndex] = useState(0);
   const ref = useRef(null);
   const viewRef = useRef<{ toolInstance: ViewOperation }>();
-  const { selectedBox } = useSingleBox();
+  const { selectedBox } = usePointCloudBoxes();
   const size = useSize(ref);
   const { t } = useTranslation();
 

@@ -12,7 +12,7 @@ import { IPolygonData } from '@labelbee/lb-utils';
 import React, { useEffect, useLayoutEffect, useRef, useState } from 'react';
 import { PointCloudContext } from './PointCloudContext';
 import { useRotate } from './hooks/useRotate';
-import { useSingleBox } from './hooks/useSingleBox';
+import { usePointCloudBoxes } from './hooks/usePointCloudBoxes';
 import { PointCloudContainer } from './PointCloudLayout';
 import { BoxInfos, PointCloudValidity } from './PointCloudInfos';
 import { usePolygon } from './hooks/usePolygon';
@@ -60,7 +60,7 @@ const TransferCanvas2WorldOffset = (
 
 const TopViewToolbar = ({ currentData }: IAnnotationStateProps) => {
   const { zoom, zoomIn, zoomOut, initialPosition } = useZoom();
-  const { selectNextBox, selectPrevBox } = useSingleBox();
+  const { selectNextBox, selectPrevBox } = usePointCloudBoxes();
   const { updateRotate } = useRotate({ currentData });
 
   const ratio = 2;
@@ -142,7 +142,7 @@ const PointCloudTopView: React.FC<IA2MapStateProps> = ({ currentData, imgList, s
   const { setZoom } = useZoom();
 
   const { addPolygon, deletePolygon } = usePolygon();
-  const { deletePointCloudBox, changeBoxValidByID } = useSingleBox();
+  const { deletePointCloudBox, changeBoxValidByID } = usePointCloudBoxes();
   const [zAxisLimit, setZAxisLimit] = useState<number>(10);
   const { t } = useTranslation();
   const pointCloudViews = usePointCloudViews();
