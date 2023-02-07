@@ -14,7 +14,7 @@ import UnifyParamsForbidSvg from '@/assets/annotation/pointCloudTool/unitAttribu
 import UnifyParamsHoverSvg from '@/assets/annotation/pointCloudTool/unitAttributeHover.svg';
 import { useTranslation } from 'react-i18next';
 import UnifyParamsModal from '../../../../components/pointCloudView/components/UnifyParamsModal';
-import { useSingleBox } from '@/components/pointCloudView/hooks/useSingleBox';
+import { usePointCloudBoxes } from '@/components/pointCloudView/hooks/usePointCloudBoxes';
 import { composeResultByToolInstance } from '@/store/annotation/reducer';
 
 const mapStateToProps = (state: AppState) => {
@@ -63,7 +63,7 @@ export const PointCloudOperation: ConnectedComponent<
 > = connect(mapStateToProps, null, null, { context: LabelBeeContext })(
   ({ toolInstance, stepInfo, imgList, stepList, imgIndex }) => {
     const { t } = useTranslation();
-    const { selectedBox } = useSingleBox();
+    const { selectedBox } = usePointCloudBoxes();
     const operationList = useOperationList(toolInstance);
     const [isShowModal, setShowModal] = useState(false);
     const [composeImgList, setComposeImgList] = useState<IFileItem[]>([]);

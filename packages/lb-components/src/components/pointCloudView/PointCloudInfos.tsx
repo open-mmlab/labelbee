@@ -8,7 +8,7 @@ import { EPerspectiveView, PointCloudUtils } from '@labelbee/lb-utils';
 import React, { useEffect, useState } from 'react';
 import { PointCloudContext } from './PointCloudContext';
 import { UnitUtils } from '@labelbee/lb-annotation';
-import { useSingleBox } from './hooks/useSingleBox';
+import { usePointCloudBoxes } from './hooks/usePointCloudBoxes';
 import { useTranslation } from 'react-i18next';
 
 const DECIMAL_PLACES = 2;
@@ -67,7 +67,7 @@ export const SizeInfoForView = ({ perspectiveView }: { perspectiveView: EPerspec
  */
 export const BoxInfos = () => {
   const ptCtx = React.useContext(PointCloudContext);
-  const { selectedBox } = useSingleBox();
+  const { selectedBox } = usePointCloudBoxes();
   const [infos, setInfos] = useState<Array<{ label: string; value: string }>>([]);
   const trans = useTranslation();
   const { t, i18n } = trans;
