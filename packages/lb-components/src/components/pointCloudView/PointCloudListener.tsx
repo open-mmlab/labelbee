@@ -14,6 +14,7 @@ import { usePointCloudViews } from './hooks/usePointCloudViews';
 import { LabelBeeContext } from '@/store/ctx';
 import { useHistory } from './hooks/useHistory';
 import { useAttribute } from './hooks/useAttribute';
+import { ICoordinate } from '@labelbee/lb-utils/dist/types/types/common';
 
 const { EPolygonPattern } = cTool;
 
@@ -29,6 +30,14 @@ const PointCloudListener: React.FC<IA2MapStateProps> = ({ currentData, config })
   const { updatePointCloudData } = usePointCloudViews();
   const { redo, undo, pushHistoryWithList } = useHistory();
   const { syncThreeViewsAttribute, reRenderPointCloud3DBox } = useAttribute();
+
+  const updatePolygonOffset = (offset: Partial<ICoordinate>) => {
+    const { topViewInstance } = ptCtx;
+    if (!topViewInstance) {
+      return;
+    }
+    topViewInstance.pointCloud2dOperation?.updateSelectedPolygonsPoints(offset);
+  };
 
   const keydownEvents = (lowerCaseKey: string, e: KeyboardEvent) => {
     const { topViewInstance, mainViewInstance } = ptCtx;
@@ -102,6 +111,22 @@ const PointCloudListener: React.FC<IA2MapStateProps> = ({ currentData, config })
 
       case 'f':
         changeSelectedBoxValid();
+        break;
+
+      case 'arrowup':
+        updatePolygonOffset({ y: -1 });
+        break;
+
+      case 'arrowdown':
+        updatePolygonOffset({ y: 1 });
+        break;
+
+      case 'arrowleft':
+        updatePolygonOffset({ x: -1 });
+        break;
+
+      case 'arrowright':
+        updatePolygonOffset({ x: 1 });
         break;
 
       default: {
