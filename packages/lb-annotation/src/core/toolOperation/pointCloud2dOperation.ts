@@ -17,6 +17,7 @@ import PolygonUtils from '@/utils/tool/PolygonUtils';
 import { polygonConfig } from '@/constant/defaultConfig';
 import PolygonOperation, { IPolygonOperationProps } from './polygonOperation';
 import { BasicToolOperation } from './basicToolOperation';
+import _ from 'lodash';
 
 interface IPointCloud2dOperationProps {
   showDirectionLine?: boolean;
@@ -101,6 +102,32 @@ class PointCloud2dOperation extends PolygonOperation {
 
   public get selectedPolygons() {
     return PolygonUtils.getPolygonByIDs(this.polygonList, this.selectedIDs);
+  }
+
+  public updateSelectedPolygonsPoints(offset: Partial<ICoordinate>) {
+    if (this.selectedPolygons?.length > 0) {
+      const originPolygonList = _.cloneDeep(this.selectedPolygons!);
+      const updateList: UpdatePolygonByDragList = [];
+
+      this.selectedPolygons?.forEach((polygon, index) => {
+        polygon.pointList = polygon.pointList.map((point) => {
+          const { x, y } = point;
+          return {
+            ...point,
+            x: x + (offset.x ?? 0),
+            y: y + (offset.y ?? 0),
+          };
+        });
+
+        updateList.push({ originPolygon: originPolygonList[index], newPolygon: polygon });
+      });
+
+      this.emit('updateResult');
+      this.emit('updatePolygonByDrag', updateList);
+      this.render();
+
+      this.history.pushHistory(this.polygonList);
+    }
   }
 
   /**
