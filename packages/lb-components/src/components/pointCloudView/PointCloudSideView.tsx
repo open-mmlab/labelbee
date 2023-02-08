@@ -7,7 +7,7 @@ import { PointCloud, PointCloudAnnotation } from '@labelbee/lb-annotation';
 import { getClassName } from '@/utils/dom';
 import { PointCloudContainer } from './PointCloudLayout';
 import React, { useEffect, useRef } from 'react';
-import { EPerspectiveView, IPointCloudBox } from '@labelbee/lb-utils';
+import { EPerspectiveView, IPointCloudBox, UpdatePolygonByDragList } from '@labelbee/lb-utils';
 import { PointCloudContext } from './PointCloudContext';
 import { SizeInfoForView } from './PointCloudInfos';
 import { connect } from 'react-redux';
@@ -135,8 +135,11 @@ const PointCloudSideView: React.FC<IA2MapStateProps> = ({ config }) => {
       );
     });
 
-    pointCloud2dOperation.singleOn('updatePolygonByDrag', ({ newPolygon, originPolygon }: any) => {
-      sideViewUpdateBox(newPolygon, originPolygon);
+    pointCloud2dOperation.singleOn('updatePolygonByDrag', (updateList: UpdatePolygonByDragList) => {
+      if (ptCtx.selectedIDs.length === 1 && updateList.length === 1) {
+        const { newPolygon, originPolygon } = updateList[0];
+        sideViewUpdateBox(newPolygon, originPolygon);
+      }
     });
   }, [ptCtx, size]);
 

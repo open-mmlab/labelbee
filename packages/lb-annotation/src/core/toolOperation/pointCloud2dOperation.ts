@@ -6,7 +6,7 @@
  * @author Ron <ron.f.luo@gmail.com>
  */
 
-import { IPointCloudConfig, toolStyleConverter } from '@labelbee/lb-utils';
+import { IPointCloudConfig, toolStyleConverter, UpdatePolygonByDragList } from '@labelbee/lb-utils';
 import { EDragTarget, ESortDirection } from '@/constant/annotation';
 import { EPolygonPattern } from '@/constant/tool';
 import { IPolygonData, IPolygonPoint } from '@/types/tool/polygon';
@@ -403,8 +403,30 @@ class PointCloud2dOperation extends PolygonOperation {
       changePointIndex: [0],
       originPolygon: this.selectedPolygon,
       dragPrevCoord: dragStartCoord,
+      originPolygonList: this.polygonList,
     };
   }
+
+  public emitUpdatePolygonByDrag = () => {
+    if (this.dragInfo) {
+      const { originPolygonList } = this.dragInfo;
+
+      if (this.selectedIDs.length > 0) {
+        const emitUpdateList: UpdatePolygonByDragList = [];
+
+        this.polygonList.forEach((polygon) => {
+          if (this.selectedIDs.includes(polygon.id)) {
+            const originPolygon = originPolygonList.find((i) => i.id === polygon.id);
+
+            if (originPolygon) {
+              emitUpdateList.push({ newPolygon: polygon, originPolygon });
+            }
+          }
+        });
+        this.emit('updatePolygonByDrag', emitUpdateList);
+      }
+    }
+  };
 }
 
 export default PointCloud2dOperation;
