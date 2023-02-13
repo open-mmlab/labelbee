@@ -1,6 +1,6 @@
 import { IPointCloudBox, IPointCloudBoxList, IPolygonData } from '@labelbee/lb-utils';
 import { PointCloud, PointCloudAnnotation, ActionsHistory } from '@labelbee/lb-annotation';
-import React, { useMemo, useRef, useState } from 'react';
+import React, { useEffect, useMemo, useRef, useState } from 'react';
 
 interface IPointCloudContextInstances {
   topViewInstance?: PointCloudAnnotation;
@@ -15,6 +15,7 @@ interface IPointCloudContextInstances {
 
 export interface IPointCloudContext extends IPointCloudContextInstances {
   pointCloudBoxList: IPointCloudBoxList;
+  displayPointCloudList: IPointCloudBoxList;
   selectedIDs: string[];
   setSelectedIDs: (ids?: string[] | string) => void;
   valid: boolean;
@@ -33,10 +34,13 @@ export interface IPointCloudContext extends IPointCloudContextInstances {
   setZoom: (zoom: number) => void;
 
   history: ActionsHistory; // Operation History
+  hideAttributes: string[];
+  toggleAttributesVisible: (attribute: string) => void;
 }
 
 export const PointCloudContext = React.createContext<IPointCloudContext>({
   pointCloudBoxList: [],
+  displayPointCloudList: [],
   polygonList: [],
   selectedID: '',
   selectedIDs: [],
@@ -56,6 +60,8 @@ export const PointCloudContext = React.createContext<IPointCloudContext>({
   zoom: 1,
   setZoom: () => {},
   history: new ActionsHistory(),
+  hideAttributes: [],
+  toggleAttributesVisible: () => {},
 });
 
 export const PointCloudProvider: React.FC<{}> = ({ children }) => {
@@ -69,6 +75,7 @@ export const PointCloudProvider: React.FC<{}> = ({ children }) => {
   const [backViewInstance, setBackViewInstance] = useState<PointCloudAnnotation>();
   const [mainViewInstance, setMainViewInstance] = useState<PointCloud>();
   const history = useRef(new ActionsHistory()).current;
+  const [hideAttributes, setHideAttributes] = useState<string[]>([]);
 
   const selectedID = useMemo(() => {
     return selectedIDs.length === 1 ? selectedIDs[0] : '';
@@ -116,9 +123,23 @@ export const PointCloudProvider: React.FC<{}> = ({ children }) => {
       setSelectedIDs(pointCloudBoxList.map((i) => i.id));
     };
 
+    const displayPointCloudList = pointCloudBoxList.filter(
+      (i) => !hideAttributes.includes(i.attribute),
+    );
+
+    const toggleAttributesVisible = (tAttribute: string) => {
+      if (hideAttributes.includes(tAttribute)) {
+        setHideAttributes(hideAttributes.filter((attribute) => attribute !== tAttribute));
+      } else {
+        const updatedHideAttributes = hideAttributes.concat(tAttribute);
+        setHideAttributes(updatedHideAttributes);
+      }
+    };
+
     return {
       selectedID,
       pointCloudBoxList,
+      displayPointCloudList,
       selectedIDs,
       setPointCloudResult,
       setSelectedIDs,
@@ -141,6 +162,8 @@ export const PointCloudProvider: React.FC<{}> = ({ children }) => {
       zoom,
       setZoom,
       history,
+      toggleAttributesVisible,
+      hideAttributes,
     };
   }, [
     valid,
@@ -152,7 +175,34 @@ export const PointCloudProvider: React.FC<{}> = ({ children }) => {
     backViewInstance,
     mainViewInstance,
     zoom,
+    hideAttributes,
   ]);
+
+  const updateSelectedIDsAndRenderAfterHide = () => {
+    const pointCloudForFilteredList = pointCloudBoxList.filter((i) =>
+      hideAttributes.includes(i.attribute),
+    );
+
+    const { displayPointCloudList, setSelectedIDs } = ptCtx;
+
+    const filteredIDs = pointCloudForFilteredList.map((i) => i.id);
+
+    if (filteredIDs.length > 0) {
+      setSelectedIDs(selectedIDs.filter((id) => !filteredIDs.includes(id)));
+    }
+
+    pointCloudBoxList.forEach((v) => {
+      mainViewInstance?.removeObjectByName(v.id);
+    });
+
+    topViewInstance?.updatePolygonList(displayPointCloudList);
+    mainViewInstance?.generateBoxes(displayPointCloudList);
+  };
+
+  useEffect(() => {
+    updateSelectedIDsAndRenderAfterHide();
+    topViewInstance?.pointCloud2dOperation?.setHiddenAttributes(hideAttributes);
+  }, [hideAttributes]);
 
   return <PointCloudContext.Provider value={ptCtx}>{children}</PointCloudContext.Provider>;
 };

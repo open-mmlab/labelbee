@@ -114,19 +114,23 @@ class PolygonOperation extends BasicToolOperation {
   }
 
   public get selectedPolygon() {
-    return PolygonUtils.getPolygonByID(this.polygonList, this.selectedID);
+    return PolygonUtils.getPolygonByID(this.visiblePolygonList, this.selectedID);
   }
 
   public get hoverPolygon() {
-    return this.polygonList.find((v) => v.id === this.hoverID && v.id !== this.selectedID);
+    return this.visiblePolygonList.find((v) => v.id === this.hoverID && v.id !== this.selectedID);
   }
 
   public get enableDrag() {
     return Boolean(this.selectedID && this.dragInfo);
   }
 
+  public get visiblePolygonList() {
+    return this.polygonList;
+  }
+
   public get polygonListUnderZoom() {
-    return this.polygonList.map((polygon) => ({
+    return this.visiblePolygonList.map((polygon) => ({
       ...polygon,
       pointList: AxisUtils.changePointListByZoom(polygon.pointList, this.zoom),
     }));
@@ -168,7 +172,7 @@ class PolygonOperation extends BasicToolOperation {
   public get currentShowList() {
     let polygon: IPolygonData[] = [];
     const [showingPolygon, selectdPolygon] = CommonToolUtils.getRenderResultList<IPolygonData>(
-      this.polygonList,
+      this.visiblePolygonList,
       CommonToolUtils.getSourceID(this.basicResult),
       this.attributeLockList,
       this.selectedID,
@@ -1527,7 +1531,7 @@ class PolygonOperation extends BasicToolOperation {
 
   public renderStaticPolygon() {
     if (this.isHidden === false) {
-      this.polygonList?.forEach((polygon) => {
+      this.visiblePolygonList?.forEach((polygon) => {
         if ([this.selectedID, this.editPolygonID].includes(polygon.id)) {
           return;
         }
