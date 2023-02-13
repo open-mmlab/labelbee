@@ -229,7 +229,7 @@ const PointCloudTopView: React.FC<IA2MapStateProps> = ({ currentData, imgList, s
 
     // 1. Update Size
     ptCtx.topViewInstance.initSize(size);
-    ptCtx.topViewInstance.updatePolygonList(ptCtx.pointCloudBoxList);
+    ptCtx.topViewInstance.updatePolygonList(ptCtx.displayPointCloudList);
 
     const {
       topViewInstance: { pointCloudInstance: pointCloud, pointCloud2dOperation: polygonOperation },

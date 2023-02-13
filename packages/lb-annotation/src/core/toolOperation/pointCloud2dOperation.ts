@@ -27,6 +27,8 @@ interface IPointCloud2dOperationProps {
 class PointCloud2dOperation extends PolygonOperation {
   public showDirectionLine: boolean;
 
+  public hideAttributes: string[];
+
   public forbidAddNew: boolean;
 
   public pointCloudConfig: IPointCloudConfig;
@@ -39,6 +41,7 @@ class PointCloud2dOperation extends PolygonOperation {
     this.showDirectionLine = props.showDirectionLine ?? true;
     this.forbidAddNew = props.forbidAddNew ?? false;
     this.pointCloudConfig = CommonToolUtils.jsonParser(props.config) ?? {};
+    this.hideAttributes = [];
 
     // Set the default
     this.config = {
@@ -55,6 +58,14 @@ class PointCloud2dOperation extends PolygonOperation {
 
   get enableDrag() {
     return Boolean(this.selectedIDs.length > 0 && this.dragInfo);
+  }
+
+  get visiblePolygonList() {
+    return this.polygonList.filter((i) => !this.hideAttributes.includes(i.attribute));
+  }
+
+  public setHiddenAttributes(hideAttributes: string[]) {
+    this.hideAttributes = hideAttributes;
   }
 
   /**
@@ -105,7 +116,7 @@ class PointCloud2dOperation extends PolygonOperation {
   }
 
   public updateSelectedPolygonsPoints(offset: Partial<ICoordinate>) {
-    if (this.selectedPolygons?.length > 0) {
+    if (this.selectedPolygons && this.selectedPolygons?.length > 0) {
       const originPolygonList = _.cloneDeep(this.selectedPolygons!);
       const updateList: UpdatePolygonByDragList = [];
 
@@ -161,7 +172,7 @@ class PointCloud2dOperation extends PolygonOperation {
    * */
   public renderStaticPolygon() {
     if (this.isHidden === false) {
-      this.polygonList?.forEach((polygon) => {
+      this.visiblePolygonList?.forEach((polygon) => {
         if ([...this.selectedIDs, this.editPolygonID].includes(polygon.id)) {
           return;
         }
