@@ -47,11 +47,14 @@ export const useStatus = () => {
 
     polygon2dOperation.clearActiveStatus();
 
+    if (toolName === pointCloudPattern) {
+      return;
+    }
+
     switch (toolName) {
       case EToolName.Rect:
         polygon2dOperation.setPattern(EPolygonPattern.Rect);
         setPointCloudPattern(EToolName.Rect);
-
         break;
       case EToolName.Polygon:
         polygon2dOperation.setPattern(EPolygonPattern.Normal);

@@ -6,12 +6,23 @@ import { useSelector } from '@/store/ctx';
 import { IPointCloudConfig } from '@labelbee/lb-utils';
 import { CaretDownFilled, DeleteOutlined, EyeFilled, EyeInvisibleFilled } from '@ant-design/icons';
 import { IInputList } from '@/types/main';
+import { useHistory } from '@/components/pointCloudView/hooks/useHistory';
 
 const AnnotatedAttributesItem = ({ attribute }: { attribute: IInputList }) => {
   const pointCloudCtx = useContext(PointCloudContext);
-  const { pointCloudBoxList, hideAttributes, toggleAttributesVisible } = pointCloudCtx;
+  const {
+    pointCloudBoxList,
+    hideAttributes,
+    toggleAttributesVisible,
+    polygonList,
+    setPolygonList,
+    setPointCloudResult,
+    reRender,
+  } = pointCloudCtx;
 
-  const pointCloudListForSpecAttribute = pointCloudBoxList.filter(
+  const { pushHistoryWithList } = useHistory();
+
+  const pointCloudListForSpecAttribute = [...pointCloudBoxList, ...polygonList].filter(
     (i) => i.attribute === attribute.value,
   );
 
@@ -20,6 +31,25 @@ const AnnotatedAttributesItem = ({ attribute }: { attribute: IInputList }) => {
   };
 
   const isHidden = hideAttributes.includes(attribute.value);
+
+  const getBoxID = ({ trackID, order }: { trackID?: number; order?: number }) => {
+    return trackID ? trackID : order;
+  };
+
+  const deleteGraphByAttr = (attribute: string) => {
+    if (pointCloudListForSpecAttribute.length === 0) {
+      return;
+    }
+
+    const newPolygonList = polygonList.filter((i) => attribute !== i.attribute);
+    const newPointCloudList = pointCloudBoxList.filter((i) => attribute !== i.attribute);
+    setPolygonList(newPolygonList);
+    setPointCloudResult(newPointCloudList);
+
+    reRender(newPointCloudList, newPolygonList);
+
+    pushHistoryWithList({ pointCloudBoxList: newPointCloudList, polygonList: newPolygonList });
+  };
 
   return (
     <>
@@ -30,11 +60,11 @@ const AnnotatedAttributesItem = ({ attribute }: { attribute: IInputList }) => {
       )}
       <CaretDownFilled />
       {attribute.key}
-      <DeleteOutlined />
+      <DeleteOutlined onClick={() => deleteGraphByAttr(attribute.value)} />
       {pointCloudListForSpecAttribute.map((box) => {
         return (
-          <div key={box.trackID}>
-            {box.trackID}
+          <div key={getBoxID(box)}>
+            {getBoxID(box)}
             {attribute.key}
           </div>
         );
