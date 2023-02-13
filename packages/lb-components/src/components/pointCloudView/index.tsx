@@ -23,6 +23,10 @@ import { AppState } from '@/store';
 import { connect } from 'react-redux';
 import { IFileItem } from '@/types/data';
 import { LabelBeeContext } from '@/store/ctx';
+import {
+  AnnotatedAttributesPanelFixedLeft,
+  AnnotatedAttributesPanelFixedRight,
+} from '@/views/MainView/toolFooter/AnnotatedAttributes';
 
 interface IProps {
   imgList: IFileItem[];
@@ -38,18 +42,24 @@ const PointCloudView: React.FC<IProps> = ({ imgList }) => {
       <PointCloudListener />
       <div className={getClassName('point-cloud-layout')} onContextMenu={(e) => e.preventDefault()}>
         <div className={getClassName('point-cloud-wrapper')}>
-          <div className={getClassName('point-cloud-container', 'left')}>
-            <PointCloud2DView />
-            <PointCloud3DView />
-          </div>
+          <AnnotatedAttributesPanelFixedLeft />
 
-          <div className={getClassName('point-cloud-container', 'right')}>
-            <PointCloudTopView />
-            <div className={getClassName('point-cloud-container', 'right-bottom')}>
-              <PointCloudSideView />
-              <PointCloudBackView />
+          <div className={getClassName('point-cloud-content')}>
+            <div className={getClassName('point-cloud-container', 'left')}>
+              <PointCloud2DView />
+              <PointCloud3DView />
+            </div>
+
+            <div className={getClassName('point-cloud-container', 'right')}>
+              <PointCloudTopView />
+              <div className={getClassName('point-cloud-container', 'right-bottom')}>
+                <PointCloudSideView />
+                <PointCloudBackView />
+              </div>
             </div>
           </div>
+
+          <AnnotatedAttributesPanelFixedRight />
         </div>
       </div>
     </>
