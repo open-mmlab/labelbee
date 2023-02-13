@@ -29,6 +29,7 @@ $prefix: bee;
     position: relative;
     z-index: 10;
     border-top: 1px solid #e2e2e2;
+    border-left: 1px solid #e2e2e2;
 
     .ant-collapse-borderless > .ant-collapse-item {
       border-bottom: 1px solid #eee;
@@ -901,10 +902,7 @@ $hotkey-container-padding: 7px;
     padding: 0 3px 0 8px;
   }
 
-  .ant-collapse-borderless
-    > .ant-collapse-item
-    > .ant-collapse-content
-    > .ant-collapse-content-box {
+  .ant-collapse-borderless > .ant-collapse-item > .ant-collapse-content > .ant-collapse-content-box {
     padding-top: 4px;
   }
 
@@ -1252,6 +1250,48 @@ $hotkey-container-padding: 7px;
   }
 }
 
+.#{$prefix}-annotated-attribute {
+  width: 240px;
+  background: white;
+
+  &__popover .ant-popover-inner-content {
+    padding: 0;
+  }
+
+  &__pin {
+    cursor: pointer;
+    color: #666fff;
+    .anticon {
+      margin-right: 4px;
+    }
+  }
+
+  &__text {
+    display: flex;
+    justify-content: space-between;
+    padding: 8px 20px;
+    color: #333;
+  }
+  &__item {
+    height: 40px;
+    line-height: 40px;
+    padding: 12px;
+    display: flex;
+    align-items: center;
+    .anticon {
+      cursor: pointer;
+    }
+    .anticon-eye,
+    .anticon-caret-down {
+      margin-right: 8px;
+    }
+
+    &__text {
+      flex: 1;
+    }
+  }
+}
+
 /** VideoPlayer样式 start */
 .#{$prefix}-video-wrapper {
   width: 100%;
@@ -1427,6 +1467,11 @@ $headerHeight: 40px;
   width: 100;
   overflow: hidden;
   flex: 1;
+
+  .#{$ptPrefix}-content {
+    flex: 1;
+    display: flex;
+  }
 
   .#{$ptPrefix}-container {
     position: relative;
