@@ -1,12 +1,19 @@
 import { PointCloudContext } from '@/components/pointCloudView/PointCloudContext';
 import { Popover } from 'antd';
-import React, { useContext } from 'react';
+import React, { useContext, useState } from 'react';
 import { stepConfigSelector } from '@/store/annotation/selectors';
 import { useSelector } from '@/store/ctx';
 import { IPointCloudConfig } from '@labelbee/lb-utils';
-import { CaretDownFilled, DeleteOutlined, EyeFilled, EyeInvisibleFilled } from '@ant-design/icons';
+import {
+  CaretDownFilled,
+  DeleteOutlined,
+  EyeFilled,
+  EyeInvisibleFilled,
+  PushpinFilled,
+} from '@ant-design/icons';
 import { IInputList } from '@/types/main';
 import { useHistory } from '@/components/pointCloudView/hooks/useHistory';
+import { getClassName } from '@/utils/dom';
 
 const AnnotatedAttributesItem = ({ attribute }: { attribute: IInputList }) => {
   const pointCloudCtx = useContext(PointCloudContext);
@@ -19,6 +26,8 @@ const AnnotatedAttributesItem = ({ attribute }: { attribute: IInputList }) => {
     setPointCloudResult,
     reRender,
   } = pointCloudCtx;
+
+  const [expanded, setExpanded] = useState(false);
 
   const { pushHistoryWithList } = useHistory();
 
@@ -53,19 +62,26 @@ const AnnotatedAttributesItem = ({ attribute }: { attribute: IInputList }) => {
 
   return (
     <>
-      {isHidden ? (
-        <EyeInvisibleFilled onClick={onVisibleChange} />
-      ) : (
-        <EyeFilled onClick={onVisibleChange} />
-      )}
-      <CaretDownFilled />
-      {attribute.key}
-      <DeleteOutlined onClick={() => deleteGraphByAttr(attribute.value)} />
+      <div className={getClassName('annotated-attribute', 'item')}>
+        {isHidden ? (
+          <EyeInvisibleFilled onClick={onVisibleChange} />
+        ) : (
+          <EyeFilled onClick={onVisibleChange} />
+        )}
+        <CaretDownFilled
+          rotate={expanded ? 270 : 0}
+          onClick={() => {
+            setExpanded(!expanded);
+          }}
+        />
+        <span className={getClassName('annotated-attribute', 'item', 'text')}>{attribute.key}</span>
+
+        <DeleteOutlined onClick={() => deleteGraphByAttr(attribute.value)} />
+      </div>
       {pointCloudListForSpecAttribute.map((box) => {
         return (
-          <div key={getBoxID(box)}>
-            {getBoxID(box)}
-            {attribute.key}
+          <div key={getBoxID(box)} style={{ paddingLeft: 54 }}>
+            {`${getBoxID(box)}.${attribute.key}`}
           </div>
         );
       })}
@@ -75,28 +91,86 @@ const AnnotatedAttributesItem = ({ attribute }: { attribute: IInputList }) => {
 
 export const AnnotatedAttributesPanel = () => {
   const stepConfig: IPointCloudConfig = useSelector(stepConfigSelector);
+  const { attrPanelLayout, setAttrPanelLayout } = useContext(PointCloudContext);
 
   return (
-    <div>
-      <div>
-        <span>固定在左侧</span>
-        <span>固定在右侧</span>
-      </div>
+    <div className={getClassName('annotated-attribute')}>
+      {attrPanelLayout ? (
+        <div className={getClassName('annotated-attribute', 'text')}>
+          <span>标注结果</span>
+          <span
+            className={getClassName('annotated-attribute', 'pin')}
+            onClick={() => {
+              setAttrPanelLayout('');
+            }}
+          >
+            <PushpinFilled />
+            取消固定
+          </span>
+        </div>
+      ) : (
+        <div className={getClassName('annotated-attribute', 'text')}>
+          <span
+            onClick={() => {
+              setAttrPanelLayout('left');
+            }}
+            className={getClassName('annotated-attribute', 'pin')}
+          >
+            <PushpinFilled />
+            固定在左侧
+          </span>
+          <span
+            onClick={() => {
+              setAttrPanelLayout('right');
+            }}
+            className={getClassName('annotated-attribute', 'pin')}
+          >
+            <PushpinFilled />
+            固定在右侧
+          </span>
+        </div>
+      )}
 
       <div>
         {stepConfig.attributeList.map((i) => (
-          <div key={i.key} style={{ width: 300 }}>
-            <AnnotatedAttributesItem attribute={i} />
-          </div>
+          <AnnotatedAttributesItem attribute={i} key={i.value} />
         ))}
       </div>
     </div>
   );
 };
 
+export const AnnotatedAttributesPanelFixedLeft = () => {
+  const { attrPanelLayout } = useContext(PointCloudContext);
+  if (attrPanelLayout === 'left') {
+    return <AnnotatedAttributesPanel />;
+  }
+
+  return null;
+};
+
+export const AnnotatedAttributesPanelFixedRight = () => {
+  const { attrPanelLayout } = useContext(PointCloudContext);
+
+  if (attrPanelLayout === 'right') {
+    return <AnnotatedAttributesPanel />;
+  }
+  return null;
+};
+
 export const AnnotatedAttributesIcon = () => {
+  const { attrPanelLayout } = useContext(PointCloudContext);
+
+  if (attrPanelLayout) {
+    return null;
+  }
+
   return (
-    <Popover placement='topLeft' content={<AnnotatedAttributesPanel />}>
+    <Popover
+      placement='topLeft'
+      content={<AnnotatedAttributesPanel />}
+      overlayClassName={getClassName('annotated-attribute', 'popover')}
+    >
       <span>图片列表</span>
     </Popover>
   );
