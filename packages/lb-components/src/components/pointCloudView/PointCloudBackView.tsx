@@ -93,7 +93,6 @@ const PointCloudSideView = ({ currentData, config }: IA2MapStateProps) => {
     newPolygon: IPolygonData,
     originPolygon: IPolygonData,
   ) => {
-    debugger
     if (
       !ptCtx.selectedPointCloudBox ||
       !ptCtx.mainViewInstance ||

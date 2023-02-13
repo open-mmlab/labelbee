@@ -9,7 +9,7 @@ import { IPointCloudConfig, PointCloudUtils } from '@labelbee/lb-utils';
 import { connect } from 'react-redux';
 import { AppState } from '@/store';
 import { AnnotationFileList } from '@/types/data';
-import { useSingleBox } from '../../hooks/useBoxes';
+import { useSingleBox } from '../../hooks/useSingleBox';
 import { MathUtils } from '@labelbee/lb-annotation';
 
 interface IProps {
@@ -190,7 +190,7 @@ const UnifyParamsModal = ({ id, visible, onCancel, config, imgList, imgIndex }: 
             rules={defaultNumberRules}
             name='prevPage'
             noStyle={true}
-            initialValue={1} // First Page 
+            initialValue={1} // First Page
           >
             <InputNumber
               precision={0}
@@ -213,7 +213,7 @@ const UnifyParamsModal = ({ id, visible, onCancel, config, imgList, imgIndex }: 
             rules={defaultNumberRules}
             name='nextPage'
             noStyle={true}
-            initialValue={imgList.length}  // Last Page 
+            initialValue={imgList.length} // Last Page
           >
             <InputNumber
               precision={0}

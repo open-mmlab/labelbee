@@ -15,9 +15,9 @@ import CommonToolUtils from '@/utils/tool/CommonToolUtils';
 import DrawUtils from '@/utils/tool/DrawUtils';
 import PolygonUtils from '@/utils/tool/PolygonUtils';
 import { polygonConfig } from '@/constant/defaultConfig';
+import _ from 'lodash';
 import PolygonOperation, { IPolygonOperationProps } from './polygonOperation';
 import { BasicToolOperation } from './basicToolOperation';
-import _ from 'lodash';
 
 interface IPointCloud2dOperationProps {
   showDirectionLine?: boolean;

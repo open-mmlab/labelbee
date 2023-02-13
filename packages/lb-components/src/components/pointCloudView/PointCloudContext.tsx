@@ -13,6 +13,8 @@ interface IPointCloudContextInstances {
   setMainViewInstance: (instance: PointCloud) => void;
 }
 
+type AttrPanelLayout = '' | 'left' | 'right';
+
 export interface IPointCloudContext extends IPointCloudContextInstances {
   pointCloudBoxList: IPointCloudBoxList;
   displayPointCloudList: IPointCloudBoxList;
@@ -36,10 +38,9 @@ export interface IPointCloudContext extends IPointCloudContextInstances {
   history: ActionsHistory; // Operation History
   hideAttributes: string[];
   toggleAttributesVisible: (attribute: string) => void;
-  reRender: (
-    _displayPointCloudList: IPointCloudBoxList = displayPointCloudList,
-    _polygonList: IPolygonData[],
-  ) => void;
+  reRender: (_displayPointCloudList: IPointCloudBoxList, _polygonList: IPolygonData[]) => void;
+  attrPanelLayout: AttrPanelLayout;
+  setAttrPanelLayout: (layout: AttrPanelLayout) => void;
 }
 
 export const PointCloudContext = React.createContext<IPointCloudContext>({
@@ -67,6 +68,8 @@ export const PointCloudContext = React.createContext<IPointCloudContext>({
   hideAttributes: [],
   toggleAttributesVisible: () => {},
   reRender: () => {},
+  setAttrPanelLayout: () => {},
+  attrPanelLayout: '',
 });
 
 export const PointCloudProvider: React.FC<{}> = ({ children }) => {
@@ -81,6 +84,7 @@ export const PointCloudProvider: React.FC<{}> = ({ children }) => {
   const [mainViewInstance, setMainViewInstance] = useState<PointCloud>();
   const history = useRef(new ActionsHistory()).current;
   const [hideAttributes, setHideAttributes] = useState<string[]>([]);
+  const [attrPanelLayout, setAttrPanelLayout] = useState<AttrPanelLayout>('left');
 
   const selectedID = useMemo(() => {
     return selectedIDs.length === 1 ? selectedIDs[0] : '';
@@ -183,6 +187,8 @@ export const PointCloudProvider: React.FC<{}> = ({ children }) => {
       hideAttributes,
       setHideAttributes,
       reRender,
+      attrPanelLayout,
+      setAttrPanelLayout,
     };
   }, [
     valid,
@@ -195,6 +201,7 @@ export const PointCloudProvider: React.FC<{}> = ({ children }) => {
     mainViewInstance,
     zoom,
     hideAttributes,
+    attrPanelLayout,
   ]);
 
   const updateSelectedIDsAndRenderAfterHide = () => {
