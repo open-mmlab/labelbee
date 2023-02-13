@@ -34,8 +34,8 @@ const PointCloud3DContext = React.createContext<{
   reset3DView: () => void;
 }>({
   isActive: false,
-  setTarget3DView: () => {},
-  reset3DView: () => {},
+  setTarget3DView: () => { },
+  reset3DView: () => { },
 });
 
 const PointCloudViewIcon = ({
@@ -95,7 +95,7 @@ const PointCloud3D: React.FC<IA2MapStateProps> = ({ currentData, config }) => {
     if (!ptCtx.mainViewInstance) {
       return;
     }
-    initPointCloud3d?.();
+    initPointCloud3d?.(size);
   }, [size]);
   const { selectedBox } = useSingleBox();
 
@@ -111,15 +111,29 @@ const PointCloud3D: React.FC<IA2MapStateProps> = ({ currentData, config }) => {
     ptCtx.mainViewInstance?.resetCamera();
   };
 
+  /**
+   * Listen for data changes.
+   */
   useEffect(() => {
     if (ref.current && currentData?.url) {
       let pointCloud = ptCtx.mainViewInstance;
-      if (!pointCloud) {
+      if (!pointCloud && size.width) {
+        const orthographicParams = {
+          left: -size.width / 2,
+          right: size.width / 2,
+          top: size.height / 2,
+          bottom: -size.height / 2,
+          near: 100,
+          far: -100,
+        }
+
+        // Need to be showed
         pointCloud = new PointCloud({
           container: ref.current,
-          backgroundColor: '#4c4c4c',
-          config,
+          isOrthographicCamera: true,
+          orthographicParams,
         });
+        ptCtx.setMainViewInstance(pointCloud);
       }
 
       if (currentData.result) {
@@ -140,9 +154,8 @@ const PointCloud3D: React.FC<IA2MapStateProps> = ({ currentData, config }) => {
         ptCtx.setPointCloudValid(jsonParser(currentData.result)?.valid);
       }
 
-      ptCtx.setMainViewInstance(pointCloud);
     }
-  }, [currentData]);
+  }, [currentData, size]);
 
   /**
    *  Observe selectedID and reset camera to target top-view

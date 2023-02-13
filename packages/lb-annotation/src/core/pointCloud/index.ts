@@ -342,6 +342,11 @@ export class PointCloud {
     };
   }
 
+  public updateCameraZoom(zoom: number) {
+    this.camera.zoom = zoom;
+    this.camera.updateProjectionMatrix();
+  }
+
   /**
    * Update Camera position & target
    * @param boxParams
@@ -392,7 +397,7 @@ export class PointCloud {
    * Reset camera to center-top
    */
   public resetCamera() {
-    this.updateCamera({ x: -1, y: 0, z: 500 }, { x: 0, y: 0, z: 0 });
+    this.updateCamera(this.DEFAULT_INIT_CAMERA_POSITION, { x: 0, y: 0, z: 0 });
   }
 
   public createThreeMatrix4(matrix4: TMatrix4Tuple) {

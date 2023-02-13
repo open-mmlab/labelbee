@@ -378,11 +378,13 @@ export const usePointCloudViews = () => {
     size,
     imgList,
     trackConfigurable,
+    zoom,
   }: {
     newPolygon: any;
     size: ISize;
     imgList: IFileItem[];
     trackConfigurable?: boolean;
+    zoom: number;
   }) => {
     const newImgList = imgList as any[];
 
@@ -423,7 +425,7 @@ export const usePointCloudViews = () => {
 
     polygonOperation.setSelectedIDs([newPolygon.id]);
     setSelectedIDs(boxParams.id);
-    syncPointCloudViews(PointCloudView.Top, newPolygon, boxParams);
+    syncPointCloudViews(PointCloudView.Top, newPolygon, boxParams, zoom);
     addPointCloudBox(boxParams);
     addHistory({ newBoxParams: boxParams });
   };
@@ -528,7 +530,12 @@ export const usePointCloudViews = () => {
    * @param polygon
    * @param boxParams
    */
-  const syncPointCloudViews = (omitView: string, polygon: any, boxParams: IPointCloudBox) => {
+  const syncPointCloudViews = (
+    omitView: string,
+    polygon: any,
+    boxParams: IPointCloudBox,
+    zoom?: number,
+  ) => {
     const dataUrl = currentData?.url;
 
     const viewToBeUpdated = {
@@ -550,6 +557,10 @@ export const usePointCloudViews = () => {
         viewToBeUpdated[key]();
       }
     });
+    if (zoom) {
+      mainViewInstance?.updateCameraZoom(zoom);
+    }
+
     mainViewGenBox(boxParams);
     mainViewInstance?.highlightOriginPointCloud(boxParams);
   };
@@ -559,12 +570,21 @@ export const usePointCloudViews = () => {
     mainViewInstance?.generateBoxes(newBoxes);
   };
 
-  const initPointCloud3d = () => {
+  const initPointCloud3d = (size: ISize) => {
     if (!mainViewInstance) {
       return;
     }
 
-    mainViewInstance.initPerspectiveCamera();
+    const orthographicParams = {
+      left: -size.width / 2,
+      right: size.width / 2,
+      top: size.height / 2,
+      bottom: -size.height / 2,
+      near: 100,
+      far: -100,
+    }
+    
+    mainViewInstance.initOrthographicCamera(orthographicParams);
     mainViewInstance.initRenderer();
     mainViewInstance.render();
   };

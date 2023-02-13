@@ -196,7 +196,7 @@ const PointCloudTopView: React.FC<IProps> = ({
 
     const { pointCloud2dOperation: TopView2dOperation } = ptCtx.topViewInstance;
 
-    TopView2dOperation.singleOn('polygonCreated', (polygon: IPolygonData) => {
+    TopView2dOperation.singleOn('polygonCreated', (polygon: IPolygonData, zoom: number) => {
       if (TopView2dOperation.pattern === EPolygonPattern.Normal || !currentData?.url) {
         /**
          * Notice. The Polygon need to be converted to pointCloud coordinate system for storage.
@@ -216,6 +216,7 @@ const PointCloudTopView: React.FC<IProps> = ({
         size,
         imgList,
         trackConfigurable: config.trackConfigurable,
+        zoom
       });
     });
 
