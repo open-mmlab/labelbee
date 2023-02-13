@@ -36,6 +36,10 @@ export interface IPointCloudContext extends IPointCloudContextInstances {
   history: ActionsHistory; // Operation History
   hideAttributes: string[];
   toggleAttributesVisible: (attribute: string) => void;
+  reRender: (
+    _displayPointCloudList: IPointCloudBoxList = displayPointCloudList,
+    _polygonList: IPolygonData[],
+  ) => void;
 }
 
 export const PointCloudContext = React.createContext<IPointCloudContext>({
@@ -62,6 +66,7 @@ export const PointCloudContext = React.createContext<IPointCloudContext>({
   history: new ActionsHistory(),
   hideAttributes: [],
   toggleAttributesVisible: () => {},
+  reRender: () => {},
 });
 
 export const PointCloudProvider: React.FC<{}> = ({ children }) => {
@@ -136,6 +141,18 @@ export const PointCloudProvider: React.FC<{}> = ({ children }) => {
       }
     };
 
+    const reRender = (
+      _displayPointCloudList: IPointCloudBoxList = displayPointCloudList,
+      _polygonList: IPolygonData[] = polygonList,
+    ) => {
+      _displayPointCloudList.forEach((v) => {
+        mainViewInstance?.removeObjectByName(v.id);
+      });
+
+      topViewInstance?.updatePolygonList(_displayPointCloudList, _polygonList);
+      mainViewInstance?.generateBoxes(_displayPointCloudList);
+    };
+
     return {
       selectedID,
       pointCloudBoxList,
@@ -164,6 +181,8 @@ export const PointCloudProvider: React.FC<{}> = ({ children }) => {
       history,
       toggleAttributesVisible,
       hideAttributes,
+      setHideAttributes,
+      reRender,
     };
   }, [
     valid,
@@ -183,7 +202,7 @@ export const PointCloudProvider: React.FC<{}> = ({ children }) => {
       hideAttributes.includes(i.attribute),
     );
 
-    const { displayPointCloudList, setSelectedIDs } = ptCtx;
+    const { setSelectedIDs, reRender } = ptCtx;
 
     const filteredIDs = pointCloudForFilteredList.map((i) => i.id);
 
@@ -191,12 +210,7 @@ export const PointCloudProvider: React.FC<{}> = ({ children }) => {
       setSelectedIDs(selectedIDs.filter((id) => !filteredIDs.includes(id)));
     }
 
-    pointCloudBoxList.forEach((v) => {
-      mainViewInstance?.removeObjectByName(v.id);
-    });
-
-    topViewInstance?.updatePolygonList(displayPointCloudList);
-    mainViewInstance?.generateBoxes(displayPointCloudList);
+    reRender();
   };
 
   useEffect(() => {

@@ -140,6 +140,7 @@ const PointCloudTopView: React.FC<IA2MapStateProps> = ({ currentData, imgList, s
   const size = useSize(ref);
   const config = jsonParser(stepInfo.config);
   const { setZoom } = useZoom();
+  const { hideAttributes } = ptCtx;
 
   const { addPolygon, deletePolygon } = usePolygon();
   const { deletePointCloudBox, changeBoxValidByID } = usePointCloudBoxes();
@@ -178,7 +179,8 @@ const PointCloudTopView: React.FC<IA2MapStateProps> = ({ currentData, imgList, s
     TopView2dOperation.singleOn('polygonCreated', (polygon: IPolygonData) => {
       if (TopView2dOperation.pattern === EPolygonPattern.Normal || !currentData?.url) {
         addPolygon(polygon);
-        ptCtx.setSelectedIDs(polygon.id);
+
+        ptCtx.setSelectedIDs(hideAttributes.includes(polygon.attribute) ? '' : polygon.id);
         return;
       }
 
