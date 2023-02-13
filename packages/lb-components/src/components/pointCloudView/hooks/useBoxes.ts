@@ -10,20 +10,14 @@ import { useTranslation } from 'react-i18next';
  * Actions for selected boxes
  */
 export const useBoxes = () => {
-  const { selectedIDs, pointCloudBoxList, setPointCloudResult } = useContext(PointCloudContext);
+  const { selectedIDs, displayPointCloudList, setPointCloudResult } = useContext(PointCloudContext);
   const [copiedBoxes, setCopiedBoxes] = useState<IPointCloudBoxList>([]);
   const { pointCloudBoxListUpdated } = usePointCloudViews();
   const { t, i18n } = useTranslation();
 
-  // const hasDuplicateID = (checkBoxList: IPointCloudBoxList) => {
-  //   return pointCloudBoxList.some((item) => {
-  //     return checkBoxList.some((i) => i.id === item.id);
-  //   });
-  // };
-
   const selectedBoxes = useMemo(() => {
-    return pointCloudBoxList.filter((i) => selectedIDs.includes(i.id));
-  }, [selectedIDs, pointCloudBoxList]);
+    return displayPointCloudList.filter((i) => selectedIDs.includes(i.id));
+  }, [selectedIDs, displayPointCloudList]);
 
   const copySelectedBoxes = useCallback(() => {
     if (selectedBoxes.length > 0) {
@@ -32,7 +26,7 @@ export const useBoxes = () => {
       setCopiedBoxes([]);
       message.error(t('CopyEmptyInPointCloud'));
     }
-  }, [selectedIDs, pointCloudBoxList, i18n.language]);
+  }, [selectedIDs, displayPointCloudList, i18n.language]);
 
   const pasteSelectedBoxes = useCallback(() => {
     if (copiedBoxes.length === 0) {
@@ -47,13 +41,13 @@ export const useBoxes = () => {
       message.error(t('HasDuplicateID'));
     } else {
       /** Paste succeed and empty */
-      const newPointCloudResult = [...pointCloudBoxList, ...copiedBoxes];
+      const newPointCloudResult = [...displayPointCloudList, ...copiedBoxes];
 
       setPointCloudResult(newPointCloudResult);
       pointCloudBoxListUpdated?.(newPointCloudResult);
       setCopiedBoxes([]);
     }
-  }, [copiedBoxes, pointCloudBoxList, i18n.language]);
+  }, [copiedBoxes, displayPointCloudList, i18n.language]);
 
   return { copySelectedBoxes, pasteSelectedBoxes, copiedBoxes, selectedBoxes };
 };

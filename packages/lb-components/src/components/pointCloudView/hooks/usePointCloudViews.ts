@@ -15,7 +15,6 @@ import {
   PointCloudUtils,
   IPolygonPoint,
   UpdatePolygonByDragList,
-  PartialIPointCloudBoxList,
 } from '@labelbee/lb-utils';
 import { useContext } from 'react';
 import { PointCloudContext } from '../PointCloudContext';
@@ -338,6 +337,7 @@ export const usePointCloudViews = () => {
     setSelectedIDs,
     selectedIDs,
     pointCloudBoxList,
+    hideAttributes,
   } = ptCtx;
   const { addHistory, initHistory, pushHistoryUnderUpdatePolygon } = useHistory();
   const { selectedPolygon } = usePolygon();
@@ -422,9 +422,17 @@ export const usePointCloudViews = () => {
       return;
     }
 
-    polygonOperation.setSelectedIDs([newPolygon.id]);
-    setSelectedIDs(boxParams.id);
-    syncPointCloudViews(PointCloudView.Top, newPolygon, boxParams);
+    const isBoxHidden = hideAttributes.includes(newPolygon.attribute);
+
+    /** If new box is hidden will not active target point box */
+    if (isBoxHidden) {
+      setSelectedIDs([]);
+    } else {
+      setSelectedIDs(boxParams.id);
+      polygonOperation.setSelectedIDs([newPolygon.id]);
+      syncPointCloudViews(PointCloudView.Top, newPolygon, boxParams);
+    }
+
     addPointCloudBox(boxParams);
     addHistory({ newBoxParams: boxParams });
   };
@@ -503,20 +511,18 @@ export const usePointCloudViews = () => {
       return;
     }
 
-    const updatePointCloudList: PartialIPointCloudBoxList = updateList.map(
-      ({ newPolygon: polygon }) => {
-        const pointCloudBox = getPointCloudByID(polygon.id);
+    const updatePointCloudList: IPointCloudBox[] = updateList.map(({ newPolygon: polygon }) => {
+      const pointCloudBox = getPointCloudByID(polygon.id);
 
-        const newBoxParams = topViewPolygon2PointCloud(
-          polygon,
-          size,
-          topViewInstance.pointCloudInstance,
-          pointCloudBox,
-        );
+      const newBoxParams = topViewPolygon2PointCloud(
+        polygon,
+        size,
+        topViewInstance.pointCloudInstance,
+        pointCloudBox,
+      );
 
-        return newBoxParams;
-      },
-    );
+      return newBoxParams;
+    });
 
     updateSelectedBoxes(updatePointCloudList);
 
