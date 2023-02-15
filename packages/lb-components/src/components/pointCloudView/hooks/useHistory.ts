@@ -12,6 +12,7 @@ export const useHistory = () => {
     topViewInstance,
     polygonList,
     setPolygonList,
+    syncAllViewPointCloudColor,
   } = useContext(PointCloudContext);
 
   const addHistory = ({
@@ -97,7 +98,7 @@ export const useHistory = () => {
       return;
     }
 
-    const { pointCloudBoxList: newPointCloudBoxList, polygonList: newPolygonList } = params;
+    const { pointCloudBoxList: newPointCloudBoxList = [], polygonList: newPolygonList = [] } = params;
 
     if (newPointCloudBoxList) {
       if (pointCloudBoxList.length !== newPointCloudBoxList.length) {
@@ -122,6 +123,7 @@ export const useHistory = () => {
       });
 
       setPointCloudResult(newPointCloudBoxList);
+      syncAllViewPointCloudColor(newPointCloudBoxList);
     }
 
     if (newPolygonList) {

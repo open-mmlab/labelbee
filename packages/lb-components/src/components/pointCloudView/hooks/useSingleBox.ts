@@ -19,6 +19,7 @@ export const useSingleBox = () => {
     selectedID,
     mainViewInstance,
     setSelectedIDs,
+    syncAllViewPointCloudColor,
   } = useContext(PointCloudContext);
 
   const { pushHistoryWithList } = useHistory();
@@ -36,10 +37,13 @@ export const useSingleBox = () => {
     (params: Partial<IPointCloudBox>) => {
       if (selectedBox?.info) {
         pointCloudBoxList.splice(selectedBox.index, 1, _.merge(selectedBox.info, params));
-        const newPointCloudBoxList = _.cloneDeep(pointCloudBoxList)
+        const newPointCloudBoxList = _.cloneDeep(pointCloudBoxList);
         setPointCloudResult(newPointCloudBoxList);
         pushHistoryWithList({ pointCloudBoxList: newPointCloudBoxList });
+        return newPointCloudBoxList;
       }
+
+      return pointCloudBoxList;
     },
     [selectedID, pointCloudBoxList],
   );
@@ -119,10 +123,11 @@ export const useSingleBox = () => {
   };
 
   const deletePointCloudBox = (id: string) => {
-    setPointCloudResult(pointCloudBoxList.filter((v) => v.id !== id));
+    const newPointCloudList = pointCloudBoxList.filter((v) => v.id !== id);
+    setPointCloudResult(newPointCloudList);
     mainViewInstance?.removeObjectByName(id);
     mainViewInstance?.render();
-    // TODO Clear Highlight.
+    syncAllViewPointCloudColor(newPointCloudList);
   };
 
   return {

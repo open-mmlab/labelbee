@@ -197,7 +197,6 @@ const PointCloudSideView = ({ currentData, config, checkMode }: IA2MapStateProps
 
         synchronizeTopView(newBoxParams, newPolygon, ptCtx.topViewInstance, ptCtx.mainViewInstance);
         synchronizeSideView(newBoxParams, newPolygon, ptCtx.sideViewInstance, currentData.url);
-        ptCtx.mainViewInstance.highlightOriginPointCloud(newBoxParams);
         updateSelectedBox(newBoxParams);
       },
     );

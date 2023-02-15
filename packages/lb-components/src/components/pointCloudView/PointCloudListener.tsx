@@ -175,7 +175,7 @@ const PointCloudListener: React.FC<IA2MapStateProps> = ({ currentData, config })
     return () => {
       window.removeEventListener('keydown', onKeyDown);
     };
-  }, [ptCtx, copiedBoxes, config]);
+  }, [ptCtx, copiedBoxes, config, ptCtx.pointCloudBoxList, ptCtx.polygonList]);
 
   useEffect(() => {
     syncAllViewsConfig(config);
@@ -210,8 +210,12 @@ const PointCloudListener: React.FC<IA2MapStateProps> = ({ currentData, config })
       if (selectBox) {
         selectBox.attribute = newAttribute;
 
-        updateSelectedBox(selectBox);
+        const newPointCloudList = updateSelectedBox(selectBox);
         reRenderPointCloud3DBox(selectBox);
+
+        if (ptCtx.mainViewInstance) {
+          ptCtx.syncAllViewPointCloudColor(newPointCloudList);
+        }
       }
       if (selectedPolygon) {
         pushHistoryUnderUpdatePolygon({ ...selectedPolygon, attribute: newAttribute });
@@ -271,7 +275,13 @@ const PointCloudListener: React.FC<IA2MapStateProps> = ({ currentData, config })
     toolInstanceRef.current.setShowDefaultCursor = (showDefaultCursor: boolean) => {
       ptCtx.topViewInstance?.pointCloud2dOperation?.setShowDefaultCursor(showDefaultCursor);
     };
-  }, [ptCtx.pointCloudBoxList, ptCtx.selectedID, ptCtx.valid, ptCtx.polygonList]);
+  }, [
+    ptCtx.pointCloudBoxList,
+    ptCtx.selectedID,
+    ptCtx.valid,
+    ptCtx.polygonList,
+    ptCtx.mainViewInstance,
+  ]);
 
   useEffect(() => {
     toolInstanceRef.current.history = {

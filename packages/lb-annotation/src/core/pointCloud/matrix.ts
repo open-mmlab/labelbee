@@ -109,6 +109,7 @@ export function getCuboidFromPointCloudBox(boxParams: IPointCloudBox) {
   const zMin = center.z - depth / 2;
 
   return {
+    ...boxParams,
     polygonPointList,
     zMax,
     zMin,

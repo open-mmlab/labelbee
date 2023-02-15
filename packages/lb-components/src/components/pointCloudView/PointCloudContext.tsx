@@ -24,7 +24,7 @@ export interface IPointCloudContext extends IPointCloudContextInstances {
   addSelectedID: (selectedID: string) => void;
   selectedAllBoxes: () => void;
   selectedID: string;
-  addPointCloudBox: (boxParams: IPointCloudBox) => void;
+  addPointCloudBox: (boxParams: IPointCloudBox) => IPointCloudBox[];
 
   polygonList: IPolygonData[];
   setPolygonList: (polygonList: IPolygonData[]) => void;
@@ -33,6 +33,8 @@ export interface IPointCloudContext extends IPointCloudContextInstances {
   setZoom: (zoom: number) => void;
 
   history: ActionsHistory; // Operation History
+
+  syncAllViewPointCloudColor: (newPointCloudList?: IPointCloudBox[]) => void;
 }
 
 export const PointCloudContext = React.createContext<IPointCloudContext>({
@@ -41,21 +43,22 @@ export const PointCloudContext = React.createContext<IPointCloudContext>({
   selectedID: '',
   selectedIDs: [],
   valid: true,
-  setSelectedIDs: () => {},
-  setPointCloudResult: () => {},
-  setPointCloudValid: () => {},
-  setTopViewInstance: () => {},
-  setSideViewInstance: () => {},
-  setBackViewInstance: () => {},
-  setMainViewInstance: () => {},
-  addSelectedID: () => {},
-  selectedAllBoxes: () => {},
-  addPointCloudBox: () => {},
-  setPolygonList: () => {},
+  setSelectedIDs: () => { },
+  setPointCloudResult: () => { },
+  setPointCloudValid: () => { },
+  setTopViewInstance: () => { },
+  setSideViewInstance: () => { },
+  setBackViewInstance: () => { },
+  setMainViewInstance: () => { },
+  addSelectedID: () => { },
+  selectedAllBoxes: () => { },
+  addPointCloudBox: () => { return [] },
+  setPolygonList: () => { },
 
   zoom: 1,
-  setZoom: () => {},
+  setZoom: () => { },
   history: new ActionsHistory(),
+  syncAllViewPointCloudColor: () => { },
 });
 
 export const PointCloudProvider: React.FC<{}> = ({ children }) => {
@@ -78,7 +81,9 @@ export const PointCloudProvider: React.FC<{}> = ({ children }) => {
     const selectedPointCloudBox = pointCloudBoxList.find((v) => v.id === selectedID);
 
     const addPointCloudBox = (box: IPointCloudBox) => {
-      setPointCloudResult(pointCloudBoxList.concat(box));
+      const newPointCloudList = pointCloudBoxList.concat(box)
+      setPointCloudResult(newPointCloudList);
+      return newPointCloudList;
     };
 
     const setPointCloudValid = (valid?: boolean) => {
@@ -116,6 +121,21 @@ export const PointCloudProvider: React.FC<{}> = ({ children }) => {
       setSelectedIDs(pointCloudBoxList.map((i) => i.id));
     };
 
+    /**
+     * Synchronize the highlighted pointCloud for all views. 
+     * @param pointCloudList 
+     */
+    const syncAllViewPointCloudColor = (pointCloudList?: IPointCloudBox[]) => {
+      const colorPromise = mainViewInstance?.highlightOriginPointCloud(pointCloudList);
+      colorPromise?.then((color) => {
+        [topViewInstance, sideViewInstance, backViewInstance].forEach(instance => {
+          if (color) {
+            instance?.pointCloudInstance?.updateColor(color);
+          }
+        })
+      })
+    }
+
     return {
       selectedID,
       pointCloudBoxList,
@@ -141,6 +161,7 @@ export const PointCloudProvider: React.FC<{}> = ({ children }) => {
       zoom,
       setZoom,
       history,
+      syncAllViewPointCloudColor,
     };
   }, [
     valid,
