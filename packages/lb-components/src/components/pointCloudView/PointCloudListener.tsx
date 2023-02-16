@@ -28,9 +28,9 @@ const PointCloudListener: React.FC<IA2MapStateProps> = ({ currentData, config })
   const { copySelectedBoxes, pasteSelectedBoxes, copiedBoxes } = useBoxes();
   const { toolInstanceRef } = useCustomToolInstance({ basicInfo });
   const { updateRotate } = useRotate({ currentData });
-  const { updatePointCloudData } = usePointCloudViews();
+  const { updatePointCloudData, topViewSelectedChanged } = usePointCloudViews();
   const { redo, undo, pushHistoryWithList, pushHistoryUnderUpdatePolygon } = useHistory();
-  const { syncThreeViewsAttribute, reRenderPointCloud3DBox } = useAttribute();
+  const { syncThreeViewsAttribute } = useAttribute();
   const { syncAllViewsConfig, reRenderTopViewRange } = useConfig();
   const { selectedPolygon } = usePolygon();
 
@@ -211,10 +211,10 @@ const PointCloudListener: React.FC<IA2MapStateProps> = ({ currentData, config })
         selectBox.attribute = newAttribute;
 
         const newPointCloudList = updateSelectedBox(selectBox);
-        reRenderPointCloud3DBox(selectBox);
 
         if (ptCtx.mainViewInstance) {
-          ptCtx.syncAllViewPointCloudColor(newPointCloudList);
+          // TODO: Poor performance.
+          topViewSelectedChanged(selectBox, newPointCloudList);
         }
       }
       if (selectedPolygon) {

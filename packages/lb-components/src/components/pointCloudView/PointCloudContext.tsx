@@ -43,22 +43,24 @@ export const PointCloudContext = React.createContext<IPointCloudContext>({
   selectedID: '',
   selectedIDs: [],
   valid: true,
-  setSelectedIDs: () => { },
-  setPointCloudResult: () => { },
-  setPointCloudValid: () => { },
-  setTopViewInstance: () => { },
-  setSideViewInstance: () => { },
-  setBackViewInstance: () => { },
-  setMainViewInstance: () => { },
-  addSelectedID: () => { },
-  selectedAllBoxes: () => { },
-  addPointCloudBox: () => { return [] },
-  setPolygonList: () => { },
+  setSelectedIDs: () => {},
+  setPointCloudResult: () => {},
+  setPointCloudValid: () => {},
+  setTopViewInstance: () => {},
+  setSideViewInstance: () => {},
+  setBackViewInstance: () => {},
+  setMainViewInstance: () => {},
+  addSelectedID: () => {},
+  selectedAllBoxes: () => {},
+  addPointCloudBox: () => {
+    return [];
+  },
+  setPolygonList: () => {},
 
   zoom: 1,
-  setZoom: () => { },
+  setZoom: () => {},
   history: new ActionsHistory(),
-  syncAllViewPointCloudColor: () => { },
+  syncAllViewPointCloudColor: () => {},
 });
 
 export const PointCloudProvider: React.FC<{}> = ({ children }) => {
@@ -81,7 +83,7 @@ export const PointCloudProvider: React.FC<{}> = ({ children }) => {
     const selectedPointCloudBox = pointCloudBoxList.find((v) => v.id === selectedID);
 
     const addPointCloudBox = (box: IPointCloudBox) => {
-      const newPointCloudList = pointCloudBoxList.concat(box)
+      const newPointCloudList = pointCloudBoxList.concat(box);
       setPointCloudResult(newPointCloudList);
       return newPointCloudList;
     };
@@ -122,19 +124,22 @@ export const PointCloudProvider: React.FC<{}> = ({ children }) => {
     };
 
     /**
-     * Synchronize the highlighted pointCloud for all views. 
-     * @param pointCloudList 
+     * Synchronize the highlighted pointCloud for all views.
+     * @param pointCloudList
      */
     const syncAllViewPointCloudColor = (pointCloudList?: IPointCloudBox[]) => {
       const colorPromise = mainViewInstance?.highlightOriginPointCloud(pointCloudList);
-      colorPromise?.then((color) => {
-        [topViewInstance, sideViewInstance, backViewInstance].forEach(instance => {
-          if (color) {
-            instance?.pointCloudInstance?.updateColor(color);
-          }
-        })
-      })
-    }
+      return new Promise((resolve) => {
+        colorPromise?.then((color) => {
+          [topViewInstance].forEach((instance) => {
+            if (color) {
+              instance?.pointCloudInstance?.updateColor(color);
+              resolve({ color });
+            }
+          });
+        });
+      });
+    };
 
     return {
       selectedID,
