@@ -170,7 +170,7 @@ class ToolStyleConverter {
 
       return {
         ...ToolStyleUtils.getToolStrokeAndFill(color, defaultStatus),
-        hex: COLORS_ARRAY_MULTI[attributeIndex % colorList.length]?.hex ?? ''
+        hex: COLORS_ARRAY_MULTI[attributeIndex % colorList.length]?.hex ?? '',
       };
     }
 
@@ -190,6 +190,50 @@ class ToolStyleConverter {
   }
 }
 
+function createColorMapJet() {
+  let s;
+  const p = new Array(256).fill('').map((v) => new Array(3).fill(''));
+  for (let i = 0; i < 20; i++) {
+    for (s = 0; s < 32; s++) {
+      p[s][0] = 128 + 4 * s;
+      p[s][1] = 0;
+      p[s][2] = 0;
+    }
+    p[32][0] = 255;
+    p[32][1] = 0;
+    p[32][2] = 0;
+    for (s = 0; s < 63; s++) {
+      p[33 + s][0] = 255;
+      p[33 + s][1] = 4 + 4 * s;
+      p[33 + s][2] = 0;
+    }
+    p[96][0] = 254;
+    p[96][1] = 255;
+    p[96][2] = 2;
+    for (s = 0; s < 62; s++) {
+      p[97 + s][0] = 250 - 4 * s;
+      p[97 + s][1] = 255;
+      p[97 + s][2] = 6 + 4 * s;
+    }
+    p[159][0] = 1;
+    p[159][1] = 255;
+    p[159][2] = 254;
+    for (s = 0; s < 64; s++) {
+      p[160 + s][0] = 0;
+      p[160 + s][1] = 252 - s * 4;
+      p[160 + s][2] = 255;
+    }
+    for (s = 0; s < 32; s++) {
+      p[224 + s][0] = 0;
+      p[224 + s][1] = 0;
+      p[224 + s][2] = 252 - 4 * s;
+    }
+  }
+  return p;
+}
+
+const COLOR_MAP_JET = createColorMapJet();
+
 export default new ToolStyleConverter();
 
-export { ToolStyleConverter };
+export { ToolStyleConverter, COLOR_MAP_JET };

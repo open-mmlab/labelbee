@@ -20,9 +20,18 @@ class ToolStyleUtils {
    */
   public static replaceAFromRGBA = (rgba: string, opacity: number) => {
     return rgba
-      .split(" ")
-      .join("")
+      .split(' ')
+      .join('')
       .replace(/,[0-9]+([.]{1}[0-9]+){0,1}\)/, `,${opacity.toFixed(2)})`);
+  };
+
+  public static toRGBAArr = (rgbStr: string, opacity = 1) => {
+    const match = rgbStr.match(/\d+/g);
+
+    if (match) {
+      const [r, g, b, a] = match;
+      return [r, g, b, a];
+    }
   };
 
   /**
@@ -41,7 +50,7 @@ class ToolStyleUtils {
       borderOpacity: number;
       fillOpacity: number;
       commonOpacity: number; // 无状态的
-    }>
+    }>,
   ) => {
     const {
       hover = false,
@@ -55,12 +64,14 @@ class ToolStyleUtils {
       return {
         stroke: this.replaceAFromRGBA(color, borderOpacity),
         fill: this.replaceAFromRGBA(color, fillOpacity),
+        rgba: this.toRGBAArr(color),
       };
     }
 
     return {
       stroke: this.replaceAFromRGBA(color, borderOpacity * commonOpacity),
       fill: this.replaceAFromRGBA(color, fillOpacity * commonOpacity),
+      rgba: this.toRGBAArr(color),
     };
   };
 
@@ -72,12 +83,10 @@ class ToolStyleUtils {
    */
   public static getAttributeIndex = (
     attribute: string | undefined,
-    attributeList: IInputList[]
+    attributeList: IInputList[],
   ) => {
     try {
-      const attributeIndex = attributeList.findIndex(
-        (i: any) => i.value === attribute
-      );
+      const attributeIndex = attributeList.findIndex((i: any) => i.value === attribute);
       return attributeIndex;
     } catch (error) {
       return -1;
