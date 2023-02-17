@@ -141,7 +141,7 @@ export class PointCloud {
   }
 
   get DEFAULT_INIT_CAMERA_POSITION() {
-    return new THREE.Vector3(-1, 0, 10);
+    return new THREE.Vector3(-0.01, 0, 10);
   }
 
   get containerWidth() {
