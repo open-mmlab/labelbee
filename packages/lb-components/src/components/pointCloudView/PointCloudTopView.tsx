@@ -242,7 +242,11 @@ const PointCloudTopView: React.FC<IProps> = ({
     });
 
     const validUpdate = (id: string) => {
-      changeBoxValidByID(id);
+      const newPointCloudList = changeBoxValidByID(id);
+      // Update Highlight;
+      if (newPointCloudList) {
+        ptCtx.syncAllViewPointCloudColor(newPointCloudList);
+      }
     };
 
     TopView2dOperation.on('validUpdate', validUpdate);

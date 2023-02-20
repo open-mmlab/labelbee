@@ -85,9 +85,14 @@ export function isInPolygon(checkPoint, polygonPoints, lineType = 0) {
   return true;
 }
 
-function getNewColorByBox({ zMin, zMax, polygonPointList, attribute, x, y, z, colorList }) {
+function getNewColorByBox({ zMin, zMax, polygonPointList, attribute, x, y, z, colorList, valid }) {
   const inPolygon = isInPolygon({ x, y }, polygonPointList);
   if (inPolygon && z >= zMin && z <= zMax) {
+    if (valid === false) {
+      /** INVALID-COlOR rgba(255, 51, 51, 1) - It is same with lb-utils( /src/constant/style.ts ) */
+      return [1, 103 / 255, 102 / 255];
+    }
+
     if (colorList[attribute]) {
       return colorList[attribute].rgba.slice(0, 3).map((v) => v / 255);
     }
@@ -131,6 +136,7 @@ onmessage = function onmessage(e) {
           z,
           attribute: v.attribute,
           colorList,
+          valid: v.valid,
         });
       })
       .filter((v) => v)

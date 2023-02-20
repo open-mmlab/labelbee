@@ -6,7 +6,7 @@
  * @author Ron <ron.f.luo@gmail.com>
  */
 
-import { IPointCloudConfig, toolStyleConverter } from '@labelbee/lb-utils';
+import { IPointCloudConfig, toolStyleConverter, INVALID_COLOR } from '@labelbee/lb-utils';
 import { ESortDirection } from '@/constant/annotation';
 import { EPolygonPattern } from '@/constant/tool';
 import { IPolygonData, IPolygonPoint } from '@/types/tool/polygon';
@@ -153,12 +153,14 @@ class PointCloud2dOperation extends PolygonOperation {
   }
 
   /** 获取当前属性颜色 */
-  public getPointCloudLineColor(attribute = '') {
-    return toolStyleConverter.getColorFromConfig(
-      { attribute },
-      { ...this.pointCloudConfig, attributeConfigurable: true },
-      {},
-    ).stroke;
+  public getPointCloudLineColor(polygon: IPolygonData) {
+    return polygon.valid === false
+      ? INVALID_COLOR
+      : toolStyleConverter.getColorFromConfig(
+          { attribute: polygon.attribute },
+          { ...this.pointCloudConfig, attributeConfigurable: true },
+          {},
+        ).stroke;
   }
 
   /**
@@ -171,8 +173,7 @@ class PointCloud2dOperation extends PolygonOperation {
         if ([...this.selectedIDs, this.editPolygonID].includes(polygon.id)) {
           return;
         }
-        const { attribute } = polygon;
-        const lineColor = this.getPointCloudLineColor(attribute);
+        const lineColor = this.getPointCloudLineColor(polygon);
         const transformPointList = AxisUtils.changePointListByZoom(polygon.pointList || [], this.zoom, this.currentPos);
 
         DrawUtils.drawPolygonWithFillAndLine(this.canvas, transformPointList, {
@@ -205,7 +206,7 @@ class PointCloud2dOperation extends PolygonOperation {
 
   public renderSingleSelectedPolygon = (selectedPolygon: IPolygonData) => {
     if (this.selectedPolygons) {
-      const color = this.getPointCloudLineColor(selectedPolygon.attribute);
+      const color = this.getPointCloudLineColor(selectedPolygon);
       // const toolData = StyleUtils.getStrokeAndFill(toolColor, selectedPolygon.valid, { isSelected: true });
 
       const polygon = AxisUtils.changePointListByZoom(selectedPolygon.pointList, this.zoom, this.currentPos);

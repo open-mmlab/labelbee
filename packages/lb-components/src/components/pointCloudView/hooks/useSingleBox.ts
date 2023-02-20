@@ -55,8 +55,11 @@ export const useSingleBox = () => {
 
       if (boxIndex > -1) {
         pointCloudBoxList.splice(boxIndex, 1, _.merge(pointCloudBoxList[boxIndex], params));
-        setPointCloudResult(_.cloneDeep(pointCloudBoxList));
+        const newPointCloudBoxList = _.cloneDeep(pointCloudBoxList);
+        setPointCloudResult(newPointCloudBoxList);
+        return newPointCloudBoxList;
       }
+      return pointCloudBoxList;
     },
     [pointCloudBoxList],
   );
@@ -79,7 +82,10 @@ export const useSingleBox = () => {
       const { id, valid = true } = selectedBox.info;
 
       // PointCloud
-      updateSelectedBox({ valid: !valid });
+      const newPointCloudList = updateSelectedBox({ valid: !valid });
+
+      // Async
+      syncAllViewPointCloudColor(newPointCloudList);
 
       changePolygonViewValid(id);
     }
@@ -93,9 +99,11 @@ export const useSingleBox = () => {
         const { id, valid = true } = boxInfo;
 
         // PointCloud
-        updateBoxByID({ valid: !valid }, id);
+        const newPointCloudBoxList = updateBoxByID({ valid: !valid }, id);
 
         changePolygonViewValid(id);
+
+        return newPointCloudBoxList;
       }
     },
     [changePolygonViewValid, pointCloudBoxList],
