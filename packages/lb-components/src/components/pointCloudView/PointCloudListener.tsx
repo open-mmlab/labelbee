@@ -19,7 +19,11 @@ import { usePolygon } from './hooks/usePolygon';
 
 const { EPolygonPattern } = cTool;
 
-const PointCloudListener: React.FC<IA2MapStateProps> = ({ currentData, config }) => {
+interface IProps extends IA2MapStateProps {
+  checkMode: boolean;
+}
+
+const PointCloudListener: React.FC<IProps> = ({ currentData, config, checkMode }) => {
   const ptCtx = useContext(PointCloudContext);
   const { changeSelectedBoxValid, selectNextBox, selectPrevBox, updateSelectedBox } =
     useSingleBox();
@@ -150,7 +154,7 @@ const PointCloudListener: React.FC<IA2MapStateProps> = ({ currentData, config })
   };
 
   const onKeyDown = (e: KeyboardEvent) => {
-    if (!CommonToolUtils.hotkeyFilter(e)) {
+    if (!CommonToolUtils.hotkeyFilter(e) || checkMode === true) {
       return;
     }
 
