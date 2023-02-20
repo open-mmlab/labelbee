@@ -4,6 +4,7 @@ import _ from 'lodash';
 import { PointCloudContext } from '../PointCloudContext';
 import { cAnnotation } from '@labelbee/lb-annotation';
 import { useHistory } from './useHistory';
+import { usePolygon } from './usePolygon';
 
 const { ESortDirection } = cAnnotation;
 
@@ -20,7 +21,9 @@ export const useSingleBox = () => {
     mainViewInstance,
     setSelectedIDs,
     syncAllViewPointCloudColor,
+    polygonList,
   } = useContext(PointCloudContext);
+  const { selectedPolygon, updateSelectedPolygon, updatePolygonValidByID } = usePolygon();
 
   const { pushHistoryWithList } = useHistory();
 
@@ -86,12 +89,16 @@ export const useSingleBox = () => {
 
       // Async
       syncAllViewPointCloudColor(newPointCloudList);
-
       changePolygonViewValid(id);
     }
-  }, [changePolygonViewValid, selectedBox]);
 
-  const changeBoxValidByID = useCallback(
+    if (selectedPolygon) {
+      updateSelectedPolygon({ ...selectedPolygon, valid: !selectedPolygon.valid });
+      topViewInstance?.pointCloud2dOperation.setPolygonValidAndRender(selectedPolygon.id, true);
+    }
+  }, [changePolygonViewValid, selectedBox, selectedPolygon]);
+
+  const changeValidByID = useCallback(
     (id: string) => {
       const boxInfo = pointCloudBoxList.find((v) => v.id === id);
 
@@ -105,8 +112,9 @@ export const useSingleBox = () => {
 
         return newPointCloudBoxList;
       }
+      updatePolygonValidByID(id);
     },
-    [changePolygonViewValid, pointCloudBoxList],
+    [changePolygonViewValid, pointCloudBoxList, polygonList],
   );
 
   /** PointCloud select next/prev one */
@@ -142,7 +150,7 @@ export const useSingleBox = () => {
     selectedBox,
     updateSelectedBox,
     changeSelectedBoxValid,
-    changeBoxValidByID,
+    changeValidByID,
     selectNextBox: switchToNextBox,
     selectPrevBox,
     deletePointCloudBox,

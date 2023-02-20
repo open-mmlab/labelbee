@@ -161,7 +161,7 @@ const PointCloudTopView: React.FC<IProps> = ({
   const { setZoom } = useZoom();
 
   const { addPolygon, deletePolygon } = usePolygon();
-  const { deletePointCloudBox, changeBoxValidByID } = useSingleBox();
+  const { deletePointCloudBox, changeValidByID } = useSingleBox();
   const [zAxisLimit, setZAxisLimit] = useState<number>(10);
   const { t } = useTranslation();
   const pointCloudViews = usePointCloudViews();
@@ -242,11 +242,17 @@ const PointCloudTopView: React.FC<IProps> = ({
     });
 
     const validUpdate = (id: string) => {
-      const newPointCloudList = changeBoxValidByID(id);
-      // Update Highlight;
+      // UpdateData.
+      const newPointCloudList = changeValidByID(id);
+
+      // HighLight
       if (newPointCloudList) {
         ptCtx.syncAllViewPointCloudColor(newPointCloudList);
       }
+      if (ptCtx.polygonList.find(v => v.id === id)) {
+        ptCtx.topViewInstance?.pointCloud2dOperation.setPolygonValidAndRender(id, true);
+      }
+
     };
 
     TopView2dOperation.on('validUpdate', validUpdate);
@@ -254,7 +260,7 @@ const PointCloudTopView: React.FC<IProps> = ({
     return () => {
       TopView2dOperation.unbind('validUpdate', validUpdate);
     };
-  }, [ptCtx, size, currentData, pointCloudViews]);
+  }, [ptCtx, size, currentData, pointCloudViews, ptCtx.polygonList]);
 
   useEffect(() => {
     if (!size?.width || !ptCtx.topViewInstance) {
