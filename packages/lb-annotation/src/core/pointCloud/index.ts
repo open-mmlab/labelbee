@@ -258,15 +258,16 @@ export class PointCloud {
    * @param color
    */
   public generateBox(boxParams: IPointCloudBox, color = 0xffffff) {
-    let newColor = color;
-    if (this.config?.attributeList && this.config?.attributeList?.length > 0 && boxParams.attribute) {
-      newColor =
-        toolStyleConverter.getColorFromConfig(
-          { attribute: boxParams.attribute },
-          { ...this.config, attributeConfigurable: true },
-          {},
-        )?.hex ?? color;
-    }
+    const newColor = color;
+    // Temporarily turn the Box white
+    // if (this.config?.attributeList && this.config?.attributeList?.length > 0 && boxParams.attribute) {
+    //   newColor =
+    //     toolStyleConverter.getColorFromConfig(
+    //       { attribute: boxParams.attribute },
+    //       { ...this.config, attributeConfigurable: true },
+    //       {},
+    //     )?.hex ?? color;
+    // }
 
     this.AddBoxToSense(boxParams, newColor);
     this.render();
