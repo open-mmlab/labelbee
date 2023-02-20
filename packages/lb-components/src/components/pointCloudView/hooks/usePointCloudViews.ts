@@ -430,8 +430,6 @@ export const usePointCloudViews = () => {
     trackConfigurable?: boolean;
     zoom: number;
   }) => {
-    const newImgList = imgList as any[];
-
     const extraData = {
       attribute: topViewInstance.pointCloud2dOperation.defaultAttribute ?? '',
     };
@@ -439,7 +437,7 @@ export const usePointCloudViews = () => {
     if (trackConfigurable === true) {
       Object.assign(extraData, {
         trackID: PointCloudUtils.getNextTrackID({
-          imgList: newImgList,
+          imgList: [], // Just calculate by the pointCloudBoxList in current page.
           extraBoxList: pointCloudBoxList,
         }),
       });
