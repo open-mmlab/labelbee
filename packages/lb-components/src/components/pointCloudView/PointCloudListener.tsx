@@ -20,7 +20,7 @@ import { usePolygon } from './hooks/usePolygon';
 const { EPolygonPattern } = cTool;
 
 interface IProps extends IA2MapStateProps {
-  checkMode: boolean;
+  checkMode?: boolean;
 }
 
 const PointCloudListener: React.FC<IProps> = ({ currentData, config, checkMode }) => {
