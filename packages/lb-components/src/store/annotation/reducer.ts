@@ -743,19 +743,31 @@ export const annotationReducer = (
     case ANNOTATION_ACTIONS.BATCH_UPDATE_TRACK_ID: {
       const { id, newID, rangeIndex, imgList } = action.payload;
       const { imgIndex, onSubmit } = state;
+
+      // Record the updated list.
+      const updateImgList: Array<{ newInfo: IFileItem; imgIndex: number }> = [];
       const newImgList = imgList.map((v: IFileItem, i: number) => {
         if (MathUtils.isInRange(i, rangeIndex)) {
-          return {
+          const newInfo = {
             ...v,
             result: PointCloudUtils.batchUpdateTrackID({ id, newID, result: v.result }),
           };
+
+          updateImgList.push({
+            imgIndex: i,
+            newInfo,
+          });
+
+          return newInfo;
         }
         return v;
       });
 
       // Notify external data changes.
       if (onSubmit) {
-        onSubmit([newImgList[imgIndex]], ESubmitType.BatchUpdateTrackID, imgIndex, newImgList);
+        onSubmit([newImgList[imgIndex]], ESubmitType.BatchUpdateTrackID, imgIndex, newImgList, {
+          updateImgList,
+        });
       }
 
       return {
@@ -767,19 +779,30 @@ export const annotationReducer = (
     case ANNOTATION_ACTIONS.BATCH_UPDATE_RESULT_BY_TRACK_ID: {
       const { id, newData, rangeIndex } = action.payload;
       const { imgList, imgIndex, onSubmit } = state;
+      // Record the updated list.
+      const updateImgList: Array<{ newInfo: IFileItem; imgIndex: number }> = [];
       const newImgList = imgList.map((v, i) => {
         if (MathUtils.isInRange(i, rangeIndex)) {
-          return {
+          const newInfo = {
             ...v,
             result: PointCloudUtils.batchUpdateResultByTrackID({ id, newData, result: v.result }),
           };
+
+          updateImgList.push({
+            imgIndex: i,
+            newInfo,
+          });
+
+          return newInfo;
         }
         return v;
       });
 
       // Notify external data changes.
       if (onSubmit) {
-        onSubmit([newImgList[imgIndex]], ESubmitType.BatchUpdateTrackID, imgIndex, newImgList);
+        onSubmit([newImgList[imgIndex]], ESubmitType.BatchUpdateTrackID, imgIndex, newImgList, {
+          updateImgList,
+        });
       }
 
       return {
