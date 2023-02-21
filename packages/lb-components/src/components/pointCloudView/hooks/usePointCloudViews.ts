@@ -691,6 +691,7 @@ export const usePointCloudViews = () => {
         mainViewInstance?.generateBox(v);
       });
 
+      ptCtx.syncAllViewPointCloudColor(boxParamsList);
       ptCtx.setPointCloudResult(boxParamsList);
       ptCtx.setPolygonList(polygonList);
     } else {
