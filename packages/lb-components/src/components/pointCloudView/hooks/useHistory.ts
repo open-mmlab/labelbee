@@ -98,18 +98,19 @@ export const useHistory = () => {
       return;
     }
 
-    const { pointCloudBoxList: newPointCloudBoxList = [], polygonList: newPolygonList = [] } = params;
+    const { pointCloudBoxList: newPointCloudBoxList = [], polygonList: newPolygonList = [] } =
+      params;
 
     if (newPointCloudBoxList) {
       if (pointCloudBoxList.length !== newPointCloudBoxList.length) {
         setSelectedIDs();
       }
 
-      const deletePointCloudList = pointCloudBoxList.filter(
-        (v) => newPointCloudBoxList.findIndex((d) => d.id === v.id) >= 0,
+      const deletePointCloudList = pointCloudBoxList.filter((v) =>
+        newPointCloudBoxList.every((d) => d.id !== v.id),
       );
-      const addPointCloudList = newPointCloudBoxList.filter(
-        (v) => pointCloudBoxList.findIndex((d) => d.id !== v.id) >= 0,
+      const addPointCloudList = newPointCloudBoxList.filter((v) =>
+        pointCloudBoxList.every((d) => d.id !== v.id),
       );
 
       // Clear All Data
