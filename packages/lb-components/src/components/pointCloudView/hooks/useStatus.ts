@@ -4,7 +4,7 @@
  * @author Ron <ron.f.luo@gmail.com>
  */
 
-import { useContext, useState } from 'react';
+import { useContext } from 'react';
 import { PointCloudContext } from '../PointCloudContext';
 import { cTool } from '@labelbee/lb-annotation';
 import { useHistory } from './useHistory';
@@ -19,7 +19,8 @@ export const useStatus = () => {
     setPointCloudResult,
     setPolygonList,
     pointCloudPattern,
-    setPointCloudPattern
+    setPointCloudPattern,
+    syncAllViewPointCloudColor
   } = useContext(PointCloudContext);
   const { pushHistoryWithList } = useHistory();
 
@@ -35,6 +36,8 @@ export const useStatus = () => {
 
     topViewInstance?.pointCloud2dOperation.clearActiveStatus();
     topViewInstance?.pointCloud2dOperation.clearResult();
+    
+    syncAllViewPointCloudColor([]);
 
     // Add History
     pushHistoryWithList({ pointCloudBoxList: [], polygonList: [] });
