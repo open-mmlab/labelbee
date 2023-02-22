@@ -18,8 +18,9 @@ export const useStatus = () => {
     pointCloudBoxList,
     setPointCloudResult,
     setPolygonList,
+    pointCloudPattern,
+    setPointCloudPattern
   } = useContext(PointCloudContext);
-  const [pointCloudPattern, setPointCloudPattern] = useState(EToolName.Rect);
   const { pushHistoryWithList } = useHistory();
 
   // Clear All PointView Data

@@ -3,7 +3,7 @@ import { useRotate } from './hooks/useRotate';
 import { useBoxes } from './hooks/useBoxes';
 import { useSingleBox } from './hooks/useSingleBox';
 import React, { useContext, useEffect } from 'react';
-import { cTool, AttributeUtils, CommonToolUtils } from '@labelbee/lb-annotation';
+import { cTool, AttributeUtils, CommonToolUtils, EToolName } from '@labelbee/lb-annotation';
 import { message } from 'antd';
 import { connect } from 'react-redux';
 import { a2MapStateToProps, IA2MapStateProps } from '@/store/annotation/map';
@@ -16,6 +16,7 @@ import { useHistory } from './hooks/useHistory';
 import { useAttribute } from './hooks/useAttribute';
 import { useConfig } from './hooks/useConfig';
 import { usePolygon } from './hooks/usePolygon';
+import { useTranslation } from 'react-i18next';
 
 const { EPolygonPattern } = cTool;
 
@@ -25,9 +26,14 @@ interface IProps extends IA2MapStateProps {
 
 const PointCloudListener: React.FC<IProps> = ({ currentData, config, checkMode, configString }) => {
   const ptCtx = useContext(PointCloudContext);
-  const { changeSelectedBoxValid, selectNextBox, selectPrevBox, updateSelectedBox } =
-    useSingleBox();
-  const { clearAllResult } = useStatus();
+  const {
+    changeSelectedBoxValid,
+    selectNextBox,
+    selectPrevBox,
+    updateSelectedBox,
+    deleteSelectedPointCloudBoxAndPolygon,
+  } = useSingleBox();
+  const { clearAllResult, updatePointCloudPattern } = useStatus();
   const basicInfo = jsonParser(currentData.result);
   const { copySelectedBoxes, pasteSelectedBoxes, copiedBoxes } = useBoxes();
   const { toolInstanceRef } = useCustomToolInstance({ basicInfo });
@@ -37,6 +43,7 @@ const PointCloudListener: React.FC<IProps> = ({ currentData, config, checkMode, 
   const { syncThreeViewsAttribute } = useAttribute();
   const { syncAllViewsConfig, reRenderTopViewRange } = useConfig();
   const { selectedPolygon } = usePolygon();
+  const { t } = useTranslation();
 
   const keydownEvents = (lowerCaseKey: string, e: KeyboardEvent) => {
     const { topViewInstance, mainViewInstance } = ptCtx;
@@ -68,16 +75,18 @@ const PointCloudListener: React.FC<IProps> = ({ currentData, config, checkMode, 
       case 'u':
         {
           // U , change TopOpereation Pattern
-          const newPattern =
+          const newToolName =
             TopPointCloudPolygonOperation.pattern === EPolygonPattern.Normal
-              ? EPolygonPattern.Rect
-              : EPolygonPattern.Normal;
-          TopPointCloudPolygonOperation.setPattern(newPattern);
+              ? EToolName.Rect
+              : EToolName.Polygon;
+          updatePointCloudPattern(newToolName);
+
+          // Tips
           const POLYGON_PATTERN = {
-            [EPolygonPattern.Normal]: 'Normal Pattern',
-            [EPolygonPattern.Rect]: 'Rect Pattern',
+            [EToolName.Polygon]: t('PolygonPattern'),
+            [EToolName.Rect]: t('RectPattern'),
           };
-          message.success(`Change Pattern to ${POLYGON_PATTERN[newPattern]} successfully`);
+          message.success(t('ChangePatternMsg', { pattern: POLYGON_PATTERN[newToolName] }));
 
           // Clear Status
           TopPointCloudPolygonOperation.clearActiveStatus();
@@ -110,6 +119,10 @@ const PointCloudListener: React.FC<IProps> = ({ currentData, config, checkMode, 
 
       case 'f':
         changeSelectedBoxValid();
+        break;
+
+      case 'delete':
+        deleteSelectedPointCloudBoxAndPolygon();
         break;
 
       default: {

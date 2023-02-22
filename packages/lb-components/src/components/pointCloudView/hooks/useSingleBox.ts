@@ -23,7 +23,8 @@ export const useSingleBox = () => {
     syncAllViewPointCloudColor,
     polygonList,
   } = useContext(PointCloudContext);
-  const { selectedPolygon, updateSelectedPolygon, updatePolygonValidByID } = usePolygon();
+  const { selectedPolygon, updateSelectedPolygon, updatePolygonValidByID, deletePolygon } =
+    usePolygon();
 
   const { pushHistoryWithList } = useHistory();
 
@@ -146,6 +147,21 @@ export const useSingleBox = () => {
     syncAllViewPointCloudColor(newPointCloudList);
   };
 
+  /**
+   * Delete all polygon by hotkey.
+   */
+  const deleteSelectedPointCloudBoxAndPolygon = () => {
+    if (selectedBox) {
+      deletePointCloudBox(selectedBox.info.id);
+      topViewInstance?.pointCloud2dOperation.deletePolygon(selectedBox.info.id);
+    }
+
+    if (selectedPolygon) {
+      deletePolygon(selectedPolygon.id);
+      topViewInstance?.pointCloud2dOperation.deletePolygon(selectedPolygon.id);
+    }
+  };
+
   return {
     selectedBox,
     updateSelectedBox,
@@ -154,5 +170,6 @@ export const useSingleBox = () => {
     selectNextBox: switchToNextBox,
     selectPrevBox,
     deletePointCloudBox,
+    deleteSelectedPointCloudBoxAndPolygon,
   };
 };

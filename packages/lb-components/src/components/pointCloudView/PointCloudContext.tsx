@@ -1,5 +1,10 @@
 import { IPointCloudBox, IPointCloudBoxList, IPolygonData } from '@labelbee/lb-utils';
-import { PointCloud, PointCloudAnnotation, ActionsHistory } from '@labelbee/lb-annotation';
+import {
+  PointCloud,
+  PointCloudAnnotation,
+  ActionsHistory,
+  EToolName,
+} from '@labelbee/lb-annotation';
 import React, { useMemo, useRef, useState } from 'react';
 
 interface IPointCloudContextInstances {
@@ -38,6 +43,9 @@ export interface IPointCloudContext extends IPointCloudContextInstances {
 
   defaultAttribute: string;
   setDefaultAttribute: (defaultAttribute: string) => void;
+
+  pointCloudPattern: EToolName.Rect | EToolName.Polygon;
+  setPointCloudPattern: (toolName: EToolName.Rect | EToolName.Polygon) => void;
 }
 
 export const PointCloudContext = React.createContext<IPointCloudContext>({
@@ -67,6 +75,9 @@ export const PointCloudContext = React.createContext<IPointCloudContext>({
 
   defaultAttribute: '',
   setDefaultAttribute: () => {},
+
+  pointCloudPattern: EToolName.Rect,
+  setPointCloudPattern: () => {},
 });
 
 export const PointCloudProvider: React.FC<{}> = ({ children }) => {
@@ -80,6 +91,9 @@ export const PointCloudProvider: React.FC<{}> = ({ children }) => {
   const [backViewInstance, setBackViewInstance] = useState<PointCloudAnnotation>();
   const [mainViewInstance, setMainViewInstance] = useState<PointCloud>();
   const [defaultAttribute, setDefaultAttribute] = useState('');
+  const [pointCloudPattern, setPointCloudPattern] = useState<EToolName.Rect | EToolName.Polygon>(
+    EToolName.Rect,
+  );
   const history = useRef(new ActionsHistory()).current;
 
   const selectedID = useMemo(() => {
@@ -144,6 +158,7 @@ export const PointCloudProvider: React.FC<{}> = ({ children }) => {
               resolve({ color });
             }
           });
+          // TODO： Sync sideView & backView Color.
         });
       });
     };
@@ -176,6 +191,8 @@ export const PointCloudProvider: React.FC<{}> = ({ children }) => {
       syncAllViewPointCloudColor,
       defaultAttribute,
       setDefaultAttribute,
+      pointCloudPattern,
+      setPointCloudPattern,
     };
   }, [
     valid,
@@ -188,6 +205,7 @@ export const PointCloudProvider: React.FC<{}> = ({ children }) => {
     mainViewInstance,
     zoom,
     defaultAttribute,
+    pointCloudPattern,
   ]);
 
   return <PointCloudContext.Provider value={ptCtx}>{children}</PointCloudContext.Provider>;
