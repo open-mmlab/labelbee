@@ -87,7 +87,7 @@ export const useHistory = () => {
     pointCloudBoxList: IPointCloudBoxList;
     polygonList: IPolygonData[];
   }) => {
-    history.initRecord([{ pointCloudBoxList, polygonList }], true);
+    history.initRecord({ pointCloudBoxList, polygonList }, true);
   };
 
   const updatePointCloud = (params?: {
