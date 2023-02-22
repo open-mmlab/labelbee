@@ -23,7 +23,7 @@ interface IProps extends IA2MapStateProps {
   checkMode?: boolean;
 }
 
-const PointCloudListener: React.FC<IProps> = ({ currentData, config, checkMode }) => {
+const PointCloudListener: React.FC<IProps> = ({ currentData, config, checkMode, configString }) => {
   const ptCtx = useContext(PointCloudContext);
   const { changeSelectedBoxValid, selectNextBox, selectPrevBox, updateSelectedBox } =
     useSingleBox();
@@ -183,7 +183,7 @@ const PointCloudListener: React.FC<IProps> = ({ currentData, config, checkMode }
 
   useEffect(() => {
     syncAllViewsConfig(config);
-  }, [config]);
+  }, [configString]);
 
   useEffect(() => {
     if (config?.radius) {

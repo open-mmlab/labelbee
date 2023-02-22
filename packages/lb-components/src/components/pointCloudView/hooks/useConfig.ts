@@ -9,14 +9,22 @@ export const useConfig = () => {
   const syncAllViewsConfig = (config: IPointCloudConfig) => {
     [topViewInstance, sideViewInstance, backViewInstance].forEach((instance) => {
       instance?.updateConfig(config);
+      
+      /**
+       * If update the config, needs to update defaultAttribute.
+       */
+      const defaultAttribute = config?.attributeList?.[0]?.value;
+      if (defaultAttribute) {
+        instance?.pointCloud2dOperation.setDefaultAttribute(defaultAttribute);
+      }
     });
     mainViewInstance?.setConfig(config);
   };
-  
+
   const reRenderTopViewRange = (radius: number) => {
     topViewInstance?.pointCloudInstance?.generateRange?.(radius);
     topViewInstance?.pointCloudInstance?.render();
-  }
+  };
 
   return {
     syncAllViewsConfig,
