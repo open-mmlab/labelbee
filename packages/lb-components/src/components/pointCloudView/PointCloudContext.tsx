@@ -35,6 +35,9 @@ export interface IPointCloudContext extends IPointCloudContextInstances {
   history: ActionsHistory; // Operation History
 
   syncAllViewPointCloudColor: (newPointCloudList?: IPointCloudBox[]) => void;
+
+  defaultAttribute: string;
+  setDefaultAttribute: (defaultAttribute: string) => void;
 }
 
 export const PointCloudContext = React.createContext<IPointCloudContext>({
@@ -61,6 +64,9 @@ export const PointCloudContext = React.createContext<IPointCloudContext>({
   setZoom: () => {},
   history: new ActionsHistory(),
   syncAllViewPointCloudColor: () => {},
+
+  defaultAttribute: '',
+  setDefaultAttribute: () => {},
 });
 
 export const PointCloudProvider: React.FC<{}> = ({ children }) => {
@@ -73,6 +79,7 @@ export const PointCloudProvider: React.FC<{}> = ({ children }) => {
   const [sideViewInstance, setSideViewInstance] = useState<PointCloudAnnotation>();
   const [backViewInstance, setBackViewInstance] = useState<PointCloudAnnotation>();
   const [mainViewInstance, setMainViewInstance] = useState<PointCloud>();
+  const [defaultAttribute, setDefaultAttribute] = useState('');
   const history = useRef(new ActionsHistory()).current;
 
   const selectedID = useMemo(() => {
@@ -167,6 +174,8 @@ export const PointCloudProvider: React.FC<{}> = ({ children }) => {
       setZoom,
       history,
       syncAllViewPointCloudColor,
+      defaultAttribute,
+      setDefaultAttribute,
     };
   }, [
     valid,
@@ -178,6 +187,7 @@ export const PointCloudProvider: React.FC<{}> = ({ children }) => {
     backViewInstance,
     mainViewInstance,
     zoom,
+    defaultAttribute,
   ]);
 
   return <PointCloudContext.Provider value={ptCtx}>{children}</PointCloudContext.Provider>;

@@ -91,8 +91,6 @@ export class PointCloudAnnotation implements IPointCloudAnnotationOperation {
     polygonOperation.eventBinding();
     polygonOperation.setPattern(EPolygonPattern.Rect);
 
-    // Set the DefaultAttribute.
-    polygonOperation.setDefaultAttribute(config?.attributeList?.[0]?.value);
 
     canvasScheduler.createCanvas(polygonOperation.canvas, { size });
 

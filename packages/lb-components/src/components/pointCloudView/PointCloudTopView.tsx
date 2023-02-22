@@ -216,7 +216,7 @@ const PointCloudTopView: React.FC<IProps> = ({
         size,
         imgList,
         trackConfigurable: config.trackConfigurable,
-        zoom
+        zoom,
       });
     });
 
@@ -249,10 +249,9 @@ const PointCloudTopView: React.FC<IProps> = ({
       if (newPointCloudList) {
         ptCtx.syncAllViewPointCloudColor(newPointCloudList);
       }
-      if (ptCtx.polygonList.find(v => v.id === id)) {
+      if (ptCtx.polygonList.find((v) => v.id === id)) {
         ptCtx.topViewInstance?.pointCloud2dOperation.setPolygonValidAndRender(id, true);
       }
-
     };
 
     TopView2dOperation.on('validUpdate', validUpdate);
@@ -265,6 +264,15 @@ const PointCloudTopView: React.FC<IProps> = ({
   useEffect(() => {
     if (!size?.width || !ptCtx.topViewInstance) {
       return;
+    }
+    /**
+     * Init Config
+     *
+     * 1. Update defaultAttribute by first attribute;
+     *  */
+    const defaultAttribute = config?.attributeList?.[0]?.value;
+    if (defaultAttribute) {
+      ptCtx.topViewInstance.pointCloud2dOperation.setDefaultAttribute(defaultAttribute);
     }
 
     // 1. Update Size
