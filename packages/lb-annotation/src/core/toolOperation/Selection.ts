@@ -58,9 +58,15 @@ class Selection {
    * Update selectedIDs:
    * Remove selectedID when selectedIDs includes
    * Append selectedID when selectedIDs not includes
+   * SelectedID is
    * @param selectedID
    */
-  public updateSelectedIDs(selectedID: SelectedID) {
+  public updateSelectedIDs(selectedID?: SelectedID) {
+    if (!selectedID) {
+      this._selectedIDs = [];
+      return;
+    }
+
     if (this.selectedIDs.includes(selectedID)) {
       this.selectedIDs = this.selectedIDs.filter((id) => id !== selectedID);
     } else {
@@ -79,6 +85,17 @@ class Selection {
     });
 
     this.setResultAndRender(updatedDataList);
+  }
+
+  public updateSelectedGraphWithOffsetProps(offset: { x: number; num }) {
+    // this.dataList.map(i => {
+    //   if (this.isIdSelected(i.id)) {
+    //     return {
+    //       ...i,
+    //       i: i.x +=
+    //     }
+    //   }
+    // })
   }
 
   public selectAll() {
@@ -118,7 +135,7 @@ class Selection {
     // todo: Update tool instance and render
   }
 
-  public isSelectedID(id: string) {
+  public isIdSelected(id: string) {
     return this.selectedIDs.includes(id);
   }
 }
