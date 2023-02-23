@@ -315,7 +315,7 @@ const PointCloudListener: React.FC<IProps> = ({ currentData, config, checkMode, 
   useEffect(() => {
     const toolInstance = ptCtx.topViewInstance?.pointCloud2dOperation;
 
-    if (!toolInstance) {
+    if (!toolInstance || checkMode) {
       return;
     }
     // TopViewOperation Emitter
