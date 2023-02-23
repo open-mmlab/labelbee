@@ -34,8 +34,8 @@ const PointCloud3DContext = React.createContext<{
   reset3DView: () => void;
 }>({
   isActive: false,
-  setTarget3DView: () => { },
-  reset3DView: () => { },
+  setTarget3DView: () => {},
+  reset3DView: () => {},
 });
 
 const PointCloudViewIcon = ({
@@ -125,13 +125,14 @@ const PointCloud3D: React.FC<IA2MapStateProps> = ({ currentData, config }) => {
           bottom: -size.height / 2,
           near: 100,
           far: -100,
-        }
+        };
 
         // Need to be showed
         pointCloud = new PointCloud({
           container: ref.current,
           isOrthographicCamera: true,
           orthographicParams,
+          config,
         });
         ptCtx.setMainViewInstance(pointCloud);
       }
@@ -153,7 +154,6 @@ const PointCloud3D: React.FC<IA2MapStateProps> = ({ currentData, config }) => {
         ptCtx.setPointCloudResult(boxParamsList);
         ptCtx.setPointCloudValid(jsonParser(currentData.result)?.valid);
       }
-
     }
   }, [currentData, size]);
 
