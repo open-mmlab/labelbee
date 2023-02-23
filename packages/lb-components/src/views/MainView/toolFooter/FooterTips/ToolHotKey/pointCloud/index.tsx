@@ -23,7 +23,6 @@ import {
   selectedPolygon,
   changePolygonAttribute,
   deletePolygon,
-  keepLine,
   insertPolygonPoint,
   deletePolygonPoint,
 } from '../polygon';
@@ -189,7 +188,6 @@ const pointCloudShortCutTable_POLYGON: IShortcut[] = [
   selectedPolygon,
   changePolygonAttribute,
   deletePolygon,
-  keepLine,
   insertPolygonPoint,
   deletePolygonPoint,
 ];
