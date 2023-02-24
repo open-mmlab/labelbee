@@ -87,17 +87,6 @@ class Selection {
     this.setResultAndRender(updatedDataList);
   }
 
-  public updateSelectedGraphWithOffsetProps(offset: { x: number; num }) {
-    // this.dataList.map(i => {
-    //   if (this.isIdSelected(i.id)) {
-    //     return {
-    //       ...i,
-    //       i: i.x +=
-    //     }
-    //   }
-    // })
-  }
-
   public selectAll() {
     this.selectedIDs = this.visibleDataList.map((i) => i.id);
     this.toolInstance.render();

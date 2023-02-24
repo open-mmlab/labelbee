@@ -1,4 +1,5 @@
 import _ from 'lodash';
+import { Coord, distance } from '@turf/turf';
 import MathUtils from '@/utils/MathUtils';
 import AxisUtils from '@/utils/tool/AxisUtils';
 import RectUtils from '@/utils/tool/RectUtils';
@@ -132,6 +133,10 @@ class RectOperation extends BasicToolOperation {
 
   get selectedRectID() {
     return this.selectedIDs.length === 1 ? this.selectedIDs[0] : undefined;
+  }
+
+  get selectedID() {
+    return this.selectedRectID;
   }
 
   public get selectedRect() {
@@ -670,15 +675,15 @@ class RectOperation extends BasicToolOperation {
         const basicWidth = this.basicResult.width * this.zoom;
         const basicHeight = this.basicResult.height * this.zoom;
 
-        if (
-          this.dragInfo.dragTarget !== EDragTarget.Plane &&
-          (selectedRect.x < basicX - 0.01 ||
-            selectedRect.y < basicY - 0.01 ||
-            selectedRect.width > basicX + basicWidth - selectedRect.x + 0.01 ||
-            selectedRect.height > basicY + basicHeight - selectedRect.y + 0.01)
-        ) {
-          return;
-        }
+        // if (
+        //   this.dragInfo.dragTarget !== EDragTarget.Plane &&
+        //   (selectedRect.x < basicX - 0.01 ||
+        //     selectedRect.y < basicY - 0.01 ||
+        //     selectedRect.width > basicX + basicWidth - selectedRect.x + 0.01 ||
+        //     selectedRect.height > basicY + basicHeight - selectedRect.y + 0.01)
+        // ) {
+        //   return;
+        // }
 
         if (selectedRect.x < basicX) {
           selectedRect.x = basicX;
@@ -689,9 +694,9 @@ class RectOperation extends BasicToolOperation {
 
         if (selectedRect.width > basicX + basicWidth - selectedRect.x) {
           switch (this.dragInfo.dragTarget) {
-            case EDragTarget.Plane:
-              selectedRect.x = basicX + basicWidth - width;
-              break;
+            // case EDragTarget.Plane:
+            //   selectedRect.x = basicX + basicWidth - width;
+            //   break;
 
             case EDragTarget.Point:
             case EDragTarget.Line:
@@ -708,9 +713,9 @@ class RectOperation extends BasicToolOperation {
 
         if (selectedRect.height > basicY + basicHeight - selectedRect.y) {
           switch (this.dragInfo.dragTarget) {
-            case EDragTarget.Plane:
-              selectedRect.y = basicY + basicHeight - height;
-              break;
+            // case EDragTarget.Plane:
+            //   selectedRect.y = basicY + basicHeight - height;
+            //   break;
 
             default: {
               break;
@@ -731,15 +736,15 @@ class RectOperation extends BasicToolOperation {
           switch (this.dragInfo.dragTarget) {
             // 仅处理翻转的偏移
 
-            case EDragTarget.Plane:
-              if (selectedRect.x + selectedRect.width > this.imgInfo?.width) {
-                selectedRect.x = this.imgInfo.width - width;
-              }
+            // case EDragTarget.Plane:
+            //   if (selectedRect.x + selectedRect.width > this.imgInfo?.width) {
+            //     selectedRect.x = this.imgInfo.width - width;
+            //   }
 
-              if (selectedRect.y + selectedRect.height > this.imgInfo?.height) {
-                selectedRect.y = this.imgInfo.height - height;
-              }
-              break;
+            //   if (selectedRect.y + selectedRect.height > this.imgInfo?.height) {
+            //     selectedRect.y = this.imgInfo.height - height;
+            //   }
+            //   break;
 
             default: {
               if (
@@ -1108,12 +1113,17 @@ class RectOperation extends BasicToolOperation {
 
     if (this.drawingRect) {
       // 取消绘制
-
       this.drawingRect = undefined;
       this.firstClickCoord = undefined;
     } else {
       // 选中操作
-      if (this.selectedRectID !== hoverRectID) {
+      if (
+        this.dragInfo?.dragStartCoord &&
+        distance(
+          this.dragInfo?.dragStartCoord as unknown as Coord,
+          this.getCoordinateUnderZoom(e) as unknown as Coord,
+        ) > 3
+      ) {
         this.dblClickListener.clearRightDblClick();
       }
 
@@ -1188,12 +1198,18 @@ class RectOperation extends BasicToolOperation {
 
   public onRightDblClick(e: MouseEvent) {
     super.onRightDblClick(e);
-
     const hoverRectID = this.getHoverRectID(e);
-    if (this.selectedRectID && this.selectedRectID === hoverRectID) {
-      // 删除
-      this.deleteRect(hoverRectID);
+
+    // 删除选中
+    if (this.selection.isIdSelected(hoverRectID)) {
+      this.deleteSelectedRect();
     }
+  }
+
+  public deleteSelectedRect() {
+    this.selectedRects.forEach((rect) => {
+      this.deleteRect(rect.id);
+    });
   }
 
   public onKeyDown(e: KeyboardEvent) {
@@ -1231,7 +1247,7 @@ class RectOperation extends BasicToolOperation {
         break;
 
       case EKeyCode.Delete:
-        this.deleteRect(this.selectedRectID);
+        this.deleteSelectedRect();
         break;
 
       case EKeyCode.Tab: {
@@ -1672,11 +1688,10 @@ class RectOperation extends BasicToolOperation {
       this.emit('changeAttributeSidebar');
 
       // 如有选中目标，则需更改当前选中的属性
-      const { selectedRect } = this;
-      if (selectedRect) {
+      if (this.selectedRects) {
         this.setRectList(
           this.rectList.map((v) => {
-            if (v.id === selectedRect.id) {
+            if (this.selection.isIdSelected(v.id)) {
               return {
                 ...v,
                 attribute: this.defaultAttribute,
