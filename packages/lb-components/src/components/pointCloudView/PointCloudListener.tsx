@@ -115,6 +115,7 @@ const PointCloudListener: React.FC<IProps> = ({ currentData, config, checkMode, 
           break;
         }
         selectNextBox();
+        e.preventDefault();
         break;
 
       case 'f':
