@@ -163,6 +163,13 @@ const PointCloud3D: React.FC<IA2MapStateProps> = ({ currentData, config }) => {
   useEffect(() => {
     if (selectedBox) {
       setTarget3DView(EPerspectiveView.Top);
+
+
+      /**
+       * 3DView's zoom synchronizes with topView' zoom. 
+       */
+      const zoom = ptCtx.topViewInstance?.pointCloudInstance?.camera.zoom ?? 1;
+      ptCtx.mainViewInstance?.updateCameraZoom(zoom);
     }
   }, [selectedBox]);
 
