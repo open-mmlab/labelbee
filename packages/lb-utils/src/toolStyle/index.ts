@@ -190,6 +190,14 @@ class ToolStyleConverter {
   }
 }
 
+/**
+ * Create ColorMap - JET
+ * 
+ * Different ranges of colors can be obtained with different indexes.
+ * 
+ * https://docs.opencv.org/3.4/d3/d50/group__imgproc__colormap.html
+ * @returns 
+ */
 function createColorMapJet() {
   let s;
   const p = new Array(256).fill('').map((v) => new Array(3).fill(''));

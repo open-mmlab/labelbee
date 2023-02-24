@@ -4,12 +4,11 @@
  * @author Glenfiddish <edwinlee0927@hotmail.com>
  * @file Refer to https://github.com/mrdoob/three.js/blob/dev/examples/jsm/loaders/PCDLoader.js
  * @date 2022-06-14
- * @update Add genColorByCoord for rendering multiple colors based on the z-axis
+ * @update Add genColorByCoord & genColorByZ for rendering multiple colors based on the z-axis
  */
 
 import { BufferGeometry, FileLoader, Float32BufferAttribute, Loader, LoaderUtils, Points, PointsMaterial } from 'three';
 import { COLOR_MAP_JET } from '@labelbee/lb-utils';
-
 class PCDLoader extends Loader {
   constructor(manager) {
     super(manager);
@@ -179,10 +178,9 @@ class PCDLoader extends Loader {
     const position = [];
     const normal = [];
     const color = [];
-    let maxZ = -Number.MAX_SAFE_INTEGER;
-    let minZ = Number.MAX_SAFE_INTEGER;
 
     // ascii
+
     if (PCDheader.data === 'ascii') {
       const { offset } = PCDheader;
       const pcdData = textData.slice(PCDheader.headerLen);
@@ -192,16 +190,36 @@ class PCDLoader extends Loader {
         if (lines[i] === '') continue;
 
         const line = lines[i].split(' ');
-        let z;
+
         if (offset.x !== undefined) {
           position.push(parseFloat(line[offset.x]));
           position.push(parseFloat(line[offset.y]));
-          z = parseFloat(line[offset.z]);
-          position.push(z);
+          position.push(parseFloat(line[offset.z]));
         }
 
-        if (this.genColorByCoord) {
-          const pdColor = this.genColorByCoord(
+        // if (offset.rgb !== undefined) {
+        //   const rgb_field_index = PCDheader.fields.findIndex((field) => field === 'rgb');
+        //   const rgb_type = PCDheader.type[rgb_field_index];
+
+        //   const float = parseFloat(line[offset.rgb]);
+        //   let rgb = float;
+
+        //   if (rgb_type === 'F') {
+        //     // treat float values as int
+        //     // https://github.com/daavoo/pyntcloud/pull/204/commits/7b4205e64d5ed09abe708b2e91b615690c24d518
+        //     const farr = new Float32Array(1);
+        //     farr[0] = float;
+        //     rgb = new Int32Array(farr.buffer)[0];
+        //   }
+
+        //   const r = (rgb >> 16) & 0x0000ff;
+        //   const g = (rgb >> 8) & 0x0000ff;
+        //   const b = (rgb >> 0) & 0x0000ff;
+        //   color.push(r / 255, g / 255, b / 255);
+        // }
+
+        if (this.genColorByZ) {
+          const pdColor = this.genColorByZ(
             parseFloat(line[offset.x]),
             parseFloat(line[offset.y]),
             parseFloat(line[offset.z]),
@@ -213,17 +231,7 @@ class PCDLoader extends Loader {
         if (offset.normal_x !== undefined) {
           normal.push(parseFloat(line[offset.normal_x]));
           normal.push(parseFloat(line[offset.normal_y]));
-          z = parseFloat(line[offset.normal_z]);
-          normal.push(z);
-        }
-
-        if (z) {
-          if (z < minZ) {
-            minZ = z;
-          }
-          if (z > maxZ) {
-            maxZ = z;
-          }
+          normal.push(parseFloat(line[offset.normal_z]));
         }
       }
     }
@@ -247,12 +255,10 @@ class PCDLoader extends Loader {
       const { offset } = PCDheader;
 
       for (let i = 0; i < PCDheader.points; i++) {
-        let z;
         if (offset.x !== undefined) {
           position.push(dataview.getFloat32(PCDheader.points * offset.x + PCDheader.size[0] * i, this.littleEndian));
           position.push(dataview.getFloat32(PCDheader.points * offset.y + PCDheader.size[1] * i, this.littleEndian));
-          z = dataview.getFloat32(PCDheader.points * offset.z + PCDheader.size[2] * i, this.littleEndian);
-          position.push(z);
+          position.push(dataview.getFloat32(PCDheader.points * offset.z + PCDheader.size[2] * i, this.littleEndian));
         }
 
         // if (offset.rgb !== undefined) {
@@ -268,12 +274,13 @@ class PCDLoader extends Loader {
           normal.push(
             dataview.getFloat32(PCDheader.points * offset.normal_y + PCDheader.size[5] * i, this.littleEndian),
           );
-          z = dataview.getFloat32(PCDheader.points * offset.normal_z + PCDheader.size[6] * i, this.littleEndian);
-          normal.push(z);
+          normal.push(
+            dataview.getFloat32(PCDheader.points * offset.normal_z + PCDheader.size[6] * i, this.littleEndian),
+          );
         }
 
-        if (this.genColorByCoord) {
-          const pdColor = this.genColorByCoord(
+        if (this.genColorByZ) {
+          const pdColor = this.genColorByZ(
             dataview.getFloat32(PCDheader.points * offset.x + PCDheader.size[0] * i, this.littleEndian),
             dataview.getFloat32(PCDheader.points * offset.y + PCDheader.size[0] * i, this.littleEndian),
             dataview.getFloat32(PCDheader.points * offset.z + PCDheader.size[0] * i, this.littleEndian),
@@ -281,30 +288,20 @@ class PCDLoader extends Loader {
           const pdColorUnit8 = pdColor.map((hex) => hex / 255);
           color.push(...pdColorUnit8);
         }
-
-        if (z) {
-          if (z < minZ) {
-            minZ = z;
-          }
-          if (z > maxZ) {
-            maxZ = z;
-          }
-        }
       }
     }
 
     // binary
+
     if (PCDheader.data === 'binary') {
       const dataview = new DataView(data, PCDheader.headerLen);
       const { offset } = PCDheader;
 
       for (let i = 0, row = 0; i < PCDheader.points; i++, row += PCDheader.rowSize) {
-        let z;
         if (offset.x !== undefined) {
           position.push(dataview.getFloat32(row + offset.x, this.littleEndian));
           position.push(dataview.getFloat32(row + offset.y, this.littleEndian));
-          z = dataview.getFloat32(row + offset.z, this.littleEndian);
-          position.push(z);
+          position.push(dataview.getFloat32(row + offset.z, this.littleEndian));
         }
 
         // if (offset.rgb !== undefined) {
@@ -316,29 +313,15 @@ class PCDLoader extends Loader {
         if (offset.normal_x !== undefined) {
           normal.push(dataview.getFloat32(row + offset.normal_x, this.littleEndian));
           normal.push(dataview.getFloat32(row + offset.normal_y, this.littleEndian));
-          z = dataview.getFloat32(row + offset.normal_z, this.littleEndian);
-          normal.push(z);
+          normal.push(dataview.getFloat32(row + offset.normal_z, this.littleEndian));
         }
-        if (z) {
-          if (z < minZ) {
-            minZ = z;
-          }
-          if (z > maxZ) {
-            maxZ = z;
-          }
-        }
-      }
 
-      for (let i = 0, row = 0; i < PCDheader.points; i++, row += PCDheader.rowSize) {
         if (this.genColorByZ) {
-          const pdColor = this.genColorByZ({
-            x: dataview.getFloat32(row + offset.x, this.littleEndian),
-            y: dataview.getFloat32(row + offset.y, this.littleEndian),
-            z: dataview.getFloat32(row + offset.z, this.littleEndian),
-            minZ,
-            maxZ,
-          });
-
+          const pdColor = this.genColorByZ(
+            dataview.getFloat32(row + offset.x, this.littleEndian),
+            dataview.getFloat32(row + offset.y, this.littleEndian),
+            dataview.getFloat32(row + offset.z, this.littleEndian),
+          );
           const pdColorUnit8 = pdColor.map((hex) => hex / 255);
           color.push(...pdColorUnit8);
         }
@@ -388,15 +371,35 @@ class PCDLoader extends Loader {
   }
 
   // rendering multiple colors based on the z-axis
-  genColorByZ({ x, y, z, minZ, maxZ }) {
-    const L = maxZ - minZ;
-
+  genColorByZ(x, y, z) {
     // 1. JET
-    const index = Math.floor(((z - minZ) / L) * 255);
-    const color = COLOR_MAP_JET[index];
+    const index = getIndex(z);
 
+    const color = COLOR_MAP_JET[index];
     return [color[0], color[1], color[2]];
   }
+}
+
+/**
+ * Generate index with a fixed range.
+ *
+ * @param {*} z
+ * @returns
+ */
+function getIndex(z) {
+  const minZ = -7;
+  const maxZ = 3;
+  const len = maxZ - minZ;
+
+  if (z < minZ) {
+    z = minZ;
+  }
+
+  if (z > maxZ) {
+    z = maxZ;
+  }
+
+  return Math.floor(((z - minZ) / len) * 255);
 }
 
 export { PCDLoader };

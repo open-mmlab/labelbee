@@ -1,3 +1,25 @@
+/**
+ * Generate index with a fixed range.
+ *
+ * @param {*} z
+ * @returns
+ */
+function getIndex(z) {
+  const minZ = -7;
+  const maxZ = 3;
+  const len = maxZ - minZ;
+
+  if (z < minZ) {
+    z = minZ;
+  }
+
+  if (z > maxZ) {
+    z = maxZ;
+  }
+
+  return Math.floor(((z - minZ) / len) * 255);
+}
+
 // COLOR_MAP_JET
 function createColorMapJet() {
   let s;
@@ -105,19 +127,22 @@ onmessage = function onmessage(e) {
   const { position: points, color, cuboidList, colorList } = e.data;
   let num = 0;
 
-  let maxZ = -Number.MAX_SAFE_INTEGER;
-  let minZ = Number.MAX_SAFE_INTEGER;
-  for (let i = 0; i < points.length; i += 3) {
-    const z = points[i + 2];
-    if (z) {
-      if (z < minZ) {
-        minZ = z;
-      }
-      if (z > maxZ) {
-        maxZ = z;
-      }
-    }
-  }
+  /**
+   * Temporary closure of range judgment
+   */
+  // let maxZ = -Number.MAX_SAFE_INTEGER;
+  // let minZ = Number.MAX_SAFE_INTEGER;
+  // for (let i = 0; i < points.length; i += 3) {
+  //   const z = points[i + 2];
+  //   if (z) {
+  //     if (z < minZ) {
+  //       minZ = z;
+  //     }
+  //     if (z > maxZ) {
+  //       maxZ = z;
+  //     }
+  //   }
+  // }
 
   //  Loop to determine if it is in range
   for (let i = 0; i < points.length; i += 3) {
@@ -150,13 +175,9 @@ onmessage = function onmessage(e) {
       color[i + 1] = g;
       color[i + 2] = b;
     } else {
-      // // DEFAULT COLOR RENDERc
+      // // DEFAULT COLOR RENDER
       // Recover the originPoint
-
-      // const [r, g, b] = PointCloudUtils.genColorByZ({ z, minZ, maxZ });
-      const L = maxZ - minZ;
-
-      const index = Math.floor(((z - minZ) / L) * 255);
+      const index = getIndex(z);
       const newColor = COLOR_MAP_JET[index];
       const [r, g, b] = newColor;
       color[i] = r / 255;
