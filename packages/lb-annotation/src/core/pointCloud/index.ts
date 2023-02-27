@@ -90,6 +90,15 @@ export class PointCloud {
 
   private showDirection: boolean = true; // Whether to display the direction of box
 
+  private currentPCDSrc?: string; // Record the src of PointCloud
+
+  /**
+   * Record the src of Highlight PCD.
+   *
+   * Avoiding src error problems caused by asynchronous
+   */
+  private highlightPCDSrc?: string;
+
   constructor({
     container,
     noAppend,
@@ -249,6 +258,10 @@ export class PointCloud {
     // Remove Old Box
     if (oldBox) {
       oldBox.removeFromParent();
+      // if (name === this.pointCloudObjectName) {
+      //   // debugger;
+      //   this.removeObjectByName(name);
+      // }
     }
   }
 
@@ -425,23 +438,23 @@ export class PointCloud {
    */
   public filterPointsByBox(
     boxParams: IPointCloudBox,
-    points?: THREE.Points,
+    points?: Float32Array,
+    color?: Float32Array,
   ): Promise<{ geometry: any; num: number } | undefined> {
     if (!points) {
-      const originPoints = this.scene.getObjectByName(this.pointCloudObjectName);
+      const originPoints = this.scene.getObjectByName(this.pointCloudObjectName) as THREE.Points;
 
       if (!originPoints) {
         console.error('There is no corresponding point cloud object');
         return Promise.resolve(undefined);
       }
 
-      points = originPoints as THREE.Points;
+      points = originPoints?.geometry?.attributes?.position?.array as Float32Array;
     }
 
     if (window.Worker) {
       const { zMin, zMax, polygonPointList } = getCuboidFromPointCloudBox(boxParams);
-      const position = points.geometry.attributes.position.array;
-      const color = points.geometry.attributes.color.array;
+      const position = points;
       const params = {
         boxParams,
         zMin,
@@ -563,8 +576,6 @@ export class PointCloud {
   };
 
   public renderPointCloud(points: THREE.Points, radius?: number) {
-    // @ts-ignore
-    points.material.size = 1;
     points.name = this.pointCloudObjectName;
 
     const pointsMaterial = new THREE.PointsMaterial({
@@ -572,6 +583,7 @@ export class PointCloud {
     });
 
     pointsMaterial.onBeforeCompile = this.overridePointShader;
+    pointsMaterial.size = 1.2;
 
     if (radius) {
       // @ts-ignore
@@ -603,10 +615,18 @@ export class PointCloud {
    */
   public loadPCDFile = async (src: string, radius?: number) => {
     this.clearPointCloud();
-    const points = (await this.cacheInstance.loadPCDFile(src)) as THREE.Points;
-    points.name = this.pointCloudObjectName;
+    this.currentPCDSrc = src;
 
-    this.renderPointCloud(points, radius);
+    /**
+     * Create the new THREE.Points by cachePCD.
+     */
+    const { points, color } = (await this.cacheInstance.loadPCDFile(src)) as any;
+    const geometry = new THREE.BufferGeometry();
+    geometry.setAttribute('position', new THREE.BufferAttribute(points, 3));
+    geometry.setAttribute('color', new THREE.BufferAttribute(color, 3));
+
+    const newPoints = new THREE.Points(geometry);
+    this.renderPointCloud(newPoints, radius);
   };
 
   /**
@@ -619,6 +639,7 @@ export class PointCloud {
     if (!oldPointCloud) {
       return;
     }
+    this.highlightPCDSrc = this.currentPCDSrc;
 
     return new Promise<BufferAttribute[] | undefined>((resolve) => {
       if (window.Worker) {
@@ -637,6 +658,15 @@ export class PointCloud {
         highlightWorker.onmessage = (e: any) => {
           const { color } = e.data;
           const colorAttribute = new THREE.BufferAttribute(color, 3);
+
+          if (this.highlightPCDSrc) {
+            // Save the new highlight color.
+            this.cacheInstance.updateColor(this.highlightPCDSrc, color);
+
+            // Clear
+            this.highlightPCDSrc = undefined;
+          }
+
           colorAttribute.needsUpdate = true;
           oldPointCloud.geometry.setAttribute('color', colorAttribute);
           resolve(color);
@@ -668,7 +698,7 @@ export class PointCloud {
     boxParams: IPointCloudBox,
     scope?: Partial<{ width: number; height: number; depth: number }>,
   ) => {
-    const cb = async (points: THREE.Points) => {
+    const cb = async (points: Float32Array, color: Float32Array) => {
       const { width = 0, height = 0, depth = 0 } = scope ?? {};
 
       // TODO. Speed can be optimized.
@@ -680,6 +710,7 @@ export class PointCloud {
           depth: boxParams.depth + depth,
         },
         points,
+        color,
       );
       if (!filterData) {
         console.error('filter Error');
@@ -687,13 +718,15 @@ export class PointCloud {
       }
 
       this.clearPointCloud();
-      const newPoints = new THREE.Points(filterData.geometry, points.material);
+
+      this.currentPCDSrc = src;
+      const newPoints = new THREE.Points(filterData.geometry);
       newPoints.name = this.pointCloudObjectName;
       this.scene.add(newPoints);
       this.render();
     };
-    const points = await this.cacheInstance.loadPCDFile(src);
-    cb(points);
+    const { points, color } = await this.cacheInstance.loadPCDFile(src);
+    cb(points, color);
   };
 
   public setShowDirection(showDirection: boolean) {
