@@ -7,6 +7,13 @@ import { pointCloudResult1 } from './pointCloud';
 // POINTCLOUD_DATA
 import pcd1 from './pointCloud/lidar/1.pcd';
 import pcd2 from './pointCloud/lidar/2.pcd';
+import pcd3 from './pointCloud/lidar/3.pcd';
+import pcd4 from './pointCloud/lidar/4.pcd';
+import pcd5 from './pointCloud/lidar/5.pcd';
+import pcd6 from './pointCloud/lidar/6.pcd';
+import pcd7 from './pointCloud/lidar/7.pcd';
+import pcd8 from './pointCloud/lidar/8.pcd';
+import pcd9 from './pointCloud/lidar/9.pcd';
 import pointCloudImg1 from './pointCloud/image/P2/1.png';
 import pointCloudImg2 from './pointCloud/image/P2/2.png';
 import calib1 from './pointCloud/calib/P2/1.json';
@@ -22,7 +29,7 @@ export const videoList = [
   'http://127.0.0.1:8080/e.mp4',
 ];
 
-export const pointCloudList = [pcd1, pcd2];
+export const pointCloudList = [pcd1, pcd2, pcd3, pcd4, pcd5, pcd6, pcd7, pcd8, pcd9];
 
 export const pointCloudMappingImgList = [
   {
