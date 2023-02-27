@@ -120,12 +120,19 @@ class PointCloud2dOperation extends PolygonOperation {
       return;
     }
 
-    if (e.ctrlKey && this.hoverID) {
-      this.emit('addSelectedIDs', this.hoverID);
-    } else {
-      this.emit('setSelectedIDs', this.hoverID);
+    if (!this.hoverID) {
+      return;
     }
 
+    /**
+     * Multi Selected.
+     */
+    if (e.ctrlKey) {
+      this.emit('addSelectedIDs', this.hoverID);
+      return;
+    }
+
+    this.emit('setSelectedIDs', this.hoverID);
     const hoverAttribute = this.polygonList.find((v) => v.id === this.hoverID)?.attribute;
     if (hoverAttribute && hoverAttribute !== this.defaultAttribute) {
       this.emit('syncAttribute', hoverAttribute);
@@ -325,7 +332,6 @@ class PointCloud2dOperation extends PolygonOperation {
     }
 
     this.selectedID = newID;
-    this.selectedIDs = newID ? [newID] : [];
 
     this.render();
   }
