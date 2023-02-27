@@ -24,7 +24,7 @@ interface IProps extends IA2MapStateProps {
   checkMode?: boolean;
 }
 
-const PointCloudListener: React.FC<IProps> = ({ currentData, config, checkMode, configString }) => {
+const PointCloudListener: React.FC<IProps> = ({ currentData, config, checkMode, configString, imgIndex }) => {
   const ptCtx = useContext(PointCloudContext);
   const {
     changeSelectedBoxValid,
@@ -208,7 +208,7 @@ const PointCloudListener: React.FC<IProps> = ({ currentData, config, checkMode, 
   // Page switch data initialization
   useEffect(() => {
     updatePointCloudData?.();
-  }, [currentData, ptCtx.mainViewInstance]);
+  }, [imgIndex, ptCtx.mainViewInstance]);
 
   // Update the listener of toolInstance.
   useEffect(() => {
