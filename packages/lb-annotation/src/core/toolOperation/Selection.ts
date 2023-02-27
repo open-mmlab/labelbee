@@ -33,6 +33,10 @@ class Selection {
     return this._selectedIDs;
   }
 
+  get selectedID() {
+    return this._selectedIDs.length === 1 ? this._selectedIDs[0] : undefined;
+  }
+
   set selectedIDs(selectedIDs: SelectedIDs) {
     this._selectedIDs = selectedIDs;
     this.toolInstance.render();

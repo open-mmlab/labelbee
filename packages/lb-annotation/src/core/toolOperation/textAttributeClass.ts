@@ -279,6 +279,17 @@ export default class TextAttributeClass {
     }
   }
 
+  public selectedIDChanged(oldID?: string, newID?: string) {
+    // 触发文本切换的操作
+    if (newID !== oldID && oldID) {
+      this?.changeSelected();
+    }
+
+    if (!newID) {
+      this?.clearTextAttribute();
+    }
+  }
+
   /**
    * 用于外层切换选中框调用
    */

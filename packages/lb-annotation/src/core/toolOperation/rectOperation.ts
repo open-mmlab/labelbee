@@ -216,21 +216,8 @@ class RectOperation extends BasicToolOperation {
     this.setSelectedRectID(newID);
   }
 
-  public updateTextAttributeWhileSelectedIdChanged(newID?: string) {
-    const oldID = this.selectedRectID;
-    if (newID !== oldID && oldID) {
-      // 触发文本切换的操作
-
-      this._textAttributInstance?.changeSelected();
-    }
-
-    if (!newID) {
-      this._textAttributInstance?.clearTextAttribute();
-    }
-  }
-
   public setSelectedRectID(newID?: string, isAppend = false) {
-    this.updateTextAttributeWhileSelectedIdChanged(newID);
+    this._textAttributInstance?.selectedIDChanged(this.selectedRectID, newID);
 
     if (isAppend) {
       this.selection.updateSelectedIDs(newID);

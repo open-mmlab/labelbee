@@ -244,6 +244,7 @@ export default class PolygonUtils {
     if (ids && ids?.length > 0) {
       return polygonList.filter((p) => ids.includes(p.id));
     }
+    return [];
   }
 
   public static getHoverEdgeIndex(
