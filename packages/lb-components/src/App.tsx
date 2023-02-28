@@ -111,6 +111,7 @@ const App: React.FC<AppProps> = (props) => {
     defaultLang = 'cn',
     skipBeforePageTurning,
     beforeRotate,
+    checkMode = false
   } = props;
 
   useEffect(() => {
@@ -127,6 +128,7 @@ const App: React.FC<AppProps> = (props) => {
         onStepChange,
         skipBeforePageTurning,
         beforeRotate,
+        checkMode
       }),
     );
 

@@ -39,6 +39,7 @@ const initialState: AnnotationState = {
   triggerEventAfterIndexChanged: false,
 
   pointCloudLoading: false,
+  checkMode: false,
 };
 
 /**
@@ -737,6 +738,14 @@ export const annotationReducer = (
       return {
         ...state,
         pointCloudLoading: !!pointCloudLoading,
+      };
+    }
+
+    case ANNOTATION_ACTIONS.SET_CHECK_MODE: {
+      const { checkMode } = action.payload;
+      return {
+        ...state,
+        checkMode: !!checkMode,
       };
     }
 

@@ -35,13 +35,13 @@ export const ViewportProviderComponent = (props: any) => {
   const {
     children,
     dispatch,
-    annotation: { skipBeforePageTurning },
+    annotation: { skipBeforePageTurning, checkMode },
   } = props;
   const [width] = useState(window.innerWidth);
   const [height] = useState(window.innerHeight);
 
   const keydown = (e: KeyboardEvent) => {
-    if (!toolUtils.hotkeyFilter(e)) {
+    if (!toolUtils.hotkeyFilter(e) || checkMode) {
       return;
     }
 
@@ -102,7 +102,7 @@ export const ViewportProviderComponent = (props: any) => {
     return () => {
       window.removeEventListener('keydown', keydown);
     };
-  }, [props.annotation.annotationEngine, props.annotation.skipBeforePageTurning]);
+  }, [props.annotation.annotationEngine, props.annotation.skipBeforePageTurning, checkMode]);
 
   const size = useMemo(() => ({ width, height }), [width, height]);
 

@@ -64,6 +64,7 @@ export interface AnnotationState {
   beforeRotate?: () => boolean;
 
   pointCloudLoading: boolean;
+  checkMode: boolean; // Judge current Mode is checkMode or not.
 }
 
 interface UpdateToolInstance {
