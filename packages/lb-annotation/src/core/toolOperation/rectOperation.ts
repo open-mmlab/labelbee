@@ -50,7 +50,7 @@ class RectOperation extends BasicToolOperation {
 
   public markerIndex: number; // 用于列表标签定位
 
-  private _textAttributInstance?: TextAttributeClass;
+  public _textAttributInstance?: TextAttributeClass;
 
   private selection: Selection;
 

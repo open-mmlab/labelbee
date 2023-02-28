@@ -39,6 +39,9 @@ class Selection {
 
   set selectedIDs(selectedIDs: SelectedIDs) {
     this._selectedIDs = selectedIDs;
+    if (selectedIDs.length > 1) {
+      this.toolInstance?._textAttributInstance?.clearTextAttribute();
+    }
     this.toolInstance.render();
   }
 

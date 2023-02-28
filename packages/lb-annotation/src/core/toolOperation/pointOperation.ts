@@ -16,6 +16,7 @@ import StyleUtils from '../../utils/tool/StyleUtils';
 import uuid from '../../utils/uuid';
 import { BasicToolOperation, IBasicToolOperationProps } from './basicToolOperation';
 import TextAttributeClass from './textAttributeClass';
+import Selection from './Selection';
 
 const TEXTAREA_WIDTH = 200;
 
@@ -32,7 +33,7 @@ class PointOperation extends BasicToolOperation {
   // 具体操作
   public hoverID?: string; // hover 到其中一个点上 会有hoverID
 
-  public selectedID?: string;
+  // public selectedID?: string;
 
   public markerIndex: number; // 用于列表标签定位
 
@@ -41,14 +42,16 @@ class PointOperation extends BasicToolOperation {
     originPointList: IPointUnit[];
   };
 
-  private _textAttributInstance?: TextAttributeClass;
+  public selection: Selection;
+
+  public _textAttributInstance?: TextAttributeClass;
 
   constructor(props: IPointOperationProps) {
     super(props);
     this.config = CommonToolUtils.jsonParser(props.config);
     this.pointList = [];
     this.markerIndex = 0;
-
+    this.selection = new Selection(this);
     this.setStyle(props.style);
 
     this.createPoint = this.createPoint.bind(this);
@@ -64,6 +67,18 @@ class PointOperation extends BasicToolOperation {
   get drawOutsideTarget() {
     // 兼容旧的目标外标注
     return this.config.drawOutsideTarget ?? this.config.drawPointOut;
+  }
+
+  get selectedID() {
+    return this.selection.selectedID;
+  }
+
+  get selectedIDs() {
+    return this.selection.selectedIDs;
+  }
+
+  get selectedPoints() {
+    return this.pointList.filter((i) => this.selection.isIdSelected(i.id));
   }
 
   /**
@@ -171,12 +186,9 @@ class PointOperation extends BasicToolOperation {
       this.emit('changeAttributeSidebar');
 
       // 如有选中目标，则需更改当前选中的属性
-      const { selectedID } = this;
-      if (selectedID) {
-        this.pointList.forEach((point) => {
-          if (point.id === selectedID) {
-            point.attribute = defaultAttribute;
-          }
+      if (this.selectedPoints.length > 0) {
+        this.selectedPoints.forEach((point) => {
+          point.attribute = defaultAttribute;
         });
         this.history.pushHistory(this.pointList);
         this.render();
@@ -222,19 +234,14 @@ class PointOperation extends BasicToolOperation {
     }
   }
 
-  public setSelectedID(newID?: string) {
-    const oldID = this.selectedID;
-    if (newID !== oldID && oldID) {
-      // 触发文本切换的操作
+  public setSelectedID(newID?: string, isAppend = false) {
+    this._textAttributInstance?.selectedIDChanged(this.selectedID, newID);
 
-      this._textAttributInstance?.changeSelected();
+    if (isAppend) {
+      this.selection.updateSelectedIDs(newID);
+    } else {
+      this.selection.selectedIDs = newID ? [newID] : [];
     }
-
-    if (!newID) {
-      this._textAttributInstance?.clearTextAttribute();
-    }
-
-    this.selectedID = newID;
 
     this.render();
     this.emit('selectedChange');
@@ -302,7 +309,6 @@ class PointOperation extends BasicToolOperation {
       this.recoverOperationMode();
       this.createPoint(e);
       this.render();
-
       return;
     }
 
@@ -312,14 +318,12 @@ class PointOperation extends BasicToolOperation {
      * 1. hoverID === Selected ID
      * 2. It's multiMoveMode & Hover a point.
      */
-    if ((this.hoverID === this.selectedID || (this.isMultiMoveMode && this.hoverID)) && e.button === 0) {
+    if (this.hoverID && this.selection.isIdSelected(this.hoverID) && e.button === 0) {
       this.dragStatus = EDragStatus.Start;
-      if (this.isMultiMoveMode) {
-        this.dragInfo = {
-          dragStartCoord: this.getCoordinateUnderZoom(e),
-          originPointList: this.pointList,
-        };
-      }
+      this.dragInfo = {
+        dragStartCoord: this.getCoordinateUnderZoom(e),
+        originPointList: this.selectedPoints,
+      };
       return;
     }
 
@@ -350,7 +354,7 @@ class PointOperation extends BasicToolOperation {
       return true;
     }
     if (e.button === 2) {
-      this.rightMouseUp();
+      this.rightMouseUp(e);
     }
     // 拖拽停止
     if (this.dragStatus === EDragStatus.Move) {
@@ -366,7 +370,7 @@ class PointOperation extends BasicToolOperation {
     this.dragStatus = EDragStatus.Move;
     const coordinateZoom = this.getCoordinateUnderZoom(e);
 
-    if (this.isMultiMoveMode && this.dragInfo) {
+    if (this.selectedIDs.length > 1 && this.dragInfo) {
       const offset = {
         x: coordinateZoom.x - this.dragInfo.dragStartCoord.x,
         y: coordinateZoom.y - this.dragInfo.dragStartCoord.y,
@@ -429,6 +433,9 @@ class PointOperation extends BasicToolOperation {
       case EKeyCode.Z:
         this.setIsHidden(!this.isHidden);
         this.render();
+        break;
+      case EKeyCode.A:
+        this.selection.selectAll();
         break;
       default: {
         if (this.config.attributeConfigurable) {
@@ -596,7 +603,7 @@ class PointOperation extends BasicToolOperation {
     return selectPoint?.id;
   }
 
-  public rightMouseUp() {
+  public rightMouseUp(e: MouseEvent) {
     this.recoverOperationMode();
 
     // 删除操作
@@ -611,7 +618,7 @@ class PointOperation extends BasicToolOperation {
 
     // 选中操作
     const hoverPoint = this.pointList.find((point) => point.id === this.hoverID);
-    this.setSelectedID(this.hoverID);
+    this.setSelectedID(this.hoverID, e.ctrlKey);
     this.setDefaultAttribute(hoverPoint?.attribute);
 
     if (hoverPoint?.label && this.hasMarkerConfig) {
@@ -637,12 +644,12 @@ class PointOperation extends BasicToolOperation {
       this.pointList,
       CommonToolUtils.getSourceID(this.basicResult),
       this.attributeLockList,
-      this.selectedID,
+      this.selectedIDs,
     );
 
     let pointList = [...showingResult];
     if (selectedResult) {
-      pointList = [...pointList, selectedResult];
+      pointList = [...pointList, ...selectedResult];
     }
     const nextSelectedRect = CommonToolUtils.getNextSelectedRectID(pointList as any, sort, this.selectedID);
     if (nextSelectedRect) {
@@ -694,8 +701,8 @@ class PointOperation extends BasicToolOperation {
   }
 
   public deletePoint() {
-    if (this.selectedID) {
-      this.setPointList(this.pointList.filter((point) => point.id !== this.selectedID));
+    if (this.selectedIDs.length > 0) {
+      this.setPointList(this.pointList.filter((point) => this.selection.isIdSelected(point.id)));
       this.history.pushHistory(this.pointList);
       this._textAttributInstance?.clearTextAttribute();
       this.emit('selectedChange');
@@ -865,39 +872,29 @@ class PointOperation extends BasicToolOperation {
   }
 
   public renderMultiSelectedPoint() {
-    if (!this.isMultiMoveMode) {
-      return;
-    }
-
-    this.pointList.forEach((point) => {
+    this.selectedPoints.forEach((point) => {
       this.renderPoint(point, true);
     });
   }
 
   public renderPointList() {
-    switch (this.operationMode) {
-      case EOperationMode.MultiMove:
-        this.renderMultiSelectedPoint();
-        break;
+    const [showingPointList, selectedPoints] = CommonToolUtils.getRenderResultList<IPointUnit>(
+      this.pointList,
+      CommonToolUtils.getSourceID(this.basicResult),
+      this.attributeLockList,
+      this.selectedIDs,
+    );
 
-      default: {
-        const [showingPointList, selectedPoint] = CommonToolUtils.getRenderResultList<IPointUnit>(
-          this.pointList,
-          CommonToolUtils.getSourceID(this.basicResult),
-          this.attributeLockList,
-          this.selectedID,
-        );
+    if (!this.isHidden) {
+      showingPointList.forEach((point) => {
+        this.renderPoint(point);
+      });
+    }
 
-        if (!this.isHidden) {
-          showingPointList.forEach((point) => {
-            this.renderPoint(point);
-          });
-        }
-
-        if (selectedPoint) {
-          this.renderPoint(selectedPoint);
-        }
-      }
+    if (selectedPoints) {
+      selectedPoints.forEach((point) => {
+        this.renderPoint(point, true);
+      });
     }
   }
 
@@ -914,13 +911,13 @@ class PointOperation extends BasicToolOperation {
       this.pointList,
       CommonToolUtils.getSourceID(this.basicResult),
       this.attributeLockList,
-      this.selectedID,
+      this.selectedIDs,
     );
 
     const pointList = showingPointList;
 
     if (selectedPoint) {
-      pointList.push(selectedPoint);
+      pointList.push(...selectedPoint);
     }
 
     if (pointList.length < 2) {
