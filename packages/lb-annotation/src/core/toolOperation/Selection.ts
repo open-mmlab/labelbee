@@ -40,7 +40,7 @@ class Selection {
   set selectedIDs(selectedIDs: SelectedIDs) {
     this._selectedIDs = selectedIDs;
     if (selectedIDs.length > 1) {
-      this.toolInstance?._textAttributInstance?.clearTextAttribute();
+      this.toolInstance?._textAttributeInstance?.clearTextAttribute();
     }
     this.toolInstance.render();
   }
@@ -78,6 +78,14 @@ class Selection {
       this.selectedIDs = this.selectedIDs.filter((id) => id !== selectedID);
     } else {
       this.selectedIDs = [...this.selectedIDs, selectedID];
+    }
+  }
+
+  public setSelectedIDs(id?: string, isAppend = false) {
+    if (isAppend) {
+      this.updateSelectedIDs(id);
+    } else {
+      this.selectedIDs = id ? [id] : [];
     }
   }
 

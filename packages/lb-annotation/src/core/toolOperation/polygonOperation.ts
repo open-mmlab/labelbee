@@ -68,7 +68,7 @@ class PolygonOperation extends BasicToolOperation {
 
   public isAlt: boolean; // 当前是否按住了 alt
 
-  public _textAttributInstance?: TextAttributeClass;
+  public _textAttributeInstance?: TextAttributeClass;
 
   public forbidAddNewPolygonFuc?: (e: MouseEvent) => boolean;
 
@@ -118,8 +118,8 @@ class PolygonOperation extends BasicToolOperation {
 
   public destroy() {
     super.destroy();
-    if (this._textAttributInstance) {
-      this._textAttributInstance.clearTextAttribute();
+    if (this._textAttributeInstance) {
+      this._textAttributeInstance.clearTextAttribute();
     }
   }
 
@@ -406,13 +406,8 @@ class PolygonOperation extends BasicToolOperation {
   }
 
   public setSelectedID(newID?: string, isAppend = false) {
-    this._textAttributInstance?.selectedIDChanged(this.selectedID, newID);
-
-    if (isAppend) {
-      this.selection.updateSelectedIDs(newID);
-    } else {
-      this.selection.selectedIDs = newID ? [newID] : [];
-    }
+    this._textAttributeInstance?.selectedIDChanged(this.selectedID, newID);
+    this.selection.setSelectedIDs(newID, isAppend);
 
     this.render();
     this.emit('selectedChange');
@@ -438,14 +433,14 @@ class PolygonOperation extends BasicToolOperation {
         this.render();
       }
 
-      if (this._textAttributInstance) {
+      if (this._textAttributeInstance) {
         if (this.attributeLockList.length > 0 && !this.attributeLockList.includes(defaultAttribute)) {
           // 属性隐藏
-          this._textAttributInstance.clearTextAttribute();
+          this._textAttributeInstance.clearTextAttribute();
           return;
         }
 
-        this._textAttributInstance.updateIcon(this.getTextIconSvg(defaultAttribute));
+        this._textAttributeInstance.updateIcon(this.getTextIconSvg(defaultAttribute));
       }
     }
   }
@@ -454,8 +449,8 @@ class PolygonOperation extends BasicToolOperation {
     super.setStyle(toolStyle);
 
     // 当存在文本 icon 的时候需要更改当前样式
-    if (this._textAttributInstance && this.config.attributeConfigurable === false) {
-      this._textAttributInstance?.updateIcon(this.getTextIconSvg());
+    if (this._textAttributeInstance && this.config.attributeConfigurable === false) {
+      this._textAttributeInstance?.updateIcon(this.getTextIconSvg());
     }
   }
 
@@ -631,7 +626,7 @@ class PolygonOperation extends BasicToolOperation {
     this.setPolygonList(this.polygonList.filter((polygon) => !this.selection.isIdSelected(polygon.id)));
 
     this.history.pushHistory(this.polygonList);
-    this._textAttributInstance?.clearTextAttribute();
+    this._textAttributeInstance?.clearTextAttribute();
     this.emit('selectedChange');
     this.render();
   }
@@ -1457,7 +1452,7 @@ class PolygonOperation extends BasicToolOperation {
 
   /** 更新文本输入，并且进行关闭 */
   public updateSelectedTextAttribute(newTextAttribute?: string) {
-    if (this._textAttributInstance && newTextAttribute && this.selectedID) {
+    if (this._textAttributeInstance && newTextAttribute && this.selectedID) {
       // 切换的时候如果存在
 
       let textAttribute = newTextAttribute;
@@ -1486,10 +1481,10 @@ class PolygonOperation extends BasicToolOperation {
     const coordinate = AxisUtils.getOffsetCoordinate({ x, y }, this.currentPos, this.zoom);
     const toolColor = this.getColor(attribute);
     const color = valid ? toolColor?.valid.stroke : toolColor?.invalid.stroke;
-    if (!this._textAttributInstance) {
+    if (!this._textAttributeInstance) {
       // 属性文本示例
 
-      this._textAttributInstance = new TextAttributeClass({
+      this._textAttributeInstance = new TextAttributeClass({
         width: newWidth,
         container: this.container,
         icon: this.getTextIconSvg(attribute),
@@ -1499,11 +1494,11 @@ class PolygonOperation extends BasicToolOperation {
       });
     }
 
-    if (this._textAttributInstance && !this._textAttributInstance?.isExit) {
-      this._textAttributInstance.appendToContainer();
+    if (this._textAttributeInstance && !this._textAttributeInstance?.isExit) {
+      this._textAttributeInstance.appendToContainer();
     }
 
-    this._textAttributInstance.update(`${textAttribute}`, {
+    this._textAttributeInstance.update(`${textAttribute}`, {
       left: coordinate.x,
       top: coordinate.y,
       color,

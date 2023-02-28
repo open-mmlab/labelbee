@@ -50,7 +50,7 @@ class RectOperation extends BasicToolOperation {
 
   public markerIndex: number; // 用于列表标签定位
 
-  public _textAttributInstance?: TextAttributeClass;
+  public _textAttributeInstance?: TextAttributeClass;
 
   private selection: Selection;
 
@@ -99,8 +99,8 @@ class RectOperation extends BasicToolOperation {
 
   public destroy() {
     super.destroy();
-    if (this._textAttributInstance) {
-      this._textAttributInstance.clearTextAttribute();
+    if (this._textAttributeInstance) {
+      this._textAttributeInstance.clearTextAttribute();
     }
   }
 
@@ -217,13 +217,8 @@ class RectOperation extends BasicToolOperation {
   }
 
   public setSelectedRectID(newID?: string, isAppend = false) {
-    this._textAttributInstance?.selectedIDChanged(this.selectedRectID, newID);
-
-    if (isAppend) {
-      this.selection.updateSelectedIDs(newID);
-    } else {
-      this.selection.selectedIDs = newID ? [newID] : [];
-    }
+    this._textAttributeInstance?.selectedIDChanged(this.selectedRectID, newID);
+    this.selection.setSelectedIDs(newID, isAppend);
 
     this.render();
     this.emit('selectedChange');
@@ -233,8 +228,8 @@ class RectOperation extends BasicToolOperation {
     super.setStyle(toolStyle);
 
     // 当存在文本 icon 的时候需要更改当前样式
-    if (this._textAttributInstance && this.config.attributeConfigurable === false) {
-      this._textAttributInstance?.updateIcon(this.getTextIconSvg());
+    if (this._textAttributeInstance && this.config.attributeConfigurable === false) {
+      this._textAttributeInstance?.updateIcon(this.getTextIconSvg());
     }
   }
 
@@ -272,7 +267,7 @@ class RectOperation extends BasicToolOperation {
 
   /** 更新文本输入，并且进行关闭 */
   public updateSelectedRectTextAttribute(newTextAttribute?: string) {
-    if (this._textAttributInstance && newTextAttribute && this.selectedRectID) {
+    if (this._textAttributeInstance && newTextAttribute && this.selectedRectID) {
       // 切换的时候如果存在
 
       let textAttribute = newTextAttribute;
@@ -1399,10 +1394,10 @@ class RectOperation extends BasicToolOperation {
     const toolColor = this.getColor(attribute);
     const color = valid ? toolColor?.valid.stroke : toolColor?.invalid.stroke;
     const distance = 4;
-    if (!this._textAttributInstance) {
+    if (!this._textAttributeInstance) {
       // 属性文本示例
 
-      this._textAttributInstance = new TextAttributeClass({
+      this._textAttributeInstance = new TextAttributeClass({
         width: newWidth,
         container: this.container,
         icon: this.getTextIconSvg(attribute),
@@ -1412,11 +1407,11 @@ class RectOperation extends BasicToolOperation {
       });
     }
 
-    if (this._textAttributInstance && !this._textAttributInstance?.isExit) {
-      this._textAttributInstance.appendToContainer();
+    if (this._textAttributeInstance && !this._textAttributeInstance?.isExit) {
+      this._textAttributeInstance.appendToContainer();
     }
 
-    this._textAttributInstance.update(`${selectedRect.textAttribute}`, {
+    this._textAttributeInstance.update(`${selectedRect.textAttribute}`, {
       left: coordinate.x,
       top: coordinate.y + distance,
       color,
@@ -1702,14 +1697,14 @@ class RectOperation extends BasicToolOperation {
         this.render();
       }
 
-      if (this._textAttributInstance) {
+      if (this._textAttributeInstance) {
         if (this.attributeLockList.length > 0 && !this.attributeLockList.includes(this.defaultAttribute)) {
           // 属性隐藏
-          this._textAttributInstance.clearTextAttribute();
+          this._textAttributeInstance.clearTextAttribute();
           return;
         }
 
-        this._textAttributInstance.updateIcon(this.getTextIconSvg(defaultAttribute));
+        this._textAttributeInstance.updateIcon(this.getTextIconSvg(defaultAttribute));
       }
     }
   }
@@ -1759,7 +1754,7 @@ class RectOperation extends BasicToolOperation {
     );
     this.history.pushHistory(this.rectList);
     this.setSelectedRectID(undefined);
-    this._textAttributInstance?.clearTextAttribute();
+    this._textAttributeInstance?.clearTextAttribute();
     this.render();
   }
 

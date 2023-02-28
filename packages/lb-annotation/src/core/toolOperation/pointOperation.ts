@@ -44,7 +44,7 @@ class PointOperation extends BasicToolOperation {
 
   public selection: Selection;
 
-  public _textAttributInstance?: TextAttributeClass;
+  public _textAttributeInstance?: TextAttributeClass;
 
   constructor(props: IPointOperationProps) {
     super(props);
@@ -194,14 +194,14 @@ class PointOperation extends BasicToolOperation {
         this.render();
       }
 
-      if (this._textAttributInstance) {
+      if (this._textAttributeInstance) {
         if (this.attributeLockList.length > 0 && !this.attributeLockList.includes(defaultAttribute)) {
           // 属性隐藏
-          this._textAttributInstance.clearTextAttribute();
+          this._textAttributeInstance.clearTextAttribute();
           return;
         }
 
-        this._textAttributInstance.updateIcon(this.getTextIconSvg(defaultAttribute));
+        this._textAttributeInstance.updateIcon(this.getTextIconSvg(defaultAttribute));
       }
     }
   }
@@ -229,19 +229,15 @@ class PointOperation extends BasicToolOperation {
     super.setStyle(toolStyle);
 
     // 当存在文本 icon 的时候需要更改当前样式
-    if (this._textAttributInstance && this.config.attributeConfigurable === false) {
-      this._textAttributInstance?.updateIcon(this.getTextIconSvg());
+    if (this._textAttributeInstance && this.config.attributeConfigurable === false) {
+      this._textAttributeInstance?.updateIcon(this.getTextIconSvg());
     }
   }
 
   public setSelectedID(newID?: string, isAppend = false) {
-    this._textAttributInstance?.selectedIDChanged(this.selectedID, newID);
+    this._textAttributeInstance?.selectedIDChanged(this.selectedID, newID);
 
-    if (isAppend) {
-      this.selection.updateSelectedIDs(newID);
-    } else {
-      this.selection.selectedIDs = newID ? [newID] : [];
-    }
+    this.selection.setSelectedIDs(newID, isAppend);
 
     this.render();
     this.emit('selectedChange');
@@ -704,7 +700,7 @@ class PointOperation extends BasicToolOperation {
     if (this.selectedIDs.length > 0) {
       this.setPointList(this.pointList.filter((point) => this.selection.isIdSelected(point.id)));
       this.history.pushHistory(this.pointList);
-      this._textAttributInstance?.clearTextAttribute();
+      this._textAttributeInstance?.clearTextAttribute();
       this.emit('selectedChange');
       this.render();
     }
@@ -754,7 +750,7 @@ class PointOperation extends BasicToolOperation {
 
   /** 更新文本输入，并且进行关闭 */
   public updateSelectedTextAttribute(newTextAttribute?: string) {
-    if (this._textAttributInstance && newTextAttribute && this.selectedID) {
+    if (this._textAttributeInstance && newTextAttribute && this.selectedID) {
       let textAttribute = newTextAttribute;
       if (AttributeUtils.textAttributeValidate(this.config.textCheckType, '', textAttribute) === false) {
         this.emit('messageError', AttributeUtils.getErrorNotice(this.config.textCheckType, this.lang));
@@ -780,10 +776,10 @@ class PointOperation extends BasicToolOperation {
     const toolColor = this.getColor(attribute);
     const color = valid ? toolColor?.valid.stroke : toolColor?.invalid.stroke;
     const distance = 4;
-    if (!this._textAttributInstance) {
+    if (!this._textAttributeInstance) {
       // 属性文本示例
 
-      this._textAttributInstance = new TextAttributeClass({
+      this._textAttributeInstance = new TextAttributeClass({
         width: newWidth,
         container: this.container,
         icon: this.getTextIconSvg(attribute),
@@ -793,11 +789,11 @@ class PointOperation extends BasicToolOperation {
       });
     }
 
-    if (this._textAttributInstance && !this._textAttributInstance?.isExit) {
-      this._textAttributInstance.appendToContainer();
+    if (this._textAttributeInstance && !this._textAttributeInstance?.isExit) {
+      this._textAttributeInstance.appendToContainer();
     }
 
-    this._textAttributInstance.update(`${point.textAttribute}`, {
+    this._textAttributeInstance.update(`${point.textAttribute}`, {
       left: coordinate.x,
       top: coordinate.y + distance,
       color,
