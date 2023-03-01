@@ -23,6 +23,7 @@ import DrawUtils from '../../utils/tool/DrawUtils';
 import StyleUtils from '../../utils/tool/StyleUtils';
 import AttributeUtils from '../../utils/tool/AttributeUtils';
 import TextAttributeClass from './textAttributeClass';
+import Selection from './Selection';
 
 enum EStatus {
   Create = 0,
@@ -56,57 +57,69 @@ class LineToolOperation extends BasicToolOperation {
    * @param e 鼠标事件
    */
   public drawActivatedLine = (coord?: ICoordinate, e?: MouseEvent, hideTempAxis?: boolean) => {
-    const activeLine = _.cloneDeep(this.activeLine);
-
-    if (!activeLine || activeLine.length === 0) {
-      return;
-    }
+    const lines = this.isCreate
+      ? _.cloneDeep([
+          {
+            pointList: this.activeLine,
+            order: this.nextOrder(),
+            attribute: this.defaultAttribute,
+            valid: this.isLineValid,
+          },
+        ])
+      : _.cloneDeep(this.selectedLines);
 
     const isActiveLineValid = this.isActiveLineValid();
 
-    let order;
-    const existLine = this.selectedID ? this.lineList.find((i) => i.id === this.selectedID) : undefined;
-    if (existLine) {
-      order = existLine.order;
-    } else {
-      order = this.nextOrder();
-    }
-    const color = this.getLineColorByAttribute({ attribute: this.defaultAttribute, valid: !!isActiveLineValid });
+    lines.forEach((line) => {
+      if (line?.pointList) {
+        line.pointList = line.pointList.map((point) =>
+          Object.assign(
+            point,
+            {
+              actual: { x: point.x, y: point.y }, // Keep The Origin Coordinate.
+            },
+            this.coordUtils.getRenderCoord(point),
+          ),
+        );
+      }
 
-    activeLine.map((point) =>
-      Object.assign(
-        point,
-        {
-          actual: { x: point.x, y: point.y }, // Keep The Origin Coordinate.
-        },
-        this.coordUtils.getRenderCoord(point),
-      ),
-    );
+      if (!line.pointList) {
+        return;
+      }
 
-    if (this.isActive) {
-      this.drawLineLength(activeLine, color);
-    }
+      const color = this.getLineColorByAttribute({
+        attribute: line.attribute!,
+        valid: line.valid!,
+      });
 
-    this.updateActiveArea();
-    this.drawLine(activeLine, coord, color, true, true);
-    this.drawLineNumber(activeLine[0], order, color, '', this.defaultAttribute, isActiveLineValid);
+      if (this.isActive) {
+        this.drawLineLength(line.pointList, color);
+        this.renderActiveArea(MathUtils.calcViewportBoundaries(line.pointList, this.isCurve, SEGMENT_NUMBER));
+      }
 
-    if (coord && this.isCreate) {
-      this.arc(coord, POINT_RADIUS, color);
-    }
-    if (this.cursor && !this.selectedPoint && !hideTempAxis && !this.isShift) {
-      this.arc(this.cursor, POINT_ACTIVE_RADIUS, color);
-    }
+      this.drawLine(line.pointList, coord, color, true, true);
+      this.drawLineNumber(line.pointList[0], line.order, color, '', this.defaultAttribute, isActiveLineValid);
+
+      if (coord && this.isCreate) {
+        this.arc(coord, POINT_RADIUS, color);
+      }
+
+      if (this.cursor && !this.selectedPoint && !hideTempAxis && !this.isShift) {
+        this.arc(this.cursor, POINT_ACTIVE_RADIUS, color);
+      }
+
+      return line;
+    });
   };
 
-  /** 线条是否被选中 */
-  get isLineSelected() {
-    return this.selectedID && this.activeLine;
+  /** 选中所有线条 */
+  get selectedLines() {
+    return this.lineList.filter((i) => this.selection.isIdSelected(i.id));
   }
 
-  /** 选中点线条的点 */
-  get selectedLinePoints() {
-    return this.activeLine ? this.getPointList(this.activeLine) : [];
+  /** 选中单个线条 */
+  get selectedLine() {
+    return this.lineList.find((i) => i.id === this.selectedID);
   }
 
   /**
@@ -118,7 +131,7 @@ class LineToolOperation extends BasicToolOperation {
       return;
     }
 
-    if (coord && this.isLineSelected) {
+    if (coord && this.selectedID) {
       const pointList = this.getPointList(this.activeLine!);
 
       const hoverPoint = this.activeLine!.find(
@@ -133,7 +146,7 @@ class LineToolOperation extends BasicToolOperation {
     }
   };
 
-  public selectedID?: string;
+  // public selectedID?: string;
 
   private lineList: ILine[] = [];
 
@@ -166,13 +179,15 @@ class LineToolOperation extends BasicToolOperation {
 
   private isReference: boolean = false;
 
-  private _textAttributeInstance?: TextAttributeClass;
+  public _textAttributeInstance?: TextAttributeClass;
 
   private textEditingID?: string;
 
   private isLineValid: boolean;
 
   private lineDragging: boolean;
+
+  private selection: Selection;
 
   constructor(props: ILineOperationProps) {
     super(props);
@@ -189,6 +204,7 @@ class LineToolOperation extends BasicToolOperation {
     this.updateSelectedTextAttribute = this.updateSelectedTextAttribute.bind(this);
     this.getCurrentSelectedData = this.getCurrentSelectedData.bind(this);
     this.actionsHistory = new ActionsHistory();
+    this.selection = new Selection(this);
 
     this.dependToolConfig = {
       lineType: ELineTypes.Line,
@@ -267,13 +283,21 @@ class LineToolOperation extends BasicToolOperation {
     return this.lineList;
   }
 
+  get selectedIDs() {
+    return this.selection.selectedIDs;
+  }
+
+  get selectedID() {
+    return this.selection.selectedID;
+  }
+
+  /**
+   * Judgement of showing Order.
+   *
+   * Origin Config of LineTool: enableOutOfTarget & outOfTarget.
+   * Configurable of other tools: drawOutsideTarget.
+   */
   get enableOutOfTarget() {
-    /**
-     * Judgement of showing Order.
-     *
-     * Origin Config of LineTool: enableOutOfTarget & outOfTarget.
-     * Configurable of other tools: drawOutsideTarget.
-     */
     return this.config.enableOutOfTarget || this.config.outOfTarget || this.config.drawOutsideTarget;
   }
 
@@ -283,7 +307,6 @@ class LineToolOperation extends BasicToolOperation {
    * Origin Config of LineTool: showOrder.
    * Configurable of other tools: isShowOrder.
    */
-
   get showOrder() {
     return this.config.showOrder ?? this.config.isShowOrder;
   }
@@ -458,14 +481,12 @@ class LineToolOperation extends BasicToolOperation {
   /**
    *  对存在绘制对象，绘制热区
    */
-  public renderActiveArea() {
-    if (this.isActive && this.activeArea && this.ctx) {
-      const { top, left, right, bottom } = this.activeArea;
-      const { x, y } = this.coordUtils.getRenderCoord({ x: left, y: top });
+  public renderActiveArea({ top, left, right, bottom }: IRectArea) {
+    if (this.ctx) {
       this.ctx.save();
       this.ctx.beginPath();
       this.ctx.strokeStyle = '#B3B8FF';
-      this.ctx.rect(x, y, (right - left) * this.zoom, (bottom - top) * this.zoom);
+      this.ctx.rect(left, top, right - left, bottom - top);
       this.ctx.stroke();
       this.ctx.restore();
     }
@@ -643,7 +664,7 @@ class LineToolOperation extends BasicToolOperation {
       }
 
       lineList.forEach((line: ILine) => {
-        if (line.id === this.selectedID) {
+        if (this.selection.isIdSelected(line.id)) {
           return;
         }
         if (line.pointList) {
@@ -681,11 +702,11 @@ class LineToolOperation extends BasicToolOperation {
     this.renderCursorLine(this.getLineColor(this.defaultAttribute));
   };
 
-  /** 重新计算并渲染热区 */
-  public updateActiveArea() {
-    this.activeArea = this.getActiveArea();
-    this.renderActiveArea();
-  }
+  // /** 重新计算并渲染热区 */
+  // public updateActiveArea() {
+  //   this.activeArea = this.getActiveArea();
+  //   this.renderActiveArea();
+  // }
 
   public getActiveArea() {
     return this.hasActiveLine
@@ -783,18 +804,11 @@ class LineToolOperation extends BasicToolOperation {
    * @param offsetY
    */
   public moveActiveArea(offsetX: number, offsetY: number) {
-    if (this.activeArea) {
-      this.activeArea = Object.assign(this.activeArea, {
-        top: this.activeArea.top + offsetY,
-        bottom: this.activeArea.bottom + offsetY,
-        right: this.activeArea.right + offsetX,
-        left: this.activeArea.left + offsetX,
+    if (this.selectedLines.length > 0) {
+      this.selectedLines.forEach((line) => {
+        line.pointList?.forEach((i) => Object.assign(i, { x: i.x + offsetX, y: i.y + offsetY }));
       });
-    }
-
-    if (this.activeLine) {
-      this.activeLine.map((i) => Object.assign(i, { x: i.x + offsetX, y: i.y + offsetY }));
-      this.updateLines();
+      this.render();
     }
   }
 
@@ -1167,7 +1181,9 @@ class LineToolOperation extends BasicToolOperation {
       return;
     }
 
-    this.setActiveArea(this.getCoordinate(e), true);
+    const activeLine = this.findHoverLine(this.getCoordinate(e));
+
+    this.setSelectedLineID(activeLine?.id, e.ctrlKey);
     this.emit('contextmenu');
   };
 
@@ -1199,8 +1215,8 @@ class LineToolOperation extends BasicToolOperation {
   }
 
   public updateSelectedAttributeAfterHistoryChanged = () => {
-    if (this.selectedID) {
-      const line = this.lineList.find((i) => i.id === this.selectedID);
+    if (this.selectedIDs.length > 0) {
+      const line = this.lineList.find((i) => i.id === this.selectedIDs[0]);
       const attribute = line?.attribute;
       if (typeof attribute === 'string') {
         this.defaultAttribute = attribute;
@@ -1369,6 +1385,12 @@ class LineToolOperation extends BasicToolOperation {
     }
   }
 
+  public isCoordOnSelectedArea(coord: ICoordinate) {
+    return this.selectedLines.some((line) => {
+      return LineToolUtils.inArea(MathUtils.calcViewportBoundaries(line.pointList), this.coordUtils.getAbsCoord(coord));
+    });
+  }
+
   public onMouseDown(e: MouseEvent) {
     if (super.onMouseDown(e) || this.forbidMouseOperation || !this.imgInfo) {
       return;
@@ -1382,10 +1404,7 @@ class LineToolOperation extends BasicToolOperation {
       return;
     }
     this.selectedPoint = this.findHoveredPoint(coord);
-    this.coordsInsideActiveArea =
-      this.isActive && this.activeArea
-        ? LineToolUtils.inArea(this.activeArea, this.coordUtils.getAbsCoord(coord))
-        : false;
+    this.coordsInsideActiveArea = this.selectedLines.length > 0 ? this.isCoordOnSelectedArea(coord) : false;
     this.lineDragging = false;
   }
 
@@ -1416,15 +1435,6 @@ class LineToolOperation extends BasicToolOperation {
       reset();
       return;
     }
-
-    // /** 非创建状态，记录当前被修改的线条 */
-    // if (this.isMousedown && !this.isCreate) {
-    //   const lineChanged = this.lineHasChanged();
-    //   if (lineChanged) {
-    //     this.updateLines();
-    //     this.history?.pushHistory(this.lineList);
-    //   }
-    // }
 
     if (e.which === 1) {
       this.onLeftClick(e);
@@ -1625,7 +1635,7 @@ class LineToolOperation extends BasicToolOperation {
     );
 
     if (nextSelectedLine) {
-      this.setActiveLineByID(nextSelectedLine.id);
+      this.selection.setSelectedIDs(nextSelectedLine.id);
     }
   }
 
@@ -1661,10 +1671,17 @@ class LineToolOperation extends BasicToolOperation {
   }
 
   public deleteSelectedLine(coord: ICoordinate) {
-    const boundary = MathUtils.calcViewportBoundaries(this.activeLine, this.isCurve, SEGMENT_NUMBER, this.zoom);
-    const axisOnArea = LineToolUtils.inArea(boundary, this.coordUtils.getAbsCoord(coord));
-    if (axisOnArea) {
-      this.deleteLine();
+    if (this.selectedLine) {
+      const boundary = MathUtils.calcViewportBoundaries(
+        this.selectedLine?.pointList,
+        this.isCurve,
+        SEGMENT_NUMBER,
+        this.zoom,
+      );
+      const axisOnArea = LineToolUtils.inArea(boundary, this.coordUtils.getAbsCoord(coord));
+      if (axisOnArea) {
+        this.deleteLine();
+      }
     }
   }
 
@@ -1708,7 +1725,7 @@ class LineToolOperation extends BasicToolOperation {
 
   /** 删除激活的线段 */
   public deleteLine() {
-    this.lineList = this.lineList.filter((i) => i.id !== this.selectedID);
+    this.lineList = this.lineList.filter((i) => !this.selection.isIdSelected(i.id));
     this.history?.pushHistory(this.lineList);
     this.setNoneStatus();
     this.emit('dataUpdated', this.lineList);
@@ -1742,7 +1759,7 @@ class LineToolOperation extends BasicToolOperation {
     if (this.attributeConfigurable) {
       this.defaultAttribute = attribute;
       this.setLineAttribute('attribute', attribute);
-      if (this.selectedID) {
+      if (this.selectedIDs.length > 0) {
         this.history?.pushHistory(this.lineList);
       }
     }
@@ -1757,17 +1774,16 @@ class LineToolOperation extends BasicToolOperation {
   }
 
   /** 更新线条的属性 */
-  public setLineAttribute(key: 'attribute' | 'textAttribute', value: string, id?: string) {
-    const targetID = id || this.selectedID;
+  public setLineAttribute(key: 'attribute' | 'textAttribute', value: string) {
+    if (this.selectedIDs.length > 0) {
+      this.lineList.forEach((line) => {
+        if (this.selection.isIdSelected(line.id)) {
+          line[key] = value;
+        }
+      });
 
-    if (targetID) {
-      const line = this.lineList.find((i) => i.id === targetID);
-      if (line) {
-        line[key] = value;
-      }
+      this.render();
     }
-
-    this.render();
   }
 
   /** 更新外部属性列表的选中值 */
@@ -1821,22 +1837,9 @@ class LineToolOperation extends BasicToolOperation {
     this.render();
   }
 
-  public setSelectedLineID(id?: string) {
-    if (this.selectedID === id) {
-      return;
-    }
+  public setSelectedLineID(id?: string, isAppend = false) {
+    this.selection.setSelectedIDs(id, isAppend);
 
-    const oldID = this.selectedID;
-
-    if (id !== oldID && oldID) {
-      this._textAttributeInstance?.changeSelected();
-    }
-
-    if (!id) {
-      this._textAttributeInstance?.clearTextAttribute();
-    }
-
-    this.selectedID = id;
     this.emit('selectedChange');
   }
 
@@ -1909,7 +1912,7 @@ class LineToolOperation extends BasicToolOperation {
     if (this.attributeConfigurable) {
       this.defaultAttribute = attribute;
       this.setLineAttribute('attribute', attribute);
-      if (this.selectedID) {
+      if (this.selectedIDs.length > 0) {
         this.history?.pushHistory(this.lineList);
       }
       this.emit('changeAttributeSidebar');
@@ -1934,14 +1937,14 @@ class LineToolOperation extends BasicToolOperation {
   }
 
   public renderTextAttribute() {
-    if (!this.ctx || !this.activeLine || this.activeLine?.length < 2 || this.isCreate) {
+    if (!this.ctx || !this.selectedLine) {
       return;
     }
 
     const valid = this.isActiveLineValid();
     const attribute = this.defaultAttribute;
 
-    const { x, y } = this.activeLine[1];
+    const { x, y } = this.selectedLine!.pointList![1];
 
     const coordinate = this.coordUtils.getRenderCoord({ x, y });
     const toolColor = this.getColor(attribute);

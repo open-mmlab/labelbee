@@ -1,3 +1,9 @@
+/**
+ * @file Manage selectedIds for ToolInstance
+ * @author Glenfiddish <edwinlee0927@hotmail.com>
+ * @createdate 2023-03-01
+ */
+
 import _ from 'lodash';
 import LineToolOperation from './LineToolOperation';
 import PointOperation from './pointOperation';
@@ -22,7 +28,7 @@ class Selection {
 
   constructor(toolInstance: ToolInstance) {
     if (!toolInstance) {
-      console.error('MultipleSelect is require an  tool instance');
+      console.error('MultipleSelect is require a tool instance');
     }
 
     this._selectedIDs = [];
@@ -35,14 +41,6 @@ class Selection {
 
   get selectedID() {
     return this._selectedIDs.length === 1 ? this._selectedIDs[0] : undefined;
-  }
-
-  set selectedIDs(selectedIDs: SelectedIDs) {
-    this._selectedIDs = selectedIDs;
-    if (selectedIDs.length > 1) {
-      this.toolInstance?._textAttributeInstance?.clearTextAttribute();
-    }
-    this.toolInstance.render();
   }
 
   get visibleDataList() {
@@ -62,13 +60,22 @@ class Selection {
   }
 
   /**
+   * Trigger tools and _textAttributeInstance to re-render when _selectedIDs changed
+   */
+  private set selectedIDs(selectedIDs: SelectedIDs) {
+    this.toolInstance._textAttributeInstance?.selectedIDsChanged(this.selectedIDs, selectedIDs);
+    this._selectedIDs = selectedIDs;
+    this.toolInstance.render();
+  }
+
+  /**
    * Update selectedIDs:
    * Remove selectedID when selectedIDs includes
    * Append selectedID when selectedIDs not includes
    * SelectedID is
    * @param selectedID
    */
-  public updateSelectedIDs(selectedID?: SelectedID) {
+  private updateSelectedIDs(selectedID?: SelectedID) {
     if (!selectedID) {
       this._selectedIDs = [];
       return;
@@ -81,25 +88,19 @@ class Selection {
     }
   }
 
+  /**
+   * Set selectedIDs
+   * isAppend is true: push or remove from selectedIDs
+   * isAppend is false: overwrite selectedIDs
+   * @param id
+   * @param isAppend
+   */
   public setSelectedIDs(id?: string, isAppend = false) {
     if (isAppend) {
       this.updateSelectedIDs(id);
     } else {
       this.selectedIDs = id ? [id] : [];
     }
-  }
-
-  public updateSelectedGraphProps(updateList: DataList) {
-    const updatedDataList = _.cloneDeep(this.dataList).map((i) => {
-      const updatedData = updateList.find((s) => s.id === i.id);
-      if (updatedData) {
-        return _.merge(i, updatedData);
-      }
-
-      return i;
-    });
-
-    this.setResultAndRender(updatedDataList);
   }
 
   public selectAll() {
@@ -111,8 +112,6 @@ class Selection {
     if (this.selectedIDs.length > 0) {
       this.stashDataList = _.cloneDeep(this.dataList.filter((i) => this.selectedIDs.includes(i.id)));
     }
-
-    // todo: while not data, through an error
   }
 
   public toUnStashDataList() {
@@ -135,9 +134,7 @@ class Selection {
     this.setResultAndRender(mergedDataList);
   }
 
-  public setResultAndRender(dataList: DataList) {
-    // todo: Update tool instance and render
-  }
+  public setResultAndRender(dataList: DataList) {}
 
   public isIdSelected(id: string) {
     return this.selectedIDs.includes(id);

@@ -406,7 +406,6 @@ class PolygonOperation extends BasicToolOperation {
   }
 
   public setSelectedID(newID?: string, isAppend = false) {
-    this._textAttributeInstance?.selectedIDChanged(this.selectedID, newID);
     this.selection.setSelectedIDs(newID, isAppend);
 
     this.render();

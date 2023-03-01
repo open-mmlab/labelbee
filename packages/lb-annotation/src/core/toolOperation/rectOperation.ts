@@ -217,7 +217,6 @@ class RectOperation extends BasicToolOperation {
   }
 
   public setSelectedRectID(newID?: string, isAppend = false) {
-    this._textAttributeInstance?.selectedIDChanged(this.selectedRectID, newID);
     this.selection.setSelectedIDs(newID, isAppend);
 
     this.render();
