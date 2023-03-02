@@ -23,7 +23,7 @@ import DrawUtils from '../../utils/tool/DrawUtils';
 import StyleUtils from '../../utils/tool/StyleUtils';
 import AttributeUtils from '../../utils/tool/AttributeUtils';
 import TextAttributeClass from './textAttributeClass';
-import Selection from './Selection';
+import Selection, { SetDataList } from './Selection';
 
 enum EStatus {
   Create = 0,
@@ -92,7 +92,7 @@ class LineToolOperation extends BasicToolOperation {
         valid: line.valid!,
       });
 
-      if (this.isActive) {
+      if (this.selectedLines.length > 0) {
         this.drawLineLength(line.pointList, color);
         this.renderActiveArea(MathUtils.calcViewportBoundaries(line.pointList, this.isCurve, SEGMENT_NUMBER));
       }
@@ -218,12 +218,12 @@ class LineToolOperation extends BasicToolOperation {
 
   /** 激活状态 */
   get isActive() {
-    return this.status === EStatus.Active;
+    return this.selectedLines.length > 0;
   }
 
   /** 无状态  */
   get isNone() {
-    return this.status === EStatus.None;
+    return !this.isCreate && this.selectedIDs.length === 0;
   }
 
   /** 线条类型是否为曲线 */
@@ -509,7 +509,7 @@ class LineToolOperation extends BasicToolOperation {
     this.render();
   }
 
-  public setCreatStatusAndAddPoint(coord: ICoordinate, isRestText: boolean = false) {
+  public setCreateStatusAndAddPoint(coord: ICoordinate, isRestText: boolean = false) {
     this.updateStatus(EStatus.Create, isRestText);
     this.addLinePoint(coord);
   }
@@ -701,18 +701,6 @@ class LineToolOperation extends BasicToolOperation {
     this.renderTextAttribute();
     this.renderCursorLine(this.getLineColor(this.defaultAttribute));
   };
-
-  // /** 重新计算并渲染热区 */
-  // public updateActiveArea() {
-  //   this.activeArea = this.getActiveArea();
-  //   this.renderActiveArea();
-  // }
-
-  public getActiveArea() {
-    return this.hasActiveLine
-      ? MathUtils.calcViewportBoundaries(this.activeLine, this.isCurve, SEGMENT_NUMBER, this.zoom)
-      : undefined;
-  }
 
   /**
    * 绘制线条序号（包含属性或者标签）
@@ -1118,53 +1106,6 @@ class LineToolOperation extends BasicToolOperation {
     this.prevAxis = coord;
   }
 
-  /**
-   * 设置激活区域
-   * @param coord
-   * @param outsideCancel
-   * @todo 拖拽区域取消选中
-   */
-  public setActiveArea(coord: ICoordinate, outsideCancel: boolean = false) {
-    const activeLine = this.findHoverLine(coord);
-    if (activeLine) {
-      const index = this.lineList.findIndex((i) => i.id === activeLine?.id);
-      const area = MathUtils.calcViewportBoundaries(
-        activeLine?.pointList || [],
-        this.isCurve,
-        SEGMENT_NUMBER,
-        this.zoom,
-      );
-      const line = this.lineList[index];
-      this.updateStatus(EStatus.Active);
-      this.setActiveLine(line.pointList);
-      this.setSelectedLineID(line.id);
-      this.activeArea = area;
-      this.updateLineAttributes(line);
-    } else if (outsideCancel) {
-      this.setNoneStatus();
-    }
-
-    this.render();
-  }
-
-  /**
-   * 根据id选中线条
-   * @param id
-   */
-  public setActiveLineByID(id: string) {
-    const line = this.lineList.find((i) => i.id === id);
-    if (line) {
-      const area = MathUtils.calcViewportBoundaries(line?.pointList || [], this.isCurve, SEGMENT_NUMBER, this.zoom);
-      this.updateStatus(EStatus.Active);
-      this.setActiveLine(line.pointList);
-      this.setSelectedLineID(line.id);
-      this.activeArea = area;
-      this.updateLineAttributes(line);
-    }
-
-    this.render();
-  }
-
   public setActiveLine(pointList?: ILinePoint[]) {
     this.activeLine = pointList ? _.cloneDeep(pointList) : undefined;
   }
@@ -1174,7 +1115,6 @@ class LineToolOperation extends BasicToolOperation {
 
     if (this.isCreate) {
       if (this.isLinePointsNotEnough()) {
-        // message.info(`顶点数不能少于${this.lowerLimitPointNum}`);
         return;
       }
       this.stopLineCreating(true);
@@ -1337,7 +1277,7 @@ class LineToolOperation extends BasicToolOperation {
     const nextAxis = this.getNextPoint(e, coord)!;
 
     if (this.isCreate || this.isNone) {
-      this.setCreatStatusAndAddPoint(nextAxis);
+      this.setCreateStatusAndAddPoint(nextAxis);
       return;
     }
 
@@ -1349,7 +1289,7 @@ class LineToolOperation extends BasicToolOperation {
       const isMouseCoordOutsideActiveArea = this.isMouseCoordOutsideActiveArea();
       if (isMouseCoordOutsideActiveArea) {
         this.setNoneStatus(false);
-        this.setCreatStatusAndAddPoint(nextAxis);
+        this.setCreateStatusAndAddPoint(nextAxis);
         return;
       }
 
@@ -1364,10 +1304,7 @@ class LineToolOperation extends BasicToolOperation {
       /** 设置线的有效无效 */
       if (this.coordsInsideActiveArea && e.ctrlKey) {
         this.setInvalidLine(this.selectedID);
-        return;
       }
-
-      this.addLinePointToActiveLine();
     }
   };
 
@@ -1492,26 +1429,14 @@ class LineToolOperation extends BasicToolOperation {
     }
 
     if (setActiveAfterCreating) {
-      this.setActiveStatus(selectedID);
-    } else {
+      this.activeLine = [];
       this.setNoneStatus();
+      this.setSelectedLineID(selectedID);
     }
 
     this.actionsHistory?.empty();
     this.emit('dataUpdated', this.lineList);
     this.render();
-  }
-
-  public setActiveStatus(id?: string) {
-    const line = id ? this.lineList.find((i) => i.id === id) : undefined;
-    if (line) {
-      const pointList = line?.pointList;
-      this.updateStatus(EStatus.Active);
-      this.setActiveLine(pointList);
-      this.setSelectedLineID(id);
-    } else {
-      this.setNoneStatus();
-    }
   }
 
   /**
@@ -1524,7 +1449,6 @@ class LineToolOperation extends BasicToolOperation {
     }
     this.activeLine = [];
     this.setSelectedLineID(undefined);
-    this.activeArea = undefined;
     this.isLineValid = true;
     this.cursor = undefined;
   }
@@ -1535,10 +1459,13 @@ class LineToolOperation extends BasicToolOperation {
 
   /** 续标当前激活的线条 */
   public continueToEdit() {
-    this.updateStatus(EStatus.Create);
-    this.cursor = undefined;
-    this.actionsHistory?.pushHistory(this.activeLine);
-    this.render();
+    if (this.selectedLine?.pointList) {
+      this.updateStatus(EStatus.Create);
+      this.cursor = undefined;
+      this.setActiveLine(this.selectedLine.pointList);
+      this.actionsHistory?.pushHistory(this.activeLine);
+      this.render();
+    }
   }
 
   public onKeyUp = (e: KeyboardEvent) => {
@@ -1547,23 +1474,27 @@ class LineToolOperation extends BasicToolOperation {
     this.isShift = false;
     this.hoverLineSegmentIndex = -1;
 
+    if (this.selection.triggerKeyboardEvent(e, this.setLineList as unknown as SetDataList)) {
+      return;
+    }
+
     if (e.keyCode === EKeyCode.Esc) {
       this.stopLineCreating(false);
       return;
     }
 
-    if (this.isActive) {
-      if (e.keyCode === EKeyCode.Delete) {
+    if (this.selectedLine) {
+      if (e.key === 'Delete') {
         this.deleteLine();
         return;
       }
 
-      if (e.keyCode === EKeyCode.F) {
+      if (e.key === 'f') {
         this.setInvalidLine(this.selectedID);
         return;
       }
 
-      if (e.keyCode === EKeyCode.Space) {
+      if (e.key === ' ') {
         this.continueToEdit();
         return;
       }
@@ -1839,7 +1770,6 @@ class LineToolOperation extends BasicToolOperation {
 
   public setSelectedLineID(id?: string, isAppend = false) {
     this.selection.setSelectedIDs(id, isAppend);
-
     this.emit('selectedChange');
   }
 

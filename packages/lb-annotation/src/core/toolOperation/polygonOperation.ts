@@ -26,7 +26,7 @@ import StyleUtils from '../../utils/tool/StyleUtils';
 import uuid from '../../utils/uuid';
 import { BasicToolOperation, IBasicToolOperationProps } from './basicToolOperation';
 import TextAttributeClass from './textAttributeClass';
-import Selection from './Selection';
+import Selection, { SetDataList } from './Selection';
 
 const TEXT_MAX_WIDTH = 164;
 
@@ -814,6 +814,10 @@ class PolygonOperation extends BasicToolOperation {
 
   public onKeyUp(e: KeyboardEvent) {
     super.onKeyUp(e);
+
+    if (this.selection.triggerKeyboardEvent(e, this.setPolygonList.bind(this) as unknown as SetDataList)) {
+      return;
+    }
 
     switch (e.keyCode) {
       case EKeyCode.Ctrl:

@@ -5,12 +5,12 @@
  */
 
 import _ from 'lodash';
+import { IPolygonData } from '@/types/tool/polygon';
 import LineToolOperation from './LineToolOperation';
 import PointOperation from './pointOperation';
 import PolygonOperation from './polygonOperation';
 import { RectOperation } from './rectOperation';
 import CommonToolUtils from '../../utils/tool/CommonToolUtils';
-import { IPolygonData } from '@/types/tool/polygon';
 
 type ToolInstance = PointOperation | PolygonOperation | LineToolOperation | RectOperation;
 
@@ -18,6 +18,7 @@ type SelectedID = string;
 type SelectedIDs = SelectedID[];
 type DataUnit = IPointUnit | IPolygonData | ILine | IRect;
 type DataList = Array<DataUnit>;
+export type SetDataList = (dataList: DataList) => void;
 
 class Selection {
   private _selectedIDs: SelectedIDs;
@@ -117,27 +118,59 @@ class Selection {
   public toUnStashDataList() {
     if (this.stashDataList) {
       const _stashDataList = this.stashDataList;
-      this.stashDataList = [];
+      this.stashDataList = undefined;
       return _stashDataList;
     }
 
     return undefined;
   }
 
-  public mergeStashData() {
+  public mergeStashData(setDataList: (dataList: DataList) => void) {
     const stashList = this.toUnStashDataList();
+    if (!stashList) {
+      return;
+    }
+
     /**
      * Merge current result and stashList
      * https://stackoverflow.com/questions/38612972/how-to-merge-two-arrays-of-objects-by-id-using-lodash
      */
     const mergedDataList = _(this.dataList).keyBy('id').merge(_.keyBy(stashList, 'id')).values().value();
-    this.setResultAndRender(mergedDataList);
+    setDataList(mergedDataList);
+    this.toolInstance.render();
   }
-
-  public setResultAndRender(dataList: DataList) {}
 
   public isIdSelected(id: string) {
     return this.selectedIDs.includes(id);
+  }
+
+  /**
+   * Trigger selection events(hijacking tools' key down event)
+   * - Copy selected data
+   * - Paste stash data
+   * - Select visible data
+   * @param e
+   * @param setDataList
+   * @returns if
+   */
+  public triggerKeyboardEvent(e: KeyboardEvent, setDataList: SetDataList): boolean {
+    if (e.ctrlKey) {
+      if (e.key === 'v') {
+        this.mergeStashData(setDataList);
+        return true;
+      }
+
+      if (e.key === 'a') {
+        this.selectAll();
+        return true;
+      }
+
+      if (e.key === 'c') {
+        this.toStashDataList();
+        return true;
+      }
+    }
+    return false;
   }
 }
 

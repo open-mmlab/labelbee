@@ -17,7 +17,7 @@ import { getPolygonPointUnderZoom } from '../../utils/tool/polygonTool';
 import uuid from '../../utils/uuid';
 import { BasicToolOperation, IBasicToolOperationProps } from './basicToolOperation';
 import TextAttributeClass from './textAttributeClass';
-import Selection from './Selection';
+import Selection, { SetDataList } from './Selection';
 
 interface IRectOperationProps extends IBasicToolOperationProps {
   drawOutSideTarget: boolean; // 是否可以在边界外进行标注
@@ -1289,6 +1289,10 @@ class RectOperation extends BasicToolOperation {
   public onKeyUp(e: KeyboardEvent) {
     super.onKeyUp(e);
 
+    if (this.selection.triggerKeyboardEvent(e, this.setRectList.bind(this) as unknown as SetDataList)) {
+      return;
+    }
+
     switch (e.keyCode) {
       case EKeyCode.Ctrl:
         if (this.drawingRect) {
@@ -1392,7 +1396,7 @@ class RectOperation extends BasicToolOperation {
     const coordinate = AxisUtils.getOffsetCoordinate({ x, y: y + height }, this.currentPos, this.zoom);
     const toolColor = this.getColor(attribute);
     const color = valid ? toolColor?.valid.stroke : toolColor?.invalid.stroke;
-    const distance = 4;
+    const offset = 4;
     if (!this._textAttributeInstance) {
       // 属性文本示例
 
@@ -1412,7 +1416,7 @@ class RectOperation extends BasicToolOperation {
 
     this._textAttributeInstance.update(`${selectedRect.textAttribute}`, {
       left: coordinate.x,
-      top: coordinate.y + distance,
+      top: coordinate.y + offset,
       color,
       width: newWidth,
     });

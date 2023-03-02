@@ -1,4 +1,4 @@
-import { edgeAdsorptionScope, ELineTypes, EOperationMode, EToolName } from '@/constant/tool';
+import { edgeAdsorptionScope, ELineTypes, EToolName } from '@/constant/tool';
 import RectUtils from '@/utils/tool/RectUtils';
 import PolygonUtils from '@/utils/tool/PolygonUtils';
 import MarkerUtils from '@/utils/tool/MarkerUtils';
@@ -16,7 +16,7 @@ import StyleUtils from '../../utils/tool/StyleUtils';
 import uuid from '../../utils/uuid';
 import { BasicToolOperation, IBasicToolOperationProps } from './basicToolOperation';
 import TextAttributeClass from './textAttributeClass';
-import Selection from './Selection';
+import Selection, { SetDataList } from './Selection';
 
 const TEXTAREA_WIDTH = 200;
 
@@ -403,6 +403,11 @@ class PointOperation extends BasicToolOperation {
       }
     });
     this.render();
+  }
+
+  public onKeyUp(e: KeyboardEvent): boolean | void {
+    super.onKeyUp(e);
+    this.selection.triggerKeyboardEvent(e, this.setPointList.bind(this) as unknown as SetDataList);
   }
 
   public onKeyDown(e: KeyboardEvent) {
