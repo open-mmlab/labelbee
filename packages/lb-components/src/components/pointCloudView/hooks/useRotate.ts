@@ -1,7 +1,7 @@
 import { useCallback, useContext } from 'react';
 import { IAnnotationStateProps } from '@/store/annotation/map';
 import { synchronizeBackView, synchronizeSideView } from './usePointCloudViews';
-import { usePointCloudBoxes } from './usePointCloudBoxes';
+import { useSingleBox } from './useSingleBox';
 import { PointCloudContext } from '../PointCloudContext';
 import { cAnnotation } from '@labelbee/lb-annotation';
 import { PointCloudUtils } from '@labelbee/lb-utils';
@@ -14,7 +14,7 @@ const { ERotateDirection } = cAnnotation;
  */
 export const useRotate = ({ currentData }: IAnnotationStateProps) => {
   const ptCtx = useContext(PointCloudContext);
-  const { selectedBox, updateSelectedBox } = usePointCloudBoxes();
+  const { selectedBox, updateSelectedBox } = useSingleBox();
 
   const updateRotate = useCallback(
     (angle: number) => {

@@ -11,7 +11,7 @@ import { IStepInfo } from '@/types/step';
 import { jsonParser } from '@/utils';
 import { ICustomToolInstance } from '@/hooks/annotation';
 import { useStatus } from '@/components/pointCloudView/hooks/useStatus';
-import { usePointCloudBoxes } from '@/components/pointCloudView/hooks/usePointCloudBoxes';
+import { useSingleBox } from '@/components/pointCloudView/hooks/useSingleBox';
 import { useTranslation } from 'react-i18next';
 import { LabelBeeContext } from '@/store/ctx';
 import BatchUpdateModal from './components/batchUpdateModal';
@@ -83,7 +83,7 @@ const AnnotatedBox = ({ imgList, imgIndex }: { imgList: IFileItem[]; imgIndex: n
 const BoxTrackIDInput = () => {
   const [isEdit, setIsEdit] = useState(false);
   const { pointCloudBoxList } = useContext(PointCloudContext);
-  const { selectedBox, updateSelectedBox } = usePointCloudBoxes();
+  const { selectedBox, updateSelectedBox } = useSingleBox();
   const [inputValue, setInputValue] = useState('');
   const { t } = useTranslation();
 
@@ -194,7 +194,7 @@ const AttributeUpdater = ({
   attributeList: any[]; // TODO
   subAttributeList: any[]; // TODO
 }) => {
-  const { selectedBox } = usePointCloudBoxes();
+  const { selectedBox } = useSingleBox();
   const ptx = useContext(PointCloudContext);
   const { t } = useTranslation();
   const { defaultAttribute } = useAttribute();

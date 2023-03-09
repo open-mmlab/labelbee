@@ -14,7 +14,6 @@ import { getClassName } from '@/utils/dom';
 import { PointCloudContainer } from './PointCloudLayout';
 import React, { useEffect, useRef } from 'react';
 import { PointCloudContext } from './PointCloudContext';
-import { usePointCloudBoxes } from './hooks/usePointCloudBoxes';
 import {
   EPerspectiveView,
   IPointCloudBox,
@@ -22,6 +21,7 @@ import {
   IPolygonPoint,
   UpdatePolygonByDragList,
 } from '@labelbee/lb-utils';
+import { useSingleBox } from './hooks/useSingleBox';
 import { SizeInfoForView } from './PointCloudInfos';
 import { connect } from 'react-redux';
 import { a2MapStateToProps, IA2MapStateProps } from '@/store/annotation/map';
@@ -86,7 +86,7 @@ const PointCloudSideView = ({ currentData, config }: IA2MapStateProps) => {
   const ptCtx = React.useContext(PointCloudContext);
   const ref = useRef<HTMLDivElement>(null);
   const size = useSize(ref);
-  const { updateSelectedBox, selectedBox } = usePointCloudBoxes();
+  const { updateSelectedBox, selectedBox } = useSingleBox();
   const { t } = useTranslation();
 
   const transferPolygonDataToBoxParams = (

@@ -18,7 +18,7 @@ import {
 } from '@labelbee/lb-utils';
 import { useContext } from 'react';
 import { PointCloudContext } from '../PointCloudContext';
-import { usePointCloudBoxes } from './usePointCloudBoxes';
+import { useSingleBox } from './useSingleBox';
 import { ISize } from '@/types/main';
 import _ from 'lodash';
 import { useDispatch, useSelector } from '@/store/ctx';
@@ -342,7 +342,7 @@ export const usePointCloudViews = () => {
   const { addHistory, initHistory, pushHistoryUnderUpdatePolygon } = useHistory();
   const { selectedPolygon } = usePolygon();
 
-  const { updateSelectedBox, updateSelectedBoxes, getPointCloudByID } = usePointCloudBoxes();
+  const { updateSelectedBox, updateSelectedBoxes, getPointCloudByID } = useSingleBox();
   const { currentData, config } = useSelector((state: AppState) => {
     const { stepList, step, imgList, imgIndex } = state.annotation;
 
@@ -352,7 +352,7 @@ export const usePointCloudViews = () => {
     };
   });
   const dispatch = useDispatch();
-  const { selectedBox } = usePointCloudBoxes();
+  const { selectedBox } = useSingleBox();
   const { t } = useTranslation();
 
   const selectedPointCloudBox = selectedBox?.info;

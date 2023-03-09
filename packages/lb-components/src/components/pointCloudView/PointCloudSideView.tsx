@@ -13,7 +13,7 @@ import { SizeInfoForView } from './PointCloudInfos';
 import { connect } from 'react-redux';
 import { a2MapStateToProps, IA2MapStateProps } from '@/store/annotation/map';
 import { usePointCloudViews } from './hooks/usePointCloudViews';
-import { usePointCloudBoxes } from './hooks/usePointCloudBoxes';
+import { useSingleBox } from './hooks/useSingleBox';
 import EmptyPage from './components/EmptyPage';
 import useSize from '@/hooks/useSize';
 import { useTranslation } from 'react-i18next';
@@ -72,7 +72,7 @@ const updateSideViewByCanvas2D = (
 const PointCloudSideView: React.FC<IA2MapStateProps> = ({ config }) => {
   const ptCtx = React.useContext(PointCloudContext);
   const { sideViewUpdateBox } = usePointCloudViews();
-  const { selectedBox } = usePointCloudBoxes();
+  const { selectedBox } = useSingleBox();
   const ref = useRef<HTMLDivElement>(null);
   const size = useSize(ref);
   const { t } = useTranslation();
