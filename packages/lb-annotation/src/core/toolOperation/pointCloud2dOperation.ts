@@ -6,7 +6,7 @@
  * @author Ron <ron.f.luo@gmail.com>
  */
 
-import { IPointCloudConfig, toolStyleConverter } from '@labelbee/lb-utils';
+import { IPointCloudConfig, toolStyleConverter, INVALID_COLOR } from '@labelbee/lb-utils';
 import { ESortDirection } from '@/constant/annotation';
 import { EPolygonPattern } from '@/constant/tool';
 import { IPolygonData, IPolygonPoint } from '@/types/tool/polygon';
@@ -20,6 +20,7 @@ import PolygonOperation, { IPolygonOperationProps } from './polygonOperation';
 interface IPointCloud2dOperationProps {
   showDirectionLine?: boolean;
   forbidAddNew?: boolean;
+  checkMode?: boolean; // Judgement of check Mode
 }
 
 class PointCloud2dOperation extends PolygonOperation {
@@ -29,6 +30,8 @@ class PointCloud2dOperation extends PolygonOperation {
 
   public pointCloudConfig: IPointCloudConfig;
 
+  private checkMode: boolean;
+
   private selectedIDs: string[] = [];
 
   constructor(props: IPolygonOperationProps & IPointCloud2dOperationProps) {
@@ -37,6 +40,12 @@ class PointCloud2dOperation extends PolygonOperation {
     this.showDirectionLine = props.showDirectionLine ?? true;
     this.forbidAddNew = props.forbidAddNew ?? false;
     this.pointCloudConfig = CommonToolUtils.jsonParser(props.config) ?? {};
+    this.checkMode = props.checkMode ?? false;
+
+    // Check Mode automatically opens forbidAddNew.
+    if (this.forbidAddNew === false && props.checkMode === true) {
+      this.forbidAddNew = true;
+    }
 
     // Set the default
     this.config = {
@@ -49,6 +58,39 @@ class PointCloud2dOperation extends PolygonOperation {
 
   get getSelectedIDs() {
     return this.selectedIDs;
+  }
+
+  public setConfig(config: string) {
+    const newConfig = CommonToolUtils.jsonParser(config);
+    this.pointCloudConfig = newConfig;
+    this.config = {
+      ...this.config,
+      attributeList: newConfig?.attributeList ?? [],
+    };
+  }
+
+  public dragMouseDown(e: MouseEvent) {
+    if (this.checkMode) {
+      return;
+    }
+
+    super.dragMouseDown(e);
+  }
+
+  public deletePolygon(id?: string) {
+    if (this.checkMode) {
+      return;
+    }
+
+    super.deletePolygon(id);
+  }
+
+  public deletePolygonPoint(index: number) {
+    if (this.checkMode) {
+      return;
+    }
+
+    super.deletePolygonPoint(index);
   }
 
   /**
@@ -78,13 +120,20 @@ class PointCloud2dOperation extends PolygonOperation {
       return;
     }
 
-    if (e.ctrlKey && this.hoverID) {
-      this.emit('addSelectedIDs', this.hoverID);
-    } else {
-      this.emit('setSelectedIDs', this.hoverID);
+    if (!this.hoverID) {
+      return;
     }
 
-    const hoverAttribute = this.hoverPolygon?.attribute;
+    /**
+     * Multi Selected.
+     */
+    if (e.ctrlKey) {
+      this.emit('addSelectedIDs', this.hoverID);
+      return;
+    }
+
+    this.emit('setSelectedIDs', this.hoverID);
+    const hoverAttribute = this.polygonList.find((v) => v.id === this.hoverID)?.attribute;
     if (hoverAttribute && hoverAttribute !== this.defaultAttribute) {
       this.emit('syncAttribute', hoverAttribute);
     }
@@ -111,12 +160,14 @@ class PointCloud2dOperation extends PolygonOperation {
   }
 
   /** 获取当前属性颜色 */
-  public getPointCloudLineColor(attribute = '') {
-    return toolStyleConverter.getColorFromConfig(
-      { attribute },
-      { ...this.pointCloudConfig, attributeConfigurable: true },
-      {},
-    ).stroke;
+  public getPointCloudLineColor(polygon: IPolygonData) {
+    return polygon.valid === false
+      ? INVALID_COLOR
+      : toolStyleConverter.getColorFromConfig(
+          { attribute: polygon.attribute },
+          { ...this.pointCloudConfig, attributeConfigurable: true },
+          {},
+        ).stroke;
   }
 
   /**
@@ -129,8 +180,7 @@ class PointCloud2dOperation extends PolygonOperation {
         if ([...this.selectedIDs, this.editPolygonID].includes(polygon.id)) {
           return;
         }
-        const { attribute } = polygon;
-        const lineColor = this.getPointCloudLineColor(attribute);
+        const lineColor = this.getPointCloudLineColor(polygon);
         const transformPointList = AxisUtils.changePointListByZoom(polygon.pointList || [], this.zoom, this.currentPos);
 
         DrawUtils.drawPolygonWithFillAndLine(this.canvas, transformPointList, {
@@ -163,7 +213,7 @@ class PointCloud2dOperation extends PolygonOperation {
 
   public renderSingleSelectedPolygon = (selectedPolygon: IPolygonData) => {
     if (this.selectedPolygons) {
-      const color = this.getPointCloudLineColor(selectedPolygon.attribute);
+      const color = this.getPointCloudLineColor(selectedPolygon);
       // const toolData = StyleUtils.getStrokeAndFill(toolColor, selectedPolygon.valid, { isSelected: true });
 
       const polygon = AxisUtils.changePointListByZoom(selectedPolygon.pointList, this.zoom, this.currentPos);
@@ -282,7 +332,6 @@ class PointCloud2dOperation extends PolygonOperation {
     }
 
     this.selectedID = newID;
-    this.selectedIDs = newID ? [newID] : [];
 
     this.render();
   }

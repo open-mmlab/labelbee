@@ -237,6 +237,15 @@ export function BatchUpdateResultByTrackID(
   };
 }
 
+export const UpdateCheckMode = (checkMode: boolean): AnnotationActionTypes => {
+  return {
+    type: ANNOTATION_ACTIONS.SET_CHECK_MODE,
+    payload: {
+      checkMode,
+    },
+  };
+};
+
 /**
  * 初始化任务数据
  * @param param0
@@ -253,6 +262,7 @@ export function InitTaskData({
   stepList,
   skipBeforePageTurning,
   beforeRotate,
+  checkMode,
 }: any): any {
   const tasks: any[] = [];
 
@@ -288,6 +298,10 @@ export function InitTaskData({
 
   if (beforeRotate) {
     tasks.push(UpdateBeforeRotate(beforeRotate));
+  }
+
+  if (typeof checkMode === 'boolean') {
+    tasks.push(UpdateCheckMode(checkMode));
   }
 
   tasks.push(SetTaskConfig({ stepList, step }));
@@ -591,5 +605,12 @@ export const SetPointCloudLoading = (dispatch: Function, loading: boolean) => {
     payload: {
       loading,
     },
+  });
+};
+
+export const InitAnnotationState = (dispatch: Function) => {
+  dispatch({
+    type: ANNOTATION_ACTIONS.INIT_ALL_STATE,
+    payload: {},
   });
 };

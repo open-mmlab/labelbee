@@ -23,19 +23,22 @@ import { AppState } from '@/store';
 import { connect } from 'react-redux';
 import { IFileItem } from '@/types/data';
 import { LabelBeeContext } from '@/store/ctx';
+import { TDrawLayerSlot } from '@/types/main';
 
 interface IProps {
   imgList: IFileItem[];
+  drawLayerSlot?: TDrawLayerSlot;
+  checkMode?: boolean;
 }
 
-const PointCloudView: React.FC<IProps> = ({ imgList }) => {
+const PointCloudView: React.FC<IProps> = ({ imgList, drawLayerSlot, checkMode }) => {
   if (imgList.length === 0) {
     return null;
   }
 
   return (
     <>
-      <PointCloudListener />
+      <PointCloudListener checkMode={checkMode}/>
       <div className={getClassName('point-cloud-layout')} onContextMenu={(e) => e.preventDefault()}>
         <div className={getClassName('point-cloud-wrapper')}>
           <div className={getClassName('point-cloud-container', 'left')}>
@@ -44,10 +47,10 @@ const PointCloudView: React.FC<IProps> = ({ imgList }) => {
           </div>
 
           <div className={getClassName('point-cloud-container', 'right')}>
-            <PointCloudTopView />
+            <PointCloudTopView drawLayerSlot={drawLayerSlot} checkMode={checkMode} />
             <div className={getClassName('point-cloud-container', 'right-bottom')}>
-              <PointCloudSideView />
-              <PointCloudBackView />
+              <PointCloudSideView checkMode={checkMode} />
+              <PointCloudBackView checkMode={checkMode} />
             </div>
           </div>
         </div>

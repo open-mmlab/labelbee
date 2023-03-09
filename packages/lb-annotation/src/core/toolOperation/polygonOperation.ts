@@ -924,6 +924,16 @@ class PolygonOperation extends BasicToolOperation {
       return;
     }
 
+    this.dragMouseDown(e);
+    return true;
+  }
+
+  /**
+   * Judgment of drag information during mousedown
+   * @param e
+   * @returns
+   */
+  public dragMouseDown(e: MouseEvent) {
     const firstPolygon = this.selectedPolygon;
 
     if (!firstPolygon || e.button !== 0) {
@@ -961,8 +971,6 @@ class PolygonOperation extends BasicToolOperation {
       changePointIndex,
       originPolygon: this.selectedPolygon,
     };
-
-    return true;
   }
 
   public segment() {
@@ -1309,15 +1317,24 @@ class PolygonOperation extends BasicToolOperation {
     }
   }
 
-  public leftMouseUp(e: MouseEvent) {
+  public leftMouseUpdateValid(e: MouseEvent) {
     const hoverID = this.getHoverID(e);
     if (this.drawingPointList.length === 0 && e.ctrlKey === true && hoverID) {
       // ctrl + 左键 + hover存在，更改框属性
       this.setPolygonValidAndRender(hoverID);
+      return true;
+    }
+    return false;
+  }
+
+  public leftMouseUp(e: MouseEvent) {
+    const isCtrl = this.leftMouseUpdateValid(e);
+
+    if (isCtrl) {
       return;
     }
 
-    // 创建多边形
+    // Create New Polygon
     this.addPointInDrawing(e);
   }
 

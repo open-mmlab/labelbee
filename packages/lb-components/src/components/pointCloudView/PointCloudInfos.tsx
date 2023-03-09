@@ -4,7 +4,7 @@
  * @createdate 2022-07-13
  */
 
-import { EPerspectiveView, PointCloudUtils } from '@labelbee/lb-utils';
+import { EPerspectiveView, IPointCloudConfig, PointCloudUtils } from '@labelbee/lb-utils';
 import React, { useEffect, useState } from 'react';
 import { PointCloudContext } from './PointCloudContext';
 import { UnitUtils } from '@labelbee/lb-annotation';
@@ -65,7 +65,13 @@ export const SizeInfoForView = ({ perspectiveView }: { perspectiveView: EPerspec
 /**
  * Display selected box's infos
  */
-export const BoxInfos = () => {
+export const BoxInfos = ({
+  checkMode,
+  config,
+}: {
+  checkMode?: boolean;
+  config: IPointCloudConfig;
+}) => {
   const ptCtx = React.useContext(PointCloudContext);
   const { selectedBox } = useSingleBox();
   const [infos, setInfos] = useState<Array<{ label: string; value: string }>>([]);
@@ -111,6 +117,16 @@ export const BoxInfos = () => {
         label: t('PointCount'),
         value: `${data.num}`,
       });
+
+      //  SubAttribute is shown in checkMode
+      if (checkMode === true && selectedBox.info.subAttribute && config) {
+        const subAttributeNameList = PointCloudUtils.getSubAttributeName(
+          selectedBox.info.subAttribute,
+          config,
+        );
+        subAttributeNameList.forEach((data) => infos.push(data));
+      }
+      
       setInfos(infos);
     });
   }, [selectedBox, i18n.language]);

@@ -47,6 +47,11 @@ export type Sider = ({
   pointCloudOperation: React.ReactNode;
 }) => React.ReactNode | React.ReactNode;
 
+export type TDrawLayerSlot = (props: {
+  zoom: number;
+  currentPos: { x: number; y: number };
+}) => React.ReactNode
+
 interface IFooter {
   /** 快捷键 (FooterTips) */
   footerTips: React.ReactNode;
