@@ -22,6 +22,8 @@ export type OnSubmit = (
   submitType: ESubmitType,
   imgIndex: number,
   imgList: IFileItem[],
+  // Just use it in pointCloud now.
+  extra?: { updateImgList: Array<{ newInfo: IFileItem; imgIndex: number }> },
 ) => void;
 
 export type OnSave = (data: IFileItem, imgIndex: number, imgList: AnnotationFileList) => void;

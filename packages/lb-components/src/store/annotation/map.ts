@@ -28,6 +28,8 @@ export interface IA2MapStateProps extends IAnnotationStateProps {
   imgList: IFileItem[];
   stepInfo: IStepInfo;
   config: any;
+  imgIndex: number;
+  configString: string; // Easy for users to listener.
 }
 
 export const a2MapStateToProps = (state: AppState) => {
@@ -39,8 +41,10 @@ export const a2MapStateToProps = (state: AppState) => {
 
   return {
     currentData,
+    imgIndex,
     imgList,
     stepInfo,
     config: jsonParser(stepInfo?.config),
+    configString: stepInfo?.config,
   };
 };

@@ -19,4 +19,6 @@ export * from './types/index';
 // Utils
 export { i18n, toolStyleConverter, PerspectiveShiftUtils, PointCloudUtils, MatrixUtils };
 
-export * from "./annotation";
+export * from './annotation';
+
+export * from './toolStyle';

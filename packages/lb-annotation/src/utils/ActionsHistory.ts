@@ -98,7 +98,7 @@ export default class ActionsHistory {
    * @param minIndex
    * @param isExitData  用于空数组下的赋值
    */
-  public initRecord(data: any[], isExitData = false) {
+  public initRecord(data: any, isExitData = false) {
     const existData = data.length > 0 || isExitData;
     this.record = existData ? [_.cloneDeep(data)] : [];
     this.minRecordIndex = existData ? 0 : -1;

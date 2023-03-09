@@ -4,11 +4,11 @@
  * @author Glenfiddish <edwinlee0927@hotmail.com>
  * @file Refer to https://github.com/mrdoob/three.js/blob/dev/examples/jsm/loaders/PCDLoader.js
  * @date 2022-06-14
- * @update Add genColorByCoord for rendering multiple colors based on the z-axis
+ * @update Add genColorByCoord & genColorByZ for rendering multiple colors based on the z-axis
  */
 
 import { BufferGeometry, FileLoader, Float32BufferAttribute, Loader, LoaderUtils, Points, PointsMaterial } from 'three';
-
+import { COLOR_MAP_JET } from '@labelbee/lb-utils';
 class PCDLoader extends Loader {
   constructor(manager) {
     super(manager);
@@ -218,8 +218,8 @@ class PCDLoader extends Loader {
         //   color.push(r / 255, g / 255, b / 255);
         // }
 
-        if (this.genColorByCoord) {
-          const pdColor = this.genColorByCoord(
+        if (this.genColorByZ) {
+          const pdColor = this.genColorByZ(
             parseFloat(line[offset.x]),
             parseFloat(line[offset.y]),
             parseFloat(line[offset.z]),
@@ -279,8 +279,8 @@ class PCDLoader extends Loader {
           );
         }
 
-        if (this.genColorByCoord) {
-          const pdColor = this.genColorByCoord(
+        if (this.genColorByZ) {
+          const pdColor = this.genColorByZ(
             dataview.getFloat32(PCDheader.points * offset.x + PCDheader.size[0] * i, this.littleEndian),
             dataview.getFloat32(PCDheader.points * offset.y + PCDheader.size[0] * i, this.littleEndian),
             dataview.getFloat32(PCDheader.points * offset.z + PCDheader.size[0] * i, this.littleEndian),
@@ -316,8 +316,8 @@ class PCDLoader extends Loader {
           normal.push(dataview.getFloat32(row + offset.normal_z, this.littleEndian));
         }
 
-        if (this.genColorByCoord) {
-          const pdColor = this.genColorByCoord(
+        if (this.genColorByZ) {
+          const pdColor = this.genColorByZ(
             dataview.getFloat32(row + offset.x, this.littleEndian),
             dataview.getFloat32(row + offset.y, this.littleEndian),
             dataview.getFloat32(row + offset.z, this.littleEndian),
@@ -369,6 +369,37 @@ class PCDLoader extends Loader {
 
     return [0, 0, 255];
   }
+
+  // rendering multiple colors based on the z-axis
+  genColorByZ(x, y, z) {
+    // 1. JET
+    const index = getIndex(z);
+
+    const color = COLOR_MAP_JET[index];
+    return [color[0], color[1], color[2]];
+  }
+}
+
+/**
+ * Generate index with a fixed range.
+ *
+ * @param {*} z
+ * @returns
+ */
+function getIndex(z) {
+  const minZ = -7;
+  const maxZ = 3;
+  const len = maxZ - minZ;
+
+  if (z < minZ) {
+    z = minZ;
+  }
+
+  if (z > maxZ) {
+    z = maxZ;
+  }
+
+  return Math.floor(((z - minZ) / len) * 255);
 }
 
 export { PCDLoader };

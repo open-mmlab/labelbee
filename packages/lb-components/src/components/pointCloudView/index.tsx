@@ -38,7 +38,7 @@ const PointCloudView: React.FC<IProps> = ({ imgList, drawLayerSlot, checkMode })
 
   return (
     <>
-      <PointCloudListener />
+      <PointCloudListener checkMode={checkMode}/>
       <div className={getClassName('point-cloud-layout')} onContextMenu={(e) => e.preventDefault()}>
         <div className={getClassName('point-cloud-wrapper')}>
           <div className={getClassName('point-cloud-container', 'left')}>

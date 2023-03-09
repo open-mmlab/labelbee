@@ -161,7 +161,7 @@ const PointCloudTopView: React.FC<IProps> = ({
   const { setZoom } = useZoom();
 
   const { addPolygon, deletePolygon } = usePolygon();
-  const { deletePointCloudBox, changeBoxValidByID } = useSingleBox();
+  const { deletePointCloudBox, changeValidByID } = useSingleBox();
   const [zAxisLimit, setZAxisLimit] = useState<number>(10);
   const { t } = useTranslation();
   const pointCloudViews = usePointCloudViews();
@@ -196,7 +196,7 @@ const PointCloudTopView: React.FC<IProps> = ({
 
     const { pointCloud2dOperation: TopView2dOperation } = ptCtx.topViewInstance;
 
-    TopView2dOperation.singleOn('polygonCreated', (polygon: IPolygonData) => {
+    TopView2dOperation.singleOn('polygonCreated', (polygon: IPolygonData, zoom: number) => {
       if (TopView2dOperation.pattern === EPolygonPattern.Normal || !currentData?.url) {
         /**
          * Notice. The Polygon need to be converted to pointCloud coordinate system for storage.
@@ -216,6 +216,7 @@ const PointCloudTopView: React.FC<IProps> = ({
         size,
         imgList,
         trackConfigurable: config.trackConfigurable,
+        zoom,
       });
     });
 
@@ -241,7 +242,16 @@ const PointCloudTopView: React.FC<IProps> = ({
     });
 
     const validUpdate = (id: string) => {
-      changeBoxValidByID(id);
+      // UpdateData.
+      const newPointCloudList = changeValidByID(id);
+
+      // HighLight
+      if (newPointCloudList) {
+        ptCtx.syncAllViewPointCloudColor(newPointCloudList);
+      }
+      if (ptCtx.polygonList.find((v) => v.id === id)) {
+        ptCtx.topViewInstance?.pointCloud2dOperation.setPolygonValidAndRender(id, true);
+      }
     };
 
     TopView2dOperation.on('validUpdate', validUpdate);
@@ -249,11 +259,20 @@ const PointCloudTopView: React.FC<IProps> = ({
     return () => {
       TopView2dOperation.unbind('validUpdate', validUpdate);
     };
-  }, [ptCtx, size, currentData, pointCloudViews]);
+  }, [ptCtx, size, currentData, pointCloudViews, ptCtx.polygonList]);
 
   useEffect(() => {
     if (!size?.width || !ptCtx.topViewInstance) {
       return;
+    }
+    /**
+     * Init Config
+     *
+     * 1. Update defaultAttribute by first attribute;
+     *  */
+    const defaultAttribute = config?.attributeList?.[0]?.value;
+    if (defaultAttribute) {
+      ptCtx.topViewInstance.pointCloud2dOperation.setDefaultAttribute(defaultAttribute);
     }
 
     // 1. Update Size

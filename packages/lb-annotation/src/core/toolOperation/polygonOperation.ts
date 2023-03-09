@@ -1317,15 +1317,24 @@ class PolygonOperation extends BasicToolOperation {
     }
   }
 
-  public leftMouseUp(e: MouseEvent) {
+  public leftMouseUpdateValid(e: MouseEvent) {
     const hoverID = this.getHoverID(e);
     if (this.drawingPointList.length === 0 && e.ctrlKey === true && hoverID) {
       // ctrl + 左键 + hover存在，更改框属性
       this.setPolygonValidAndRender(hoverID);
+      return true;
+    }
+    return false;
+  }
+
+  public leftMouseUp(e: MouseEvent) {
+    const isCtrl = this.leftMouseUpdateValid(e);
+
+    if (isCtrl) {
       return;
     }
 
-    // 创建多边形
+    // Create New Polygon
     this.addPointInDrawing(e);
   }
 

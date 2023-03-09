@@ -1,6 +1,6 @@
 import { Popover } from 'antd/es';
 import _ from 'lodash';
-import React, { useState } from 'react';
+import React, { useContext, useState } from 'react';
 
 import hotKeySvg from '@/assets/annotation/toolHotKeyIcon/icon_kj1.svg';
 import hotKeyHoverSvg from '@/assets/annotation/toolHotKeyIcon/icon_kj_h.svg';
@@ -12,12 +12,13 @@ import lineToolShortCutTable from './line';
 import tagToolSingleShortCutTable from './tag';
 import textToolShortCutTable from './text';
 import videoToolShortCutTable from './videoTag';
-import pointCloudShortCutTable from './pointCloud';
+import pointCloudShortCutTable, { pointCloudShortCutTable_POLYGON } from './pointCloud';
 import scribbleShortCutTable from './scribble';
 
 import { footerCls } from '../../index';
 import { useTranslation } from 'react-i18next';
 import { cTool } from '@labelbee/lb-annotation';
+import { PointCloudContext } from '@/components/pointCloudView/PointCloudContext';
 
 const { EVideoToolName, EPointCloudName } = cTool;
 
@@ -49,6 +50,7 @@ export const shortCutTable: { [a: string]: IShortCutInfo[] } = {
   [EToolName.Text]: textToolShortCutTable,
   [EVideoToolName.VideoTagTool]: videoToolShortCutTable,
   [EPointCloudName.PointCloud]: pointCloudShortCutTable,
+  [EPointCloudName.PointCloud + '_POLYGON']: pointCloudShortCutTable_POLYGON,
   [EToolName.ScribbleTool]: scribbleShortCutTable,
 };
 
@@ -222,6 +224,7 @@ export const ToolHotKeyCom: React.FC<IComponentsProps> = ({ title, style, shortC
 };
 
 const ToolHotKey: React.FC<IProps> = ({ style, title, toolName }) => {
+  const { pointCloudPattern } = useContext(PointCloudContext);
   if (!toolName) {
     return null;
   }
@@ -231,10 +234,15 @@ const ToolHotKey: React.FC<IProps> = ({ style, title, toolName }) => {
     return null;
   }
 
+  let newToolName = toolName;
+  if (newToolName === `${EPointCloudName.PointCloud}` && pointCloudPattern === EToolName.Polygon) {
+    newToolName += '_POLYGON';
+  }
+
   const props = {
     style,
     title,
-    shortCutList: shortCutTable[toolName],
+    shortCutList: shortCutTable[newToolName],
   };
 
   return <ToolHotKeyCom {...props} />;

@@ -3,7 +3,7 @@ import { useRotate } from './hooks/useRotate';
 import { useBoxes } from './hooks/useBoxes';
 import { useSingleBox } from './hooks/useSingleBox';
 import React, { useContext, useEffect } from 'react';
-import { cTool, AttributeUtils, CommonToolUtils } from '@labelbee/lb-annotation';
+import { cTool, AttributeUtils, CommonToolUtils, EToolName } from '@labelbee/lb-annotation';
 import { message } from 'antd';
 import { connect } from 'react-redux';
 import { a2MapStateToProps, IA2MapStateProps } from '@/store/annotation/map';
@@ -16,23 +16,34 @@ import { useHistory } from './hooks/useHistory';
 import { useAttribute } from './hooks/useAttribute';
 import { useConfig } from './hooks/useConfig';
 import { usePolygon } from './hooks/usePolygon';
+import { useTranslation } from 'react-i18next';
 
 const { EPolygonPattern } = cTool;
 
-const PointCloudListener: React.FC<IA2MapStateProps> = ({ currentData, config }) => {
+interface IProps extends IA2MapStateProps {
+  checkMode?: boolean;
+}
+
+const PointCloudListener: React.FC<IProps> = ({ currentData, config, checkMode, configString, imgIndex }) => {
   const ptCtx = useContext(PointCloudContext);
-  const { changeSelectedBoxValid, selectNextBox, selectPrevBox, updateSelectedBox } =
-    useSingleBox();
-  const { clearAllResult } = useStatus();
+  const {
+    changeSelectedBoxValid,
+    selectNextBox,
+    selectPrevBox,
+    updateSelectedBox,
+    deleteSelectedPointCloudBoxAndPolygon,
+  } = useSingleBox();
+  const { clearAllResult, updatePointCloudPattern } = useStatus();
   const basicInfo = jsonParser(currentData.result);
-  const { copySelectedBoxes, pasteSelectedBoxes, copiedBoxes } = useBoxes();
+  const { copySelectedBoxes, pasteSelectedBoxes, copiedBoxes } = useBoxes({ config });
   const { toolInstanceRef } = useCustomToolInstance({ basicInfo });
   const { updateRotate } = useRotate({ currentData });
-  const { updatePointCloudData } = usePointCloudViews();
+  const { updatePointCloudData, topViewSelectedChanged } = usePointCloudViews();
   const { redo, undo, pushHistoryWithList, pushHistoryUnderUpdatePolygon } = useHistory();
-  const { syncThreeViewsAttribute, reRenderPointCloud3DBox } = useAttribute();
+  const { syncThreeViewsAttribute } = useAttribute();
   const { syncAllViewsConfig, reRenderTopViewRange } = useConfig();
   const { selectedPolygon } = usePolygon();
+  const { t } = useTranslation();
 
   const keydownEvents = (lowerCaseKey: string, e: KeyboardEvent) => {
     const { topViewInstance, mainViewInstance } = ptCtx;
@@ -64,16 +75,18 @@ const PointCloudListener: React.FC<IA2MapStateProps> = ({ currentData, config })
       case 'u':
         {
           // U , change TopOpereation Pattern
-          const newPattern =
+          const newToolName =
             TopPointCloudPolygonOperation.pattern === EPolygonPattern.Normal
-              ? EPolygonPattern.Rect
-              : EPolygonPattern.Normal;
-          TopPointCloudPolygonOperation.setPattern(newPattern);
+              ? EToolName.Rect
+              : EToolName.Polygon;
+          updatePointCloudPattern(newToolName);
+
+          // Tips
           const POLYGON_PATTERN = {
-            [EPolygonPattern.Normal]: 'Normal Pattern',
-            [EPolygonPattern.Rect]: 'Rect Pattern',
+            [EToolName.Polygon]: t('PolygonPattern'),
+            [EToolName.Rect]: t('RectPattern'),
           };
-          message.success(`Change Pattern to ${POLYGON_PATTERN[newPattern]} successfully`);
+          message.success(t('ChangePatternMsg', { pattern: POLYGON_PATTERN[newToolName] }));
 
           // Clear Status
           TopPointCloudPolygonOperation.clearActiveStatus();
@@ -102,10 +115,15 @@ const PointCloudListener: React.FC<IA2MapStateProps> = ({ currentData, config })
           break;
         }
         selectNextBox();
+        e.preventDefault();
         break;
 
       case 'f':
         changeSelectedBoxValid();
+        break;
+
+      case 'delete':
+        deleteSelectedPointCloudBoxAndPolygon();
         break;
 
       default: {
@@ -150,7 +168,7 @@ const PointCloudListener: React.FC<IA2MapStateProps> = ({ currentData, config })
   };
 
   const onKeyDown = (e: KeyboardEvent) => {
-    if (!CommonToolUtils.hotkeyFilter(e)) {
+    if (!CommonToolUtils.hotkeyFilter(e) || checkMode === true) {
       return;
     }
 
@@ -175,11 +193,11 @@ const PointCloudListener: React.FC<IA2MapStateProps> = ({ currentData, config })
     return () => {
       window.removeEventListener('keydown', onKeyDown);
     };
-  }, [ptCtx, copiedBoxes, config]);
+  }, [ptCtx, copiedBoxes, config, ptCtx.pointCloudBoxList, ptCtx.polygonList]);
 
   useEffect(() => {
     syncAllViewsConfig(config);
-  }, [config]);
+  }, [configString]);
 
   useEffect(() => {
     if (config?.radius) {
@@ -190,7 +208,7 @@ const PointCloudListener: React.FC<IA2MapStateProps> = ({ currentData, config })
   // Page switch data initialization
   useEffect(() => {
     updatePointCloudData?.();
-  }, [currentData, ptCtx.mainViewInstance]);
+  }, [imgIndex, ptCtx.mainViewInstance]);
 
   // Update the listener of toolInstance.
   useEffect(() => {
@@ -210,8 +228,12 @@ const PointCloudListener: React.FC<IA2MapStateProps> = ({ currentData, config })
       if (selectBox) {
         selectBox.attribute = newAttribute;
 
-        updateSelectedBox(selectBox);
-        reRenderPointCloud3DBox(selectBox);
+        const newPointCloudList = updateSelectedBox(selectBox);
+
+        if (ptCtx.mainViewInstance) {
+          // TODO: Poor performance.
+          topViewSelectedChanged(selectBox, newPointCloudList);
+        }
       }
       if (selectedPolygon) {
         pushHistoryUnderUpdatePolygon({ ...selectedPolygon, attribute: newAttribute });
@@ -271,7 +293,13 @@ const PointCloudListener: React.FC<IA2MapStateProps> = ({ currentData, config })
     toolInstanceRef.current.setShowDefaultCursor = (showDefaultCursor: boolean) => {
       ptCtx.topViewInstance?.pointCloud2dOperation?.setShowDefaultCursor(showDefaultCursor);
     };
-  }, [ptCtx.pointCloudBoxList, ptCtx.selectedID, ptCtx.valid, ptCtx.polygonList]);
+  }, [
+    ptCtx.pointCloudBoxList,
+    ptCtx.selectedID,
+    ptCtx.valid,
+    ptCtx.polygonList,
+    ptCtx.mainViewInstance,
+  ]);
 
   useEffect(() => {
     toolInstanceRef.current.history = {
@@ -288,7 +316,7 @@ const PointCloudListener: React.FC<IA2MapStateProps> = ({ currentData, config })
   useEffect(() => {
     const toolInstance = ptCtx.topViewInstance?.pointCloud2dOperation;
 
-    if (!toolInstance) {
+    if (!toolInstance || checkMode) {
       return;
     }
     // TopViewOperation Emitter

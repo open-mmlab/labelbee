@@ -1,10 +1,11 @@
-import React, { useEffect, useState } from 'react';
+import React, { useContext, useEffect, useState } from 'react';
 import { AppState } from '@/store';
 import { connect } from 'react-redux';
 import { GraphToolInstance } from '@/store/annotation/types';
 import { Divider } from 'antd/es';
 import { useTranslation } from 'react-i18next';
 import { LabelBeeContext } from '@/store/ctx';
+import { PointCloudContext } from '@/components/pointCloudView/PointCloudContext';
 
 interface IProps {
   toolInstance: GraphToolInstance;
@@ -13,6 +14,7 @@ interface IProps {
 const PageNumber = (props: IProps) => {
   const { toolInstance } = props;
   const [_, forceRender] = useState(0);
+  const { pointCloudBoxList } = useContext(PointCloudContext);
   const { t } = useTranslation();
   useEffect(() => {
     if (toolInstance) {
@@ -26,7 +28,8 @@ const PageNumber = (props: IProps) => {
     return null;
   }
 
-  const count = toolInstance?.currentPageResult?.length;
+  const count = toolInstance?.currentPageResult?.length ?? pointCloudBoxList.length;
+
   if (count >= 0) {
     return (
       <span>
