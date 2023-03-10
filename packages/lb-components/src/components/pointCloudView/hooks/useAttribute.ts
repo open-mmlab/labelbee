@@ -1,13 +1,16 @@
 import { IPointCloudBox } from '@labelbee/lb-utils';
-import { useContext, useEffect, useState } from 'react';
+import { useContext, useEffect } from 'react';
 import { PointCloudContext } from '../PointCloudContext';
 
 export const useAttribute = () => {
-  const { topViewInstance, sideViewInstance, backViewInstance, mainViewInstance } =
-    useContext(PointCloudContext);
-  const [defaultAttribute, setDefaultAttribute] = useState(
-    topViewInstance?.pointCloud2dOperation?.defaultAttribute ?? '',
-  );
+  const {
+    topViewInstance,
+    sideViewInstance,
+    backViewInstance,
+    mainViewInstance,
+    defaultAttribute,
+    setDefaultAttribute,
+  } = useContext(PointCloudContext);
 
   useEffect(() => {
     if (!topViewInstance?.pointCloud2dOperation) {

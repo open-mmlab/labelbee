@@ -6,7 +6,12 @@ import { store } from '.';
 import { LabelBeeContext } from '@/store/ctx';
 import { AppState } from './store';
 import { ANNOTATION_ACTIONS } from './store/Actions';
-import { InitTaskData, loadImgList, UpdateInjectFunc } from './store/annotation/actionCreators';
+import {
+  InitAnnotationState,
+  InitTaskData,
+  loadImgList,
+  UpdateInjectFunc,
+} from './store/annotation/actionCreators';
 import { LoadFileAndFileData } from './store/annotation/reducer';
 import { ToolInstance } from './store/annotation/types';
 import {
@@ -83,6 +88,8 @@ export interface AppProps {
     creatingRender?: (canvas: HTMLCanvasElement, data: any, style: IAnnotationStyle) => void;
   };
   customRenderStyle?: (data: any) => IAnnotationStyle;
+
+  checkMode?: boolean;
 }
 
 const App: React.FC<AppProps> = (props) => {
@@ -104,6 +111,7 @@ const App: React.FC<AppProps> = (props) => {
     defaultLang = 'cn',
     skipBeforePageTurning,
     beforeRotate,
+    checkMode = false
   } = props;
 
   useEffect(() => {
@@ -120,6 +128,7 @@ const App: React.FC<AppProps> = (props) => {
         onStepChange,
         skipBeforePageTurning,
         beforeRotate,
+        checkMode
       }),
     );
 
@@ -134,6 +143,9 @@ const App: React.FC<AppProps> = (props) => {
     i18n.on('languageChanged', i18nLanguageChangedFunc);
     return () => {
       i18n.off('languageChanged', i18nLanguageChangedFunc);
+
+      // Init all annotation state after unmounting
+      InitAnnotationState(store.dispatch);
     };
   }, []);
 

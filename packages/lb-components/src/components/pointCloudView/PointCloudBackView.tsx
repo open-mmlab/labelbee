@@ -5,10 +5,10 @@
  * @LastEditTime: 2022-07-08 11:08:02
  */
 import {
-  PointCloud,
-  MathUtils,
-  PointCloudAnnotation,
   getCuboidFromPointCloudBox,
+  MathUtils,
+  PointCloud,
+  PointCloudAnnotation,
 } from '@labelbee/lb-annotation';
 import { getClassName } from '@/utils/dom';
 import { PointCloudContainer } from './PointCloudLayout';
@@ -25,7 +25,11 @@ import { useSingleBox } from './hooks/useSingleBox';
 import { SizeInfoForView } from './PointCloudInfos';
 import { connect } from 'react-redux';
 import { a2MapStateToProps, IA2MapStateProps } from '@/store/annotation/map';
-import { synchronizeSideView, synchronizeTopView } from './hooks/usePointCloudViews';
+import {
+  synchronizeSideView,
+  synchronizeTopView,
+  usePointCloudViews,
+} from './hooks/usePointCloudViews';
 import useSize from '@/hooks/useSize';
 import EmptyPage from './components/EmptyPage';
 import { useTranslation } from 'react-i18next';
@@ -82,12 +86,17 @@ const updateBackViewByCanvas2D = (
   backPointCloud.render();
 };
 
-const PointCloudSideView = ({ currentData, config }: IA2MapStateProps) => {
+interface IProps {
+  checkMode?: boolean;
+}
+
+const PointCloudSideView = ({ currentData, config, checkMode }: IA2MapStateProps & IProps) => {
   const ptCtx = React.useContext(PointCloudContext);
   const ref = useRef<HTMLDivElement>(null);
   const size = useSize(ref);
-  const { updateSelectedBox, selectedBox } = useSingleBox();
+  const { selectedBox, updateSelectedBox } = useSingleBox();
   const { t } = useTranslation();
+  const { backViewUpdateBox } = usePointCloudViews();
 
   const transferPolygonDataToBoxParams = (
     newPolygon: IPolygonData,
@@ -158,7 +167,7 @@ const PointCloudSideView = ({ currentData, config }: IA2MapStateProps) => {
 
     synchronizeTopView(newBoxParams, newPolygon, ptCtx.topViewInstance, ptCtx.mainViewInstance);
     synchronizeSideView(newBoxParams, newPolygon, ptCtx.sideViewInstance, currentData.url);
-    ptCtx.mainViewInstance.highlightOriginPointCloud(newBoxParams);
+    ptCtx.mainViewInstance.highlightOriginPointCloud([newBoxParams]);
 
     updateSelectedBox(newBoxParams);
   };
@@ -175,6 +184,7 @@ const PointCloudSideView = ({ currentData, config }: IA2MapStateProps) => {
         size,
         polygonOperationProps: { showDirectionLine: false, forbidAddNew: true },
         config,
+        checkMode,
       });
       ptCtx.setBackViewInstance(pointCloudAnnotation);
     }
@@ -215,7 +225,12 @@ const PointCloudSideView = ({ currentData, config }: IA2MapStateProps) => {
       'updatePolygonByDrag',
       (updateList: UpdatePolygonByDragList) => {
         if (ptCtx.selectedIDs.length === 1 && updateList.length === 1) {
-          transferPolygonDataToBoxParams(updateList[0].newPolygon, updateList[0].originPolygon);
+          const { newPolygon, originPolygon } = updateList[0];
+
+          if (newPolygon && originPolygon) {
+            transferPolygonDataToBoxParams(newPolygon, originPolygon);
+            backViewUpdateBox(newPolygon, originPolygon);
+          }
         }
       },
     );

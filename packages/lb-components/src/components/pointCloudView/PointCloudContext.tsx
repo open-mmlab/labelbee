@@ -1,6 +1,11 @@
 import { IPointCloudBox, IPointCloudBoxList, IPolygonData } from '@labelbee/lb-utils';
-import { PointCloud, PointCloudAnnotation, ActionsHistory } from '@labelbee/lb-annotation';
 import React, { useEffect, useMemo, useRef, useState } from 'react';
+import {
+  PointCloud,
+  PointCloudAnnotation,
+  ActionsHistory,
+  EToolName,
+} from '@labelbee/lb-annotation';
 
 interface IPointCloudContextInstances {
   topViewInstance?: PointCloudAnnotation;
@@ -27,7 +32,7 @@ export interface IPointCloudContext extends IPointCloudContextInstances {
   addSelectedID: (selectedID: string) => void;
   selectedAllBoxes: () => void;
   selectedID: string;
-  addPointCloudBox: (boxParams: IPointCloudBox) => void;
+  addPointCloudBox: (boxParams: IPointCloudBox) => IPointCloudBox[];
 
   polygonList: IPolygonData[];
   setPolygonList: (polygonList: IPolygonData[]) => void;
@@ -41,6 +46,14 @@ export interface IPointCloudContext extends IPointCloudContextInstances {
   reRender: (_displayPointCloudList: IPointCloudBoxList, _polygonList: IPolygonData[]) => void;
   attrPanelLayout: AttrPanelLayout;
   setAttrPanelLayout: (layout: AttrPanelLayout) => void;
+
+  syncAllViewPointCloudColor: (newPointCloudList?: IPointCloudBox[]) => void;
+
+  defaultAttribute: string;
+  setDefaultAttribute: (defaultAttribute: string) => void;
+
+  pointCloudPattern: EToolName.Rect | EToolName.Polygon;
+  setPointCloudPattern: (toolName: EToolName.Rect | EToolName.Polygon) => void;
 }
 
 export const PointCloudContext = React.createContext<IPointCloudContext>({
@@ -59,7 +72,9 @@ export const PointCloudContext = React.createContext<IPointCloudContext>({
   setMainViewInstance: () => {},
   addSelectedID: () => {},
   selectedAllBoxes: () => {},
-  addPointCloudBox: () => {},
+  addPointCloudBox: () => {
+    return [];
+  },
   setPolygonList: () => {},
 
   zoom: 1,
@@ -70,6 +85,13 @@ export const PointCloudContext = React.createContext<IPointCloudContext>({
   reRender: () => {},
   setAttrPanelLayout: () => {},
   attrPanelLayout: '',
+  syncAllViewPointCloudColor: () => {},
+
+  defaultAttribute: '',
+  setDefaultAttribute: () => {},
+
+  pointCloudPattern: EToolName.Rect,
+  setPointCloudPattern: () => {},
 });
 
 export const PointCloudProvider: React.FC<{}> = ({ children }) => {
@@ -82,9 +104,13 @@ export const PointCloudProvider: React.FC<{}> = ({ children }) => {
   const [sideViewInstance, setSideViewInstance] = useState<PointCloudAnnotation>();
   const [backViewInstance, setBackViewInstance] = useState<PointCloudAnnotation>();
   const [mainViewInstance, setMainViewInstance] = useState<PointCloud>();
+  const [defaultAttribute, setDefaultAttribute] = useState('');
+  const [pointCloudPattern, setPointCloudPattern] = useState<EToolName.Rect | EToolName.Polygon>(
+    EToolName.Rect,
+  );
   const history = useRef(new ActionsHistory()).current;
   const [hideAttributes, setHideAttributes] = useState<string[]>([]);
-  const [attrPanelLayout, setAttrPanelLayout] = useState<AttrPanelLayout>('left');
+  const [attrPanelLayout, setAttrPanelLayout] = useState<AttrPanelLayout>('');
 
   const selectedID = useMemo(() => {
     return selectedIDs.length === 1 ? selectedIDs[0] : '';
@@ -94,7 +120,9 @@ export const PointCloudProvider: React.FC<{}> = ({ children }) => {
     const selectedPointCloudBox = pointCloudBoxList.find((v) => v.id === selectedID);
 
     const addPointCloudBox = (box: IPointCloudBox) => {
-      setPointCloudResult(pointCloudBoxList.concat(box));
+      const newPointCloudList = pointCloudBoxList.concat(box);
+      setPointCloudResult(newPointCloudList);
+      return newPointCloudList;
     };
 
     const setPointCloudValid = (valid?: boolean) => {
@@ -157,6 +185,26 @@ export const PointCloudProvider: React.FC<{}> = ({ children }) => {
       mainViewInstance?.generateBoxes(_displayPointCloudList);
     };
 
+    /**
+     * Synchronize the highlighted pointCloud for all views.
+     * @param pointCloudList
+     */
+
+    const syncAllViewPointCloudColor = (pointCloudList?: IPointCloudBox[]) => {
+      const colorPromise = mainViewInstance?.highlightOriginPointCloud(pointCloudList);
+      return new Promise((resolve) => {
+        colorPromise?.then((color) => {
+          [topViewInstance].forEach((instance) => {
+            if (color) {
+              instance?.pointCloudInstance?.updateColor(color);
+              resolve({ color });
+            }
+          });
+          // TODO： Sync sideView & backView Color.
+        });
+      });
+    };
+
     return {
       selectedID,
       pointCloudBoxList,
@@ -189,6 +237,11 @@ export const PointCloudProvider: React.FC<{}> = ({ children }) => {
       reRender,
       attrPanelLayout,
       setAttrPanelLayout,
+      syncAllViewPointCloudColor,
+      defaultAttribute,
+      setDefaultAttribute,
+      pointCloudPattern,
+      setPointCloudPattern,
     };
   }, [
     valid,
@@ -202,6 +255,8 @@ export const PointCloudProvider: React.FC<{}> = ({ children }) => {
     zoom,
     hideAttributes,
     attrPanelLayout,
+    defaultAttribute,
+    pointCloudPattern,
   ]);
 
   const updateSelectedIDsAndRenderAfterHide = () => {

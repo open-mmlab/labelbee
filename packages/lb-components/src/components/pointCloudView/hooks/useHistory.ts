@@ -12,6 +12,7 @@ export const useHistory = () => {
     topViewInstance,
     polygonList,
     setPolygonList,
+    syncAllViewPointCloudColor,
   } = useContext(PointCloudContext);
 
   const addHistory = ({
@@ -63,17 +64,19 @@ export const useHistory = () => {
     const selectedPolygon = polygonList.find((v) => v.id === polygon.id);
 
     if (selectedPolygon) {
+      const newPolygonList = polygonList.map((v) => {
+        if (v.id === polygon.id) {
+          return polygon;
+        }
+        return {
+          ...v,
+        };
+      });
       history.pushHistory({
         pointCloudBoxList,
-        polygonList: polygonList.map((v) => {
-          if (v.id === polygon.id) {
-            return polygon;
-          }
-          return {
-            ...v,
-          };
-        }),
+        polygonList: newPolygonList,
       });
+      setPolygonList(newPolygonList);
     }
   };
 
@@ -84,7 +87,7 @@ export const useHistory = () => {
     pointCloudBoxList: IPointCloudBoxList;
     polygonList: IPolygonData[];
   }) => {
-    history.initRecord([{ pointCloudBoxList, polygonList }], true);
+    history.initRecord({ pointCloudBoxList, polygonList }, true);
   };
 
   const updatePointCloud = (params?: {
@@ -95,18 +98,19 @@ export const useHistory = () => {
       return;
     }
 
-    const { pointCloudBoxList: newPointCloudBoxList, polygonList: newPolygonList } = params;
+    const { pointCloudBoxList: newPointCloudBoxList = [], polygonList: newPolygonList = [] } =
+      params;
 
     if (newPointCloudBoxList) {
       if (pointCloudBoxList.length !== newPointCloudBoxList.length) {
         setSelectedIDs();
       }
 
-      const deletePointCloudList = pointCloudBoxList.filter(
-        (v) => newPointCloudBoxList.findIndex((d) => d.id === v.id) >= 0,
+      const deletePointCloudList = pointCloudBoxList.filter((v) =>
+        newPointCloudBoxList.every((d) => d.id !== v.id),
       );
-      const addPointCloudList = newPointCloudBoxList.filter(
-        (v) => pointCloudBoxList.findIndex((d) => d.id !== v.id) >= 0,
+      const addPointCloudList = newPointCloudBoxList.filter((v) =>
+        pointCloudBoxList.every((d) => d.id !== v.id),
       );
 
       // Clear All Data
@@ -120,6 +124,7 @@ export const useHistory = () => {
       });
 
       setPointCloudResult(newPointCloudBoxList);
+      syncAllViewPointCloudColor(newPointCloudBoxList);
     }
 
     if (newPolygonList) {

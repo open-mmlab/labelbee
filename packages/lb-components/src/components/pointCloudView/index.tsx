@@ -27,19 +27,22 @@ import {
   AnnotatedAttributesPanelFixedLeft,
   AnnotatedAttributesPanelFixedRight,
 } from '@/views/MainView/toolFooter/AnnotatedAttributes';
+import { TDrawLayerSlot } from '@/types/main';
 
 interface IProps {
   imgList: IFileItem[];
+  drawLayerSlot?: TDrawLayerSlot;
+  checkMode?: boolean;
 }
 
-const PointCloudView: React.FC<IProps> = ({ imgList }) => {
+const PointCloudView: React.FC<IProps> = ({ imgList, drawLayerSlot, checkMode }) => {
   if (imgList.length === 0) {
     return null;
   }
 
   return (
     <>
-      <PointCloudListener />
+      <PointCloudListener checkMode={checkMode} />
       <div className={getClassName('point-cloud-layout')} onContextMenu={(e) => e.preventDefault()}>
         <div className={getClassName('point-cloud-wrapper')}>
           <AnnotatedAttributesPanelFixedLeft />
@@ -51,7 +54,7 @@ const PointCloudView: React.FC<IProps> = ({ imgList }) => {
             </div>
 
             <div className={getClassName('point-cloud-container', 'right')}>
-              <PointCloudTopView />
+              <PointCloudTopView drawLayerSlot={drawLayerSlot} checkMode={checkMode} />
               <div className={getClassName('point-cloud-container', 'right-bottom')}>
                 <PointCloudSideView />
                 <PointCloudBackView />

@@ -1,6 +1,7 @@
 import { i18n } from '@labelbee/lb-utils';
 import MathUtils from '@/utils/MathUtils';
 import RectUtils from '@/utils/tool/RectUtils';
+import _ from 'lodash';
 import {
   DEFAULT_TEXT_OFFSET,
   EDragStatus,
@@ -25,7 +26,6 @@ import StyleUtils from '../../utils/tool/StyleUtils';
 import uuid from '../../utils/uuid';
 import { BasicToolOperation, IBasicToolOperationProps } from './basicToolOperation';
 import TextAttributeClass from './textAttributeClass';
-import _ from 'lodash';
 
 const TEXT_MAX_WIDTH = 164;
 
@@ -202,18 +202,6 @@ class PolygonOperation extends BasicToolOperation {
       [],
     );
     return showingPolygon;
-  }
-
-  /**
-   *  Just Update Data. Not Clear Status
-   * @param polygonList
-   */
-  public setResultAndSelectedID(polygonList: IPolygonData[], selectedID: string) {
-    this.setPolygonList(polygonList);
-    if (selectedID) {
-      this.selectedID = selectedID;
-    }
-    this.render();
   }
 
   public setResult(polygonList: IPolygonData[]) {
@@ -935,6 +923,16 @@ class PolygonOperation extends BasicToolOperation {
       return;
     }
 
+    this.dragMouseDown(e);
+    return true;
+  }
+
+  /**
+   * Judgment of drag information during mousedown
+   * @param e
+   * @returns
+   */
+  public dragMouseDown(e: MouseEvent) {
     const firstPolygon = this.selectedPolygon;
 
     if (!firstPolygon || e.button !== 0) {
@@ -974,8 +972,6 @@ class PolygonOperation extends BasicToolOperation {
       dragPrevCoord: dragStartCoord,
       originPolygonList: this.polygonList,
     };
-
-    return true;
   }
 
   public segment() {
@@ -1223,7 +1219,7 @@ class PolygonOperation extends BasicToolOperation {
 
     switch (dragTarget) {
       case EDragTarget.Plane:
-        selectedPointList = selectedPointList.map((v, i) => ({
+        selectedPointList = selectedPointList.map((v) => ({
           ...v,
           x: v.x + offset.x,
           y: v.y + offset.y,
@@ -1365,15 +1361,24 @@ class PolygonOperation extends BasicToolOperation {
     }
   };
 
-  public leftMouseUp(e: MouseEvent) {
+  public leftMouseUpdateValid(e: MouseEvent) {
     const hoverID = this.getHoverID(e);
     if (this.drawingPointList.length === 0 && e.ctrlKey === true && hoverID) {
       // ctrl + 左键 + hover存在，更改框属性
       this.setPolygonValidAndRender(hoverID);
+      return true;
+    }
+    return false;
+  }
+
+  public leftMouseUp(e: MouseEvent) {
+    const isCtrl = this.leftMouseUpdateValid(e);
+
+    if (isCtrl) {
       return;
     }
 
-    // 创建多边形
+    // Create New Polygon
     this.addPointInDrawing(e);
   }
 

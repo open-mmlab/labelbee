@@ -20,10 +20,45 @@ export const usePolygon = () => {
 
   const deletePolygon = (id: string) => {
     const newPolygonList = polygonList.filter((v) => v.id !== id).map((v) => ({ ...v }));
-
     setPolygonList(newPolygonList);
     pushHistoryWithList({ polygonList: newPolygonList });
   };
 
-  return { addPolygon, deletePolygon, selectedPolygon };
+  const updateSelectedPolygon = (polygon: IPolygonData) => {
+    if (selectedPolygon) {
+      setPolygonList(
+        polygonList.map((v) => {
+          if (v.id === selectedID) {
+            return polygon;
+          }
+          return v;
+        }),
+      );
+    }
+  };
+
+  const updatePolygonValidByID = (id: string) => {
+    const polygon = polygonList.find((v) => v.id === id);
+    if (polygon) {
+      setPolygonList(
+        polygonList.map((v) => {
+          if (v.id === id) {
+            return {
+              ...v,
+              valid: !v.valid,
+            };
+          }
+          return v;
+        }),
+      );
+    }
+  };
+
+  return {
+    addPolygon,
+    deletePolygon,
+    selectedPolygon,
+    updateSelectedPolygon,
+    updatePolygonValidByID,
+  };
 };

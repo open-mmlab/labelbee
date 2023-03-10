@@ -23,6 +23,8 @@ interface IPointCloudAnnotationProps {
   polygonOperationProps?: IPointCloud2dOperationProps;
 
   config: IPointCloudConfig;
+
+  checkMode?: boolean;
 }
 
 const createEmptyImage = (size: { width: number; height: number }) => {
@@ -47,7 +49,7 @@ export class PointCloudAnnotation implements IPointCloudAnnotationOperation {
 
   public config: IPointCloudConfig;
 
-  constructor({ size, container, pcdPath, polygonOperationProps, config }: IPointCloudAnnotationProps) {
+  constructor({ size, container, pcdPath, polygonOperationProps, config, checkMode }: IPointCloudAnnotationProps) {
     const defaultOrthographic = this.getDefaultOrthographic(size);
 
     const imgSrc = createEmptyImage(size);
@@ -76,6 +78,9 @@ export class PointCloudAnnotation implements IPointCloudAnnotationOperation {
       config: JSON.stringify(config),
       imgNode: image,
       isAppend: false,
+      checkMode,
+      // forbidOperation: true,
+      // forbidOperation: !!checkMode,
     };
     if (polygonOperationProps) {
       Object.assign(defaultPolygonProps, polygonOperationProps);
@@ -86,9 +91,6 @@ export class PointCloudAnnotation implements IPointCloudAnnotationOperation {
     polygonOperation.eventBinding();
     polygonOperation.setPattern(EPolygonPattern.Rect);
 
-    // Set the DefaultAttribute.
-    polygonOperation.setDefaultAttribute(config?.attributeList?.[0]?.value);
-
     canvasScheduler.createCanvas(polygonOperation.canvas, { size });
 
     // 3. Data record
@@ -97,6 +99,11 @@ export class PointCloudAnnotation implements IPointCloudAnnotationOperation {
     this.canvasScheduler = canvasScheduler;
 
     this.config = config;
+  }
+
+  public updateConfig(config: IPointCloudConfig) {
+    this.config = config;
+    this.pointCloud2dOperation.setConfig(JSON.stringify(config));
   }
 
   /**
@@ -144,9 +151,11 @@ export class PointCloudAnnotation implements IPointCloudAnnotationOperation {
        * (Like `ptCtx.topViewInstance.updatePolygonList(ptCtx.pointCloudBoxList);`)
        */
       this.pointCloud2dOperation.setImgNode(image);
-      this.pointCloud2dOperation.setCanvasSize(size);
       this.pointCloud2dOperation.initImgPos();
     };
+
+    // It need to update directly
+    this.pointCloud2dOperation.setCanvasSize(size);
   }
 
   public addPolygonListOnTopView(result: string) {
@@ -170,7 +179,15 @@ export class PointCloudAnnotation implements IPointCloudAnnotationOperation {
     }) as IPolygonData[];
 
     if (extraList) {
-      polygonList = polygonList.concat(extraList);
+      // Convert extraList(polygonList) from PointCloud coordinate to Canvas Coordinate
+      polygonList = polygonList.concat(
+        extraList.map((v) => ({
+          ...v,
+          pointList: v?.pointList?.map((point) =>
+            PointCloudUtils.transferWorld2Canvas(point, this.pointCloud2dOperation.size),
+          ),
+        })),
+      );
     }
 
     this.pointCloud2dOperation.setResult(polygonList);

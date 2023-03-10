@@ -95,7 +95,7 @@ const PointCloud3D: React.FC<IA2MapStateProps> = ({ currentData, config }) => {
     if (!ptCtx.mainViewInstance) {
       return;
     }
-    initPointCloud3d?.();
+    initPointCloud3d?.(size);
   }, [size]);
   const { selectedBox } = useSingleBox();
 
@@ -111,15 +111,30 @@ const PointCloud3D: React.FC<IA2MapStateProps> = ({ currentData, config }) => {
     ptCtx.mainViewInstance?.resetCamera();
   };
 
+  /**
+   * Listen for data changes.
+   */
   useEffect(() => {
     if (ref.current && currentData?.url) {
       let pointCloud = ptCtx.mainViewInstance;
-      if (!pointCloud) {
+      if (!pointCloud && size.width) {
+        const orthographicParams = {
+          left: -size.width / 2,
+          right: size.width / 2,
+          top: size.height / 2,
+          bottom: -size.height / 2,
+          near: 100,
+          far: -100,
+        };
+
+        // Need to be showed
         pointCloud = new PointCloud({
           container: ref.current,
-          backgroundColor: '#4c4c4c',
+          isOrthographicCamera: true,
+          orthographicParams,
           config,
         });
+        ptCtx.setMainViewInstance(pointCloud);
       }
 
       if (currentData.result) {
@@ -139,10 +154,8 @@ const PointCloud3D: React.FC<IA2MapStateProps> = ({ currentData, config }) => {
         ptCtx.setPointCloudResult(boxParamsList);
         ptCtx.setPointCloudValid(jsonParser(currentData.result)?.valid);
       }
-
-      ptCtx.setMainViewInstance(pointCloud);
     }
-  }, [currentData]);
+  }, [currentData, size]);
 
   /**
    *  Observe selectedID and reset camera to target top-view
@@ -150,6 +163,13 @@ const PointCloud3D: React.FC<IA2MapStateProps> = ({ currentData, config }) => {
   useEffect(() => {
     if (selectedBox) {
       setTarget3DView(EPerspectiveView.Top);
+
+
+      /**
+       * 3DView's zoom synchronizes with topView' zoom. 
+       */
+      const zoom = ptCtx.topViewInstance?.pointCloudInstance?.camera.zoom ?? 1;
+      ptCtx.mainViewInstance?.updateCameraZoom(zoom);
     }
   }, [selectedBox]);
 

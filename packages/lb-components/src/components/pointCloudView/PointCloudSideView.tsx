@@ -69,7 +69,11 @@ const updateSideViewByCanvas2D = (
   SidePointCloud.render();
 };
 
-const PointCloudSideView: React.FC<IA2MapStateProps> = ({ config }) => {
+interface IProps {
+  checkMode?: boolean
+}
+
+const PointCloudSideView: React.FC<IA2MapStateProps & IProps> = ({ config, checkMode }) => {
   const ptCtx = React.useContext(PointCloudContext);
   const { sideViewUpdateBox } = usePointCloudViews();
   const { selectedBox } = useSingleBox();
@@ -89,6 +93,7 @@ const PointCloudSideView: React.FC<IA2MapStateProps> = ({ config }) => {
         size,
         polygonOperationProps: { showDirectionLine: false, forbidAddNew: true },
         config,
+        checkMode
       });
       ptCtx.setSideViewInstance(pointCloudAnnotation);
       // };

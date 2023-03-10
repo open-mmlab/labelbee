@@ -53,3 +53,5 @@ const OutputApp = (props: AppProps, ref: any) => {
 export default React.forwardRef(OutputApp);
 
 export { AnnotationView, PointCloudAnnotationView, i18n, VideoTagTool };
+
+export * from './constant';

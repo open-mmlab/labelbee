@@ -232,7 +232,7 @@ const AttributeUpdater = ({
       <AttributeList
         list={list}
         forbidDefault={true}
-        selectedAttribute={ptx.selectedPointCloudBox?.attribute ?? defaultAttribute ?? ''}
+        selectedAttribute={defaultAttribute ?? ''}
         attributeChanged={(attribute: string) => setAttribute(attribute)}
       />
       <Divider style={{ margin: 0 }} />
