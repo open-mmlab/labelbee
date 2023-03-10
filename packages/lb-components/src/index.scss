@@ -320,6 +320,36 @@ $prefix: bee;
     background: #eee;
   }
 
+  &__attributeTree {
+    padding: 0 12px;
+    &__listItem {
+      font-size: 14px;
+      color: #000;
+      display: inline-flex;
+      width: 100%;
+      align-items: center;
+      height: 40px;
+      line-height: 40px;
+      &__radio-wrapper {
+        width: 100%;
+        span:has(.sensebee-radio-label) {
+          overflow: hidden;
+          text-overflow: ellipsis;
+          white-space: nowrap;
+        }
+      }
+    }
+    &__title {
+      flex: 1;
+      margin: 0 10px;
+      text-overflow: ellipsis;
+      overflow: hidden;
+      white-space: nowrap;
+    }
+    &__count {
+      color: rgba(0, 0, 0, 0.45);
+    }
+  }
   .dashHorizontal {
     width: 100%;
     border-bottom: 1px dashed #eee;

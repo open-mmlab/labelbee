@@ -18,6 +18,8 @@ import BatchUpdateModal from './components/batchUpdateModal';
 import { IFileItem } from '@/types/data';
 import { PointCloudUtils } from '@labelbee/lb-utils';
 import AttributeList from '@/components/attributeList';
+import AttributeTree from '@/components/attributeTree';
+
 import { IInputList } from '@/types/main';
 import { useAttribute } from '@/components/pointCloudView/hooks/useAttribute';
 
@@ -220,18 +222,11 @@ const AttributeUpdater = ({
     toolInstance.setSubAttribute(key, value);
   };
 
-  const list = attributeList.map((i: any) => ({
-    label: i.key,
-    value: i.value,
-    color: i?.color,
-  }));
-
   return (
     <div>
       <div style={titleStyle}>{t('Attribute')}</div>
-      <AttributeList
-        list={list}
-        forbidDefault={true}
+      <AttributeTree
+        attributeListForPointCloud={attributeList}
         selectedAttribute={defaultAttribute ?? ''}
         attributeChanged={(attribute: string) => setAttribute(attribute)}
       />
