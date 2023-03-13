@@ -219,10 +219,8 @@ export class PointCloudAnnotation implements IPointCloudAnnotationOperation {
   }
 
   public updatePolygonList = (pointCloudDataList: IPointCloudBox[], extraList?: IPolygonData[]) => {
-    let pointList;
     let polygonList = pointCloudDataList.map((v: IPointCloudBox) => {
-      const { polygon2d } = this.pointCloudInstance.getBoxTopPolygon2DCoordinate(v);
-      pointList = polygon2d;
+      const { polygon2d: pointList } = this.pointCloudInstance.getBoxTopPolygon2DCoordinate(v);
       return {
         id: v.id,
         sourceID: '',

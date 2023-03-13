@@ -8,7 +8,7 @@
 
 import { IInputList } from './base';
 import { IPolygonData } from './polygon';
-import { ICoordinate } from "./common";
+import { ICoordinate } from './common';
 
 export type TMatrix4Tuple = [
   number,
@@ -77,8 +77,6 @@ export interface I3DSpaceCoord {
 
 export interface IPointCloudBox extends IVolume {
   attribute: string;
-  length?: number;
-  linePointList?: Array<Record<string, string>>;
   center: I3DSpaceCoord;
   id: string;
   rotation: number;
@@ -102,7 +100,7 @@ export interface IPointCloudSphere {
   };
 }
 
-export type IPointCloudSphereList = IPointCloudSphere[]
+export type IPointCloudSphereList = IPointCloudSphere[];
 
 /** IPointCloudBox */
 export type PartialIPointCloudBoxList = Partial<IPointCloudBox> & Pick<IPointCloudBox, 'id'>[];

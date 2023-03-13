@@ -525,13 +525,13 @@ export default class ViewOperation extends BasicToolOperation {
         case 'line':
           this.renderLine({
             type: 'line',
-            annotation: newAnnotation as any,
+            annotation: newAnnotation,
           });
           break;
         case 'polygon':
           this.renderPolygon({
             type: 'polygon',
-            annotation: newAnnotation as any,
+            annotation: newAnnotation,
           });
           break;
 

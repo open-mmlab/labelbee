@@ -1046,7 +1046,6 @@ export const usePointCloudViews = () => {
     newPointCloudBoxList?: IPointCloudBox[],
   ) => {
     const dataUrl = currentData?.url;
-    const toolName = topViewInstance?.toolInstance.toolName;
     if (newPointCloudBoxList) {
       // Wait for the mainPointCloudData.
       await ptCtx.syncAllViewPointCloudColor(newPointCloudBoxList);
@@ -1064,14 +1063,13 @@ export const usePointCloudViews = () => {
         synchronizeTopView(boxParams, polygon, topViewInstance, mainViewInstance);
       },
     };
-    if (toolName !== 'lineTool') {
-      Object.keys(viewToBeUpdated).forEach((key) => {
-        if (key !== omitView) {
-          viewToBeUpdated[key]();
-        }
-      });
-    }
 
+    Object.keys(viewToBeUpdated).forEach((key) => {
+      if (key !== omitView) {
+        viewToBeUpdated[key]();
+      }
+    });
+    
     if (zoom) {
       mainViewInstance?.updateCameraZoom(zoom);
     }

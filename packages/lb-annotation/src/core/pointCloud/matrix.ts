@@ -78,14 +78,7 @@ export function lidar2image(point: { x: number; y: number; z: number }, composeM
 }
 
 export function getCuboidFromPointCloudBox(boxParams: IPointCloudBox) {
-  const { center, width, height, depth, rotation, length } = boxParams;
-  // lineTool
-  if (length) {
-    return {
-      ...boxParams,
-      polygonPointList: boxParams.linePointList,
-    };
-  }
+  const { center, width, height, depth, rotation } = boxParams;
   const polygonPointList = [
     {
       x: center.x + width / 2,
@@ -130,14 +123,6 @@ export function pointCloudLidar2image(
     T: [TMatrix14Tuple, TMatrix14Tuple, TMatrix14Tuple];
   },
 ) {
-  if (boxParams.length) {
-    return boxParams.linePointList
-      ?.map((line) => ({
-        type: 'line',
-        pointList: [line],
-      }))
-      .slice(0, boxParams.linePointList.length - 1);
-  }
   const allViewData = PointCloudUtils.getAllViewData(boxParams);
   const { P, R, T } = cameraMatrix;
   const { composeMatrix4 } = transferKitti2Matrix(P, R, T);

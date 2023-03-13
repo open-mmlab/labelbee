@@ -558,7 +558,7 @@ export class PointCloud {
     }
 
     if (window.Worker) {
-      const { zMin, zMax, polygonPointList } = getCuboidFromPointCloudBox(boxParams) as any;
+      const { zMin, zMax, polygonPointList } = getCuboidFromPointCloudBox(boxParams);
       const position = points;
       color = color ?? new Float32Array([]); // If the color is not existed, it can be recreated by default.
       const params = {
