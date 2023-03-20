@@ -191,7 +191,8 @@
     "UnifyTrackID": "Unify TrackID",
     "UnifySize": "Unify Size",
     "UnifyTag": "Unify Tag",
-    "NoData": "No Data"
+    "NoData": "No Data",
+    "AnnotatedList": "Annotated List"
   },
   "cn": {
     "TextInput": "文本输入",
@@ -385,6 +386,7 @@
     "UnifyTrackID": "统一标注框ID",
     "UnifySize": "统一尺寸",
     "UnifyTag": "统一标签",
-    "NoData": "暂无数据"
+    "NoData": "暂无数据",
+    "AnnotatedList": "标注列表"
   }
 }

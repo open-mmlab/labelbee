@@ -10,10 +10,15 @@ import {
   EyeFilled,
   EyeInvisibleFilled,
   PushpinFilled,
+  UnorderedListOutlined,
 } from '@ant-design/icons';
 import { IInputList } from '@/types/main';
 import { useHistory } from '@/components/pointCloudView/hooks/useHistory';
 import { getClassName } from '@/utils/dom';
+import StepUtils from '@/utils/StepUtils';
+import { EPointCloudName } from '@labelbee/lb-annotation';
+import { useTranslation } from 'react-i18next';
+import FooterPopover from '../FooterPopover';
 
 const AnnotatedAttributesItem = ({ attribute }: { attribute: IInputList }) => {
   const pointCloudCtx = useContext(PointCloudContext);
@@ -155,23 +160,32 @@ export const AnnotatedAttributesPanelFixedRight = () => {
   if (attrPanelLayout === 'right') {
     return <AnnotatedAttributesPanel />;
   }
+
   return null;
 };
 
 export const AnnotatedAttributesIcon = () => {
   const { attrPanelLayout } = useContext(PointCloudContext);
+  const { t } = useTranslation();
+  const stepInfo = useSelector((state) =>
+    // @ts-ignore
+    StepUtils.getCurrentStepInfo(state?.annotation?.step, state.annotation?.stepList),
+  );
+
+  if (stepInfo?.tool !== EPointCloudName.PointCloud) {
+    return null;
+  }
 
   if (attrPanelLayout) {
     return null;
   }
 
   return (
-    <Popover
-      placement='topLeft'
+    <FooterPopover
+      hoverIcon={<UnorderedListOutlined style={{ marginRight: 4 }} />}
+      icon={<UnorderedListOutlined style={{ marginRight: 4 }} />}
+      title={t('AnnotatedList')}
       content={<AnnotatedAttributesPanel />}
-      overlayClassName={getClassName('annotated-attribute', 'popover')}
-    >
-      <span>图片列表</span>
-    </Popover>
+    />
   );
 };

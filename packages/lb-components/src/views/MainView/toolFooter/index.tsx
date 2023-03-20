@@ -54,10 +54,12 @@ const renderFooter: RenderFooter = ({
   zoomController,
   curItems,
   footerDivider,
+  annotateAttrList,
 }) => {
   return (
     <>
       {footerTips}
+      {annotateAttrList}
       <div style={{ flex: 1 }} />
       {hiddenTips}
       {pageNumber}
@@ -145,6 +147,7 @@ const ToolFooter: React.FC<IProps> = (props: IProps) => {
           footerTips: <FooterTips />,
           hiddenTips: <HiddenTips />,
           pageNumber: <PageNumber />,
+          annotateAttrList: <AnnotatedAttributesIcon />,
           pagination,
           zoomController: <ZoomController mode={mode} />,
           curItems,
