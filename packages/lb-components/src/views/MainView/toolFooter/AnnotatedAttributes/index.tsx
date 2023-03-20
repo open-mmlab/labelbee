@@ -1,5 +1,5 @@
 import { PointCloudContext } from '@/components/pointCloudView/PointCloudContext';
-import { Modal, Popover } from 'antd';
+import { Modal } from 'antd';
 import React, { useContext, useState } from 'react';
 import { stepConfigSelector } from '@/store/annotation/selectors';
 import { useSelector } from '@/store/ctx';
@@ -198,18 +198,5 @@ export const AnnotatedAttributesIcon = () => {
       title={t('AnnotatedList')}
       content={<AnnotatedAttributesPanel />}
     />
-  );
-
-  return (
-    <Popover
-      placement='topLeft'
-      content={<AnnotatedAttributesPanel />}
-      overlayClassName={getClassName('annotated-attribute', 'popover')}
-    >
-      <span>
-        <UnorderedListOutlined style={{ marginRight: 4 }} />
-        {t('AnnotatedList')}
-      </span>
-    </Popover>
   );
 };

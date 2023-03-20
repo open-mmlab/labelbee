@@ -16,7 +16,7 @@ import {
   IPointCloudConfig,
   toolStyleConverter,
 } from '@labelbee/lb-utils';
-import { BufferAttribute, PointsMaterial, Shader } from 'three';
+import { BufferAttribute, OrthographicCamera, PerspectiveCamera, PointsMaterial, Shader } from 'three';
 import HighlightWorker from 'web-worker:./highlightWorker.js';
 import FilterBoxWorker from 'web-worker:./filterBoxWorker.js';
 import { isInPolygon } from '@/utils/tool/polygonTool';
@@ -424,6 +424,28 @@ export class PointCloud {
   public resetCamera() {
     this.updateCamera(this.DEFAULT_INIT_CAMERA_POSITION, { x: 0, y: 0, z: 0 });
   }
+
+  /**
+   * Get camera target from matrix
+   * @param camera
+   * @returns
+   */
+  public getOrthographicCameraTarget(camera: OrthographicCamera) {
+    const direction = new THREE.Vector3(0, 0, -1).applyQuaternion(camera.quaternion);
+    const target = camera.position.clone().add(direction);
+    return target;
+  }
+
+  public applyCameraTarget = (camera: OrthographicCamera | PerspectiveCamera) => {
+    if (this.camera.type !== 'OrthographicCamera') {
+      return;
+    }
+
+    if (camera) {
+      const cameraTar = this.getOrthographicCameraTarget(camera as OrthographicCamera);
+      this.updateCamera(camera.position, cameraTar);
+    }
+  };
 
   public createThreeMatrix4(matrix4: TMatrix4Tuple) {
     return new THREE.Matrix4().set(...matrix4);

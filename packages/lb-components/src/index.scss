@@ -1573,14 +1573,24 @@ $headerHeight: 40px;
           justify-content: flex-end;
 
           .#{$ptPrefix}-3d-view {
-            &__reset {
+            &__reset,
+            &__followTop {
               @include icon();
-              background-image: url('./assets/annotation/pointCloudTool/3DViewReset.svg');
-              margin: 16px 0;
+
               font-size: 36px;
               background-position: center;
               background-color: #444;
               border-radius: 4px;
+            }
+
+            &__reset {
+              background-image: url('./assets/annotation/pointCloudTool/3DViewReset.svg');
+              margin: 16px 0;
+            }
+
+            &__followTop {
+              margin: 16px 0 0 0;
+              background-image: url('./assets/annotation/pointCloudTool/followTop.svg');
             }
 
             &__top,
