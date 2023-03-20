@@ -183,6 +183,7 @@ export const PointCloudProvider: React.FC<{}> = ({ children }) => {
 
       topViewInstance?.updatePolygonList(_displayPointCloudList, _polygonList);
       mainViewInstance?.generateBoxes(_displayPointCloudList);
+      syncAllViewPointCloudColor(_displayPointCloudList);
     };
 
     /**

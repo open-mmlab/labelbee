@@ -1269,9 +1269,10 @@ $hotkey-container-padding: 7px;
   &__text {
     display: flex;
     justify-content: space-between;
-    padding: 8px 20px;
+    padding: 8px 12px;
     color: #333;
   }
+
   &__item {
     height: 40px;
     line-height: 40px;

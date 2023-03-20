@@ -1,9 +1,9 @@
 import { PointCloudContext } from '@/components/pointCloudView/PointCloudContext';
-import { Popover } from 'antd';
+import { Modal, Popover } from 'antd';
 import React, { useContext, useState } from 'react';
 import { stepConfigSelector } from '@/store/annotation/selectors';
 import { useSelector } from '@/store/ctx';
-import { IPointCloudConfig } from '@labelbee/lb-utils';
+import { i18n, IPointCloudConfig } from '@labelbee/lb-utils';
 import {
   CaretDownFilled,
   DeleteOutlined,
@@ -65,6 +65,17 @@ const AnnotatedAttributesItem = ({ attribute }: { attribute: IInputList }) => {
     pushHistoryWithList({ pointCloudBoxList: newPointCloudList, polygonList: newPolygonList });
   };
 
+  const onDeleteGraphByAttr = (attribute: IInputList) => {
+    Modal.confirm({
+      content: i18n.t('onDeleteGraphByAttr', { attribute: attribute.key }),
+      onOk: () => {
+        deleteGraphByAttr(attribute.value);
+      },
+      okText: i18n.t('Confirm'),
+      cancelText: i18n.t('Cancel'),
+    });
+  };
+
   return (
     <>
       <div className={getClassName('annotated-attribute', 'item')}>
@@ -81,7 +92,7 @@ const AnnotatedAttributesItem = ({ attribute }: { attribute: IInputList }) => {
         />
         <span className={getClassName('annotated-attribute', 'item', 'text')}>{attribute.key}</span>
 
-        <DeleteOutlined onClick={() => deleteGraphByAttr(attribute.value)} />
+        <DeleteOutlined onClick={() => onDeleteGraphByAttr(attribute)} />
       </div>
       {pointCloudListForSpecAttribute.map((box) => {
         return (
@@ -187,5 +198,18 @@ export const AnnotatedAttributesIcon = () => {
       title={t('AnnotatedList')}
       content={<AnnotatedAttributesPanel />}
     />
+  );
+
+  return (
+    <Popover
+      placement='topLeft'
+      content={<AnnotatedAttributesPanel />}
+      overlayClassName={getClassName('annotated-attribute', 'popover')}
+    >
+      <span>
+        <UnorderedListOutlined style={{ marginRight: 4 }} />
+        {t('AnnotatedList')}
+      </span>
+    </Popover>
   );
 };

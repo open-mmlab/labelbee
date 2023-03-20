@@ -75,7 +75,7 @@
     "AnnotateInvalidPolygon": "Annotate Invalid Polygon",
     "TogglePolygonEffectiveness": "Toggle Polygon Validity",
     "DeletePolygon": "Delete Polygon",
-    "Delete": "Delete", 
+    "Delete": "Delete",
     "TogglePointParticularity": "Toggle Point Particularity",
     "CropOverlapArea": "Crop Overlap Area",
     "SegmentationRecognition": "Segmentation Recognition",
@@ -192,7 +192,8 @@
     "UnifySize": "Unify Size",
     "UnifyTag": "Unify Tag",
     "NoData": "No Data",
-    "AnnotatedList": "Annotated List"
+    "AnnotatedList": "Annotated List",
+    "onDeleteGraphByAttr": "Are you sure to delete the data with attribute {{attribute}}?"
   },
   "cn": {
     "TextInput": "文本输入",
@@ -387,6 +388,7 @@
     "UnifySize": "统一尺寸",
     "UnifyTag": "统一标签",
     "NoData": "暂无数据",
-    "AnnotatedList": "标注列表"
+    "AnnotatedList": "标注列表",
+    "onDeleteGraphByAttr": "确定要删除属性为 {{attribute}} 的标注数据吗?"
   }
 }
