@@ -44,8 +44,8 @@ export interface IPointCloudContext extends IPointCloudContextInstances {
   defaultAttribute: string;
   setDefaultAttribute: (defaultAttribute: string) => void;
 
-  pointCloudPattern: EToolName.Rect | EToolName.Polygon;
-  setPointCloudPattern: (toolName: EToolName.Rect | EToolName.Polygon) => void;
+  pointCloudPattern: EToolName.Rect | EToolName.Polygon | EToolName.Line;
+  setPointCloudPattern: (toolName: EToolName.Rect | EToolName.Polygon | EToolName.Line) => void;
 }
 
 export const PointCloudContext = React.createContext<IPointCloudContext>({

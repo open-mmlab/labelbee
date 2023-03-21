@@ -20,7 +20,7 @@ export const useStatus = () => {
     setPolygonList,
     pointCloudPattern,
     setPointCloudPattern,
-    syncAllViewPointCloudColor
+    syncAllViewPointCloudColor,
   } = useContext(PointCloudContext);
   const { pushHistoryWithList } = useHistory();
 
@@ -36,7 +36,7 @@ export const useStatus = () => {
 
     topViewInstance?.pointCloud2dOperation.clearActiveStatus();
     topViewInstance?.pointCloud2dOperation.clearResult();
-    
+
     syncAllViewPointCloudColor([]);
 
     // Add History
@@ -60,6 +60,9 @@ export const useStatus = () => {
       case EToolName.Polygon:
         polygon2dOperation.setPattern(EPolygonPattern.Normal);
         setPointCloudPattern(EToolName.Polygon);
+        break;
+      case EToolName.Line:
+        setPointCloudPattern(EToolName.Line);
         break;
     }
   };
