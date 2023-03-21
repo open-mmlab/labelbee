@@ -108,6 +108,7 @@ const AnnotatedAttributesItem = ({ attribute }: { attribute: IInputList }) => {
 export const AnnotatedAttributesPanel = () => {
   const stepConfig: IPointCloudConfig = useSelector(stepConfigSelector);
   const { attrPanelLayout, setAttrPanelLayout } = useContext(PointCloudContext);
+  const { t } = useTranslation();
 
   return (
     <div className={getClassName('annotated-attribute')}>
@@ -121,7 +122,7 @@ export const AnnotatedAttributesPanel = () => {
             }}
           >
             <PushpinFilled />
-            取消固定
+            {t('CancelFixed')}
           </span>
         </div>
       ) : (
@@ -133,7 +134,7 @@ export const AnnotatedAttributesPanel = () => {
             className={getClassName('annotated-attribute', 'pin')}
           >
             <PushpinFilled />
-            固定在左侧
+            {t('FixedOnLeft')}
           </span>
           <span
             onClick={() => {
@@ -142,7 +143,7 @@ export const AnnotatedAttributesPanel = () => {
             className={getClassName('annotated-attribute', 'pin')}
           >
             <PushpinFilled />
-            固定在右侧
+            {t('FixedOnRight')}
           </span>
         </div>
       )}

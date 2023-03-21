@@ -193,7 +193,10 @@
     "UnifyTag": "Unify Tag",
     "NoData": "No Data",
     "AnnotatedList": "Annotated List",
-    "onDeleteGraphByAttr": "Are you sure to delete the data with attribute {{attribute}}?"
+    "onDeleteGraphByAttr": "Are you sure to delete the data with attribute {{attribute}}?",
+    "CancelFixed": "Cancel Fixed",
+    "FixedOnLeft": "Fixed On Left",
+    "FixedOnRight": "Fixed On Right"
   },
   "cn": {
     "TextInput": "文本输入",
@@ -389,6 +392,9 @@
     "UnifyTag": "统一标签",
     "NoData": "暂无数据",
     "AnnotatedList": "标注列表",
-    "onDeleteGraphByAttr": "确定要删除属性为 {{attribute}} 的标注数据吗?"
+    "onDeleteGraphByAttr": "确定要删除属性为 {{attribute}} 的标注数据吗?",
+    "CancelFixed": "取消固定",
+    "FixedOnLeft": "固定在左侧",
+    "FixedOnRight": "固定在右侧"
   }
 }
