@@ -177,7 +177,7 @@ export const PointCloudProvider: React.FC<{}> = ({ children }) => {
       _displayPointCloudList: IPointCloudBoxList = displayPointCloudList,
       _polygonList: IPolygonData[] = polygonList,
     ) => {
-      _displayPointCloudList.forEach((v) => {
+      pointCloudBoxList.forEach((v) => {
         mainViewInstance?.removeObjectByName(v.id);
       });
 
