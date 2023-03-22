@@ -196,7 +196,8 @@
     "onDeleteGraphByAttr": "Are you sure to delete the data with attribute {{attribute}}?",
     "CancelFixed": "Cancel Fixed",
     "FixedOnLeft": "Fixed On Left",
-    "FixedOnRight": "Fixed On Right"
+    "FixedOnRight": "Fixed On Right",
+    "AnnotatedResult": "Annotated Result"
   },
   "cn": {
     "TextInput": "文本输入",
@@ -395,6 +396,7 @@
     "onDeleteGraphByAttr": "确定要删除属性为 {{attribute}} 的标注数据吗?",
     "CancelFixed": "取消固定",
     "FixedOnLeft": "固定在左侧",
-    "FixedOnRight": "固定在右侧"
+    "FixedOnRight": "固定在右侧",
+    "AnnotatedResult": "标注结果"
   }
 }
