@@ -228,6 +228,37 @@ const pointCloudConfig = {
   trackConfigurable: true,
 };
 
+const cuboidToolConfig = {
+  "isShowCursor": false,
+  "showConfirm": false,
+  "skipWhileNoDependencies": false,
+  "drawOutsideTarget": false,
+  "copyBackwardResult": true,
+  "minWidth": 1,
+  "attributeConfigurable": true,
+  "textConfigurable": true,
+  "textCheckType": 0,
+  "customFormat": "",
+  "attributeList": [
+    {
+      "key": "rectTool",
+      "value": "rectTool"
+    },
+    {
+      "key": "23",
+      "value": "23"
+    },
+    {
+      "key": "4",
+      "value": "4"
+    },
+    {
+      "key": "55",
+      "value": "55"
+    }
+  ]
+}
+
 export const getConfig = (tool) => {
   if (tool === EToolName.Line) {
     return lineToolConfig;
@@ -259,6 +290,10 @@ export const getConfig = (tool) => {
 
   if (tool === EToolName.ScribbleTool) {
     return scribbleToolConfig;
+  }
+
+  if (tool === EToolName.Cuboid) {
+    return cuboidToolConfig;
   }
 
   return rectToolConfig;
