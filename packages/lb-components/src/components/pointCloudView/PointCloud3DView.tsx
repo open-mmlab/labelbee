@@ -191,7 +191,7 @@ const PointCloud3D: React.FC<IA2MapStateProps> = ({ currentData, config }) => {
 
   const ptCloud3DCtx = useMemo(() => {
     return { reset3DView, setTarget3DView, isActive: !!selectedBox, followTopView };
-  }, [selectedBox]);
+  }, [selectedBox, ptCtx.mainViewInstance]);
 
   const PointCloud3DTitle = (
     <div>
