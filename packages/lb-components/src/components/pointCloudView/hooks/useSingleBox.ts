@@ -1,4 +1,4 @@
-import { IPointCloudBox } from '@labelbee/lb-utils';
+import { IPointCloudBox, PartialIPointCloudBoxList } from '@labelbee/lb-utils';
 import { useCallback, useContext, useMemo } from 'react';
 import _ from 'lodash';
 import { PointCloudContext } from '../PointCloudContext';
@@ -36,7 +36,7 @@ export const useSingleBox = () => {
     }
   }, [selectedID, pointCloudBoxList]);
 
-  /** Use Partial<IPointCloudBox> to update selected box  */
+  /** Use Partial<IPointCloudBox> to update selected box */
   const updateSelectedBox = useCallback(
     (params: Partial<IPointCloudBox>) => {
       if (selectedBox?.info) {
@@ -162,6 +162,56 @@ export const useSingleBox = () => {
     }
   };
 
+  /**
+   * According to selectedIDs, return selected pointCloudList
+   * @returns pointCloudList {IPointCloudBoxList}
+   */
+  const selectedBoxes = useMemo(() => {
+    return pointCloudBoxList.filter((i) => selectedIDs.includes(i.id));
+  }, [selectedIDs, pointCloudBoxList]);
+
+  /**
+   * Update point cloud boxes list by updateList
+   * @param updateList {PartialIPointCloudBoxList}
+   */
+  const updateSelectedBoxes = useCallback(
+    (updateList: PartialIPointCloudBoxList) => {
+      const newPointCloudBoxList = _.cloneDeep(pointCloudBoxList);
+      let hasModify = false;
+
+      updateList.forEach((i) => {
+        const index = newPointCloudBoxList.findIndex((p) => p.id === i.id);
+
+        if (index > -1) {
+          const updatedBoxParam = _.merge(newPointCloudBoxList[index], i);
+          newPointCloudBoxList.splice(index, 1, updatedBoxParam);
+          mainViewInstance?.generateBox(updatedBoxParam);
+          hasModify = true;
+        }
+      });
+
+      if (hasModify) {
+        setPointCloudResult(newPointCloudBoxList);
+        pushHistoryWithList({ pointCloudBoxList: newPointCloudBoxList });
+        mainViewInstance?.render();
+        return newPointCloudBoxList;
+      }
+    },
+
+    [selectedIDs, pointCloudBoxList],
+  );
+
+  /**
+   * @param id {string}
+   * @returns pointCloud {IPointCloudBox | undefined }
+   */
+  const getPointCloudByID = useCallback(
+    (id: string) => {
+      return pointCloudBoxList.find((i) => i.id === id);
+    },
+    [pointCloudBoxList],
+  );
+
   return {
     selectedBox,
     updateSelectedBox,
@@ -170,6 +220,9 @@ export const useSingleBox = () => {
     selectNextBox: switchToNextBox,
     selectPrevBox,
     deletePointCloudBox,
+    selectedBoxes,
+    updateSelectedBoxes,
+    getPointCloudByID,
     deleteSelectedPointCloudBoxAndPolygon,
   };
 };

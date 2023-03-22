@@ -32,10 +32,12 @@ const PointCloud3DContext = React.createContext<{
   isActive: boolean;
   setTarget3DView: (perspectiveView: EPerspectiveView) => void;
   reset3DView: () => void;
+  followTopView: () => void;
 }>({
   isActive: false,
   setTarget3DView: () => {},
   reset3DView: () => {},
+  followTopView: () => {},
 });
 
 const PointCloudViewIcon = ({
@@ -63,7 +65,7 @@ const PointCloudViewIcon = ({
 };
 
 const PointCloud3DSideBar = () => {
-  const { reset3DView } = useContext(PointCloud3DContext);
+  const { reset3DView, followTopView } = useContext(PointCloud3DContext);
   return (
     <div className={getClassName('point-cloud-3d-sidebar')}>
       <PointCloudViewIcon perspectiveView='Top' />
@@ -73,6 +75,14 @@ const PointCloud3DSideBar = () => {
       <PointCloudViewIcon perspectiveView='Right' />
       <PointCloudViewIcon perspectiveView='LFT' />
       <PointCloudViewIcon perspectiveView='RBT' />
+
+      <span
+        onClick={() => {
+          followTopView();
+        }}
+        className={getClassName('point-cloud-3d-view', 'followTop')}
+      />
+
       <span
         onClick={() => {
           reset3DView();
@@ -109,6 +119,13 @@ const PointCloud3D: React.FC<IA2MapStateProps> = ({ currentData, config }) => {
 
   const reset3DView = () => {
     ptCtx.mainViewInstance?.resetCamera();
+  };
+
+  const followTopView = () => {
+    const topViewCamera = ptCtx.topViewInstance?.pointCloudInstance.camera;
+    if (topViewCamera) {
+      ptCtx.mainViewInstance?.applyCameraTarget(topViewCamera);
+    }
   };
 
   /**
@@ -164,9 +181,8 @@ const PointCloud3D: React.FC<IA2MapStateProps> = ({ currentData, config }) => {
     if (selectedBox) {
       setTarget3DView(EPerspectiveView.Top);
 
-
       /**
-       * 3DView's zoom synchronizes with topView' zoom. 
+       * 3DView's zoom synchronizes with topView' zoom.
        */
       const zoom = ptCtx.topViewInstance?.pointCloudInstance?.camera.zoom ?? 1;
       ptCtx.mainViewInstance?.updateCameraZoom(zoom);
@@ -174,7 +190,7 @@ const PointCloud3D: React.FC<IA2MapStateProps> = ({ currentData, config }) => {
   }, [selectedBox]);
 
   const ptCloud3DCtx = useMemo(() => {
-    return { reset3DView, setTarget3DView, isActive: !!selectedBox };
+    return { reset3DView, setTarget3DView, isActive: !!selectedBox, followTopView };
   }, [selectedBox]);
 
   const PointCloud3DTitle = (
