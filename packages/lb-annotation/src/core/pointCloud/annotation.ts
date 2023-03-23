@@ -82,10 +82,10 @@ export class PointCloudAnnotation implements IPointCloudAnnotationOperation {
       // forbidOperation: true,
       // forbidOperation: !!checkMode,
     };
+
     if (polygonOperationProps) {
       Object.assign(defaultPolygonProps, polygonOperationProps);
     }
-
     const polygonOperation = new PointCloud2dOperation(defaultPolygonProps);
 
     polygonOperation.eventBinding();

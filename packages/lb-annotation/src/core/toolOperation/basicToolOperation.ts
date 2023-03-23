@@ -291,7 +291,6 @@ class BasicToolOperation extends EventListener {
   public get hasMarkerConfig() {
     return this.config.markerConfigurable === true && this.config.markerList && this.config.markerList.length > 0;
   }
-
   public setZoom(zoom: number) {
     this.zoom = zoom;
     this.innerZoom = zoom;

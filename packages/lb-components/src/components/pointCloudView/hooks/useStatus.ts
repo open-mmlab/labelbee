@@ -48,7 +48,7 @@ export const useStatus = () => {
     if (!polygon2dOperation) {
       return;
     }
-
+    console.log(topViewInstance, 777);
     polygon2dOperation.clearActiveStatus();
 
     if (toolName === pointCloudPattern) {

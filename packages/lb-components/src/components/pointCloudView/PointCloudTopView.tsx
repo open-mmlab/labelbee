@@ -182,10 +182,14 @@ const PointCloudTopView: React.FC<IProps> = ({
         container: ref.current,
         size,
         pcdPath: currentData.url,
-        config,
+        config: { ...config, pointCloudPattern: ptCtx.pointCloudPattern },
         checkMode,
       });
-
+      console.log('container', ref.current);
+      console.log('size', size);
+      console.log('pcdPath', currentData.url);
+      console.log('config', config);
+      console.log('ptCtx', ptCtx);
       ptCtx.setTopViewInstance(pointCloudAnnotation);
     }
   }, [currentData]);
@@ -291,6 +295,7 @@ const PointCloudTopView: React.FC<IProps> = ({
      */
     polygonOperation.singleOn('renderZoom', (zoom: number, currentPos: any) => {
       const { offsetX, offsetY } = TransferCanvas2WorldOffset(currentPos, size, zoom);
+      console.log(offsetX, 888);
       pointCloud.camera.zoom = zoom;
       if (currentPos) {
         const { x, y, z } = pointCloud.initCameraPosition;
@@ -307,6 +312,7 @@ const PointCloudTopView: React.FC<IProps> = ({
     // Synchronized 3d point cloud view displacement operations
     polygonOperation.singleOn('dragMove', ({ currentPos, zoom }) => {
       const { offsetX, offsetY } = TransferCanvas2WorldOffset(currentPos, size, zoom);
+      console.log(offsetX);
       pointCloud.camera.zoom = zoom;
       const { x, y, z } = pointCloud.initCameraPosition;
       pointCloud.camera.position.set(x + offsetY, y - offsetX, z);

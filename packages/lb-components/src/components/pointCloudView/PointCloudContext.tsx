@@ -105,9 +105,9 @@ export const PointCloudProvider: React.FC<{}> = ({ children }) => {
   const [backViewInstance, setBackViewInstance] = useState<PointCloudAnnotation>();
   const [mainViewInstance, setMainViewInstance] = useState<PointCloud>();
   const [defaultAttribute, setDefaultAttribute] = useState('');
-  const [pointCloudPattern, setPointCloudPattern] = useState<EToolName.Rect | EToolName.Polygon>(
-    EToolName.Rect,
-  );
+  const [pointCloudPattern, setPointCloudPattern] = useState<
+    EToolName.Rect | EToolName.Polygon | EToolName.Line
+  >(EToolName.Rect);
   const history = useRef(new ActionsHistory()).current;
   const [hideAttributes, setHideAttributes] = useState<string[]>([]);
   const [attrPanelLayout, setAttrPanelLayout] = useState<AttrPanelLayout>('');
