@@ -9,6 +9,7 @@ import {
   MathUtils,
   PointCloud,
   PointCloudAnnotation,
+  THybridToolName,
 } from '@labelbee/lb-annotation';
 import { getClassName } from '@/utils/dom';
 import { PointCloudContainer } from './PointCloudLayout';
@@ -34,6 +35,7 @@ import useSize from '@/hooks/useSize';
 import EmptyPage from './components/EmptyPage';
 import { useTranslation } from 'react-i18next';
 import { LabelBeeContext } from '@/store/ctx';
+import ToolUtils from '@/utils/ToolUtils';
 
 /**
  * 统一一下，将其拓展为 二维转换为 三维坐标的转换
@@ -185,6 +187,7 @@ const PointCloudSideView = ({ currentData, config, checkMode }: IA2MapStateProps
         polygonOperationProps: { showDirectionLine: false, forbidAddNew: true },
         config,
         checkMode,
+        toolName: ToolUtils.getPointCloudToolList() as THybridToolName,
       });
       ptCtx.setBackViewInstance(pointCloudAnnotation);
     }
