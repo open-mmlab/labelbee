@@ -41,6 +41,8 @@ export enum EToolName {
   OCRRelation = 'OCRRelationTool',
   /** 算法分割辅助工具 */
   SegmentByRect = 'segmentByRectTool',
+  /** 点云多边形工具 */
+  PointCloudPolygon = 'pointCloudPolygon',
 }
 
 
