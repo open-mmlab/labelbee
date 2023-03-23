@@ -763,7 +763,7 @@ $hotkey-container-padding: 7px;
   .svg {
     width: 80px;
     height: 100%;
-    color: #cccccc;
+    color: white;
     display: flex;
     justify-content: center;
     align-items: center;
@@ -1283,7 +1283,8 @@ $hotkey-container-padding: 7px;
       cursor: pointer;
     }
     .anticon-eye,
-    .anticon-caret-down {
+    .anticon-caret-down,
+    .anticon-eye-invisible {
       margin-right: 8px;
     }
 
@@ -1590,7 +1591,8 @@ $headerHeight: 40px;
 
             &__followTop {
               margin: 16px 0 0 0;
-              background-image: url('./assets/annotation/pointCloudTool/followTop.svg');
+              background-size: 36px;
+              background-image: url('./assets/annotation/pointCloudTool/followTopView.png');
             }
 
             &__top,

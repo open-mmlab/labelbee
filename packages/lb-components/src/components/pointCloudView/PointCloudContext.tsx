@@ -42,6 +42,7 @@ export interface IPointCloudContext extends IPointCloudContextInstances {
 
   history: ActionsHistory; // Operation History
   hideAttributes: string[];
+  setHideAttributes: (hideAttrs: string[]) => void;
   toggleAttributesVisible: (attribute: string) => void;
   reRender: (_displayPointCloudList: IPointCloudBoxList, _polygonList: IPolygonData[]) => void;
   attrPanelLayout: AttrPanelLayout;
@@ -81,6 +82,7 @@ export const PointCloudContext = React.createContext<IPointCloudContext>({
   setZoom: () => {},
   history: new ActionsHistory(),
   hideAttributes: [],
+  setHideAttributes: () => {},
   toggleAttributesVisible: () => {},
   reRender: () => {},
   setAttrPanelLayout: () => {},
@@ -177,7 +179,7 @@ export const PointCloudProvider: React.FC<{}> = ({ children }) => {
       _displayPointCloudList: IPointCloudBoxList = displayPointCloudList,
       _polygonList: IPolygonData[] = polygonList,
     ) => {
-      _displayPointCloudList.forEach((v) => {
+      pointCloudBoxList.forEach((v) => {
         mainViewInstance?.removeObjectByName(v.id);
       });
 

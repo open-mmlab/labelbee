@@ -442,8 +442,9 @@ export class PointCloud {
     }
 
     if (camera) {
-      const cameraTar = this.getOrthographicCameraTarget(camera as OrthographicCamera);
-      this.updateCamera(camera.position, cameraTar);
+      const cameraTarget = this.getOrthographicCameraTarget(camera as OrthographicCamera);
+      this.camera.zoom = camera.zoom;
+      this.updateCamera(camera.position, cameraTarget);
     }
   };
 

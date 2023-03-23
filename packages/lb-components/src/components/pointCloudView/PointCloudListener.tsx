@@ -241,6 +241,10 @@ const PointCloudListener: React.FC<IProps> = ({
     updatePointCloudData?.();
   }, [imgIndex, ptCtx.mainViewInstance]);
 
+  useEffect(() => {
+    ptCtx.setHideAttributes([]);
+  }, [imgIndex]);
+
   // Update the listener of toolInstance.
   useEffect(() => {
     toolInstanceRef.current.exportData = () => {
