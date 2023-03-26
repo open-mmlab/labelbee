@@ -131,9 +131,6 @@ const PointCloud3D: React.FC<IA2MapStateProps> = ({ currentData, config }) => {
     }
   };
 
-  /**
-   * Listen for data changes.
-   */
   useEffect(() => {
     if (ref.current && currentData?.url) {
       let pointCloud = ptCtx.mainViewInstance;
@@ -156,8 +153,16 @@ const PointCloud3D: React.FC<IA2MapStateProps> = ({ currentData, config }) => {
         });
         ptCtx.setMainViewInstance(pointCloud);
       }
+    }
+  }, [size]);
 
-      if (currentData.result) {
+  /**
+   * Listen for data changes.
+   */
+  useEffect(() => {
+    if (ref.current && currentData?.url) {
+      if (currentData.result && ptCtx.mainViewInstance) {
+        let pointCloud = ptCtx.mainViewInstance;
         const boxParamsList = PointCloudUtils.getBoxParamsFromResultList(currentData.result);
 
         // Add Init Box
@@ -175,7 +180,7 @@ const PointCloud3D: React.FC<IA2MapStateProps> = ({ currentData, config }) => {
         ptCtx.setPointCloudValid(jsonParser(currentData.result)?.valid);
       }
     }
-  }, [currentData, size]);
+  }, [currentData, ptCtx.mainViewInstance]);
 
   /**
    *  Observe selectedID and reset camera to target top-view

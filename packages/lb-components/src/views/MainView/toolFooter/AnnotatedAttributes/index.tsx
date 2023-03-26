@@ -1,6 +1,6 @@
 import { PointCloudContext } from '@/components/pointCloudView/PointCloudContext';
 import { Modal } from 'antd';
-import React, { useContext, useState } from 'react';
+import React, { useContext, useMemo, useState } from 'react';
 import { stepConfigSelector } from '@/store/annotation/selectors';
 import { useSelector } from '@/store/ctx';
 import { i18n, IPointCloudConfig } from '@labelbee/lb-utils';
@@ -22,7 +22,6 @@ import FooterPopover from '../FooterPopover';
 
 const AnnotatedAttributesItem = ({ attribute }: { attribute: IInputList }) => {
   const pointCloudCtx = useContext(PointCloudContext);
-  const { t } = useTranslation();
   const {
     pointCloudBoxList,
     hideAttributes,
@@ -33,7 +32,7 @@ const AnnotatedAttributesItem = ({ attribute }: { attribute: IInputList }) => {
     reRender,
   } = pointCloudCtx;
 
-  const [expanded, setExpanded] = useState(false);
+  const [expanded, setExpanded] = useState(true);
 
   const { pushHistoryWithList } = useHistory();
 
@@ -102,25 +101,32 @@ const AnnotatedAttributesItem = ({ attribute }: { attribute: IInputList }) => {
       </div>
 
       {expanded &&
-        (pointCloudListForSpecAttribute.length > 0 ? (
-          pointCloudListForSpecAttribute.map((box) => {
-            return (
-              <div key={getBoxKey(box)} style={{ paddingLeft: 54 }}>
-                {`${getBoxID(box)}.${attribute.key}`}
-              </div>
-            );
-          })
-        ) : (
-          <div style={{ textAlign: 'center' }}>{t('NoData')}</div>
-        ))}
+        pointCloudListForSpecAttribute.map((box) => {
+          return (
+            <div key={getBoxKey(box)} style={{ paddingLeft: 54 }}>
+              {`${getBoxID(box)}.${attribute.key}`}
+            </div>
+          );
+        })}
     </>
   );
 };
 
 export const AnnotatedAttributesPanel = () => {
   const stepConfig: IPointCloudConfig = useSelector(stepConfigSelector);
-  const { attrPanelLayout, setAttrPanelLayout } = useContext(PointCloudContext);
+  const { attrPanelLayout, setAttrPanelLayout, pointCloudBoxList, polygonList } =
+    useContext(PointCloudContext);
   const { t } = useTranslation();
+
+  const existAttributes = useMemo(() => {
+    return [...pointCloudBoxList, ...polygonList].map((i) => i.attribute);
+  }, [pointCloudBoxList, polygonList]);
+
+  const displayAttrList = useMemo(() => {
+    return (stepConfig.attributeList as IInputList[]).filter((i) =>
+      existAttributes.includes(i.value),
+    );
+  }, [existAttributes]);
 
   return (
     <div className={getClassName('annotated-attribute')}>
@@ -161,9 +167,11 @@ export const AnnotatedAttributesPanel = () => {
       )}
 
       <div>
-        {stepConfig.attributeList.map((i) => (
-          <AnnotatedAttributesItem attribute={i} key={i.value} />
-        ))}
+        {displayAttrList.length > 0 ? (
+          displayAttrList.map((i) => <AnnotatedAttributesItem attribute={i} key={i.value} />)
+        ) : (
+          <div style={{ textAlign: 'center', height: 200, lineHeight: '200px' }}>{t('NoData')}</div>
+        )}
       </div>
     </div>
   );
