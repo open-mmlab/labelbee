@@ -1253,6 +1253,7 @@ $hotkey-container-padding: 7px;
 .#{$prefix}-annotated-attribute {
   width: 240px;
   background: white;
+  padding-bottom: 12px;
 
   &__popover .ant-popover-inner-content {
     padding: 0;
@@ -1271,6 +1272,7 @@ $hotkey-container-padding: 7px;
     justify-content: space-between;
     padding: 8px 12px;
     color: #333;
+    cursor: pointer;
   }
 
   &__item {

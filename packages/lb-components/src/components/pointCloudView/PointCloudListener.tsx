@@ -182,6 +182,7 @@ const PointCloudListener: React.FC<IProps> = ({
         pasteSelectedBoxes();
         break;
       case 'a':
+        e.preventDefault();
         ptCtx.selectedAllBoxes();
         break;
       case 'z': {
