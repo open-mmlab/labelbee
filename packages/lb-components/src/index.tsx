@@ -55,3 +55,5 @@ export default React.forwardRef(OutputApp);
 export { AnnotationView, PointCloudAnnotationView, i18n, VideoTagTool };
 
 export * from './constant';
+
+export * from './utils';

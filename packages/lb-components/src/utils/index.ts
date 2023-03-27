@@ -1,4 +1,5 @@
 import _ from 'lodash';
+import StepUtils from './StepUtils';
 
 export const jsonParser = (content: any, defaultValue: any = {}) => {
   try {
@@ -33,3 +34,5 @@ export const classnames = (className: { [key: string]: boolean } | (string | und
 
   return '';
 };
+
+export { StepUtils };

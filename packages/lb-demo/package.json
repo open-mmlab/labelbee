@@ -6,9 +6,6 @@
     "@labelbee/lb-annotation": "^1.12.1",
     "@labelbee/lb-components": "^1.8.1",
     "@labelbee/lb-utils": "^1.5.0",
-    "@testing-library/jest-dom": "^5.11.4",
-    "@testing-library/react": "^11.1.0",
-    "@testing-library/user-event": "^12.1.10",
     "@types/three": ">=0.141.0",
     "qs": "^6.10.1",
     "react": "^17.0.2",
@@ -19,11 +16,9 @@
     "web-vitals": "^1.0.2"
   },
   "scripts": {
-    "start": "react-scripts start",
-    "dev": "npm run start",
-    "build": "react-scripts build",
-    "test": "react-scripts test",
-    "eject": "react-scripts eject"
+    "start": "vite",
+    "dev": "npm start",
+    "build": "vite build"
   },
   "eslintConfig": {
     "extends": [
@@ -44,6 +39,8 @@
     ]
   },
   "devDependencies": {
-    "antd": "^4.16.13"
+    "@vitejs/plugin-react": "^3.1.0",
+    "antd": "^4.16.13",
+    "vite": "^4.2.0"
   }
 }

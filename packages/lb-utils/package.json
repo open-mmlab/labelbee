@@ -28,13 +28,5 @@
   "dependencies": {
     "i18next": "^21.3.3",
     "react-i18next": "^11.12.0"
-  },
-  "devDependencies": {
-    "@rollup/plugin-json": "^4.1.0",
-    "@types/react-i18next": "^8.1.0",
-    "esbuild": "^0.11.0",
-    "rollup": "^2.43.1",
-    "rollup-plugin-esbuild": "^3.0.2",
-    "typescript": "^4.2.3"
   }
 }

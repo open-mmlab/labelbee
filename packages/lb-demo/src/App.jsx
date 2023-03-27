@@ -5,7 +5,7 @@
  * @LastEditTime: 2022-06-13 19:34:53
  */
 import { AnnotationView, PointCloudAnnotationView } from '@labelbee/lb-components';
-import StepUtils from '@labelbee/lb-components/dist/utils/StepUtils';
+import { StepUtils } from '@labelbee/lb-components';
 import 'antd/dist/antd.css';
 import qs from 'qs';
 import React, { useState } from 'react';
