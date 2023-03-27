@@ -3,8 +3,8 @@
   "version": "1.9.0",
   "private": true,
   "dependencies": {
-    "@labelbee/lb-annotation": "^1.12.0",
-    "@labelbee/lb-components": "^1.8.0",
+    "@labelbee/lb-annotation": "^1.12.1",
+    "@labelbee/lb-components": "^1.8.1",
     "@labelbee/lb-utils": "^1.5.0",
     "@testing-library/jest-dom": "^5.11.4",
     "@testing-library/react": "^11.1.0",
