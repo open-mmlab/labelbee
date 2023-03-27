@@ -30,6 +30,7 @@ const AnnotatedAttributesItem = ({ attribute }: { attribute: IInputList }) => {
     setPolygonList,
     setPointCloudResult,
     reRender,
+    selectSpecAttr,
   } = pointCloudCtx;
 
   const [expanded, setExpanded] = useState(true);
@@ -95,7 +96,14 @@ const AnnotatedAttributesItem = ({ attribute }: { attribute: IInputList }) => {
             setExpanded(!expanded);
           }}
         />
-        <span className={getClassName('annotated-attribute', 'item', 'text')}>{attribute.key}</span>
+        <span
+          className={getClassName('annotated-attribute', 'item', 'text')}
+          onClick={() => {
+            selectSpecAttr(attribute.value);
+          }}
+        >
+          {attribute.key}
+        </span>
 
         <DeleteOutlined onClick={() => onDeleteGraphByAttr(attribute)} />
       </div>
