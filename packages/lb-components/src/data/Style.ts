@@ -88,11 +88,13 @@ export const CHANGE_COLOR: { [a: number]: any } = {
 };
 
 export const BORDER_OPACITY_LEVEL: { [a: number]: number } = {
+  0: 0,
   1: 0.2,
   3: 0.4,
   5: 0.6,
   7: 0.8,
   9: 1.0,
+  10: 1.0,
 };
 
 export const FILL_OPACITY_LEVEL: { [a: number]: number } = {
@@ -101,4 +103,5 @@ export const FILL_OPACITY_LEVEL: { [a: number]: number } = {
   5: 0.4,
   7: 0.6,
   9: 0.8,
+  10: 1.0,
 };
