@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [1.12.1](https://github.com/open-mmlab/labelbee/compare/v1.12.0...v1.12.1) (2023-03-23)
+
+
+### Bug Fixes
+
+* **view-operation:** Update the range of direction judgement ([943c2b0](https://github.com/open-mmlab/labelbee/commit/943c2b0dbb025c983352f12d16793b508b4c15ce))
+
 ## [1.12.0](https://github.com/open-mmlab/labelbee/compare/v1.11.0...v1.12.0) (2023-03-09)
 
 

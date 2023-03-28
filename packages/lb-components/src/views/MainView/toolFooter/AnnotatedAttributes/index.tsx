@@ -22,6 +22,7 @@ import FooterPopover from '../FooterPopover';
 
 const AnnotatedAttributesItem = ({ attribute }: { attribute: IInputList }) => {
   const pointCloudCtx = useContext(PointCloudContext);
+  const { t } = useTranslation();
   const {
     pointCloudBoxList,
     hideAttributes,
@@ -50,6 +51,10 @@ const AnnotatedAttributesItem = ({ attribute }: { attribute: IInputList }) => {
     return trackID ? trackID : order;
   };
 
+  const getBoxKey = ({ trackID, order }: { trackID?: number; order?: number }) => {
+    return trackID ? `trackID_${trackID}` : `order_${order}`;
+  };
+
   const deleteGraphByAttr = (attribute: string) => {
     if (pointCloudListForSpecAttribute.length === 0) {
       return;
@@ -57,10 +62,11 @@ const AnnotatedAttributesItem = ({ attribute }: { attribute: IInputList }) => {
 
     const newPolygonList = polygonList.filter((i) => attribute !== i.attribute);
     const newPointCloudList = pointCloudBoxList.filter((i) => attribute !== i.attribute);
-    setPolygonList(newPolygonList);
-    setPointCloudResult(newPointCloudList);
 
     reRender(newPointCloudList, newPolygonList);
+
+    setPolygonList(newPolygonList);
+    setPointCloudResult(newPointCloudList);
 
     pushHistoryWithList({ pointCloudBoxList: newPointCloudList, polygonList: newPolygonList });
   };
@@ -85,7 +91,7 @@ const AnnotatedAttributesItem = ({ attribute }: { attribute: IInputList }) => {
           <EyeFilled onClick={onVisibleChange} />
         )}
         <CaretDownFilled
-          rotate={expanded ? 270 : 0}
+          rotate={expanded ? 0 : 270}
           onClick={() => {
             setExpanded(!expanded);
           }}
@@ -94,13 +100,19 @@ const AnnotatedAttributesItem = ({ attribute }: { attribute: IInputList }) => {
 
         <DeleteOutlined onClick={() => onDeleteGraphByAttr(attribute)} />
       </div>
-      {pointCloudListForSpecAttribute.map((box) => {
-        return (
-          <div key={getBoxID(box)} style={{ paddingLeft: 54 }}>
-            {`${getBoxID(box)}.${attribute.key}`}
-          </div>
-        );
-      })}
+
+      {expanded &&
+        (pointCloudListForSpecAttribute.length > 0 ? (
+          pointCloudListForSpecAttribute.map((box) => {
+            return (
+              <div key={getBoxKey(box)} style={{ paddingLeft: 54 }}>
+                {`${getBoxID(box)}.${attribute.key}`}
+              </div>
+            );
+          })
+        ) : (
+          <div style={{ textAlign: 'center' }}>{t('NoData')}</div>
+        ))}
     </>
   );
 };
@@ -114,7 +126,7 @@ export const AnnotatedAttributesPanel = () => {
     <div className={getClassName('annotated-attribute')}>
       {attrPanelLayout ? (
         <div className={getClassName('annotated-attribute', 'text')}>
-          <span>标注结果</span>
+          <span>{t('AnnotatedResult')}</span>
           <span
             className={getClassName('annotated-attribute', 'pin')}
             onClick={() => {
