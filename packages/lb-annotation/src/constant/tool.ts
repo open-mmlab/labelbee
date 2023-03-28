@@ -58,6 +58,8 @@ export enum EToolName {
   OCRRelation = 'OCRRelationTool',
   /** 算法分割辅助工具 */
   SegmentByRect = 'segmentByRectTool',
+  /** 点云多边形工具 */
+  PointCloudPolygon = 'pointCloudPolygon',
 }
 
 export enum ECheckModel {
@@ -71,6 +73,7 @@ export enum ERectPattern {
 }
 
 export type ToolName = EToolName | EVideoToolName | EPointCloudName;
+export type THybridToolName = EToolName | Array<EToolName>;
 
 export const TOOL_NAME: { [a: string]: string } = {
   [EToolName.Rect]: '拉框',
