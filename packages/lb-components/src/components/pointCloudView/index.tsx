@@ -56,8 +56,8 @@ const PointCloudView: React.FC<IProps> = ({ imgList, drawLayerSlot, checkMode })
             <div className={getClassName('point-cloud-container', 'right')}>
               <PointCloudTopView drawLayerSlot={drawLayerSlot} checkMode={checkMode} />
               <div className={getClassName('point-cloud-container', 'right-bottom')}>
-                <PointCloudSideView />
-                <PointCloudBackView />
+                <PointCloudSideView checkMode={checkMode} />
+                <PointCloudBackView checkMode={checkMode} />
               </div>
             </div>
           </div>
