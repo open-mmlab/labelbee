@@ -63,7 +63,9 @@ export const ToolIcons = ({
   const { i18n } = useTranslation();
   const renderTools = toolList?.filter((item) => {
     if (toolName === (EPointCloudName.PointCloud as unknown as EToolName)) {
-      return [EToolName.Polygon, EToolName.Rect, EToolName.Line].includes(item?.toolName);
+      return [EToolName.Polygon, EToolName.Rect, EToolName.Point, EToolName.Line].includes(
+        item?.toolName,
+      );
     }
 
     return item?.toolName === toolName;

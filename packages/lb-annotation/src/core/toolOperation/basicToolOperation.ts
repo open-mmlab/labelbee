@@ -838,7 +838,6 @@ class BasicToolOperation extends EventListener {
     this.isDrag = false;
     this.isDragStart = false;
     this.isSpaceClick = false;
-
     if (this.startTime !== 0 && this._firstClickCoordinate) {
       const time = new Date().getTime();
       const currentCoord = this.getCoordinate(e);
@@ -973,7 +972,6 @@ class BasicToolOperation extends EventListener {
       // 放大
       operator = 1;
     }
-
     this.wheelChangePos(coord, operator);
     this.emit('dependRender');
     if (isRender) {

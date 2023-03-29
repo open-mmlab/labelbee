@@ -290,10 +290,12 @@ class PointCloudUtils {
    */
   public static transferBox2Kitti(boxParams: IPointCloudBox) {
     return {
-      height: boxParams.depth,
-      length: boxParams.width,
-      width: boxParams.height,
-      rotation_y: this.transferRotation2KittiRotation_y(boxParams.rotation),
+      height: boxParams.depth ?? 0,
+      length: boxParams.width ?? boxParams.length,
+      width: boxParams.height ?? 0,
+      rotation_y: boxParams.rotation
+        ? this.transferRotation2KittiRotation_y(boxParams.rotation)
+        : 0,
     };
   }
 

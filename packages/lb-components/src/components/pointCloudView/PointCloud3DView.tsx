@@ -100,7 +100,8 @@ const PointCloud3D: React.FC<IA2MapStateProps> = ({ currentData, config }) => {
   const { initPointCloud3d } = usePointCloudViews();
   const size = useSize(ref);
   const { t } = useTranslation();
-
+  const toolName = ptCtx?.topViewInstance?.toolInstance.toolName;
+  const isLine = toolName === 'lineTool';
   useEffect(() => {
     if (!ptCtx.mainViewInstance) {
       return;
@@ -211,7 +212,7 @@ const PointCloud3D: React.FC<IA2MapStateProps> = ({ currentData, config }) => {
     <PointCloudContainer
       className={getClassName('point-cloud-3d-container')}
       title={t('3DView')}
-      toolbar={PointCloud3DTitle}
+      toolbar={isLine ? null : PointCloud3DTitle}
       style={{
         height:
           currentData.mappingImgList && currentData.mappingImgList?.length > 0 ? '55%' : '100%',
@@ -219,7 +220,7 @@ const PointCloud3D: React.FC<IA2MapStateProps> = ({ currentData, config }) => {
     >
       <div className={getClassName('point-cloud-3d-content')}>
         <PointCloud3DContext.Provider value={ptCloud3DCtx}>
-          <PointCloud3DSideBar />
+          {isLine ? null : <PointCloud3DSideBar />}
         </PointCloud3DContext.Provider>
         <div className={getClassName('point-cloud-3d-view')} id={pointCloudID} ref={ref} />
       </div>

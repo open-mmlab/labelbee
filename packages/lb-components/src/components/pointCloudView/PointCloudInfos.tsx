@@ -77,12 +77,14 @@ export const BoxInfos = ({
   const [infos, setInfos] = useState<Array<{ label: string; value: string }>>([]);
   const trans = useTranslation();
   const { t, i18n } = trans;
+  const toolName = ptCtx?.topViewInstance?.toolInstance.toolName;
+  const isLine = toolName === 'lineTool';
 
   useEffect(() => {
     if (!selectedBox) {
       return;
     }
-
+    console.log(123123123);
     const { length, width, height, rotation_y } = PointCloudUtils.transferBox2Kitti(
       selectedBox.info,
     );
@@ -105,7 +107,10 @@ export const BoxInfos = ({
         value: UnitUtils.rad2deg(rotation_y).toFixed(DECIMAL_PLACES),
       },
     ];
-
+    if (isLine) {
+      setInfos(infos);
+      return;
+    }
     // Get Point Count.
     ptCtx.mainViewInstance?.filterPointsByBox(selectedBox.info).then((data) => {
       if (!data) {
@@ -126,7 +131,7 @@ export const BoxInfos = ({
         );
         subAttributeNameList.forEach((data) => infos.push(data));
       }
-      
+
       setInfos(infos);
     });
   }, [selectedBox, i18n.language]);

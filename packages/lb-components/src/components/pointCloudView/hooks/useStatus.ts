@@ -44,27 +44,30 @@ export const useStatus = () => {
   };
 
   const updatePointCloudPattern = (toolName: any) => {
-    const polygon2dOperation = topViewInstance?.pointCloud2dOperation;
-    if (!polygon2dOperation) {
-      return;
-    }
-    console.log(topViewInstance, 777);
-    polygon2dOperation.clearActiveStatus();
-
     if (toolName === pointCloudPattern) {
       return;
     }
 
     switch (toolName) {
       case EToolName.Rect:
-        polygon2dOperation.setPattern(EPolygonPattern.Rect);
+        topViewInstance?.switchToCanvas(EToolName.PointCloudPolygon);
+        topViewInstance?.toolInstance.setPattern(EPolygonPattern.Rect);
+        // polygon2dOperation.setPattern(EPolygonPattern.Rect);
         setPointCloudPattern(EToolName.Rect);
         break;
       case EToolName.Polygon:
-        polygon2dOperation.setPattern(EPolygonPattern.Normal);
+        topViewInstance?.switchToCanvas(EToolName.PointCloudPolygon);
+        topViewInstance?.toolInstance.setPattern(EPolygonPattern.Normal);
+        // polygon2dOperation.setPattern(EPolygonPattern.Normal);
         setPointCloudPattern(EToolName.Polygon);
         break;
+      case EToolName.Point:
+        // polygon2dOperation.setPattern(EPolygonPattern.Point);
+        topViewInstance?.switchToCanvas(EToolName.Point);
+        setPointCloudPattern(EToolName.Point);
+        break;
       case EToolName.Line:
+        topViewInstance?.switchToCanvas(EToolName.Line);
         setPointCloudPattern(EToolName.Line);
         break;
     }

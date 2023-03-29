@@ -9,6 +9,7 @@ import {
   MathUtils,
   PointCloud,
   PointCloudAnnotation,
+  THybridToolName,
 } from '@labelbee/lb-annotation';
 import { getClassName } from '@/utils/dom';
 import { PointCloudContainer } from './PointCloudLayout';
@@ -34,6 +35,7 @@ import useSize from '@/hooks/useSize';
 import EmptyPage from './components/EmptyPage';
 import { useTranslation } from 'react-i18next';
 import { LabelBeeContext } from '@/store/ctx';
+import ToolUtils from '@/utils/ToolUtils';
 
 /**
  * 统一一下，将其拓展为 二维转换为 三维坐标的转换
@@ -97,7 +99,8 @@ const PointCloudSideView = ({ currentData, config, checkMode }: IA2MapStateProps
   const { selectedBox, updateSelectedBox } = useSingleBox();
   const { t } = useTranslation();
   const { backViewUpdateBox } = usePointCloudViews();
-
+  const toolName = ptCtx?.topViewInstance?.toolInstance.toolName;
+  const isLine = toolName === 'lineTool';
   const transferPolygonDataToBoxParams = (
     newPolygon: IPolygonData,
     originPolygon: IPolygonData,
@@ -185,6 +188,7 @@ const PointCloudSideView = ({ currentData, config, checkMode }: IA2MapStateProps
         polygonOperationProps: { showDirectionLine: false, forbidAddNew: true },
         config,
         checkMode,
+        toolName: ToolUtils.getPointCloudToolList() as THybridToolName,
       });
       ptCtx.setBackViewInstance(pointCloudAnnotation);
     }
@@ -245,11 +249,11 @@ const PointCloudSideView = ({ currentData, config, checkMode }: IA2MapStateProps
     <PointCloudContainer
       className={getClassName('point-cloud-container', 'back-view')}
       title={t('BackView')}
-      toolbar={<SizeInfoForView perspectiveView={EPerspectiveView.Back} />}
+      toolbar={isLine ? null : <SizeInfoForView perspectiveView={EPerspectiveView.Back} />}
     >
       <div className={getClassName('point-cloud-container', 'bottom-view-content')}>
         <div className={getClassName('point-cloud-container', 'core-instance')} ref={ref} />
-        {!selectedBox && <EmptyPage />}
+        {(!selectedBox || isLine) && <EmptyPage />}
       </div>
     </PointCloudContainer>
   );

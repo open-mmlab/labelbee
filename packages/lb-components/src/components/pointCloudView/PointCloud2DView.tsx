@@ -44,6 +44,7 @@ interface IAnnotationDataTemporarily {
 }
 
 const PointCloud2DView = ({ currentData, config }: IA2MapStateProps) => {
+  const ptCtx = React.useContext(PointCloudContext);
   const [annotations2d, setAnnotations2d] = useState<IAnnotationDataTemporarily[]>([]);
   const { topViewInstance, displayPointCloudList } = useContext(PointCloudContext);
   const [mappingIndex, setMappingIndex] = useState(0);
@@ -52,6 +53,9 @@ const PointCloud2DView = ({ currentData, config }: IA2MapStateProps) => {
   const { selectedBox } = useSingleBox();
   const size = useSize(ref);
   const { t } = useTranslation();
+
+  const toolName = ptCtx?.topViewInstance?.toolInstance.toolName;
+  const isLine = toolName === 'lineTool';
 
   const mappingData = currentData?.mappingImgList?.[mappingIndex];
 
@@ -102,7 +106,10 @@ const PointCloud2DView = ({ currentData, config }: IA2MapStateProps) => {
   }, [displayPointCloudList, mappingData]);
 
   const hiddenData =
-    !currentData || !currentData?.mappingImgList || !(currentData?.mappingImgList?.length > 0);
+    !currentData ||
+    !currentData?.mappingImgList ||
+    !(currentData?.mappingImgList?.length > 0) ||
+    isLine;
 
   const afterImgOnLoad = useCallback(() => {
     const toolInstance = viewRef.current?.toolInstance;

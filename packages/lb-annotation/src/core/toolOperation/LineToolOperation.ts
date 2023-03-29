@@ -12,6 +12,8 @@ import EKeyCode from '@/constant/keyCode';
 import MathUtils from '@/utils/MathUtils';
 import { BasicToolOperation, IBasicToolOperationProps } from './basicToolOperation';
 import LineToolUtils from '../../utils/tool/LineToolUtils';
+import { IPolygonData } from '../../types/tool/polygon';
+
 import {
   isInPolygon,
   createSmoothCurvePoints,
@@ -135,6 +137,8 @@ class LineToolOperation extends BasicToolOperation {
 
   public selectedID?: string;
 
+  public toolName: string = 'lineTool';
+
   private lineList: ILine[] = [];
 
   private activeLine?: ILinePoint[] = [];
@@ -173,6 +177,8 @@ class LineToolOperation extends BasicToolOperation {
   private isLineValid: boolean;
 
   private lineDragging: boolean;
+
+  private selectedIDs: string[] = [];
 
   constructor(props: ILineOperationProps) {
     super(props);
@@ -469,6 +475,20 @@ class LineToolOperation extends BasicToolOperation {
       this.ctx.stroke();
       this.ctx.restore();
     }
+  }
+
+  /**
+   * Update selectedIDs and rerender
+   * @param selectedIDs
+   */
+  public setSelectedIDs(selectedIDs: string[]) {
+    this.selectedIDs = selectedIDs;
+
+    if (this.selectedIDs.length < 2) {
+      this.setSelectedID(this.selectedIDs.length === 1 ? this.selectedIDs[0] : '');
+    }
+
+    this.render();
   }
 
   /**
@@ -1126,6 +1146,7 @@ class LineToolOperation extends BasicToolOperation {
       this.setSelectedLineID(line.id);
       this.activeArea = area;
       this.updateLineAttributes(line);
+      this.updateLineBasicInfo(line);
     } else if (outsideCancel) {
       this.setNoneStatus();
     }
@@ -1146,9 +1167,30 @@ class LineToolOperation extends BasicToolOperation {
       this.setSelectedLineID(line.id);
       this.activeArea = area;
       this.updateLineAttributes(line);
+      this.updateLineBasicInfo(line);
     }
 
     this.render();
+  }
+
+  public updateLineBasicInfo(line: ILine) {
+    let createPolygon: IPolygonData | undefined;
+    const basicSourceID = CommonToolUtils.getSourceID(this.basicResult);
+    const id = uuid(8, 62);
+    let newPolygon: IPolygonData = {
+      id,
+      sourceID: basicSourceID,
+      valid: true, // !this.isCtrl
+      textAttribute: '',
+      pointList: line.pointList!,
+      attribute: this.defaultAttribute,
+      order:
+        CommonToolUtils.getMaxOrder(
+          this.lineList.filter((v) => CommonToolUtils.isSameSourceID(v.sourceID, basicSourceID)),
+        ) + 1,
+    };
+    createPolygon = newPolygon;
+    this.emit('polygonCreated', createPolygon, this.zoom, this.currentPos);
   }
 
   public setActiveLine(pointList?: ILinePoint[]) {
@@ -1416,7 +1458,6 @@ class LineToolOperation extends BasicToolOperation {
       reset();
       return;
     }
-
     // /** 非创建状态，记录当前被修改的线条 */
     // if (this.isMousedown && !this.isCreate) {
     //   const lineChanged = this.lineHasChanged();
@@ -1697,7 +1738,7 @@ class LineToolOperation extends BasicToolOperation {
 
       /* 删除点 */
       if (hoverPoint) {
-        this.deleteSelectedLinePoint(hoverPoint.id);
+        this.deleteSelectedLinePoint(hoverPoint.id!);
         return;
       }
 

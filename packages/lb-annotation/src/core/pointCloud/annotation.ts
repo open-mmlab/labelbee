@@ -4,12 +4,13 @@
  * @author Ron <ron.f.luo@gmail.com>
  */
 
-import { IPointCloudBox, PointCloudUtils, IPointCloudConfig } from '@labelbee/lb-utils';
-import { EPolygonPattern } from '@/constant/tool';
+import { IPointCloudBox, IPointCloudConfig, PointCloudUtils } from '@labelbee/lb-utils';
+import { EPolygonPattern, EToolName, THybridToolName } from '@/constant/tool';
 import { CanvasScheduler } from '@/newCore';
-import { IPolygonData } from '@/types/tool/polygon';
+import { IPolygonData, IPolygonPoint } from '@/types/tool/polygon';
 import { PointCloud } from '.';
 import PointCloud2dOperation, { IPointCloud2dOperationProps } from '../toolOperation/pointCloud2dOperation';
+import { HybridToolUtils, ToolScheduler } from '../scheduler';
 
 interface IPointCloudAnnotationOperation {
   updateData: (pcdPath: string, result: string) => void;
@@ -25,6 +26,7 @@ interface IPointCloudAnnotationProps {
   config: IPointCloudConfig;
 
   checkMode?: boolean;
+  toolName: THybridToolName;
 }
 
 const createEmptyImage = (size: { width: number; height: number }) => {
@@ -43,19 +45,33 @@ const createEmptyImage = (size: { width: number; height: number }) => {
 export class PointCloudAnnotation implements IPointCloudAnnotationOperation {
   public pointCloudInstance: PointCloud;
 
-  public pointCloud2dOperation: PointCloud2dOperation;
+  public pointCloud2dOperation!: PointCloud2dOperation;
 
   public canvasScheduler: CanvasScheduler;
 
+  public toolScheduler: ToolScheduler;
+
+  public toolInstance: any; // 用于存储当前工具实例
+
   public config: IPointCloudConfig;
 
-  constructor({ size, container, pcdPath, polygonOperationProps, config, checkMode }: IPointCloudAnnotationProps) {
+  constructor({
+    size,
+    container,
+    pcdPath,
+    polygonOperationProps,
+    config,
+    checkMode,
+    toolName,
+  }: IPointCloudAnnotationProps) {
     const defaultOrthographic = this.getDefaultOrthographic(size);
 
     const imgSrc = createEmptyImage(size);
 
     const image = new Image();
     image.src = imgSrc;
+
+    const toolScheduler = new ToolScheduler({ container, size, toolName });
     const canvasScheduler = new CanvasScheduler({ container });
 
     // 1. PointCloud initialization
@@ -73,11 +89,9 @@ export class PointCloudAnnotation implements IPointCloudAnnotationOperation {
 
     // 2. PointCloud2dOperation initialization
     const defaultPolygonProps = {
-      container,
       size,
       config: JSON.stringify(config),
       imgNode: image,
-      isAppend: false,
       checkMode,
       // forbidOperation: true,
       // forbidOperation: !!checkMode,
@@ -86,17 +100,40 @@ export class PointCloudAnnotation implements IPointCloudAnnotationOperation {
     if (polygonOperationProps) {
       Object.assign(defaultPolygonProps, polygonOperationProps);
     }
-    const polygonOperation = new PointCloud2dOperation(defaultPolygonProps);
 
-    polygonOperation.eventBinding();
-    polygonOperation.setPattern(EPolygonPattern.Rect);
+    // init operations
+    let toolList: EToolName[] = [];
 
-    canvasScheduler.createCanvas(polygonOperation.canvas, { size });
+    if (HybridToolUtils.isSingleTool(toolName)) {
+      toolList = [toolName] as EToolName[];
+    } else {
+      toolList = toolName as EToolName[];
+    }
+    toolList.forEach((tool, i) => {
+      let toolInstance;
+      if (tool === EToolName.PointCloudPolygon) {
+        const pointCloudPolygonOperation = toolScheduler.createOperation(tool, image, defaultPolygonProps);
+        pointCloudPolygonOperation.eventBinding();
+        pointCloudPolygonOperation.setPattern(EPolygonPattern.Rect);
+        this.toolInstance = pointCloudPolygonOperation;
+        this.toolInstance.eventBinding();
+        this.pointCloud2dOperation = pointCloudPolygonOperation;
+      } else {
+        toolInstance = toolScheduler.createOperation(tool, image, config);
+      }
+      if (i === toolList.length - 1) {
+        if (!this.toolInstance) {
+          this.toolInstance = toolInstance;
+          this.toolInstance.eventBinding();
+        }
+        // The last one by default is the topmost operation.
+      }
+    });
 
     // 3. Data record
-    this.pointCloud2dOperation = polygonOperation;
     this.pointCloudInstance = pointCloud;
     this.canvasScheduler = canvasScheduler;
+    this.toolScheduler = toolScheduler;
 
     this.config = config;
   }
@@ -150,8 +187,11 @@ export class PointCloudAnnotation implements IPointCloudAnnotationOperation {
        * Notice. It needs to update polygon if it shows polygon.
        * (Like `ptCtx.topViewInstance.updatePolygonList(ptCtx.pointCloudBoxList);`)
        */
-      this.pointCloud2dOperation.setImgNode(image);
-      this.pointCloud2dOperation.initImgPos();
+      this.toolInstance.setImgNode(image);
+      this.toolInstance.initImgPos();
+
+      // this.pointCloud2dOperation.setImgNode(image);
+      // this.pointCloud2dOperation.initImgPos();
     };
 
     // It need to update directly
@@ -166,7 +206,7 @@ export class PointCloudAnnotation implements IPointCloudAnnotationOperation {
   }
 
   public updatePolygonList = (pointCloudDataList: IPointCloudBox[], extraList?: IPolygonData[]) => {
-    let polygonList = pointCloudDataList.map((v) => {
+    let polygonList = pointCloudDataList.map((v: IPointCloudBox) => {
       const { polygon2d: pointList } = this.pointCloudInstance.getBoxTopPolygon2DCoordinate(v);
       return {
         id: v.id,
@@ -181,9 +221,9 @@ export class PointCloudAnnotation implements IPointCloudAnnotationOperation {
     if (extraList) {
       // Convert extraList(polygonList) from PointCloud coordinate to Canvas Coordinate
       polygonList = polygonList.concat(
-        extraList.map((v) => ({
+        extraList.map((v: IPolygonData) => ({
           ...v,
-          pointList: v?.pointList?.map((point) =>
+          pointList: v?.pointList?.map((point: IPolygonPoint) =>
             PointCloudUtils.transferWorld2Canvas(point, this.pointCloud2dOperation.size),
           ),
         })),
@@ -206,6 +246,20 @@ export class PointCloudAnnotation implements IPointCloudAnnotationOperation {
 
     this.pointCloudInstance.loadPCDFile(pcdPath, config?.radius);
     this.addPolygonListOnTopView(result);
+  }
+
+  /**
+   * switch to chosen canvas。
+   *
+   */
+  public switchToCanvas(toolName: EToolName) {
+    const newInstance = this.toolScheduler.switchToCanvas(toolName);
+    if (newInstance) {
+      newInstance.eventBinding();
+      this.toolInstance = newInstance;
+      return newInstance;
+    }
+    return this.toolInstance;
   }
 
   /**

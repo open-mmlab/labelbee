@@ -4,9 +4,9 @@
 
 import { ELang } from '@/constant/annotation';
 import { getConfig, styleDefaultConfig } from '@/constant/defaultConfig';
-import { EToolName } from '@/constant/tool';
+import { EToolName, THybridToolName } from '@/constant/tool';
 import { IPolygonData } from '@/types/tool/polygon';
-import { HybridToolUtils, THybridToolName, ToolScheduler } from './scheduler';
+import { HybridToolUtils, ToolScheduler } from './scheduler';
 
 interface IProps {
   container: HTMLElement;

@@ -41,7 +41,41 @@ const PointCloudView = {
   Side: 'Side',
   Back: 'Back',
 };
-
+export const topViewLine2PointCloud = (
+  newPolygon: any,
+  size: ISize,
+  pointCloud?: PointCloud,
+  selectedPointCloudBox?: IPointCloudBox,
+  defaultValue?: { [v: string]: any },
+) => {
+  const pointList = newPolygon.pointList.map((v: any) =>
+    PointCloudUtils.transferCanvas2World(v, size),
+  );
+  let extraData = {};
+  let totalLineLength = 0;
+  pointList.forEach((p: any, i: number) => {
+    const nextP = pointList[i + 1];
+    if (nextP) {
+      totalLineLength += MathUtils.getLineLength(p, nextP);
+    }
+  });
+  const newPosition = {
+    length: totalLineLength,
+    id: newPolygon.id,
+  };
+  const boxParams = {
+    // Init Data
+    ...newPosition,
+    attribute: '',
+    valid: true,
+    ...extraData,
+  };
+  if (defaultValue) {
+    Object.assign(boxParams, defaultValue);
+  }
+  console.log(boxParams);
+  return boxParams;
+};
 export const topViewPolygon2PointCloud = (
   newPolygon: any,
   size: ISize,
@@ -52,7 +86,7 @@ export const topViewPolygon2PointCloud = (
   const [point1, point2, point3, point4] = newPolygon.pointList.map((v: any) =>
     PointCloudUtils.transferCanvas2World(v, size),
   );
-
+  console.log(point1, point2, point3, point4, 9991);
   const centerPoint = MathUtils.getLineCenterPoint([point1, point3]);
   const height = MathUtils.getLineLength(point1, point2);
   const width = MathUtils.getLineLength(point2, point3);
@@ -416,7 +450,7 @@ export const usePointCloudViews = () => {
     zoom: number;
   }) => {
     const extraData = {
-      attribute: topViewInstance.pointCloud2dOperation.defaultAttribute ?? '',
+      attribute: topViewInstance.toolInstance.defaultAttribute ?? '',
     };
 
     if (trackConfigurable === true) {
@@ -427,39 +461,46 @@ export const usePointCloudViews = () => {
         }),
       });
     }
+    const toolName = topViewInstance?.toolInstance.toolName;
+    let newParams;
+    const polygonOperation = topViewInstance?.toolInstance;
 
-    const newParams = topViewPolygon2PointCloud(
-      newPolygon,
-      size,
-      topViewPointCloud,
-      undefined,
-      extraData,
-    );
-    const polygonOperation = topViewInstance?.pointCloud2dOperation;
-
-    const boxParams: IPointCloudBox = newParams;
-
-    // If the count is less than lowerLimitPointsNumInBox, needs to delete it
-    if (
-      config?.lowerLimitPointsNumInBox &&
-      typeof newParams.count === 'number' &&
-      newParams.count < config.lowerLimitPointsNumInBox
-    ) {
-      message.info(t('LowerLimitPointsNumInBox', { num: config.lowerLimitPointsNumInBox }));
-      polygonOperation.deletePolygon(newParams.id);
-      return;
+    if (toolName === 'lineTool') {
+      newParams = topViewLine2PointCloud(newPolygon, size, topViewPointCloud, undefined, extraData);
+    } else {
+      newParams = topViewPolygon2PointCloud(
+        newPolygon,
+        size,
+        topViewPointCloud,
+        undefined,
+        extraData,
+      );
+      // If the count is less than lowerLimitPointsNumInBox, needs to delete it
+      if (
+        config?.lowerLimitPointsNumInBox &&
+        typeof newParams.count === 'number' &&
+        newParams.count < config.lowerLimitPointsNumInBox
+      ) {
+        message.info(t('LowerLimitPointsNumInBox', { num: config.lowerLimitPointsNumInBox }));
+        polygonOperation.deletePolygon(newParams.id);
+        return;
+      }
     }
 
-    const isBoxHidden = hideAttributes.includes(newPolygon.attribute);
-    const newPointCloudList = addPointCloudBox(boxParams);
+    const boxParams: any = newParams;
 
+    const isBoxHidden = hideAttributes.includes(newPolygon.attribute);
+    console.log(3332);
     /** If new box is hidden will not active target point box */
     if (isBoxHidden) {
       setSelectedIDs([]);
     } else {
       setSelectedIDs(boxParams.id);
-      polygonOperation.setSelectedIDs([newPolygon.id]);
-      syncPointCloudViews(PointCloudView.Top, newPolygon, boxParams, zoom, newPointCloudList);
+      const newPointCloudList = addPointCloudBox(boxParams);
+      // polygonOperation.setSelectedIDs([newPolygon.id]);
+      if (toolName !== 'lineTool') {
+        syncPointCloudViews(PointCloudView.Top, newPolygon, boxParams, zoom, newPointCloudList);
+      }
     }
 
     addHistory({ newBoxParams: boxParams });

@@ -3,7 +3,7 @@
  * @createdate 2022-07-11
  * @author Ron <ron.f.luo@gmail.com>
  */
-import { PointCloud, PointCloudAnnotation } from '@labelbee/lb-annotation';
+import { PointCloud, PointCloudAnnotation, THybridToolName } from '@labelbee/lb-annotation';
 import { getClassName } from '@/utils/dom';
 import { PointCloudContainer } from './PointCloudLayout';
 import React, { useEffect, useRef } from 'react';
@@ -18,6 +18,8 @@ import EmptyPage from './components/EmptyPage';
 import useSize from '@/hooks/useSize';
 import { useTranslation } from 'react-i18next';
 import { LabelBeeContext } from '@/store/ctx';
+import ToolUtils from '@/utils/ToolUtils';
+
 /**
  * Get the offset from canvas2d-coordinate to world coordinate
  * @param currentPos
@@ -70,7 +72,7 @@ const updateSideViewByCanvas2D = (
 };
 
 interface IProps {
-  checkMode?: boolean
+  checkMode?: boolean;
 }
 
 const PointCloudSideView: React.FC<IA2MapStateProps & IProps> = ({ config, checkMode }) => {
@@ -80,7 +82,8 @@ const PointCloudSideView: React.FC<IA2MapStateProps & IProps> = ({ config, check
   const ref = useRef<HTMLDivElement>(null);
   const size = useSize(ref);
   const { t } = useTranslation();
-
+  const toolName = ptCtx?.topViewInstance?.toolInstance.toolName;
+  const isLine = toolName === 'lineTool';
   useEffect(() => {
     if (ref.current) {
       const size = {
@@ -93,7 +96,8 @@ const PointCloudSideView: React.FC<IA2MapStateProps & IProps> = ({ config, check
         size,
         polygonOperationProps: { showDirectionLine: false, forbidAddNew: true },
         config,
-        checkMode
+        checkMode,
+        toolName: ToolUtils.getPointCloudToolList() as THybridToolName,
       });
       ptCtx.setSideViewInstance(pointCloudAnnotation);
       // };
@@ -157,11 +161,11 @@ const PointCloudSideView: React.FC<IA2MapStateProps & IProps> = ({ config, check
     <PointCloudContainer
       className={getClassName('point-cloud-container', 'side-view')}
       title={t('SideView')}
-      toolbar={<SizeInfoForView perspectiveView={EPerspectiveView.Left} />}
+      toolbar={isLine ? null : <SizeInfoForView perspectiveView={EPerspectiveView.Left} />}
     >
       <div className={getClassName('point-cloud-container', 'bottom-view-content')}>
         <div className={getClassName('point-cloud-container', 'core-instance')} ref={ref} />
-        {!selectedBox && <EmptyPage />}
+        {(!selectedBox || isLine) && <EmptyPage />}
       </div>
     </PointCloudContainer>
   );
