@@ -1,4 +1,4 @@
-import { IPointCloudBox, IPointCloudBoxList, IPolygonData } from '@labelbee/lb-utils';
+import { IPointCloudBox, IPointCloudBoxList, IPolygonData, IPointUnit } from '@labelbee/lb-utils';
 import { useContext } from 'react';
 import { PointCloudContext } from '../PointCloudContext';
 
@@ -8,10 +8,13 @@ export const useHistory = () => {
     setPointCloudResult,
     setSelectedIDs,
     pointCloudBoxList,
+    pointCloudSphereList,
     mainViewInstance,
     topViewInstance,
     polygonList,
     setPolygonList,
+    pointList,
+    setPointList,
     syncAllViewPointCloudColor,
   } = useContext(PointCloudContext);
 
@@ -59,6 +62,17 @@ export const useHistory = () => {
 
     history.pushHistory(historyRecord);
   };
+
+  const pushHistoryUnderUpdatePoint = (point: IPointUnit) => {
+    if (pointList.find((v) => v.id === point.id)) {
+      const newPointList = pointList.map((v) => v.id === point.id ? point : v)
+      history.pushHistory({
+        pointCloudSphereList,
+        pointList: newPointList
+      })
+      setPointList(newPointList)
+    }
+  }
 
   const pushHistoryUnderUpdatePolygon = (polygon: IPolygonData) => {
     const selectedPolygon = polygonList.find((v) => v.id === polygon.id);
@@ -146,6 +160,7 @@ export const useHistory = () => {
     addHistory,
     pushHistoryWithList,
     initHistory,
+    pushHistoryUnderUpdatePoint,
     pushHistoryUnderUpdatePolygon,
     redo,
     undo,

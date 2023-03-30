@@ -12,6 +12,8 @@ import {
   EPerspectiveView,
   IVolume,
   IPointCloudBox,
+  IPointCloudSphere,
+  IPointCloudSphereList,
   I3DSpaceCoord,
   IPointCloudConfig,
   toolStyleConverter,
@@ -297,6 +299,37 @@ export class PointCloud {
     }, {});
   }
 
+  /**
+   * add new sphere just like adding new box
+   * @param sphereParams
+   */
+  public AddSphereToSense = (sphereParams: IPointCloudSphere, color = 'blue') => {
+    const id = sphereParams.id ?? uuid();
+
+    this.removeObjectByName(id)
+
+    const { center, widthSegments, heightSegments, radius } = sphereParams
+    const group = new THREE.Group();
+    const spGeo = new THREE.SphereGeometry( radius, widthSegments, heightSegments );
+    const spMaterial = new THREE.MeshBasicMaterial( { color } );
+    const sphere = new THREE.Mesh( spGeo, spMaterial );
+    sphere.position.set(center.x, center.y, center.z)
+    group.add(sphere)
+    group.name = id
+    this.scene.add(group);
+  }
+
+  public generateSphere = (sphereParams: IPointCloudSphere, color = 'blue') => {
+    this.AddSphereToSense(sphereParams, color);
+    this.render();
+  }
+
+  public generateSpheres = (spheres: IPointCloudSphere[]) => {
+    spheres.forEach((sphere) => {
+      this.generateSphere(sphere);
+    });
+    this.render();
+  }
   /*
    * Remove exist box and add new one to scene
    * @param boxParams
@@ -386,6 +419,24 @@ export class PointCloud {
 
   public updateOrthoCamera(boxParams: IPointCloudBox, perspectiveView: EPerspectiveView) {
     const cameraPositionVector = this.updateCameraByBox(boxParams, perspectiveView);
+
+    // Initialize the camera zoom to get right projectionMatrix.(like functin - getBoxPolygon2DCoordinate)
+    this.camera.zoom = 1;
+    this.camera.updateProjectionMatrix();
+    return {
+      cameraPositionVector,
+    };
+  }
+
+  public updateCameraBySphere(sphereParams: IPointCloudSphere, perspectiveView: EPerspectiveView) {
+    const { center, radius } = sphereParams;
+    const cameraPositionVector = this.getCameraVector(center, 0, { width: 2 * radius,  height: 2 * radius,  depth: 2 * radius }, perspectiveView);
+    this.updateCamera(cameraPositionVector, center);
+    return cameraPositionVector;
+  }
+
+  public updateOrthoCameraBySphere(sphereParams: IPointCloudSphere, perspectiveView: EPerspectiveView) {
+    const cameraPositionVector = this.updateCameraBySphere(sphereParams, perspectiveView);
 
     // Initialize the camera zoom to get right projectionMatrix.(like functin - getBoxPolygon2DCoordinate)
     this.camera.zoom = 1;
@@ -983,7 +1034,7 @@ export class PointCloud {
     return vectorList;
   }
 
-  public getModelTransformationMatrix(boxParams: IPointCloudBox) {
+  public getModelTransformationMatrix(boxParams: IPointCloudBox | any) {
     const {
       center: { x, y, z },
       rotation,
@@ -1010,6 +1061,14 @@ export class PointCloud {
 
   public getBoxBackPolygon2DCoordinate(boxParams: IPointCloudBox) {
     return this.getBoxPolygon2DCoordinate(boxParams, EPerspectiveView.Back);
+  }
+
+  public getSphereSidePoint2DCoordinate(sphereParams: IPointCloudSphere) {
+    return this.getSpherePoint2DCoordinate(sphereParams, EPerspectiveView.Left);
+  }
+
+  public getSphereBackPoint2DCoordinate(sphereParams: IPointCloudSphere) {
+    return this.getSpherePoint2DCoordinate(sphereParams, EPerspectiveView.Back);
   }
 
   public boxParams2ViewPolygon(boxParams: IPointCloudBox, perspectiveView: EPerspectiveView) {
@@ -1066,6 +1125,30 @@ export class PointCloud {
     };
   }
 
+  public getSpherePoint2DCoordinate(sphereParams: IPointCloudSphere, perspectiveView: EPerspectiveView) {
+    const { center, radius } = sphereParams
+    const transParams = { center, width: radius * 2, height: radius * 2, depth: radius * 2, rotation: 0 }
+    const projectMatrix = new THREE.Matrix4()
+      .premultiply(this.camera.matrixWorldInverse) // View / Camera Translation
+      .premultiply(this.camera.projectionMatrix); // Projection Translation
+
+    const boxSideMatrix = new THREE.Matrix4()
+      .premultiply(this.getModelTransformationMatrix(transParams)) // Model Translation
+      .premultiply(projectMatrix) // View Translation + Projection Translation
+      .premultiply(this.basicCoordinate2CanvasMatrix4); // Viewport Translation
+    this.sideMatrix = boxSideMatrix;
+
+    const point2d =  new THREE.Vector3(center.x, center.y, center.z).applyMatrix4(this.sideMatrix as any)
+
+    const wZoom = this.containerWidth / (radius * 2);
+    const hZoom = this.containerHeight / (radius * 2);
+
+    return {
+      point2d,
+      zoom: Math.min(wZoom, hZoom) / 2,
+    };
+  }
+
   public getBoxTopPolygon2DCoordinate(boxParams: IPointCloudBox) {
     const { width, height } = boxParams;
     const vectorList = this.getPolygonTopPoints(boxParams);
@@ -1097,6 +1180,27 @@ export class PointCloud {
     };
   }
 
+  public getNewSphereBySideUpdate(
+    offsetCenterPoint: { x: number; y: number; z: number }, // Just use x now.
+    offsetWidth: number,
+    offsetDepth: number,
+    selectedPointCloudSphere: IPointCloudSphere,
+  ) {
+    const Rz = new THREE.Matrix4().makeRotationZ(0);
+
+    // Because the positive direction of 2DView is -x, but the positive direction of 2DView is x.
+    const offsetVector = new THREE.Vector3(-offsetCenterPoint.x, 0, 0).applyMatrix4(Rz);
+
+    return {
+      ...selectedPointCloudSphere,
+      center: {
+        x: selectedPointCloudSphere.center.x + offsetVector.x,
+        y: selectedPointCloudSphere.center.y + offsetVector.y,
+        z: selectedPointCloudSphere.center.z - offsetCenterPoint.z,
+      }
+    }
+  }
+
   public getNewBoxBySideUpdate(
     offsetCenterPoint: { x: number; y: number; z: number }, // Just use x now.
     offsetWidth: number,
@@ -1123,6 +1227,25 @@ export class PointCloud {
       depth: newBoxParams.depth + offsetDepth,
     };
     return { newBoxParams };
+  }
+
+  public getNewSphereByBackUpdate(
+    offsetCenterPoint: { x: number; y: number; z: number }, // Just use x now.
+    offsetWidth: number,
+    offsetDepth: number,
+    selectedPointCloudSphere: IPointCloudSphere,
+  ) {
+    const Rz = new THREE.Matrix4().makeRotationZ(0);
+    const offsetVector = new THREE.Vector3(0, -offsetCenterPoint.x, 0).applyMatrix4(Rz);
+
+    return {
+      ...selectedPointCloudSphere,
+      center: {
+        x: selectedPointCloudSphere.center.x + offsetVector.x,
+        y: selectedPointCloudSphere.center.y + offsetVector.y,
+        z: selectedPointCloudSphere.center.z - offsetCenterPoint.z,
+      }
+    }
   }
 
   public getNewBoxByBackUpdate(

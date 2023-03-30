@@ -1,4 +1,11 @@
-declare interface IPointUnit extends IPoint {
+import { IToolConfig } from './common'
+import { IInputList } from './base'
+
+export interface IPoint {
+  x: number;
+  y: number;
+}
+export interface IPointUnit extends IPoint {
   id: string;
   sourceID?: string;
   valid: boolean;
@@ -8,7 +15,7 @@ declare interface IPointUnit extends IPoint {
   textAttribute?: string;
 }
 
-declare interface IPointToolConfig extends IToolConfig {
+export interface IPointToolConfig extends IToolConfig {
   // 目标外标注
   drawOutsideTarget: boolean;
   // 显示标注顺序

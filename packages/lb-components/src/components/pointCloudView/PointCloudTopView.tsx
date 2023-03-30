@@ -8,7 +8,7 @@ import { FooterDivider } from '@/views/MainView/toolFooter';
 import { ZoomController } from '@/views/MainView/toolFooter/ZoomController';
 import { DownSquareOutlined, UpSquareOutlined } from '@ant-design/icons';
 import { cTool, PointCloudAnnotation, THybridToolName } from '@labelbee/lb-annotation';
-import { IPolygonData, PointCloudUtils, UpdatePolygonByDragList } from '@labelbee/lb-utils';
+import { IPolygonData, PointCloudUtils, UpdatePolygonByDragList, IPointUnit } from '@labelbee/lb-utils';
 import React, { useEffect, useLayoutEffect, useRef, useState } from 'react';
 import { PointCloudContext } from './PointCloudContext';
 import { useRotate } from './hooks/useRotate';
@@ -16,6 +16,7 @@ import { useSingleBox } from './hooks/useSingleBox';
 import { PointCloudContainer } from './PointCloudLayout';
 import { BoxInfos, PointCloudValidity } from './PointCloudInfos';
 import { usePolygon } from './hooks/usePolygon';
+import { usePoint } from './hooks/usePoint';
 import { useZoom } from './hooks/useZoom';
 import { Slider } from 'antd';
 import { a2MapStateToProps, IA2MapStateProps, IAnnotationStateProps } from '@/store/annotation/map';
@@ -159,10 +160,11 @@ const PointCloudTopView: React.FC<IProps> = ({
   const ptCtx = React.useContext(PointCloudContext);
   const size = useSize(ref);
   const config = jsonParser(stepInfo.config);
-  const { setZoom } = useZoom();
+  const { setZoom, syncTopviewToolZoom } = useZoom();
   const { hideAttributes } = ptCtx;
 
   const { addPolygon, deletePolygon } = usePolygon();
+  const { addPoint, deletePoint } = usePoint();
   const { deletePointCloudBox, changeValidByID } = useSingleBox();
   const [zAxisLimit, setZAxisLimit] = useState<number>(10);
   const { t } = useTranslation();
@@ -198,6 +200,23 @@ const PointCloudTopView: React.FC<IProps> = ({
     }
 
     const { toolInstance: TopView2dOperation } = ptCtx.topViewInstance;
+
+    // point tool events
+    TopView2dOperation.singleOn('pointCreated', (point: IPointUnit, zoom: number) => {
+      const { x: realX, y: realY } = PointCloudUtils.transferCanvas2World(point, size)
+      addPoint(point)
+      ptCtx.setSelectedIDs(point.id)
+      pointCloudViews.topViewAddSphere({
+        newPoint: point,
+        size,
+        trackConfigurable: config.trackConfigurable,
+        zoom,
+      })
+    })
+
+    TopView2dOperation.singleOn('updatePointByDrag', (updatePoint: IPointUnit, oldList: IPointUnit[]) => {
+      pointCloudViews.topViewUpdatePoint?.(updatePoint, size)
+    })
 
     TopView2dOperation.singleOn('polygonCreated', (polygon: IPolygonData, zoom: number) => {
       if (TopView2dOperation.pattern === EPolygonPattern.Normal || !currentData?.url) {
@@ -253,7 +272,7 @@ const PointCloudTopView: React.FC<IProps> = ({
         ptCtx.syncAllViewPointCloudColor(newPointCloudList);
       }
       if (ptCtx.polygonList.find((v) => v.id === id)) {
-        ptCtx.topViewInstance?.pointCloud2dOperation.setPolygonValidAndRender(id, true);
+        ptCtx.topViewInstance?.toolInstance.setPolygonValidAndRender(id, true);
       }
     };
 
@@ -262,7 +281,7 @@ const PointCloudTopView: React.FC<IProps> = ({
     return () => {
       TopView2dOperation.unbind('validUpdate', validUpdate);
     };
-  }, [ptCtx, size, currentData, pointCloudViews, ptCtx.polygonList]);
+  }, [ptCtx, size, currentData, pointCloudViews, ptCtx.polygonList, ptCtx.pointList]);
 
   useEffect(() => {
     if (!size?.width || !ptCtx.topViewInstance) {
@@ -275,7 +294,7 @@ const PointCloudTopView: React.FC<IProps> = ({
      *  */
     const defaultAttribute = config?.attributeList?.[0]?.value;
     if (defaultAttribute) {
-      ptCtx.topViewInstance.pointCloud2dOperation.setDefaultAttribute(defaultAttribute);
+      ptCtx.topViewInstance.toolInstance.setDefaultAttribute(defaultAttribute);
     }
 
     // 1. Update Size
@@ -283,7 +302,7 @@ const PointCloudTopView: React.FC<IProps> = ({
     ptCtx.topViewInstance.updatePolygonList(ptCtx.displayPointCloudList, ptCtx.polygonList);
 
     const {
-      topViewInstance: { pointCloudInstance: pointCloud, pointCloud2dOperation: polygonOperation },
+      topViewInstance: { pointCloudInstance: pointCloud, toolInstance },
     } = ptCtx;
 
     /**
@@ -291,7 +310,7 @@ const PointCloudTopView: React.FC<IProps> = ({
      *
      * Change Orthographic Camera size
      */
-    polygonOperation.singleOn('renderZoom', (zoom: number, currentPos: any) => {
+    toolInstance.singleOn('renderZoom', (zoom: number, currentPos: any) => {
       const { offsetX, offsetY } = TransferCanvas2WorldOffset(currentPos, size, zoom);
       pointCloud.camera.zoom = zoom;
       if (currentPos) {
@@ -303,11 +322,12 @@ const PointCloudTopView: React.FC<IProps> = ({
       pointCloud.render();
 
       setZoom(zoom);
+      syncTopviewToolZoom(currentPos, zoom, size);
       setAnnotationPos({ zoom, currentPos });
     });
 
     // Synchronized 3d point cloud view displacement operations
-    polygonOperation.singleOn('dragMove', ({ currentPos, zoom }) => {
+    toolInstance.singleOn('dragMove', ({ currentPos, zoom }) => {
       const { offsetX, offsetY } = TransferCanvas2WorldOffset(currentPos, size, zoom);
       pointCloud.camera.zoom = zoom;
       const { x, y, z } = pointCloud.initCameraPosition;
@@ -315,7 +335,7 @@ const PointCloudTopView: React.FC<IProps> = ({
       pointCloud.render();
       setAnnotationPos({ zoom, currentPos });
     });
-  }, [size, ptCtx.topViewInstance]);
+  }, [size, ptCtx.topViewInstance, ptCtx.topViewInstance?.toolInstance]);
 
   useEffect(() => {
     ptCtx.topViewInstance?.pointCloudInstance?.applyZAxisPoints(zAxisLimit);

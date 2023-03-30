@@ -195,7 +195,7 @@ class PointOperation extends BasicToolOperation {
   }
 
   /**
-   * 外层 sidabr 调用
+   * 外层 sidebar 调用
    * @param v
    * @returns
    */
@@ -355,6 +355,7 @@ class PointOperation extends BasicToolOperation {
     // 拖拽停止
     if (this.dragStatus === EDragStatus.Move) {
       this.history.pushHistory(this.pointList);
+      this.emit('updatePointByDrag', this.pointList.find((v) => v?.id == this.selectedID), this.dragInfo?.originPointList)
       this.dragInfo = undefined;
     }
     this.dragStatus = EDragStatus.Wait;
@@ -579,6 +580,7 @@ class PointOperation extends BasicToolOperation {
     this.hoverID = newDrawingPoint.id;
     const newPointList = [...this.pointList, newDrawingPoint];
     this.setPointList(newPointList);
+    this.emit('pointCreated', newDrawingPoint, this.zoom)
     this.history.pushHistory(newPointList);
     this.setSelectedID(newDrawingPoint.id);
   }

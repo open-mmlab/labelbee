@@ -17,12 +17,14 @@ import React, { useEffect, useRef } from 'react';
 import { PointCloudContext } from './PointCloudContext';
 import {
   EPerspectiveView,
-  IPointCloudBox,
+  IPointCloudBox, IPointUnit,
   IPolygonData,
   IPolygonPoint,
   UpdatePolygonByDragList,
 } from '@labelbee/lb-utils';
 import { useSingleBox } from './hooks/useSingleBox';
+import { useSphere } from './hooks/useSphere'
+import { useZoom } from './hooks/useZoom'
 import { SizeInfoForView } from './PointCloudInfos';
 import { connect } from 'react-redux';
 import { a2MapStateToProps, IA2MapStateProps } from '@/store/annotation/map';
@@ -36,6 +38,7 @@ import EmptyPage from './components/EmptyPage';
 import { useTranslation } from 'react-i18next';
 import { LabelBeeContext } from '@/store/ctx';
 import ToolUtils from '@/utils/ToolUtils';
+import { usePoint } from '@/components/pointCloudView/hooks/usePoint';
 
 /**
  * 统一一下，将其拓展为 二维转换为 三维坐标的转换
@@ -71,14 +74,14 @@ const updateBackViewByCanvas2D = (
   currentPos: { x: number; y: number },
   zoom: number,
   size: { width: number; height: number },
-  selectedPointCloudBox: IPointCloudBox,
+  selectedPointCloudBox: IPointCloudBox | IPointCloudSphere,
   backPointCloud: PointCloud,
 ) => {
   const { offsetX, offsetY } = TransferCanvas2WorldOffset(currentPos, size, zoom);
   backPointCloud.camera.zoom = zoom;
   if (currentPos) {
-    const cos = Math.cos(selectedPointCloudBox.rotation);
-    const sin = Math.sin(selectedPointCloudBox.rotation);
+    const cos = Math.cos(selectedPointCloudBox.rotation ?? 0);
+    const sin = Math.sin(selectedPointCloudBox.rotation ?? 0);
     const offsetXX = offsetX * cos;
     const offsetXY = offsetX * sin;
     const { x, y, z } = backPointCloud.initCameraPosition;
@@ -92,13 +95,17 @@ interface IProps {
   checkMode?: boolean;
 }
 
-const PointCloudSideView = ({ currentData, config, checkMode }: IA2MapStateProps & IProps) => {
+const PointCloudBackView = ({ currentData, config, checkMode }: IA2MapStateProps & IProps) => {
   const ptCtx = React.useContext(PointCloudContext);
   const ref = useRef<HTMLDivElement>(null);
   const size = useSize(ref);
   const { selectedBox, updateSelectedBox } = useSingleBox();
+  const { selectedSphere } = useSphere();
+  const { syncBackviewToolZoom } = useZoom();
+  const { selectedPoint } = usePoint();
+
   const { t } = useTranslation();
-  const { backViewUpdateBox } = usePointCloudViews();
+  const { backViewUpdateBox, backViewUpdatePoint } = usePointCloudViews();
 
   const transferPolygonDataToBoxParams = (
     newPolygon: IPolygonData,
@@ -200,7 +207,7 @@ const PointCloudSideView = ({ currentData, config, checkMode }: IA2MapStateProps
     }
 
     const {
-      pointCloud2dOperation: backPointCloudPolygonOperation,
+      toolInstance: backPointCloudPolygonOperation,
       pointCloudInstance: backPointCloud,
     } = ptCtx.backViewInstance;
 
@@ -210,20 +217,24 @@ const PointCloudSideView = ({ currentData, config, checkMode }: IA2MapStateProps
      * Change Orthographic Camera size
      */
     backPointCloudPolygonOperation.singleOn('renderZoom', (zoom: number, currentPos: any) => {
-      if (!ptCtx.selectedPointCloudBox) {
+      if (!ptCtx.selectedPointCloudBox && !selectedSphere) {
         return;
       }
-      updateBackViewByCanvas2D(currentPos, zoom, size, ptCtx.selectedPointCloudBox, backPointCloud);
+      updateBackViewByCanvas2D(currentPos, zoom, size, ptCtx.selectedPointCloudBox ?? selectedSphere, backPointCloud);
+      syncBackviewToolZoom(currentPos, zoom, size);
     });
 
     // Synchronized 3d point cloud view displacement operations
     backPointCloudPolygonOperation.singleOn('dragMove', ({ currentPos, zoom }: any) => {
-      if (!ptCtx.selectedPointCloudBox) {
+      if (!ptCtx.selectedPointCloudBox && !selectedSphere) {
         return;
       }
-      updateBackViewByCanvas2D(currentPos, zoom, size, ptCtx.selectedPointCloudBox, backPointCloud);
+      updateBackViewByCanvas2D(currentPos, zoom, size, ptCtx.selectedPointCloudBox ?? selectedSphere, backPointCloud);
     });
 
+    backPointCloudPolygonOperation.singleOn('updatePointByDrag', (updatePoint: IPointUnit, oldList: IPointUnit[]) => {
+      backViewUpdatePoint?.(updatePoint, selectedPoint)
+    })
     backPointCloudPolygonOperation.singleOn(
       'updatePolygonByDrag',
       (updateList: UpdatePolygonByDragList) => {
@@ -252,12 +263,12 @@ const PointCloudSideView = ({ currentData, config, checkMode }: IA2MapStateProps
     >
       <div className={getClassName('point-cloud-container', 'bottom-view-content')}>
         <div className={getClassName('point-cloud-container', 'core-instance')} ref={ref} />
-        {!selectedBox && <EmptyPage />}
+        {!selectedBox && !selectedSphere && <EmptyPage />}
       </div>
     </PointCloudContainer>
   );
 };
 
 export default connect(a2MapStateToProps, null, null, { context: LabelBeeContext })(
-  PointCloudSideView,
+  PointCloudBackView,
 );

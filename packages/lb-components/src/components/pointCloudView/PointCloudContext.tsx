@@ -1,4 +1,4 @@
-import { IPointCloudBox, IPointCloudBoxList, IPolygonData } from '@labelbee/lb-utils';
+import { IPointCloudBox, IPointCloudBoxList, IPolygonData, IPointUnit, IPointCloudSphereList, IPointCloudSphere } from '@labelbee/lb-utils';
 import React, { useEffect, useMemo, useRef, useState } from 'react';
 import {
   PointCloud,
@@ -22,20 +22,26 @@ type AttrPanelLayout = '' | 'left' | 'right';
 
 export interface IPointCloudContext extends IPointCloudContextInstances {
   pointCloudBoxList: IPointCloudBoxList;
+  pointCloudSphereList: IPointCloudSphereList;
   displayPointCloudList: IPointCloudBoxList;
   selectedIDs: string[];
   setSelectedIDs: (ids?: string[] | string) => void;
   valid: boolean;
   setPointCloudResult: (resultList: IPointCloudBoxList) => void;
+  setPointCloudSphereList: (sphereList: IPointCloudSphereList) => void;
   selectedPointCloudBox?: IPointCloudBox;
   setPointCloudValid: (valid?: boolean) => void;
   addSelectedID: (selectedID: string) => void;
   selectedAllBoxes: () => void;
   selectedID: string;
   addPointCloudBox: (boxParams: IPointCloudBox) => IPointCloudBox[];
+  addPointCloudSphere: (sphereParams: IPointCloudSphere) => IPointCloudSphere[];
 
   polygonList: IPolygonData[];
   setPolygonList: (polygonList: IPolygonData[]) => void;
+
+  pointList: IPointUnit[];
+  setPointList: (polyList: IPointUnit[]) => void;
 
   zoom: number;
   setZoom: (zoom: number) => void;
@@ -59,6 +65,7 @@ export interface IPointCloudContext extends IPointCloudContextInstances {
 
 export const PointCloudContext = React.createContext<IPointCloudContext>({
   pointCloudBoxList: [],
+  pointCloudSphereList: [],
   displayPointCloudList: [],
   polygonList: [],
   selectedID: '',
@@ -66,6 +73,7 @@ export const PointCloudContext = React.createContext<IPointCloudContext>({
   valid: true,
   setSelectedIDs: () => {},
   setPointCloudResult: () => {},
+  setPointCloudSphereList: () => {},
   setPointCloudValid: () => {},
   setTopViewInstance: () => {},
   setSideViewInstance: () => {},
@@ -76,8 +84,13 @@ export const PointCloudContext = React.createContext<IPointCloudContext>({
   addPointCloudBox: () => {
     return [];
   },
+  addPointCloudSphere: () => {
+    return [];
+  },
   setPolygonList: () => {},
 
+  pointList: [],
+  setPointList: () => {},
   zoom: 1,
   setZoom: () => {},
   history: new ActionsHistory(),
@@ -98,7 +111,9 @@ export const PointCloudContext = React.createContext<IPointCloudContext>({
 
 export const PointCloudProvider: React.FC<{}> = ({ children }) => {
   const [pointCloudBoxList, setPointCloudResult] = useState<IPointCloudBoxList>([]);
+  const [pointCloudSphereList, setPointCloudSphereList] = useState<IPointCloudSphereList>([])
   const [polygonList, setPolygonList] = useState<IPolygonData[]>([]);
+  const [pointList, setPointList] = useState<IPointUnit[]>([]);
   const [selectedIDs, setSelectedIDsState] = useState<string[]>([]);
   const [valid, setValid] = useState<boolean>(true);
   const [zoom, setZoom] = useState<number>(1);
@@ -125,6 +140,12 @@ export const PointCloudProvider: React.FC<{}> = ({ children }) => {
       const newPointCloudList = pointCloudBoxList.concat(box);
       setPointCloudResult(newPointCloudList);
       return newPointCloudList;
+    };
+
+    const addPointCloudSphere = (sphere: IPointCloudSphere) => {
+      const newSphereList = pointCloudSphereList.concat(sphere)
+      setPointCloudSphereList(newSphereList)
+      return newSphereList
     };
 
     const setPointCloudValid = (valid?: boolean) => {
@@ -211,11 +232,14 @@ export const PointCloudProvider: React.FC<{}> = ({ children }) => {
     return {
       selectedID,
       pointCloudBoxList,
+      pointCloudSphereList,
       displayPointCloudList,
       selectedIDs,
       setPointCloudResult,
       setSelectedIDs,
       addPointCloudBox,
+      addPointCloudSphere,
+      setPointCloudSphereList,
       valid,
       selectedPointCloudBox,
       setPointCloudValid,
@@ -231,6 +255,8 @@ export const PointCloudProvider: React.FC<{}> = ({ children }) => {
       setMainViewInstance,
       polygonList,
       setPolygonList,
+      pointList,
+      setPointList,
       zoom,
       setZoom,
       history,
@@ -250,7 +276,9 @@ export const PointCloudProvider: React.FC<{}> = ({ children }) => {
     valid,
     selectedIDs,
     pointCloudBoxList,
+    pointCloudSphereList,
     polygonList,
+    pointList,
     topViewInstance,
     sideViewInstance,
     backViewInstance,

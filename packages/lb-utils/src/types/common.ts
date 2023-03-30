@@ -8,3 +8,7 @@ export enum ELineTypes {
   Line,
   Curve,
 }
+
+export interface IToolConfig {
+  showConfirm?: boolean;
+}

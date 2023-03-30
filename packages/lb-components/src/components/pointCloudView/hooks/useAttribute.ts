@@ -33,9 +33,9 @@ export const useAttribute = () => {
 
   const syncThreeViewsAttribute = (attribute?: string) => {
     [
-      topViewInstance?.pointCloud2dOperation,
-      sideViewInstance?.pointCloud2dOperation,
-      backViewInstance?.pointCloud2dOperation,
+      topViewInstance?.toolInstance,
+      sideViewInstance?.toolInstance,
+      backViewInstance?.toolInstance,
     ].forEach((instance) => {
       instance?.setDefaultAttribute(attribute);
     });

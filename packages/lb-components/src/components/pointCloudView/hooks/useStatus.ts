@@ -14,6 +14,8 @@ const { EToolName, EPolygonPattern } = cTool;
 export const useStatus = () => {
   const {
     topViewInstance,
+    sideViewInstance,
+    backViewInstance,
     mainViewInstance,
     pointCloudBoxList,
     setPointCloudResult,
@@ -50,24 +52,45 @@ export const useStatus = () => {
 
     switch (toolName) {
       case EToolName.Rect:
+        sideViewInstance?.toolInstance.clearResult()
+        backViewInstance?.toolInstance.clearResult()
+
         topViewInstance?.switchToCanvas(EToolName.PointCloudPolygon)
         topViewInstance?.toolInstance.setPattern(EPolygonPattern.Rect)
-        // polygon2dOperation.setPattern(EPolygonPattern.Rect);
+        sideViewInstance?.switchToCanvas(EToolName.PointCloudPolygon)
+        sideViewInstance?.toolInstance.setPattern(EPolygonPattern.Rect)
+        backViewInstance?.switchToCanvas(EToolName.PointCloudPolygon)
+        backViewInstance?.toolInstance.setPattern(EPolygonPattern.Rect)
         setPointCloudPattern(EToolName.Rect);
         break;
       case EToolName.Polygon:
+        sideViewInstance?.toolInstance.clearResult()
+        backViewInstance?.toolInstance.clearResult()
+
         topViewInstance?.switchToCanvas(EToolName.PointCloudPolygon)
         topViewInstance?.toolInstance.setPattern(EPolygonPattern.Normal)
-        // polygon2dOperation.setPattern(EPolygonPattern.Normal);
+        sideViewInstance?.switchToCanvas(EToolName.PointCloudPolygon)
+        sideViewInstance?.toolInstance.setPattern(EPolygonPattern.Normal)
+        backViewInstance?.switchToCanvas(EToolName.PointCloudPolygon)
+        backViewInstance?.toolInstance.setPattern(EPolygonPattern.Normal)
         setPointCloudPattern(EToolName.Polygon);
         break;
       case EToolName.Point:
-        // polygon2dOperation.setPattern(EPolygonPattern.Point);
+        sideViewInstance?.toolInstance.clearResult()
+        backViewInstance?.toolInstance.clearResult()
+
         topViewInstance?.switchToCanvas(EToolName.Point)
+        sideViewInstance?.switchToCanvas(EToolName.Point)
+        backViewInstance?.switchToCanvas(EToolName.Point)
         setPointCloudPattern(EToolName.Point);
         break;
       case EToolName.Line:
+        sideViewInstance?.toolInstance.clearResult()
+        backViewInstance?.toolInstance.clearResult()
+
         topViewInstance?.switchToCanvas(EToolName.Line)
+        sideViewInstance?.switchToCanvas(EToolName.Line)
+        backViewInstance?.switchToCanvas(EToolName.Line)
         setPointCloudPattern(EToolName.Line);
         break;
     }
