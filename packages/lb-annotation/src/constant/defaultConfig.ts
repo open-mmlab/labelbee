@@ -9,8 +9,45 @@ const rectToolConfig = {
   minHeight: 1,
   isShowOrder: false,
   filterData: ['valid', 'invalid'],
-  attributeConfigurable: false,
-  attributeList: [],
+  attributeConfigurable: true,
+  attributeList: [
+    {
+      key: '类别1',
+      value: '类别1',
+    },
+    {
+      key: '类别8f',
+      value: 'class-8f',
+    },
+    {
+      key: '类别My',
+      value: 'class-My',
+    },
+    {
+      key: '类别cN',
+      value: 'class-cN',
+    },
+    {
+      key: '类别4H',
+      value: 'class-4H',
+    },
+    {
+      key: '类别Au',
+      value: 'class-Au',
+    },
+    {
+      key: '类别FM',
+      value: 'class-FM',
+    },
+    {
+      key: '类别Nj',
+      value: 'class-Nj',
+    },
+    {
+      key: '类别CP',
+      value: 'class-CP',
+    },
+  ],
   textConfigurable: false,
   textCheckType: 0,
   customFormat: '',
@@ -59,7 +96,7 @@ const lineToolConfig = {
   outOfTarget: true,
   copyBackwardResult: false,
   isShowOrder: false,
-  attributeConfigurable: false,
+  attributeConfigurable: true,
   attributeList: [
     { key: '类别1', value: '类别1' },
     { key: '类别ao', value: 'class-ao' },

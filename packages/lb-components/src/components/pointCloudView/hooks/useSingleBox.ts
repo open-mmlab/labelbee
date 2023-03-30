@@ -30,7 +30,6 @@ export const useSingleBox = () => {
 
   /** Returns { info: selected box, index: selected box index } */
   const selectedBox = useMemo(() => {
-    console.log('selectedBox useMeno', selectedID, pointCloudBoxList);
     const boxIndex = pointCloudBoxList.findIndex((i: { id: string }) => i.id === selectedID);
     if (boxIndex > -1) {
       return { info: pointCloudBoxList[boxIndex], index: boxIndex };

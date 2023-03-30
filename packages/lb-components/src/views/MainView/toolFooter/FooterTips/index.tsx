@@ -9,7 +9,7 @@ const FooterTips: React.FC = () => {
     // @ts-ignore
     StepUtils.getCurrentStepInfo(state?.annotation?.step, state.annotation?.stepList),
   );
-
+  console.log('stepInfo', stepInfo);
   return <ToolHotKey toolName={stepInfo?.tool} />;
 };
 

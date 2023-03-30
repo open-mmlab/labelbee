@@ -200,6 +200,7 @@ export const PointCloudProvider: React.FC<{}> = ({ children }) => {
       return new Promise((resolve) => {
         colorPromise?.then((color) => {
           [topViewInstance].forEach((instance) => {
+            console.log('color', 99876);
             if (color) {
               instance?.pointCloudInstance?.updateColor(color);
               resolve({ color });

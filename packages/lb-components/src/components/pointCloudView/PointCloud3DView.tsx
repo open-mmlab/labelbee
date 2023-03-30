@@ -179,6 +179,7 @@ const PointCloud3D: React.FC<IA2MapStateProps> = ({ currentData, config }) => {
    *  Observe selectedID and reset camera to target top-view
    */
   useEffect(() => {
+    if (isLine) return;
     if (selectedBox) {
       setTarget3DView(EPerspectiveView.Top);
 

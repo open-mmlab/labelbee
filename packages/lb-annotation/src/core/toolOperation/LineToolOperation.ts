@@ -74,7 +74,6 @@ class LineToolOperation extends BasicToolOperation {
       order = this.nextOrder();
     }
     const color = this.getLineColorByAttribute({ attribute: this.defaultAttribute, valid: !!isActiveLineValid });
-
     activeLine.map((point) =>
       Object.assign(
         point,
@@ -100,6 +99,8 @@ class LineToolOperation extends BasicToolOperation {
       this.arc(this.cursor, POINT_ACTIVE_RADIUS, color);
     }
   };
+
+  public _textAttributInstance?: TextAttributeClass;
 
   /** 线条是否被选中 */
   get isLineSelected() {
@@ -482,6 +483,7 @@ class LineToolOperation extends BasicToolOperation {
    * @param selectedIDs
    */
   public setSelectedIDs(selectedIDs: string[]) {
+    console.log('setSelectedIDs', selectedIDs);
     this.selectedIDs = selectedIDs;
 
     if (this.selectedIDs.length < 2) {
@@ -489,6 +491,24 @@ class LineToolOperation extends BasicToolOperation {
     }
 
     this.render();
+  }
+
+  public setSelectedID(newID?: string) {
+    const oldID = this.selectedID;
+    if (newID !== oldID && oldID) {
+      // 触发文本切换的操作
+
+      this._textAttributInstance?.changeSelected();
+    }
+
+    if (!newID) {
+      this._textAttributInstance?.clearTextAttribute();
+    }
+
+    this.selectedID = newID;
+
+    this.render();
+    this.emit('selectedChange');
   }
 
   /**
@@ -1176,9 +1196,8 @@ class LineToolOperation extends BasicToolOperation {
   public updateLineBasicInfo(line: ILine) {
     let createPolygon: IPolygonData | undefined;
     const basicSourceID = CommonToolUtils.getSourceID(this.basicResult);
-    const id = uuid(8, 62);
-    let newPolygon: IPolygonData = {
-      id,
+    const newPolygon: IPolygonData = {
+      id: line.id,
       sourceID: basicSourceID,
       valid: true, // !this.isCtrl
       textAttribute: '',
@@ -1199,7 +1218,7 @@ class LineToolOperation extends BasicToolOperation {
 
   public onRightClick = (e: MouseEvent) => {
     this.cursor = undefined;
-
+    console.log(123123);
     if (this.isCreate) {
       if (this.isLinePointsNotEnough()) {
         // message.info(`顶点数不能少于${this.lowerLimitPointNum}`);
@@ -1949,6 +1968,7 @@ class LineToolOperation extends BasicToolOperation {
   public setDefaultAttribute(attribute: string = '') {
     if (this.attributeConfigurable) {
       this.defaultAttribute = attribute;
+      this.changeStyle(this.defaultAttribute);
       this.setLineAttribute('attribute', attribute);
       if (this.selectedID) {
         this.history?.pushHistory(this.lineList);

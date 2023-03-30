@@ -86,6 +86,11 @@ export class ToolScheduler implements IToolSchedulerOperation {
     this.size = props.size;
     this.imgNode = props.imgNode;
     this.config = props.config ?? JSON.stringify(getConfig(HybridToolUtils.getTopToolName(props.toolName))); // 设置默认操作
+    console.log(
+      getConfig(HybridToolUtils.getTopToolName(props.toolName)),
+      1231222111,
+      HybridToolUtils.getTopToolName(props.toolName),
+    );
     this.style = props.style ?? styleDefaultConfig; // 设置默认操作
   }
 

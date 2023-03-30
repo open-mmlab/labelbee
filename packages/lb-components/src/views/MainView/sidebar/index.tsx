@@ -162,7 +162,6 @@ const Sidebar: React.FC<IProps> = ({ sider }) => {
         {horizontal}
         <div className={`${sidebarCls}__content`}>
           {toolStyle}
-          123123
           {imageAttributeInfo}
         </div>
         {operation}

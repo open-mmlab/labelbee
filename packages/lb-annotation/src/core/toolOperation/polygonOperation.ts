@@ -1377,7 +1377,7 @@ class PolygonOperation extends BasicToolOperation {
     if (isCtrl) {
       return;
     }
-    console.log(66666)
+    console.log(66666);
     // Create New Polygon
     this.addPointInDrawing(e);
   }

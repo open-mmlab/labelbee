@@ -62,6 +62,7 @@ export const topViewLine2PointCloud = (
   const newPosition = {
     length: totalLineLength,
     id: newPolygon.id,
+    linePointList: newPolygon.pointList,
   };
   const boxParams = {
     // Init Data
@@ -512,7 +513,7 @@ export const usePointCloudViews = () => {
     newPointCloudList?: IPointCloudBox[],
   ) => {
     const boxParams = newSelectedBox ?? selectedBox?.info;
-    const polygonOperation = topViewInstance?.pointCloud2dOperation;
+    const polygonOperation = topViewInstance?.toolInstance;
 
     polygonOperation.setSelectedIDs(selectedIDs);
 
@@ -659,12 +660,12 @@ export const usePointCloudViews = () => {
     newPointCloudBoxList?: IPointCloudBox[],
   ) => {
     const dataUrl = currentData?.url;
-
+    const toolName = topViewInstance?.toolInstance.toolName;
     if (newPointCloudBoxList) {
       // Wait for the mainPointCloudData.
       await ptCtx.syncAllViewPointCloudColor(newPointCloudBoxList);
     }
-
+    console.log(886);
     const viewToBeUpdated = {
       [PointCloudView.Side]: () => {
         synchronizeSideView(boxParams, polygon, sideViewInstance, dataUrl);
@@ -678,12 +679,14 @@ export const usePointCloudViews = () => {
         synchronizeTopView(boxParams, polygon, topViewInstance, mainViewInstance);
       },
     };
+    if (toolName !== 'lineTool') {
+      Object.keys(viewToBeUpdated).forEach((key) => {
+        if (key !== omitView) {
+          viewToBeUpdated[key]();
+        }
+      });
+    }
 
-    Object.keys(viewToBeUpdated).forEach((key) => {
-      if (key !== omitView) {
-        viewToBeUpdated[key]();
-      }
-    });
     if (zoom) {
       mainViewInstance?.updateCameraZoom(zoom);
     }

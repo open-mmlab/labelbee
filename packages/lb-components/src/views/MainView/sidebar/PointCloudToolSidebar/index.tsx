@@ -213,6 +213,7 @@ const AttributeUpdater = ({
   };
 
   const setAttribute = (attribute: string) => {
+    console.log(21323);
     toolInstance.setDefaultAttribute(attribute);
   };
 

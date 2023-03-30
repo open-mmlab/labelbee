@@ -64,6 +64,7 @@ const PointCloud2DView = ({ currentData, config }: IA2MapStateProps) => {
   }, [currentData]);
 
   useEffect(() => {
+    if (isLine) return;
     if (topViewInstance && mappingData) {
       const defaultViewStyle = {
         fill: 'transparent',

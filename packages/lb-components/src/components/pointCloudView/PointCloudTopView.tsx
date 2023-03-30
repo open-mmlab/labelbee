@@ -281,6 +281,7 @@ const PointCloudTopView: React.FC<IProps> = ({
      * 1. Update defaultAttribute by first attribute;
      *  */
     const defaultAttribute = config?.attributeList?.[0]?.value;
+    console.log('defaultAttribute', 999);
     if (defaultAttribute) {
       ptCtx.topViewInstance.pointCloud2dOperation.setDefaultAttribute(defaultAttribute);
     }
