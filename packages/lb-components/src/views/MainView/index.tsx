@@ -43,7 +43,7 @@ const ImageAnnotate: React.FC<AppProps & IProps> = (props) => {
 const PointCloudAnnotate: React.FC<AppProps & IProps> = (props) => {
   return (
     <>
-      <PointCloudView drawLayerSlot={props.drawLayerSlot} checkMode={props.checkMode}/>
+      <PointCloudView drawLayerSlot={props.drawLayerSlot} checkMode={props.checkMode} />
       <ToolFooter style={props.style?.footer} mode={props.mode} footer={props?.footer} />
     </>
   );
