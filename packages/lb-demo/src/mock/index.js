@@ -4,6 +4,14 @@ import img3 from './images/20.jpg';
 import img4 from './images/66.jpg';
 import { pointCloudResult1 } from './pointCloud';
 
+// Cuboid_IMG
+import car1 from './cuboidImages/1.png';
+import car2 from './cuboidImages/2.png';
+import car3 from './cuboidImages/3.png';
+import car4 from './cuboidImages/4.png';
+import car5 from './cuboidImages/5.png';
+
+
 // POINTCLOUD_DATA
 import pcd1 from './pointCloud/lidar/1.pcd';
 import pcd2 from './pointCloud/lidar/2.pcd';
@@ -21,7 +29,8 @@ import calib2 from './pointCloud/calib/P2/2.json';
 
 // const MOCK_URL = 'http://bee-sdk-demo.sensebee.xyz/images/';
 // export const fileList = ['10', '19', '20', '66'].map((i) => `${MOCK_URL}${i}.jpg`);
-export const fileList = [img1, img2, img3, img4];
+export const fileList = [car1, car2, car3, car4, car5];
+// export const fileList = [img1, img2, img3, img4];
 export const videoList = [
   'http://127.0.0.1:8080/a.mp4',
   'http://127.0.0.1:8080/d.mp4',

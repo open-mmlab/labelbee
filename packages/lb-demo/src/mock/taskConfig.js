@@ -241,21 +241,26 @@ const cuboidToolConfig = {
   "customFormat": "",
   "attributeList": [
     {
-      "key": "rectTool",
-      "value": "rectTool"
+      "key": "跑车",
+      "value": "sports car"
+    },
+
+    {
+      "key": "吉普车",
+      "value": "jeep"
     },
     {
-      "key": "23",
-      "value": "23"
+      "key": "紧凑车型",
+      "value": "single"
     },
     {
-      "key": "4",
-      "value": "4"
+      "key": "SUV等车型",
+      "value": "suv"
     },
     {
-      "key": "55",
-      "value": "55"
-    }
+      "key": "货车",
+      "value": "trucks"
+    },
   ]
 }
 
