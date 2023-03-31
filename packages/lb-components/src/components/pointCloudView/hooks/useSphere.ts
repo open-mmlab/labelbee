@@ -23,7 +23,7 @@ export const useSphere = () => {
 
   const updatePointCloudSphere = useCallback(
     (sphereParams) => {
-      const sphereIndex = pointCloudSphereList.findIndex((v) => v.id == sphereParams.id)
+      const sphereIndex = pointCloudSphereList.findIndex((v) => v.id === sphereParams.id)
       if (sphereIndex > -1) {
         pointCloudSphereList.splice(sphereIndex, 1, _.merge(pointCloudSphereList[sphereIndex], sphereParams));
         const newPointCloudSphereList = _.cloneDeep(pointCloudSphereList);

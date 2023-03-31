@@ -90,7 +90,7 @@ export class PointCloudAnnotation implements IPointCloudAnnotationOperation {
     // 2. PointCloud2dOperation initialization
     const defaultPolygonProps = {
       size,
-      config: JSON.stringify({...config, attributeConfigurable: true, hideAttribute: true }),
+      config: JSON.stringify({ ...config, attributeConfigurable: true, hideAttribute: true }),
       imgNode: image,
       checkMode,
       // forbidOperation: true,

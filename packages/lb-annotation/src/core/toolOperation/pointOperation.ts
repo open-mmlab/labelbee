@@ -355,7 +355,11 @@ class PointOperation extends BasicToolOperation {
     // 拖拽停止
     if (this.dragStatus === EDragStatus.Move) {
       this.history.pushHistory(this.pointList);
-      this.emit('updatePointByDrag', this.pointList.find((v) => v?.id == this.selectedID), this.dragInfo?.originPointList)
+      this.emit(
+        'updatePointByDrag',
+        this.pointList.find((v) => v?.id === this.selectedID),
+        this.dragInfo?.originPointList,
+      );
       this.dragInfo = undefined;
     }
     this.dragStatus = EDragStatus.Wait;
@@ -580,7 +584,7 @@ class PointOperation extends BasicToolOperation {
     this.hoverID = newDrawingPoint.id;
     const newPointList = [...this.pointList, newDrawingPoint];
     this.setPointList(newPointList);
-    this.emit('pointCreated', newDrawingPoint, this.zoom)
+    this.emit('pointCreated', newDrawingPoint, this.zoom);
     this.history.pushHistory(newPointList);
     this.setSelectedID(newDrawingPoint.id);
   }
@@ -606,7 +610,7 @@ class PointOperation extends BasicToolOperation {
       const pointList = this.pointList.filter((point) => point.id !== this.selectedID);
       this.setPointList(pointList);
       this.history.pushHistory(pointList);
-      this.emit('pointDeleted', this.selectedID)
+      this.emit('pointDeleted', this.selectedID);
       this.setSelectedID('');
       this.hoverID = '';
       return;
@@ -702,7 +706,7 @@ class PointOperation extends BasicToolOperation {
       this.history.pushHistory(this.pointList);
       this._textAttributInstance?.clearTextAttribute();
       this.emit('selectedChange');
-      this.emit('pointDeleted', this.selectedID)
+      this.emit('pointDeleted', this.selectedID);
       this.render();
     }
   }

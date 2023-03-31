@@ -970,7 +970,7 @@ export const usePointCloudViews = () => {
       mainViewInstance?.updateCameraZoom(zoom);
     }
     let toolColor = topViewInstance.toolInstance.getColor(point.attribute)
-    let { stroke, fill } = StyleUtils.getStrokeAndFill(toolColor, true, {
+    let { fill } = StyleUtils.getStrokeAndFill(toolColor, true, {
       isSelected: true,
     })
     mainViewGenSphere(sphereParams, fill)
