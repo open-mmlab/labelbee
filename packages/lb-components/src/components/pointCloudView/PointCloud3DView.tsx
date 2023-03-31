@@ -219,9 +219,12 @@ const PointCloud3D: React.FC<IA2MapStateProps> = ({ currentData, config }) => {
           currentData.mappingImgList && currentData.mappingImgList?.length > 0 ? '55%' : '100%',
       }}
     >
-      <div className={getClassName('point-cloud-3d-content')}>
+      <div
+        className={getClassName('point-cloud-3d-content')}
+        style={{ visibility: isLine ? 'hidden' : 'visible' }}
+      >
         <PointCloud3DContext.Provider value={ptCloud3DCtx}>
-          {isLine ? null : <PointCloud3DSideBar />}
+          <PointCloud3DSideBar />
         </PointCloud3DContext.Provider>
         <div className={getClassName('point-cloud-3d-view')} id={pointCloudID} ref={ref} />
       </div>

@@ -717,7 +717,7 @@ class LineToolOperation extends BasicToolOperation {
     super.render();
     this.drawLines();
     this.drawActivatedLine(nextPoint, undefined, true);
-    this.renderTextAttribute();
+    // this.renderTextAttribute();
     this.renderCursorLine(this.getLineColor(this.defaultAttribute));
   };
 
@@ -1810,6 +1810,7 @@ class LineToolOperation extends BasicToolOperation {
 
   /** 设置线条文本标注属性 */
   public setTextAttribute(text: string) {
+    console.log('setText', 77)
     if (this.isTextConfigurable) {
       this.setLineAttribute('textAttribute', text);
       this.history?.applyAttribute(this.selectedID, 'textAttribute', text);

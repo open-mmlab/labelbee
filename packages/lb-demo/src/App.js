@@ -25,7 +25,6 @@ const App = () => {
   const tool = qs.parse(window.location.search, { ignoreQueryPrefix: true, comma: true }).tool;
 
   const isSingleTool = !Array.isArray(tool);
-  debugger;
   const stepList = isSingleTool ? getStepList(tool) : getDependStepList(tool);
   const currentIsVideo = StepUtils.currentToolIsVideo(1, stepList);
   const currentIsPointCloud = StepUtils.currentToolIsPointCloud(1, stepList);

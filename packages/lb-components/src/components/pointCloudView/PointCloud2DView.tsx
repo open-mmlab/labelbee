@@ -107,10 +107,7 @@ const PointCloud2DView = ({ currentData, config }: IA2MapStateProps) => {
   }, [displayPointCloudList, mappingData]);
 
   const hiddenData =
-    !currentData ||
-    !currentData?.mappingImgList ||
-    !(currentData?.mappingImgList?.length > 0) ||
-    isLine;
+    !currentData || !currentData?.mappingImgList || !(currentData?.mappingImgList?.length > 0);
 
   const afterImgOnLoad = useCallback(() => {
     const toolInstance = viewRef.current?.toolInstance;
@@ -162,13 +159,19 @@ const PointCloud2DView = ({ currentData, config }: IA2MapStateProps) => {
       }
       style={{ display: hiddenData ? 'none' : 'flex' }}
     >
-      <div className={getClassName('point-cloud-2d-image')} ref={ref}>
+      <div
+        className={getClassName('point-cloud-2d-image')}
+        ref={ref}
+        style={{ visibility: isLine ? 'hidden' : 'visible' }}
+      >
         <AnnotationView
           src={mappingData?.url ?? ''}
           annotations={annotations2d}
           size={size}
           ref={viewRef}
-          globalStyle={{ display: hiddenData ? 'none' : 'block' }}
+          globalStyle={{
+            display: hiddenData ? 'none' : 'block',
+          }}
           afterImgOnLoad={afterImgOnLoad}
         />
       </div>

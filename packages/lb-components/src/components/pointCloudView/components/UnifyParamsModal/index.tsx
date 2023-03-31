@@ -242,7 +242,6 @@ const UnifyParamsModal = ({ id, visible, onCancel, config, imgList, imgIndex }: 
           <div style={attributeStyle}>
             <PrefixTag text={t('Attribute')} />
             <Form.Item name='attribute' noStyle={true} rules={defaultSelectedAttribute}>
-              {12312}
               <Select style={selectStyle}>
                 {config.attributeList.map((v) => (
                   <Select.Option key={v.value} value={v.value}>

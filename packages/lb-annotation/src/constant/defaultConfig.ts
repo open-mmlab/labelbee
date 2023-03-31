@@ -48,7 +48,7 @@ const rectToolConfig = {
       value: 'class-CP',
     },
   ],
-  textConfigurable: false,
+  textConfigurable: true,
   textCheckType: 0,
   customFormat: '',
 };
