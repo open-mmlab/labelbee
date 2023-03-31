@@ -7,7 +7,7 @@ import { PointCloud, PointCloudAnnotation, THybridToolName } from '@labelbee/lb-
 import { getClassName } from '@/utils/dom';
 import { PointCloudContainer } from './PointCloudLayout';
 import React, { useEffect, useRef } from 'react';
-import { EPerspectiveView, IPointCloudBox, IPointUnit, UpdatePolygonByDragList } from '@labelbee/lb-utils';
+import { EPerspectiveView, IPointUnit, UpdatePolygonByDragList } from '@labelbee/lb-utils';
 import { PointCloudContext } from './PointCloudContext';
 import { SizeInfoForView } from './PointCloudInfos';
 import { connect } from 'react-redux';
@@ -57,14 +57,14 @@ const updateSideViewByCanvas2D = (
   currentPos: { x: number; y: number },
   zoom: number,
   size: { width: number; height: number },
-  selectedPointCloudBox: IPointCloudBox | IPointCloudSphere,
+  rotation: number,
   SidePointCloud: PointCloud,
 ) => {
   const { offsetX, offsetY } = TransferCanvas2WorldOffset(currentPos, size, zoom);
   SidePointCloud.camera.zoom = zoom;
   if (currentPos) {
-    const cos = Math.cos(selectedPointCloudBox?.rotation ?? 0);
-    const sin = Math.sin(selectedPointCloudBox?.rotation ?? 0);
+    const cos = Math.cos(rotation);
+    const sin = Math.sin(rotation);
     const offsetXX = offsetX * cos;
     const offsetXY = offsetX * sin;
     const { x, y, z } = SidePointCloud.initCameraPosition;
@@ -123,17 +123,28 @@ const PointCloudSideView: React.FC<IA2MapStateProps & IProps> = ({ config, check
      * Change Orthographic Camera size
      */
     toolInstance.singleOn('renderZoom', (zoom: number, currentPos: any) => {
-      if (!ptCtx.selectedPointCloudBox && !selectedSphere) {
-        return;
+      if (ptCtx.selectedPointCloudBox) {
+        updateSideViewByCanvas2D(
+          currentPos,
+          zoom,
+          size,
+          ptCtx.selectedPointCloudBox.rotation,
+          pointCloudInstance,
+        );
+        syncSideviewToolZoom(currentPos, zoom, size);
+        return
       }
-      updateSideViewByCanvas2D(
-        currentPos,
-        zoom,
-        size,
-        ptCtx.selectedPointCloudBox ?? selectedSphere,
-        pointCloudInstance,
-      );
-      syncSideviewToolZoom(currentPos, zoom, size);
+      if (selectedSphere) {
+        updateSideViewByCanvas2D(
+          currentPos,
+          zoom,
+          size,
+          0,
+          pointCloudInstance,
+        );
+        syncSideviewToolZoom(currentPos, zoom, size);
+      }
+
     });
 
     // Synchronized 3d point cloud view displacement operations
@@ -145,13 +156,15 @@ const PointCloudSideView: React.FC<IA2MapStateProps & IProps> = ({ config, check
         currentPos,
         zoom,
         size,
-        ptCtx.selectedPointCloudBox ?? selectedSphere,
+        ptCtx.selectedPointCloudBox ? ptCtx.selectedPointCloudBox.rotation : 0,
         pointCloudInstance,
       );
     });
 
     toolInstance.singleOn('updatePointByDrag', (updatePoint: IPointUnit, oldList: IPointUnit[]) => {
-      sideViewUpdatePoint?.(updatePoint, selectedPoint)
+      if (selectedPoint) {
+        sideViewUpdatePoint?.(updatePoint, selectedPoint)
+      }
     })
 
     toolInstance.singleOn('updatePolygonByDrag', (updateList: UpdatePolygonByDragList) => {

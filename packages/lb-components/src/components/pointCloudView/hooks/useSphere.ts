@@ -7,6 +7,7 @@ export const useSphere = () => {
     pointCloudSphereList,
     setPointCloudSphereList,
     selectedID,
+    mainViewInstance,
   } = useContext(PointCloudContext);
 
   const selectedSphere = useMemo(() => {
@@ -33,10 +34,19 @@ export const useSphere = () => {
     }, [pointCloudSphereList]
   )
 
+  const deletePointCloudSphere = useCallback(
+    (id: string) => {
+      const newPointCloudSphereList = pointCloudSphereList.filter((v) => v.id !== id);
+      setPointCloudSphereList(newPointCloudSphereList);
+      mainViewInstance?.removeObjectByName(id);
+      mainViewInstance?.render();
+    }, [pointCloudSphereList]
+  )
 
   return {
     selectedSphere,
     getPointCloudSphereByID,
     updatePointCloudSphere,
+    deletePointCloudSphere,
   }
 }

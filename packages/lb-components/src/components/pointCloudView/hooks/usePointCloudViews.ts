@@ -8,6 +8,7 @@ import {
   PointCloud,
   MathUtils,
   getCuboidFromPointCloudBox,
+  StyleUtils
 } from '@labelbee/lb-annotation';
 import {
   IPointCloudBox,
@@ -627,8 +628,8 @@ export const usePointCloudViews = () => {
     mainViewInstance?.render();
   };
 
-  const mainViewGenSphere = (sphereParams: IPointCloudSphere) => {
-    mainViewInstance?.generateSphere(sphereParams);
+  const mainViewGenSphere = (sphereParams: IPointCloudSphere, color?: string) => {
+    mainViewInstance?.generateSphere(sphereParams, color);
     mainViewInstance?.controls.update();
     mainViewInstance?.render();
   }
@@ -940,13 +941,11 @@ export const usePointCloudViews = () => {
     point: any,
     sphereParams: IPointCloudSphere,
     zoom?: number,
-    newPointCloudSphereList: IPointCloudSphere[],
+    newPointCloudSphereList?: IPointCloudSphere[],
     config?: any,
   ) => {
 
     const dataUrl = currentData?.url;
-
-    // todo: sync color
 
     const viewToBeUpdated = {
       [PointCloudView.Side]: () => {
@@ -970,7 +969,11 @@ export const usePointCloudViews = () => {
     if (zoom) {
       mainViewInstance?.updateCameraZoom(zoom);
     }
-    mainViewGenSphere(sphereParams)
+    let toolColor = topViewInstance.toolInstance.getColor(point.attribute)
+    let { stroke, fill } = StyleUtils.getStrokeAndFill(toolColor, true, {
+      isSelected: true,
+    })
+    mainViewGenSphere(sphereParams, fill)
   }
   /**
    * Sync views' data from omit view, regenerate and highlight box on 3D-view

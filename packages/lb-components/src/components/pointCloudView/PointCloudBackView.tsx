@@ -17,7 +17,7 @@ import React, { useEffect, useRef } from 'react';
 import { PointCloudContext } from './PointCloudContext';
 import {
   EPerspectiveView,
-  IPointCloudBox, IPointUnit,
+  IPointUnit,
   IPolygonData,
   IPolygonPoint,
   UpdatePolygonByDragList,
@@ -74,14 +74,14 @@ const updateBackViewByCanvas2D = (
   currentPos: { x: number; y: number },
   zoom: number,
   size: { width: number; height: number },
-  selectedPointCloudBox: IPointCloudBox | IPointCloudSphere,
+  rotation: number,
   backPointCloud: PointCloud,
 ) => {
   const { offsetX, offsetY } = TransferCanvas2WorldOffset(currentPos, size, zoom);
   backPointCloud.camera.zoom = zoom;
   if (currentPos) {
-    const cos = Math.cos(selectedPointCloudBox.rotation ?? 0);
-    const sin = Math.sin(selectedPointCloudBox.rotation ?? 0);
+    const cos = Math.cos(rotation);
+    const sin = Math.sin(rotation);
     const offsetXX = offsetX * cos;
     const offsetXY = offsetX * sin;
     const { x, y, z } = backPointCloud.initCameraPosition;
@@ -217,11 +217,16 @@ const PointCloudBackView = ({ currentData, config, checkMode }: IA2MapStateProps
      * Change Orthographic Camera size
      */
     backPointCloudPolygonOperation.singleOn('renderZoom', (zoom: number, currentPos: any) => {
-      if (!ptCtx.selectedPointCloudBox && !selectedSphere) {
-        return;
+      if (ptCtx.selectedPointCloudBox) {
+        updateBackViewByCanvas2D(currentPos, zoom, size, ptCtx.selectedPointCloudBox.rotation, backPointCloud);
+        syncBackviewToolZoom(currentPos, zoom, size);
+        return
       }
-      updateBackViewByCanvas2D(currentPos, zoom, size, ptCtx.selectedPointCloudBox ?? selectedSphere, backPointCloud);
-      syncBackviewToolZoom(currentPos, zoom, size);
+      if (selectedSphere) {
+        updateBackViewByCanvas2D(currentPos, zoom, size, 0, backPointCloud);
+        syncBackviewToolZoom(currentPos, zoom, size);
+        return
+      }
     });
 
     // Synchronized 3d point cloud view displacement operations
@@ -229,11 +234,13 @@ const PointCloudBackView = ({ currentData, config, checkMode }: IA2MapStateProps
       if (!ptCtx.selectedPointCloudBox && !selectedSphere) {
         return;
       }
-      updateBackViewByCanvas2D(currentPos, zoom, size, ptCtx.selectedPointCloudBox ?? selectedSphere, backPointCloud);
+      updateBackViewByCanvas2D(currentPos, zoom, size, ptCtx.selectedPointCloudBox ? ptCtx.selectedPointCloudBox.rotation : 0 , backPointCloud);
     });
 
     backPointCloudPolygonOperation.singleOn('updatePointByDrag', (updatePoint: IPointUnit, oldList: IPointUnit[]) => {
-      backViewUpdatePoint?.(updatePoint, selectedPoint)
+      if (selectedPoint) {
+        backViewUpdatePoint?.(updatePoint, selectedPoint)
+      }
     })
     backPointCloudPolygonOperation.singleOn(
       'updatePolygonByDrag',

@@ -17,6 +17,7 @@ import { PointCloudContainer } from './PointCloudLayout';
 import { BoxInfos, PointCloudValidity } from './PointCloudInfos';
 import { usePolygon } from './hooks/usePolygon';
 import { usePoint } from './hooks/usePoint';
+import { useSphere } from './hooks/useSphere';
 import { useZoom } from './hooks/useZoom';
 import { Slider } from 'antd';
 import { a2MapStateToProps, IA2MapStateProps, IAnnotationStateProps } from '@/store/annotation/map';
@@ -165,6 +166,7 @@ const PointCloudTopView: React.FC<IProps> = ({
 
   const { addPolygon, deletePolygon } = usePolygon();
   const { addPoint, deletePoint } = usePoint();
+  const { deletePointCloudSphere } = useSphere();
   const { deletePointCloudBox, changeValidByID } = useSingleBox();
   const [zAxisLimit, setZAxisLimit] = useState<number>(10);
   const { t } = useTranslation();
@@ -203,15 +205,18 @@ const PointCloudTopView: React.FC<IProps> = ({
 
     // point tool events
     TopView2dOperation.singleOn('pointCreated', (point: IPointUnit, zoom: number) => {
-      const { x: realX, y: realY } = PointCloudUtils.transferCanvas2World(point, size)
       addPoint(point)
-      ptCtx.setSelectedIDs(point.id)
       pointCloudViews.topViewAddSphere({
         newPoint: point,
         size,
         trackConfigurable: config.trackConfigurable,
         zoom,
       })
+    })
+
+    TopView2dOperation.singleOn('pointDeleted', (selectedID: string) => {
+      deletePoint(selectedID)
+      deletePointCloudSphere(selectedID)
     })
 
     TopView2dOperation.singleOn('updatePointByDrag', (updatePoint: IPointUnit, oldList: IPointUnit[]) => {
@@ -327,7 +332,7 @@ const PointCloudTopView: React.FC<IProps> = ({
     });
 
     // Synchronized 3d point cloud view displacement operations
-    toolInstance.singleOn('dragMove', ({ currentPos, zoom }) => {
+    toolInstance.singleOn('dragMove', ({ currentPos, zoom }: any) => {
       const { offsetX, offsetY } = TransferCanvas2WorldOffset(currentPos, size, zoom);
       pointCloud.camera.zoom = zoom;
       const { x, y, z } = pointCloud.initCameraPosition;

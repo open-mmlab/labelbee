@@ -417,6 +417,13 @@ export class PointCloud {
     return cameraPositionVector;
   }
 
+  public updateCameraBySphere(sphereParams: IPointCloudSphere, perspectiveView: EPerspectiveView) {
+    const { center, radius } = sphereParams;
+    const cameraPositionVector = this.getCameraVector(center, 0, { width: radius * 2, height: radius * 2, depth: radius * 2 }, perspectiveView);
+    this.updateCamera(cameraPositionVector, center);
+    return cameraPositionVector;
+  }
+
   public updateOrthoCamera(boxParams: IPointCloudBox, perspectiveView: EPerspectiveView) {
     const cameraPositionVector = this.updateCameraByBox(boxParams, perspectiveView);
 
@@ -1126,6 +1133,7 @@ export class PointCloud {
   }
 
   public getSpherePoint2DCoordinate(sphereParams: IPointCloudSphere, perspectiveView: EPerspectiveView) {
+    // whq todo: maybe wrong params
     const { center, radius } = sphereParams
     const transParams = { center, width: radius * 2, height: radius * 2, depth: radius * 2, rotation: 0 }
     const projectMatrix = new THREE.Matrix4()

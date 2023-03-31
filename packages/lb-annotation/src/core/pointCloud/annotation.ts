@@ -90,7 +90,7 @@ export class PointCloudAnnotation implements IPointCloudAnnotationOperation {
     // 2. PointCloud2dOperation initialization
     const defaultPolygonProps = {
       size,
-      config: JSON.stringify(config),
+      config: JSON.stringify({...config, attributeConfigurable: true, hideAttribute: true }),
       imgNode: image,
       checkMode,
       // forbidOperation: true,
@@ -116,9 +116,10 @@ export class PointCloudAnnotation implements IPointCloudAnnotationOperation {
         pointCloudPolygonOperation.setPattern(EPolygonPattern.Rect);
         this.toolInstance = pointCloudPolygonOperation;
         this.toolInstance.eventBinding();
+        // need to be deleted
         this.pointCloud2dOperation = pointCloudPolygonOperation;
       } else {
-        toolInstance = toolScheduler.createOperation(tool, image, config);
+        toolInstance = toolScheduler.createOperation(tool, image, defaultPolygonProps);
       }
       if (i === toolList.length - 1) {
         if (!this.toolInstance) {

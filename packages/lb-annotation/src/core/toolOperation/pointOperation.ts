@@ -606,6 +606,7 @@ class PointOperation extends BasicToolOperation {
       const pointList = this.pointList.filter((point) => point.id !== this.selectedID);
       this.setPointList(pointList);
       this.history.pushHistory(pointList);
+      this.emit('pointDeleted', this.selectedID)
       this.setSelectedID('');
       this.hoverID = '';
       return;
@@ -701,6 +702,7 @@ class PointOperation extends BasicToolOperation {
       this.history.pushHistory(this.pointList);
       this._textAttributInstance?.clearTextAttribute();
       this.emit('selectedChange');
+      this.emit('pointDeleted', this.selectedID)
       this.render();
     }
   }
@@ -838,7 +840,7 @@ class PointOperation extends BasicToolOperation {
       showText = `${order}_${MarkerUtils.getMarkerShowText(point.label, this.config.markerList)}`;
     }
 
-    if (point.attribute) {
+    if (point.attribute && !this.config.hideAttribute) {
       showText = `${showText}  ${AttributeUtils.getAttributeShowText(point.attribute, this.config?.attributeList)}`;
     }
 
