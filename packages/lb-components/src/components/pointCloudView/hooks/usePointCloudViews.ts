@@ -31,6 +31,7 @@ import { useTranslation } from 'react-i18next';
 import { useHistory } from './useHistory';
 import { usePolygon } from './usePolygon';
 import { IFileItem } from '@/types/data';
+import { ICoordinate } from '@labelbee/lb-utils/src/types/common';
 
 const DEFAULT_SCOPE = 5;
 const DEFAULT_RADIUS = 90;
@@ -49,27 +50,32 @@ export const topViewPolygon2PointCloud = (
   selectedPointCloudBox?: IPointCloudBox,
   defaultValue?: { [v: string]: any },
 ) => {
-  const [point1, point2, point3, point4] = newPolygon.pointList.map((v: any) =>
+  let worldPointList = newPolygon.pointList.map((v: any) =>
     PointCloudUtils.transferCanvas2World(v, size),
   );
-
-  const centerPoint = MathUtils.getLineCenterPoint([point1, point3]);
-  const height = MathUtils.getLineLength(point1, point2);
-  const width = MathUtils.getLineLength(point2, point3);
-  const rotation = MathUtils.getRadiusFromQuadrangle(newPolygon.pointList);
   let z = 0;
   let depth = 1;
   let extraData = {};
 
   // Init PointCloud Data
   if (pointCloud) {
-    const zInfo = pointCloud.getSensesPointZAxisInPolygon([point1, point2, point3, point4]);
+    const zInfo = pointCloud.getSensesPointZAxisInPolygon(worldPointList);
+    worldPointList = zInfo.worldPointList;
     z = (zInfo.maxZ + zInfo.minZ) / 2;
     depth = zInfo.maxZ - zInfo.minZ;
     extraData = {
       count: zInfo.zCount,
+      newPointList: worldPointList.map((v: ICoordinate) =>
+        PointCloudUtils.transferWorld2Canvas(v, size),
+      ),
     };
   }
+
+  const [point1, point2, point3] = worldPointList;
+  const centerPoint = MathUtils.getLineCenterPoint([point1, point3]);
+  const height = MathUtils.getLineLength(point1, point2);
+  const width = MathUtils.getLineLength(point2, point3);
+  const rotation = MathUtils.getRadiusFromQuadrangle(newPolygon.pointList);
 
   if (selectedPointCloudBox) {
     z = selectedPointCloudBox.center.z;
@@ -403,13 +409,13 @@ export const usePointCloudViews = () => {
 
   /** Top-view create box from 2D */
   const topViewAddBox = ({
-    newPolygon,
+    polygon,
     size,
     imgList,
     trackConfigurable,
     zoom,
   }: {
-    newPolygon: any;
+    polygon: any;
     size: ISize;
     imgList: IFileItem[];
     trackConfigurable?: boolean;
@@ -428,6 +434,7 @@ export const usePointCloudViews = () => {
       });
     }
 
+    const newPolygon = { ...polygon };
     const newParams = topViewPolygon2PointCloud(
       newPolygon,
       size,
@@ -450,6 +457,10 @@ export const usePointCloudViews = () => {
       return;
     }
 
+    if (newParams.newPointList?.length) {
+      newPolygon.pointList = newParams.newPointList;
+    }
+
     const isBoxHidden = hideAttributes.includes(newPolygon.attribute);
     const newPointCloudList = addPointCloudBox(boxParams);
 
@@ -460,6 +471,7 @@ export const usePointCloudViews = () => {
       setSelectedIDs(boxParams.id);
       polygonOperation.setSelectedIDs([newPolygon.id]);
       syncPointCloudViews(PointCloudView.Top, newPolygon, boxParams, zoom, newPointCloudList);
+      synchronizeTopView(boxParams, newPolygon, topViewInstance, mainViewInstance);
     }
 
     addHistory({ newBoxParams: boxParams });

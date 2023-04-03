@@ -215,7 +215,7 @@ const PointCloudTopView: React.FC<IProps> = ({
       }
 
       pointCloudViews.topViewAddBox({
-        newPolygon: polygon,
+        polygon,
         size,
         imgList,
         trackConfigurable: config.trackConfigurable,
