@@ -7,7 +7,11 @@ import icon from '@/assets/predictTracking/icon.svg';
 import { useSingleBox } from '@/components/pointCloudView/hooks/useSingleBox';
 import { AppState } from '@/store';
 import {
-    ChangeSave, GetBoxesByID, SetPointCloudLoading, SetPredictResult, SetPredictResultVisible
+  ChangeSave,
+  GetBoxesByID,
+  SetPointCloudLoading,
+  SetPredictResult,
+  SetPredictResultVisible,
 } from '@/store/annotation/actionCreators';
 import { LabelBeeContext, useDispatch } from '@/store/ctx';
 
@@ -28,7 +32,7 @@ const PredictTrackingIcon = (props: { loading: boolean }) => {
     const selectedBoxTrackID = selectedBox?.info.trackID;
 
     if (!selectedBoxTrackID) {
-      message.error('未找到当前标注框ID');
+      message.error(t('BeforePredictStarting'));
       return;
     }
 
@@ -37,7 +41,7 @@ const PredictTrackingIcon = (props: { loading: boolean }) => {
     const boxes: any = await dispatch(GetBoxesByID(selectedBoxTrackID));
 
     if (boxes.length < 2) {
-      message.error('请至少标记两个目标');
+      message.error(t('BeforePredictStarting'));
       return;
     }
 
@@ -47,12 +51,12 @@ const PredictTrackingIcon = (props: { loading: boolean }) => {
     const difference = end.index - start.index;
 
     if (difference < 2) {
-      message.error('不需要进行补全');
+      message.error(t('BeforePredictStarting'));
       return;
     }
 
     if (difference > 8) {
-      message.error('需要补全的数据不能大于10个');
+      message.error(t('ThePredictedPointCloud'));
       return;
     }
 

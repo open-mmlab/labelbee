@@ -16,11 +16,7 @@ export const sleep = (time = 300) => {
   });
 };
 
-export const views: [EPerspectiveView.Top, EPerspectiveView.Left, EPerspectiveView.Back] = [
-  EPerspectiveView.Top,
-  EPerspectiveView.Left,
-  EPerspectiveView.Back,
-];
+export const views = [EPerspectiveView.Top, EPerspectiveView.Left, EPerspectiveView.Back] as const;
 
 interface viewDataUrl {
   [EPerspectiveView.Top]?: string;
