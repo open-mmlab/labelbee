@@ -40,6 +40,8 @@ const initialState: AnnotationState = {
 
   pointCloudLoading: false,
   checkMode: false,
+  predictionResult: [],
+  predictionResultVisible: false,
 };
 
 /**
@@ -581,6 +583,20 @@ export const annotationReducer = (
       };
     }
 
+    case ANNOTATION_ACTIONS.SET_PREDICT_RESULT: {
+      return {
+        ...state,
+        predictionResult: action.payload.result,
+      };
+    }
+
+    case ANNOTATION_ACTIONS.SET_PREDICT_RESULT_VISIBLE: {
+      return {
+        ...state,
+        predictionResultVisible: action.payload.visible,
+      };
+    }
+
     case ANNOTATION_ACTIONS.UPDATE_ON_STEP_CHANGE: {
       return {
         ...state,
@@ -817,6 +833,15 @@ export const annotationReducer = (
       return {
         ...state,
         imgList: newImgList,
+      };
+    }
+
+    case ANNOTATION_ACTIONS.BATCH_UPDATE_IMG_LIST_RESULT: {
+      const { nextImgList } = action.payload;
+
+      return {
+        ...state,
+        imgList: nextImgList,
       };
     }
 
