@@ -20,6 +20,7 @@ import PointCloudView from '@/components/pointCloudView';
 import { getClassName } from '@/utils/dom';
 import { classnames } from '@/utils';
 import { LabelBeeContext } from '@/store/ctx';
+import PreviewResult from '@/components/predictTracking/previewResult';
 
 interface IProps {
   path: string;
@@ -94,6 +95,7 @@ const MainView: React.FC<AppProps & IProps> = (props) => {
             >
               <Sidebar sider={props?.sider} />
             </Sider>
+            <PreviewResult />
           </Layout>
         </Layout>
       </Spin>

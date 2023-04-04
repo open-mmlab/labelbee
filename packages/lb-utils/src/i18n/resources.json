@@ -197,7 +197,10 @@
     "CancelFixed": "Cancel Fixed",
     "FixedOnLeft": "Fixed On Left",
     "FixedOnRight": "Fixed On Right",
-    "AnnotatedResult": "Annotated Result"
+    "AnnotatedResult": "Annotated Result",
+    "ComplementaryTracking": "Complementary tracking",
+    "ComplementaryTrackingPrediction": "Complementary tracking prediction",
+    "Apply": "Apply"
   },
   "cn": {
     "TextInput": "文本输入",
@@ -397,6 +400,9 @@
     "CancelFixed": "取消固定",
     "FixedOnLeft": "固定在左侧",
     "FixedOnRight": "固定在右侧",
-    "AnnotatedResult": "标注结果"
+    "AnnotatedResult": "标注结果",
+    "ComplementaryTracking": "补全跟踪",
+    "ComplementaryTrackingPrediction": "补全跟踪预测",
+    "Apply": "应用"
   }
 }
