@@ -88,15 +88,8 @@ export const predict = (start: IPointCloudBoxWithIndex, end: IPointCloudBoxWithI
   const len = diff - 1;
   const result: IPointCloudBox[] = [];
   const map: { [key: string]: number[] } = {};
-  const centerKeys: ['x', 'y', 'z'] = ['x', 'y', 'z'];
-  const predictKeys: ['center', 'depth', 'height', 'index', 'rotation', 'width'] = [
-    'center',
-    'depth',
-    'height',
-    'index',
-    'rotation',
-    'width',
-  ];
+  const centerKeys = ['x', 'y', 'z'] as const;
+  const predictKeys = ['center', 'depth', 'height', 'index', 'rotation', 'width'] as const;
 
   centerKeys.forEach((key) => {
     map[key] = getInteriorNumbersByStartAndEnd(start.center[key], end.center[key], len);
@@ -110,22 +103,25 @@ export const predict = (start: IPointCloudBoxWithIndex, end: IPointCloudBoxWithI
   });
 
   for (let i = 0; i < len; i++) {
-    const nextCenter: Partial<IPointCloudBox['center']> = {};
-    centerKeys.forEach((key) => {
-      nextCenter[key] = map[key][i];
-    });
-    let nextValue: IPointCloudBoxWithIndex = Object.assign(
-      {},
-      start,
-      { id: uuid() },
-      { center: nextCenter },
+    const nextCenter = centerKeys.reduce(
+      (acc, key) => {
+        acc[key] = map[key][i];
+        return acc;
+      },
+      { x: 0, y: 0, z: 0 },
     );
-    predictKeys.forEach((key) => {
-      if (key === 'center') {
-        return;
-      }
-      nextValue[key] = map[key][i];
-    });
+
+    const nextValue = predictKeys.reduce(
+      (acc, key) => {
+        if (key === 'center') {
+          return acc;
+        }
+        acc[key] = map[key][i];
+        return acc;
+      },
+      { ...start, id: uuid(), center: nextCenter },
+    );
+
     result.push(nextValue);
   }
 

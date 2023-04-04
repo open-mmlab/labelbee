@@ -88,52 +88,50 @@ const PreviewResult = (props: IProps) => {
     close();
   };
 
-  return (
-    predictionResultVisible && (
-      <>
-        {list.length > 0 && (
-          <div className={getClassName('point-cloud-predict-tracking-container')}>
-            <div className={getClassName('point-cloud-predict-tracking-container', 'bar')}>
-              <div className={getClassName('point-cloud-predict-tracking-container', 'title')}>
-                <div>
-                  {t('ComplementaryTrackingPrediction')}
-                  {list.length > 0 ? `（${list.length}）` : ''}
-                </div>
-                <div className={getClassName('point-cloud-predict-tracking-container', 'option')}>
-                  <div
-                    className={classNames([
-                      getClassName('point-cloud-predict-tracking-container', 'cancelOption'),
-                      getClassName('point-cloud-predict-tracking-container', 'button'),
-                    ])}
-                    onClick={close}
-                  >
-                    {t('Cancel')}
-                  </div>
-
-                  <div
-                    className={classNames([
-                      getClassName('point-cloud-predict-tracking-container', 'okOption'),
-                      getClassName('point-cloud-predict-tracking-container', 'button'),
-                    ])}
-                    onClick={apply}
-                  >
-                    {t('Apply')}
-                  </div>
-                </div>
+  return predictionResultVisible ? (
+    <>
+      {list.length > 0 && (
+        <div className={getClassName('point-cloud-predict-tracking-container')}>
+          <div className={getClassName('point-cloud-predict-tracking-container', 'bar')}>
+            <div className={getClassName('point-cloud-predict-tracking-container', 'title')}>
+              <div>
+                {t('ComplementaryTrackingPrediction')}
+                {list.length > 0 ? `（${list.length}）` : ''}
               </div>
+              <div className={getClassName('point-cloud-predict-tracking-container', 'option')}>
+                <div
+                  className={classNames([
+                    getClassName('point-cloud-predict-tracking-container', 'cancelOption'),
+                    getClassName('point-cloud-predict-tracking-container', 'button'),
+                  ])}
+                  onClick={close}
+                >
+                  {t('Cancel')}
+                </div>
 
-              <div className={getClassName('point-cloud-predict-tracking-container', 'content')}>
-                <Result list={list} />
+                <div
+                  className={classNames([
+                    getClassName('point-cloud-predict-tracking-container', 'okOption'),
+                    getClassName('point-cloud-predict-tracking-container', 'button'),
+                  ])}
+                  onClick={apply}
+                >
+                  {t('Apply')}
+                </div>
               </div>
             </div>
+
+            <div className={getClassName('point-cloud-predict-tracking-container', 'content')}>
+              <Result list={list} />
+            </div>
           </div>
-        )}
-        {predictionResult.length > 0 && (
-          <GenerateViewsDataUrl result={predictionResult} imgList={imgList} setList={setList} />
-        )}
-      </>
-    )
-  );
+        </div>
+      )}
+      {predictionResult.length > 0 && (
+        <GenerateViewsDataUrl result={predictionResult} imgList={imgList} setList={setList} />
+      )}
+    </>
+  ) : null;
 };
 
 const Result = (props: { list: IBox[] }) => {
@@ -221,7 +219,7 @@ const GenerateViewsDataUrl = (props: {
 
           const url = imgList[index].url
             ? imgList[index].url
-            : //@ts-ignore
+            : // @ts-ignore
               imgList[index].webPointCloudFile.lidar.url;
 
           await pointCloud.loadPCDFileByBox(url, item, {
@@ -254,16 +252,15 @@ const GenerateViewsDataUrl = (props: {
     generate();
   }, []);
 
-  return <div style={size} ref={ref} className='generate-view'></div>;
+  return <div style={size} ref={ref} className='generate-view' />;
 };
 
-function mapStateToProps(state: AppState) {
-  return {
-    predictionResult: state.annotation.predictionResult,
-    predictionResultVisible: state.annotation.predictionResultVisible,
-    imgList: state.annotation.imgList,
-    step: state.annotation.step,
-    stepList: state.annotation.stepList,
-  };
-}
+const mapStateToProps = (state: AppState) => ({
+  predictionResult: state.annotation.predictionResult,
+  predictionResultVisible: state.annotation.predictionResultVisible,
+  imgList: state.annotation.imgList,
+  step: state.annotation.step,
+  stepList: state.annotation.stepList,
+});
+
 export default connect(mapStateToProps, null, null, { context: LabelBeeContext })(PreviewResult);
