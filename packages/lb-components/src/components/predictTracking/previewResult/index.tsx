@@ -7,17 +7,12 @@ import { connect } from 'react-redux';
 import { PointCloudContext } from '@/components/pointCloudView/PointCloudContext';
 import { AppState } from '@/store';
 import {
-  BatchUpdateImgListResult,
-  SetPointCloudLoading,
-  SetPredictResult,
-  SetPredictResultVisible,
+    BatchUpdateImgListResultByPredictResult, SetPointCloudLoading, SetPredictResult,
+    SetPredictResultVisible
 } from '@/store/annotation/actionCreators';
 import { IPointCloudBoxWithIndex } from '@/store/annotation/types';
 import { LabelBeeContext, useDispatch } from '@/store/ctx';
 import { IFileItem } from '@/types/data';
-import { IStepInfo } from '@/types/step';
-import { jsonParser } from '@/utils';
-import { composeResult } from '@/utils/data';
 import { getClassName } from '@/utils/dom';
 import { PointCloud } from '@labelbee/lb-annotation';
 import { toolStyleConverter } from '@labelbee/lb-utils';
@@ -25,15 +20,13 @@ import { toolStyleConverter } from '@labelbee/lb-utils';
 import { getViewsDataUrl, IBox, sleep, views } from './util';
 
 interface IProps {
-  stepList: IStepInfo[];
-  step: number;
   imgList: IFileItem[];
   predictionResultVisible: boolean;
   predictionResult: IPointCloudBoxWithIndex[];
 }
 
 const PreviewResult = (props: IProps) => {
-  const { predictionResult, predictionResultVisible, imgList, step, stepList } = props;
+  const { predictionResult, predictionResultVisible, imgList } = props;
 
   const [list, setList] = useState<IBox[]>([]);
   const dispatch = useDispatch();
@@ -47,43 +40,7 @@ const PreviewResult = (props: IProps) => {
 
   const apply = async () => {
     SetPointCloudLoading(dispatch, true);
-    const tmpMap: {
-      [key: number]: any;
-    } = {};
-    predictionResult.forEach((element) => {
-      const { index } = element;
-      tmpMap[index] = _.pick(element, [
-        'center',
-        'width',
-        'height',
-        'depth',
-        'rotation',
-        'id',
-        'attribute',
-        'valid',
-        'trackID',
-      ]);
-    });
-
-    const stepName = `step_${step}`;
-
-    const nextImgList = imgList.map((element, index) => {
-      if (tmpMap[index]) {
-        const elementResult =
-          element.result === '{}'
-            ? jsonParser(composeResult('', { step, stepList }, { rect: [] }, {}))
-            : jsonParser(element.result);
-
-        elementResult[stepName].result.push(tmpMap[index]);
-
-        return {
-          ...element,
-          result: JSON.stringify(elementResult),
-        };
-      }
-      return element;
-    });
-    await dispatch(BatchUpdateImgListResult(nextImgList));
+    await dispatch(BatchUpdateImgListResultByPredictResult());
     SetPointCloudLoading(dispatch, false);
     close();
   };
@@ -259,8 +216,6 @@ const mapStateToProps = (state: AppState) => ({
   predictionResult: state.annotation.predictionResult,
   predictionResultVisible: state.annotation.predictionResultVisible,
   imgList: state.annotation.imgList,
-  step: state.annotation.step,
-  stepList: state.annotation.stepList,
 });
 
 export default connect(mapStateToProps, null, null, { context: LabelBeeContext })(PreviewResult);

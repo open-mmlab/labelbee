@@ -238,12 +238,10 @@ export function BatchUpdateResultByTrackID(
   };
 }
 
-export function BatchUpdateImgListResult(nextImgList: any): AnnotationActionTypes {
+export function BatchUpdateImgListResultByPredictResult(): AnnotationActionTypes {
   return {
-    type: ANNOTATION_ACTIONS.BATCH_UPDATE_IMG_LIST_RESULT,
-    payload: {
-      nextImgList,
-    },
+    type: ANNOTATION_ACTIONS.BATCH_UPDATE_IMG_LIST_RESULT_BY_PREDICT_RESULT,
+    payload: {},
   };
 }
 

@@ -11,7 +11,7 @@ import { composeResult, composeResultWithBasicImgInfo } from '@/utils/data';
 import StepUtils from '@/utils/StepUtils';
 import ToolUtils from '@/utils/ToolUtils';
 import { AnnotationEngine, CommonToolUtils, ImgUtils, MathUtils } from '@labelbee/lb-annotation';
-import { i18n, PointCloudUtils } from '@labelbee/lb-utils';
+import { i18n, IPointCloudBox, PointCloudUtils } from '@labelbee/lb-utils';
 import { Modal } from 'antd';
 import { message } from 'antd/es';
 import _ from 'lodash';
@@ -836,9 +836,58 @@ export const annotationReducer = (
       };
     }
 
-    case ANNOTATION_ACTIONS.BATCH_UPDATE_IMG_LIST_RESULT: {
-      const { nextImgList } = action.payload;
+    case ANNOTATION_ACTIONS.BATCH_UPDATE_IMG_LIST_RESULT_BY_PREDICT_RESULT: {
+      const { onSubmit, imgList, stepList, step, predictionResult } = state;
 
+      const tmpMap: {
+        [key: number]: IPointCloudBox;
+      } = {};
+
+      predictionResult.forEach((element) => {
+        const { index } = element;
+        tmpMap[index] = _.pick(element, [
+          'center',
+          'width',
+          'height',
+          'depth',
+          'rotation',
+          'id',
+          'attribute',
+          'valid',
+          'trackID',
+        ]);
+      });
+
+      const stepName = `step_${step}`;
+      const updateImgList: Array<{ newInfo: IFileItem; imgIndex: number }> = [];
+
+      const nextImgList = imgList.map((element, index) => {
+        if (tmpMap[index]) {
+          const elementResult =
+            element.result === '{}'
+              ? jsonParser(composeResult('', { step, stepList }, { rect: [] }, {}))
+              : jsonParser(element.result);
+
+          elementResult[stepName].result.push(tmpMap[index]);
+
+          const newInfo = {
+            ...element,
+            result: JSON.stringify(elementResult),
+          };
+
+          updateImgList.push({
+            imgIndex: index,
+            newInfo,
+          });
+
+          return newInfo;
+        }
+        return element;
+      });
+
+      onSubmit?.(nextImgList, ESubmitType.BatchUpdateImgList, -1, nextImgList, {
+        updateImgList,
+      });
       return {
         ...state,
         imgList: nextImgList,
