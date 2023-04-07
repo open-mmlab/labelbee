@@ -100,7 +100,7 @@ const AnnotatedAttributesItem = ({ attribute }: { attribute: IInputList }) => {
 
         <DeleteOutlined onClick={() => onDeleteGraphByAttr(attribute)} />
       </div>
-
+      {console.log(pointCloudListForSpecAttribute)}
       {expanded &&
         (pointCloudListForSpecAttribute.length > 0 ? (
           pointCloudListForSpecAttribute.map((box) => {
@@ -121,7 +121,7 @@ export const AnnotatedAttributesPanel = () => {
   const stepConfig: IPointCloudConfig = useSelector(stepConfigSelector);
   const { attrPanelLayout, setAttrPanelLayout } = useContext(PointCloudContext);
   const { t } = useTranslation();
-
+  console.log(stepConfig, 998);
   return (
     <div className={getClassName('annotated-attribute')}>
       {attrPanelLayout ? (

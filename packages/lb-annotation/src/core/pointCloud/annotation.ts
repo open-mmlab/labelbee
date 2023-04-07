@@ -206,13 +206,26 @@ export class PointCloudAnnotation implements IPointCloudAnnotationOperation {
   }
 
   public updatePolygonList = (pointCloudDataList: IPointCloudBox[], extraList?: IPolygonData[]) => {
+    console.log('pointCloudDataList', pointCloudDataList);
+    let pointList;
     let polygonList = pointCloudDataList.map((v: IPointCloudBox) => {
-      const { polygon2d: pointList } = this.pointCloudInstance.getBoxTopPolygon2DCoordinate(v);
+      // line
+      if (v.length) {
+        pointList = v.linePointList?.map((point) => {
+          return {
+            x: point.x,
+            y: point.y,
+          };
+        });
+      } else {
+        const { polygon2d } = this.pointCloudInstance.getBoxTopPolygon2DCoordinate(v);
+        pointList = polygon2d;
+      }
       return {
         id: v.id,
         sourceID: '',
         pointList,
-        isRect: true,
+        isRect: !v.length,
         valid: v.valid ?? true,
         attribute: v.attribute,
       };
@@ -224,13 +237,13 @@ export class PointCloudAnnotation implements IPointCloudAnnotationOperation {
         extraList.map((v: IPolygonData) => ({
           ...v,
           pointList: v?.pointList?.map((point: IPolygonPoint) =>
-            PointCloudUtils.transferWorld2Canvas(point, this.pointCloud2dOperation.size),
+            PointCloudUtils.transferWorld2Canvas(point, this.toolInstance.size),
           ),
         })),
       );
     }
 
-    this.pointCloud2dOperation.setResult(polygonList);
+    this.toolInstance.setResult(polygonList);
   };
 
   /**
@@ -243,7 +256,6 @@ export class PointCloudAnnotation implements IPointCloudAnnotationOperation {
     if (!this.pointCloud2dOperation || !this.pointCloudInstance) {
       return;
     }
-
     this.pointCloudInstance.loadPCDFile(pcdPath, config?.radius);
     this.addPolygonListOnTopView(result);
   }

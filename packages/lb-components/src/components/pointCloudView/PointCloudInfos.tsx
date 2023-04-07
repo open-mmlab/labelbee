@@ -84,7 +84,6 @@ export const BoxInfos = ({
     if (!selectedBox) {
       return;
     }
-    console.log(123123123);
     const { length, width, height, rotation_y } = PointCloudUtils.transferBox2Kitti(
       selectedBox.info,
     );

@@ -555,6 +555,7 @@ export const DispatcherTurning = async (
 
   // 翻页
   if (fileIndexChanged) {
+    console.log('next page', 998);
     if (annotationStore.loading) {
       return;
     }

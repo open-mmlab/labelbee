@@ -213,16 +213,13 @@ const PointCloud3D: React.FC<IA2MapStateProps> = ({ currentData, config }) => {
     <PointCloudContainer
       className={getClassName('point-cloud-3d-container')}
       title={t('3DView')}
-      toolbar={isLine ? null : PointCloud3DTitle}
+      toolbar={PointCloud3DTitle}
       style={{
         height:
           currentData.mappingImgList && currentData.mappingImgList?.length > 0 ? '55%' : '100%',
       }}
     >
-      <div
-        className={getClassName('point-cloud-3d-content')}
-        style={{ visibility: isLine ? 'hidden' : 'visible' }}
-      >
+      <div className={getClassName('point-cloud-3d-content')}>
         <PointCloud3DContext.Provider value={ptCloud3DCtx}>
           <PointCloud3DSideBar />
         </PointCloud3DContext.Provider>

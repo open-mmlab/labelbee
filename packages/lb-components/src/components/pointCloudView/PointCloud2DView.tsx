@@ -159,11 +159,7 @@ const PointCloud2DView = ({ currentData, config }: IA2MapStateProps) => {
       }
       style={{ display: hiddenData ? 'none' : 'flex' }}
     >
-      <div
-        className={getClassName('point-cloud-2d-image')}
-        ref={ref}
-        style={{ visibility: isLine ? 'hidden' : 'visible' }}
-      >
+      <div className={getClassName('point-cloud-2d-image')} ref={ref}>
         <AnnotationView
           src={mappingData?.url ?? ''}
           annotations={annotations2d}

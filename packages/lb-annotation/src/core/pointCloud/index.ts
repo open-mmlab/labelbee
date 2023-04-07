@@ -330,7 +330,6 @@ export class PointCloud {
     if (rotation) {
       group.rotation.set(0, 0, rotation);
     }
-    console.log(777776);
     group.name = id;
     this.scene.add(group);
   };

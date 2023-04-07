@@ -105,6 +105,7 @@ const updateToolInstance = (annotation: AnnotationState, imgNode: HTMLImageEleme
 export const LoadFileAndFileData =
   (nextIndex: number, nextBasicIndex?: number): any =>
   async (dispatch: any, getState: any) => {
+    console.log('LoadFileAndFileData', 9998);
     const { stepList, step } = getState().annotation;
     const currentIsVideo = StepUtils.currentToolIsVideo(step, stepList);
     const currentIsPointCloud = StepUtils.currentToolIsPointCloud(step, stepList);
@@ -414,6 +415,7 @@ export const annotationReducer = (
     }
 
     case ANNOTATION_ACTIONS.LOAD_FILE_DATA: {
+      console.log('LOAD_FILE_DATA', 776);
       const { imgList, step, toolInstance, annotationEngine, stepList } = state;
 
       /**
