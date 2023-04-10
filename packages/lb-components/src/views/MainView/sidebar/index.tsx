@@ -35,7 +35,6 @@ const Sidebar: React.FC<IProps> = ({ sider }) => {
     StepUtils.getCurrentStepInfo(state.annotation.step, state.annotation.stepList),
   );
   const toolName = stepInfo?.tool;
-  console.log('toolName',toolName)
   const { t } = useTranslation();
 
   if (!toolName) {
@@ -151,7 +150,7 @@ const Sidebar: React.FC<IProps> = ({ sider }) => {
         EToolName.Line,
         EToolName.Rect,
         EToolName.Polygon,
-        EToolName.Cuboid
+        EToolName.Cuboid,
       ] as string[]
     ).includes(toolName)
   ) {

@@ -252,6 +252,13 @@ class CuboidOperation extends BasicToolOperation {
     this.render();
   }
 
+  /**
+   * 获取当前页面标注结果
+   */
+  public get currentPageResult() {
+    return this.cuboidList;
+  }
+
   public clearResult() {
     this.setCuboidList([], true);
     this.setSelectedID(undefined);

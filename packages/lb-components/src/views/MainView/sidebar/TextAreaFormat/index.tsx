@@ -66,7 +66,7 @@ const TextAreaFormat = (props: IProps) => {
   }, [textValue]);
 
   const checkText = (e: FocusEvent<HTMLTextAreaElement>) => {
-    if (error) {
+    if (error || !new RegExp(checkString).test(e.target.value)) {
       onChange('');
       message.error(TextUtils.getErrorNotice(textCheckType));
       return true;
