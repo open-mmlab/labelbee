@@ -5,8 +5,6 @@
  * @LastEditTime: 2022-07-08 11:08:02
  */
 import {
-  getCuboidFromPointCloudBox,
-  MathUtils,
   PointCloud,
   PointCloudAnnotation,
   THybridToolName,
