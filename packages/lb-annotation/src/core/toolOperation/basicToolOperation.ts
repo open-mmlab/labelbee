@@ -514,6 +514,32 @@ class BasicToolOperation extends EventListener {
     this.emit('hiddenChange');
   }
 
+  public setDefaultAttribute(attribute: string) {
+    this.defaultAttribute = attribute;
+  }
+
+  public getCoordinateInOrigin(e: MouseEvent) {
+    const bounding = this.canvas.getBoundingClientRect();
+
+    return {
+      x: (e.clientX - bounding.left - this.currentPos.x) / this.zoom,
+      y: (e.clientY - bounding.top - this.currentPos.y) / this.zoom,
+    };
+  }
+
+  /**
+   * Get the textIconSvg by attribute.
+   * @param attribute
+   */
+  public getTextIconSvg(attribute = '') {
+    return AttributeUtils.getTextIconSvg(
+      attribute,
+      this.config?.attributeList,
+      this.config.attributeConfigurable,
+      this.baseIcon,
+    );
+  }
+
   /**
    * 用于外界直接控制序号的是否展示
    * @param isShowOrder
