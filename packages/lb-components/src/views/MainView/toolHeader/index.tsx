@@ -20,6 +20,7 @@ import { store } from '@/index';
 import ExportData from './ExportData';
 import HeaderOption from './headerOption';
 import StepSwitch from './StepSwitch';
+import PredictTrackingIcon from '@/components/predictTracking/predictTrackingIcon';
 
 interface INextStep {
   stepProgress: number;
@@ -174,6 +175,13 @@ const ToolHeader: React.FC<IToolHeaderProps> = ({
     </div>
   );
 
+  const rightActions = (
+    <>
+      <PredictTrackingIcon />
+      {langNode}
+    </>
+  );
+
   if (header) {
     if (typeof header === 'function') {
       return (
@@ -184,7 +192,7 @@ const ToolHeader: React.FC<IToolHeaderProps> = ({
               headerNameNode,
               stepListNode,
               headerOptionNode,
-              langNode,
+              langNode: rightActions,
             })}
           </div>
         </div>
@@ -209,7 +217,7 @@ const ToolHeader: React.FC<IToolHeaderProps> = ({
           {headerOptionNode}
         </div>
         <div className={`${prefix}-header__titlePlacement`} />
-        {langNode}
+        {rightActions}
       </div>
     </div>
   );

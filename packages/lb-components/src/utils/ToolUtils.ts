@@ -5,7 +5,7 @@
  */
 
 import { cTool } from '@labelbee/lb-annotation';
-const { EVideoToolName, EPointCloudName } = cTool;
+const { EVideoToolName, EPointCloudName, EToolName } = cTool;
 
 class ToolUtils {
   public static isVideoTool(tool?: string) {
@@ -14,6 +14,10 @@ class ToolUtils {
 
   public static isPointCloudTool(tool?: string) {
     return tool ? (Object.values(EPointCloudName) as string[]).includes(tool) : false;
+  }
+
+  public static getPointCloudToolList() {
+    return [EToolName.Point, EToolName.Line, EToolName.PointCloudPolygon]
   }
 }
 
