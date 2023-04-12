@@ -53,8 +53,8 @@ export interface IPointCloudContext extends IPointCloudContextInstances {
   defaultAttribute: string;
   setDefaultAttribute: (defaultAttribute: string) => void;
 
-  pointCloudPattern: EToolName.Rect | EToolName.Polygon;
-  setPointCloudPattern: (toolName: EToolName.Rect | EToolName.Polygon) => void;
+  pointCloudPattern: EToolName.Rect | EToolName.Polygon | EToolName.Point | EToolName.Line;
+  setPointCloudPattern: (toolName: EToolName.Rect | EToolName.Polygon | EToolName.Point | EToolName.Line) => void;
   selectSpecAttr: (attr: string) => void;
 }
 
@@ -109,7 +109,7 @@ export const PointCloudProvider: React.FC<{}> = ({ children }) => {
   const [backViewInstance, setBackViewInstance] = useState<PointCloudAnnotation>();
   const [mainViewInstance, setMainViewInstance] = useState<PointCloud>();
   const [defaultAttribute, setDefaultAttribute] = useState('');
-  const [pointCloudPattern, setPointCloudPattern] = useState<EToolName.Rect | EToolName.Polygon>(
+  const [pointCloudPattern, setPointCloudPattern] = useState<EToolName.Rect | EToolName.Polygon | EToolName.Point | EToolName.Line>(
     EToolName.Rect,
   );
   const history = useRef(new ActionsHistory()).current;

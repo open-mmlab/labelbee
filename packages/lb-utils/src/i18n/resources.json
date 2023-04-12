@@ -198,6 +198,11 @@
     "FixedOnLeft": "Fixed On Left",
     "FixedOnRight": "Fixed On Right",
     "AnnotatedResult": "Annotated Result",
+    "ComplementaryTracking": "Complementary tracking",
+    "ComplementaryTrackingPrediction": "Complementary tracking prediction",
+    "Apply": "Apply",
+    "BeforePredictStarting": "Before starting, please mark the first and last box, need the same trackID",
+    "ThePredictedPointCloud": "The predicted point cloud now needs to be less than 10 frames",
     "CameraFollowTopView": "Positioned by top view"
   },
   "cn": {
@@ -399,6 +404,11 @@
     "FixedOnLeft": "固定在左侧",
     "FixedOnRight": "固定在右侧",
     "AnnotatedResult": "标注结果",
+    "ComplementaryTracking": "补全跟踪",
+    "ComplementaryTrackingPrediction": "补全跟踪预测",
+    "Apply": "应用",
+    "BeforePredictStarting": "启动前，请先标出首尾的框，需同序号",
+    "ThePredictedPointCloud": "现预测点云需要小于 10 帧",
     "CameraFollowTopView": "按俯视图定位"
   }
 }

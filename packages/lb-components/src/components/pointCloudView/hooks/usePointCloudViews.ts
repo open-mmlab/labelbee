@@ -31,6 +31,7 @@ import { useTranslation } from 'react-i18next';
 import { useHistory } from './useHistory';
 import { usePolygon } from './usePolygon';
 import { IFileItem } from '@/types/data';
+import { ICoordinate } from '@labelbee/lb-utils/src/types/common';
 
 const DEFAULT_SCOPE = 5;
 const DEFAULT_RADIUS = 90;
@@ -48,28 +49,37 @@ export const topViewPolygon2PointCloud = (
   pointCloud?: PointCloud,
   selectedPointCloudBox?: IPointCloudBox,
   defaultValue?: { [v: string]: any },
+  intelligentFit?: boolean,
 ) => {
-  const [point1, point2, point3, point4] = newPolygon.pointList.map((v: any) =>
+  let worldPointList = newPolygon.pointList.map((v: any) =>
     PointCloudUtils.transferCanvas2World(v, size),
   );
-
-  const centerPoint = MathUtils.getLineCenterPoint([point1, point3]);
-  const height = MathUtils.getLineLength(point1, point2);
-  const width = MathUtils.getLineLength(point2, point3);
-  const rotation = MathUtils.getRadiusFromQuadrangle(newPolygon.pointList);
   let z = 0;
   let depth = 1;
   let extraData = {};
 
   // Init PointCloud Data
   if (pointCloud) {
-    const zInfo = pointCloud.getSensesPointZAxisInPolygon([point1, point2, point3, point4]);
+    const zInfo = pointCloud.getSensesPointZAxisInPolygon(
+      worldPointList,
+      undefined,
+      intelligentFit,
+    );
+    if (intelligentFit) {
+      worldPointList = zInfo.fittedCoordinates;
+    }
     z = (zInfo.maxZ + zInfo.minZ) / 2;
     depth = zInfo.maxZ - zInfo.minZ;
     extraData = {
       count: zInfo.zCount,
     };
   }
+
+  const [point1, point2, point3] = worldPointList;
+  const centerPoint = MathUtils.getLineCenterPoint([point1, point3]);
+  const height = MathUtils.getLineLength(point1, point2);
+  const width = MathUtils.getLineLength(point2, point3);
+  const rotation = MathUtils.getRadiusFromQuadrangle(newPolygon.pointList);
 
   if (selectedPointCloudBox) {
     z = selectedPointCloudBox.center.z;
@@ -108,7 +118,12 @@ export const topViewPolygon2PointCloud = (
     Object.assign(boxParams, defaultValue);
   }
 
-  return boxParams;
+  // Polygon coordinates after fitting
+  const newPointList = worldPointList.map((v: ICoordinate) =>
+    PointCloudUtils.transferWorld2Canvas(v, size),
+  );
+
+  return { boxParams, newPointList };
 };
 
 const sideViewPolygon2PointCloud = (
@@ -402,17 +417,19 @@ export const usePointCloudViews = () => {
 
   /** Top-view create box from 2D */
   const topViewAddBox = ({
-    newPolygon,
+    polygon,
     size,
     imgList,
     trackConfigurable,
     zoom,
+    intelligentFit,
   }: {
-    newPolygon: any;
+    polygon: any;
     size: ISize;
     imgList: IFileItem[];
     trackConfigurable?: boolean;
     zoom: number;
+    intelligentFit?: boolean;
   }) => {
     const extraData = {
       attribute: topViewInstance.pointCloud2dOperation.defaultAttribute ?? '',
@@ -427,26 +444,30 @@ export const usePointCloudViews = () => {
       });
     }
 
-    const newParams = topViewPolygon2PointCloud(
+    const newPolygon = { ...polygon };
+    const { boxParams, newPointList } = topViewPolygon2PointCloud(
       newPolygon,
       size,
       topViewPointCloud,
       undefined,
       extraData,
+      intelligentFit,
     );
     const polygonOperation = topViewInstance?.pointCloud2dOperation;
-
-    const boxParams: IPointCloudBox = newParams;
 
     // If the count is less than lowerLimitPointsNumInBox, needs to delete it
     if (
       config?.lowerLimitPointsNumInBox &&
-      typeof newParams.count === 'number' &&
-      newParams.count < config.lowerLimitPointsNumInBox
+      typeof boxParams.count === 'number' &&
+      boxParams.count < config.lowerLimitPointsNumInBox
     ) {
       message.info(t('LowerLimitPointsNumInBox', { num: config.lowerLimitPointsNumInBox }));
-      polygonOperation.deletePolygon(newParams.id);
+      polygonOperation.deletePolygon(boxParams.id);
       return;
+    }
+
+    if (intelligentFit && newPointList?.length) {
+      newPolygon.pointList = newPointList;
     }
 
     const isBoxHidden = hideAttributes.includes(newPolygon.attribute);
@@ -459,6 +480,9 @@ export const usePointCloudViews = () => {
       setSelectedIDs(boxParams.id);
       polygonOperation.setSelectedIDs([newPolygon.id]);
       syncPointCloudViews(PointCloudView.Top, newPolygon, boxParams, zoom, newPointCloudList);
+      if (intelligentFit) {
+        synchronizeTopView(boxParams, newPolygon, topViewInstance, mainViewInstance);
+      }
     }
 
     addHistory({ newBoxParams: boxParams });
@@ -570,14 +594,14 @@ export const usePointCloudViews = () => {
     const updatePointCloudList: IPointCloudBox[] = updateList.map(({ newPolygon: polygon }) => {
       const pointCloudBox = getPointCloudByID(polygon.id);
 
-      const newBoxParams = topViewPolygon2PointCloud(
+      const { boxParams } = topViewPolygon2PointCloud(
         polygon,
         size,
         topViewInstance.pointCloudInstance,
         pointCloudBox,
       );
 
-      return newBoxParams;
+      return boxParams;
     });
 
     /**

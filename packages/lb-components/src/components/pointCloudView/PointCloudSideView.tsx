@@ -3,7 +3,7 @@
  * @createdate 2022-07-11
  * @author Ron <ron.f.luo@gmail.com>
  */
-import { PointCloud, PointCloudAnnotation } from '@labelbee/lb-annotation';
+import { PointCloud, PointCloudAnnotation, THybridToolName } from '@labelbee/lb-annotation';
 import { getClassName } from '@/utils/dom';
 import { PointCloudContainer } from './PointCloudLayout';
 import React, { useEffect, useRef } from 'react';
@@ -18,6 +18,8 @@ import EmptyPage from './components/EmptyPage';
 import useSize from '@/hooks/useSize';
 import { useTranslation } from 'react-i18next';
 import { LabelBeeContext } from '@/store/ctx';
+import ToolUtils from '@/utils/ToolUtils';
+
 /**
  * Get the offset from canvas2d-coordinate to world coordinate
  * @param currentPos
@@ -93,7 +95,8 @@ const PointCloudSideView: React.FC<IA2MapStateProps & IProps> = ({ config, check
         size,
         polygonOperationProps: { showDirectionLine: false, forbidAddNew: true },
         config,
-        checkMode
+        checkMode,
+        toolName: ToolUtils.getPointCloudToolList() as THybridToolName,
       });
       ptCtx.setSideViewInstance(pointCloudAnnotation);
       // };

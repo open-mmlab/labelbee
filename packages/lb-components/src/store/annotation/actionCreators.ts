@@ -16,6 +16,7 @@ import { EPageTurningOperation } from '@/data/enums/AnnotationSize';
 import PageOperator from '@/utils/PageOperator';
 import { jsonParser } from '@/utils';
 import { IPointCloudBox } from '@labelbee/lb-utils';
+import { getBoxesByTrackID } from '@/components/predictTracking/previewResult/util';
 
 const dispatchTasks = (dispatch: any, tasks: any[]) => tasks.map((task) => dispatch(task));
 
@@ -234,6 +235,13 @@ export function BatchUpdateResultByTrackID(
       newData,
       rangeIndex,
     },
+  };
+}
+
+export function BatchUpdateImgListResultByPredictResult(): AnnotationActionTypes {
+  return {
+    type: ANNOTATION_ACTIONS.BATCH_UPDATE_IMG_LIST_RESULT_BY_PREDICT_RESULT,
+    payload: {},
   };
 }
 
@@ -614,3 +622,28 @@ export const InitAnnotationState = (dispatch: Function) => {
     payload: {},
   });
 };
+
+export const SetPredictResult = (dispatch: Function, result: any) => {
+  dispatch({
+    type: ANNOTATION_ACTIONS.SET_PREDICT_RESULT,
+    payload: {
+      result,
+    },
+  });
+};
+
+export const SetPredictResultVisible = (dispatch: Function, visible: boolean) => {
+  dispatch({
+    type: ANNOTATION_ACTIONS.SET_PREDICT_RESULT_VISIBLE,
+    payload: {
+      visible,
+    },
+  });
+};
+
+export const GetBoxesByID =
+  (selectedBoxTrackID: number) =>
+  (dispatch: any, getState: any): IPointCloudBox[] => {
+    const { imgList, step } = getState().annotation;
+    return getBoxesByTrackID(imgList, step, selectedBoxTrackID);
+  };
