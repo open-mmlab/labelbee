@@ -72,9 +72,6 @@ export const topViewPolygon2PointCloud = (
     depth = zInfo.maxZ - zInfo.minZ;
     extraData = {
       count: zInfo.zCount,
-      newPointList: worldPointList.map((v: ICoordinate) =>
-        PointCloudUtils.transferWorld2Canvas(v, size),
-      ),
     };
   }
 
@@ -121,7 +118,12 @@ export const topViewPolygon2PointCloud = (
     Object.assign(boxParams, defaultValue);
   }
 
-  return boxParams;
+  // Polygon coordinates after fitting
+  const newPointList = worldPointList.map((v: ICoordinate) =>
+    PointCloudUtils.transferWorld2Canvas(v, size),
+  );
+
+  return { boxParams, newPointList };
 };
 
 const sideViewPolygon2PointCloud = (
@@ -444,7 +446,7 @@ export const usePointCloudViews = () => {
     }
 
     const newPolygon = { ...polygon };
-    const newParams = topViewPolygon2PointCloud(
+    const { boxParams, newPointList } = topViewPolygon2PointCloud(
       newPolygon,
       size,
       topViewPointCloud,
@@ -454,21 +456,19 @@ export const usePointCloudViews = () => {
     );
     const polygonOperation = topViewInstance?.pointCloud2dOperation;
 
-    const boxParams: IPointCloudBox = newParams;
-
     // If the count is less than lowerLimitPointsNumInBox, needs to delete it
     if (
       config?.lowerLimitPointsNumInBox &&
-      typeof newParams.count === 'number' &&
-      newParams.count < config.lowerLimitPointsNumInBox
+      typeof boxParams.count === 'number' &&
+      boxParams.count < config.lowerLimitPointsNumInBox
     ) {
       message.info(t('LowerLimitPointsNumInBox', { num: config.lowerLimitPointsNumInBox }));
-      polygonOperation.deletePolygon(newParams.id);
+      polygonOperation.deletePolygon(boxParams.id);
       return;
     }
 
-    if (intelligentFit && newParams.newPointList?.length) {
-      newPolygon.pointList = newParams.newPointList;
+    if (intelligentFit && newPointList?.length) {
+      newPolygon.pointList = newPointList;
     }
 
     const isBoxHidden = hideAttributes.includes(newPolygon.attribute);
@@ -595,14 +595,14 @@ export const usePointCloudViews = () => {
     const updatePointCloudList: IPointCloudBox[] = updateList.map(({ newPolygon: polygon }) => {
       const pointCloudBox = getPointCloudByID(polygon.id);
 
-      const newBoxParams = topViewPolygon2PointCloud(
+      const { boxParams } = topViewPolygon2PointCloud(
         polygon,
         size,
         topViewInstance.pointCloudInstance,
         pointCloudBox,
       );
 
-      return newBoxParams;
+      return boxParams;
     });
 
     /**
