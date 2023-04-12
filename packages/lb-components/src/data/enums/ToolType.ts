@@ -43,6 +43,8 @@ export enum EToolName {
   SegmentByRect = 'segmentByRectTool',
   
   Cuboid = 'cuboidTool',
+  /** 点云多边形工具 */
+  PointCloudPolygon = 'pointCloudPolygon',
 }
 
 

@@ -20,6 +20,7 @@ import PointCloudView from '@/components/pointCloudView';
 import { getClassName } from '@/utils/dom';
 import { classnames } from '@/utils';
 import { LabelBeeContext } from '@/store/ctx';
+import PreviewResult from '@/components/predictTracking/previewResult';
 
 interface IProps {
   path: string;
@@ -43,7 +44,11 @@ const ImageAnnotate: React.FC<AppProps & IProps> = (props) => {
 const PointCloudAnnotate: React.FC<AppProps & IProps> = (props) => {
   return (
     <>
-      <PointCloudView drawLayerSlot={props.drawLayerSlot} checkMode={props.checkMode} />
+      <PointCloudView
+        drawLayerSlot={props.drawLayerSlot}
+        checkMode={props.checkMode}
+        intelligentFit={props.intelligentFit}
+      />
       <ToolFooter style={props.style?.footer} mode={props.mode} footer={props?.footer} />
     </>
   );
@@ -94,6 +99,7 @@ const MainView: React.FC<AppProps & IProps> = (props) => {
             >
               <Sidebar sider={props?.sider} />
             </Sider>
+            <PreviewResult />
           </Layout>
         </Layout>
       </Spin>

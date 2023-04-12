@@ -2,6 +2,47 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [1.13.0](https://github.com/open-mmlab/labelbee/compare/v1.12.1...v1.13.0) (2023-04-12)
+
+
+### Features
+
+* Extract "FooterPopover" component and uses in annotatedList ([753a7b2](https://github.com/open-mmlab/labelbee/commit/753a7b24f7848bb7e32fa8c85b50cfb2e2fd8351))
+* **pointcloud:** 3Dview sync the direction with topview after selected ([7ed2855](https://github.com/open-mmlab/labelbee/commit/7ed285580defef82c75cb404cf42d5df66bc3bba))
+* **pointcloud:** Adding component for selecting boxes by attribute ([5e6b648](https://github.com/open-mmlab/labelbee/commit/5e6b6487d4c3e30e6dccd8673d60e285ab6119b7))
+* **pointcloud:** Annotated-Attributes-Panel supports fixed layout ([f698cf1](https://github.com/open-mmlab/labelbee/commit/f698cf1fc77769eeaedff3e2f920e04947a0a56f))
+* **pointcloud:** Confirm before deleteGraphByAttr ([e8759ac](https://github.com/open-mmlab/labelbee/commit/e8759acd88c7476348ae6031d1d00ad9eac6ea5b))
+* **pointcloud:** Follow top add tooltip ([f0c360e](https://github.com/open-mmlab/labelbee/commit/f0c360e4fbffa6b9ecf7bb10dfc3e0a7a5221bc0))
+* **pointcloud:** Hide the operation in checkmode(side&backView) ([a12901e](https://github.com/open-mmlab/labelbee/commit/a12901e208bed684561ede01d154195a9c7a5680))
+* **pointcloud:** MainView support to follow top view ([81fba17](https://github.com/open-mmlab/labelbee/commit/81fba17476d3f458f38293fe921058118cb4fbb0))
+* **pointcloud:** Support select spec attribute boxes ([05228c5](https://github.com/open-mmlab/labelbee/commit/05228c5c66bb73166e486b51bab151e204176687))
+* **pointcloud:** Support selecting polygons by attributes ([b0b4a43](https://github.com/open-mmlab/labelbee/commit/b0b4a431a79ebeb6e0e368a18071fdd916f601a5))
+* **pointcloud:** Support updating position by keydown events ([12e6d68](https://github.com/open-mmlab/labelbee/commit/12e6d686a598f64e1ef3da4c4b3db56b90055c58))
+* **pointcloud:** Supports moving multiple selected rects ([dbfa665](https://github.com/open-mmlab/labelbee/commit/dbfa6652bf54eba141799681bf7eb1b74294c178))
+* **pointcloud:** Supports rendering after moving multi-boxes ([4228988](https://github.com/open-mmlab/labelbee/commit/42289888e0883ccdc8a07cfb3c9b42fd8c4f944c))
+* **pointcloud:** Update the backgroundColor of pointCloud ([df16fdc](https://github.com/open-mmlab/labelbee/commit/df16fdc87df911088e800527274cf36cb492da99))
+
+
+### Bug Fixes
+
+* **copy-result:** AsyncData needs to determine if it exists ([17dc99a](https://github.com/open-mmlab/labelbee/commit/17dc99a7633e01541650e948d7eeb436a83c1691))
+* **pointcloud:** Fix applyCameraTarget not to apply zoom ([c7b426a](https://github.com/open-mmlab/labelbee/commit/c7b426a6b75b458f4e126cee1df923c44255f5f0))
+* **pointcloud:** Fix attribute list hide attr fail ([7d4d28d](https://github.com/open-mmlab/labelbee/commit/7d4d28d51c7bf49c92b05d9a9957fdb21471f72e))
+* **pointcloud:** Fix size changed and init point cloud result ([f940e42](https://github.com/open-mmlab/labelbee/commit/f940e42d16f66394469e2b46264937418d136856))
+* **pointcloud:** Fix the feature of COPY_BACKWARD_RESULT ([26b3062](https://github.com/open-mmlab/labelbee/commit/26b30624c23267deb262417d4a103c71dee90f7d))
+* **pointcloud:** Init hideAttr while imgIndex changed ([99e5642](https://github.com/open-mmlab/labelbee/commit/99e5642d435f62332434c81537ad5360f48e73cf))
+* **pointcloud:** Prevent default event on ctrl + a ([cf2d147](https://github.com/open-mmlab/labelbee/commit/cf2d147005911fb58c497e1e25b0bc4675fc61af))
+* **pointcloud:** Repeated updates of pointCloudBackView ([bfe634a](https://github.com/open-mmlab/labelbee/commit/bfe634a5f57e6e1ca33547e7b950f7612a6fe449))
+* **pointcloud:** SyncTopview doesn't need to update camera ([634ca61](https://github.com/open-mmlab/labelbee/commit/634ca6196e95a710b762e419ad5800044eab9d24))
+* **pointcloud:** Update attr list style ([d26691e](https://github.com/open-mmlab/labelbee/commit/d26691ec248fc940e63e53850fb2c0ba5ae42e17))
+
+### [1.12.1](https://github.com/open-mmlab/labelbee/compare/v1.12.0...v1.12.1) (2023-03-23)
+
+
+### Bug Fixes
+
+* **view-operation:** Update the range of direction judgement ([943c2b0](https://github.com/open-mmlab/labelbee/commit/943c2b0dbb025c983352f12d16793b508b4c15ce))
+
 ## [1.12.0](https://github.com/open-mmlab/labelbee/compare/v1.11.0...v1.12.0) (2023-03-09)
 
 

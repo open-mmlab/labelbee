@@ -388,7 +388,7 @@ export default class ViewOperation extends BasicToolOperation {
       newPointList = DrawUtils.drawPolygon(this.canvas, renderLineWithZoom, lineRenderOptions);
     }
 
-    const isShowDirection = line?.showDirection === true && line?.pointList?.length > 2;
+    const isShowDirection = line?.showDirection === true && line?.pointList?.length >= 2;
 
     // 是否展示方向
     if (isShowDirection) {
@@ -463,7 +463,7 @@ export default class ViewOperation extends BasicToolOperation {
       newPointList = DrawUtils.drawPolygon(this.canvas, renderPolygon, polygonRenderOptions);
     }
 
-    const isShowDirection = polygon?.showDirection === true && polygon?.pointList?.length > 2;
+    const isShowDirection = polygon?.showDirection === true && polygon?.pointList?.length >= 2;
 
     // 是否展示方向
     if (isShowDirection) {

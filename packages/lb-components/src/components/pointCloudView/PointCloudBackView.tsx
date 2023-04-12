@@ -7,13 +7,14 @@
 import {
   PointCloud,
   PointCloudAnnotation,
+  THybridToolName,
 } from '@labelbee/lb-annotation';
 import { getClassName } from '@/utils/dom';
 import { PointCloudContainer } from './PointCloudLayout';
 import React, { useEffect, useRef } from 'react';
 import { PointCloudContext } from './PointCloudContext';
+import { EPerspectiveView, IPointCloudBox, UpdatePolygonByDragList } from '@labelbee/lb-utils';
 import { useSingleBox } from './hooks/useSingleBox';
-import { EPerspectiveView, IPointCloudBox } from '@labelbee/lb-utils';
 import { SizeInfoForView } from './PointCloudInfos';
 import { connect } from 'react-redux';
 import { a2MapStateToProps, IA2MapStateProps } from '@/store/annotation/map';
@@ -22,6 +23,7 @@ import useSize from '@/hooks/useSize';
 import EmptyPage from './components/EmptyPage';
 import { useTranslation } from 'react-i18next';
 import { LabelBeeContext } from '@/store/ctx';
+import ToolUtils from '@/utils/ToolUtils';
 
 /**
  * 统一一下，将其拓展为 二维转换为 三维坐标的转换
@@ -75,7 +77,7 @@ const updateBackViewByCanvas2D = (
 };
 
 interface IProps {
-  checkMode?: boolean
+  checkMode?: boolean;
 }
 
 const PointCloudSideView = ({ currentData, config, checkMode }: IA2MapStateProps & IProps) => {
@@ -98,7 +100,8 @@ const PointCloudSideView = ({ currentData, config, checkMode }: IA2MapStateProps
         size,
         polygonOperationProps: { showDirectionLine: false, forbidAddNew: true },
         config,
-        checkMode
+        checkMode,
+        toolName: ToolUtils.getPointCloudToolList() as THybridToolName,
       });
       ptCtx.setBackViewInstance(pointCloudAnnotation);
     }
@@ -137,8 +140,14 @@ const PointCloudSideView = ({ currentData, config, checkMode }: IA2MapStateProps
 
     backPointCloudPolygonOperation.singleOn(
       'updatePolygonByDrag',
-      ({ newPolygon, originPolygon }: any) => {
-        backViewUpdateBox?.(newPolygon, originPolygon)
+      (updateList: UpdatePolygonByDragList) => {
+        if (ptCtx.selectedIDs.length === 1 && updateList.length === 1) {
+          const { newPolygon, originPolygon } = updateList[0];
+
+          if (newPolygon && originPolygon) {
+            backViewUpdateBox(newPolygon, originPolygon);
+          }
+        }
       },
     );
   }, [ptCtx, size]);

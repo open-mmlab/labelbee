@@ -7,8 +7,8 @@ import { getClassName } from '@/utils/dom';
 import { FooterDivider } from '@/views/MainView/toolFooter';
 import { ZoomController } from '@/views/MainView/toolFooter/ZoomController';
 import { DownSquareOutlined, UpSquareOutlined } from '@ant-design/icons';
-import { cTool, PointCloudAnnotation } from '@labelbee/lb-annotation';
-import { IPolygonData, PointCloudUtils } from '@labelbee/lb-utils';
+import { cTool, PointCloudAnnotation, THybridToolName } from '@labelbee/lb-annotation';
+import { IPolygonData, PointCloudUtils, UpdatePolygonByDragList } from '@labelbee/lb-utils';
 import React, { useEffect, useLayoutEffect, useRef, useState } from 'react';
 import { PointCloudContext } from './PointCloudContext';
 import { useRotate } from './hooks/useRotate';
@@ -26,6 +26,7 @@ import { useTranslation } from 'react-i18next';
 import { LabelBeeContext } from '@/store/ctx';
 import { jsonParser } from '@/utils';
 import { TDrawLayerSlot } from '@/types/main';
+import ToolUtils from '@/utils/ToolUtils';
 
 const { EPolygonPattern } = cTool;
 
@@ -144,6 +145,7 @@ const ZAxisSlider = ({
 interface IProps extends IA2MapStateProps {
   drawLayerSlot?: TDrawLayerSlot;
   checkMode?: boolean;
+  intelligentFit?: boolean;
 }
 
 const PointCloudTopView: React.FC<IProps> = ({
@@ -152,6 +154,7 @@ const PointCloudTopView: React.FC<IProps> = ({
   stepInfo,
   drawLayerSlot,
   checkMode,
+  intelligentFit,
 }) => {
   const [annotationPos, setAnnotationPos] = useState({ zoom: 1, currentPos: { x: 0, y: 0 } });
   const ref = useRef<HTMLDivElement>(null);
@@ -159,6 +162,7 @@ const PointCloudTopView: React.FC<IProps> = ({
   const size = useSize(ref);
   const config = jsonParser(stepInfo.config);
   const { setZoom } = useZoom();
+  const { hideAttributes } = ptCtx;
 
   const { addPolygon, deletePolygon } = usePolygon();
   const { deletePointCloudBox, changeValidByID } = useSingleBox();
@@ -183,6 +187,7 @@ const PointCloudTopView: React.FC<IProps> = ({
         pcdPath: currentData.url,
         config,
         checkMode,
+        toolName: ToolUtils.getPointCloudToolList() as THybridToolName,
       });
 
       ptCtx.setTopViewInstance(pointCloudAnnotation);
@@ -194,7 +199,7 @@ const PointCloudTopView: React.FC<IProps> = ({
       return;
     }
 
-    const { pointCloud2dOperation: TopView2dOperation } = ptCtx.topViewInstance;
+    const { toolInstance: TopView2dOperation } = ptCtx.topViewInstance;
 
     TopView2dOperation.singleOn('polygonCreated', (polygon: IPolygonData, zoom: number) => {
       if (TopView2dOperation.pattern === EPolygonPattern.Normal || !currentData?.url) {
@@ -207,20 +212,21 @@ const PointCloudTopView: React.FC<IProps> = ({
         };
 
         addPolygon(newPolygon);
-        ptCtx.setSelectedIDs(polygon.id);
+        ptCtx.setSelectedIDs(hideAttributes.includes(polygon.attribute) ? '' : polygon.id);
         return;
       }
 
       pointCloudViews.topViewAddBox({
-        newPolygon: polygon,
+        polygon,
         size,
         imgList,
         trackConfigurable: config.trackConfigurable,
         zoom,
+        intelligentFit,
       });
     });
 
-    TopView2dOperation.singleOn('deletedObject', ({ id }) => {
+    TopView2dOperation.singleOn('deletedObject', ({ id }: { id: any }) => {
       deletePointCloudBox(id);
       deletePolygon(id);
     });
@@ -237,8 +243,8 @@ const PointCloudTopView: React.FC<IProps> = ({
       ptCtx.setSelectedIDs(selectedIDs);
     });
 
-    TopView2dOperation.singleOn('updatePolygonByDrag', ({ newPolygon }: any) => {
-      pointCloudViews.topViewUpdateBox?.(newPolygon, size);
+    TopView2dOperation.singleOn('updatePolygonByDrag', (updateList: UpdatePolygonByDragList) => {
+      pointCloudViews.topViewUpdateBox?.(updateList, size);
     });
 
     const validUpdate = (id: string) => {
@@ -277,7 +283,7 @@ const PointCloudTopView: React.FC<IProps> = ({
 
     // 1. Update Size
     ptCtx.topViewInstance.initSize(size);
-    ptCtx.topViewInstance.updatePolygonList(ptCtx.pointCloudBoxList, ptCtx.polygonList);
+    ptCtx.topViewInstance.updatePolygonList(ptCtx.displayPointCloudList, ptCtx.polygonList);
 
     const {
       topViewInstance: { pointCloudInstance: pointCloud, pointCloud2dOperation: polygonOperation },

@@ -1,11 +1,11 @@
 import { IPointCloudBox, IPointCloudBoxList, IPolygonData } from '@labelbee/lb-utils';
+import React, { useEffect, useMemo, useRef, useState } from 'react';
 import {
   PointCloud,
   PointCloudAnnotation,
   ActionsHistory,
   EToolName,
 } from '@labelbee/lb-annotation';
-import React, { useMemo, useRef, useState } from 'react';
 
 interface IPointCloudContextInstances {
   topViewInstance?: PointCloudAnnotation;
@@ -18,8 +18,11 @@ interface IPointCloudContextInstances {
   setMainViewInstance: (instance: PointCloud) => void;
 }
 
+type AttrPanelLayout = '' | 'left' | 'right';
+
 export interface IPointCloudContext extends IPointCloudContextInstances {
   pointCloudBoxList: IPointCloudBoxList;
+  displayPointCloudList: IPointCloudBoxList;
   selectedIDs: string[];
   setSelectedIDs: (ids?: string[] | string) => void;
   valid: boolean;
@@ -38,18 +41,26 @@ export interface IPointCloudContext extends IPointCloudContextInstances {
   setZoom: (zoom: number) => void;
 
   history: ActionsHistory; // Operation History
+  hideAttributes: string[];
+  setHideAttributes: (hideAttrs: string[]) => void;
+  toggleAttributesVisible: (attribute: string) => void;
+  reRender: (_displayPointCloudList: IPointCloudBoxList, _polygonList: IPolygonData[]) => void;
+  attrPanelLayout: AttrPanelLayout;
+  setAttrPanelLayout: (layout: AttrPanelLayout) => void;
 
   syncAllViewPointCloudColor: (newPointCloudList?: IPointCloudBox[]) => void;
 
   defaultAttribute: string;
   setDefaultAttribute: (defaultAttribute: string) => void;
 
-  pointCloudPattern: EToolName.Rect | EToolName.Polygon;
-  setPointCloudPattern: (toolName: EToolName.Rect | EToolName.Polygon) => void;
+  pointCloudPattern: EToolName.Rect | EToolName.Polygon | EToolName.Point | EToolName.Line;
+  setPointCloudPattern: (toolName: EToolName.Rect | EToolName.Polygon | EToolName.Point | EToolName.Line) => void;
+  selectSpecAttr: (attr: string) => void;
 }
 
 export const PointCloudContext = React.createContext<IPointCloudContext>({
   pointCloudBoxList: [],
+  displayPointCloudList: [],
   polygonList: [],
   selectedID: '',
   selectedIDs: [],
@@ -71,6 +82,12 @@ export const PointCloudContext = React.createContext<IPointCloudContext>({
   zoom: 1,
   setZoom: () => {},
   history: new ActionsHistory(),
+  hideAttributes: [],
+  setHideAttributes: () => {},
+  toggleAttributesVisible: () => {},
+  reRender: () => {},
+  setAttrPanelLayout: () => {},
+  attrPanelLayout: '',
   syncAllViewPointCloudColor: () => {},
 
   defaultAttribute: '',
@@ -78,6 +95,7 @@ export const PointCloudContext = React.createContext<IPointCloudContext>({
 
   pointCloudPattern: EToolName.Rect,
   setPointCloudPattern: () => {},
+  selectSpecAttr: () => {},
 });
 
 export const PointCloudProvider: React.FC<{}> = ({ children }) => {
@@ -91,10 +109,12 @@ export const PointCloudProvider: React.FC<{}> = ({ children }) => {
   const [backViewInstance, setBackViewInstance] = useState<PointCloudAnnotation>();
   const [mainViewInstance, setMainViewInstance] = useState<PointCloud>();
   const [defaultAttribute, setDefaultAttribute] = useState('');
-  const [pointCloudPattern, setPointCloudPattern] = useState<EToolName.Rect | EToolName.Polygon>(
+  const [pointCloudPattern, setPointCloudPattern] = useState<EToolName.Rect | EToolName.Polygon | EToolName.Point | EToolName.Line>(
     EToolName.Rect,
   );
   const history = useRef(new ActionsHistory()).current;
+  const [hideAttributes, setHideAttributes] = useState<string[]>([]);
+  const [attrPanelLayout, setAttrPanelLayout] = useState<AttrPanelLayout>('');
 
   const selectedID = useMemo(() => {
     return selectedIDs.length === 1 ? selectedIDs[0] : '';
@@ -144,10 +164,41 @@ export const PointCloudProvider: React.FC<{}> = ({ children }) => {
       setSelectedIDs(pointCloudBoxList.map((i) => i.id));
     };
 
+    const selectSpecAttr = (attr: string) => {
+      setSelectedIDs(pointCloudBoxList.filter((i) => i.attribute === attr).map((i) => i.id));
+    };
+
+    const displayPointCloudList = pointCloudBoxList.filter(
+      (i) => !hideAttributes.includes(i.attribute),
+    );
+
+    const toggleAttributesVisible = (tAttribute: string) => {
+      if (hideAttributes.includes(tAttribute)) {
+        setHideAttributes(hideAttributes.filter((attribute) => attribute !== tAttribute));
+      } else {
+        const updatedHideAttributes = hideAttributes.concat(tAttribute);
+        setHideAttributes(updatedHideAttributes);
+      }
+    };
+
+    const reRender = (
+      _displayPointCloudList: IPointCloudBoxList = displayPointCloudList,
+      _polygonList: IPolygonData[] = polygonList,
+    ) => {
+      pointCloudBoxList.forEach((v) => {
+        mainViewInstance?.removeObjectByName(v.id);
+      });
+
+      topViewInstance?.updatePolygonList(_displayPointCloudList, _polygonList);
+      mainViewInstance?.generateBoxes(_displayPointCloudList);
+      syncAllViewPointCloudColor(_displayPointCloudList);
+    };
+
     /**
      * Synchronize the highlighted pointCloud for all views.
      * @param pointCloudList
      */
+
     const syncAllViewPointCloudColor = (pointCloudList?: IPointCloudBox[]) => {
       const colorPromise = mainViewInstance?.highlightOriginPointCloud(pointCloudList);
       return new Promise((resolve) => {
@@ -166,6 +217,7 @@ export const PointCloudProvider: React.FC<{}> = ({ children }) => {
     return {
       selectedID,
       pointCloudBoxList,
+      displayPointCloudList,
       selectedIDs,
       setPointCloudResult,
       setSelectedIDs,
@@ -188,11 +240,18 @@ export const PointCloudProvider: React.FC<{}> = ({ children }) => {
       zoom,
       setZoom,
       history,
+      toggleAttributesVisible,
+      hideAttributes,
+      setHideAttributes,
+      reRender,
+      attrPanelLayout,
+      setAttrPanelLayout,
       syncAllViewPointCloudColor,
       defaultAttribute,
       setDefaultAttribute,
       pointCloudPattern,
       setPointCloudPattern,
+      selectSpecAttr,
     };
   }, [
     valid,
@@ -204,9 +263,32 @@ export const PointCloudProvider: React.FC<{}> = ({ children }) => {
     backViewInstance,
     mainViewInstance,
     zoom,
+    hideAttributes,
+    attrPanelLayout,
     defaultAttribute,
     pointCloudPattern,
   ]);
+
+  const updateSelectedIDsAndRenderAfterHide = () => {
+    const pointCloudForFilteredList = pointCloudBoxList.filter((i) =>
+      hideAttributes.includes(i.attribute),
+    );
+
+    const { setSelectedIDs, reRender } = ptCtx;
+
+    const filteredIDs = pointCloudForFilteredList.map((i) => i.id);
+
+    if (filteredIDs.length > 0) {
+      setSelectedIDs(selectedIDs.filter((id) => !filteredIDs.includes(id)));
+    }
+
+    reRender();
+  };
+
+  useEffect(() => {
+    updateSelectedIDsAndRenderAfterHide();
+    topViewInstance?.pointCloud2dOperation?.setHiddenAttributes(hideAttributes);
+  }, [hideAttributes]);
 
   return <PointCloudContext.Provider value={ptCtx}>{children}</PointCloudContext.Provider>;
 };

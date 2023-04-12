@@ -54,5 +54,11 @@ export const usePolygon = () => {
     }
   };
 
-  return { addPolygon, deletePolygon, selectedPolygon, updateSelectedPolygon, updatePolygonValidByID };
+  return {
+    addPolygon,
+    deletePolygon,
+    selectedPolygon,
+    updateSelectedPolygon,
+    updatePolygonValidByID,
+  };
 };

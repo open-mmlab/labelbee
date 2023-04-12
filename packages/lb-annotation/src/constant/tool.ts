@@ -60,6 +60,8 @@ export enum EToolName {
   SegmentByRect = 'segmentByRectTool',
   /** 立体框工具  */
   Cuboid = 'cuboidTool',
+  /** 点云多边形工具 */
+  PointCloudPolygon = 'pointCloudPolygon',
 }
 
 export enum ECheckModel {
@@ -73,6 +75,7 @@ export enum ERectPattern {
 }
 
 export type ToolName = EToolName | EVideoToolName | EPointCloudName;
+export type THybridToolName = EToolName | Array<EToolName>;
 
 export const TOOL_NAME: { [a: string]: string } = {
   [EToolName.Rect]: '拉框',

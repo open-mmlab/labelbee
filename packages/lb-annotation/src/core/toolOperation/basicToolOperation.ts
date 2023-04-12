@@ -1,6 +1,5 @@
-import { IBasicText } from '@labelbee/lb-utils';
+import { IBasicText, toolStyleConverter } from '@labelbee/lb-utils';
 import { isNumber } from 'lodash';
-import { styleDefaultConfig } from '@/constant/defaultConfig';
 import { EOperationMode, EToolName } from '@/constant/tool';
 import { IPolygonConfig, IPolygonData } from '@/types/tool/polygon';
 import MathUtils from '@/utils/MathUtils';
@@ -1201,22 +1200,18 @@ class BasicToolOperation extends EventListener {
     this.emit('updateResult');
   }
 
-  /** 获取当前属性颜色 */
+  /** Get the current property color */
   public getColor(attribute = '', config = this.config) {
-    if (config?.attributeConfigurable === true && this.style.attributeColor) {
-      const attributeIndex = AttributeUtils.getAttributeIndex(attribute, config.attributeList ?? []) + 1;
-      return this.style.attributeColor[attributeIndex];
-    }
-    const { color, toolColor } = this.style;
-    if (toolColor) {
-      return toolColor[color];
-    }
-    return styleDefaultConfig.toolColor['1'];
+    return toolStyleConverter.getColorByConfig({ attribute, config, style: this.style });
   }
 
   public getLineColor(attribute = '') {
     if (this.config?.attributeConfigurable === true) {
       const attributeIndex = AttributeUtils.getAttributeIndex(attribute, this.config?.attributeList ?? []) + 1;
+      const color = this.config?.attributeList?.find((i: any) => i.value === attribute)?.color;
+      if (color) {
+        return toolStyleConverter.getColorByConfig({ attribute, config: this.config })?.valid?.stroke;
+      }
       return this.style.attributeLineColor ? this.style.attributeLineColor[attributeIndex] : '';
     }
     const { color, lineColor } = this.style;
