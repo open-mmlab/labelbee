@@ -7,8 +7,10 @@ import { connect } from 'react-redux';
 import { PointCloudContext } from '@/components/pointCloudView/PointCloudContext';
 import { AppState } from '@/store';
 import {
-    BatchUpdateImgListResultByPredictResult, SetPointCloudLoading, SetPredictResult,
-    SetPredictResultVisible
+  BatchUpdateImgListResultByPredictResult,
+  SetPointCloudLoading,
+  SetPredictResult,
+  SetPredictResultVisible,
 } from '@/store/annotation/actionCreators';
 import { IPointCloudBoxWithIndex } from '@/store/annotation/types';
 import { LabelBeeContext, useDispatch } from '@/store/ctx';
@@ -177,7 +179,7 @@ const GenerateViewsDataUrl = (props: {
           const url = imgList[index].url
             ? imgList[index].url
             : // @ts-ignore
-              imgList[index].webPointCloudFile.lidar.url;
+              imgList[index]?.webPointCloudFile?.lidar?.url ?? '';
 
           await pointCloud.loadPCDFileByBox(url, item, {
             width: 2,
@@ -195,6 +197,7 @@ const GenerateViewsDataUrl = (props: {
 
           pointCloud.generateBox(item, hex);
           // TODO
+          // getViewsDataUrl requires pointCloud to finish loading the 3D view, otherwise it will not capture the correct image
           await sleep(500);
           await getViewsDataUrl(pointCloud, item, ptCtx.zoom);
           await pointCloud.removeObjectByName(item.id);
