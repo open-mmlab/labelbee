@@ -49,6 +49,7 @@ export const topViewPolygon2PointCloud = (
   pointCloud?: PointCloud,
   selectedPointCloudBox?: IPointCloudBox,
   defaultValue?: { [v: string]: any },
+  intelligentFit?: boolean,
 ) => {
   let worldPointList = newPolygon.pointList.map((v: any) =>
     PointCloudUtils.transferCanvas2World(v, size),
@@ -59,8 +60,14 @@ export const topViewPolygon2PointCloud = (
 
   // Init PointCloud Data
   if (pointCloud) {
-    const zInfo = pointCloud.getSensesPointZAxisInPolygon(worldPointList);
-    worldPointList = zInfo.worldPointList;
+    const zInfo = pointCloud.getSensesPointZAxisInPolygon(
+      worldPointList,
+      undefined,
+      intelligentFit,
+    );
+    if (intelligentFit) {
+      worldPointList = zInfo.fittedCoordinates;
+    }
     z = (zInfo.maxZ + zInfo.minZ) / 2;
     depth = zInfo.maxZ - zInfo.minZ;
     extraData = {
@@ -414,12 +421,14 @@ export const usePointCloudViews = () => {
     imgList,
     trackConfigurable,
     zoom,
+    intelligentFit,
   }: {
     polygon: any;
     size: ISize;
     imgList: IFileItem[];
     trackConfigurable?: boolean;
     zoom: number;
+    intelligentFit?: boolean;
   }) => {
     const extraData = {
       attribute: topViewInstance.pointCloud2dOperation.defaultAttribute ?? '',
@@ -441,6 +450,7 @@ export const usePointCloudViews = () => {
       topViewPointCloud,
       undefined,
       extraData,
+      intelligentFit,
     );
     const polygonOperation = topViewInstance?.pointCloud2dOperation;
 
@@ -457,7 +467,7 @@ export const usePointCloudViews = () => {
       return;
     }
 
-    if (newParams.newPointList?.length) {
+    if (intelligentFit && newParams.newPointList?.length) {
       newPolygon.pointList = newParams.newPointList;
     }
 
@@ -471,7 +481,9 @@ export const usePointCloudViews = () => {
       setSelectedIDs(boxParams.id);
       polygonOperation.setSelectedIDs([newPolygon.id]);
       syncPointCloudViews(PointCloudView.Top, newPolygon, boxParams, zoom, newPointCloudList);
-      synchronizeTopView(boxParams, newPolygon, topViewInstance, mainViewInstance);
+      if (intelligentFit) {
+        synchronizeTopView(boxParams, newPolygon, topViewInstance, mainViewInstance);
+      }
     }
 
     addHistory({ newBoxParams: boxParams });

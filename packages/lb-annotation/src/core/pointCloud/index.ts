@@ -23,11 +23,11 @@ import FilterBoxWorker from 'web-worker:./filterBoxWorker.js';
 import { isInPolygon } from '@/utils/tool/polygonTool';
 import { IPolygonPoint } from '@/types/tool/polygon';
 import uuid from '@/utils/uuid';
+import MathUtils from '@/utils/MathUtils';
 import { PCDLoader } from './PCDLoader';
 import { OrbitControls } from './OrbitControls';
 import { PointCloudCache } from './cache';
 import { getCuboidFromPointCloudBox } from './matrix';
-import MathUtils from '@/utils/MathUtils';
 
 interface IOrthographicCamera {
   left: number;
@@ -814,7 +814,12 @@ export class PointCloud {
     return canvas;
   }
 
-  // Filter road points and noise in all directions
+  /**
+   * Filter road points and noise in all directions
+   * 1. The first 5% of the z-axis is used as the road coordinate
+   * 2. Filter out points 10cm above the road surface.
+   * 3. Filter out the first 0.5% of noise points in other directions
+   */
   public filterNoise(pointList: I3DSpaceCoord[]) {
     let newPointList = [...pointList];
     newPointList.sort((a, b) => a.z - b.z);
@@ -840,43 +845,12 @@ export class PointCloud {
     return newPointList.length > 100 ? newPointList : pointList;
   }
 
-  public getSensesPointZAxisInPolygon(polygon: IPolygonPoint[], zScope?: [number, number]) {
-    const points = this.scene.children.find((i) => i.uuid === this.pointsUuid) as THREE.Points;
-    let minZ = 0;
-    let maxZ = 0;
-    let count = 0; // The count of scope
-    let zCount = 0; // The Count of Polygon range
-    let worldPointList: ICoordinate[] = []; // Vertex coordinates after fitting(ThreeJs coordinates)
-    let inPolygonList: I3DSpaceCoord[] = []; // Points within the polygon range
-
-    if (!points?.geometry) {
-      return { maxZ, minZ, count, zCount, worldPointList };
-    }
-
-    const pointPosArray = points?.geometry.attributes.position.array;
-
-    for (let idx = 0; idx < pointPosArray.length; idx += 3) {
-      const x = pointPosArray[idx];
-      const y = pointPosArray[idx + 1];
-      const z = pointPosArray[idx + 2];
-      const inPolygon = isInPolygon({ x, y }, polygon);
-      if (inPolygon && (z || z === 0)) {
-        inPolygonList.push({ x, y, z });
-      }
-    }
-
-    inPolygonList = this.filterNoise(inPolygonList).sort((a, b) => a.z - b.z);
-    minZ = inPolygonList[0].z - 0.01;
-    maxZ = inPolygonList[inPolygonList.length - 1].z + 0.01;
-    zCount = inPolygonList.length;
+  // Get the polygon coordinates after fitting
+  public getFittedCoordinates(polygon: IPolygonPoint[], innerPointList: ICoordinate[]) {
     const minDistanceList: Array<{ distance: number; point: ICoordinate }> = [];
-
-    inPolygonList.forEach(({ x, y, z }) => {
-      if (zScope && z >= zScope[0] && z <= zScope[1]) {
-        count++;
-      }
+    let _polygon = [...polygon, polygon[0]];
+    innerPointList.forEach(({ x, y }) => {
       polygon.forEach((p1, index) => {
-        const _polygon = [...polygon, polygon[0]];
         const p2 = _polygon[index + 1];
         const distance = MathUtils.getFootOfPerpendicular({ x, y }, p1, p2).length;
         if (!minDistanceList[index] || distance < minDistanceList[index].distance) {
@@ -885,10 +859,10 @@ export class PointCloud {
       });
     });
 
-    // todo should leave a little margin
-    worldPointList = polygon.map((_, index) => {
-      const _polygon = [polygon[polygon.length - 1], ...polygon, polygon[0]];
-      const _minDistanceList = [minDistanceList[minDistanceList.length - 1], ...minDistanceList];
+    // todo: should leave a little margin
+    _polygon = [polygon[polygon.length - 1], ...polygon, polygon[0]];
+    const _minDistanceList = [minDistanceList[minDistanceList.length - 1], ...minDistanceList];
+    const fittedCoordinates = polygon.map((_, index) => {
       const p1 = _polygon[index];
       const p2 = _polygon[index + 1];
       const p3 = _polygon[index + 2];
@@ -899,8 +873,47 @@ export class PointCloud {
         k2: (p2.y - p3.y) / (p2.x - p3.x),
       });
     });
+    return fittedCoordinates;
+  }
 
-    return { maxZ, minZ, count, zCount, worldPointList };
+  public getSensesPointZAxisInPolygon(polygon: IPolygonPoint[], zScope?: [number, number], intelligentFit?: boolean) {
+    const points = this.scene.children.find((i) => i.uuid === this.pointsUuid) as THREE.Points;
+    let minZ = 0;
+    let maxZ = 0;
+    let count = 0; // The count of scope
+    let zCount = 0; // The Count of Polygon range
+    let fittedCoordinates: ICoordinate[] = []; // Vertex coordinates after fitting(ThreeJs coordinates)
+    let innerPointList: I3DSpaceCoord[] = []; // Points within the polygon range
+
+    if (!points?.geometry) {
+      return { maxZ, minZ, count, zCount, fittedCoordinates: [] };
+    }
+
+    const pointPosArray = points?.geometry.attributes.position.array;
+
+    for (let idx = 0; idx < pointPosArray.length; idx += 3) {
+      const x = pointPosArray[idx];
+      const y = pointPosArray[idx + 1];
+      const z = pointPosArray[idx + 2];
+      const inPolygon = isInPolygon({ x, y }, polygon);
+      if (inPolygon && (z || z === 0)) {
+        innerPointList.push({ x, y, z });
+      }
+    }
+
+    if (intelligentFit) {
+      innerPointList = this.filterNoise(innerPointList);
+      fittedCoordinates = this.getFittedCoordinates(polygon, innerPointList);
+    }
+    innerPointList.sort((a, b) => a.z - b.z);
+    minZ = innerPointList[0].z - 0.01;
+    maxZ = innerPointList[innerPointList.length - 1].z + 0.01;
+    zCount = innerPointList.length;
+    if (zScope) {
+      count = innerPointList.filter(({ z }) => z >= zScope[0] && z <= zScope[1]).length;
+    }
+
+    return { maxZ, minZ, count, zCount, fittedCoordinates };
   }
 
   /**
