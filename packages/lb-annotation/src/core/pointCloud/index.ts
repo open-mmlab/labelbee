@@ -106,7 +106,7 @@ export class PointCloud {
     noAppend,
     isOrthographicCamera,
     orthographicParams,
-    backgroundColor = 'black',
+    backgroundColor = '#4C4C4C', // GRAY_BACKGROUND
     config,
   }: IProps) {
     this.container = container;
@@ -378,10 +378,19 @@ export class PointCloud {
    * Update Camera position & target
    * @param boxParams
    * @param perspectiveView
+   * @param customCameraVector Provide a custom way.
    */
-  public updateCameraByBox(boxParams: IPointCloudBox, perspectiveView: EPerspectiveView) {
+  public updateCameraByBox(
+    boxParams: IPointCloudBox,
+    perspectiveView: EPerspectiveView,
+    customCameraVector?: I3DSpaceCoord,
+  ) {
     const { center, width, height, depth, rotation } = boxParams;
     const cameraPositionVector = this.getCameraVector(center, rotation, { width, height, depth }, perspectiveView);
+    if (customCameraVector) {
+      this.updateCamera(customCameraVector, center);
+      return new THREE.Vector3(customCameraVector.x, customCameraVector.y, customCameraVector.z);
+    }
     this.updateCamera(cameraPositionVector, center);
     return cameraPositionVector;
   }
@@ -445,7 +454,7 @@ export class PointCloud {
 
     if (camera) {
       const cameraTarget = this.getOrthographicCameraTarget(camera as OrthographicCamera);
-      this.camera.zoom = camera.zoom;
+      this.updateCameraZoom(camera.zoom);
       this.updateCamera(camera.position, cameraTarget);
     }
   };

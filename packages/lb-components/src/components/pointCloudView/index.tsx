@@ -66,8 +66,8 @@ const PointCloudView: React.FC<IProps> = ({
                 intelligentFit={intelligentFit}
               />
               <div className={getClassName('point-cloud-container', 'right-bottom')}>
-                <PointCloudSideView />
-                <PointCloudBackView />
+                <PointCloudSideView checkMode={checkMode} />
+                <PointCloudBackView checkMode={checkMode} />
               </div>
             </div>
           </div>

@@ -21,7 +21,7 @@ import { a2MapStateToProps, IA2MapStateProps } from '@/store/annotation/map';
 import { connect } from 'react-redux';
 import { jsonParser } from '@/utils';
 import { useSingleBox } from './hooks/useSingleBox';
-import { Switch } from 'antd';
+import { Switch, Tooltip } from 'antd';
 import useSize from '@/hooks/useSize';
 import { usePointCloudViews } from './hooks/usePointCloudViews';
 import { useTranslation } from 'react-i18next';
@@ -66,6 +66,7 @@ const PointCloudViewIcon = ({
 
 const PointCloud3DSideBar = () => {
   const { reset3DView, followTopView } = useContext(PointCloud3DContext);
+  const { t } = useTranslation();
   return (
     <div className={getClassName('point-cloud-3d-sidebar')}>
       <PointCloudViewIcon perspectiveView='Top' />
@@ -76,12 +77,14 @@ const PointCloud3DSideBar = () => {
       <PointCloudViewIcon perspectiveView='LFT' />
       <PointCloudViewIcon perspectiveView='RBT' />
 
-      <span
-        onClick={() => {
-          followTopView();
-        }}
-        className={getClassName('point-cloud-3d-view', 'followTop')}
-      />
+      <Tooltip title={t('CameraFollowTopView')}>
+        <span
+          onClick={() => {
+            followTopView();
+          }}
+          className={getClassName('point-cloud-3d-view', 'followTop')}
+        />
+      </Tooltip>
 
       <span
         onClick={() => {
@@ -113,7 +116,17 @@ const PointCloud3D: React.FC<IA2MapStateProps> = ({ currentData, config }) => {
     const box = selectedBox?.info;
 
     if (box) {
-      ptCtx.mainViewInstance?.updateCameraByBox(box, perspectiveView);
+      // Business Logic: If the updated view is top, need to sync with topView Direction in 3dView.
+      const topViewVector = { ...box.center };
+      topViewVector.x = topViewVector.x - 0.01;
+      topViewVector.z = 10;
+      const isTopView = perspectiveView === EPerspectiveView.Top;
+
+      ptCtx.mainViewInstance?.updateCameraByBox(
+        box,
+        perspectiveView,
+        isTopView ? topViewVector : undefined,
+      );
     }
   };
 
@@ -128,9 +141,6 @@ const PointCloud3D: React.FC<IA2MapStateProps> = ({ currentData, config }) => {
     }
   };
 
-  /**
-   * Listen for data changes.
-   */
   useEffect(() => {
     if (ref.current && currentData?.url) {
       let pointCloud = ptCtx.mainViewInstance;
@@ -153,8 +163,16 @@ const PointCloud3D: React.FC<IA2MapStateProps> = ({ currentData, config }) => {
         });
         ptCtx.setMainViewInstance(pointCloud);
       }
+    }
+  }, [size]);
 
-      if (currentData.result) {
+  /**
+   * Listen for data changes.
+   */
+  useEffect(() => {
+    if (ref.current && currentData?.url) {
+      if (currentData.result && ptCtx.mainViewInstance) {
+        let pointCloud = ptCtx.mainViewInstance;
         const boxParamsList = PointCloudUtils.getBoxParamsFromResultList(currentData.result);
 
         // Add Init Box
@@ -172,7 +190,7 @@ const PointCloud3D: React.FC<IA2MapStateProps> = ({ currentData, config }) => {
         ptCtx.setPointCloudValid(jsonParser(currentData.result)?.valid);
       }
     }
-  }, [currentData, size]);
+  }, [currentData, ptCtx.mainViewInstance]);
 
   /**
    *  Observe selectedID and reset camera to target top-view
