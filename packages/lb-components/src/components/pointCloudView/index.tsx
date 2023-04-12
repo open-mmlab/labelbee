@@ -33,9 +33,15 @@ interface IProps {
   imgList: IFileItem[];
   drawLayerSlot?: TDrawLayerSlot;
   checkMode?: boolean;
+  intelligentFit?: boolean;
 }
 
-const PointCloudView: React.FC<IProps> = ({ imgList, drawLayerSlot, checkMode }) => {
+const PointCloudView: React.FC<IProps> = ({
+  imgList,
+  drawLayerSlot,
+  checkMode,
+  intelligentFit,
+}) => {
   if (imgList.length === 0) {
     return null;
   }
@@ -54,7 +60,11 @@ const PointCloudView: React.FC<IProps> = ({ imgList, drawLayerSlot, checkMode })
             </div>
 
             <div className={getClassName('point-cloud-container', 'right')}>
-              <PointCloudTopView drawLayerSlot={drawLayerSlot} checkMode={checkMode} />
+              <PointCloudTopView
+                drawLayerSlot={drawLayerSlot}
+                checkMode={checkMode}
+                intelligentFit={intelligentFit}
+              />
               <div className={getClassName('point-cloud-container', 'right-bottom')}>
                 <PointCloudSideView />
                 <PointCloudBackView />

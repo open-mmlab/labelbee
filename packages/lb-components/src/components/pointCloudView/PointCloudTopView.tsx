@@ -145,6 +145,7 @@ const ZAxisSlider = ({
 interface IProps extends IA2MapStateProps {
   drawLayerSlot?: TDrawLayerSlot;
   checkMode?: boolean;
+  intelligentFit?: boolean;
 }
 
 const PointCloudTopView: React.FC<IProps> = ({
@@ -153,6 +154,7 @@ const PointCloudTopView: React.FC<IProps> = ({
   stepInfo,
   drawLayerSlot,
   checkMode,
+  intelligentFit,
 }) => {
   const [annotationPos, setAnnotationPos] = useState({ zoom: 1, currentPos: { x: 0, y: 0 } });
   const ref = useRef<HTMLDivElement>(null);
@@ -215,11 +217,12 @@ const PointCloudTopView: React.FC<IProps> = ({
       }
 
       pointCloudViews.topViewAddBox({
-        newPolygon: polygon,
+        polygon,
         size,
         imgList,
         trackConfigurable: config.trackConfigurable,
         zoom,
+        intelligentFit,
       });
     });
 
