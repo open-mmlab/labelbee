@@ -6,8 +6,8 @@
  * @author Ron <ron.f.luo@gmail.com>
  */
 
-import { IPointCloudConfig, toolStyleConverter, INVALID_COLOR } from '@labelbee/lb-utils';
-import { ESortDirection } from '@/constant/annotation';
+import { IPointCloudConfig, toolStyleConverter, UpdatePolygonByDragList, INVALID_COLOR } from '@labelbee/lb-utils';
+import { EDragTarget, ESortDirection } from '@/constant/annotation';
 import { EPolygonPattern } from '@/constant/tool';
 import { IPolygonData, IPolygonPoint } from '@/types/tool/polygon';
 import AxisUtils from '@/utils/tool/AxisUtils';
@@ -15,7 +15,9 @@ import CommonToolUtils from '@/utils/tool/CommonToolUtils';
 import DrawUtils from '@/utils/tool/DrawUtils';
 import PolygonUtils from '@/utils/tool/PolygonUtils';
 import { polygonConfig } from '@/constant/defaultConfig';
+import _ from 'lodash';
 import PolygonOperation, { IPolygonOperationProps } from './polygonOperation';
+import { BasicToolOperation } from './basicToolOperation';
 
 interface IPointCloud2dOperationProps {
   showDirectionLine?: boolean;
@@ -25,6 +27,8 @@ interface IPointCloud2dOperationProps {
 
 class PointCloud2dOperation extends PolygonOperation {
   public showDirectionLine: boolean;
+
+  public hideAttributes: string[];
 
   public forbidAddNew: boolean;
 
@@ -40,6 +44,7 @@ class PointCloud2dOperation extends PolygonOperation {
     this.showDirectionLine = props.showDirectionLine ?? true;
     this.forbidAddNew = props.forbidAddNew ?? false;
     this.pointCloudConfig = CommonToolUtils.jsonParser(props.config) ?? {};
+    this.hideAttributes = [];
     this.checkMode = props.checkMode ?? false;
 
     // Check Mode automatically opens forbidAddNew.
@@ -58,6 +63,18 @@ class PointCloud2dOperation extends PolygonOperation {
 
   get getSelectedIDs() {
     return this.selectedIDs;
+  }
+
+  get enableDrag() {
+    return Boolean(this.selectedIDs.length > 0 && this.dragInfo);
+  }
+
+  get visiblePolygonList() {
+    return this.polygonList.filter((i) => !this.hideAttributes.includes(i.attribute));
+  }
+
+  public setHiddenAttributes(hideAttributes: string[]) {
+    this.hideAttributes = hideAttributes;
   }
 
   public setConfig(config: string) {
@@ -99,7 +116,11 @@ class PointCloud2dOperation extends PolygonOperation {
    */
   public setSelectedIDs(selectedIDs: string[]) {
     this.selectedIDs = selectedIDs;
-    this.setSelectedID(this.selectedIDs.length === 1 ? this.selectedIDs[0] : '');
+
+    if (this.selectedIDs.length < 2) {
+      this.setSelectedID(this.selectedIDs.length === 1 ? this.selectedIDs[0] : '');
+    }
+
     this.render();
   }
 
@@ -120,10 +141,6 @@ class PointCloud2dOperation extends PolygonOperation {
       return;
     }
 
-    if (!this.hoverID) {
-      return;
-    }
-
     /**
      * Multi Selected.
      */
@@ -141,6 +158,32 @@ class PointCloud2dOperation extends PolygonOperation {
 
   public get selectedPolygons() {
     return PolygonUtils.getPolygonByIDs(this.polygonList, this.selectedIDs);
+  }
+
+  public updateSelectedPolygonsPoints(offset: Partial<ICoordinate>) {
+    if (this.selectedPolygons && this.selectedPolygons?.length > 0) {
+      const originPolygonList = _.cloneDeep(this.selectedPolygons!);
+      const updateList: UpdatePolygonByDragList = [];
+
+      this.selectedPolygons?.forEach((polygon, index) => {
+        polygon.pointList = polygon.pointList.map((point) => {
+          const { x, y } = point;
+          return {
+            ...point,
+            x: x + (offset.x ?? 0),
+            y: y + (offset.y ?? 0),
+          };
+        });
+
+        updateList.push({ originPolygon: originPolygonList[index], newPolygon: polygon });
+      });
+
+      this.emit('updateResult');
+      this.emit('updatePolygonByDrag', updateList);
+      this.render();
+
+      this.history.pushHistory(this.polygonList);
+    }
   }
 
   /**
@@ -176,7 +219,7 @@ class PointCloud2dOperation extends PolygonOperation {
    * */
   public renderStaticPolygon() {
     if (this.isHidden === false) {
-      this.polygonList?.forEach((polygon) => {
+      this.visiblePolygonList?.forEach((polygon) => {
         if ([...this.selectedIDs, this.editPolygonID].includes(polygon.id)) {
           return;
         }
@@ -212,10 +255,8 @@ class PointCloud2dOperation extends PolygonOperation {
   }
 
   public renderSingleSelectedPolygon = (selectedPolygon: IPolygonData) => {
-    if (this.selectedPolygons) {
+    if (selectedPolygon) {
       const color = this.getPointCloudLineColor(selectedPolygon);
-      // const toolData = StyleUtils.getStrokeAndFill(toolColor, selectedPolygon.valid, { isSelected: true });
-
       const polygon = AxisUtils.changePointListByZoom(selectedPolygon.pointList, this.zoom, this.currentPos);
 
       DrawUtils.drawSelectedPolygonWithFillAndLine(this.canvas, polygon, {
@@ -315,11 +356,7 @@ class PointCloud2dOperation extends PolygonOperation {
     this.setSelectedID(newID);
   }
 
-  /**
-   * Overwrite and prevent selectedChange emit
-   * @override
-   */
-  public setSelectedID(newID?: string) {
+  public updateTextAttribute(newID?: string) {
     const oldID = this.selectedID;
     if (newID !== oldID && oldID) {
       // 触发文本切换的操作
@@ -330,7 +367,14 @@ class PointCloud2dOperation extends PolygonOperation {
     if (!newID) {
       this._textAttributInstance?.clearTextAttribute();
     }
+  }
 
+  /**
+   * Overwrite and prevent selectedChange emit
+   * @override
+   */
+  public setSelectedID(newID?: string) {
+    this.updateTextAttribute(newID);
     this.selectedID = newID;
 
     this.render();
@@ -385,6 +429,94 @@ class PointCloud2dOperation extends PolygonOperation {
 
     this.emit('validUpdate', id);
   }
+
+  public onDragMove(e: MouseEvent) {
+    const newPolygonList = this.polygonList.map((v) => {
+      if (this.selectedIDs.includes(v.id)) {
+        const selectedPointList = this.dragPolygon(e, v);
+
+        if (!selectedPointList) {
+          return v;
+        }
+
+        const newData = {
+          ...v,
+          pointList: selectedPointList as IPolygonPoint[],
+        };
+
+        // 非矩形模式下拖动，矩形模式下生成的框将会转换为非矩形框
+        if (v.isRect === true && this.pattern === EPolygonPattern.Normal) {
+          Object.assign(newData, { isRect: false });
+        }
+
+        return newData;
+      }
+
+      return v;
+    });
+
+    this.dragInfo!.dragPrevCoord = this.getCoordinateUnderZoom(e);
+
+    this.setPolygonList(newPolygonList);
+    this.render();
+  }
+
+  public onMouseDown(e: MouseEvent) {
+    if (
+      BasicToolOperation.prototype.onMouseDown.call(this, e) ||
+      this.forbidMouseOperation ||
+      e.ctrlKey === true ||
+      e.button !== 0
+    ) {
+      return;
+    }
+
+    if (this.selectedIDs.length < 2) {
+      return super.onMouseDown(e);
+    }
+
+    const dragStartCoord = this.getCoordinateUnderZoom(e);
+
+    this.dragInfo = {
+      dragStartCoord,
+      dragTarget: EDragTarget.Plane,
+      initPointList: [],
+      changePointIndex: [0],
+      originPolygon: this.selectedPolygon,
+      dragPrevCoord: dragStartCoord,
+      originPolygonList: this.polygonList,
+    };
+  }
+
+  /**
+   *  Just Update Data. Not Clear Status
+   * @param polygonList
+   */
+  public setResultAndSelectedID(polygonList: IPolygonData[], selectedID: string) {
+    this.setPolygonList(polygonList);
+    this.setSelectedIDs([selectedID]);
+  }
+
+  public emitUpdatePolygonByDrag = () => {
+    if (this.dragInfo) {
+      const { originPolygonList } = this.dragInfo;
+
+      if (this.selectedIDs.length > 0) {
+        const emitUpdateList: UpdatePolygonByDragList = [];
+
+        this.polygonList.forEach((polygon) => {
+          if (this.selectedIDs.includes(polygon.id)) {
+            const originPolygon = originPolygonList.find((i) => i.id === polygon.id);
+
+            if (originPolygon) {
+              emitUpdateList.push({ newPolygon: polygon, originPolygon });
+            }
+          }
+        });
+        this.emit('updatePolygonByDrag', emitUpdateList);
+      }
+    }
+  };
 }
 
 export default PointCloud2dOperation;

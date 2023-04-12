@@ -29,6 +29,7 @@ $prefix: bee;
     position: relative;
     z-index: 10;
     border-top: 1px solid #e2e2e2;
+    border-left: 1px solid #e2e2e2;
 
     .ant-collapse-borderless > .ant-collapse-item {
       border-bottom: 1px solid #eee;
@@ -762,7 +763,7 @@ $hotkey-container-padding: 7px;
   .svg {
     width: 80px;
     height: 100%;
-    color: #cccccc;
+    color: white;
     display: flex;
     justify-content: center;
     align-items: center;
@@ -901,10 +902,7 @@ $hotkey-container-padding: 7px;
     padding: 0 3px 0 8px;
   }
 
-  .ant-collapse-borderless
-    > .ant-collapse-item
-    > .ant-collapse-content
-    > .ant-collapse-content-box {
+  .ant-collapse-borderless > .ant-collapse-item > .ant-collapse-content > .ant-collapse-content-box {
     padding-top: 4px;
   }
 
@@ -1252,6 +1250,52 @@ $hotkey-container-padding: 7px;
   }
 }
 
+.#{$prefix}-annotated-attribute {
+  width: 240px;
+  background: white;
+  padding-bottom: 12px;
+
+  &__popover .ant-popover-inner-content {
+    padding: 0;
+  }
+
+  &__pin {
+    cursor: pointer;
+    color: #666fff;
+    .anticon {
+      margin-right: 4px;
+    }
+  }
+
+  &__text {
+    display: flex;
+    justify-content: space-between;
+    padding: 8px 12px;
+    color: #333;
+    cursor: pointer;
+  }
+
+  &__item {
+    height: 40px;
+    line-height: 40px;
+    padding: 12px;
+    display: flex;
+    align-items: center;
+    .anticon {
+      cursor: pointer;
+    }
+    .anticon-eye,
+    .anticon-caret-down,
+    .anticon-eye-invisible {
+      margin-right: 8px;
+    }
+
+    &__text {
+      flex: 1;
+    }
+  }
+}
+
 /** VideoPlayer样式 start */
 .#{$prefix}-video-wrapper {
   width: 100%;
@@ -1428,6 +1472,11 @@ $headerHeight: 40px;
   overflow: hidden;
   flex: 1;
 
+  .#{$ptPrefix}-content {
+    flex: 1;
+    display: flex;
+  }
+
   .#{$ptPrefix}-container {
     position: relative;
 
@@ -1527,14 +1576,25 @@ $headerHeight: 40px;
           justify-content: flex-end;
 
           .#{$ptPrefix}-3d-view {
-            &__reset {
+            &__reset,
+            &__followTop {
               @include icon();
-              background-image: url('./assets/annotation/pointCloudTool/3DViewReset.svg');
-              margin: 16px 0;
+
               font-size: 36px;
               background-position: center;
               background-color: #444;
               border-radius: 4px;
+            }
+
+            &__reset {
+              background-image: url('./assets/annotation/pointCloudTool/3DViewReset.svg');
+              margin: 16px 0;
+            }
+
+            &__followTop {
+              margin: 16px 0 0 0;
+              background-size: 36px;
+              background-image: url('./assets/annotation/pointCloudTool/followTopView.png');
             }
 
             &__top,

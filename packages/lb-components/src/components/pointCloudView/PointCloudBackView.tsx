@@ -4,16 +4,13 @@
  * @LastEditors: Laoluo luozefeng@sensetime.com
  * @LastEditTime: 2022-07-08 11:08:02
  */
-import {
-  PointCloud,
-  PointCloudAnnotation,
-} from '@labelbee/lb-annotation';
+import { PointCloud, PointCloudAnnotation } from '@labelbee/lb-annotation';
 import { getClassName } from '@/utils/dom';
 import { PointCloudContainer } from './PointCloudLayout';
 import React, { useEffect, useRef } from 'react';
 import { PointCloudContext } from './PointCloudContext';
+import { EPerspectiveView, IPointCloudBox, UpdatePolygonByDragList } from '@labelbee/lb-utils';
 import { useSingleBox } from './hooks/useSingleBox';
-import { EPerspectiveView, IPointCloudBox } from '@labelbee/lb-utils';
 import { SizeInfoForView } from './PointCloudInfos';
 import { connect } from 'react-redux';
 import { a2MapStateToProps, IA2MapStateProps } from '@/store/annotation/map';
@@ -75,7 +72,7 @@ const updateBackViewByCanvas2D = (
 };
 
 interface IProps {
-  checkMode?: boolean
+  checkMode?: boolean;
 }
 
 const PointCloudSideView = ({ currentData, config, checkMode }: IA2MapStateProps & IProps) => {
@@ -98,7 +95,7 @@ const PointCloudSideView = ({ currentData, config, checkMode }: IA2MapStateProps
         size,
         polygonOperationProps: { showDirectionLine: false, forbidAddNew: true },
         config,
-        checkMode
+        checkMode,
       });
       ptCtx.setBackViewInstance(pointCloudAnnotation);
     }
@@ -137,8 +134,14 @@ const PointCloudSideView = ({ currentData, config, checkMode }: IA2MapStateProps
 
     backPointCloudPolygonOperation.singleOn(
       'updatePolygonByDrag',
-      ({ newPolygon, originPolygon }: any) => {
-        backViewUpdateBox?.(newPolygon, originPolygon)
+      (updateList: UpdatePolygonByDragList) => {
+        if (ptCtx.selectedIDs.length === 1 && updateList.length === 1) {
+          const { newPolygon, originPolygon } = updateList[0];
+
+          if (newPolygon && originPolygon) {
+            backViewUpdateBox(newPolygon, originPolygon);
+          }
+        }
       },
     );
   }, [ptCtx, size]);

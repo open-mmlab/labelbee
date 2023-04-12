@@ -14,6 +14,7 @@ import HiddenTips from './HiddenTips';
 import PageNumber from './PageNumber';
 import ZoomController from './ZoomController';
 import { Pagination } from './Pagination';
+import { AnnotatedAttributesIcon } from './AnnotatedAttributes';
 import { cTool } from '@labelbee/lb-annotation';
 import { shortCutTable, ToolHotKeyCom } from './FooterTips/ToolHotKey';
 
@@ -53,10 +54,12 @@ const renderFooter: RenderFooter = ({
   zoomController,
   curItems,
   footerDivider,
+  annotateAttrList,
 }) => {
   return (
     <>
       {footerTips}
+      {annotateAttrList}
       <div style={{ flex: 1 }} />
       {hiddenTips}
       {pageNumber}
@@ -131,6 +134,7 @@ const ToolFooter: React.FC<IProps> = (props: IProps) => {
       return (
         <div className={`${footerCls}`} style={props.style}>
           <FooterTips />
+          <AnnotatedAttributesIcon />
           <div style={{ flex: 1 }} />
           {pagination}
         </div>
@@ -143,6 +147,7 @@ const ToolFooter: React.FC<IProps> = (props: IProps) => {
           footerTips: <FooterTips />,
           hiddenTips: <HiddenTips />,
           pageNumber: <PageNumber />,
+          annotateAttrList: <AnnotatedAttributesIcon />,
           pagination,
           zoomController: <ZoomController mode={mode} />,
           curItems,

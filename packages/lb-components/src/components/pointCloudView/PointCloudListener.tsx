@@ -14,9 +14,11 @@ import { usePointCloudViews } from './hooks/usePointCloudViews';
 import { LabelBeeContext } from '@/store/ctx';
 import { useHistory } from './hooks/useHistory';
 import { useAttribute } from './hooks/useAttribute';
+import { ICoordinate } from '@labelbee/lb-utils/dist/types/types/common';
 import { useConfig } from './hooks/useConfig';
 import { usePolygon } from './hooks/usePolygon';
 import { useTranslation } from 'react-i18next';
+import { IFileItem } from '@/types/data';
 
 const { EPolygonPattern } = cTool;
 
@@ -24,7 +26,13 @@ interface IProps extends IA2MapStateProps {
   checkMode?: boolean;
 }
 
-const PointCloudListener: React.FC<IProps> = ({ currentData, config, checkMode, configString, imgIndex }) => {
+const PointCloudListener: React.FC<IProps> = ({
+  currentData,
+  config,
+  checkMode,
+  configString,
+  imgIndex,
+}) => {
   const ptCtx = useContext(PointCloudContext);
   const {
     changeSelectedBoxValid,
@@ -44,6 +52,14 @@ const PointCloudListener: React.FC<IProps> = ({ currentData, config, checkMode, 
   const { syncAllViewsConfig, reRenderTopViewRange } = useConfig();
   const { selectedPolygon } = usePolygon();
   const { t } = useTranslation();
+
+  const updatePolygonOffset = (offset: Partial<ICoordinate>) => {
+    const { topViewInstance } = ptCtx;
+    if (!topViewInstance) {
+      return;
+    }
+    topViewInstance.pointCloud2dOperation?.updateSelectedPolygonsPoints(offset);
+  };
 
   const keydownEvents = (lowerCaseKey: string, e: KeyboardEvent) => {
     const { topViewInstance, mainViewInstance } = ptCtx;
@@ -122,6 +138,22 @@ const PointCloudListener: React.FC<IProps> = ({ currentData, config, checkMode, 
         changeSelectedBoxValid();
         break;
 
+      case 'arrowup':
+        updatePolygonOffset({ y: -1 });
+        break;
+
+      case 'arrowdown':
+        updatePolygonOffset({ y: 1 });
+        break;
+
+      case 'arrowleft':
+        updatePolygonOffset({ x: -1 });
+        break;
+
+      case 'arrowright':
+        updatePolygonOffset({ x: 1 });
+        break;
+
       case 'delete':
         deleteSelectedPointCloudBoxAndPolygon();
         break;
@@ -151,6 +183,7 @@ const PointCloudListener: React.FC<IProps> = ({ currentData, config, checkMode, 
         pasteSelectedBoxes();
         break;
       case 'a':
+        e.preventDefault();
         ptCtx.selectedAllBoxes();
         break;
       case 'z': {
@@ -209,6 +242,10 @@ const PointCloudListener: React.FC<IProps> = ({ currentData, config, checkMode, 
   useEffect(() => {
     updatePointCloudData?.();
   }, [imgIndex, ptCtx.mainViewInstance]);
+
+  useEffect(() => {
+    ptCtx.setHideAttributes([]);
+  }, [imgIndex]);
 
   // Update the listener of toolInstance.
   useEffect(() => {
@@ -292,6 +329,13 @@ const PointCloudListener: React.FC<IProps> = ({ currentData, config, checkMode, 
 
     toolInstanceRef.current.setShowDefaultCursor = (showDefaultCursor: boolean) => {
       ptCtx.topViewInstance?.pointCloud2dOperation?.setShowDefaultCursor(showDefaultCursor);
+    };
+
+    toolInstanceRef.current.asyncData = (newData: IFileItem) => {
+      // Next Tick to update.
+      setTimeout(() => {
+        updatePointCloudData?.(newData);
+      });
     };
   }, [
     ptCtx.pointCloudBoxList,

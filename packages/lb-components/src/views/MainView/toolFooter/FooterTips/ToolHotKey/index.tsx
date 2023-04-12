@@ -1,6 +1,5 @@
-import { Popover } from 'antd/es';
 import _ from 'lodash';
-import React, { useContext, useState } from 'react';
+import React, { useContext } from 'react';
 
 import hotKeySvg from '@/assets/annotation/toolHotKeyIcon/icon_kj1.svg';
 import hotKeyHoverSvg from '@/assets/annotation/toolHotKeyIcon/icon_kj_h.svg';
@@ -19,6 +18,7 @@ import { footerCls } from '../../index';
 import { useTranslation } from 'react-i18next';
 import { cTool } from '@labelbee/lb-annotation';
 import { PointCloudContext } from '@/components/pointCloudView/PointCloudContext';
+import FooterPopover from '@/views/MainView/toolFooter/FooterPopover';
 
 const { EVideoToolName, EPointCloudName } = cTool;
 
@@ -67,7 +67,6 @@ const ToolHotKeyIcon = ({ icon }: { icon: React.ReactElement | string }) => {
 };
 
 export const ToolHotKeyCom: React.FC<IComponentsProps> = ({ title, style, shortCutList }) => {
-  const [svgFlag, setFlag] = useState(false);
   const { t } = useTranslation();
 
   const shortCutStyle = {
@@ -184,42 +183,16 @@ export const ToolHotKeyCom: React.FC<IComponentsProps> = ({ title, style, shortC
       {shortCutList?.map((info: any, index: number) => setHotKey(info, index))}
     </div>
   );
-  const containerStyle = style || { width: 100 };
+  const containerStyle = style || {};
 
   return (
-    // @ts-ignore
-    <Popover
-      placement='topLeft'
+    <FooterPopover
+      hoverIcon={hotKeyHoverSvg}
+      icon={hotKeySvg}
+      title={t('Hotkeys')}
       content={content}
-      // @ts-ignore
-      onMouseMove={() => setFlag(true)}
-      onMouseLeave={() => {
-        setFlag(false);
-      }}
-      overlayClassName='tool-hotkeys-popover'
-      className='tipsBar'
-      // visible={svgFlag}
-    >
-      <div
-        className='shortCutTitle'
-        onMouseMove={() => setFlag(true)}
-        onMouseLeave={() => setFlag(false)}
-        style={containerStyle}
-      >
-        {title ?? (
-          <a className='svg'>
-            <img
-              src={svgFlag ? hotKeyHoverSvg : hotKeySvg}
-              width={15}
-              height={13}
-              style={{ marginRight: '5px' }}
-            />
-
-            {t('Hotkeys')}
-          </a>
-        )}
-      </div>
-    </Popover>
+      containerStyle={containerStyle}
+    />
   );
 };
 

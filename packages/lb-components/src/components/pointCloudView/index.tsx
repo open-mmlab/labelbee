@@ -23,6 +23,10 @@ import { AppState } from '@/store';
 import { connect } from 'react-redux';
 import { IFileItem } from '@/types/data';
 import { LabelBeeContext } from '@/store/ctx';
+import {
+  AnnotatedAttributesPanelFixedLeft,
+  AnnotatedAttributesPanelFixedRight,
+} from '@/views/MainView/toolFooter/AnnotatedAttributes';
 import { TDrawLayerSlot } from '@/types/main';
 
 interface IProps {
@@ -38,21 +42,27 @@ const PointCloudView: React.FC<IProps> = ({ imgList, drawLayerSlot, checkMode })
 
   return (
     <>
-      <PointCloudListener checkMode={checkMode}/>
+      <PointCloudListener checkMode={checkMode} />
       <div className={getClassName('point-cloud-layout')} onContextMenu={(e) => e.preventDefault()}>
         <div className={getClassName('point-cloud-wrapper')}>
-          <div className={getClassName('point-cloud-container', 'left')}>
-            <PointCloud2DView />
-            <PointCloud3DView />
-          </div>
+          <AnnotatedAttributesPanelFixedLeft />
 
-          <div className={getClassName('point-cloud-container', 'right')}>
-            <PointCloudTopView drawLayerSlot={drawLayerSlot} checkMode={checkMode} />
-            <div className={getClassName('point-cloud-container', 'right-bottom')}>
-              <PointCloudSideView checkMode={checkMode} />
-              <PointCloudBackView checkMode={checkMode} />
+          <div className={getClassName('point-cloud-content')}>
+            <div className={getClassName('point-cloud-container', 'left')}>
+              <PointCloud2DView />
+              <PointCloud3DView />
+            </div>
+
+            <div className={getClassName('point-cloud-container', 'right')}>
+              <PointCloudTopView drawLayerSlot={drawLayerSlot} checkMode={checkMode} />
+              <div className={getClassName('point-cloud-container', 'right-bottom')}>
+                <PointCloudSideView checkMode={checkMode} />
+                <PointCloudBackView checkMode={checkMode} />
+              </div>
             </div>
           </div>
+
+          <AnnotatedAttributesPanelFixedRight />
         </div>
       </div>
     </>

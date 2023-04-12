@@ -699,6 +699,11 @@ export const annotationReducer = (
       toolInstance?.setResult(result);
       toolInstance?.history.pushHistory(result);
 
+      /**
+       * Async PointCloud Data.
+       */
+      // @ts-ignore 
+      toolInstance?.asyncData?.(imgList[imgIndex]);
       return {
         ...state,
         imgList: [...imgList],

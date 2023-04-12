@@ -75,7 +75,7 @@
     "AnnotateInvalidPolygon": "Annotate Invalid Polygon",
     "TogglePolygonEffectiveness": "Toggle Polygon Validity",
     "DeletePolygon": "Delete Polygon",
-    "Delete": "Delete", 
+    "Delete": "Delete",
     "TogglePointParticularity": "Toggle Point Particularity",
     "CropOverlapArea": "Crop Overlap Area",
     "SegmentationRecognition": "Segmentation Recognition",
@@ -191,7 +191,14 @@
     "UnifyTrackID": "Unify TrackID",
     "UnifySize": "Unify Size",
     "UnifyTag": "Unify Tag",
-    "NoData": "No Data"
+    "NoData": "No Data",
+    "AnnotatedList": "Annotated List",
+    "onDeleteGraphByAttr": "Are you sure to delete the data with attribute {{attribute}}?",
+    "CancelFixed": "Cancel Fixed",
+    "FixedOnLeft": "Fixed On Left",
+    "FixedOnRight": "Fixed On Right",
+    "AnnotatedResult": "Annotated Result",
+    "CameraFollowTopView": "Positioned by top view"
   },
   "cn": {
     "TextInput": "文本输入",
@@ -385,6 +392,13 @@
     "UnifyTrackID": "统一标注框ID",
     "UnifySize": "统一尺寸",
     "UnifyTag": "统一标签",
-    "NoData": "暂无数据"
+    "NoData": "暂无数据",
+    "AnnotatedList": "标注列表",
+    "onDeleteGraphByAttr": "确定要删除属性为 {{attribute}} 的标注数据吗?",
+    "CancelFixed": "取消固定",
+    "FixedOnLeft": "固定在左侧",
+    "FixedOnRight": "固定在右侧",
+    "AnnotatedResult": "标注结果",
+    "CameraFollowTopView": "按俯视图定位"
   }
 }

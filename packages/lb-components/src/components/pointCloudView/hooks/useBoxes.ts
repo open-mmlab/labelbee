@@ -10,8 +10,13 @@ import { useTranslation } from 'react-i18next';
  * Actions for selected boxes
  */
 export const useBoxes = ({ config }: { config: IPointCloudConfig }) => {
-  const { selectedIDs, pointCloudBoxList, setPointCloudResult, syncAllViewPointCloudColor } =
-    useContext(PointCloudContext);
+  const {
+    selectedIDs,
+    pointCloudBoxList,
+    displayPointCloudList,
+    setPointCloudResult,
+    syncAllViewPointCloudColor,
+  } = useContext(PointCloudContext);
   const [copiedBoxes, setCopiedBoxes] = useState<IPointCloudBoxList>([]);
   const { pointCloudBoxListUpdated } = usePointCloudViews();
   const { t, i18n } = useTranslation();
@@ -27,8 +32,8 @@ export const useBoxes = ({ config }: { config: IPointCloudConfig }) => {
   };
 
   const selectedBoxes = useMemo(() => {
-    return pointCloudBoxList.filter((i) => selectedIDs.includes(i.id));
-  }, [selectedIDs, pointCloudBoxList]);
+    return displayPointCloudList.filter((i) => selectedIDs.includes(i.id));
+  }, [selectedIDs, displayPointCloudList]);
 
   const copySelectedBoxes = useCallback(() => {
     if (selectedBoxes.length > 0) {
@@ -37,7 +42,7 @@ export const useBoxes = ({ config }: { config: IPointCloudConfig }) => {
       setCopiedBoxes([]);
       message.error(t('CopyEmptyInPointCloud'));
     }
-  }, [selectedIDs, pointCloudBoxList, i18n.language]);
+  }, [selectedIDs, displayPointCloudList, i18n.language]);
 
   const pasteSelectedBoxes = useCallback(() => {
     if (copiedBoxes.length === 0) {
@@ -79,11 +84,11 @@ export const useBoxes = ({ config }: { config: IPointCloudConfig }) => {
       });
     } else {
       /** Paste succeed and empty */
-      const newPointCloudResult = [...pointCloudBoxList, ...copiedBoxes];
+      const newPointCloudResult = [...displayPointCloudList, ...copiedBoxes];
 
       updatePointCloudResult(newPointCloudResult);
     }
-  }, [copiedBoxes, pointCloudBoxList, i18n.language]);
+  }, [copiedBoxes, displayPointCloudList, i18n.language]);
 
   return { copySelectedBoxes, pasteSelectedBoxes, copiedBoxes, selectedBoxes };
 };

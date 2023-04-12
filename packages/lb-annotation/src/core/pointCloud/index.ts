@@ -16,7 +16,7 @@ import {
   IPointCloudConfig,
   toolStyleConverter,
 } from '@labelbee/lb-utils';
-import { BufferAttribute, PointsMaterial, Shader } from 'three';
+import { BufferAttribute, OrthographicCamera, PerspectiveCamera, PointsMaterial, Shader } from 'three';
 import HighlightWorker from 'web-worker:./highlightWorker.js';
 import FilterBoxWorker from 'web-worker:./filterBoxWorker.js';
 import { isInPolygon } from '@/utils/tool/polygonTool';
@@ -104,7 +104,7 @@ export class PointCloud {
     noAppend,
     isOrthographicCamera,
     orthographicParams,
-    backgroundColor = 'black',
+    backgroundColor = '#4C4C4C', // GRAY_BACKGROUND
     config,
   }: IProps) {
     this.container = container;
@@ -376,10 +376,19 @@ export class PointCloud {
    * Update Camera position & target
    * @param boxParams
    * @param perspectiveView
+   * @param customCameraVector Provide a custom way.
    */
-  public updateCameraByBox(boxParams: IPointCloudBox, perspectiveView: EPerspectiveView) {
+  public updateCameraByBox(
+    boxParams: IPointCloudBox,
+    perspectiveView: EPerspectiveView,
+    customCameraVector?: I3DSpaceCoord,
+  ) {
     const { center, width, height, depth, rotation } = boxParams;
     const cameraPositionVector = this.getCameraVector(center, rotation, { width, height, depth }, perspectiveView);
+    if (customCameraVector) {
+      this.updateCamera(customCameraVector, center);
+      return new THREE.Vector3(customCameraVector.x, customCameraVector.y, customCameraVector.z);
+    }
     this.updateCamera(cameraPositionVector, center);
     return cameraPositionVector;
   }
@@ -424,6 +433,29 @@ export class PointCloud {
   public resetCamera() {
     this.updateCamera(this.DEFAULT_INIT_CAMERA_POSITION, { x: 0, y: 0, z: 0 });
   }
+
+  /**
+   * Get camera target from matrix
+   * @param camera
+   * @returns
+   */
+  public getOrthographicCameraTarget(camera: OrthographicCamera) {
+    const direction = new THREE.Vector3(0, 0, -1).applyQuaternion(camera.quaternion);
+    const target = camera.position.clone().add(direction);
+    return target;
+  }
+
+  public applyCameraTarget = (camera: OrthographicCamera | PerspectiveCamera) => {
+    if (this.camera.type !== 'OrthographicCamera') {
+      return;
+    }
+
+    if (camera) {
+      const cameraTarget = this.getOrthographicCameraTarget(camera as OrthographicCamera);
+      this.updateCameraZoom(camera.zoom);
+      this.updateCamera(camera.position, cameraTarget);
+    }
+  };
 
   public createThreeMatrix4(matrix4: TMatrix4Tuple) {
     return new THREE.Matrix4().set(...matrix4);
