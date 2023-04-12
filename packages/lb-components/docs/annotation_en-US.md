@@ -16,6 +16,7 @@ enum ESubmitType {
   StepChanged = 6,
   Save = 7,
   BatchUpdateTrackID = 8,
+  BatchUpdateImgList = 9,
   SyncImgList = 10001, 
   SyncCurrentPageData = 10002, // 同步当页数据
 }
