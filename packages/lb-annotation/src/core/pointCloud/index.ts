@@ -104,7 +104,7 @@ export class PointCloud {
     noAppend,
     isOrthographicCamera,
     orthographicParams,
-    backgroundColor = 'black',
+    backgroundColor = '#4C4C4C', // GRAY_BACKGROUND
     config,
   }: IProps) {
     this.container = container;
