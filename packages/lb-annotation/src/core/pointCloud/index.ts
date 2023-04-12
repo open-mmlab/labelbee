@@ -852,7 +852,7 @@ export class PointCloud {
     innerPointList.forEach(({ x, y }) => {
       polygon.forEach((p1, index) => {
         const p2 = _polygon[index + 1];
-        const distance = MathUtils.getFootOfPerpendicular({ x, y }, p1, p2).length;
+        const distance = MathUtils.getFootOfPerpendicular({ x, y }, p1, p2, false, true).length;
         if (!minDistanceList[index] || distance < minDistanceList[index].distance) {
           minDistanceList[index] = { distance, point: { x, y } };
         }
