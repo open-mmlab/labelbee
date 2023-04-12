@@ -10,7 +10,7 @@ import LineToolUtils from './LineToolUtils';
 export default class PolygonUtils {
   static getHoverPolygonID(
     checkPoint: IPolygonPoint,
-    polygonPoints: IPolygonData[],
+    polygonPoints: { pointList: IPolygonPoint[]; id: string }[],
     scope = 3,
     lineType: ELineTypes = ELineTypes.Line,
   ): string {
@@ -55,7 +55,7 @@ export default class PolygonUtils {
 
   static isInPolygon(
     checkPoint: IPolygonPoint,
-    polygonPoints: IPolygonPoint[],
+    polygonPoints: (IPolygonPoint | ICoordinate)[],
     lineType: ELineTypes = ELineTypes.Line,
   ): boolean {
     let counter = 0;

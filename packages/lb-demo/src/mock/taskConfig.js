@@ -228,6 +228,42 @@ const pointCloudConfig = {
   trackConfigurable: true,
 };
 
+const cuboidToolConfig = {
+  "isShowCursor": false,
+  "showConfirm": false,
+  "skipWhileNoDependencies": false,
+  "drawOutsideTarget": false,
+  "copyBackwardResult": true,
+  "minWidth": 1,
+  "attributeConfigurable": true,
+  "textConfigurable": true,
+  "textCheckType": 0,
+  "customFormat": "",
+  "attributeList": [
+    {
+      "key": "跑车",
+      "value": "sports car"
+    },
+
+    {
+      "key": "吉普车",
+      "value": "jeep"
+    },
+    {
+      "key": "紧凑车型",
+      "value": "single"
+    },
+    {
+      "key": "SUV等车型",
+      "value": "suv"
+    },
+    {
+      "key": "货车",
+      "value": "trucks"
+    },
+  ]
+}
+
 export const getConfig = (tool) => {
   if (tool === EToolName.Line) {
     return lineToolConfig;
@@ -259,6 +295,10 @@ export const getConfig = (tool) => {
 
   if (tool === EToolName.ScribbleTool) {
     return scribbleToolConfig;
+  }
+
+  if (tool === EToolName.Cuboid) {
+    return cuboidToolConfig;
   }
 
   return rectToolConfig;

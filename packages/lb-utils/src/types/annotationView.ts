@@ -6,6 +6,7 @@
  */
 import { ICoordinate, ELineTypes } from './common';
 import { ICalib } from './pointCloud';
+import { IDrawingCuboid } from './cuboid';
 
 export interface IBasicStyle {
   stroke?: string; // 边框颜色
@@ -27,6 +28,7 @@ export interface IGraphicsBasicConfig extends IBasicStyle {
   isReference?: boolean; // 是否进行的参考显示
   renderEnhance?: (params: IRenderEnhanceParams) => void;
 }
+
 export interface IBasicRect extends IGraphicsBasicConfig {
   id: string;
   x: number;
@@ -87,6 +89,12 @@ export interface IBasicBox3d extends IGraphicsBasicConfig {
   calib: ICalib; // Calibration parameters of the current picture.
 }
 
+export interface ICuboid extends IDrawingCuboid, IBasicStyle {
+  hiddenText?: boolean; // 是否隐藏文本
+  isReference?: boolean; // 是否进行的参考显示
+  renderEnhance?: (params: IRenderEnhanceParams) => void;
+}
+
 export type TAnnotationViewRect = {
   type: 'rect';
   annotation: IBasicRect;
@@ -117,10 +125,16 @@ export type TAnnotationViewText = {
   annotation: IBasicText;
 };
 
+export declare type TAnnotationViewCuboid = {
+  type: 'cuboid';
+  annotation: ICuboid;
+};
+
 export type TAnnotationViewData =
   | TAnnotationViewRect
   | TAnnotationViewPolygon
   | TAnnotationViewPoint
   | TAnnotationViewBox3d
   | TAnnotationViewLine
-  | TAnnotationViewText;
+  | TAnnotationViewText
+  | TAnnotationViewCuboid;

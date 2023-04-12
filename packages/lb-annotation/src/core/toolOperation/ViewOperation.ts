@@ -9,6 +9,7 @@ import {
   TAnnotationViewPolygon,
   TAnnotationViewBox3d,
   IBasicStyle,
+  TAnnotationViewCuboid,
 } from '@labelbee/lb-utils';
 import _ from 'lodash';
 import rgba from 'color-rgba';
@@ -23,6 +24,8 @@ import { DEFAULT_TEXT_SHADOW, DEFAULT_TEXT_OFFSET, TEXT_ATTRIBUTE_OFFSET } from 
 import ImgPosUtils from '@/utils/tool/ImgPosUtils';
 import { BasicToolOperation, IBasicToolOperationProps } from './basicToolOperation';
 import { pointCloudLidar2image } from '../pointCloud/matrix';
+import AttributeUtils from '@/utils/tool/AttributeUtils';
+import { getCuboidTextAttributeOffset } from '@/utils/tool/CuboidUtils';
 
 const newScope = 3;
 const DEFAULT_RADIUS = 3;
@@ -499,6 +502,59 @@ export default class ViewOperation extends BasicToolOperation {
     }
   }
 
+  public renderSingleCuboid(annotation: TAnnotationViewCuboid) {
+    const { style } = this.getRenderStyle(annotation);
+    const cuboid = annotation.annotation;
+    const fillArr = rgba(style?.fill ?? style?.stroke ?? DEFAULT_STROKE_COLOR);
+    const fillColor = `rgba(${fillArr[0]}, ${fillArr[1]}, ${fillArr[2]},${fillArr[3] * 0.8})`;
+    const strokeColor = style.stroke;
+    const transformCuboid = AxisUtils.changeCuboidByZoom(cuboid, this.zoom, this.currentPos);
+
+    const textColor = strokeColor;
+
+    const { headerText, bottomText } = this.getRenderText(cuboid, cuboid?.hiddenText);
+    const { backPoints, frontPoints, textAttribute } = transformCuboid;
+
+    const frontPointsSizeWidth = frontPoints.br.x - frontPoints.bl.x;
+
+    DrawUtils.drawCuboid(this.canvas, transformCuboid, { strokeColor, fillColor, thickness: style.thickness });
+
+    let showText = '';
+    if (this.config?.isShowOrder && transformCuboid.order && transformCuboid?.order > 0) {
+      showText = `${transformCuboid.order}`;
+    }
+
+    if (transformCuboid.attribute) {
+      showText = `${showText}  ${AttributeUtils.getAttributeShowText(
+        transformCuboid.attribute,
+        this.config?.attributeList,
+      )}`;
+    }
+
+    if (headerText && backPoints) {
+      DrawUtils.drawText(this.canvas, { x: backPoints.tl.x, y: backPoints.tl.y - 5 }, showText, {
+        color: strokeColor,
+        textMaxWidth: 300,
+      });
+    }
+
+    const textPosition = getCuboidTextAttributeOffset({
+      cuboid,
+      currentPos: this.currentPos,
+      zoom: this.zoom,
+      topOffset: 16,
+      leftOffset: 0,
+    });
+
+    if (bottomText) {
+      const textWidth = Math.max(20, frontPointsSizeWidth * 0.8);
+      DrawUtils.drawText(this.canvas, { x: textPosition.left, y: textPosition.top }, textAttribute, {
+        color: textColor,
+        textMaxWidth: textWidth,
+      });
+    }
+  }
+
   public renderBox3d(annotation: TAnnotationViewBox3d) {
     if (annotation.type !== 'box3d') {
       return;
@@ -723,6 +779,11 @@ export default class ViewOperation extends BasicToolOperation {
 
           case 'box3d': {
             this.renderBox3d(annotation);
+            break;
+          }
+
+          case 'cuboid': {
+            this.renderSingleCuboid(annotation);
             break;
           }
 
