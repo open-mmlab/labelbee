@@ -329,7 +329,6 @@ export const synchronizeTopView = (
 
   // Control the 3D view data to create box
   mainViewInstance.generateBox(newBoxParams, newPolygon.id);
-  mainViewInstance.updateCameraByBox(newBoxParams, EPerspectiveView.Top);
   mainViewInstance.render();
 
   const { pointCloud2dOperation, pointCloudInstance } = topViewInstance;
@@ -678,13 +677,13 @@ export const usePointCloudViews = () => {
    * Update the data of pointCloudView when the page change.
    * @returns
    */
-  const updatePointCloudData = async () => {
-    if (!currentData?.url || !mainViewInstance) {
+  const updatePointCloudData = async (newData = currentData) => {
+    if (!newData?.url || !mainViewInstance) {
       return;
     }
 
     SetPointCloudLoading(dispatch, true);
-    await mainViewInstance.loadPCDFile(currentData.url, config?.radius ?? DEFAULT_RADIUS);
+    await mainViewInstance.loadPCDFile(newData.url, config?.radius ?? DEFAULT_RADIUS);
 
     // Clear All Data
     pointCloudBoxList.forEach((v) => {
@@ -693,9 +692,9 @@ export const usePointCloudViews = () => {
 
     let boxParamsList: any[] = [];
     let polygonList = [];
-    if (currentData.result) {
-      boxParamsList = PointCloudUtils.getBoxParamsFromResultList(currentData.result);
-      polygonList = PointCloudUtils.getPolygonListFromResultList(currentData.result);
+    if (newData.result) {
+      boxParamsList = PointCloudUtils.getBoxParamsFromResultList(newData.result);
+      polygonList = PointCloudUtils.getPolygonListFromResultList(newData.result);
 
       // Add Init Box
       boxParamsList.forEach((v: IPointCloudBox) => {
@@ -713,7 +712,7 @@ export const usePointCloudViews = () => {
 
     mainViewInstance.updateTopCamera();
 
-    const valid = jsonParser(currentData.result)?.valid ?? true;
+    const valid = jsonParser(newData.result)?.valid ?? true;
     ptCtx.setPointCloudValid(valid);
 
     // Clear other view data during initialization
@@ -727,7 +726,7 @@ export const usePointCloudViews = () => {
      * 2. Reload PointCloud
      * 3. Clear Polygon
      */
-    topViewInstance.updateData(currentData.url, currentData.result, {
+    topViewInstance.updateData(newData.url, newData.result, {
       radius: config?.radius ?? DEFAULT_RADIUS,
     });
     SetPointCloudLoading(dispatch, false);
