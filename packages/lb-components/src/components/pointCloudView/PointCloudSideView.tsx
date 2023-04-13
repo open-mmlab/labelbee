@@ -15,7 +15,6 @@ import { a2MapStateToProps, IA2MapStateProps } from '@/store/annotation/map';
 import { usePointCloudViews } from './hooks/usePointCloudViews';
 import { useSingleBox } from './hooks/useSingleBox';
 import { useSphere } from './hooks/useSphere'
-import { usePoint } from './hooks/usePoint'
 import EmptyPage from './components/EmptyPage';
 import useSize from '@/hooks/useSize';
 import { useTranslation } from 'react-i18next';
@@ -83,7 +82,6 @@ const PointCloudSideView: React.FC<IA2MapStateProps & IProps> = ({ config, check
   const { sideViewUpdateBox, sideViewUpdatePoint } = usePointCloudViews();
   const { selectedBox } = useSingleBox();
   const { selectedSphere } = useSphere();
-  const { selectedPoint } = usePoint();
   const ref = useRef<HTMLDivElement>(null);
   const size = useSize(ref);
   const { t } = useTranslation();
@@ -99,7 +97,7 @@ const PointCloudSideView: React.FC<IA2MapStateProps & IProps> = ({ config, check
       const pointCloudAnnotation = new PointCloudAnnotation({
         container: ref.current,
         size,
-        polygonOperationProps: { showDirectionLine: false, forbidAddNew: true },
+        extraProps: { showDirectionLine: false, forbidAddNew: true, forbidDelete: true },
         config,
         checkMode,
         toolName: ToolUtils.getPointCloudToolList() as THybridToolName,
@@ -161,9 +159,9 @@ const PointCloudSideView: React.FC<IA2MapStateProps & IProps> = ({ config, check
       );
     });
 
-    toolInstance.singleOn('updatePointByDrag', (updatePoint: IPointUnit, oldList: IPointUnit[]) => {
-      if (selectedPoint) {
-        sideViewUpdatePoint?.(updatePoint, selectedPoint)
+    toolInstance.singleOn('updatePointByDrag', (updatePoint: IPointUnit, oldPointList: IPointUnit[]) => {
+      if (selectedSphere) {
+        sideViewUpdatePoint?.(updatePoint, oldPointList[0])
       }
     })
 

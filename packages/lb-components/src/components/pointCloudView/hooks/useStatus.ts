@@ -18,7 +18,9 @@ export const useStatus = () => {
     backViewInstance,
     mainViewInstance,
     pointCloudBoxList,
+    pointCloudSphereList,
     setPointCloudResult,
+    setPointCloudSphereList,
     setPolygonList,
     pointCloudPattern,
     setPointCloudPattern,
@@ -31,13 +33,16 @@ export const useStatus = () => {
     pointCloudBoxList.forEach((v) => {
       mainViewInstance?.removeObjectByName(v.id);
     });
+    pointCloudSphereList.forEach((v) => {
+      mainViewInstance?.removeObjectByName(v.id)
+    })
     mainViewInstance?.render();
 
     setPointCloudResult([]);
     setPolygonList([]);
+    setPointCloudSphereList([])
 
-    topViewInstance?.pointCloud2dOperation.clearActiveStatus();
-    topViewInstance?.pointCloud2dOperation.clearResult();
+    topViewInstance?.toolScheduler.clearStatusAndResult()
 
     syncAllViewPointCloudColor([]);
 

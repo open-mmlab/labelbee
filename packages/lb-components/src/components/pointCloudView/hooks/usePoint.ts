@@ -12,7 +12,6 @@ export const usePoint = () => {
 
   const addPoint = (point: IPointUnit) => {
     setPointList([...pointList, point])
-    setSelectedIDs([point.id])
   }
 
   const deletePoint = (id: string) => {

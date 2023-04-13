@@ -16,7 +16,6 @@ import { useSingleBox } from './hooks/useSingleBox';
 import { PointCloudContainer } from './PointCloudLayout';
 import { BoxInfos, PointCloudValidity } from './PointCloudInfos';
 import { usePolygon } from './hooks/usePolygon';
-import { usePoint } from './hooks/usePoint';
 import { useSphere } from './hooks/useSphere';
 import { useZoom } from './hooks/useZoom';
 import { Slider } from 'antd';
@@ -165,7 +164,6 @@ const PointCloudTopView: React.FC<IProps> = ({
   const { hideAttributes } = ptCtx;
 
   const { addPolygon, deletePolygon } = usePolygon();
-  const { addPoint, deletePoint } = usePoint();
   const { deletePointCloudSphere } = useSphere();
   const { deletePointCloudBox, changeValidByID } = useSingleBox();
   const [zAxisLimit, setZAxisLimit] = useState<number>(10);
@@ -205,7 +203,7 @@ const PointCloudTopView: React.FC<IProps> = ({
 
     // point tool events
     TopView2dOperation.singleOn('pointCreated', (point: IPointUnit, zoom: number) => {
-      addPoint(point)
+      // addPoint(point)
       pointCloudViews.topViewAddSphere({
         newPoint: point,
         size,
@@ -215,10 +213,12 @@ const PointCloudTopView: React.FC<IProps> = ({
     })
 
     TopView2dOperation.singleOn('pointDeleted', (selectedID: string) => {
-      deletePoint(selectedID)
+      // deletePoint(selectedID)
       deletePointCloudSphere(selectedID)
     })
-
+    TopView2dOperation.singleOn('pointSelected', (selectedID: string) => {
+      ptCtx.setSelectedIDs([selectedID])
+    })
     TopView2dOperation.singleOn('updatePointByDrag', (updatePoint: IPointUnit, oldList: IPointUnit[]) => {
       pointCloudViews.topViewUpdatePoint?.(updatePoint, size)
     })
@@ -305,6 +305,7 @@ const PointCloudTopView: React.FC<IProps> = ({
     // 1. Update Size
     ptCtx.topViewInstance.initSize(size);
     ptCtx.topViewInstance.updatePolygonList(ptCtx.displayPointCloudList, ptCtx.polygonList);
+    ptCtx.topViewInstance.updatePointList(ptCtx.displaySphereList)
 
     const {
       topViewInstance: { pointCloudInstance: pointCloud, toolInstance },
@@ -347,7 +348,7 @@ const PointCloudTopView: React.FC<IProps> = ({
   }, [zAxisLimit]);
 
   useEffect(() => {
-    pointCloudViews.topViewSelectedChanged();
+    pointCloudViews.topViewSelectedChanged({});
   }, [ptCtx.selectedIDs]);
 
   return (

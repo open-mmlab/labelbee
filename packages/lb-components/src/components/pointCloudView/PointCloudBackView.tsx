@@ -38,7 +38,6 @@ import EmptyPage from './components/EmptyPage';
 import { useTranslation } from 'react-i18next';
 import { LabelBeeContext } from '@/store/ctx';
 import ToolUtils from '@/utils/ToolUtils';
-import { usePoint } from '@/components/pointCloudView/hooks/usePoint';
 
 /**
  * 统一一下，将其拓展为 二维转换为 三维坐标的转换
@@ -102,7 +101,6 @@ const PointCloudBackView = ({ currentData, config, checkMode }: IA2MapStateProps
   const { selectedBox, updateSelectedBox } = useSingleBox();
   const { selectedSphere } = useSphere();
   const { syncBackviewToolZoom } = useZoom();
-  const { selectedPoint } = usePoint();
 
   const { t } = useTranslation();
   const { backViewUpdateBox, backViewUpdatePoint } = usePointCloudViews();
@@ -191,7 +189,7 @@ const PointCloudBackView = ({ currentData, config, checkMode }: IA2MapStateProps
       const pointCloudAnnotation = new PointCloudAnnotation({
         container: ref.current,
         size,
-        polygonOperationProps: { showDirectionLine: false, forbidAddNew: true },
+        extraProps: { showDirectionLine: false, forbidAddNew: true, forbidDelete: true },
         config,
         checkMode,
         toolName: ToolUtils.getPointCloudToolList() as THybridToolName,
@@ -237,9 +235,9 @@ const PointCloudBackView = ({ currentData, config, checkMode }: IA2MapStateProps
       updateBackViewByCanvas2D(currentPos, zoom, size, ptCtx.selectedPointCloudBox ? ptCtx.selectedPointCloudBox.rotation : 0 , backPointCloud);
     });
 
-    backPointCloudPolygonOperation.singleOn('updatePointByDrag', (updatePoint: IPointUnit, oldList: IPointUnit[]) => {
-      if (selectedPoint) {
-        backViewUpdatePoint?.(updatePoint, selectedPoint)
+    backPointCloudPolygonOperation.singleOn('updatePointByDrag', (updatePoint: IPointUnit, oldPointList: IPointUnit[]) => {
+      if (selectedSphere) {
+        backViewUpdatePoint?.(updatePoint, oldPointList[0])
       }
     })
     backPointCloudPolygonOperation.singleOn(

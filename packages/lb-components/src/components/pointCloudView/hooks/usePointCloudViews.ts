@@ -8,7 +8,6 @@ import {
   PointCloud,
   MathUtils,
   getCuboidFromPointCloudBox,
-  StyleUtils
 } from '@labelbee/lb-annotation';
 import {
   IPointCloudBox,
@@ -160,7 +159,6 @@ const sideViewPoint2PointCloud = (
   newPoint: any,
   originPoint: any,
   selectedSphere: IPointCloudSphere,
-  pointCloudInstance: PointCloud,
 ) => {
   // 2D centerPoint => 3D x & z
 
@@ -172,23 +170,14 @@ const sideViewPoint2PointCloud = (
   /**
    * The key of sideView change is x & z, y isn't used.
    */
-  const offsetCenterPoint = {
-    x: offset.x,
-    y: 0,
-    z: newPoint.y - originPoint.y,
-  };
-
-  const offsetHeight = newPoint.y - originPoint.y
-  const offsetWidth = newPoint.x - originPoint.x
-
-  const newSphereParams  = pointCloudInstance.getNewSphereBySideUpdate(
-    offsetCenterPoint,
-    offsetWidth,
-    offsetHeight,
-    selectedSphere,
-  );
-
-  return newSphereParams;
+  return {
+    ...selectedSphere,
+    center: {
+      x: selectedSphere.center.x - offset.x,
+      y: selectedSphere.center.y,
+      z: selectedSphere.center.z - offset.y
+    }
+  }
 }
 const sideViewPolygon2PointCloud = (
   newPolygon: any,
@@ -241,9 +230,8 @@ const backViewPoint2PointCloud = (
   newPoint: any,
   originPoint: any,
   selectedSphere: IPointCloudSphere,
-  pointCloudInstance: PointCloud,
 ) => {
-  // 2D centerPoint => 3D x & z
+  // 2D centerPoint => 3D y & z
 
   const offset = {
     x: newPoint.x - originPoint.x,
@@ -253,23 +241,15 @@ const backViewPoint2PointCloud = (
   /**
    * The key of sideView change is x & z, y isn't used.
    */
-  const offsetCenterPoint = {
-    x: offset.x,
-    y: 0,
-    z: newPoint.y - originPoint.y,
-  };
 
-  const offsetHeight = newPoint.y - originPoint.y
-  const offsetWidth = newPoint.x - originPoint.x
-
-  const newSphereParams  = pointCloudInstance.getNewSphereByBackUpdate(
-    offsetCenterPoint,
-    offsetWidth,
-    offsetHeight,
-    selectedSphere,
-  );
-
-  return newSphereParams;
+  return {
+    ...selectedSphere,
+    center: {
+      x: selectedSphere.center.x,
+      y: selectedSphere.center.y - offset.x,
+      z: selectedSphere.center.z - offset.y
+    }
+  }
 }
 const backViewPolygon2PointCloud = (
   newPolygon: any,
@@ -345,8 +325,6 @@ export const syncSideViewByPoint = (
   );
 
   pointCloudInstance.setInitCameraPosition(cameraPositionVector);
-
-  // whq todo: wrong computed point2d!
 
   const { point2d, zoom } = pointCloudInstance.getSphereSidePoint2DCoordinate(sphereParams);
 
@@ -456,8 +434,6 @@ export const syncBackViewByPoint = (
 
   pointCloudInstance.setInitCameraPosition(cameraPositionVector);
 
-  // whq todo: wrong computed point2d!
-
   const { point2d, zoom } = pointCloudInstance.getSphereBackPoint2DCoordinate(sphereParams);
 
   pointCloudInstance.camera.zoom = zoom;
@@ -535,6 +511,33 @@ export const synchronizeBackView = (
   );
 };
 
+export const syncTopViewByPoint = (
+  newSphereParams: IPointCloudSphere,
+  newPoint: any,
+  topViewInstance?: PointCloudAnnotation,
+  mainViewInstance?: PointCloud,
+) => {
+  if (!topViewInstance || !mainViewInstance) {
+    return;
+  }
+  mainViewInstance.generateSphere(newSphereParams)
+  mainViewInstance.updateCameraBySphere(newSphereParams, EPerspectiveView.Top);
+  mainViewInstance.render();
+
+  const { toolInstance, pointCloudInstance } = topViewInstance
+
+  const { point2d } = pointCloudInstance.getSphereTopPoint2DCoordinate(newSphereParams)
+
+  const newPointList = [...toolInstance.pointList].map((v) => v.id === newPoint.id ? {
+    ...newPoint,
+    ...point2d,
+    valid: newSphereParams.valid,
+    textAttribute: '',
+    attribute: newSphereParams.attribute,
+  } : v)
+  toolInstance.setResult(newPointList)
+  toolInstance.setSelectedID(newPoint.id)
+}
 /**
  * NewBox synchronize TopView
  * @param boxParams
@@ -588,6 +591,7 @@ export const usePointCloudViews = () => {
     setSelectedIDs,
     selectedIDs,
     pointCloudBoxList,
+    pointCloudSphereList,
     hideAttributes,
   } = ptCtx;
   const { addHistory, initHistory, pushHistoryUnderUpdatePolygon, pushHistoryUnderUpdatePoint } = useHistory();
@@ -628,8 +632,8 @@ export const usePointCloudViews = () => {
     mainViewInstance?.render();
   };
 
-  const mainViewGenSphere = (sphereParams: IPointCloudSphere, color?: string) => {
-    mainViewInstance?.generateSphere(sphereParams, color);
+  const mainViewGenSphere = (sphereParams: IPointCloudSphere) => {
+    mainViewInstance?.generateSphere(sphereParams);
     mainViewInstance?.controls.update();
     mainViewInstance?.render();
   }
@@ -656,7 +660,8 @@ export const usePointCloudViews = () => {
       Object.assign(extraData, {
         trackID: PointCloudUtils.getNextTrackID({
           imgList: [], // Just calculate by the pointCloudBoxList in current page.
-          extraBoxList: pointCloudBoxList,
+          extraBoxList: [],
+          extraSphereList: pointCloudSphereList,
         }),
       });
     }
@@ -669,6 +674,7 @@ export const usePointCloudViews = () => {
       extraData,
     )
 
+    setSelectedIDs(newPoint.id)
     const newSphereList = addPointCloudSphere(sphereParams)
     syncPointCloudPoint(PointCloudView.Top, newPoint, sphereParams, zoom, newSphereList, config);
   }
@@ -696,6 +702,7 @@ export const usePointCloudViews = () => {
         trackID: PointCloudUtils.getNextTrackID({
           imgList: [], // Just calculate by the pointCloudBoxList in current page.
           extraBoxList: pointCloudBoxList,
+          extraSphereList: pointCloudSphereList,
         }),
       });
     }
@@ -738,24 +745,40 @@ export const usePointCloudViews = () => {
   };
 
   /** Top-view selected changed and render to other view */
-  const topViewSelectedChanged = (
+  const topViewSelectedChanged = ({
+    newSelectedBox,
+    newPointCloudList,
+    newSelectedSphere,
+    newSphereList,
+  }: {
     newSelectedBox?: IPointCloudBox,
     newPointCloudList?: IPointCloudBox[],
-  ) => {
-    const boxParams = newSelectedBox ?? selectedBox?.info;
-    const polygonOperation = topViewInstance?.pointCloud2dOperation;
-
-    polygonOperation.setSelectedIDs(selectedIDs);
-
-    if (selectedIDs.length === 0 || !polygonOperation) {
+    newSelectedSphere?: IPointCloudSphere,
+    newSphereList?: IPointCloudSphere[],
+  }) => {
+    const operation = topViewInstance?.toolInstance
+    if (selectedIDs.length === 0 || !operation) {
       return;
     }
+    if (newSelectedBox || selectedBox?.info) {
+      const boxParams = newSelectedBox ?? selectedBox?.info;
+      operation.setSelectedIDs(selectedIDs);
+      const polygon = operation.selectedPolygon;
+      if (selectedIDs.length === 1 && boxParams) {
+        syncPointCloudViews(PointCloudView.Top, polygon, boxParams, undefined, newPointCloudList);
+        return;
+      }
+    }
 
-    const polygon = polygonOperation.selectedPolygon;
-
-    if (selectedIDs.length === 1 && boxParams) {
-      syncPointCloudViews(PointCloudView.Top, polygon, boxParams, undefined, newPointCloudList);
-      return;
+    if (newSelectedSphere || selectedSphere) {
+      if (selectedIDs.length === 1) {
+        const sphereParams = newSelectedSphere ?? selectedSphere
+        operation.setSelectedID(selectedIDs[0])
+        const point = operation.selectedPoint
+        if (sphereParams) {
+          syncPointCloudPoint(PointCloudView.Top, point, sphereParams, undefined, newSphereList, config)
+        }
+      }
     }
   };
 
@@ -817,7 +840,6 @@ export const usePointCloudViews = () => {
       let transfer2PointCloud;
       let newSphereParams;
 
-      // whq todo: wrong computed sphereparams!
       // Switch the right function.
       switch (fromView) {
         case PointCloudView.Back:
@@ -836,7 +858,6 @@ export const usePointCloudViews = () => {
         newPoint,
         originPoint,
         selectedSphere,
-        sideViewInstance.pointCloudInstance,
       );
 
       const newSphereList = updatePointCloudSphere(newSphereParams);
@@ -957,7 +978,7 @@ export const usePointCloudViews = () => {
         }
       },
       [PointCloudView.Top]: () => {
-        // synchronizeTopView(sphereParams, point, topViewInstance, mainViewInstance);
+        syncTopViewByPoint(sphereParams, point, topViewInstance, mainViewInstance);
       },
     };
 
@@ -969,11 +990,7 @@ export const usePointCloudViews = () => {
     if (zoom) {
       mainViewInstance?.updateCameraZoom(zoom);
     }
-    let toolColor = topViewInstance.toolInstance.getColor(point.attribute)
-    let { fill } = StyleUtils.getStrokeAndFill(toolColor, true, {
-      isSelected: true,
-    })
-    mainViewGenSphere(sphereParams, fill)
+    mainViewGenSphere(sphereParams)
   }
   /**
    * Sync views' data from omit view, regenerate and highlight box on 3D-view
@@ -1062,23 +1079,36 @@ export const usePointCloudViews = () => {
       mainViewInstance?.removeObjectByName(v.id);
     });
 
+    pointCloudSphereList.forEach((v: IPointCloudSphere) => {
+      mainViewInstance?.removeObjectByName(v.id)
+    })
+
     let boxParamsList: any[] = [];
     let polygonList = [];
+    let sphereParamsList: IPointCloudSphere[] = []
     if (currentData.result) {
       boxParamsList = PointCloudUtils.getBoxParamsFromResultList(currentData.result);
       polygonList = PointCloudUtils.getPolygonListFromResultList(currentData.result);
+      sphereParamsList = PointCloudUtils.getSphereParamsFromResultList(currentData.result)
 
       // Add Init Box
       boxParamsList.forEach((v: IPointCloudBox) => {
         mainViewInstance?.generateBox(v);
       });
 
+      sphereParamsList.forEach((v: IPointCloudSphere) => {
+        mainViewInstance?.generateSphere(v)
+      })
+
       ptCtx.syncAllViewPointCloudColor(boxParamsList);
       ptCtx.setPointCloudResult(boxParamsList);
       ptCtx.setPolygonList(polygonList);
+      ptCtx.setPointCloudSphereList(sphereParamsList)
+
     } else {
       ptCtx.setPointCloudResult([]);
       ptCtx.setPolygonList([]);
+      ptCtx.setPointCloudSphereList([])
     }
     initHistory({ pointCloudBoxList: boxParamsList, polygonList });
 

@@ -5,7 +5,7 @@
  */
 
 import { IPolygonData } from './types';
-import { IPointCloudBox, IPointCloudConfig } from './types/pointCloud';
+import { IPointCloudBox, IPointCloudConfig, IPointCloudSphere } from './types/pointCloud';
 
 class PointCloudUtils {
   public static genColorByCoord(x: number, y: number, z: number) {
@@ -50,6 +50,15 @@ class PointCloudUtils {
     const pointCloudDataList = data?.[DEFAULT_STEP]?.result ?? [];
 
     return pointCloudDataList;
+  }
+
+  public static getSphereParamsFromResultList(result: string): IPointCloudSphere[] {
+    const data = this.jsonParser(result);
+
+    const DEFAULT_STEP = `step_1`;
+    const pointCloudDataList = data?.[DEFAULT_STEP]?.resultPoint ?? []
+
+    return pointCloudDataList
   }
 
   /**
@@ -340,11 +349,13 @@ class PointCloudUtils {
     imgList,
     step = 1,
     extraBoxList,
+    extraSphereList = [],
     ignoreIndexList = [],
   }: {
     imgList: Array<{ result: string }>;
     step?: number;
     extraBoxList: IPointCloudBox[];
+    extraSphereList?: IPointCloudSphere[];
     ignoreIndexList?: number[];
   }) {
     const resultList = imgList
@@ -352,7 +363,7 @@ class PointCloudUtils {
       .map((v) => this.jsonParser(v.result));
     const DEFAULT_STEP_NAME = `step_${step}`;
 
-    let boxList: IPointCloudBox[] = [];
+    let boxList: Array<IPointCloudBox | IPointCloudSphere> = [];
 
     resultList.forEach((result) => {
       if (result?.[DEFAULT_STEP_NAME]?.['result']?.length > 0) {
@@ -364,6 +375,10 @@ class PointCloudUtils {
       boxList = boxList.concat(extraBoxList);
     }
 
+    if (extraSphereList) {
+      boxList = boxList.concat(extraSphereList);
+    }
+
     return boxList;
   }
 
@@ -371,15 +386,17 @@ class PointCloudUtils {
     imgList,
     step = 1,
     extraBoxList,
+    extraSphereList,
   }: {
     imgList: Array<{ result: string }>;
     step?: number;
     extraBoxList: IPointCloudBox[];
+    extraSphereList?: IPointCloudSphere[];
   }) {
     let trackID = 1;
-    const boxList = this.getAllPointCloudResult({ imgList, step, extraBoxList });
+    const boxList = this.getAllPointCloudResult({ imgList, step, extraBoxList, extraSphereList });
 
-    boxList.forEach((data: IPointCloudBox) => {
+    boxList.forEach((data: IPointCloudBox | IPointCloudSphere) => {
       if (typeof data?.trackID === 'number' && data.trackID >= trackID) {
         trackID = data.trackID + 1;
       }

@@ -29,6 +29,81 @@ export const ATTRIBUTE_COLORS = [
   'rgba(0, 255, 234, 1)',
 ];
 
+export const ATTRIBUTE_COLORS_MAP = [
+  {
+    valid: { stroke: 'rgba(204,204,204,1.00)', fill: 'rgba(204,204,204,0.40)' },
+    invalid: { stroke: 'rgba(255,153,102,1.00)', fill: 'rgba(255,153,102,0.40)' },
+    validSelected: { stroke: 'rgba(204,204,204,1.00)', fill: 'rgba(204,204,204,0.80)' },
+    invalidSelected: { stroke: 'rgba(255,0,0,1.00)', fill: 'rgba(255,0,0,0.80)' },
+    validHover: { stroke: 'rgba(204,204,204,1.00)', fill: 'rgba(204,204,204,0.80)' },
+    invalidHover: { stroke: 'rgba(255,0,0,1.00)', fill: 'rgba(255,0,0,0.80)' },
+  },
+  {
+    valid: { stroke: 'rgba(128, 12, 249, 1)', fill: 'rgba(128, 12, 249, 0.40)' },
+    invalid: { stroke: 'rgba(255,153,102,1.00)', fill: 'rgba(255,153,102,0.40)' },
+    validSelected: { stroke: 'rgba(128, 12, 249, 1)', fill: 'rgba(128, 12, 249, 0.80)' },
+    invalidSelected: { stroke: 'rgba(255,0,0,1.00)', fill: 'rgba(255,0,0,0.80)' },
+    validHover: { stroke: 'rgba(128, 12, 249, 1)', fill: 'rgba(128, 12, 249, 0.80)' },
+    invalidHover: { stroke: 'rgba(255,0,0,1.00)', fill: 'rgba(255,0,0,0.80)' },
+  },
+  {
+    valid: { stroke: 'rgba(0, 255, 48, 1)', fill: 'rgba(0, 255, 48, 1, 0.40)' },
+    invalid: { stroke: 'rgba(255,153,102,1.00)', fill: 'rgba(255,153,102,0.40)' },
+    validSelected: { stroke: 'rgba(0, 255, 48,1.00)', fill: 'rgba(0, 255, 48,0.80)' },
+    invalidSelected: { stroke: 'rgba(255,0,0,1.00)', fill: 'rgba(255,0,0,0.80)' },
+    validHover: { stroke: 'rgba(0, 255, 48,1.00)', fill: 'rgba(0, 255, 48,0.80)' },
+    invalidHover: { stroke: 'rgba(255,0,0,1.00)', fill: 'rgba(255,0,0,0.80)' },
+  },
+  {
+    valid: { stroke: 'rgba(255, 136, 247,1.00)', fill: 'rgba(255, 136, 247,0.40)' },
+    invalid: { stroke: 'rgba(255,153,102,1.00)', fill: 'rgba(255,153,102,0.40)' },
+    validSelected: { stroke: 'rgba(255, 136, 247,1.00)', fill: 'rgba(255, 136, 247,0.80)' },
+    invalidSelected: { stroke: 'rgba(255,0,0,1.00)', fill: 'rgba(255,0,0,0.80)' },
+    validHover: { stroke: 'rgba(255, 136, 247,1.00)', fill: 'rgba(255, 136, 247,0.80)' },
+    invalidHover: { stroke: 'rgba(255,0,0,1.00)', fill: 'rgba(255,0,0,0.80)' },
+  },
+  {
+    valid: { stroke: 'rgba(255, 226, 50,1.00)', fill: 'rgba(255, 226, 50,0.40)' },
+    invalid: { stroke: 'rgba(255,153,102,1.00)', fill: 'rgba(255,153,102,0.40)' },
+    validSelected: { stroke: 'rgba(255, 226, 50,1.00)', fill: 'rgba(255, 226, 50,0.80)' },
+    invalidSelected: { stroke: 'rgba(255,0,0,1.00)', fill: 'rgba(255,0,0,0.80)' },
+    validHover: { stroke: 'rgba(255, 226, 50,1.00)', fill: 'rgba(255, 226, 50,0.80)' },
+    invalidHover: { stroke: 'rgba(255,0,0,1.00)', fill: 'rgba(255,0,0,0.80)' },
+  },
+  {
+    valid: { stroke: 'rgba(153, 66, 23,1.00)', fill: 'rgba(153, 66, 23,0.40)' },
+    invalid: { stroke: 'rgba(255,153,102,1.00)', fill: 'rgba(255,153,102,0.40)' },
+    validSelected: { stroke: 'rgba(153, 66, 23,1.00)', fill: 'rgba(153, 66, 23,0.80)' },
+    invalidSelected: { stroke: 'rgba(255,0,0,1.00)', fill: 'rgba(255,0,0,0.80)' },
+    validHover: { stroke: 'rgba(153, 66, 23,1.00)', fill: 'rgba(153, 66, 23,0.80)' },
+    invalidHover: { stroke: 'rgba(255,0,0,1.00)', fill: 'rgba(255,0,0,0.80)' },
+  },
+  {
+    valid: { stroke: 'rgba(2, 130, 250,1.00)', fill: 'rgba(2, 130, 250,0.40)' },
+    invalid: { stroke: 'rgba(255,153,102,1.00)', fill: 'rgba(255,153,102,0.40)' },
+    validSelected: { stroke: 'rgba(2, 130, 250,1.00)', fill: 'rgba(2, 130, 250,0.80)' },
+    invalidSelected: { stroke: 'rgba(255,0,0,1.00)', fill: 'rgba(255,0,0,0.80)' },
+    validHover: { stroke: 'rgba(2, 130, 250,1.00)', fill: 'rgba(2, 130, 250,0.80)' },
+    invalidHover: { stroke: 'rgba(255,0,0,1.00)', fill: 'rgba(255,0,0,0.80)' },
+  },
+  {
+    valid: { stroke: 'rgba(255, 35, 35,1.00)', fill: 'rgba(255, 35, 35,0.40)' },
+    invalid: { stroke: 'rgba(255,153,102,1.00)', fill: 'rgba(255,153,102,0.40)' },
+    validSelected: { stroke: 'rgba(255, 35, 35,1.00)', fill: 'rgba(255, 35, 35,0.80)' },
+    invalidSelected: { stroke: 'rgba(255,0,0,1.00)', fill: 'rgba(255,0,0,0.80)' },
+    validHover: { stroke: 'rgba(255, 35, 35,1.00)', fill: 'rgba(255, 35, 35,0.80)' },
+    invalidHover: { stroke: 'rgba(255,0,0,1.00)', fill: 'rgba(255,0,0,0.80)' },
+  },
+  {
+    valid: { stroke: 'rgba(0, 255, 234,1.00)', fill: 'rgba(0, 255, 234,0.40)' },
+    invalid: { stroke: 'rgba(255,153,102,1.00)', fill: 'rgba(255,153,102,0.40)' },
+    validSelected: { stroke: 'rgba(0, 255, 234,1.00)', fill: 'rgba(0, 255, 234,0.80)' },
+    invalidSelected: { stroke: 'rgba(255,0,0,1.00)', fill: 'rgba(255,0,0,0.80)' },
+    validHover: { stroke: 'rgba(0, 255, 234,1.00)', fill: 'rgba(0, 255, 234,0.80)' },
+    invalidHover: { stroke: 'rgba(255,0,0,1.00)', fill: 'rgba(255,0,0,0.80)' },
+  },
+]
+
 export const COLORS_ARRAY_MULTI = [
   {
     rgba: 'rgba(128, 12, 249, 1)',

@@ -177,7 +177,7 @@ const PointCloud3D: React.FC<IA2MapStateProps> = ({ currentData, config }) => {
         ptCtx.setPointCloudValid(jsonParser(currentData.result)?.valid);
       }
     }
-  }, [currentData, size]);
+  }, [currentData, size.width, size.height]);
 
   /**
    *  Observe selectedID and reset camera to target top-view

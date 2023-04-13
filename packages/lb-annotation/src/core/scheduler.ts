@@ -312,6 +312,21 @@ export class ToolScheduler implements IToolSchedulerOperation {
     return this.toolOperationList[lastOneIndex];
   }
 
+  public updateDataByToolName(toolName: EToolName, result: any) {
+    const operationIndex = this.toolOperationNameList.indexOf(toolName);
+    if (operationIndex >= 0) {
+      const operationInstance = this.toolOperationList[operationIndex];
+      operationInstance.setResult(result);
+    }
+  }
+
+  public clearStatusAndResult() {
+    this.toolOperationList.forEach((toolInstance) => {
+      toolInstance.clearActiveStatus?.();
+      toolInstance.clearResult();
+    });
+  }
+
   public destroyAllLayer() {
     this.toolOperationList.forEach((toolInstance) => {
       toolInstance.destroyCanvas();

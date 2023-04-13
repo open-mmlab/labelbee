@@ -318,9 +318,14 @@ export class PointCloud {
     this.scene.add(group);
   };
 
-  public generateSphere = (sphereParams: IPointCloudSphere, color = 'blue') => {
-    this.AddSphereToSense(sphereParams, color);
+  public generateSphere = (sphereParams: IPointCloudSphere) => {
     this.render();
+    const { fill } = toolStyleConverter.getColorFromConfig(
+      { attribute: sphereParams.attribute },
+      { ...this.config, attributeConfigurable: true },
+      {},
+    );
+    this.AddSphereToSense(sphereParams, fill);
   };
 
   public generateSpheres = (spheres: IPointCloudSphere[]) => {
@@ -1131,7 +1136,6 @@ export class PointCloud {
   }
 
   public getSpherePoint2DCoordinate(sphereParams: IPointCloudSphere) {
-    // whq todo: maybe wrong params
     const { center, radius } = sphereParams;
     const transParams = { center, width: radius * 2, height: radius * 2, depth: radius * 2, rotation: 0 };
     const projectMatrix = new THREE.Matrix4()
@@ -1149,6 +1153,25 @@ export class PointCloud {
     const wZoom = this.containerWidth / (radius * 2);
     const hZoom = this.containerHeight / (radius * 2);
 
+    return {
+      point2d,
+      zoom: Math.min(wZoom, hZoom) / 2,
+    };
+  }
+
+  public getSphereTopPoint2DCoordinate(sphereParams: IPointCloudSphere) {
+    const { radius, center } = sphereParams;
+    const transParams = { center, width: radius * 2, height: radius * 2, depth: radius * 2, rotation: 0 };
+
+    const vector = new THREE.Vector3(center?.x, center?.y, center?.z).applyMatrix4(
+      this.getModelTransformationMatrix(transParams),
+    );
+    const point2d = {
+      x: -(vector.y - this.containerWidth / 2),
+      y: -(vector.x - this.containerHeight / 2),
+    };
+    const wZoom = this.containerWidth / (radius * 2);
+    const hZoom = this.containerHeight / (radius * 2);
     return {
       point2d,
       zoom: Math.min(wZoom, hZoom) / 2,
@@ -1183,27 +1206,6 @@ export class PointCloud {
     return {
       polygon2d,
       zoom: Math.min(wZoom, hZoom) / 2,
-    };
-  }
-
-  public getNewSphereBySideUpdate(
-    offsetCenterPoint: { x: number; y: number; z: number }, // Just use x now.
-    offsetWidth: number,
-    offsetDepth: number,
-    selectedPointCloudSphere: IPointCloudSphere,
-  ) {
-    const Rz = new THREE.Matrix4().makeRotationZ(0);
-
-    // Because the positive direction of 2DView is -x, but the positive direction of 2DView is x.
-    const offsetVector = new THREE.Vector3(-offsetCenterPoint.x, 0, 0).applyMatrix4(Rz);
-
-    return {
-      ...selectedPointCloudSphere,
-      center: {
-        x: selectedPointCloudSphere.center.x + offsetVector.x,
-        y: selectedPointCloudSphere.center.y + offsetVector.y,
-        z: selectedPointCloudSphere.center.z - offsetCenterPoint.z,
-      },
     };
   }
 
