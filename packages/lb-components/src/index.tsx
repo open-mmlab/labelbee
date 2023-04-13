@@ -15,6 +15,7 @@ import './index.scss';
 import { PointCloudProvider } from './components/pointCloudView/PointCloudContext';
 import { AppState } from './store';
 import { LabelBeeContext } from '@/store/ctx';
+import PredictTracking from '@/components/predictTracking';
 
 export const store = configureStore();
 
@@ -52,6 +53,6 @@ const OutputApp = (props: AppProps, ref: any) => {
 
 export default React.forwardRef(OutputApp);
 
-export { AnnotationView, PointCloudAnnotationView, i18n, VideoTagTool };
+export { AnnotationView, PointCloudAnnotationView, i18n, VideoTagTool, PredictTracking };
 
 export * from './constant';

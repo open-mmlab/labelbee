@@ -4,8 +4,8 @@
  * @author Ron <ron.f.luo@gmail.com>
  */
 
-import { IPolygonData } from './types';
 import { IPointCloudBox, IPointCloudConfig, IPointCloudSphere } from './types/pointCloud';
+import { ICoordinate } from './types/common';
 
 class PointCloudUtils {
   public static genColorByCoord(x: number, y: number, z: number) {
@@ -549,6 +549,29 @@ class PointCloudUtils {
         value,
       };
     });
+  }
+
+  /**
+   * Get intersection coordinates by slope
+   * @param p1  A point on line1
+   * @param k1  The slope of line1
+   * @param p2  A point on line2
+   * @param k2  The slope of line2
+   */
+  static getIntersectionBySlope(params: {
+    p1: ICoordinate;
+    k1: number;
+    p2: ICoordinate;
+    k2: number;
+  }) {
+    const { p1, k1, p2, k2 } = params;
+    if (p1.x === p2.x && p1.y === p2.y) {
+      return p1;
+    }
+    const x = (p1.y - p2.y - k1 * p1.x + k2 * p2.x) / (k2 - k1);
+    const y = p1.y - k1 * (p1.x - x);
+
+    return { x, y };
   }
 }
 

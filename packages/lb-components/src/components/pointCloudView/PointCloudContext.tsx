@@ -62,6 +62,7 @@ export interface IPointCloudContext extends IPointCloudContextInstances {
 
   pointCloudPattern: EToolName.Rect | EToolName.Polygon | EToolName.Point | EToolName.Line;
   setPointCloudPattern: (toolName: EToolName.Rect | EToolName.Polygon | EToolName.Point | EToolName.Line) => void;
+  selectSpecAttr: (attr: string) => void;
 }
 
 export const PointCloudContext = React.createContext<IPointCloudContext>({
@@ -109,6 +110,7 @@ export const PointCloudContext = React.createContext<IPointCloudContext>({
 
   pointCloudPattern: EToolName.Rect,
   setPointCloudPattern: () => {},
+  selectSpecAttr: () => {},
 });
 
 export const PointCloudProvider: React.FC<{}> = ({ children }) => {
@@ -183,6 +185,10 @@ export const PointCloudProvider: React.FC<{}> = ({ children }) => {
 
     const selectedAllBoxes = () => {
       setSelectedIDs(pointCloudBoxList.map((i) => i.id));
+    };
+
+    const selectSpecAttr = (attr: string) => {
+      setSelectedIDs(pointCloudBoxList.filter((i) => i.attribute === attr).map((i) => i.id));
     };
 
     const displayPointCloudList = pointCloudBoxList.filter(
@@ -283,6 +289,7 @@ export const PointCloudProvider: React.FC<{}> = ({ children }) => {
       setDefaultAttribute,
       pointCloudPattern,
       setPointCloudPattern,
+      selectSpecAttr,
     };
   }, [
     valid,

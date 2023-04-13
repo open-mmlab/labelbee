@@ -236,16 +236,23 @@ class ToolStyleConverter {
         config?.attributeList,
       );
 
-      let color = colorList[attributeIndex % colorList.length];
+      let color = config?.attributeList?.find((i: any) => i.value === result?.attribute)?.color;
+      let hexColor = '';
 
+      if (!color && attributeIndex !== -1) {
+        color = colorList[attributeIndex % colorList.length];
+      }
       // 找不到则开启为无属性
       if (attributeIndex === -1) {
         color = NULL_COLOR;
       }
+      hexColor = ToolStyleUtils.rgbaStringToHex(color).toString().substring(1);
+      const colorDecimal = parseInt(hexColor, 16); // 十进制
+      const colorHex = COLORS_ARRAY_MULTI[attributeIndex % colorList.length]?.hex ?? '';
 
       return {
         ...ToolStyleUtils.getToolStrokeAndFill(color, defaultStatus),
-        hex: COLORS_ARRAY_MULTI[attributeIndex % colorList.length]?.hex ?? '',
+        hex: colorDecimal || colorHex,
       };
     }
 
@@ -263,15 +270,54 @@ class ToolStyleConverter {
       defaultStatus,
     );
   }
+
+  /**
+   * Get the color under the configuration (dynamically generate the activation color for hover)
+   * @param attribute
+   * @param config
+   * @param style
+   * @returns
+   */
+  public getColorByConfig({
+    attribute,
+    config,
+    style,
+  }: {
+    attribute: string;
+    config: any;
+    style?: any;
+  }) {
+    if (config?.attributeConfigurable === true) {
+      const color = config?.attributeList?.find((i: any) => i.value === attribute)?.color;
+
+      if (color) {
+        return ToolStyleUtils.getToolColorList(color, style?.borderOpacity, style?.fillOpacity);
+      }
+
+      // If the property does not have a custom color (color), then use a default Attribute Color
+      if (style?.attributeColor) {
+        const attributeIndex =
+          ToolStyleUtils.getAttributeIndex(attribute, config?.attributeList ?? []) + 1;
+        return style.attributeColor[attributeIndex];
+      }
+    }
+    if (style) {
+      const { color, toolColor } = style;
+      if (toolColor) {
+        return toolColor[color];
+      }
+    }
+    return ToolStyleUtils.getToolColorList(NULL_COLOR);
+  }
 }
 
 /**
  * Create ColorMap - JET
- * 
+ *
  * Different ranges of colors can be obtained with different indexes.
- * 
+ *
  * https://docs.opencv.org/3.4/d3/d50/group__imgproc__colormap.html
- * @returns 
+ * @returns
  */
 function createColorMapJet() {
   let s;
@@ -319,4 +365,4 @@ const COLOR_MAP_JET = createColorMapJet();
 
 export default new ToolStyleConverter();
 
-export { ToolStyleConverter, COLOR_MAP_JET };
+export { ToolStyleConverter, ToolStyleUtils, COLOR_MAP_JET };

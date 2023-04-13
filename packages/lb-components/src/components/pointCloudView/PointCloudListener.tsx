@@ -19,6 +19,7 @@ import { ICoordinate } from '@labelbee/lb-utils/dist/types/types/common';
 import { useConfig } from './hooks/useConfig';
 import { usePolygon } from './hooks/usePolygon';
 import { useTranslation } from 'react-i18next';
+import { IFileItem } from '@/types/data';
 
 const { EPolygonPattern } = cTool;
 
@@ -184,6 +185,7 @@ const PointCloudListener: React.FC<IProps> = ({
         pasteSelectedBoxes();
         break;
       case 'a':
+        e.preventDefault();
         ptCtx.selectedAllBoxes();
         break;
       case 'z': {
@@ -340,6 +342,13 @@ const PointCloudListener: React.FC<IProps> = ({
 
     toolInstanceRef.current.setShowDefaultCursor = (showDefaultCursor: boolean) => {
       ptCtx.topViewInstance?.pointCloud2dOperation?.setShowDefaultCursor(showDefaultCursor);
+    };
+
+    toolInstanceRef.current.asyncData = (newData: IFileItem) => {
+      // Next Tick to update.
+      setTimeout(() => {
+        updatePointCloudData?.(newData);
+      });
     };
   }, [
     ptCtx.pointCloudBoxList,

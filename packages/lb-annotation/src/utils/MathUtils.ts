@@ -150,6 +150,7 @@ export default class MathUtils {
     end: ICoordinate,
     /* 使用坐标范围 */
     useAxisRange = false,
+    allowOverRange = false,
   ) => {
     // 直线结束点
     let retVal: any = { x: 0, y: 0 };
@@ -183,7 +184,7 @@ export default class MathUtils {
 
     const isOverRange = useAxisRange ? allAxisOverRange : someAxisOverRange;
 
-    if (isOverRange) {
+    if (!allowOverRange && isOverRange) {
       return {
         footPoint: retVal,
         length: Infinity,
