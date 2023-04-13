@@ -376,6 +376,17 @@ class CuboidOperation extends BasicToolOperation {
         }
         break;
 
+      case EKeyCode.Delete:
+        if (this.selectedID) {
+          this.deleteCuboid(this.selectedID);
+        }
+        break;
+
+      case EKeyCode.Z:
+        this.setIsHidden(!this.isHidden);
+        this.render();
+        break;
+
       case EKeyCode.F:
         if (this.selectedID) {
           this.setCuboidValidAndRender(this.selectedID);
@@ -961,7 +972,9 @@ class CuboidOperation extends BasicToolOperation {
   }
 
   public renderStatic() {
-    this.cuboidList.forEach((cuboid) => this.renderSingleCuboid(cuboid));
+    if (!this.isHidden) {
+      this.currentShowList.forEach((cuboid) => this.renderSingleCuboid(cuboid));
+    }
   }
 
   public renderSelected() {
