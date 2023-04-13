@@ -251,7 +251,6 @@ class PointCloudUtils {
       height,
       depth,
     } = boxParams;
-
     return [
       {
         type: 'polygon',

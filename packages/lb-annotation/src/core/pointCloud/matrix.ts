@@ -130,6 +130,12 @@ export function pointCloudLidar2image(
     T: [TMatrix14Tuple, TMatrix14Tuple, TMatrix14Tuple];
   },
 ) {
+  if (boxParams.length) {
+    return boxParams.linePointList?.map((line) => ({
+      type: 'line',
+      pointList: [line],
+    }));
+  }
   const allViewData = PointCloudUtils.getAllViewData(boxParams);
   const { P, R, T } = cameraMatrix;
   const { composeMatrix4 } = transferKitti2Matrix(P, R, T);
