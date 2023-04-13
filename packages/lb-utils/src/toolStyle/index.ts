@@ -132,7 +132,6 @@ class ToolStyleConverter {
     if (!options) {
       options = {};
     }
-
     const valid = result?.valid ?? true;
 
     const { multiColorIndex = -1, selected, hover } = options;
@@ -192,11 +191,11 @@ class ToolStyleConverter {
 
 /**
  * Create ColorMap - JET
- * 
+ *
  * Different ranges of colors can be obtained with different indexes.
- * 
+ *
  * https://docs.opencv.org/3.4/d3/d50/group__imgproc__colormap.html
- * @returns 
+ * @returns
  */
 function createColorMapJet() {
   let s;

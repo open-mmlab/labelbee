@@ -36,13 +36,13 @@ export const composeResult = (
     const { dataSourceStep } = currentStepInfo;
 
     const stepName = `step_${currentStepInfo.step}`;
-
     if (data[stepName]) {
       const info = data[stepName];
       Object.assign(info, customObject);
 
       if (info.result) {
         if (JSON.stringify(info.result) === JSON.stringify(rect)) {
+          info.resultLine = info.result.filter((r: any) => r.length);
           return JSON.stringify(data);
         }
         if (basicRectID) {
@@ -55,6 +55,7 @@ export const composeResult = (
         } else {
           info.result = rect;
         }
+        info.resultLine = info.resultLine = info.result.filter((r: any) => r.length);
         return JSON.stringify(data);
       }
       return JSON.stringify({
@@ -63,6 +64,7 @@ export const composeResult = (
           ...data[stepName],
           ...customObject,
           result: rect,
+          resultLine: [],
         },
       });
     }
@@ -74,6 +76,7 @@ export const composeResult = (
         ...customObject,
         toolName: stepList[step - 1].tool,
         result: rect,
+        resultLine: [],
       },
     });
   } catch (e) {

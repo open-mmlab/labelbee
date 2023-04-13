@@ -284,7 +284,6 @@ export const annotationReducer = (
             step,
             stepList,
           );
-
           return {
             ...v,
             result: newResult,
@@ -336,7 +335,7 @@ export const annotationReducer = (
       }
 
       const [exportResult] = toolInstance?.exportData() ?? [];
-
+      console.log('submit data', exportResult);
       let previousResultList = exportResult;
 
       if (basicResultList?.length > 0) {
@@ -415,9 +414,8 @@ export const annotationReducer = (
     }
 
     case ANNOTATION_ACTIONS.LOAD_FILE_DATA: {
-      console.log('LOAD_FILE_DATA', 776);
       const { imgList, step, toolInstance, annotationEngine, stepList } = state;
-
+      console.log('reducer load_file_data');
       /**
        * TODO
        * Before: !toolInstance || !annotationEngine

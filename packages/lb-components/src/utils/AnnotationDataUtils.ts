@@ -225,6 +225,7 @@ export default class AnnotationDataUtils {
     deletedIds: string[],
     stepKeys: number[],
   ) {
+    console.log('deleteRes');
     stepKeys.forEach((s) => {
       if (s > dataSourceStep) {
         const stepRes = resData[`step_${s}`];
@@ -243,6 +244,7 @@ export default class AnnotationDataUtils {
 
             return true;
           });
+          stepRes.resultLine = [];
           this.deleteRes(resData, s, newDeletedIds, stepKeys);
         } else {
           // 非直接依赖关系下，也同样过滤删除了对应框的数据（注意: 该场景不包含 filterData 过滤属性下，更改框的属性来删除对应的框体）
@@ -254,6 +256,7 @@ export default class AnnotationDataUtils {
 
             return true;
           });
+          stepRes.resultLine = [];
         }
       }
     });

@@ -121,7 +121,7 @@ export const AnnotatedAttributesPanel = () => {
   const stepConfig: IPointCloudConfig = useSelector(stepConfigSelector);
   const { attrPanelLayout, setAttrPanelLayout } = useContext(PointCloudContext);
   const { t } = useTranslation();
-  console.log(stepConfig, 998);
+  console.log('stepConfig', 998);
   return (
     <div className={getClassName('annotated-attribute')}>
       {attrPanelLayout ? (
