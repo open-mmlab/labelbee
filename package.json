@@ -38,9 +38,5 @@
     "commitizen": {
       "path": "./node_modules/cz-conventional-changelog"
     }
-  },
-  "dependencies": {
-    "slate": "^0.91.4",
-    "slate-react": "^0.92.0"
   }
 }
