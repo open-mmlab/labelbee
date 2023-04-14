@@ -17,6 +17,7 @@ import {
   IPointCloudConfig,
   toolStyleConverter,
   PointCloudUtils,
+  DEFAULT_SPHERE_PARAMS,
 } from '@labelbee/lb-utils';
 import { BufferAttribute, OrthographicCamera, PerspectiveCamera, PointsMaterial, Shader } from 'three';
 import HighlightWorker from 'web-worker:./highlightWorker.js';
@@ -304,12 +305,13 @@ export class PointCloud {
    * add new sphere just like adding new box
    * @param sphereParams
    */
-  public AddSphereToSense = (sphereParams: IPointCloudSphere, color = 'blue') => {
+  public addSphereToSense = (sphereParams: IPointCloudSphere, color = 'blue') => {
     const id = sphereParams.id ?? uuid();
 
     this.removeObjectByName(id);
 
-    const { center, widthSegments, heightSegments, radius } = sphereParams;
+    const { radius, widthSegments, heightSegments } = DEFAULT_SPHERE_PARAMS;
+    const { center } = sphereParams;
     const group = new THREE.Group();
     const spGeo = new THREE.SphereGeometry(radius, widthSegments, heightSegments);
     const spMaterial = new THREE.MeshBasicMaterial({ color });
@@ -321,18 +323,23 @@ export class PointCloud {
   };
 
   public generateSphere = (sphereParams: IPointCloudSphere) => {
-    this.render();
     const { fill } = toolStyleConverter.getColorFromConfig(
       { attribute: sphereParams.attribute },
       { ...this.config, attributeConfigurable: true },
       {},
     );
-    this.AddSphereToSense(sphereParams, fill);
+    this.addSphereToSense(sphereParams, fill);
+    this.render();
   };
 
   public generateSpheres = (spheres: IPointCloudSphere[]) => {
     spheres.forEach((sphere) => {
-      this.generateSphere(sphere);
+      const { fill } = toolStyleConverter.getColorFromConfig(
+        { attribute: sphere.attribute },
+        { ...this.config, attributeConfigurable: true },
+        {},
+      );
+      this.addSphereToSense(sphere, fill);
     });
     this.render();
   };
@@ -434,7 +441,8 @@ export class PointCloud {
   }
 
   public updateCameraBySphere(sphereParams: IPointCloudSphere, perspectiveView: EPerspectiveView) {
-    const { center, radius } = sphereParams;
+    const { center } = sphereParams;
+    const { radius } = DEFAULT_SPHERE_PARAMS;
     const cameraPositionVector = this.getCameraVector(
       center,
       0,
@@ -1122,7 +1130,7 @@ export class PointCloud {
     return vectorList;
   }
 
-  public getModelTransformationMatrix(boxParams: IPointCloudBox | any) {
+  public getModelTransformationMatrix(boxParams: IPointCloudBox) {
     const {
       center: { x, y, z },
       rotation,
@@ -1214,8 +1222,19 @@ export class PointCloud {
   }
 
   public getSpherePoint2DCoordinate(sphereParams: IPointCloudSphere) {
-    const { center, radius } = sphereParams;
-    const transParams = { center, width: radius * 2, height: radius * 2, depth: radius * 2, rotation: 0 };
+    const { center, attribute, id, valid } = sphereParams;
+    const { radius } = DEFAULT_SPHERE_PARAMS;
+
+    const transParams = {
+      center,
+      attribute,
+      id,
+      valid,
+      width: radius * 2,
+      height: radius * 2,
+      depth: radius * 2,
+      rotation: 0,
+    } as IPointCloudBox;
     const projectMatrix = new THREE.Matrix4()
       .premultiply(this.camera.matrixWorldInverse) // View / Camera Translation
       .premultiply(this.camera.projectionMatrix); // Projection Translation
@@ -1238,15 +1257,12 @@ export class PointCloud {
   }
 
   public getSphereTopPoint2DCoordinate(sphereParams: IPointCloudSphere) {
-    const { radius, center } = sphereParams;
-    const transParams = { center, width: radius * 2, height: radius * 2, depth: radius * 2, rotation: 0 };
+    const { center } = sphereParams;
+    const { radius } = DEFAULT_SPHERE_PARAMS;
 
-    const vector = new THREE.Vector3(center?.x, center?.y, center?.z).applyMatrix4(
-      this.getModelTransformationMatrix(transParams),
-    );
     const point2d = {
-      x: -(vector.y - this.containerWidth / 2),
-      y: -(vector.x - this.containerHeight / 2),
+      x: -(center.y - this.containerWidth / 2),
+      y: -(center.x - this.containerHeight / 2),
     };
     const wZoom = this.containerWidth / (radius * 2);
     const hZoom = this.containerHeight / (radius * 2);
@@ -1313,25 +1329,6 @@ export class PointCloud {
       depth: newBoxParams.depth + offsetDepth,
     };
     return { newBoxParams };
-  }
-
-  public getNewSphereByBackUpdate(
-    offsetCenterPoint: { x: number; y: number; z: number }, // Just use x now.
-    offsetWidth: number,
-    offsetDepth: number,
-    selectedPointCloudSphere: IPointCloudSphere,
-  ) {
-    const Rz = new THREE.Matrix4().makeRotationZ(0);
-    const offsetVector = new THREE.Vector3(0, -offsetCenterPoint.x, 0).applyMatrix4(Rz);
-
-    return {
-      ...selectedPointCloudSphere,
-      center: {
-        x: selectedPointCloudSphere.center.x + offsetVector.x,
-        y: selectedPointCloudSphere.center.y + offsetVector.y,
-        z: selectedPointCloudSphere.center.z - offsetCenterPoint.z,
-      },
-    };
   }
 
   public getNewBoxByBackUpdate(

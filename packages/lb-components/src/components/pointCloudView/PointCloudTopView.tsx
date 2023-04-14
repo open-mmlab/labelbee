@@ -215,7 +215,6 @@ const PointCloudTopView: React.FC<IProps> = ({
     })
 
     TopView2dOperation.singleOn('pointDeleted', (selectedID: string) => {
-      // deletePoint(selectedID)
       deletePointCloudSphere(selectedID)
     })
     TopView2dOperation.singleOn('pointSelected', (selectedID: string) => {
@@ -289,7 +288,7 @@ const PointCloudTopView: React.FC<IProps> = ({
     return () => {
       TopView2dOperation.unbind('validUpdate', validUpdate);
     };
-  }, [ptCtx, size, currentData, pointCloudViews, ptCtx.polygonList, ptCtx.pointList]);
+  }, [ptCtx, size, currentData, pointCloudViews, ptCtx.polygonList]);
 
   useEffect(() => {
     if (!size?.width || !ptCtx.topViewInstance) {

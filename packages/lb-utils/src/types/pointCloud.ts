@@ -92,16 +92,12 @@ export interface IPointCloudBox extends IVolume {
 export interface IPointCloudSphere {
   attribute: string;
   center: I3DSpaceCoord;
-  radius: number,
-  widthSegments: number,
-  heightSegments: number,
   id: string;
   valid: boolean;
   trackID?: number;
   subAttribute?: {
     [k: string]: string;
   };
-  count?: number;
 }
 
 export type IPointCloudSphereList = IPointCloudSphere[]

@@ -356,7 +356,6 @@ const PointCloudListener: React.FC<IProps> = ({
     ptCtx.selectedID,
     ptCtx.valid,
     ptCtx.polygonList,
-    ptCtx.pointList,
     ptCtx.mainViewInstance,
   ]);
 

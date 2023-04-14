@@ -17,6 +17,7 @@ import {
   IPolygonPoint,
   IPointUnit,
   UpdatePolygonByDragList,
+  DEFAULT_SPHERE_PARAMS,
 } from '@labelbee/lb-utils';
 import { useContext } from 'react';
 import { PointCloudContext } from '../PointCloudContext';
@@ -33,7 +34,6 @@ import { message } from 'antd';
 import { useTranslation } from 'react-i18next';
 import { useHistory } from './useHistory';
 import { usePolygon } from './usePolygon';
-import { usePoint } from './usePoint';
 import { IFileItem } from '@/types/data';
 import { ICoordinate } from '@labelbee/lb-utils/src/types/common';
 
@@ -55,10 +55,7 @@ export const topViewPoint2PointCloud = (
   defaultValue?: { [v: string]: any },
 ) => {
   const { x: realX, y: realY } = PointCloudUtils.transferCanvas2World(newPoint, size)
-  const radius = 3
-  const widthSegments = 32
-  const heightSegments = 16
-  const defaultZ = 5
+  const { defaultZ } = DEFAULT_SPHERE_PARAMS
 
   const newPosition = {
     center: {
@@ -66,9 +63,6 @@ export const topViewPoint2PointCloud = (
       y: realY,
       z: defaultZ,
     },
-    radius,
-    widthSegments,
-    heightSegments,
     id: newPoint.id,
   };
 
@@ -610,7 +604,6 @@ export const usePointCloudViews = () => {
   } = ptCtx;
   const { addHistory, initHistory, pushHistoryUnderUpdatePolygon, pushHistoryUnderUpdatePoint } = useHistory();
   const { selectedPolygon } = usePolygon();
-  const { selectedPoint } = usePoint()
 
   const { updateSelectedBox, updateSelectedBoxes, getPointCloudByID } = useSingleBox();
   const { getPointCloudSphereByID, updatePointCloudSphere, selectedSphere } = useSphere();
@@ -905,10 +898,8 @@ export const usePointCloudViews = () => {
   };
 
   const topViewUpdatePoint = (updatePoint: IPointUnit, size: ISize) => {
-    if (selectedPoint) {
-      const { x: realX, y: realY } = PointCloudUtils.transferCanvas2World(updatePoint, size)
-      pushHistoryUnderUpdatePoint({ ...updatePoint, x: realX, y: realY })
-    }
+    const { x: realX, y: realY } = PointCloudUtils.transferCanvas2World(updatePoint, size)
+    pushHistoryUnderUpdatePoint({ ...updatePoint, x: realX, y: realY })
 
     const pointCloudSphere = getPointCloudSphereByID(updatePoint.id)
     const newSphereParams = topViewPoint2PointCloud(

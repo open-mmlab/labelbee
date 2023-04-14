@@ -13,8 +13,6 @@ export const useHistory = () => {
     topViewInstance,
     polygonList,
     setPolygonList,
-    pointList,
-    setPointList,
     syncAllViewPointCloudColor,
   } = useContext(PointCloudContext);
 
@@ -63,14 +61,12 @@ export const useHistory = () => {
     history.pushHistory(historyRecord);
   };
 
+  // todo: need to be completed in future when adding history
   const pushHistoryUnderUpdatePoint = (point: IPointUnit) => {
-    if (pointList.find((v) => v.id === point.id)) {
-      const newPointList = pointList.map((v) => v.id === point.id ? point : v)
+    if (point) {
       history.pushHistory({
         pointCloudSphereList,
-        pointList: newPointList
       })
-      setPointList(newPointList)
     }
   }
 

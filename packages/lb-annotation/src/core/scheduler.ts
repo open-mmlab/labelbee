@@ -279,7 +279,7 @@ export class ToolScheduler implements IToolSchedulerOperation {
   }
 
   /**
-   * switch to canvas by given toolName
+   * Switch to canvas by given toolName
    * TODO: change operationList to operationMap
    */
   public switchToCanvas(toolName: EToolName) {
@@ -312,6 +312,15 @@ export class ToolScheduler implements IToolSchedulerOperation {
     return this.toolOperationList[lastOneIndex];
   }
 
+  /**
+   *
+   * @param toolName
+   * @param result
+   * Update result by give toolName
+   * All the operation instances are maintained in toolOperationList,
+   * there is no more specific instance like pointCloud2dOperation you can reach,
+   * so if you need to update result in specific operation instance, you can try this.
+   */
   public updateDataByToolName(toolName: EToolName, result: any) {
     const operationIndex = this.toolOperationNameList.indexOf(toolName);
     if (operationIndex >= 0) {

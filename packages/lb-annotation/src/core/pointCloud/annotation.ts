@@ -231,12 +231,11 @@ export class PointCloudAnnotation implements IPointCloudAnnotationOperation {
   };
 
   public updatePointList = (sphereList: IPointCloudSphere[]) => {
-    const pointList = sphereList?.map((v: IPointCloudSphere, order) => {
+    const pointList = sphereList?.map((v: IPointCloudSphere) => {
       const { point2d } = this.pointCloudInstance.getSphereTopPoint2DCoordinate(v);
       return {
         ...point2d,
         id: v.id,
-        order,
         sourceID: '',
         valid: v.valid ?? true,
         attribute: v.attribute,
