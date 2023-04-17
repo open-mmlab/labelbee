@@ -477,7 +477,6 @@ class PolygonOperation extends BasicToolOperation {
    * @returns
    */
   public addDrawingPointToPolygonList(isRect?: boolean) {
-    console.log('rect created');
     let { lowerLimitPointNum = 3 } = this.config;
 
     if (lowerLimitPointNum < 3) {
@@ -1378,7 +1377,6 @@ class PolygonOperation extends BasicToolOperation {
     if (isCtrl) {
       return;
     }
-    console.log(66666);
     // Create New Polygon
     this.addPointInDrawing(e);
   }

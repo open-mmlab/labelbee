@@ -488,7 +488,6 @@ class LineToolOperation extends BasicToolOperation {
    * @param selectedIDs
    */
   public setSelectedIDs(selectedIDs: string[]) {
-    console.log('setSelectedIDs', selectedIDs);
     this.selectedIDs = selectedIDs;
 
     if (this.selectedIDs.length < 2) {
@@ -1795,7 +1794,6 @@ class LineToolOperation extends BasicToolOperation {
 
   /** 设置线条文本标注属性 */
   public setTextAttribute(text: string) {
-    console.log('setText', 77);
     if (this.isTextConfigurable) {
       this.setLineAttribute('textAttribute', text);
       this.history?.applyAttribute(this.selectedID, 'textAttribute', text);
