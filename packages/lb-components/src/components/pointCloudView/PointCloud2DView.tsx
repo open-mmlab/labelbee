@@ -96,7 +96,6 @@ const PointCloud2DView = ({ currentData, config }: IA2MapStateProps) => {
         },
         [],
       );
-      console.log('view data', newAnnotations2d);
 
       setAnnotations2d(newAnnotations2d);
     }

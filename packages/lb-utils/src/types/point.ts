@@ -1,4 +1,8 @@
-declare interface IPointUnit extends IPoint {
+import { IToolConfig } from './common';
+import { IInputList } from './base';
+import { IPoint } from './common';
+
+export interface IPointUnit extends IPoint {
   id: string;
   sourceID?: string;
   valid: boolean;
@@ -8,7 +12,7 @@ declare interface IPointUnit extends IPoint {
   textAttribute?: string;
 }
 
-declare interface IPointToolConfig extends IToolConfig {
+export interface IPointToolConfig extends IToolConfig {
   // 目标外标注
   drawOutsideTarget: boolean;
   // 显示标注顺序
@@ -32,5 +36,4 @@ declare interface IPointToolConfig extends IToolConfig {
   showOrder?: boolean; // 兼容旧 order 的配置
   drawPointOut?: boolean; // 兼容旧的目标外标注
   edgeAdsorption?: boolean; // 是否开启边缘吸附
-  hideAttribute?: boolean;
 }

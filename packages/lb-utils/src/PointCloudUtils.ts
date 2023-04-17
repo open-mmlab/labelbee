@@ -4,8 +4,8 @@
  * @author Ron <ron.f.luo@gmail.com>
  */
 
-import { IPolygonData } from './types';
-import { IPointCloudBox, IPointCloudConfig } from './types/pointCloud';
+import { IPointCloudBox, IPointCloudConfig, IPointCloudSphere } from './types/pointCloud';
+import { ICoordinate } from './types/common';
 
 class PointCloudUtils {
   public static genColorByCoord(x: number, y: number, z: number) {
@@ -50,6 +50,15 @@ class PointCloudUtils {
     const pointCloudDataList = data?.[DEFAULT_STEP]?.result ?? [];
 
     return pointCloudDataList;
+  }
+
+  public static getSphereParamsFromResultList(result: string): IPointCloudSphere[] {
+    const data = this.jsonParser(result);
+
+    const DEFAULT_STEP = `step_1`;
+    const pointCloudDataList = data?.[DEFAULT_STEP]?.resultPoint ?? []
+
+    return pointCloudDataList
   }
 
   /**
@@ -351,11 +360,13 @@ class PointCloudUtils {
     imgList,
     step = 1,
     extraBoxList,
+    extraSphereList = [],
     ignoreIndexList = [],
   }: {
     imgList: Array<{ result: string }>;
     step?: number;
     extraBoxList: IPointCloudBox[];
+    extraSphereList?: IPointCloudSphere[];
     ignoreIndexList?: number[];
   }) {
     const resultList = imgList
@@ -363,7 +374,7 @@ class PointCloudUtils {
       .map((v) => this.jsonParser(v.result));
     const DEFAULT_STEP_NAME = `step_${step}`;
 
-    let boxList: IPointCloudBox[] = [];
+    let boxList: Array<IPointCloudBox | IPointCloudSphere> = [];
 
     resultList.forEach((result) => {
       if (result?.[DEFAULT_STEP_NAME]?.['result']?.length > 0) {
@@ -375,6 +386,10 @@ class PointCloudUtils {
       boxList = boxList.concat(extraBoxList);
     }
 
+    if (extraSphereList) {
+      boxList = boxList.concat(extraSphereList);
+    }
+
     return boxList;
   }
 
@@ -382,15 +397,17 @@ class PointCloudUtils {
     imgList,
     step = 1,
     extraBoxList,
+    extraSphereList,
   }: {
     imgList: Array<{ result: string }>;
     step?: number;
     extraBoxList: IPointCloudBox[];
+    extraSphereList?: IPointCloudSphere[];
   }) {
     let trackID = 1;
-    const boxList = this.getAllPointCloudResult({ imgList, step, extraBoxList });
+    const boxList = this.getAllPointCloudResult({ imgList, step, extraBoxList, extraSphereList });
 
-    boxList.forEach((data: IPointCloudBox) => {
+    boxList.forEach((data: IPointCloudBox | IPointCloudSphere) => {
       if (typeof data?.trackID === 'number' && data.trackID >= trackID) {
         trackID = data.trackID + 1;
       }
@@ -543,6 +560,29 @@ class PointCloudUtils {
         value,
       };
     });
+  }
+
+  /**
+   * Get intersection coordinates by slope
+   * @param p1  A point on line1
+   * @param k1  The slope of line1
+   * @param p2  A point on line2
+   * @param k2  The slope of line2
+   */
+  static getIntersectionBySlope(params: {
+    p1: ICoordinate;
+    k1: number;
+    p2: ICoordinate;
+    k2: number;
+  }) {
+    const { p1, k1, p2, k2 } = params;
+    if (p1.x === p2.x && p1.y === p2.y) {
+      return p1;
+    }
+    const x = (p1.y - p2.y - k1 * p1.x + k2 * p2.x) / (k2 - k1);
+    const y = p1.y - k1 * (p1.x - x);
+
+    return { x, y };
   }
 }
 

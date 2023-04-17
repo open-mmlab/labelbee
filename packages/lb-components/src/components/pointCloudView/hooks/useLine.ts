@@ -14,7 +14,6 @@ export const useLine = () => {
   const selectedLine = lineList.find((v) => v.id === selectedID);
 
   const addLine = (line: ILine) => {
-    console.log('add line');
     setLineList(lineList.concat(line));
     addHistory({ newLine: line });
   };

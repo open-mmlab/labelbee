@@ -2,6 +2,7 @@ import { PointCloudContext } from './PointCloudContext';
 import { useRotate } from './hooks/useRotate';
 import { useBoxes } from './hooks/useBoxes';
 import { useSingleBox } from './hooks/useSingleBox';
+import { useSphere } from './hooks/useSphere';
 import React, { useContext, useEffect } from 'react';
 import { cTool, AttributeUtils, CommonToolUtils, EToolName } from '@labelbee/lb-annotation';
 import { message } from 'antd';
@@ -18,6 +19,7 @@ import { ICoordinate } from '@labelbee/lb-utils/dist/types/types/common';
 import { useConfig } from './hooks/useConfig';
 import { usePolygon } from './hooks/usePolygon';
 import { useTranslation } from 'react-i18next';
+import { IFileItem } from '@/types/data';
 
 const { EPolygonPattern } = cTool;
 
@@ -40,6 +42,7 @@ const PointCloudListener: React.FC<IProps> = ({
     updateSelectedBox,
     deleteSelectedPointCloudBoxAndPolygon,
   } = useSingleBox();
+  const { selectedSphere, updatePointCloudSphere } = useSphere();
   const { clearAllResult, updatePointCloudPattern } = useStatus();
   const basicInfo = jsonParser(currentData.result);
   const { copySelectedBoxes, pasteSelectedBoxes, copiedBoxes } = useBoxes({ config });
@@ -182,6 +185,7 @@ const PointCloudListener: React.FC<IProps> = ({
         pasteSelectedBoxes();
         break;
       case 'a':
+        e.preventDefault();
         ptCtx.selectedAllBoxes();
         break;
       case 'z': {
@@ -255,6 +259,7 @@ const PointCloudListener: React.FC<IProps> = ({
       return {
         resultPolygon: ptCtx.polygonList ?? [],
         resultLine: ptCtx.lineList ?? [],
+        resultPoint: ptCtx.pointCloudSphereList ?? [],
       };
     };
 
@@ -268,11 +273,27 @@ const PointCloudListener: React.FC<IProps> = ({
 
         if (ptCtx.mainViewInstance) {
           // TODO: Poor performance.
-          topViewSelectedChanged(selectBox, newPointCloudList);
+          topViewSelectedChanged({
+            newSelectedBox: selectBox,
+            newPointCloudList: newPointCloudList,
+          });
         }
       }
       if (selectedPolygon) {
         pushHistoryUnderUpdatePolygon({ ...selectedPolygon, attribute: newAttribute });
+      }
+      if (selectedSphere) {
+        const newSphereList = updatePointCloudSphere({
+          ...selectedSphere,
+          attribute: newAttribute,
+        });
+        if (ptCtx.mainViewInstance) {
+          ptCtx.mainViewInstance?.generateSpheres(newSphereList);
+          topViewSelectedChanged({
+            newSelectedSphere: selectedSphere,
+            newSphereList: newSphereList,
+          });
+        }
       }
     };
 
@@ -329,8 +350,16 @@ const PointCloudListener: React.FC<IProps> = ({
     toolInstanceRef.current.setShowDefaultCursor = (showDefaultCursor: boolean) => {
       ptCtx.topViewInstance?.pointCloud2dOperation?.setShowDefaultCursor(showDefaultCursor);
     };
+
+    toolInstanceRef.current.asyncData = (newData: IFileItem) => {
+      // Next Tick to update.
+      setTimeout(() => {
+        updatePointCloudData?.(newData);
+      });
+    };
   }, [
     ptCtx.pointCloudBoxList,
+    ptCtx.pointCloudSphereList,
     ptCtx.selectedID,
     ptCtx.valid,
     ptCtx.polygonList,
@@ -351,7 +380,7 @@ const PointCloudListener: React.FC<IProps> = ({
   }, []);
 
   useEffect(() => {
-    const toolInstance = ptCtx.topViewInstance?.pointCloud2dOperation;
+    const toolInstance = ptCtx.topViewInstance?.toolInstance;
 
     if (!toolInstance || checkMode) {
       return;

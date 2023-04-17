@@ -1,6 +1,6 @@
 import { PointCloudContext } from '@/components/pointCloudView/PointCloudContext';
 import { Modal } from 'antd';
-import React, { useContext, useState } from 'react';
+import React, { useContext, useMemo, useState } from 'react';
 import { stepConfigSelector } from '@/store/annotation/selectors';
 import { useSelector } from '@/store/ctx';
 import { i18n, IPointCloudConfig } from '@labelbee/lb-utils';
@@ -22,9 +22,9 @@ import FooterPopover from '../FooterPopover';
 
 const AnnotatedAttributesItem = ({ attribute }: { attribute: IInputList }) => {
   const pointCloudCtx = useContext(PointCloudContext);
-  const { t } = useTranslation();
   const {
     pointCloudBoxList,
+    pointCloudSphereList,
     hideAttributes,
     toggleAttributesVisible,
     polygonList,
@@ -32,16 +32,21 @@ const AnnotatedAttributesItem = ({ attribute }: { attribute: IInputList }) => {
     lineList,
     setLineList,
     setPointCloudResult,
+    setPointCloudSphereList,
     reRender,
+    selectSpecAttr,
   } = pointCloudCtx;
 
-  const [expanded, setExpanded] = useState(false);
+  const [expanded, setExpanded] = useState(true);
 
   const { pushHistoryWithList } = useHistory();
 
-  const pointCloudListForSpecAttribute = [...pointCloudBoxList, ...polygonList, ...lineList].filter(
-    (i) => i.attribute === attribute.value,
-  );
+  const pointCloudListForSpecAttribute = [
+    ...pointCloudBoxList,
+    ...polygonList,
+    ...pointCloudSphereList,
+    ...lineList,
+  ].filter((i) => i.attribute === attribute.value);
 
   const onVisibleChange = () => {
     toggleAttributesVisible(attribute.value);
@@ -49,11 +54,11 @@ const AnnotatedAttributesItem = ({ attribute }: { attribute: IInputList }) => {
 
   const isHidden = hideAttributes.includes(attribute.value);
 
-  const getBoxID = ({ trackID, order }: { trackID?: number; order?: number }) => {
+  const getItemID = ({ trackID, order }: { trackID?: number; order?: number }) => {
     return trackID ? trackID : order;
   };
 
-  const getBoxKey = ({ trackID, order }: { trackID?: number; order?: number }) => {
+  const getItemKey = ({ trackID, order }: { trackID?: number; order?: number }) => {
     return trackID ? `trackID_${trackID}` : `order_${order}`;
   };
 
@@ -65,10 +70,11 @@ const AnnotatedAttributesItem = ({ attribute }: { attribute: IInputList }) => {
     const newPolygonList = polygonList.filter((i) => attribute !== i.attribute);
     const newPointCloudList = pointCloudBoxList.filter((i) => attribute !== i.attribute);
     const newLineList = lineList.filter((i) => attribute !== i.attribute);
-    reRender(newPointCloudList, newPolygonList);
-
+    const newSphereList = pointCloudSphereList.filter((i) => attribute !== i.attribute);
+    reRender(newPointCloudList, newPolygonList, newSphereList, newLineList);
     setPolygonList(newPolygonList);
     setPointCloudResult(newPointCloudList);
+    setPointCloudSphereList(newSphereList);
     setLineList(newLineList);
 
     pushHistoryWithList({
@@ -103,32 +109,46 @@ const AnnotatedAttributesItem = ({ attribute }: { attribute: IInputList }) => {
             setExpanded(!expanded);
           }}
         />
-        <span className={getClassName('annotated-attribute', 'item', 'text')}>{attribute.key}</span>
+        <span
+          className={getClassName('annotated-attribute', 'item', 'text')}
+          onClick={() => {
+            selectSpecAttr(attribute.value);
+          }}
+        >
+          {attribute.key}
+        </span>
 
         <DeleteOutlined onClick={() => onDeleteGraphByAttr(attribute)} />
       </div>
-      {console.log(pointCloudListForSpecAttribute)}
+
       {expanded &&
-        (pointCloudListForSpecAttribute.length > 0 ? (
-          pointCloudListForSpecAttribute.map((box) => {
-            return (
-              <div key={getBoxKey(box)} style={{ paddingLeft: 54 }}>
-                {`${getBoxID(box)}.${attribute.key}`}
-              </div>
-            );
-          })
-        ) : (
-          <div style={{ textAlign: 'center' }}>{t('NoData')}</div>
-        ))}
+        pointCloudListForSpecAttribute.map((item, order) => {
+          return (
+            <div key={getItemKey({ ...item, order })} style={{ paddingLeft: 54 }}>
+              {`${getItemID({ ...item, order })}.${attribute.key}`}
+            </div>
+          );
+        })}
     </>
   );
 };
 
 export const AnnotatedAttributesPanel = () => {
   const stepConfig: IPointCloudConfig = useSelector(stepConfigSelector);
-  const { attrPanelLayout, setAttrPanelLayout } = useContext(PointCloudContext);
+  const { attrPanelLayout, setAttrPanelLayout, pointCloudBoxList, polygonList, lineList } =
+    useContext(PointCloudContext);
   const { t } = useTranslation();
-  console.log('stepConfig', 998);
+
+  const existAttributes = useMemo(() => {
+    return [...pointCloudBoxList, ...polygonList, ...lineList].map((i) => i.attribute);
+  }, [pointCloudBoxList, polygonList, lineList]);
+
+  const displayAttrList = useMemo(() => {
+    return (stepConfig.attributeList as IInputList[]).filter((i) =>
+      existAttributes.includes(i.value),
+    );
+  }, [existAttributes]);
+
   return (
     <div className={getClassName('annotated-attribute')}>
       {attrPanelLayout ? (
@@ -168,9 +188,11 @@ export const AnnotatedAttributesPanel = () => {
       )}
 
       <div>
-        {stepConfig.attributeList.map((i) => (
-          <AnnotatedAttributesItem attribute={i} key={i.value} />
-        ))}
+        {displayAttrList.length > 0 ? (
+          displayAttrList.map((i) => <AnnotatedAttributesItem attribute={i} key={i.value} />)
+        ) : (
+          <div style={{ textAlign: 'center', height: 200, lineHeight: '200px' }}>{t('NoData')}</div>
+        )}
       </div>
     </div>
   );

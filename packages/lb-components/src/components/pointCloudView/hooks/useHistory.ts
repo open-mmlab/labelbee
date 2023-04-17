@@ -1,4 +1,10 @@
-import { IPointCloudBox, IPointCloudBoxList, IPolygonData, ILine } from '@labelbee/lb-utils';
+import {
+  IPointCloudBox,
+  IPointCloudBoxList,
+  IPolygonData,
+  IPointUnit,
+  ILine,
+} from '@labelbee/lb-utils';
 import { useContext } from 'react';
 import { PointCloudContext } from '../PointCloudContext';
 
@@ -8,6 +14,7 @@ export const useHistory = () => {
     setPointCloudResult,
     setSelectedIDs,
     pointCloudBoxList,
+    pointCloudSphereList,
     mainViewInstance,
     topViewInstance,
     polygonList,
@@ -74,7 +81,6 @@ export const useHistory = () => {
   };
   const pushHistoryUnderUpdateLine = (line: ILine) => {
     const selectedLine = lineList.find((v) => v.id === line.id);
-    console.log('selectedLine', 998);
     if (selectedLine) {
       const newLineList = lineList.map((v) => {
         if (v.id === line.id) {
@@ -90,6 +96,16 @@ export const useHistory = () => {
       setLineList(newLineList);
     }
   };
+
+  // todo: need to be completed in future when adding history
+  const pushHistoryUnderUpdatePoint = (point: IPointUnit) => {
+    if (point) {
+      history.pushHistory({
+        pointCloudSphereList,
+      });
+    }
+  };
+
   const pushHistoryUnderUpdatePolygon = (polygon: IPolygonData) => {
     const selectedPolygon = polygonList.find((v) => v.id === polygon.id);
 
@@ -176,6 +192,7 @@ export const useHistory = () => {
     addHistory,
     pushHistoryWithList,
     initHistory,
+    pushHistoryUnderUpdatePoint,
     pushHistoryUnderUpdatePolygon,
     pushHistoryUnderUpdateLine,
     redo,

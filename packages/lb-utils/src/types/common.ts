@@ -1,3 +1,12 @@
+export interface IPoint {
+  x: number;
+  y: number;
+}
+export interface ISize {
+  width: number;
+  height: number;
+}
+
 export interface ICoordinate {
   x: number;
   y: number;
@@ -7,4 +16,8 @@ export interface ICoordinate {
 export enum ELineTypes {
   Line,
   Curve,
+}
+
+export interface IToolConfig {
+  showConfirm?: boolean;
 }

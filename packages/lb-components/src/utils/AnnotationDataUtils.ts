@@ -225,7 +225,6 @@ export default class AnnotationDataUtils {
     deletedIds: string[],
     stepKeys: number[],
   ) {
-    console.log('deleteRes');
     stepKeys.forEach((s) => {
       if (s > dataSourceStep) {
         const stepRes = resData[`step_${s}`];

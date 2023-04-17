@@ -1,7 +1,4 @@
-export interface IPoint {
-  x: number;
-  y: number;
-}
+import { IPoint } from './common';
 export interface ILinePoint extends IPoint {
   id?: string;
   specialEdge?: boolean;

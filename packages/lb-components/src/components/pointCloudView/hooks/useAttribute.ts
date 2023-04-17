@@ -18,7 +18,6 @@ export const useAttribute = () => {
     }
 
     const updateDefaultAttribute = () => {
-      console.log('update');
       setDefaultAttribute(topViewInstance?.toolInstance.defaultAttribute);
     };
 
@@ -30,20 +29,17 @@ export const useAttribute = () => {
   }, [topViewInstance?.toolInstance]);
 
   const syncThreeViewsAttribute = (attribute?: string) => {
-    let instanceArr = [topViewInstance?.toolInstance];
-    if (topViewInstance?.toolInstance.toolName !== 'lineTool') {
-      instanceArr = instanceArr.concat([
-        sideViewInstance?.toolInstance,
-        backViewInstance?.toolInstance,
-      ]);
-    }
-    instanceArr.forEach((instance) => {
+    [
+      topViewInstance?.toolInstance,
+      sideViewInstance?.toolInstance,
+      backViewInstance?.toolInstance,
+    ].forEach((instance) => {
       instance?.setDefaultAttribute(attribute);
     });
   };
 
   const updateDefaultAttribute = (attribute?: string) => {
-    topViewInstance?.pointCloud2dOperation.setDefaultAttribute(attribute);
+    topViewInstance?.toolInstance.setDefaultAttribute(attribute);
   };
 
   const reRenderPointCloud3DBox = (newBox: IPointCloudBox) => {

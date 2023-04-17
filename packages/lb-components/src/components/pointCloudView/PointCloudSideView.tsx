@@ -7,18 +7,20 @@ import { PointCloud, PointCloudAnnotation, THybridToolName } from '@labelbee/lb-
 import { getClassName } from '@/utils/dom';
 import { PointCloudContainer } from './PointCloudLayout';
 import React, { useEffect, useRef } from 'react';
-import { EPerspectiveView, IPointCloudBox, UpdatePolygonByDragList } from '@labelbee/lb-utils';
+import { EPerspectiveView, IPointUnit, UpdatePolygonByDragList } from '@labelbee/lb-utils';
 import { PointCloudContext } from './PointCloudContext';
 import { SizeInfoForView } from './PointCloudInfos';
 import { connect } from 'react-redux';
 import { a2MapStateToProps, IA2MapStateProps } from '@/store/annotation/map';
 import { usePointCloudViews } from './hooks/usePointCloudViews';
 import { useSingleBox } from './hooks/useSingleBox';
+import { useSphere } from './hooks/useSphere';
 import EmptyPage from './components/EmptyPage';
 import useSize from '@/hooks/useSize';
 import { useTranslation } from 'react-i18next';
 import { LabelBeeContext } from '@/store/ctx';
 import ToolUtils from '@/utils/ToolUtils';
+import { useZoom } from '@/components/pointCloudView/hooks/useZoom';
 
 /**
  * Get the offset from canvas2d-coordinate to world coordinate
@@ -54,14 +56,14 @@ const updateSideViewByCanvas2D = (
   currentPos: { x: number; y: number },
   zoom: number,
   size: { width: number; height: number },
-  selectedPointCloudBox: IPointCloudBox,
+  rotation: number,
   SidePointCloud: PointCloud,
 ) => {
   const { offsetX, offsetY } = TransferCanvas2WorldOffset(currentPos, size, zoom);
   SidePointCloud.camera.zoom = zoom;
   if (currentPos) {
-    const cos = Math.cos(selectedPointCloudBox.rotation);
-    const sin = Math.sin(selectedPointCloudBox.rotation);
+    const cos = Math.cos(rotation);
+    const sin = Math.sin(rotation);
     const offsetXX = offsetX * cos;
     const offsetXY = offsetX * sin;
     const { x, y, z } = SidePointCloud.initCameraPosition;
@@ -77,13 +79,14 @@ interface IProps {
 
 const PointCloudSideView: React.FC<IA2MapStateProps & IProps> = ({ config, checkMode }) => {
   const ptCtx = React.useContext(PointCloudContext);
-  const { sideViewUpdateBox } = usePointCloudViews();
+  const { sideViewUpdateBox, sideViewUpdatePoint } = usePointCloudViews();
   const { selectedBox } = useSingleBox();
+  const { selectedSphere } = useSphere();
   const ref = useRef<HTMLDivElement>(null);
   const size = useSize(ref);
   const { t } = useTranslation();
-  const toolName = ptCtx?.topViewInstance?.toolInstance.toolName;
-  const isLine = toolName === 'lineTool';
+  const { syncSideviewToolZoom } = useZoom();
+
   useEffect(() => {
     if (ref.current) {
       const size = {
@@ -94,7 +97,7 @@ const PointCloudSideView: React.FC<IA2MapStateProps & IProps> = ({ config, check
       const pointCloudAnnotation = new PointCloudAnnotation({
         container: ref.current,
         size,
-        polygonOperationProps: { showDirectionLine: false, forbidAddNew: true },
+        extraProps: { showDirectionLine: false, forbidAddNew: true, forbidDelete: true },
         config,
         checkMode,
         toolName: ToolUtils.getPointCloudToolList() as THybridToolName,
@@ -110,41 +113,55 @@ const PointCloudSideView: React.FC<IA2MapStateProps & IProps> = ({ config, check
       return;
     }
 
-    const { pointCloud2dOperation, pointCloudInstance } = ptCtx.sideViewInstance;
+    const { toolInstance, pointCloudInstance } = ptCtx.sideViewInstance;
 
     /**
      * Synchronized 3d point cloud view displacement operations
      *
      * Change Orthographic Camera size
      */
-    pointCloud2dOperation.singleOn('renderZoom', (zoom: number, currentPos: any) => {
-      if (!ptCtx.selectedPointCloudBox) {
+    toolInstance.singleOn('renderZoom', (zoom: number, currentPos: any) => {
+      if (ptCtx.selectedPointCloudBox) {
+        updateSideViewByCanvas2D(
+          currentPos,
+          zoom,
+          size,
+          ptCtx.selectedPointCloudBox.rotation,
+          pointCloudInstance,
+        );
+        syncSideviewToolZoom(currentPos, zoom, size);
         return;
       }
-      updateSideViewByCanvas2D(
-        currentPos,
-        zoom,
-        size,
-        ptCtx.selectedPointCloudBox,
-        pointCloudInstance,
-      );
+      if (selectedSphere) {
+        updateSideViewByCanvas2D(currentPos, zoom, size, 0, pointCloudInstance);
+        syncSideviewToolZoom(currentPos, zoom, size);
+      }
     });
 
     // Synchronized 3d point cloud view displacement operations
-    pointCloud2dOperation.singleOn('dragMove', ({ currentPos, zoom }: any) => {
-      if (!ptCtx.selectedPointCloudBox) {
+    toolInstance.singleOn('dragMove', ({ currentPos, zoom }: any) => {
+      if (!ptCtx.selectedPointCloudBox && !selectedSphere) {
         return;
       }
       updateSideViewByCanvas2D(
         currentPos,
         zoom,
         size,
-        ptCtx.selectedPointCloudBox,
+        ptCtx.selectedPointCloudBox ? ptCtx.selectedPointCloudBox.rotation : 0,
         pointCloudInstance,
       );
     });
 
-    pointCloud2dOperation.singleOn('updatePolygonByDrag', (updateList: UpdatePolygonByDragList) => {
+    toolInstance.singleOn(
+      'updatePointByDrag',
+      (updatePoint: IPointUnit, oldPointList: IPointUnit[]) => {
+        if (selectedSphere) {
+          sideViewUpdatePoint?.(updatePoint, oldPointList[0]);
+        }
+      },
+    );
+
+    toolInstance.singleOn('updatePolygonByDrag', (updateList: UpdatePolygonByDragList) => {
       if (ptCtx.selectedIDs.length === 1 && updateList.length === 1) {
         const { newPolygon, originPolygon } = updateList[0];
         sideViewUpdateBox(newPolygon, originPolygon);
@@ -161,11 +178,11 @@ const PointCloudSideView: React.FC<IA2MapStateProps & IProps> = ({ config, check
     <PointCloudContainer
       className={getClassName('point-cloud-container', 'side-view')}
       title={t('SideView')}
-      toolbar={isLine ? null : <SizeInfoForView perspectiveView={EPerspectiveView.Left} />}
+      toolbar={<SizeInfoForView perspectiveView={EPerspectiveView.Left} />}
     >
       <div className={getClassName('point-cloud-container', 'bottom-view-content')}>
         <div className={getClassName('point-cloud-container', 'core-instance')} ref={ref} />
-        {(!selectedBox || isLine) && <EmptyPage />}
+        {!selectedBox && !selectedSphere && <EmptyPage />}
       </div>
     </PointCloudContainer>
   );

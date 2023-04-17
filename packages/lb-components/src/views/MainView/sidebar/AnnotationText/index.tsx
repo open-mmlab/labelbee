@@ -29,7 +29,6 @@ const AnnotationText: React.FC<IProps> = ({ toolInstance }) => {
       });
     }
   }, [toolInstance]);
-  console.log(toolInstance, 6675);
   if (!toolInstance) {
     return null;
   }

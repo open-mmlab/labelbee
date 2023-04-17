@@ -1,7 +1,7 @@
 {
   "name": "labelbee",
   "private": true,
-  "version": "1.12.1",
+  "version": "1.13.0",
   "scripts": {
     "start": "lerna run build:type && lerna run --parallel --stream start",
     "start:quick": "lerna run --parallel --stream start",
@@ -14,7 +14,8 @@
     "version": "lerna version --conventional-graduate --yes",
     "publish": "lerna publish from-package --yes",
     "commit": "cz",
-    "release": "standard-version"
+    "release": "standard-version",
+    "prerelease": "lerna version prerelease --conventional-graduate --yes"
   },
   "main": "index.js",
   "license": "Apache-2.0",

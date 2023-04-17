@@ -1,4 +1,11 @@
-import { IPointCloudBox, IPointCloudBoxList, IPolygonData, ILine } from '@labelbee/lb-utils';
+import {
+  IPointCloudBox,
+  IPointCloudBoxList,
+  IPolygonData,
+  IPointCloudSphereList,
+  IPointCloudSphere,
+  ILine,
+} from '@labelbee/lb-utils';
 import React, { useEffect, useMemo, useRef, useState } from 'react';
 import {
   PointCloud,
@@ -22,17 +29,21 @@ type AttrPanelLayout = '' | 'left' | 'right';
 
 export interface IPointCloudContext extends IPointCloudContextInstances {
   pointCloudBoxList: IPointCloudBoxList;
+  pointCloudSphereList: IPointCloudSphereList;
   displayPointCloudList: IPointCloudBoxList;
+  displaySphereList: IPointCloudSphereList;
   selectedIDs: string[];
   setSelectedIDs: (ids?: string[] | string) => void;
   valid: boolean;
   setPointCloudResult: (resultList: IPointCloudBoxList) => void;
+  setPointCloudSphereList: (sphereList: IPointCloudSphereList) => void;
   selectedPointCloudBox?: IPointCloudBox;
   setPointCloudValid: (valid?: boolean) => void;
   addSelectedID: (selectedID: string) => void;
   selectedAllBoxes: () => void;
   selectedID: string;
   addPointCloudBox: (boxParams: IPointCloudBox) => IPointCloudBox[];
+  addPointCloudSphere: (sphereParams: IPointCloudSphere) => IPointCloudSphere[];
 
   polygonList: IPolygonData[];
   setPolygonList: (polygonList: IPolygonData[]) => void;
@@ -47,7 +58,12 @@ export interface IPointCloudContext extends IPointCloudContextInstances {
   hideAttributes: string[];
   setHideAttributes: (hideAttrs: string[]) => void;
   toggleAttributesVisible: (attribute: string) => void;
-  reRender: (_displayPointCloudList: IPointCloudBoxList, _polygonList: IPolygonData[]) => void;
+  reRender: (
+    _displayPointCloudList: IPointCloudBoxList,
+    _polygonList: IPolygonData[],
+    _displaySphereList: IPointCloudSphereList,
+    _lineList: ILine[],
+  ) => void;
   attrPanelLayout: AttrPanelLayout;
   setAttrPanelLayout: (layout: AttrPanelLayout) => void;
 
@@ -60,11 +76,14 @@ export interface IPointCloudContext extends IPointCloudContextInstances {
   setPointCloudPattern: (
     toolName: EToolName.Rect | EToolName.Polygon | EToolName.Point | EToolName.Line,
   ) => void;
+  selectSpecAttr: (attr: string) => void;
 }
 
 export const PointCloudContext = React.createContext<IPointCloudContext>({
   pointCloudBoxList: [],
+  pointCloudSphereList: [],
   displayPointCloudList: [],
+  displaySphereList: [],
   polygonList: [],
   lineList: [],
   selectedID: '',
@@ -72,6 +91,7 @@ export const PointCloudContext = React.createContext<IPointCloudContext>({
   valid: true,
   setSelectedIDs: () => {},
   setPointCloudResult: () => {},
+  setPointCloudSphereList: () => {},
   setPointCloudValid: () => {},
   setTopViewInstance: () => {},
   setSideViewInstance: () => {},
@@ -80,6 +100,9 @@ export const PointCloudContext = React.createContext<IPointCloudContext>({
   addSelectedID: () => {},
   selectedAllBoxes: () => {},
   addPointCloudBox: () => {
+    return [];
+  },
+  addPointCloudSphere: () => {
     return [];
   },
   setPolygonList: () => {},
@@ -101,10 +124,12 @@ export const PointCloudContext = React.createContext<IPointCloudContext>({
 
   pointCloudPattern: EToolName.Rect,
   setPointCloudPattern: () => {},
+  selectSpecAttr: () => {},
 });
 
 export const PointCloudProvider: React.FC<{}> = ({ children }) => {
   const [pointCloudBoxList, setPointCloudResult] = useState<IPointCloudBoxList>([]);
+  const [pointCloudSphereList, setPointCloudSphereList] = useState<IPointCloudSphereList>([]);
   const [polygonList, setPolygonList] = useState<IPolygonData[]>([]);
   const [lineList, setLineList] = useState<ILine[]>([]);
   const [selectedIDs, setSelectedIDsState] = useState<string[]>([]);
@@ -133,6 +158,12 @@ export const PointCloudProvider: React.FC<{}> = ({ children }) => {
       const newPointCloudList = pointCloudBoxList.concat(box);
       setPointCloudResult(newPointCloudList);
       return newPointCloudList;
+    };
+
+    const addPointCloudSphere = (sphere: IPointCloudSphere) => {
+      const newSphereList = pointCloudSphereList.concat(sphere);
+      setPointCloudSphereList(newSphereList);
+      return newSphereList;
     };
 
     const setPointCloudValid = (valid?: boolean) => {
@@ -170,7 +201,15 @@ export const PointCloudProvider: React.FC<{}> = ({ children }) => {
       setSelectedIDs(pointCloudBoxList.map((i) => i.id));
     };
 
+    const selectSpecAttr = (attr: string) => {
+      setSelectedIDs(pointCloudBoxList.filter((i) => i.attribute === attr).map((i) => i.id));
+    };
+
     const displayPointCloudList = pointCloudBoxList.filter(
+      (i) => !hideAttributes.includes(i.attribute),
+    );
+
+    const displaySphereList = pointCloudSphereList.filter(
       (i) => !hideAttributes.includes(i.attribute),
     );
 
@@ -186,13 +225,27 @@ export const PointCloudProvider: React.FC<{}> = ({ children }) => {
     const reRender = (
       _displayPointCloudList: IPointCloudBoxList = displayPointCloudList,
       _polygonList: IPolygonData[] = polygonList,
+      _displaySphereList: IPointCloudSphereList = displaySphereList,
+      _lineList: ILine[] = lineList,
     ) => {
       pointCloudBoxList.forEach((v) => {
         mainViewInstance?.removeObjectByName(v.id);
       });
 
+      pointCloudSphereList.forEach((v) => {
+        mainViewInstance?.removeObjectByName(v.id);
+      });
+
+      lineList.forEach((v) => {
+        mainViewInstance?.removeObjectByName(v.id);
+      });
+
       topViewInstance?.updatePolygonList(_displayPointCloudList, _polygonList);
+      topViewInstance?.updatePointList(_displaySphereList);
+      topViewInstance?.updateLineList(_lineList);
       mainViewInstance?.generateBoxes(_displayPointCloudList);
+      mainViewInstance?.generateSpheres(_displaySphereList);
+      // mainViewInstance?.generateLine(_lineList);
       syncAllViewPointCloudColor(_displayPointCloudList);
     };
 
@@ -206,7 +259,6 @@ export const PointCloudProvider: React.FC<{}> = ({ children }) => {
       return new Promise((resolve) => {
         colorPromise?.then((color) => {
           [topViewInstance].forEach((instance) => {
-            console.log('color', 99876);
             if (color) {
               instance?.pointCloudInstance?.updateColor(color);
               resolve({ color });
@@ -220,11 +272,15 @@ export const PointCloudProvider: React.FC<{}> = ({ children }) => {
     return {
       selectedID,
       pointCloudBoxList,
+      pointCloudSphereList,
       displayPointCloudList,
+      displaySphereList,
       selectedIDs,
       setPointCloudResult,
       setSelectedIDs,
       addPointCloudBox,
+      addPointCloudSphere,
+      setPointCloudSphereList,
       valid,
       selectedPointCloudBox,
       setPointCloudValid,
@@ -256,11 +312,13 @@ export const PointCloudProvider: React.FC<{}> = ({ children }) => {
       setDefaultAttribute,
       pointCloudPattern,
       setPointCloudPattern,
+      selectSpecAttr,
     };
   }, [
     valid,
     selectedIDs,
     pointCloudBoxList,
+    pointCloudSphereList,
     polygonList,
     lineList,
     topViewInstance,
