@@ -50,6 +50,12 @@ export const useStatus = () => {
     pushHistoryWithList({ pointCloudBoxList: [], polygonList: [] });
   };
 
+  // Clear results of sideview and backview
+  const clearSBViewResult = () => {
+    sideViewInstance?.toolInstance.clearResult()
+    backViewInstance?.toolInstance.clearResult()
+  }
+
   const updatePointCloudPattern = (toolName: any) => {
     if (toolName === pointCloudPattern) {
       return;
@@ -59,9 +65,7 @@ export const useStatus = () => {
 
     switch (toolName) {
       case EToolName.Rect:
-        sideViewInstance?.toolInstance.clearResult()
-        backViewInstance?.toolInstance.clearResult()
-
+        clearSBViewResult()
         instanceArr.forEach((instance) => {
           instance?.switchToCanvas(EToolName.PointCloudPolygon)
           instance?.toolInstance.setPattern(EPolygonPattern.Rect)
@@ -69,9 +73,7 @@ export const useStatus = () => {
         setPointCloudPattern(EToolName.Rect);
         break;
       case EToolName.Polygon:
-        sideViewInstance?.toolInstance.clearResult()
-        backViewInstance?.toolInstance.clearResult()
-
+        clearSBViewResult()
         instanceArr.forEach((instance) => {
           instance?.switchToCanvas(EToolName.PointCloudPolygon)
           instance?.toolInstance.setPattern(EPolygonPattern.Normal)
@@ -79,18 +81,14 @@ export const useStatus = () => {
         setPointCloudPattern(EToolName.Polygon);
         break;
       case EToolName.Point:
-        sideViewInstance?.toolInstance.clearResult()
-        backViewInstance?.toolInstance.clearResult()
-
+        clearSBViewResult()
         instanceArr.forEach((instance) => {
           instance?.switchToCanvas(EToolName.Point)
         })
         setPointCloudPattern(EToolName.Point);
         break;
       case EToolName.Line:
-        sideViewInstance?.toolInstance.clearResult()
-        backViewInstance?.toolInstance.clearResult()
-
+        clearSBViewResult()
         instanceArr.forEach((instance) => {
           instance?.switchToCanvas(EToolName.Line)
         })
