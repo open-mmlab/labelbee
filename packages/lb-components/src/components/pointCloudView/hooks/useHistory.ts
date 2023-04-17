@@ -139,13 +139,17 @@ export const useHistory = () => {
   const updatePointCloud = (params?: {
     pointCloudBoxList: IPointCloudBoxList;
     polygonList: IPolygonData[];
+    lineList: ILine[];
   }) => {
     if (!params) {
       return;
     }
 
-    const { pointCloudBoxList: newPointCloudBoxList = [], polygonList: newPolygonList = [] } =
-      params;
+    const {
+      pointCloudBoxList: newPointCloudBoxList = [],
+      polygonList: newPolygonList = [],
+      lineList: newLineList = [],
+    } = params;
 
     if (newPointCloudBoxList) {
       if (pointCloudBoxList.length !== newPointCloudBoxList.length) {
@@ -177,7 +181,12 @@ export const useHistory = () => {
       setPolygonList(newPolygonList);
     }
 
+    if (newLineList) {
+      setLineList(newLineList);
+    }
+
     topViewInstance?.updatePolygonList(newPointCloudBoxList ?? [], newPolygonList ?? []);
+    topViewInstance?.updateLineList(newLineList ?? []);
   };
 
   const redo = () => {
