@@ -676,7 +676,6 @@ export const usePointCloudViews = () => {
       // Wait for the mainPointCloudData.
       await ptCtx.syncAllViewPointCloudColor(newPointCloudBoxList);
     }
-    console.log(886);
     const viewToBeUpdated = {
       [PointCloudView.Side]: () => {
         synchronizeSideView(boxParams, polygon, sideViewInstance, dataUrl);
@@ -747,11 +746,12 @@ export const usePointCloudViews = () => {
     });
 
     let boxParamsList: any[] = [];
+    let lineList: any[] = [];
     let polygonList = [];
     if (currentData.result) {
       boxParamsList = PointCloudUtils.getBoxParamsFromResultList(currentData.result);
       polygonList = PointCloudUtils.getPolygonListFromResultList(currentData.result);
-
+      lineList = PointCloudUtils.getLineListFromResultList(currentData.result);
       // Add Init Box
       boxParamsList.forEach((v: IPointCloudBox) => {
         mainViewInstance?.generateBox(v);
@@ -760,9 +760,11 @@ export const usePointCloudViews = () => {
       ptCtx.syncAllViewPointCloudColor(boxParamsList);
       ptCtx.setPointCloudResult(boxParamsList);
       ptCtx.setPolygonList(polygonList);
+      ptCtx.setLineList(lineList);
     } else {
       ptCtx.setPointCloudResult([]);
       ptCtx.setPolygonList([]);
+      ptCtx.setLineList([]);
     }
     initHistory({ pointCloudBoxList: boxParamsList, polygonList });
 

@@ -29,6 +29,8 @@ const AnnotatedAttributesItem = ({ attribute }: { attribute: IInputList }) => {
     toggleAttributesVisible,
     polygonList,
     setPolygonList,
+    lineList,
+    setLineList,
     setPointCloudResult,
     reRender,
   } = pointCloudCtx;
@@ -37,7 +39,7 @@ const AnnotatedAttributesItem = ({ attribute }: { attribute: IInputList }) => {
 
   const { pushHistoryWithList } = useHistory();
 
-  const pointCloudListForSpecAttribute = [...pointCloudBoxList, ...polygonList].filter(
+  const pointCloudListForSpecAttribute = [...pointCloudBoxList, ...polygonList, ...lineList].filter(
     (i) => i.attribute === attribute.value,
   );
 
@@ -62,13 +64,18 @@ const AnnotatedAttributesItem = ({ attribute }: { attribute: IInputList }) => {
 
     const newPolygonList = polygonList.filter((i) => attribute !== i.attribute);
     const newPointCloudList = pointCloudBoxList.filter((i) => attribute !== i.attribute);
-
+    const newLineList = lineList.filter((i) => attribute !== i.attribute);
     reRender(newPointCloudList, newPolygonList);
 
     setPolygonList(newPolygonList);
     setPointCloudResult(newPointCloudList);
+    setLineList(newLineList);
 
-    pushHistoryWithList({ pointCloudBoxList: newPointCloudList, polygonList: newPolygonList });
+    pushHistoryWithList({
+      pointCloudBoxList: newPointCloudList,
+      polygonList: newPolygonList,
+      lineList: newLineList,
+    });
   };
 
   const onDeleteGraphByAttr = (attribute: IInputList) => {

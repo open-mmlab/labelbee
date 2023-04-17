@@ -5,7 +5,7 @@
  */
 
 import { IPointCloudBox, IPointCloudConfig, PointCloudUtils } from '@labelbee/lb-utils';
-import { EPolygonPattern, EToolName, THybridToolName } from '@/constant/tool';
+import { EPolygonPattern, EToolName, THybridToolName, ILine } from '@/constant/tool';
 import { CanvasScheduler } from '@/newCore';
 import { IPolygonData, IPolygonPoint } from '@/types/tool/polygon';
 import { PointCloud } from '.';
@@ -205,6 +205,23 @@ export class PointCloudAnnotation implements IPointCloudAnnotationOperation {
     this.updatePolygonList(pointCloudDataList, polygonList);
   }
 
+  public updateLineList = (lineList: ILine[]) => {
+    const list = lineList.map((v: ILine) => ({
+      ...v,
+      pointList: v?.pointList?.map((point) => ({
+        x: point.x,
+        y: point.y,
+      })),
+    }));
+
+    this.toolScheduler.updateDataByToolName(EToolName.Line, list);
+  };
+
+  public addLineListOnTopView(result: string) {
+    const lineList = PointCloudUtils.getLineListFromResultList(result);
+    this.updateLineList(lineList);
+  }
+
   public updatePolygonList = (pointCloudDataList: IPointCloudBox[], extraList?: IPolygonData[]) => {
     let pointList;
     let polygonList = pointCloudDataList.map((v: IPointCloudBox) => {
@@ -252,11 +269,12 @@ export class PointCloudAnnotation implements IPointCloudAnnotationOperation {
    * @returns
    */
   public updateData(pcdPath: string, result: string, config?: { radius?: number }) {
-    if (!this.pointCloud2dOperation || !this.pointCloudInstance) {
+    if (!this.toolInstance || !this.pointCloudInstance) {
       return;
     }
     this.pointCloudInstance.loadPCDFile(pcdPath, config?.radius);
     this.addPolygonListOnTopView(result);
+    this.addLineListOnTopView(result);
   }
 
   /**
