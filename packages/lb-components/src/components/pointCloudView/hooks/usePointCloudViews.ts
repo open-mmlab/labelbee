@@ -15,6 +15,7 @@ import {
   PointCloudUtils,
   IPolygonPoint,
   UpdatePolygonByDragList,
+  ILine,
 } from '@labelbee/lb-utils';
 import { useContext } from 'react';
 import { PointCloudContext } from '../PointCloudContext';
@@ -401,7 +402,8 @@ export const usePointCloudViews = () => {
     pointCloudBoxList,
     hideAttributes,
   } = ptCtx;
-  const { addHistory, initHistory, pushHistoryUnderUpdatePolygon } = useHistory();
+  const { addHistory, initHistory, pushHistoryUnderUpdatePolygon, pushHistoryUnderUpdateLine } =
+    useHistory();
   const { selectedPolygon } = usePolygon();
 
   const { updateSelectedBox, updateSelectedBoxes, getPointCloudByID } = useSingleBox();
@@ -590,6 +592,14 @@ export const usePointCloudViews = () => {
     viewUpdateBox(newPolygon, originPolygon, PointCloudView.Back);
   };
 
+  const topViewUpdateLine = (updateList: ILine, size: ISize) => {
+    // updateList.pointList = updateList.pointList.map((v) =>
+    //   PointCloudUtils.transferCanvas2World(v, size),
+    // );
+
+    pushHistoryUnderUpdateLine(updateList);
+    return;
+  };
   /**
    * Top view box updated and sync views
    * @param polygon
@@ -598,6 +608,7 @@ export const usePointCloudViews = () => {
   const topViewUpdateBox = (updateList: UpdatePolygonByDragList, size: ISize) => {
     // If the selected Object is Polygon.
     if (selectedPolygon) {
+      console.log(updateList, 6665);
       /**
        * Notice. The Polygon need to be converted to pointCloud coordinate system for storage.
        */
@@ -781,6 +792,7 @@ export const usePointCloudViews = () => {
     topViewAddBox,
     topViewSelectedChanged,
     topViewUpdateBox,
+    topViewUpdateLine,
     sideViewUpdateBox,
     backViewUpdateBox,
     pointCloudBoxListUpdated,

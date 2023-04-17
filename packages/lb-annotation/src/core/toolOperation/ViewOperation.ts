@@ -513,7 +513,7 @@ export default class ViewOperation extends BasicToolOperation {
 
     const extraData = _.pick(data, ['stroke', 'thickness']);
 
-    viewDataPointList.forEach((v, i) => {
+    viewDataPointList!.forEach((v, i) => {
       const newAnnotation = {
         ...extraData,
         id: `${annotation.annotation.id}-${i}`,
@@ -525,13 +525,13 @@ export default class ViewOperation extends BasicToolOperation {
         case 'line':
           this.renderLine({
             type: 'line',
-            annotation: newAnnotation,
+            annotation: newAnnotation as any,
           });
           break;
         case 'polygon':
           this.renderPolygon({
             type: 'polygon',
-            annotation: newAnnotation,
+            annotation: newAnnotation as any,
           });
           break;
 

@@ -86,11 +86,6 @@ export class ToolScheduler implements IToolSchedulerOperation {
     this.size = props.size;
     this.imgNode = props.imgNode;
     this.config = props.config ?? JSON.stringify(getConfig(HybridToolUtils.getTopToolName(props.toolName))); // 设置默认操作
-    console.log(
-      getConfig(HybridToolUtils.getTopToolName(props.toolName)),
-      1231222111,
-      HybridToolUtils.getTopToolName(props.toolName),
-    );
     this.style = props.style ?? styleDefaultConfig; // 设置默认操作
   }
 
@@ -119,7 +114,6 @@ export class ToolScheduler implements IToolSchedulerOperation {
   }
 
   public syncPosition(currentPos: ICoordinate, zoom: number, imgInfo: ISize, currentToolInstance: any) {
-    console.log('syncPosition', 111222);
     this.toolOperationList.forEach((toolInstance) => {
       if (currentToolInstance === toolInstance) {
         return;
@@ -208,7 +202,6 @@ export class ToolScheduler implements IToolSchedulerOperation {
       },
     );
     toolInstance.on('renderZoom', (zoom: number, currentPos: ICoordinate, imgInfo: ISize) => {
-      console.log(zoom, currentPos);
       if (zoom && currentPos) {
         this.syncPosition(currentPos, zoom, imgInfo, toolInstance);
       }

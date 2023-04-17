@@ -206,7 +206,6 @@ export class PointCloudAnnotation implements IPointCloudAnnotationOperation {
   }
 
   public updatePolygonList = (pointCloudDataList: IPointCloudBox[], extraList?: IPolygonData[]) => {
-    console.log('pointCloudDataList', pointCloudDataList);
     let pointList;
     let polygonList = pointCloudDataList.map((v: IPointCloudBox) => {
       // line

@@ -1,4 +1,4 @@
-import { IPointCloudBox, IPointCloudBoxList, IPolygonData } from '@labelbee/lb-utils';
+import { IPointCloudBox, IPointCloudBoxList, IPolygonData, ILine } from '@labelbee/lb-utils';
 import React, { useEffect, useMemo, useRef, useState } from 'react';
 import {
   PointCloud,
@@ -37,6 +37,9 @@ export interface IPointCloudContext extends IPointCloudContextInstances {
   polygonList: IPolygonData[];
   setPolygonList: (polygonList: IPolygonData[]) => void;
 
+  lineList: ILine[];
+  setLineList: (lineList: ILine[]) => void;
+
   zoom: number;
   setZoom: (zoom: number) => void;
 
@@ -63,6 +66,7 @@ export const PointCloudContext = React.createContext<IPointCloudContext>({
   pointCloudBoxList: [],
   displayPointCloudList: [],
   polygonList: [],
+  lineList: [],
   selectedID: '',
   selectedIDs: [],
   valid: true,
@@ -79,6 +83,7 @@ export const PointCloudContext = React.createContext<IPointCloudContext>({
     return [];
   },
   setPolygonList: () => {},
+  setLineList: () => {},
 
   zoom: 1,
   setZoom: () => {},
@@ -101,6 +106,7 @@ export const PointCloudContext = React.createContext<IPointCloudContext>({
 export const PointCloudProvider: React.FC<{}> = ({ children }) => {
   const [pointCloudBoxList, setPointCloudResult] = useState<IPointCloudBoxList>([]);
   const [polygonList, setPolygonList] = useState<IPolygonData[]>([]);
+  const [lineList, setLineList] = useState<ILine[]>([]);
   const [selectedIDs, setSelectedIDsState] = useState<string[]>([]);
   const [valid, setValid] = useState<boolean>(true);
   const [zoom, setZoom] = useState<number>(1);
@@ -234,6 +240,8 @@ export const PointCloudProvider: React.FC<{}> = ({ children }) => {
       setMainViewInstance,
       polygonList,
       setPolygonList,
+      lineList,
+      setLineList,
       zoom,
       setZoom,
       history,
@@ -254,6 +262,7 @@ export const PointCloudProvider: React.FC<{}> = ({ children }) => {
     selectedIDs,
     pointCloudBoxList,
     polygonList,
+    lineList,
     topViewInstance,
     sideViewInstance,
     backViewInstance,

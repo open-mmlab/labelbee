@@ -254,6 +254,7 @@ const PointCloudListener: React.FC<IProps> = ({
     toolInstanceRef.current.exportCustomData = () => {
       return {
         resultPolygon: ptCtx.polygonList ?? [],
+        resultLine: ptCtx.lineList ?? [],
       };
     };
 
@@ -333,6 +334,7 @@ const PointCloudListener: React.FC<IProps> = ({
     ptCtx.selectedID,
     ptCtx.valid,
     ptCtx.polygonList,
+    ptCtx.lineList,
     ptCtx.mainViewInstance,
   ]);
 

@@ -131,10 +131,12 @@ export function pointCloudLidar2image(
   },
 ) {
   if (boxParams.length) {
-    return boxParams.linePointList?.map((line) => ({
-      type: 'line',
-      pointList: [line],
-    }));
+    return boxParams.linePointList
+      ?.map((line) => ({
+        type: 'line',
+        pointList: [line],
+      }))
+      .slice(0, boxParams.linePointList.length - 1);
   }
   const allViewData = PointCloudUtils.getAllViewData(boxParams);
   const { P, R, T } = cameraMatrix;
