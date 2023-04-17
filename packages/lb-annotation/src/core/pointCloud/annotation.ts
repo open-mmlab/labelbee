@@ -4,12 +4,13 @@
  * @author Ron <ron.f.luo@gmail.com>
  */
 
-import { IPointCloudBox, IPointCloudConfig, PointCloudUtils } from '@labelbee/lb-utils';
+import { IPointCloudBox, IPointCloudSphere, IPointCloudConfig, PointCloudUtils } from '@labelbee/lb-utils';
 import { EPolygonPattern, EToolName, THybridToolName } from '@/constant/tool';
 import { CanvasScheduler } from '@/newCore';
 import { IPolygonData, IPolygonPoint } from '@/types/tool/polygon';
 import { PointCloud } from '.';
 import PointCloud2dOperation, { IPointCloud2dOperationProps } from '../toolOperation/pointCloud2dOperation';
+import { IPointOperationProps } from '../toolOperation/pointOperation';
 import { HybridToolUtils, ToolScheduler } from '../scheduler';
 
 interface IPointCloudAnnotationOperation {
@@ -21,7 +22,7 @@ interface IPointCloudAnnotationProps {
   size: ISize;
 
   pcdPath?: string;
-  polygonOperationProps?: IPointCloud2dOperationProps;
+  extraProps?: IPointCloud2dOperationProps | IPointOperationProps;
 
   config: IPointCloudConfig;
 
@@ -55,15 +56,7 @@ export class PointCloudAnnotation implements IPointCloudAnnotationOperation {
 
   public config: IPointCloudConfig;
 
-  constructor({
-    size,
-    container,
-    pcdPath,
-    polygonOperationProps,
-    config,
-    checkMode,
-    toolName,
-  }: IPointCloudAnnotationProps) {
+  constructor({ size, container, pcdPath, extraProps, config, checkMode, toolName }: IPointCloudAnnotationProps) {
     const defaultOrthographic = this.getDefaultOrthographic(size);
 
     const imgSrc = createEmptyImage(size);
@@ -88,16 +81,16 @@ export class PointCloudAnnotation implements IPointCloudAnnotationOperation {
     canvasScheduler.createCanvas(pointCloud.renderer.domElement);
 
     // 2. PointCloud2dOperation initialization
-    const defaultPolygonProps = {
+    const defaultProps = {
       size,
-      config: JSON.stringify(config),
+      config: JSON.stringify({ ...config, attributeConfigurable: true, hideAttribute: true }),
       imgNode: image,
       checkMode,
       // forbidOperation: true,
       // forbidOperation: !!checkMode,
     };
-    if (polygonOperationProps) {
-      Object.assign(defaultPolygonProps, polygonOperationProps);
+    if (extraProps) {
+      Object.assign(defaultProps, extraProps);
     }
 
     // init operations
@@ -111,14 +104,15 @@ export class PointCloudAnnotation implements IPointCloudAnnotationOperation {
     toolList.forEach((tool, i) => {
       let toolInstance;
       if (tool === EToolName.PointCloudPolygon) {
-        const pointCloudPolygonOperation = toolScheduler.createOperation(tool, image, defaultPolygonProps);
+        const pointCloudPolygonOperation = toolScheduler.createOperation(tool, image, defaultProps);
         pointCloudPolygonOperation.eventBinding();
         pointCloudPolygonOperation.setPattern(EPolygonPattern.Rect);
         this.toolInstance = pointCloudPolygonOperation;
         this.toolInstance.eventBinding();
+        // need to be deleted
         this.pointCloud2dOperation = pointCloudPolygonOperation;
       } else {
-        toolInstance = toolScheduler.createOperation(tool, image, config);
+        toolInstance = toolScheduler.createOperation(tool, image, defaultProps);
       }
       if (i === toolList.length - 1) {
         if (!this.toolInstance) {
@@ -200,8 +194,12 @@ export class PointCloudAnnotation implements IPointCloudAnnotationOperation {
   public addPolygonListOnTopView(result: string) {
     const pointCloudDataList = PointCloudUtils.getBoxParamsFromResultList(result);
     const polygonList = PointCloudUtils.getPolygonListFromResultList(result);
-
     this.updatePolygonList(pointCloudDataList, polygonList);
+  }
+
+  public addPointListOnTopView(result: string) {
+    const sphereList = PointCloudUtils.getSphereParamsFromResultList(result);
+    this.updatePointList(sphereList);
   }
 
   public updatePolygonList = (pointCloudDataList: IPointCloudBox[], extraList?: IPolygonData[]) => {
@@ -229,7 +227,22 @@ export class PointCloudAnnotation implements IPointCloudAnnotationOperation {
       );
     }
 
-    this.pointCloud2dOperation.setResult(polygonList);
+    this.toolScheduler.updateDataByToolName(EToolName.PointCloudPolygon, polygonList);
+  };
+
+  public updatePointList = (sphereList: IPointCloudSphere[]) => {
+    const pointList = sphereList?.map((v: IPointCloudSphere) => {
+      const { point2d } = this.pointCloudInstance.getSphereTopPoint2DCoordinate(v);
+      return {
+        ...point2d,
+        id: v.id,
+        sourceID: '',
+        valid: v.valid ?? true,
+        attribute: v.attribute,
+        textAttribute: '',
+      };
+    }) as IPointUnit[];
+    this.toolScheduler.updateDataByToolName(EToolName.Point, pointList);
   };
 
   /**
@@ -239,12 +252,13 @@ export class PointCloudAnnotation implements IPointCloudAnnotationOperation {
    * @returns
    */
   public updateData(pcdPath: string, result: string, config?: { radius?: number }) {
-    if (!this.pointCloud2dOperation || !this.pointCloudInstance) {
+    if (!this.toolInstance || !this.pointCloudInstance) {
       return;
     }
 
     this.pointCloudInstance.loadPCDFile(pcdPath, config?.radius);
     this.addPolygonListOnTopView(result);
+    this.addPointListOnTopView(result);
   }
 
   /**

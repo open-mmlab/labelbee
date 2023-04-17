@@ -5,10 +5,11 @@
  */
  import { useContext } from 'react';
  import { PointCloudContext } from '../PointCloudContext';
+ import { ICoordinate, ISize } from '@labelbee/lb-utils'
 
 export const useZoom = () => {
-  const { topViewInstance } = useContext(PointCloudContext);
-  const { zoom, setZoom } = useContext(PointCloudContext); 
+  const { topViewInstance, sideViewInstance, backViewInstance } = useContext(PointCloudContext);
+  const { zoom, setZoom } = useContext(PointCloudContext);
 
   const initialPosition = () => {
     topViewInstance?.pointCloud2dOperation.initImgPos();
@@ -22,11 +23,27 @@ export const useZoom = () => {
     topViewInstance?.pointCloud2dOperation.zoomChanged(true);
   };
 
+  const syncTopviewToolZoom = (currentPos: ICoordinate, zoom: number, size: ISize) => {
+    topViewInstance?.toolScheduler.syncPosition(currentPos, zoom, size, topViewInstance?.toolInstance)
+  }
+
+  const syncSideviewToolZoom = (currentPos: ICoordinate, zoom: number, size: ISize) => {
+    sideViewInstance?.toolScheduler.syncPosition(currentPos, zoom, size, sideViewInstance?.toolInstance)
+  }
+
+  const syncBackviewToolZoom = (currentPos: ICoordinate, zoom: number, size: ISize) => {
+    backViewInstance?.toolScheduler.syncPosition(currentPos, zoom, size, backViewInstance?.toolInstance)
+  }
+
+
   return {
-    zoom, 
+    zoom,
     setZoom,
     initialPosition,
     zoomOut,
-    zoomIn
+    zoomIn,
+    syncTopviewToolZoom,
+    syncSideviewToolZoom,
+    syncBackviewToolZoom
   }
 }
