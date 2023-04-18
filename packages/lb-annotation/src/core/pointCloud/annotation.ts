@@ -227,7 +227,7 @@ export class PointCloudAnnotation implements IPointCloudAnnotationOperation {
         id: v.id,
         sourceID: '',
         pointList,
-        isRect: !v.length,
+        isRect: true,
         valid: v.valid ?? true,
         attribute: v.attribute,
       };

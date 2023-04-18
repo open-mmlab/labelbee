@@ -56,9 +56,9 @@ class PointCloudUtils {
     const data = this.jsonParser(result);
 
     const DEFAULT_STEP = `step_1`;
-    const pointCloudDataList = data?.[DEFAULT_STEP]?.resultPoint ?? []
+    const pointCloudDataList = data?.[DEFAULT_STEP]?.resultPoint ?? [];
 
-    return pointCloudDataList
+    return pointCloudDataList;
   }
 
   /**
@@ -309,7 +309,7 @@ class PointCloudUtils {
   public static transferBox2Kitti(boxParams: IPointCloudBox) {
     return {
       height: boxParams.depth ?? 0,
-      length: boxParams.width ?? boxParams.length,
+      length: boxParams.width ?? 0,
       width: boxParams.height ?? 0,
       rotation_y: boxParams.rotation
         ? this.transferRotation2KittiRotation_y(boxParams.rotation)

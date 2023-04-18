@@ -236,16 +236,11 @@ export const PointCloudProvider: React.FC<{}> = ({ children }) => {
         mainViewInstance?.removeObjectByName(v.id);
       });
 
-      lineList.forEach((v) => {
-        mainViewInstance?.removeObjectByName(v.id);
-      });
-
       topViewInstance?.updatePolygonList(_displayPointCloudList, _polygonList);
       topViewInstance?.updatePointList(_displaySphereList);
       topViewInstance?.updateLineList(_lineList);
       mainViewInstance?.generateBoxes(_displayPointCloudList);
       mainViewInstance?.generateSpheres(_displaySphereList);
-      // mainViewInstance?.generateLine(_lineList);
       syncAllViewPointCloudColor(_displayPointCloudList);
     };
 

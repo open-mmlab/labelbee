@@ -721,7 +721,7 @@ class LineToolOperation extends BasicToolOperation {
     super.render();
     this.drawLines();
     this.drawActivatedLine(nextPoint, undefined, true);
-    // this.renderTextAttribute();
+    this.renderTextAttribute();
     this.renderCursorLine(this.getLineColor(this.defaultAttribute));
   };
 
@@ -839,6 +839,7 @@ class LineToolOperation extends BasicToolOperation {
       this.activeLine.map((i) => Object.assign(i, { x: i.x + offsetX, y: i.y + offsetY }));
       this.updateLines();
     }
+    this.emit('updateLineByDrag', this.updatedLine);
   }
 
   /**
@@ -1013,13 +1014,11 @@ class LineToolOperation extends BasicToolOperation {
     if (this.enableOutOfTarget) {
       this.lineDragging = true;
       this.moveActiveArea(offsetX, offsetY);
-      this.emit('updateLineByDrag', this.updatedLine);
       return;
     }
 
     if (this.isDependPolygon) {
       this.moveLineInPolygon(offsetX, offsetY);
-      this.emit('updateLineByDrag', this.updatedLine);
       return;
     }
 
@@ -1032,7 +1031,6 @@ class LineToolOperation extends BasicToolOperation {
       rectVerticalRange = [y, y + height];
     }
     this.moveLineInRectRange(offsetX, offsetY, rectHorizontalRange, rectVerticalRange);
-    this.emit('updateLineByDrag', this.updatedLine);
   }
 
   /**
@@ -1755,6 +1753,7 @@ class LineToolOperation extends BasicToolOperation {
     this.lineList = this.lineList.filter((i) => i.id !== this.selectedID);
     this.history?.pushHistory(this.lineList);
     this.setNoneStatus();
+    this.emit('dataUpdated', this.lineList);
     this.emit('lineDeleted', this.selectedID);
     this.render();
   }
