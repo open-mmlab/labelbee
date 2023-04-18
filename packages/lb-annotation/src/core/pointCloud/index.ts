@@ -282,7 +282,7 @@ export class PointCloud {
     //     )?.hex ?? color;
     // }
 
-    this.AddBoxToSense(boxParams, newColor);
+    this.addBoxToSense(boxParams, newColor);
     this.render();
   }
 
@@ -303,7 +303,7 @@ export class PointCloud {
    * @param id
    * @param color
    */
-  public AddBoxToSense = (boxParams: IPointCloudBox, color = 0xffffff) => {
+  public addBoxToSense = (boxParams: IPointCloudBox, color = 0xffffff) => {
     const id = boxParams.id ?? uuid();
 
     this.removeObjectByName(id);
@@ -334,7 +334,7 @@ export class PointCloud {
 
   public generateBoxes(boxes: IPointCloudBox[]) {
     boxes.forEach((box) => {
-      this.generateBox(box);
+      this.addBoxToSense(box);
     });
     this.render();
   }
