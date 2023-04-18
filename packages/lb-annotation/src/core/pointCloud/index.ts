@@ -898,8 +898,8 @@ export class PointCloud {
    * 2. Filter out points 10cm above the road surface.
    * 3. Filter out the first 0.5% of noise points in other directions
    */
-  public filterNoise(pointList: I3DSpaceCoord[]) {
-    let newPointList = [...pointList];
+  public filterNoise(innerPointList: I3DSpaceCoord[]) {
+    let newPointList = [...innerPointList];
     newPointList.sort((a, b) => a.z - b.z);
 
     const startIndexZ = Math.floor(newPointList.length * 0.05);
@@ -920,7 +920,7 @@ export class PointCloud {
     const endIndexY = Math.floor(newPointList.length * (1 - noisePercent));
     newPointList = newPointList.slice(startIndexY, endIndexY);
 
-    return newPointList.length > 100 ? newPointList : pointList;
+    return newPointList.length > 100 ? newPointList : innerPointList;
   }
 
   // Get the polygon coordinates after fitting
@@ -963,11 +963,7 @@ export class PointCloud {
     let fittedCoordinates: ICoordinate[] = []; // Vertex coordinates after fitting(ThreeJs coordinates)
     let innerPointList: I3DSpaceCoord[] = []; // Points within the polygon range
 
-    if (!points?.geometry) {
-      return { maxZ, minZ, count, zCount, fittedCoordinates: [] };
-    }
-
-    const pointPosArray = points?.geometry.attributes.position.array;
+    const pointPosArray = points?.geometry?.attributes?.position?.array || [];
 
     for (let idx = 0; idx < pointPosArray.length; idx += 3) {
       const x = pointPosArray[idx];
@@ -977,6 +973,10 @@ export class PointCloud {
       if (inPolygon && (z || z === 0)) {
         innerPointList.push({ x, y, z });
       }
+    }
+
+    if (!innerPointList.length) {
+      return { maxZ, minZ, count, zCount, fittedCoordinates };
     }
 
     if (intelligentFit) {

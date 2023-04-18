@@ -103,7 +103,7 @@ export const topViewPolygon2PointCloud = (
       undefined,
       intelligentFit,
     );
-    if (intelligentFit) {
+    if (intelligentFit && zInfo.fittedCoordinates.length > 0) {
       worldPointList = zInfo.fittedCoordinates;
     }
     z = (zInfo.maxZ + zInfo.minZ) / 2;
