@@ -113,12 +113,12 @@ const PointCloudListener: React.FC<IProps> = ({
 
       // +: Increase points size
       case '+':
-        mainViewInstance?.updatePointSize(true);
+        mainViewInstance?.updatePointSize({ zoomIn: true });
         break;
 
       // -: Reduce points size
       case '-':
-        mainViewInstance?.updatePointSize(false);
+        mainViewInstance?.updatePointSize({ zoomIn: false });
         break;
 
       case 'v':

@@ -21,11 +21,12 @@ import { a2MapStateToProps, IA2MapStateProps } from '@/store/annotation/map';
 import { connect } from 'react-redux';
 import { jsonParser } from '@/utils';
 import { useSingleBox } from './hooks/useSingleBox';
-import { Switch, Tooltip } from 'antd';
+import { Slider, Switch, Tooltip } from 'antd';
 import useSize from '@/hooks/useSize';
 import { usePointCloudViews } from './hooks/usePointCloudViews';
 import { useTranslation } from 'react-i18next';
 import { LabelBeeContext } from '@/store/ctx';
+import PointCloudSizeSlider from './components/PointCloudSizeSlider';
 
 const pointCloudID = 'LABELBEE-POINTCLOUD';
 const PointCloud3DContext = React.createContext<{
@@ -212,7 +213,12 @@ const PointCloud3D: React.FC<IA2MapStateProps> = ({ currentData, config }) => {
   }, [selectedBox, ptCtx.mainViewInstance]);
 
   const PointCloud3DTitle = (
-    <div>
+    <>
+      <PointCloudSizeSlider
+        onChange={(v: number) => {
+          ptCtx.mainViewInstance?.updatePointSize({ customSize: v });
+        }}
+      />
       <span style={{ marginRight: 8 }}>{t('ShowArrows')}</span>
       <Switch
         size='small'
@@ -222,7 +228,7 @@ const PointCloud3D: React.FC<IA2MapStateProps> = ({ currentData, config }) => {
           ptCtx.mainViewInstance?.setShowDirection(showDirection);
         }}
       />
-    </div>
+    </>
   );
 
   return (

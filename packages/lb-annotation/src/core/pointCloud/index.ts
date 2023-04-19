@@ -92,6 +92,8 @@ export class PointCloud {
 
   private currentPCDSrc?: string; // Record the src of PointCloud
 
+  private pointsMaterialSize: number = 1;
+
   /**
    * Record the src of Highlight PCD.
    *
@@ -616,7 +618,7 @@ export class PointCloud {
     });
 
     pointsMaterial.onBeforeCompile = this.overridePointShader;
-    pointsMaterial.size = 1.2;
+    pointsMaterial.size = this.pointsMaterialSize;
 
     if (radius) {
       // @ts-ignore
@@ -1259,9 +1261,10 @@ export class PointCloud {
 
   /**
    * Update point size
-   * @param zoomIn
+   * @param param0
+   * @returns
    */
-  public updatePointSize = (zoomIn: boolean) => {
+  public updatePointSize = ({ zoomIn, customSize }: { zoomIn?: boolean; customSize?: number }) => {
     const points = this.scene.getObjectByName(this.pointCloudObjectName) as { material: PointsMaterial } | undefined;
 
     if (!points) {
@@ -1274,6 +1277,11 @@ export class PointCloud {
       points.material.size = Math.min(preSize * 1.2, 10);
     } else {
       points.material.size = Math.max(preSize / 1.2, 1);
+    }
+
+    if (customSize) {
+      points.material.size = customSize;
+      this.pointsMaterialSize = customSize;
     }
 
     this.render();
