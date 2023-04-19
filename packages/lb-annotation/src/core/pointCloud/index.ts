@@ -676,7 +676,7 @@ export class PointCloud {
     }
     this.highlightPCDSrc = this.currentPCDSrc;
 
-    return new Promise<BufferAttribute[] | undefined>((resolve) => {
+    return new Promise<BufferAttribute[] | undefined>((resolve, reject) => {
       if (window.Worker) {
         const newPointCloudBoxList = pointCloudBoxList ? [...pointCloudBoxList] : [];
 
@@ -694,13 +694,27 @@ export class PointCloud {
           const { color } = e.data;
           const colorAttribute = new THREE.BufferAttribute(color, 3);
 
-          if (this.highlightPCDSrc) {
-            // Save the new highlight color.
-            this.cacheInstance.updateColor(this.highlightPCDSrc, color);
-
-            // Clear
-            this.highlightPCDSrc = undefined;
+          /**
+           * Need to return;
+           *
+           * 1. Not exist highlightPCDSrc
+           * 2. HighlightPCDSrc is not same with currentPCDSrc.
+           * 3. If the calculate color is not same with origin Points length.
+           */
+          if (
+            !this.highlightPCDSrc ||
+            this.highlightPCDSrc !== this.currentPCDSrc ||
+            oldPointCloud.geometry.attributes.position.array.length !== color.length
+          ) {
+            reject(new Error('Error Path'));
+            return;
           }
+
+          // Save the new highlight color.
+          this.cacheInstance.updateColor(this.highlightPCDSrc, color);
+
+          // Clear
+          this.highlightPCDSrc = undefined;
 
           colorAttribute.needsUpdate = true;
           oldPointCloud.geometry.setAttribute('color', colorAttribute);
