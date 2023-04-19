@@ -36,10 +36,14 @@ class ResourceManager {
     });
   }
 
+  /**
+   * Just use index & imgList to preload all data.
+   * @param param0
+   */
   public quickPreload({
     currentIndex,
     imgList,
-    size = 2,
+    size = DEFAULT_CACHE_SIZE,
   }: {
     currentIndex: number;
     imgList: Array<{ url: string; webPointCloudFile?: { lidar: { url: string } } }>;
@@ -69,7 +73,7 @@ class ResourceManager {
       return [];
     }
 
-    const urlList: string[] = [];
+    let urlList: string[] = [];
     const withInRange = (index: number) => index >= 0 && index < imgList.length;
 
     /**
@@ -78,20 +82,32 @@ class ResourceManager {
     for (let i = 1; i <= size; i += 1) {
       [currentIndex - i, currentIndex + i].forEach((i: number) => {
         if (withInRange(i)) {
-          // Img
-          if (imgList[i].url) {
-            urlList.push(imgList[i].url);
-          }
+          const newUrlList = this.processResourceUrl(imgList[i]);
 
-          // PointCloud
-          const lidarUrl = imgList[i]?.webPointCloudFile?.lidar?.url;
-          if (lidarUrl) {
-            urlList.push(lidarUrl);
-          }
+          urlList = [...urlList, ...newUrlList];
         }
       });
     }
 
+    return urlList;
+  }
+
+  /**
+   * Unified Resource Acquisition
+   * @param imgInfo TODO: Need to Define
+   */
+  public processResourceUrl(imgInfo: any = {}) {
+    const urlList = [];
+    // Img Url.
+    if (imgInfo?.url) {
+      urlList.push(imgInfo.url);
+    }
+
+    // PointCloud-PCD
+    const lidarUrl = imgInfo?.webPointCloudFile?.lidar?.url;
+    if (lidarUrl) {
+      urlList.push(lidarUrl);
+    }
     return urlList;
   }
 }
