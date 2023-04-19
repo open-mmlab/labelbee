@@ -21,7 +21,7 @@ import { a2MapStateToProps, IA2MapStateProps } from '@/store/annotation/map';
 import { connect } from 'react-redux';
 import { jsonParser } from '@/utils';
 import { useSingleBox } from './hooks/useSingleBox';
-import { Slider, Switch, Tooltip } from 'antd';
+import { Switch, Tooltip } from 'antd';
 import useSize from '@/hooks/useSize';
 import { usePointCloudViews } from './hooks/usePointCloudViews';
 import { useTranslation } from 'react-i18next';
