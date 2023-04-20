@@ -24,8 +24,6 @@ import { DEFAULT_TEXT_SHADOW, DEFAULT_TEXT_OFFSET, TEXT_ATTRIBUTE_OFFSET } from 
 import ImgPosUtils from '@/utils/tool/ImgPosUtils';
 import { BasicToolOperation, IBasicToolOperationProps } from './basicToolOperation';
 import { pointCloudLidar2image } from '../pointCloud/matrix';
-import AttributeUtils from '@/utils/tool/AttributeUtils';
-import { getCuboidTextAttributeOffset } from '@/utils/tool/CuboidUtils';
 
 const newScope = 3;
 const DEFAULT_RADIUS = 3;
@@ -509,50 +507,21 @@ export default class ViewOperation extends BasicToolOperation {
     const fillColor = `rgba(${fillArr[0]}, ${fillArr[1]}, ${fillArr[2]},${fillArr[3] * 0.8})`;
     const strokeColor = style.stroke;
     const transformCuboid = AxisUtils.changeCuboidByZoom(cuboid, this.zoom, this.currentPos);
-
-    const textColor = strokeColor;
-
     const { headerText, bottomText } = this.getRenderText(cuboid, cuboid?.hiddenText);
-    const { backPoints, frontPoints, textAttribute } = transformCuboid;
 
-    const frontPointsSizeWidth = frontPoints.br.x - frontPoints.bl.x;
-
-    DrawUtils.drawCuboid(this.canvas, transformCuboid, { strokeColor, fillColor, thickness: style.thickness });
-
-    let showText = '';
-    if (this.config?.isShowOrder && transformCuboid.order && transformCuboid?.order > 0) {
-      showText = `${transformCuboid.order}`;
-    }
-
-    if (transformCuboid.attribute) {
-      showText = `${showText}  ${AttributeUtils.getAttributeShowText(
-        transformCuboid.attribute,
-        this.config?.attributeList,
-      )}`;
-    }
-
-    if (headerText && backPoints) {
-      DrawUtils.drawText(this.canvas, { x: backPoints.tl.x, y: backPoints.tl.y - 5 }, showText, {
-        color: strokeColor,
-        textMaxWidth: 300,
-      });
-    }
-
-    const textPosition = getCuboidTextAttributeOffset({
-      cuboid,
-      currentPos: this.currentPos,
-      zoom: this.zoom,
-      topOffset: 16,
-      leftOffset: 0,
-    });
-
-    if (bottomText) {
-      const textWidth = Math.max(20, frontPointsSizeWidth * 0.8);
-      DrawUtils.drawText(this.canvas, { x: textPosition.left, y: textPosition.top }, textAttribute, {
-        color: textColor,
-        textMaxWidth: textWidth,
-      });
-    }
+    DrawUtils.drawCuboidWithText(
+      this.canvas,
+      transformCuboid,
+      { strokeColor, fillColor, thickness: style.thickness },
+      {
+        config: this.config,
+        hiddenText: cuboid?.hiddenText,
+        currentPos: this.currentPos,
+        zoom: this.zoom,
+        headerText,
+        bottomText,
+      },
+    );
   }
 
   public renderBox3d(annotation: TAnnotationViewBox3d) {
