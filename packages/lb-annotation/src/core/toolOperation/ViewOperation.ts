@@ -24,8 +24,6 @@ import { DEFAULT_TEXT_SHADOW, DEFAULT_TEXT_OFFSET, TEXT_ATTRIBUTE_OFFSET } from 
 import ImgPosUtils from '@/utils/tool/ImgPosUtils';
 import { BasicToolOperation, IBasicToolOperationProps } from './basicToolOperation';
 import { pointCloudLidar2image } from '../pointCloud/matrix';
-import AttributeUtils from '@/utils/tool/AttributeUtils';
-import { getCuboidTextAttributeOffset } from '@/utils/tool/CuboidUtils';
 
 const newScope = 3;
 const DEFAULT_RADIUS = 3;

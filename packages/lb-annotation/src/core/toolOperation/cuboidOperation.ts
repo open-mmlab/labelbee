@@ -10,6 +10,7 @@ import {
   getCuboidTextAttributeOffset,
   isCuboidWithInLimits,
   getPlainPointsByDiagonalPoints,
+  getHighlightLines,
 } from '@/utils/tool/CuboidUtils';
 import PolygonUtils from '@/utils/tool/PolygonUtils';
 import { ECuboidDirection, EDragStatus, EDragTarget } from '@/constant/annotation';
@@ -195,12 +196,13 @@ class CuboidOperation extends BasicToolOperation implements ITextAttributeFuc {
     });
   }
 
-  public getColorToRender(attribute: string, valid: boolean) {
+  public getStylesToRender(attribute: string, valid: boolean) {
     const toolColor = this.getColor(attribute);
     const strokeColor = valid ? toolColor?.valid.stroke : toolColor?.invalid.stroke;
     const fillColor = valid ? toolColor?.valid.fill : toolColor?.invalid.fill;
+    const lineWidth = this.style?.width ?? 2;
 
-    return { strokeColor, toolColor, fillColor };
+    return { strokeColor, toolColor, fillColor, lineWidth };
   }
 
   /**
@@ -217,7 +219,7 @@ class CuboidOperation extends BasicToolOperation implements ITextAttributeFuc {
       return;
     }
 
-    const { strokeColor: color } = this.getColorToRender(selectedCuboid.attribute, selectedCuboid.valid);
+    const { strokeColor: color } = this.getStylesToRender(selectedCuboid.attribute, selectedCuboid.valid);
     return {
       width: TEXT_MAX_WIDTH,
       textAttribute: selectedCuboid.textAttribute,
@@ -785,21 +787,57 @@ class CuboidOperation extends BasicToolOperation implements ITextAttributeFuc {
   }
 
   /**
+   * Render the highlight components
+   *
+   * Situation:
+   * 1. hover
+   * 2. selected.
+   *
+   * Components:
+   * 1. 6 Points
+   * 2. 5 Lines.
+   *
+   * @param cuboid
+   */
+  public renderHighlightCuboidCom(cuboid: ICuboid | IDrawingCuboid) {
+    const transformCuboid = AxisUtils.changeCuboidByZoom(cuboid, this.zoom, this.currentPos);
+    const isHover = transformCuboid.id === this.hoverID;
+    const isSelected = transformCuboid.id === this.selectedID;
+    const { strokeColor, lineWidth } = this.getStylesToRender(transformCuboid.attribute, transformCuboid.valid);
+
+    const defaultStyle = {
+      color: strokeColor,
+      thickness: lineWidth,
+    };
+    // Hover Highlight
+    if (isHover || isSelected) {
+      const hoverPointList = getHighlightPoints(transformCuboid as ICuboid);
+      hoverPointList.forEach((data) => {
+        DrawUtils.drawCircleWithFill(this.canvas, data.point, 5, { ...defaultStyle });
+      });
+      if (isSelected) {
+        const highlightLine = getHighlightLines(transformCuboid as ICuboid);
+        highlightLine.forEach((line) => {
+          DrawUtils.drawLine(this.canvas, line.p1, line.p2, { color: strokeColor, thickness: lineWidth + 2 });
+        });
+
+        hoverPointList.forEach((data) => {
+          DrawUtils.drawCircleWithFill(this.canvas, data.point, 3, { color: 'white' });
+        });
+      }
+    }
+  }
+
+  /**
    * TODO - Need to optimize.
    * @param cuboid
    */
   public renderSingleCuboid(cuboid: ICuboid | IDrawingCuboid) {
     const transformCuboid = AxisUtils.changeCuboidByZoom(cuboid, this.zoom, this.currentPos);
-    const isHover = transformCuboid.id === this.hoverID;
-    const isSelected = transformCuboid.id === this.selectedID;
-    const { strokeColor, fillColor } = this.getColorToRender(transformCuboid.attribute, transformCuboid.valid);
+    const { strokeColor, fillColor } = this.getStylesToRender(transformCuboid.attribute, transformCuboid.valid);
 
     const lineWidth = this.style?.width ?? 2;
     const { hiddenText = false } = this.style;
-    const defaultStyle = {
-      color: strokeColor,
-      thickness: lineWidth,
-    };
 
     DrawUtils.drawCuboidWithText(
       this.canvas,
@@ -813,19 +851,6 @@ class CuboidOperation extends BasicToolOperation implements ITextAttributeFuc {
         selectedID: this.selectedID,
       },
     );
-
-    // Hover Highlight
-    if (isHover || isSelected) {
-      const hoverPointList = getHighlightPoints(transformCuboid as ICuboid);
-      hoverPointList.forEach((data) => {
-        DrawUtils.drawCircleWithFill(this.canvas, data.point, 5, { ...defaultStyle });
-      });
-      if (isSelected) {
-        hoverPointList.forEach((data) => {
-          DrawUtils.drawCircleWithFill(this.canvas, data.point, 3, { color: 'white' });
-        });
-      }
-    }
 
     this.renderTextAttribute();
   }
@@ -890,7 +915,7 @@ class CuboidOperation extends BasicToolOperation implements ITextAttributeFuc {
     }
     const { attribute, valid } = selectedCuboid;
 
-    const { strokeColor: color } = this.getColorToRender(attribute, valid);
+    const { strokeColor: color } = this.getStylesToRender(attribute, valid);
 
     if (!this.toggleButtonInstance) {
       this.toggleButtonInstance = new CuboidToggleButtonClass({
@@ -919,7 +944,7 @@ class CuboidOperation extends BasicToolOperation implements ITextAttributeFuc {
       return;
     }
 
-    const { strokeColor: color } = this.getColorToRender(selectedCuboid.attribute, selectedCuboid.valid);
+    const { strokeColor: color } = this.getStylesToRender(selectedCuboid.attribute, selectedCuboid.valid);
     const { attribute, textAttribute, frontPoints } = selectedCuboid;
     const offset = getCuboidTextAttributeOffset({
       cuboid: selectedCuboid,
@@ -966,6 +991,7 @@ class CuboidOperation extends BasicToolOperation implements ITextAttributeFuc {
     const { selectedCuboid } = this;
     if (selectedCuboid) {
       this.renderSingleCuboid(selectedCuboid);
+      this.renderHighlightCuboidCom(selectedCuboid);
       this.renderToggleButton();
     } else {
       this.toggleButtonInstance?.clearCuboidButtonDOM();
@@ -1004,7 +1030,7 @@ class CuboidOperation extends BasicToolOperation implements ITextAttributeFuc {
       return;
     }
     this.highlightInfo?.forEach((data) => {
-      const { strokeColor } = this.getColorToRender(data.originCuboid.attribute, data.originCuboid.valid);
+      const { strokeColor } = this.getStylesToRender(data.originCuboid.attribute, data.originCuboid.valid);
       const thickness = 8;
 
       switch (data.type) {
