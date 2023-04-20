@@ -18,8 +18,7 @@
     "commit": "git-cz",
     "lint": "eslint 'src/**/*.{ts,tsx,js,jsx}' && npm run build:type",
     "lint:fix": "eslint 'src/**/*.{ts,tsx,js,jsx}' --fix",
-    "commitmsg": "commitlint -e $GIT_PARAMS",
-    "prepublishOnly": "npm run build"
+    "commitmsg": "commitlint -e $GIT_PARAMS"
   },
   "author": "laoluo",
   "contributors": [
@@ -33,6 +32,9 @@
     "canvas",
     "react"
   ],
+  "publishConfig": {
+    "access": "public"
+  },
   "license": "Apache-2.0",
   "homepage": "https://github.com/open-mmlab/labelbee/tree/main/packages/lb-components",
   "bugs": {

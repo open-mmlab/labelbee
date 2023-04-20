@@ -1,6 +1,7 @@
 {
   "workspaces": [
-    "packages/*"
+    "packages/*",
+    "!packages/lb-demo/**"
   ],
   "branches": [
     "main",
