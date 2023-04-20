@@ -21,6 +21,7 @@ import { a2MapStateToProps, IA2MapStateProps } from '@/store/annotation/map';
 import { connect } from 'react-redux';
 import { jsonParser } from '@/utils';
 import { useSingleBox } from './hooks/useSingleBox';
+import { useSphere } from './hooks/useSphere'
 import { Switch, Tooltip } from 'antd';
 import useSize from '@/hooks/useSize';
 import { usePointCloudViews } from './hooks/usePointCloudViews';
@@ -111,6 +112,7 @@ const PointCloud3D: React.FC<IA2MapStateProps> = ({ currentData, config }) => {
     initPointCloud3d?.(size);
   }, [size]);
   const { selectedBox } = useSingleBox();
+  const { selectedSphere } = useSphere()
 
   const setTarget3DView = (perspectiveView: EPerspectiveView) => {
     const box = selectedBox?.info;
@@ -127,6 +129,9 @@ const PointCloud3D: React.FC<IA2MapStateProps> = ({ currentData, config }) => {
         perspectiveView,
         isTopView ? topViewVector : undefined,
       );
+    }
+    if (selectedSphere) {
+      ptCtx.mainViewInstance?.updateCameraBySphere(selectedSphere, perspectiveView)
     }
   };
 
@@ -206,6 +211,18 @@ const PointCloud3D: React.FC<IA2MapStateProps> = ({ currentData, config }) => {
       ptCtx.mainViewInstance?.updateCameraZoom(zoom);
     }
   }, [selectedBox]);
+
+  useEffect(() => {
+    if (selectedSphere) {
+      setTarget3DView(EPerspectiveView.Top);
+
+      /**
+       * 3DView's zoom synchronizes with topView' zoom.
+       */
+      const zoom = ptCtx.topViewInstance?.pointCloudInstance?.camera.zoom ?? 1;
+      ptCtx.mainViewInstance?.updateCameraZoom(zoom);
+    }
+  }, [selectedSphere]);
 
   const ptCloud3DCtx = useMemo(() => {
     return { reset3DView, setTarget3DView, isActive: !!selectedBox, followTopView };

@@ -42,6 +42,7 @@ import DblClickEventListener from './utils/tool/DblClickEventListener'; // tempo
 import AnnotationEngine from './core';
 
 import UnitUtils from './utils/tool/UnitUtils';
+import StyleUtils from './utils/tool/StyleUtils';
 
 const CommonToolUtils = EnhanceCommonToolUtils;
 const toolUtils = EnhanceCommonToolUtils; // Compatible with the old version of the definition
@@ -80,6 +81,7 @@ export {
   AnnotationEngine,
   ScribbleTool,
   UnitUtils,
+  StyleUtils,
   // 其他特殊基础功能
   ActionsHistory,
 };

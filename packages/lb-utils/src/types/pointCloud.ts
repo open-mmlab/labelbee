@@ -89,6 +89,19 @@ export interface IPointCloudBox extends IVolume {
   newPointList?: ICoordinate[];
 }
 
+export interface IPointCloudSphere {
+  attribute: string;
+  center: I3DSpaceCoord;
+  id: string;
+  valid: boolean;
+  trackID?: number;
+  subAttribute?: {
+    [k: string]: string;
+  };
+}
+
+export type IPointCloudSphereList = IPointCloudSphere[]
+
 /** IPointCloudBox */
 export type PartialIPointCloudBoxList = Partial<IPointCloudBox> & Pick<IPointCloudBox, 'id'>[];
 

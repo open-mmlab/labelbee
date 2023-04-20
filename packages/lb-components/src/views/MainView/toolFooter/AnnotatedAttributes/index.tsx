@@ -24,11 +24,13 @@ const AnnotatedAttributesItem = ({ attribute }: { attribute: IInputList }) => {
   const pointCloudCtx = useContext(PointCloudContext);
   const {
     pointCloudBoxList,
+    pointCloudSphereList,
     hideAttributes,
     toggleAttributesVisible,
     polygonList,
     setPolygonList,
     setPointCloudResult,
+    setPointCloudSphereList,
     reRender,
     selectSpecAttr,
   } = pointCloudCtx;
@@ -37,7 +39,7 @@ const AnnotatedAttributesItem = ({ attribute }: { attribute: IInputList }) => {
 
   const { pushHistoryWithList } = useHistory();
 
-  const pointCloudListForSpecAttribute = [...pointCloudBoxList, ...polygonList].filter(
+  const pointCloudListForSpecAttribute = [...pointCloudBoxList, ...polygonList, ...pointCloudSphereList].filter(
     (i) => i.attribute === attribute.value,
   );
 
@@ -47,11 +49,11 @@ const AnnotatedAttributesItem = ({ attribute }: { attribute: IInputList }) => {
 
   const isHidden = hideAttributes.includes(attribute.value);
 
-  const getBoxID = ({ trackID, order }: { trackID?: number; order?: number }) => {
+  const getItemID = ({ trackID, order }: { trackID?: number; order?: number }) => {
     return trackID ? trackID : order;
   };
 
-  const getBoxKey = ({ trackID, order }: { trackID?: number; order?: number }) => {
+  const getItemKey = ({ trackID, order }: { trackID?: number; order?: number }) => {
     return trackID ? `trackID_${trackID}` : `order_${order}`;
   };
 
@@ -62,11 +64,12 @@ const AnnotatedAttributesItem = ({ attribute }: { attribute: IInputList }) => {
 
     const newPolygonList = polygonList.filter((i) => attribute !== i.attribute);
     const newPointCloudList = pointCloudBoxList.filter((i) => attribute !== i.attribute);
-
-    reRender(newPointCloudList, newPolygonList);
+    const newSphereList = pointCloudSphereList.filter((i) => attribute !== i.attribute)
+    reRender(newPointCloudList, newPolygonList, newSphereList);
 
     setPolygonList(newPolygonList);
     setPointCloudResult(newPointCloudList);
+    setPointCloudSphereList(newSphereList)
 
     pushHistoryWithList({ pointCloudBoxList: newPointCloudList, polygonList: newPolygonList });
   };
@@ -108,14 +111,13 @@ const AnnotatedAttributesItem = ({ attribute }: { attribute: IInputList }) => {
         <DeleteOutlined onClick={() => onDeleteGraphByAttr(attribute)} />
       </div>
 
-      {expanded &&
-        pointCloudListForSpecAttribute.map((box) => {
-          return (
-            <div key={getBoxKey(box)} style={{ paddingLeft: 54 }}>
-              {`${getBoxID(box)}.${attribute.key}`}
-            </div>
-          );
-        })}
+      {expanded && pointCloudListForSpecAttribute.map((item, order) => {
+        return (
+          <div key={getItemKey({ ...item, order })} style={{ paddingLeft: 54 }}>
+            {`${getItemID({ ...item, order })}.${attribute.key}`}
+          </div>
+        );
+      })}
     </>
   );
 };
