@@ -22,7 +22,7 @@ import { BasicToolOperation } from './basicToolOperation';
 import type { IBasicToolOperationProps } from './basicToolOperation';
 import DrawUtils from '../../utils/tool/DrawUtils';
 import CuboidToggleButtonClass from './cuboidToggleButtonClass';
-import TextAttributeClass from './textAttributeClass';
+import TextAttributeClass, { ITextAttributeFuc } from './textAttributeClass';
 import locale from '../../locales';
 import { EMessage } from '../../locales/constants';
 
@@ -38,7 +38,7 @@ enum EDrawingStatus {
 }
 const TEXT_MAX_WIDTH = 164;
 
-class CuboidOperation extends BasicToolOperation {
+class CuboidOperation extends BasicToolOperation implements ITextAttributeFuc {
   private toggleButtonInstance?: CuboidToggleButtonClass;
 
   public drawingCuboid?: IDrawingCuboid;
@@ -75,6 +75,10 @@ class CuboidOperation extends BasicToolOperation {
   }[];
 
   private _textAttributeInstance?: TextAttributeClass;
+
+  public get selectedText() {
+    return this.selectedCuboid?.textAttribute ?? '';
+  }
 
   public constructor(props: ICuboidOperationProps) {
     super(props);
@@ -247,7 +251,7 @@ class CuboidOperation extends BasicToolOperation {
   }
 
   public setResult(cuboidList: ICuboid[]) {
-    this.clearDrawingStatus();
+    this.clearActiveStatus();
     this.setCuboidList(cuboidList);
     this.render();
   }
@@ -261,7 +265,8 @@ class CuboidOperation extends BasicToolOperation {
 
   public clearResult() {
     this.setCuboidList([], true);
-    this.setSelectedID(undefined);
+    this.deleteSelectedID();
+    this.render();
   }
 
   public exportData() {
@@ -693,6 +698,19 @@ class CuboidOperation extends BasicToolOperation {
 
     // 3. Update Status.
     this.drawingStatus = EDrawingStatus.FirstPoint;
+
+    // 4. Update TextAttribute
+    if (this.config.textConfigurable) {
+      let textAttribute = '';
+      textAttribute = AttributeUtils.getTextAttribute(
+        this.cuboidList.filter((cuboid) => CommonToolUtils.isSameSourceID(cuboid.sourceID, basicSourceID)),
+        this.config.textCheckType,
+      );
+      this.drawingCuboid = {
+        ...this.drawingCuboid,
+        textAttribute,
+      };
+    }
   }
 
   /**
@@ -732,11 +750,20 @@ class CuboidOperation extends BasicToolOperation {
     this.render();
   }
 
+  public deleteSelectedID() {
+    this.setSelectedID('');
+  }
+
   public clearDrawingStatus() {
     if (this.drawingCuboid) {
       this.drawingCuboid = undefined;
       this.drawingStatus = EDrawingStatus.Ready;
     }
+  }
+
+  public clearActiveStatus() {
+    this.clearDrawingStatus();
+    this.deleteSelectedID();
   }
 
   public rightMouseUp(e: MouseEvent) {
@@ -887,7 +914,7 @@ class CuboidOperation extends BasicToolOperation {
 
   public renderToggleButton() {
     const { selectedCuboid } = this;
-    if (!this.ctx || this.config.textConfigurable !== true || !selectedCuboid) {
+    if (!this.ctx || !selectedCuboid) {
       return;
     }
     const { attribute, valid } = selectedCuboid;
