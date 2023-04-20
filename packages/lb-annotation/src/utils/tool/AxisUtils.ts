@@ -140,7 +140,7 @@ export default class AxisUtils {
     zoom: number,
     currentPos: ICoordinate = { x: 0, y: 0 },
   ) {
-    return pointList.map((point: IPolygonPoint | IPoint) => {
+    return pointList?.map((point: IPolygonPoint | IPoint) => {
       return this.changePointByZoom(point, zoom, currentPos);
     });
   }

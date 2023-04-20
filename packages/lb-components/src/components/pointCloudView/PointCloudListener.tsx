@@ -2,6 +2,7 @@ import { PointCloudContext } from './PointCloudContext';
 import { useRotate } from './hooks/useRotate';
 import { useBoxes } from './hooks/useBoxes';
 import { useSingleBox } from './hooks/useSingleBox';
+import { useSphere } from './hooks/useSphere'
 import React, { useContext, useEffect } from 'react';
 import { cTool, AttributeUtils, CommonToolUtils, EToolName } from '@labelbee/lb-annotation';
 import { message } from 'antd';
@@ -41,6 +42,7 @@ const PointCloudListener: React.FC<IProps> = ({
     updateSelectedBox,
     deleteSelectedPointCloudBoxAndPolygon,
   } = useSingleBox();
+  const { selectedSphere, updatePointCloudSphere } = useSphere();
   const { clearAllResult, updatePointCloudPattern } = useStatus();
   const basicInfo = jsonParser(currentData.result);
   const { copySelectedBoxes, pasteSelectedBoxes, copiedBoxes } = useBoxes({ config });
@@ -256,6 +258,7 @@ const PointCloudListener: React.FC<IProps> = ({
     toolInstanceRef.current.exportCustomData = () => {
       return {
         resultPolygon: ptCtx.polygonList ?? [],
+        resultPoint: ptCtx.pointCloudSphereList ?? [],
       };
     };
 
@@ -269,11 +272,21 @@ const PointCloudListener: React.FC<IProps> = ({
 
         if (ptCtx.mainViewInstance) {
           // TODO: Poor performance.
-          topViewSelectedChanged(selectBox, newPointCloudList);
+          topViewSelectedChanged({ newSelectedBox: selectBox, newPointCloudList: newPointCloudList });
         }
       }
       if (selectedPolygon) {
         pushHistoryUnderUpdatePolygon({ ...selectedPolygon, attribute: newAttribute });
+      }
+      if (selectedSphere) {
+        const newSphereList = updatePointCloudSphere({
+          ...selectedSphere,
+          attribute: newAttribute,
+        })
+        if (ptCtx.mainViewInstance) {
+          ptCtx.mainViewInstance?.generateSpheres(newSphereList)
+          topViewSelectedChanged({ newSelectedSphere: selectedSphere, newSphereList: newSphereList })
+        }
       }
     };
 
@@ -339,6 +352,7 @@ const PointCloudListener: React.FC<IProps> = ({
     };
   }, [
     ptCtx.pointCloudBoxList,
+    ptCtx.pointCloudSphereList,
     ptCtx.selectedID,
     ptCtx.valid,
     ptCtx.polygonList,
@@ -358,7 +372,7 @@ const PointCloudListener: React.FC<IProps> = ({
   }, []);
 
   useEffect(() => {
-    const toolInstance = ptCtx.topViewInstance?.pointCloud2dOperation;
+    const toolInstance = ptCtx.topViewInstance?.toolInstance;
 
     if (!toolInstance || checkMode) {
       return;
