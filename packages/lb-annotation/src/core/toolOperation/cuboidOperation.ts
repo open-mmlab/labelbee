@@ -793,7 +793,6 @@ class CuboidOperation extends BasicToolOperation implements ITextAttributeFuc {
     const isHover = transformCuboid.id === this.hoverID;
     const isSelected = transformCuboid.id === this.selectedID;
     const { strokeColor, fillColor } = this.getColorToRender(transformCuboid.attribute, transformCuboid.valid);
-    const textColor = strokeColor;
 
     const lineWidth = this.style?.width ?? 2;
     const { hiddenText = false } = this.style;
@@ -801,11 +800,19 @@ class CuboidOperation extends BasicToolOperation implements ITextAttributeFuc {
       color: strokeColor,
       thickness: lineWidth,
     };
-    const { backPoints, frontPoints, textAttribute } = transformCuboid;
 
-    const frontPointsSizeWidth = frontPoints.br.x - frontPoints.bl.x;
-
-    DrawUtils.drawCuboid(this.canvas, transformCuboid, { strokeColor, fillColor, thickness: lineWidth });
+    DrawUtils.drawCuboidWithText(
+      this.canvas,
+      transformCuboid,
+      { strokeColor, fillColor, thickness: lineWidth },
+      {
+        config: this.config,
+        hiddenText,
+        currentPos: this.currentPos,
+        zoom: this.zoom,
+        selectedID: this.selectedID,
+      },
+    );
 
     // Hover Highlight
     if (isHover || isSelected) {
@@ -818,42 +825,6 @@ class CuboidOperation extends BasicToolOperation implements ITextAttributeFuc {
           DrawUtils.drawCircleWithFill(this.canvas, data.point, 3, { color: 'white' });
         });
       }
-    }
-
-    let showText = '';
-    if (this.config?.isShowOrder && transformCuboid.order && transformCuboid?.order > 0) {
-      showText = `${transformCuboid.order}`;
-    }
-
-    if (transformCuboid.attribute) {
-      showText = `${showText}  ${AttributeUtils.getAttributeShowText(
-        transformCuboid.attribute,
-        this.config?.attributeList,
-      )}`;
-    }
-
-    if (!hiddenText && backPoints) {
-      DrawUtils.drawText(this.canvas, { x: backPoints.tl.x, y: backPoints.tl.y - 5 }, showText, {
-        color: strokeColor,
-        textMaxWidth: 300,
-      });
-    }
-
-    const textPosition = getCuboidTextAttributeOffset({
-      cuboid,
-      currentPos: this.currentPos,
-      zoom: this.zoom,
-      topOffset: 16,
-      leftOffset: 0,
-    });
-
-    // 文本的输入
-    if (!hiddenText && textAttribute && cuboid.id !== this.selectedID) {
-      const textWidth = Math.max(20, frontPointsSizeWidth * 0.8);
-      DrawUtils.drawText(this.canvas, { x: textPosition.left, y: textPosition.top }, textAttribute, {
-        color: textColor,
-        textMaxWidth: textWidth,
-      });
     }
 
     this.renderTextAttribute();
@@ -873,6 +844,16 @@ class CuboidOperation extends BasicToolOperation implements ITextAttributeFuc {
       // If this target is selected, the currently selected property needs to be changed
       const { selectedCuboid } = this;
 
+      // Update TextAttribute Icon Color
+      if (this._textAttributeInstance) {
+        if (this.attributeLockList.length > 0 && !this.attributeLockList.includes(this.defaultAttribute)) {
+          // Hide the locked attribute.
+          this._textAttributeInstance.clearTextAttribute();
+        } else {
+          this._textAttributeInstance.updateIcon(this.getTextIconSvg(defaultAttribute));
+        }
+      }
+
       if (selectedCuboid) {
         this.setCuboidList(
           this.cuboidList.map((v) => {
@@ -889,6 +870,7 @@ class CuboidOperation extends BasicToolOperation implements ITextAttributeFuc {
 
         this.history.pushHistory(this.cuboidList);
         this.render();
+        return;
       }
 
       if (this.drawingCuboid) {
@@ -897,17 +879,6 @@ class CuboidOperation extends BasicToolOperation implements ITextAttributeFuc {
           attribute: this.defaultAttribute,
         };
         this.render();
-      }
-
-      // Update TextAttribute Icon Color
-      if (this._textAttributeInstance) {
-        if (this.attributeLockList.length > 0 && !this.attributeLockList.includes(this.defaultAttribute)) {
-          // 属性隐藏
-          this._textAttributeInstance.clearTextAttribute();
-          return;
-        }
-
-        this._textAttributeInstance.updateIcon(this.getTextIconSvg(defaultAttribute));
       }
     }
   }

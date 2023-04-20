@@ -223,6 +223,7 @@ export function getCuboidShowingSideLine({
 }
 
 /**
+ * Get the intersections from frontPoints & backPoints.
  *
  * @param param0
  * @returns
@@ -528,7 +529,6 @@ export function getHighlightPoints(cuboid: ICuboid): { point: ICoordinate; posit
 /**
  * Get the range of Cuboid in 2D.
  *
- *
  * @param param0
  * @returns
  */
@@ -670,6 +670,116 @@ export function getNewPointsAfterOffset({
 }
 
 /**
+ * Update cuboid when dragging by cuboid.
+ * @param param0
+ * @returns
+ */
+function moveCuboidByCuboid({ offset, cuboid }: { offset: ICoordinate; cuboid: ICuboid }) {
+  const { frontPoints, backPoints } = cuboid;
+  const newFrontPoints = Object.entries(frontPoints).reduce((acc, [key, point]) => {
+    return {
+      ...acc,
+      [key]: {
+        x: point.x + offset.x,
+        y: point.y + offset.y,
+      },
+    };
+  }, {}) as IPlanePoints;
+
+  const newBackPoints = Object.entries(backPoints).reduce((acc, [key, point]) => {
+    return {
+      ...acc,
+      [key]: {
+        x: point.x + offset.x,
+        y: point.y + offset.y,
+      },
+    };
+  }, {}) as IPlanePoints;
+
+  return {
+    frontPoints: newFrontPoints,
+    backPoints: newBackPoints,
+  };
+}
+
+/**
+ * Update cuboid when dragging by Line.
+ * @param param0
+ * @returns
+ */
+function moveCuboidByLine({
+  offset,
+  cuboid,
+  positions,
+}: {
+  offset: ICoordinate;
+  cuboid: ICuboid;
+  positions?: ICuboidPosition[];
+}) {
+  const { frontPoints, backPoints } = cuboid;
+  return getNewPointsAfterOffset({
+    offset,
+    frontPoints,
+    backPoints,
+    positions,
+  });
+}
+
+/**
+ * Update cuboid when dragging by Points.
+ * @param param0
+ * @returns
+ */
+function moveCuboidByPoints({
+  offset,
+  cuboid,
+  positions,
+}: {
+  offset: ICoordinate;
+  cuboid: ICuboid;
+  positions?: ICuboidPosition[];
+}) {
+  if (!positions?.[0]) {
+    return;
+  }
+  const { frontPoints, backPoints } = cuboid;
+  const pointPosition = positions[0];
+
+  const isFrontPlain = pointPosition.plain === ECuboidPlain.Front;
+
+  // Notice: The following solution involves only the front and back plains.
+  const movePoints = isFrontPlain ? frontPoints : backPoints;
+
+  // 1. Get the NewPlain by pointPosition.plain.
+  let movePoint = movePoints[pointPosition.position];
+  const diagonalPoint = movePoints[DIAGONAL_POINT[pointPosition.position] as ECuboidPosition];
+
+  if (!movePoint || !diagonalPoint) {
+    return;
+  }
+
+  movePoint = Vector.add(movePoint, offset);
+
+  const newPlainsPoints = getPlainPointsByDiagonalPoints(movePoint, diagonalPoint);
+
+  const getNewPlainPoints = isFrontPlain ? getBackPointsByFrontPoints : getFrontPointsByBackPoints;
+
+  let payload = {
+    frontPoints,
+    backPoints: newPlainsPoints,
+  };
+
+  if (isFrontPlain) {
+    payload = {
+      frontPoints: newPlainsPoints,
+      backPoints,
+    };
+  }
+
+  return getNewPlainPoints(payload);
+}
+
+/**
  * Update cuboid when dragging.
  * @param param0
  * @returns
@@ -685,97 +795,33 @@ export function getCuboidDragMove({
   dragTarget: EDragTarget;
   positions?: ICuboidPosition[];
 }): ICuboid | undefined {
-  const { frontPoints, backPoints } = cuboid;
-
   switch (dragTarget) {
     case EDragTarget.Cuboid: {
-      const newFrontPoints = Object.entries(frontPoints).reduce((acc, [key, point]) => {
-        return {
-          ...acc,
-          [key]: {
-            x: point.x + offset.x,
-            y: point.y + offset.y,
-          },
-        };
-      }, {}) as IPlanePoints;
-
-      const newBackPoints = Object.entries(backPoints).reduce((acc, [key, point]) => {
-        return {
-          ...acc,
-          [key]: {
-            x: point.x + offset.x,
-            y: point.y + offset.y,
-          },
-        };
-      }, {}) as IPlanePoints;
+      const newCuboidPoints = moveCuboidByCuboid({ offset, cuboid });
 
       return {
         ...cuboid,
-        frontPoints: newFrontPoints,
-        backPoints: newBackPoints,
+        ...newCuboidPoints,
       };
     }
     case EDragTarget.Line: {
       //
-      const { frontPoints: newFrontPoints, backPoints: newBackPoints } = getNewPointsAfterOffset({
-        offset,
-        frontPoints,
-        backPoints,
-        positions,
-      });
-
+      const newCuboidPoints = moveCuboidByLine({ offset, cuboid, positions });
       return {
         ...cuboid,
-        frontPoints: newFrontPoints,
-        backPoints: newBackPoints,
+        ...newCuboidPoints,
       };
     }
 
     case EDragTarget.Point: {
-      if (!positions?.[0]) {
-        return;
-      }
-      const pointPosition = positions[0];
-
-      const isFrontPlain = pointPosition.plain === ECuboidPlain.Front;
-
-      // Notice: The following solution involves only the front and back plains.
-      const movePoints = isFrontPlain ? frontPoints : backPoints;
-
-      // 1. Get the NewPlain by pointPosition.plain.
-      let movePoint = movePoints[pointPosition.position];
-      const diagonalPoint = movePoints[DIAGONAL_POINT[pointPosition.position] as ECuboidPosition];
-
-      if (!movePoint || !diagonalPoint) {
-        return;
-      }
-
-      movePoint = Vector.add(movePoint, offset);
-
-      const newPlainsPoints = getPlainPointsByDiagonalPoints(movePoint, diagonalPoint);
-
-      const getNewPlainPoints = isFrontPlain ? getBackPointsByFrontPoints : getFrontPointsByBackPoints;
-
-      let payload = {
-        frontPoints,
-        backPoints: newPlainsPoints,
-      };
-
-      if (isFrontPlain) {
-        payload = {
-          frontPoints: newPlainsPoints,
-          backPoints,
+      const newCuboidPoints = moveCuboidByPoints({ cuboid, offset, positions });
+      if (newCuboidPoints) {
+        return {
+          ...cuboid,
+          ...newCuboidPoints,
         };
       }
-
-      const { frontPoints: newFrontPoints, backPoints: newBackPoints } = getNewPlainPoints(payload);
-
-      // Calculate New Points by Diagonal Point (对角点)
-      return {
-        ...cuboid,
-        frontPoints: newFrontPoints,
-        backPoints: newBackPoints,
-      };
+      break;
     }
 
     default: {

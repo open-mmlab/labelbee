@@ -1,10 +1,11 @@
-import type { ICuboid, IDrawingCuboid } from '@/types/tool/cuboid';
+import type { ICuboid, ICuboidConfig, IDrawingCuboid } from '@/types/tool/cuboid';
 import { DEFAULT_FONT, ELineTypes, SEGMENT_NUMBER } from '../../constant/tool';
 import { IPolygonPoint } from '../../types/tool/polygon';
 import PolygonUtils from './PolygonUtils';
 import UnitUtils from './UnitUtils';
 import AxisUtils from './AxisUtils';
-import { getCuboidAllSideLine, getPointListsByDirection } from './CuboidUtils';
+import { getCuboidAllSideLine, getCuboidTextAttributeOffset, getPointListsByDirection } from './CuboidUtils';
+import AttributeUtils from './AttributeUtils';
 
 const DEFAULT_ZOOM = 1;
 const DEFAULT_CURRENT_POS = {
@@ -768,5 +769,73 @@ export default class DrawUtils {
 
     // 4. Drawing the frontPoints.
     DrawUtils.drawPolygon(canvas, pointList, { ...defaultStyle, isClose: true });
+  }
+
+  /**
+   * Draw Cuboid and Text in header & bottom.
+   * @param canvas
+   * @param cuboid
+   * @param options
+   * @param dataConfig
+   */
+  public static drawCuboidWithText(
+    canvas: HTMLCanvasElement,
+    cuboid: ICuboid | IDrawingCuboid,
+    options: {
+      strokeColor: string;
+      fillColor?: string;
+      thickness?: number;
+    },
+    dataConfig: {
+      config: ICuboidConfig;
+      hiddenText?: boolean;
+      currentPos: ICoordinate;
+      zoom: number;
+      selectedID?: string;
+
+      headerText?: string;
+      bottomText?: string;
+    },
+  ) {
+    const { strokeColor } = options;
+    const textColor = strokeColor;
+    const { config, hiddenText, currentPos, zoom, selectedID, headerText, bottomText } = dataConfig;
+    const { backPoints, frontPoints, textAttribute } = cuboid;
+    const frontPointsSizeWidth = frontPoints.br.x - frontPoints.bl.x;
+
+    DrawUtils.drawCuboid(canvas, cuboid, options);
+
+    let showText = '';
+
+    if (config?.isShowOrder && cuboid.order && cuboid?.order > 0) {
+      showText = `${cuboid.order}`;
+    }
+
+    if (cuboid.attribute) {
+      showText = `${showText}  ${AttributeUtils.getAttributeShowText(cuboid.attribute, config?.attributeList)}`;
+    }
+
+    if (!hiddenText && backPoints && showText) {
+      DrawUtils.drawText(canvas, { x: backPoints.tl.x, y: backPoints.tl.y - 5 }, headerText ?? showText, {
+        color: strokeColor,
+        textMaxWidth: 300,
+      });
+    }
+
+    const textPosition = getCuboidTextAttributeOffset({
+      cuboid,
+      currentPos,
+      zoom,
+      topOffset: 16,
+      leftOffset: 0,
+    });
+
+    if (!hiddenText && textAttribute && cuboid.id !== selectedID) {
+      const textWidth = Math.max(20, frontPointsSizeWidth * 0.8);
+      DrawUtils.drawText(canvas, { x: textPosition.left, y: textPosition.top }, bottomText ?? textAttribute, {
+        color: textColor,
+        textMaxWidth: textWidth,
+      });
+    }
   }
 }
