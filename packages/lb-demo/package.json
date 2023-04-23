@@ -2,6 +2,10 @@
   "name": "lb-demo",
   "version": "1.11.0-alpha.1",
   "private": true,
+  "publishConfig": {
+    "access": "public"
+  },
+  "license": "Apache-2.0",
   "dependencies": {
     "@labelbee/lb-annotation": "^1.14.0-alpha.2",
     "@labelbee/lb-components": "^1.10.0-alpha.2",
