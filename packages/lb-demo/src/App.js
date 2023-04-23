@@ -102,7 +102,7 @@ const App = () => {
   if (tool === 'PointCloudAnnotationView') {
     return (
       <PointCloudAnnotationView
-        src='http://10.152.32.16:8080/top_center_lidar/2022-02-20-12-21-03-100.pcd'
+        src={pointCloudList[0]}
         size={{
           height: 1080,
           width: 1000,

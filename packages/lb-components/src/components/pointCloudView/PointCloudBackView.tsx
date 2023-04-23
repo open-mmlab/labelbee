@@ -4,23 +4,15 @@
  * @LastEditors: Laoluo luozefeng@sensetime.com
  * @LastEditTime: 2022-07-08 11:08:02
  */
-import {
-  PointCloud,
-  PointCloudAnnotation,
-  THybridToolName,
-} from '@labelbee/lb-annotation';
+import { PointCloud, PointCloudAnnotation, THybridToolName } from '@labelbee/lb-annotation';
 import { getClassName } from '@/utils/dom';
 import { PointCloudContainer } from './PointCloudLayout';
 import React, { useEffect, useRef } from 'react';
 import { PointCloudContext } from './PointCloudContext';
-import {
-  EPerspectiveView,
-  IPointUnit,
-  UpdatePolygonByDragList,
-} from '@labelbee/lb-utils';
+import { EPerspectiveView, IPointUnit, UpdatePolygonByDragList } from '@labelbee/lb-utils';
 import { useSingleBox } from './hooks/useSingleBox';
-import { useSphere } from './hooks/useSphere'
-import { useZoom } from './hooks/useZoom'
+import { useSphere } from './hooks/useSphere';
+import { useZoom } from './hooks/useZoom';
 import { SizeInfoForView } from './PointCloudInfos';
 import { connect } from 'react-redux';
 import { a2MapStateToProps, IA2MapStateProps } from '@/store/annotation/map';
@@ -122,10 +114,8 @@ const PointCloudBackView = ({ currentData, config, checkMode }: IA2MapStateProps
       return;
     }
 
-    const {
-      toolInstance: backPointCloudPolygonOperation,
-      pointCloudInstance: backPointCloud,
-    } = ptCtx.backViewInstance;
+    const { toolInstance: backPointCloudPolygonOperation, pointCloudInstance: backPointCloud } =
+      ptCtx.backViewInstance;
 
     /**
      * Synchronized 3d point cloud view displacement operations
@@ -134,14 +124,20 @@ const PointCloudBackView = ({ currentData, config, checkMode }: IA2MapStateProps
      */
     backPointCloudPolygonOperation.singleOn('renderZoom', (zoom: number, currentPos: any) => {
       if (ptCtx.selectedPointCloudBox) {
-        updateBackViewByCanvas2D(currentPos, zoom, size, ptCtx.selectedPointCloudBox.rotation, backPointCloud);
+        updateBackViewByCanvas2D(
+          currentPos,
+          zoom,
+          size,
+          ptCtx.selectedPointCloudBox.rotation,
+          backPointCloud,
+        );
         syncBackviewToolZoom(currentPos, zoom, size);
-        return
+        return;
       }
       if (selectedSphere) {
         updateBackViewByCanvas2D(currentPos, zoom, size, 0, backPointCloud);
         syncBackviewToolZoom(currentPos, zoom, size);
-        return
+        return;
       }
     });
 
@@ -150,14 +146,23 @@ const PointCloudBackView = ({ currentData, config, checkMode }: IA2MapStateProps
       if (!ptCtx.selectedPointCloudBox && !selectedSphere) {
         return;
       }
-      updateBackViewByCanvas2D(currentPos, zoom, size, ptCtx.selectedPointCloudBox ? ptCtx.selectedPointCloudBox.rotation : 0 , backPointCloud);
+      updateBackViewByCanvas2D(
+        currentPos,
+        zoom,
+        size,
+        ptCtx.selectedPointCloudBox ? ptCtx.selectedPointCloudBox.rotation : 0,
+        backPointCloud,
+      );
     });
 
-    backPointCloudPolygonOperation.singleOn('updatePointByDrag', (updatePoint: IPointUnit, oldPointList: IPointUnit[]) => {
-      if (selectedSphere) {
-        backViewUpdatePoint?.(updatePoint, oldPointList[0])
-      }
-    })
+    backPointCloudPolygonOperation.singleOn(
+      'updatePointByDrag',
+      (updatePoint: IPointUnit, oldPointList: IPointUnit[]) => {
+        if (selectedSphere) {
+          backViewUpdatePoint?.(updatePoint, oldPointList[0]);
+        }
+      },
+    );
     backPointCloudPolygonOperation.singleOn(
       'updatePolygonByDrag',
       (updateList: UpdatePolygonByDragList) => {

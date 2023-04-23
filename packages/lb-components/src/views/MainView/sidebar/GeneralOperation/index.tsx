@@ -85,7 +85,9 @@ export const PointCloudOperation: ConnectedComponent<
         hoverSvg: UnifyParamsHoverSvg,
         onClick: () => {
           // TODO, The inner modal needs to use the newest ImgList
-          setComposeImgList(composeResultByToolInstance({ toolInstance, imgList, imgIndex, stepList }))
+          setComposeImgList(
+            composeResultByToolInstance({ toolInstance, imgList, imgIndex, stepList }),
+          );
 
           setShowModal(true);
         },

@@ -1377,7 +1377,6 @@ class PolygonOperation extends BasicToolOperation {
     if (isCtrl) {
       return;
     }
-
     // Create New Polygon
     this.addPointInDrawing(e);
   }
@@ -1398,7 +1397,6 @@ class PolygonOperation extends BasicToolOperation {
 
       return;
     }
-
     if (super.onMouseUp(e) || this.forbidMouseOperation || !this.imgInfo) {
       return undefined;
     }

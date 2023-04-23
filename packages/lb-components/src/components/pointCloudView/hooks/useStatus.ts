@@ -24,7 +24,7 @@ export const useStatus = () => {
     setPolygonList,
     pointCloudPattern,
     setPointCloudPattern,
-    syncAllViewPointCloudColor
+    syncAllViewPointCloudColor,
   } = useContext(PointCloudContext);
   const { pushHistoryWithList } = useHistory();
 
@@ -34,15 +34,15 @@ export const useStatus = () => {
       mainViewInstance?.removeObjectByName(v.id);
     });
     pointCloudSphereList.forEach((v) => {
-      mainViewInstance?.removeObjectByName(v.id)
-    })
+      mainViewInstance?.removeObjectByName(v.id);
+    });
     mainViewInstance?.render();
 
     setPointCloudResult([]);
     setPolygonList([]);
-    setPointCloudSphereList([])
+    setPointCloudSphereList([]);
 
-    topViewInstance?.toolScheduler.clearStatusAndResult()
+    topViewInstance?.toolScheduler.clearStatusAndResult();
 
     syncAllViewPointCloudColor([]);
 
@@ -52,46 +52,46 @@ export const useStatus = () => {
 
   // Clear results of sideview and backview
   const clearSBViewResult = () => {
-    sideViewInstance?.toolInstance.clearResult()
-    backViewInstance?.toolInstance.clearResult()
-  }
+    sideViewInstance?.toolInstance.clearResult();
+    backViewInstance?.toolInstance.clearResult();
+  };
 
   const updatePointCloudPattern = (toolName: any) => {
     if (toolName === pointCloudPattern) {
       return;
     }
 
-    const instanceArr = [topViewInstance, sideViewInstance, backViewInstance]
+    const instanceArr = [topViewInstance, sideViewInstance, backViewInstance];
 
     switch (toolName) {
       case EToolName.Rect:
-        clearSBViewResult()
+        clearSBViewResult();
         instanceArr.forEach((instance) => {
-          instance?.switchToCanvas(EToolName.PointCloudPolygon)
-          instance?.toolInstance.setPattern(EPolygonPattern.Rect)
-        })
+          instance?.switchToCanvas(EToolName.PointCloudPolygon);
+          instance?.toolInstance.setPattern(EPolygonPattern.Rect);
+        });
         setPointCloudPattern(EToolName.Rect);
         break;
       case EToolName.Polygon:
-        clearSBViewResult()
+        clearSBViewResult();
         instanceArr.forEach((instance) => {
-          instance?.switchToCanvas(EToolName.PointCloudPolygon)
-          instance?.toolInstance.setPattern(EPolygonPattern.Normal)
-        })
+          instance?.switchToCanvas(EToolName.PointCloudPolygon);
+          instance?.toolInstance.setPattern(EPolygonPattern.Normal);
+        });
         setPointCloudPattern(EToolName.Polygon);
         break;
       case EToolName.Point:
-        clearSBViewResult()
+        clearSBViewResult();
         instanceArr.forEach((instance) => {
-          instance?.switchToCanvas(EToolName.Point)
-        })
+          instance?.switchToCanvas(EToolName.Point);
+        });
         setPointCloudPattern(EToolName.Point);
         break;
       case EToolName.Line:
-        clearSBViewResult()
+        clearSBViewResult();
         instanceArr.forEach((instance) => {
-          instance?.switchToCanvas(EToolName.Line)
-        })
+          instance?.switchToCanvas(EToolName.Line);
+        });
         setPointCloudPattern(EToolName.Line);
         break;
     }

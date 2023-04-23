@@ -212,8 +212,11 @@ const ToolHotKey: React.FC<IProps> = ({ style, title, toolName }) => {
   let newToolName = toolName;
   if (newToolName === `${EPointCloudName.PointCloud}` && pointCloudPattern === EToolName.Polygon) {
     newToolName += '_POLYGON';
+  } else if (pointCloudPattern === EToolName.Line) {
+    newToolName = EToolName.Line;
+  } else if (pointCloudPattern === EToolName.Point) {
+    newToolName = EToolName.Point;
   }
-
   const props = {
     style,
     title,

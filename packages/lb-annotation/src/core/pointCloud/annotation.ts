@@ -4,7 +4,7 @@
  * @author Ron <ron.f.luo@gmail.com>
  */
 
-import { IPointCloudBox, IPointCloudSphere, IPointCloudConfig, PointCloudUtils } from '@labelbee/lb-utils';
+import { IPointCloudBox, IPointCloudSphere, IPointCloudConfig, PointCloudUtils, ILine } from '@labelbee/lb-utils';
 import { EPolygonPattern, EToolName, THybridToolName } from '@/constant/tool';
 import { CanvasScheduler } from '@/newCore';
 import { IPolygonData, IPolygonPoint } from '@/types/tool/polygon';
@@ -197,6 +197,22 @@ export class PointCloudAnnotation implements IPointCloudAnnotationOperation {
     this.updatePolygonList(pointCloudDataList, polygonList);
   }
 
+  public updateLineList = (lineList: ILine[]) => {
+    const list = lineList.map((v: ILine) => ({
+      ...v,
+      pointList: v?.pointList?.map((point: IPoint) =>
+        PointCloudUtils.transferWorld2Canvas(point, this.toolInstance.size),
+      ),
+    }));
+
+    this.toolScheduler.updateDataByToolName(EToolName.Line, list);
+  };
+
+  public addLineListOnTopView(result: string) {
+    const lineList = PointCloudUtils.getLineListFromResultList(result);
+    this.updateLineList(lineList);
+  }
+
   public addPointListOnTopView(result: string) {
     const sphereList = PointCloudUtils.getSphereParamsFromResultList(result);
     this.updatePointList(sphereList);
@@ -221,7 +237,7 @@ export class PointCloudAnnotation implements IPointCloudAnnotationOperation {
         extraList.map((v: IPolygonData) => ({
           ...v,
           pointList: v?.pointList?.map((point: IPolygonPoint) =>
-            PointCloudUtils.transferWorld2Canvas(point, this.pointCloud2dOperation.size),
+            PointCloudUtils.transferWorld2Canvas(point, this.toolInstance.size),
           ),
         })),
       );
@@ -255,9 +271,9 @@ export class PointCloudAnnotation implements IPointCloudAnnotationOperation {
     if (!this.toolInstance || !this.pointCloudInstance) {
       return;
     }
-
     this.pointCloudInstance.loadPCDFile(pcdPath, config?.radius);
     this.addPolygonListOnTopView(result);
+    this.addLineListOnTopView(result);
     this.addPointListOnTopView(result);
   }
 

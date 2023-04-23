@@ -24,10 +24,7 @@ export const useAttribute = () => {
     topViewInstance?.toolInstance.on('changeAttributeSidebar', updateDefaultAttribute);
 
     return () => {
-      topViewInstance?.toolInstance.unbind(
-        'changeAttributeSidebar',
-        updateDefaultAttribute,
-      );
+      topViewInstance?.toolInstance.unbind('changeAttributeSidebar', updateDefaultAttribute);
     };
   }, [topViewInstance?.toolInstance]);
 

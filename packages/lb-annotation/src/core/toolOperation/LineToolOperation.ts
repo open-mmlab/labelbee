@@ -12,6 +12,7 @@ import EKeyCode from '@/constant/keyCode';
 import MathUtils from '@/utils/MathUtils';
 import { BasicToolOperation, IBasicToolOperationProps } from './basicToolOperation';
 import LineToolUtils from '../../utils/tool/LineToolUtils';
+
 import {
   isInPolygon,
   createSmoothCurvePoints,
@@ -72,7 +73,6 @@ class LineToolOperation extends BasicToolOperation {
       order = this.nextOrder();
     }
     const color = this.getLineColorByAttribute({ attribute: this.defaultAttribute, valid: !!isActiveLineValid });
-
     activeLine.map((point) =>
       Object.assign(
         point,
@@ -98,6 +98,8 @@ class LineToolOperation extends BasicToolOperation {
       this.arc(this.cursor, POINT_ACTIVE_RADIUS, color);
     }
   };
+
+  public _textAttributInstance?: TextAttributeClass;
 
   /** 线条是否被选中 */
   get isLineSelected() {
@@ -134,6 +136,14 @@ class LineToolOperation extends BasicToolOperation {
   };
 
   public selectedID?: string;
+
+  public updatedLine: ILine = {
+    id: '',
+    valid: false,
+    order: 0,
+  };
+
+  public toolName: string = 'lineTool';
 
   private lineList: ILine[] = [];
 
@@ -173,6 +183,8 @@ class LineToolOperation extends BasicToolOperation {
   private isLineValid: boolean;
 
   private lineDragging: boolean;
+
+  private selectedIDs: string[] = [];
 
   constructor(props: ILineOperationProps) {
     super(props);
@@ -469,6 +481,38 @@ class LineToolOperation extends BasicToolOperation {
       this.ctx.stroke();
       this.ctx.restore();
     }
+  }
+
+  /**
+   * Update selectedIDs and rerender
+   * @param selectedIDs
+   */
+  public setSelectedIDs(selectedIDs: string[]) {
+    this.selectedIDs = selectedIDs;
+
+    if (this.selectedIDs.length < 2) {
+      this.setSelectedID(this.selectedIDs.length === 1 ? this.selectedIDs[0] : '');
+    }
+
+    this.render();
+  }
+
+  public setSelectedID(newID?: string) {
+    const oldID = this.selectedID;
+    if (newID !== oldID && oldID) {
+      // 触发文本切换的操作
+
+      this._textAttributInstance?.changeSelected();
+    }
+
+    if (!newID) {
+      this._textAttributInstance?.clearTextAttribute();
+    }
+
+    this.selectedID = newID;
+
+    this.render();
+    this.emit('selectedChange');
   }
 
   /**
@@ -791,11 +835,11 @@ class LineToolOperation extends BasicToolOperation {
         left: this.activeArea.left + offsetX,
       });
     }
-
     if (this.activeLine) {
       this.activeLine.map((i) => Object.assign(i, { x: i.x + offsetX, y: i.y + offsetY }));
       this.updateLines();
     }
+    this.emit('updateLineByDrag', this.updatedLine);
   }
 
   /**
@@ -966,7 +1010,6 @@ class LineToolOperation extends BasicToolOperation {
   public moveSelectedLine(coord: ICoordinate) {
     const offsetX = (coord.x - this.prevAxis.x) / this.zoom;
     const offsetY = (coord.y - this.prevAxis.y) / this.zoom;
-
     /** 允许目标外 */
     if (this.enableOutOfTarget) {
       this.lineDragging = true;
@@ -1157,7 +1200,6 @@ class LineToolOperation extends BasicToolOperation {
 
   public onRightClick = (e: MouseEvent) => {
     this.cursor = undefined;
-
     if (this.isCreate) {
       if (this.isLinePointsNotEnough()) {
         // message.info(`顶点数不能少于${this.lowerLimitPointNum}`);
@@ -1398,6 +1440,7 @@ class LineToolOperation extends BasicToolOperation {
     const line = this.lineList.find((i) => i.id === this.selectedID);
     if (line) {
       line.pointList = _.cloneDeep(this.activeLine);
+      this.updatedLine = line;
       this.emit('dataUpdated', this.lineList);
     }
   }
@@ -1416,7 +1459,6 @@ class LineToolOperation extends BasicToolOperation {
       reset();
       return;
     }
-
     // /** 非创建状态，记录当前被修改的线条 */
     // if (this.isMousedown && !this.isCreate) {
     //   const lineChanged = this.lineHasChanged();
@@ -1461,7 +1503,6 @@ class LineToolOperation extends BasicToolOperation {
   public stopLineCreating(isAppend: boolean = true) {
     /** 新建线条后在文本标注未开启时默认不选中, 续标后默认选中 */
     const setActiveAfterCreating = this.selectedID ? true : !!this.isTextConfigurable;
-
     let selectedID;
     if (isAppend) {
       if (this.selectedID) {
@@ -1477,6 +1518,7 @@ class LineToolOperation extends BasicToolOperation {
         const newLine = this.createLineData();
         selectedID = newLine.id;
         this.setLineList([...this.lineList, newLine]);
+        this.emit('lineCreated', newLine, this.zoom, this.currentPos);
         this.history?.pushHistory(this.lineList);
       }
     }
@@ -1697,7 +1739,7 @@ class LineToolOperation extends BasicToolOperation {
 
       /* 删除点 */
       if (hoverPoint) {
-        this.deleteSelectedLinePoint(hoverPoint.id);
+        this.deleteSelectedLinePoint(hoverPoint.id!);
         return;
       }
 
@@ -1712,6 +1754,7 @@ class LineToolOperation extends BasicToolOperation {
     this.history?.pushHistory(this.lineList);
     this.setNoneStatus();
     this.emit('dataUpdated', this.lineList);
+    this.emit('lineDeleted', this.selectedID);
     this.render();
   }
 
@@ -1908,6 +1951,7 @@ class LineToolOperation extends BasicToolOperation {
   public setDefaultAttribute(attribute: string = '') {
     if (this.attributeConfigurable) {
       this.defaultAttribute = attribute;
+      this.changeStyle(this.defaultAttribute);
       this.setLineAttribute('attribute', attribute);
       if (this.selectedID) {
         this.history?.pushHistory(this.lineList);

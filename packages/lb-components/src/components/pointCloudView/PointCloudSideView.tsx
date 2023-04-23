@@ -14,7 +14,7 @@ import { connect } from 'react-redux';
 import { a2MapStateToProps, IA2MapStateProps } from '@/store/annotation/map';
 import { usePointCloudViews } from './hooks/usePointCloudViews';
 import { useSingleBox } from './hooks/useSingleBox';
-import { useSphere } from './hooks/useSphere'
+import { useSphere } from './hooks/useSphere';
 import EmptyPage from './components/EmptyPage';
 import useSize from '@/hooks/useSize';
 import { useTranslation } from 'react-i18next';
@@ -74,7 +74,7 @@ const updateSideViewByCanvas2D = (
 };
 
 interface IProps {
-  checkMode?: boolean
+  checkMode?: boolean;
 }
 
 const PointCloudSideView: React.FC<IA2MapStateProps & IProps> = ({ config, checkMode }) => {
@@ -130,19 +130,12 @@ const PointCloudSideView: React.FC<IA2MapStateProps & IProps> = ({ config, check
           pointCloudInstance,
         );
         syncSideviewToolZoom(currentPos, zoom, size);
-        return
+        return;
       }
       if (selectedSphere) {
-        updateSideViewByCanvas2D(
-          currentPos,
-          zoom,
-          size,
-          0,
-          pointCloudInstance,
-        );
+        updateSideViewByCanvas2D(currentPos, zoom, size, 0, pointCloudInstance);
         syncSideviewToolZoom(currentPos, zoom, size);
       }
-
     });
 
     // Synchronized 3d point cloud view displacement operations
@@ -159,11 +152,14 @@ const PointCloudSideView: React.FC<IA2MapStateProps & IProps> = ({ config, check
       );
     });
 
-    toolInstance.singleOn('updatePointByDrag', (updatePoint: IPointUnit, oldPointList: IPointUnit[]) => {
-      if (selectedSphere) {
-        sideViewUpdatePoint?.(updatePoint, oldPointList[0])
-      }
-    })
+    toolInstance.singleOn(
+      'updatePointByDrag',
+      (updatePoint: IPointUnit, oldPointList: IPointUnit[]) => {
+        if (selectedSphere) {
+          sideViewUpdatePoint?.(updatePoint, oldPointList[0]);
+        }
+      },
+    );
 
     toolInstance.singleOn('updatePolygonByDrag', (updateList: UpdatePolygonByDragList) => {
       if (ptCtx.selectedIDs.length === 1 && updateList.length === 1) {

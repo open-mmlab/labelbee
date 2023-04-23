@@ -132,7 +132,6 @@ class ToolStyleConverter {
     if (!options) {
       options = {};
     }
-
     const valid = result?.valid ?? true;
 
     const { multiColorIndex = -1, selected, hover } = options;

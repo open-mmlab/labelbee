@@ -2,7 +2,7 @@ import { PointCloudContext } from './PointCloudContext';
 import { useRotate } from './hooks/useRotate';
 import { useBoxes } from './hooks/useBoxes';
 import { useSingleBox } from './hooks/useSingleBox';
-import { useSphere } from './hooks/useSphere'
+import { useSphere } from './hooks/useSphere';
 import React, { useContext, useEffect } from 'react';
 import { cTool, AttributeUtils, CommonToolUtils, EToolName } from '@labelbee/lb-annotation';
 import { message } from 'antd';
@@ -258,6 +258,7 @@ const PointCloudListener: React.FC<IProps> = ({
     toolInstanceRef.current.exportCustomData = () => {
       return {
         resultPolygon: ptCtx.polygonList ?? [],
+        resultLine: ptCtx.lineList ?? [],
         resultPoint: ptCtx.pointCloudSphereList ?? [],
       };
     };
@@ -272,7 +273,10 @@ const PointCloudListener: React.FC<IProps> = ({
 
         if (ptCtx.mainViewInstance) {
           // TODO: Poor performance.
-          topViewSelectedChanged({ newSelectedBox: selectBox, newPointCloudList: newPointCloudList });
+          topViewSelectedChanged({
+            newSelectedBox: selectBox,
+            newPointCloudList: newPointCloudList,
+          });
         }
       }
       if (selectedPolygon) {
@@ -282,10 +286,13 @@ const PointCloudListener: React.FC<IProps> = ({
         const newSphereList = updatePointCloudSphere({
           ...selectedSphere,
           attribute: newAttribute,
-        })
+        });
         if (ptCtx.mainViewInstance) {
-          ptCtx.mainViewInstance?.generateSpheres(newSphereList)
-          topViewSelectedChanged({ newSelectedSphere: selectedSphere, newSphereList: newSphereList })
+          ptCtx.mainViewInstance?.generateSpheres(newSphereList);
+          topViewSelectedChanged({
+            newSelectedSphere: selectedSphere,
+            newSphereList: newSphereList,
+          });
         }
       }
     };
@@ -356,6 +363,7 @@ const PointCloudListener: React.FC<IProps> = ({
     ptCtx.selectedID,
     ptCtx.valid,
     ptCtx.polygonList,
+    ptCtx.lineList,
     ptCtx.mainViewInstance,
   ]);
 

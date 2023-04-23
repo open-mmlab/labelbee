@@ -174,22 +174,6 @@ const pointCloudConfig = {
       key: '类别4H',
       value: 'class-4H',
     },
-    {
-      key: '类别Au',
-      value: 'class-Au',
-    },
-    {
-      key: '类别FM',
-      value: 'class-FM',
-    },
-    {
-      key: '类别Nj',
-      value: 'class-Nj',
-    },
-    {
-      key: '类别CP',
-      value: 'class-CP',
-    },
   ],
   // 标注半径范围
   radius: 90,
@@ -225,7 +209,8 @@ const pointCloudConfig = {
   ],
   // 框内点数下限
   lowerLimitPointsNumInBox: 5,
-  trackConfigurable: true,
+  // attributeConfigurable: true,
+  trackConfigurable: false,
 };
 
 const cuboidToolConfig = {
