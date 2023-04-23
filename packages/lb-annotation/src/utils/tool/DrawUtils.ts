@@ -789,8 +789,6 @@ export default class DrawUtils {
     dataConfig: {
       config: ICuboidConfig;
       hiddenText?: boolean;
-      currentPos: ICoordinate;
-      zoom: number;
       selectedID?: string;
 
       headerText?: string;
@@ -799,7 +797,7 @@ export default class DrawUtils {
   ) {
     const { strokeColor } = options;
     const textColor = strokeColor;
-    const { config, hiddenText, currentPos, zoom, selectedID, headerText, bottomText } = dataConfig;
+    const { config, hiddenText, selectedID, headerText, bottomText } = dataConfig;
     const { backPoints, frontPoints, textAttribute } = cuboid;
     const frontPointsSizeWidth = frontPoints.br.x - frontPoints.bl.x;
 
@@ -824,8 +822,8 @@ export default class DrawUtils {
 
     const textPosition = getCuboidTextAttributeOffset({
       cuboid,
-      currentPos,
-      zoom,
+      currentPos: { x: 0, y: 0 },
+      zoom: 1,
       topOffset: 16,
       leftOffset: 0,
     });

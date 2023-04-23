@@ -846,8 +846,6 @@ class CuboidOperation extends BasicToolOperation implements ITextAttributeFuc {
       {
         config: this.config,
         hiddenText,
-        currentPos: this.currentPos,
-        zoom: this.zoom,
         selectedID: this.selectedID,
       },
     );
