@@ -371,10 +371,12 @@ export class PointCloud {
 
     group.add(box);
     group.add(arrow);
-    group.position.set(center.x, center.y, center.z);
-
-    group.rotation.set(0, 0, rotation);
-
+    if (center) {
+      group.position.set(center.x, center.y, center.z);
+    }
+    if (rotation) {
+      group.rotation.set(0, 0, rotation);
+    }
     group.name = id;
     this.scene.add(group);
   };
