@@ -1,10 +1,7 @@
-import { IToolConfig } from './common'
-import { IInputList } from './base'
+import { IToolConfig } from './common';
+import { IInputList } from './base';
+import { IPoint } from './common';
 
-export interface IPoint {
-  x: number;
-  y: number;
-}
 export interface IPointUnit extends IPoint {
   id: string;
   sourceID?: string;

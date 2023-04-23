@@ -29,6 +29,8 @@ const AnnotatedAttributesItem = ({ attribute }: { attribute: IInputList }) => {
     toggleAttributesVisible,
     polygonList,
     setPolygonList,
+    lineList,
+    setLineList,
     setPointCloudResult,
     setPointCloudSphereList,
     reRender,
@@ -39,9 +41,12 @@ const AnnotatedAttributesItem = ({ attribute }: { attribute: IInputList }) => {
 
   const { pushHistoryWithList } = useHistory();
 
-  const pointCloudListForSpecAttribute = [...pointCloudBoxList, ...polygonList, ...pointCloudSphereList].filter(
-    (i) => i.attribute === attribute.value,
-  );
+  const pointCloudListForSpecAttribute = [
+    ...pointCloudBoxList,
+    ...polygonList,
+    ...pointCloudSphereList,
+    ...lineList,
+  ].filter((i) => i.attribute === attribute.value);
 
   const onVisibleChange = () => {
     toggleAttributesVisible(attribute.value);
@@ -64,14 +69,19 @@ const AnnotatedAttributesItem = ({ attribute }: { attribute: IInputList }) => {
 
     const newPolygonList = polygonList.filter((i) => attribute !== i.attribute);
     const newPointCloudList = pointCloudBoxList.filter((i) => attribute !== i.attribute);
-    const newSphereList = pointCloudSphereList.filter((i) => attribute !== i.attribute)
-    reRender(newPointCloudList, newPolygonList, newSphereList);
-
+    const newLineList = lineList.filter((i) => attribute !== i.attribute);
+    const newSphereList = pointCloudSphereList.filter((i) => attribute !== i.attribute);
+    reRender(newPointCloudList, newPolygonList, newSphereList, newLineList);
     setPolygonList(newPolygonList);
     setPointCloudResult(newPointCloudList);
-    setPointCloudSphereList(newSphereList)
+    setPointCloudSphereList(newSphereList);
+    setLineList(newLineList);
 
-    pushHistoryWithList({ pointCloudBoxList: newPointCloudList, polygonList: newPolygonList });
+    pushHistoryWithList({
+      pointCloudBoxList: newPointCloudList,
+      polygonList: newPolygonList,
+      lineList: newLineList,
+    });
   };
 
   const onDeleteGraphByAttr = (attribute: IInputList) => {
@@ -111,26 +121,27 @@ const AnnotatedAttributesItem = ({ attribute }: { attribute: IInputList }) => {
         <DeleteOutlined onClick={() => onDeleteGraphByAttr(attribute)} />
       </div>
 
-      {expanded && pointCloudListForSpecAttribute.map((item, order) => {
-        return (
-          <div key={getItemKey({ ...item, order })} style={{ paddingLeft: 54 }}>
-            {`${getItemID({ ...item, order })}.${attribute.key}`}
-          </div>
-        );
-      })}
+      {expanded &&
+        pointCloudListForSpecAttribute.map((item, order) => {
+          return (
+            <div key={getItemKey({ ...item, order })} style={{ paddingLeft: 54 }}>
+              {`${getItemID({ ...item, order })}.${attribute.key}`}
+            </div>
+          );
+        })}
     </>
   );
 };
 
 export const AnnotatedAttributesPanel = () => {
   const stepConfig: IPointCloudConfig = useSelector(stepConfigSelector);
-  const { attrPanelLayout, setAttrPanelLayout, pointCloudBoxList, polygonList } =
+  const { attrPanelLayout, setAttrPanelLayout, pointCloudBoxList, polygonList, lineList } =
     useContext(PointCloudContext);
   const { t } = useTranslation();
 
   const existAttributes = useMemo(() => {
-    return [...pointCloudBoxList, ...polygonList].map((i) => i.attribute);
-  }, [pointCloudBoxList, polygonList]);
+    return [...pointCloudBoxList, ...polygonList, ...lineList].map((i) => i.attribute);
+  }, [pointCloudBoxList, polygonList, lineList]);
 
   const displayAttrList = useMemo(() => {
     return (stepConfig.attributeList as IInputList[]).filter((i) =>

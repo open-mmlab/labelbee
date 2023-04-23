@@ -9,9 +9,9 @@ const rectToolConfig = {
   minHeight: 1,
   isShowOrder: false,
   filterData: ['valid', 'invalid'],
-  attributeConfigurable: false,
+  attributeConfigurable: true,
   attributeList: [],
-  textConfigurable: false,
+  textConfigurable: true,
   textCheckType: 0,
   customFormat: '',
 };
@@ -59,7 +59,7 @@ const lineToolConfig = {
   outOfTarget: true,
   copyBackwardResult: false,
   isShowOrder: false,
-  attributeConfigurable: false,
+  attributeConfigurable: true,
   attributeList: [
     { key: '类别1', value: '类别1' },
     { key: '类别ao', value: 'class-ao' },

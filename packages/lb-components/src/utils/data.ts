@@ -36,7 +36,6 @@ export const composeResult = (
     const { dataSourceStep } = currentStepInfo;
 
     const stepName = `step_${currentStepInfo.step}`;
-
     if (data[stepName]) {
       const info = data[stepName];
       Object.assign(info, customObject);

@@ -21,7 +21,7 @@ import { a2MapStateToProps, IA2MapStateProps } from '@/store/annotation/map';
 import { connect } from 'react-redux';
 import { jsonParser } from '@/utils';
 import { useSingleBox } from './hooks/useSingleBox';
-import { useSphere } from './hooks/useSphere'
+import { useSphere } from './hooks/useSphere';
 import { Switch, Tooltip } from 'antd';
 import useSize from '@/hooks/useSize';
 import { usePointCloudViews } from './hooks/usePointCloudViews';
@@ -104,7 +104,6 @@ const PointCloud3D: React.FC<IA2MapStateProps> = ({ currentData, config }) => {
   const { initPointCloud3d } = usePointCloudViews();
   const size = useSize(ref);
   const { t } = useTranslation();
-
   useEffect(() => {
     if (!ptCtx.mainViewInstance) {
       return;
@@ -112,7 +111,7 @@ const PointCloud3D: React.FC<IA2MapStateProps> = ({ currentData, config }) => {
     initPointCloud3d?.(size);
   }, [size]);
   const { selectedBox } = useSingleBox();
-  const { selectedSphere } = useSphere()
+  const { selectedSphere } = useSphere();
 
   const setTarget3DView = (perspectiveView: EPerspectiveView) => {
     const box = selectedBox?.info;
@@ -131,7 +130,7 @@ const PointCloud3D: React.FC<IA2MapStateProps> = ({ currentData, config }) => {
       );
     }
     if (selectedSphere) {
-      ptCtx.mainViewInstance?.updateCameraBySphere(selectedSphere, perspectiveView)
+      ptCtx.mainViewInstance?.updateCameraBySphere(selectedSphere, perspectiveView);
     }
   };
 

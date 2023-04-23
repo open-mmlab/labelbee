@@ -8,7 +8,7 @@
 
 import { IInputList } from './base';
 import { IPolygonData } from './polygon';
-import { ICoordinate } from "./common";
+import { ICoordinate } from './common';
 
 export type TMatrix4Tuple = [
   number,
@@ -100,7 +100,7 @@ export interface IPointCloudSphere {
   };
 }
 
-export type IPointCloudSphereList = IPointCloudSphere[]
+export type IPointCloudSphereList = IPointCloudSphere[];
 
 /** IPointCloudBox */
 export type PartialIPointCloudBoxList = Partial<IPointCloudBox> & Pick<IPointCloudBox, 'id'>[];

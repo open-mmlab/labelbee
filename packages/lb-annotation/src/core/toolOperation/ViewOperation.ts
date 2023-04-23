@@ -516,8 +516,6 @@ export default class ViewOperation extends BasicToolOperation {
       {
         config: this.config,
         hiddenText: cuboid?.hiddenText,
-        currentPos: this.currentPos,
-        zoom: this.zoom,
         headerText,
         bottomText,
       },
@@ -538,7 +536,7 @@ export default class ViewOperation extends BasicToolOperation {
 
     const extraData = _.pick(data, ['stroke', 'thickness']);
 
-    viewDataPointList.forEach((v, i) => {
+    viewDataPointList!.forEach((v, i) => {
       const newAnnotation = {
         ...extraData,
         id: `${annotation.annotation.id}-${i}`,

@@ -4,7 +4,7 @@ import React from 'react';
 
 export const PointCloudContainer: React.FC<{
   title: string;
-  toolbar?: React.ReactElement;
+  toolbar?: React.ReactElement | null;
   className?: string;
   style?: React.CSSProperties;
 }> = ({ title, toolbar, children, className, style }) => {

@@ -81,7 +81,7 @@ const PointCloud2DView = ({ currentData, config }: IA2MapStateProps) => {
 
           return [
             ...acc,
-            ...viewDataPointList.map((v: any) => {
+            ...viewDataPointList!.map((v: any) => {
               return {
                 type: v.type,
                 annotation: {
@@ -160,7 +160,9 @@ const PointCloud2DView = ({ currentData, config }: IA2MapStateProps) => {
           annotations={annotations2d}
           size={size}
           ref={viewRef}
-          globalStyle={{ display: hiddenData ? 'none' : 'block' }}
+          globalStyle={{
+            display: hiddenData ? 'none' : 'block',
+          }}
           afterImgOnLoad={afterImgOnLoad}
         />
       </div>

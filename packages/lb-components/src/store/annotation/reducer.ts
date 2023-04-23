@@ -285,7 +285,6 @@ export const annotationReducer = (
             step,
             stepList,
           );
-
           return {
             ...v,
             result: newResult,
@@ -337,7 +336,6 @@ export const annotationReducer = (
       }
 
       const [exportResult] = toolInstance?.exportData() ?? [];
-
       let previousResultList = exportResult;
 
       if (basicResultList?.length > 0) {
@@ -417,7 +415,6 @@ export const annotationReducer = (
 
     case ANNOTATION_ACTIONS.LOAD_FILE_DATA: {
       const { imgList, step, toolInstance, annotationEngine, stepList } = state;
-
       /**
        * TODO
        * Before: !toolInstance || !annotationEngine
