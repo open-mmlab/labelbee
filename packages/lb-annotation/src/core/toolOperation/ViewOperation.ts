@@ -516,8 +516,6 @@ export default class ViewOperation extends BasicToolOperation {
       {
         config: this.config,
         hiddenText: cuboid?.hiddenText,
-        currentPos: this.currentPos,
-        zoom: this.zoom,
         headerText,
         bottomText,
       },
