@@ -15,7 +15,7 @@
     "publish": "lerna publish from-package --yes",
     "commit": "cz",
     "release": "standard-version",
-    "semantic": "multi-semantic-release"
+    "semantic": "multi-semantic-release --ignore-private-packages"
   },
   "main": "index.js",
   "publishConfig": {
