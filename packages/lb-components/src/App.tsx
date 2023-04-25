@@ -11,7 +11,6 @@ import {
   InitTaskData,
   loadImgList,
   UpdateInjectFunc,
-  UpdateProcessingStep,
 } from './store/annotation/actionCreators';
 import { LoadFileAndFileData } from './store/annotation/reducer';
 import { ToolInstance } from './store/annotation/types';
@@ -180,10 +179,6 @@ const App: React.FC<AppProps> = (props) => {
     defaultLang,
     beforeRotate,
   ]);
-
-  useEffect(() => {
-    store.dispatch(UpdateProcessingStep(step) as any);
-  }, [step]);
 
   useEffect(() => {
     setToolInstance?.(toolInstance);
