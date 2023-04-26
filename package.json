@@ -15,7 +15,8 @@
     "publish": "lerna publish from-package --yes",
     "commit": "cz",
     "release": "standard-version",
-    "semantic": "multi-semantic-release --ignore-private-packages"
+    "semantic": "multi-semantic-release --ignore-private-packages",
+    "updemo": "node ./scripts/upgrade-lbdemo-ver.js"
   },
   "main": "index.js",
   "publishConfig": {
