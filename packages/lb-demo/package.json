@@ -8,7 +8,7 @@
   "license": "Apache-2.0",
   "dependencies": {
     "@labelbee/lb-annotation": "^1.14.0-alpha.2",
-    "@labelbee/lb-components": "^1.10.0-alpha.2",
+    "@labelbee/lb-components": "^1.10.0-alpha.3",
     "@labelbee/lb-utils": "^1.7.0-alpha.2",
     "@testing-library/jest-dom": "^5.11.4",
     "@testing-library/react": "^11.1.0",
