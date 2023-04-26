@@ -9,6 +9,10 @@ npm run start
 
 # 编码规范
 
+## Commit 规范
+
+[LabelBee CommitLint 规范](./commitlint.md)
+
 ## 注释 (参考: [jsDoc](url: https://jsdoc.app/))
 
 ### 文件头
