@@ -106,21 +106,24 @@ const cropAndEnlarge = (
  * @param {Array} imageList - An array of file items to search through.
  * @param {Number} targetStep - The step number within the result object to retrieve boxes from.
  * @param {Number} selectedBoxTrackID - The trackID to match when searching for boxes.
+ * @param {string} selectedBoxID - The selected BoxID.
  * @return {Array} An array of point cloud boxes that match the provided trackID, along with their index in the original array.
  */
 export const getBoxesByTrackID = (
   imageList: IFileItem[],
   targetStep: number,
   selectedBoxTrackID: number,
+  selectedBoxID: string,
 ) => {
   const matchingBoxes: IPointCloudBoxWithIndex[] = [];
-  imageList.forEach((element, index) => {
+  imageList.some((element, index) => {
     const fileResult = jsonParser(element?.result);
     const stepResult = fileResult?.[`step_${targetStep}`]?.result;
     const box = stepResult?.find((item: IPointCloudBox) => item.trackID === selectedBoxTrackID);
     if (box) {
       matchingBoxes.push({ ...box, index });
     }
+    return box?.id === selectedBoxID;
   });
 
   return matchingBoxes;
@@ -168,7 +171,7 @@ export const predict = (start: IPointCloudBoxWithIndex, end: IPointCloudBoxWithI
         acc[key] = map[key][i];
         return acc;
       },
-      { ...start, id: uuid(), center: nextCenter },
+      { ...end, id: uuid(), center: nextCenter },
     );
 
     result.push(nextValue);
