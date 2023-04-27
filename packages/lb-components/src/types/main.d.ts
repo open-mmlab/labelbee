@@ -29,7 +29,7 @@ export type Sider = ({
   tagToolSideBar,
   textToolSideBar,
   horizontal,
-  scribbleSidebar
+  scribbleSidebar,
 }: {
   toolIcon: React.ReactNode;
   attributeList: React.ReactNode;
@@ -43,14 +43,14 @@ export type Sider = ({
   scribbleSidebar: React.ReactNode;
 
   // PointCloud
-  pointCloudToolSidebar : React.ReactNode;
+  pointCloudToolSidebar: React.ReactNode;
   pointCloudOperation: React.ReactNode;
 }) => React.ReactNode | React.ReactNode;
 
 export type TDrawLayerSlot = (props: {
   zoom: number;
   currentPos: { x: number; y: number };
-}) => React.ReactNode
+}) => React.ReactNode;
 
 interface IFooter {
   /** 快捷键 (FooterTips) */
@@ -67,14 +67,16 @@ interface IFooter {
   curItems: React.ReactNode;
   /** footer 分隔符 */
   footerDivider: React.ReactNode;
-  
+  /** 属性标注列表 */
+  annotateAttrList: React.ReactNode;
+
   /** 快捷键组件 */
-  ToolHotKeyCom: React.ReactNode; 
+  ToolHotKeyCom: React.ReactNode;
 
   /** 快捷键列表 */
   shortCutTable: {
-    [a: string]: any
-  }
+    [a: string]: any;
+  };
 }
 
 export type RenderFooter = ({
@@ -86,7 +88,7 @@ export type RenderFooter = ({
   curItems,
   footerDivider,
   ToolHotKeyCom,
-  shortCutTable
+  shortCutTable,
 }: IFooter) => React.ReactNode;
 
 export type Header = ({

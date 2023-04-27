@@ -2,6 +2,100 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [1.13.0](https://github.com/open-mmlab/labelbee/compare/v1.12.1...v1.13.0) (2023-04-12)
+
+
+### Features
+
+* Extract "FooterPopover" component and uses in annotatedList ([753a7b2](https://github.com/open-mmlab/labelbee/commit/753a7b24f7848bb7e32fa8c85b50cfb2e2fd8351))
+* **pointcloud:** 3Dview sync the direction with topview after selected ([7ed2855](https://github.com/open-mmlab/labelbee/commit/7ed285580defef82c75cb404cf42d5df66bc3bba))
+* **pointcloud:** Adding component for selecting boxes by attribute ([5e6b648](https://github.com/open-mmlab/labelbee/commit/5e6b6487d4c3e30e6dccd8673d60e285ab6119b7))
+* **pointcloud:** Annotated-Attributes-Panel supports fixed layout ([f698cf1](https://github.com/open-mmlab/labelbee/commit/f698cf1fc77769eeaedff3e2f920e04947a0a56f))
+* **pointcloud:** Confirm before deleteGraphByAttr ([e8759ac](https://github.com/open-mmlab/labelbee/commit/e8759acd88c7476348ae6031d1d00ad9eac6ea5b))
+* **pointcloud:** Follow top add tooltip ([f0c360e](https://github.com/open-mmlab/labelbee/commit/f0c360e4fbffa6b9ecf7bb10dfc3e0a7a5221bc0))
+* **pointcloud:** Hide the operation in checkmode(side&backView) ([a12901e](https://github.com/open-mmlab/labelbee/commit/a12901e208bed684561ede01d154195a9c7a5680))
+* **pointcloud:** MainView support to follow top view ([81fba17](https://github.com/open-mmlab/labelbee/commit/81fba17476d3f458f38293fe921058118cb4fbb0))
+* **pointcloud:** Support select spec attribute boxes ([05228c5](https://github.com/open-mmlab/labelbee/commit/05228c5c66bb73166e486b51bab151e204176687))
+* **pointcloud:** Support selecting polygons by attributes ([b0b4a43](https://github.com/open-mmlab/labelbee/commit/b0b4a431a79ebeb6e0e368a18071fdd916f601a5))
+* **pointcloud:** Support updating position by keydown events ([12e6d68](https://github.com/open-mmlab/labelbee/commit/12e6d686a598f64e1ef3da4c4b3db56b90055c58))
+* **pointcloud:** Supports moving multiple selected rects ([dbfa665](https://github.com/open-mmlab/labelbee/commit/dbfa6652bf54eba141799681bf7eb1b74294c178))
+* **pointcloud:** Supports rendering after moving multi-boxes ([4228988](https://github.com/open-mmlab/labelbee/commit/42289888e0883ccdc8a07cfb3c9b42fd8c4f944c))
+* **pointcloud:** Update the backgroundColor of pointCloud ([df16fdc](https://github.com/open-mmlab/labelbee/commit/df16fdc87df911088e800527274cf36cb492da99))
+
+
+### Bug Fixes
+
+* **copy-result:** AsyncData needs to determine if it exists ([17dc99a](https://github.com/open-mmlab/labelbee/commit/17dc99a7633e01541650e948d7eeb436a83c1691))
+* **pointcloud:** Fix applyCameraTarget not to apply zoom ([c7b426a](https://github.com/open-mmlab/labelbee/commit/c7b426a6b75b458f4e126cee1df923c44255f5f0))
+* **pointcloud:** Fix attribute list hide attr fail ([7d4d28d](https://github.com/open-mmlab/labelbee/commit/7d4d28d51c7bf49c92b05d9a9957fdb21471f72e))
+* **pointcloud:** Fix size changed and init point cloud result ([f940e42](https://github.com/open-mmlab/labelbee/commit/f940e42d16f66394469e2b46264937418d136856))
+* **pointcloud:** Fix the feature of COPY_BACKWARD_RESULT ([26b3062](https://github.com/open-mmlab/labelbee/commit/26b30624c23267deb262417d4a103c71dee90f7d))
+* **pointcloud:** Init hideAttr while imgIndex changed ([99e5642](https://github.com/open-mmlab/labelbee/commit/99e5642d435f62332434c81537ad5360f48e73cf))
+* **pointcloud:** Prevent default event on ctrl + a ([cf2d147](https://github.com/open-mmlab/labelbee/commit/cf2d147005911fb58c497e1e25b0bc4675fc61af))
+* **pointcloud:** Repeated updates of pointCloudBackView ([bfe634a](https://github.com/open-mmlab/labelbee/commit/bfe634a5f57e6e1ca33547e7b950f7612a6fe449))
+* **pointcloud:** SyncTopview doesn't need to update camera ([634ca61](https://github.com/open-mmlab/labelbee/commit/634ca6196e95a710b762e419ad5800044eab9d24))
+* **pointcloud:** Update attr list style ([d26691e](https://github.com/open-mmlab/labelbee/commit/d26691ec248fc940e63e53850fb2c0ba5ae42e17))
+
+### [1.12.1](https://github.com/open-mmlab/labelbee/compare/v1.12.0...v1.12.1) (2023-03-23)
+
+
+### Bug Fixes
+
+* **view-operation:** Update the range of direction judgement ([943c2b0](https://github.com/open-mmlab/labelbee/commit/943c2b0dbb025c983352f12d16793b508b4c15ce))
+
+## [1.12.0](https://github.com/open-mmlab/labelbee/compare/v1.11.0...v1.12.0) (2023-03-09)
+
+
+### Features
+
+* 【标点工具 列表功能】列表点之间增加辅助线的连接 ([1ccc96c](https://github.com/open-mmlab/labelbee/commit/1ccc96c4a9330482a2534ebe938936017bbba325))
+* **footer:** Support PointCloud PageNumber ([794847c](https://github.com/open-mmlab/labelbee/commit/794847c6758d9f207e6f93ad91857122df0cc654))
+* **lb-components:** Add initState action after unmount ([73bfb1d](https://github.com/open-mmlab/labelbee/commit/73bfb1de7aae28d9424145b46231c3e905ea1f7c))
+* **lb—components:** Forbid keydown if checkMode === true ([fd6bb0d](https://github.com/open-mmlab/labelbee/commit/fd6bb0d21e2d7a2aafa493a108db64ccb09a9ae9))
+* **pointcloud-view:** Support custom configuration of bgColor and ortho ([40a4ad6](https://github.com/open-mmlab/labelbee/commit/40a4ad633f8ae74952aa525b306ce3516b682ee7))
+* **pointcloud:** Add drawLayerSlot to PointCloudTopView ([bd56cb0](https://github.com/open-mmlab/labelbee/commit/bd56cb007a6906f00f443607be602e04795a4714))
+* **pointcloud:** Add hotkey in different pattern ([caf294c](https://github.com/open-mmlab/labelbee/commit/caf294c700fb343d6da33274be39a99d1f20534c))
+* **pointcloud:** Add ModalConfirm after copying same trackID ([358085f](https://github.com/open-mmlab/labelbee/commit/358085fc4ade279866dd0d0d46db85a6f59873bf))
+* **pointcloud:** Add more default operation(like setForbidOperation) ([72f54eb](https://github.com/open-mmlab/labelbee/commit/72f54eb2721f862bd9400bfa5376225f444024d9))
+* **pointcloud:** BatchUpdate provides more params ([47a9047](https://github.com/open-mmlab/labelbee/commit/47a9047e0e7e977cbb160264208e9d1087c3ab7c))
+* **pointcloud:** Change 3DView camera from perspective to orthographic ([6be1167](https://github.com/open-mmlab/labelbee/commit/6be116722306f6b6a22713ad55399391e3b4ddd7))
+* **pointcloud:** CheckMode needs to forbid keydown function ([e9c22fb](https://github.com/open-mmlab/labelbee/commit/e9c22fb1b135d7cbc857c736787b4dda483ede66))
+* **pointcloud:** Highlighing pointCloud after change in side&back view ([d45362b](https://github.com/open-mmlab/labelbee/commit/d45362b37e4ba94abe2f92edcba84203de4aaae7))
+* **pointcloud:** Highlighing pointCLoud by the attribute ([1f7ac06](https://github.com/open-mmlab/labelbee/commit/1f7ac06e340883e5106bcc049e5167a01f901f5a))
+* **pointcloud:** Limit pointCloud syncAttribute in checkMode ([1f80161](https://github.com/open-mmlab/labelbee/commit/1f801617bf6d0753f1c7fac027e6b4d12b328f06))
+* **pointcloud:** Polygon mode alse supports the validUpdate ([d93d8da](https://github.com/open-mmlab/labelbee/commit/d93d8da16ab8d2d4c10867e868a28f7d94065339))
+* **pointcloud:** Support more dataShowing in checkMode ([4db92f6](https://github.com/open-mmlab/labelbee/commit/4db92f629d9163d2e7c67561d5591c16777b0e03))
+* **pointcloud:** Support the invalid color of pointCloud ([10195d5](https://github.com/open-mmlab/labelbee/commit/10195d5c7dd4b95d2ff088607d5b1d182e6c7112))
+* **pointcloud:** The default color of Box is white ([6bbd1da](https://github.com/open-mmlab/labelbee/commit/6bbd1dab27e1a2d0069a09c2cc9bbcbb40d1bd4c))
+* **pointcloud:** Topview defaults from -x to x ([9f49afc](https://github.com/open-mmlab/labelbee/commit/9f49afc163aee35f6c7245fbf14991fa32cc3dc5))
+* **pointcloud:** TrackID is incremented for the current page ([2920cd3](https://github.com/open-mmlab/labelbee/commit/2920cd3564dce0b4abc7aec371e8ef5dd50f3db6))
+* **pointcloud:** Update defaultAttribute after the change of config ([b685df1](https://github.com/open-mmlab/labelbee/commit/b685df154ab9a9237cc749fb985cdcc67c6afb7c))
+* **pointcloud:** Update pointCloud Hotkey ([c500cb5](https://github.com/open-mmlab/labelbee/commit/c500cb58beb778a3878a178c253541723da1906f))
+* **pointcloud:** Update PointCloud Polygon Result KeyName ([90993d1](https://github.com/open-mmlab/labelbee/commit/90993d1fbf5934d31e56c86ef894d1b46bd18794))
+* **pointcloud:** Update the default colorMap within pointCloud\ ([7ebff87](https://github.com/open-mmlab/labelbee/commit/7ebff87a2f5bc9a2fc95b82bed10bf24020be317))
+* **remark:** PointCloud support the checkMode ([9c35600](https://github.com/open-mmlab/labelbee/commit/9c35600cba46de30eaa8acef47f22ff5fd025b9a))
+* **toolstyle:** Update invalid color ([1df9807](https://github.com/open-mmlab/labelbee/commit/1df980704e2605dc7a0a134a9b0ba43462acf323))
+
+
+### Bug Fixes
+
+* **img-utils:** Fix the image loading error ([0bbd8dd](https://github.com/open-mmlab/labelbee/commit/0bbd8dd4f989a601ef5418b2dd2ae2dcc6127cd1))
+* **pointcloud:** Clear pointCloud highlighting after ClearResult ([ab48dee](https://github.com/open-mmlab/labelbee/commit/ab48deefa9d82cbb2f884553bedc327af72045b6))
+* **pointcloud:** Fix pointCloud polygon data problem ([03e9deb](https://github.com/open-mmlab/labelbee/commit/03e9deb819cd1158c8d617e82dcdd9f70f2b53b0))
+* **pointcloud:** Fix the calculation of redo & undo ([d24909c](https://github.com/open-mmlab/labelbee/commit/d24909cfdc9d41c876969c333132197e08ba32d7))
+* **pointcloud:** Fix the highlighting problem ([abd6de2](https://github.com/open-mmlab/labelbee/commit/abd6de20da141495042eb3f68492b61a193b9e81))
+* **pointcloud:** Fix the PCD Loading Error ([d28fae9](https://github.com/open-mmlab/labelbee/commit/d28fae91fdb41d6755e5a694f071e593801549f6))
+* **pointcloud:** Fix the visual deviation of topview ([23cdfc1](https://github.com/open-mmlab/labelbee/commit/23cdfc17e62920c5164276979579c9051a3c3b73))
+* **pointcloud:** Need to highlight pointCloud after initData ([f5d6902](https://github.com/open-mmlab/labelbee/commit/f5d6902cfb917c54199c2eed5556a0d2744c10b6))
+* **pointcloud:** PointCloud Multi-Selection error ([d87207c](https://github.com/open-mmlab/labelbee/commit/d87207c243cc05696f78cde4862163423e24622b))
+* **pointcloud:** Polygon Data is not saved after change ([0bf1622](https://github.com/open-mmlab/labelbee/commit/0bf1622aaa11d13afa31cc257e2967add2f87e7d))
+* **pointcloud:** Sync the defaultAttribute after selected polygon ([d211947](https://github.com/open-mmlab/labelbee/commit/d2119474a4faa1b09893277d50e2652deb9802ad))
+* **pointcloud:** Update polygonList after resizing ([252e3a4](https://github.com/open-mmlab/labelbee/commit/252e3a4a194bca6a7f87bbf03dd06d87d38b021a))
+* **pointcloud:** Update polygonList after setDefaultAttribute ([e80bc46](https://github.com/open-mmlab/labelbee/commit/e80bc4666d37973c1ab8040a8ad40f2585b0d990))
+* **pointcloud:** Update the init data in pointCloud History ([abb038a](https://github.com/open-mmlab/labelbee/commit/abb038a28c356e028d6577f39d0c670feaf20c47))
+* Supplement the better type ([c0c2116](https://github.com/open-mmlab/labelbee/commit/c0c2116c47d498f9cc0aa71fc6da292b324e9f9b))
+* Use changePointListByZoom instead of changePointByZoom ([03ed572](https://github.com/open-mmlab/labelbee/commit/03ed572dfdb11cb3e47259e168009ff125bd16eb))
+
 ## [1.10.0](https://github.com/open-mmlab/labelbee/compare/v1.9.0...v1.10.0) (2023-01-03)
 
 ### Features

@@ -1,4 +1,10 @@
-import { IPointCloudBox, IPointCloudBoxList, IPolygonData } from '@labelbee/lb-utils';
+import {
+  IPointCloudBox,
+  IPointCloudBoxList,
+  IPolygonData,
+  IPointUnit,
+  ILine,
+} from '@labelbee/lb-utils';
 import { useContext } from 'react';
 import { PointCloudContext } from '../PointCloudContext';
 
@@ -8,22 +14,29 @@ export const useHistory = () => {
     setPointCloudResult,
     setSelectedIDs,
     pointCloudBoxList,
+    pointCloudSphereList,
     mainViewInstance,
     topViewInstance,
     polygonList,
     setPolygonList,
+    lineList,
+    setLineList,
+    syncAllViewPointCloudColor,
   } = useContext(PointCloudContext);
 
   const addHistory = ({
     newBoxParams,
     newPolygon,
+    newLine,
   }: {
     newBoxParams?: IPointCloudBox;
     newPolygon?: IPolygonData;
+    newLine?: ILine;
   }) => {
     const historyRecord = {
       pointCloudBoxList,
       polygonList,
+      lineList,
     };
 
     if (newBoxParams) {
@@ -33,6 +46,9 @@ export const useHistory = () => {
     if (newPolygon) {
       historyRecord.polygonList = polygonList.concat(newPolygon);
     }
+    if (newLine) {
+      historyRecord.lineList = lineList.concat(newLine);
+    }
 
     history.pushHistory(historyRecord);
   };
@@ -41,11 +57,13 @@ export const useHistory = () => {
     params: Partial<{
       pointCloudBoxList: IPointCloudBoxList;
       polygonList: IPolygonData[];
+      lineList: ILine[];
     }>,
   ) => {
     const historyRecord = {
       pointCloudBoxList,
       polygonList,
+      lineList,
     };
 
     if (params.pointCloudBoxList) {
@@ -56,7 +74,36 @@ export const useHistory = () => {
       historyRecord.polygonList = params.polygonList;
     }
 
+    if (params.lineList) {
+      historyRecord.lineList = params.lineList;
+    }
     history.pushHistory(historyRecord);
+  };
+  const pushHistoryUnderUpdateLine = (line: ILine) => {
+    const selectedLine = lineList.find((v) => v.id === line.id);
+    if (selectedLine) {
+      const newLineList = lineList.map((v) => {
+        if (v.id === line.id) {
+          return line;
+        }
+        return {
+          ...v,
+        };
+      });
+      history.pushHistory({
+        lineList: newLineList,
+      });
+      setLineList(newLineList);
+    }
+  };
+
+  // todo: need to be completed in future when adding history
+  const pushHistoryUnderUpdatePoint = (point: IPointUnit) => {
+    if (point) {
+      history.pushHistory({
+        pointCloudSphereList,
+      });
+    }
   };
 
   const pushHistoryUnderUpdatePolygon = (polygon: IPolygonData) => {
@@ -86,29 +133,34 @@ export const useHistory = () => {
     pointCloudBoxList: IPointCloudBoxList;
     polygonList: IPolygonData[];
   }) => {
-    history.initRecord([{ pointCloudBoxList, polygonList }], true);
+    history.initRecord({ pointCloudBoxList, polygonList }, true);
   };
 
   const updatePointCloud = (params?: {
     pointCloudBoxList: IPointCloudBoxList;
     polygonList: IPolygonData[];
+    lineList: ILine[];
   }) => {
     if (!params) {
       return;
     }
 
-    const { pointCloudBoxList: newPointCloudBoxList, polygonList: newPolygonList } = params;
+    const {
+      pointCloudBoxList: newPointCloudBoxList = [],
+      polygonList: newPolygonList = [],
+      lineList: newLineList = [],
+    } = params;
 
     if (newPointCloudBoxList) {
       if (pointCloudBoxList.length !== newPointCloudBoxList.length) {
         setSelectedIDs();
       }
 
-      const deletePointCloudList = pointCloudBoxList.filter(
-        (v) => newPointCloudBoxList.findIndex((d) => d.id === v.id) >= 0,
+      const deletePointCloudList = pointCloudBoxList.filter((v) =>
+        newPointCloudBoxList.every((d) => d.id !== v.id),
       );
-      const addPointCloudList = newPointCloudBoxList.filter(
-        (v) => pointCloudBoxList.findIndex((d) => d.id !== v.id) >= 0,
+      const addPointCloudList = newPointCloudBoxList.filter((v) =>
+        pointCloudBoxList.every((d) => d.id !== v.id),
       );
 
       // Clear All Data
@@ -122,13 +174,19 @@ export const useHistory = () => {
       });
 
       setPointCloudResult(newPointCloudBoxList);
+      syncAllViewPointCloudColor(newPointCloudBoxList);
     }
 
     if (newPolygonList) {
       setPolygonList(newPolygonList);
     }
 
+    if (newLineList) {
+      setLineList(newLineList);
+    }
+
     topViewInstance?.updatePolygonList(newPointCloudBoxList ?? [], newPolygonList ?? []);
+    topViewInstance?.updateLineList(newLineList ?? []);
   };
 
   const redo = () => {
@@ -143,7 +201,9 @@ export const useHistory = () => {
     addHistory,
     pushHistoryWithList,
     initHistory,
+    pushHistoryUnderUpdatePoint,
     pushHistoryUnderUpdatePolygon,
+    pushHistoryUnderUpdateLine,
     redo,
     undo,
   };

@@ -3,6 +3,7 @@ import RectUtils from '@/utils/tool/RectUtils';
 import PolygonUtils from '@/utils/tool/PolygonUtils';
 import MarkerUtils from '@/utils/tool/MarkerUtils';
 import MathUtils from '@/utils/MathUtils';
+import _ from 'lodash';
 import { DEFAULT_TEXT_OFFSET, EDragStatus, ESortDirection } from '../../constant/annotation';
 import EKeyCode from '../../constant/keyCode';
 import locale from '../../locales';
@@ -22,6 +23,8 @@ const TEXTAREA_WIDTH = 200;
 
 export interface IPointOperationProps extends IBasicToolOperationProps {
   style: any;
+  forbidAddNew?: boolean;
+  forbidDelete?: boolean;
 }
 class PointOperation extends BasicToolOperation {
   public config: IPointToolConfig;
@@ -46,6 +49,10 @@ class PointOperation extends BasicToolOperation {
 
   public _textAttributeInstance?: TextAttributeClass;
 
+  public forbidAddNew?: boolean;
+
+  public forbidDelete?: boolean;
+
   constructor(props: IPointOperationProps) {
     super(props);
     this.config = CommonToolUtils.jsonParser(props.config);
@@ -58,6 +65,8 @@ class PointOperation extends BasicToolOperation {
     this.getCurrentSelectedData = this.getCurrentSelectedData.bind(this);
     this.updateSelectedTextAttribute = this.updateSelectedTextAttribute.bind(this);
     this.setSelectedID = this.setSelectedID.bind(this);
+    this.forbidAddNew = props.forbidAddNew ?? false;
+    this.forbidDelete = props.forbidDelete ?? false;
   }
 
   get dataList() {
@@ -207,7 +216,7 @@ class PointOperation extends BasicToolOperation {
   }
 
   /**
-   * 外层 sidabr 调用
+   * 外层 sidebar 调用
    * @param v
    * @returns
    */
@@ -316,7 +325,7 @@ class PointOperation extends BasicToolOperation {
       this.dragStatus = EDragStatus.Start;
       this.dragInfo = {
         dragStartCoord: this.getCoordinateUnderZoom(e),
-        originPointList: this.selectedPoints,
+        originPointList: _.cloneDeep(this.selectedPoints),
       };
       return;
     }
@@ -353,6 +362,11 @@ class PointOperation extends BasicToolOperation {
     // 拖拽停止
     if (this.dragStatus === EDragStatus.Move) {
       this.history.pushHistory(this.pointList);
+      this.emit(
+        'updatePointByDrag',
+        this.pointList.find((v) => v?.id === this.selectedID),
+        this.dragInfo?.originPointList,
+      );
       this.dragInfo = undefined;
     }
     this.dragStatus = EDragStatus.Wait;
@@ -460,6 +474,7 @@ class PointOperation extends BasicToolOperation {
 
   public createPoint(e: MouseEvent) {
     if (!this.imgInfo) return;
+    if (this.forbidAddNew) return;
     const { upperLimit } = this.config;
     if (upperLimit && this.currentPageResult.length >= upperLimit) {
       // 小于对应的下限点, 大于上限点无法添加
@@ -585,6 +600,7 @@ class PointOperation extends BasicToolOperation {
     this.hoverID = newDrawingPoint.id;
     const newPointList = [...this.pointList, newDrawingPoint];
     this.setPointList(newPointList);
+    this.emit('pointCreated', newDrawingPoint, this.zoom);
     this.history.pushHistory(newPointList);
     this.setSelectedID(newDrawingPoint.id);
   }
@@ -602,14 +618,20 @@ class PointOperation extends BasicToolOperation {
     return selectPoint?.id;
   }
 
+  public get selectedPoint() {
+    return this.pointList.find((v) => v.id === this.selectedID);
+  }
+
   public rightMouseUp(e: MouseEvent) {
     this.recoverOperationMode();
 
     // 删除操作
     if (this.selectedID === this.hoverID) {
+      if (this.forbidDelete) return;
       const pointList = this.pointList.filter((point) => point.id !== this.selectedID);
       this.setPointList(pointList);
       this.history.pushHistory(pointList);
+      this.emit('pointDeleted', this.selectedID);
       this.setSelectedID('');
       this.hoverID = '';
       return;
@@ -618,6 +640,7 @@ class PointOperation extends BasicToolOperation {
     // 选中操作
     const hoverPoint = this.pointList.find((point) => point.id === this.hoverID);
     this.setSelectedID(this.hoverID, e.ctrlKey);
+    this.emit('pointSelected', this.hoverID);
     this.setDefaultAttribute(hoverPoint?.attribute);
 
     if (hoverPoint?.label && this.hasMarkerConfig) {
@@ -705,6 +728,7 @@ class PointOperation extends BasicToolOperation {
       this.history.pushHistory(this.pointList);
       this._textAttributeInstance?.clearTextAttribute();
       this.emit('selectedChange');
+      this.emit('pointDeleted', this.selectedID);
       this.render();
     }
   }
@@ -842,7 +866,7 @@ class PointOperation extends BasicToolOperation {
       showText = `${order}_${MarkerUtils.getMarkerShowText(point.label, this.config.markerList)}`;
     }
 
-    if (point.attribute) {
+    if (point.attribute && !this.config.hideAttribute) {
       showText = `${showText}  ${AttributeUtils.getAttributeShowText(point.attribute, this.config?.attributeList)}`;
     }
 

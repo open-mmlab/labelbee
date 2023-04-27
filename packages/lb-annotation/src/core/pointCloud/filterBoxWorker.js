@@ -1,3 +1,68 @@
+/**
+ * Generate index with a fixed range.
+ *
+ * @param {*} z
+ * @returns
+ */
+function getIndex(z) {
+  const minZ = -7;
+  const maxZ = 3;
+  const len = maxZ - minZ;
+
+  if (z < minZ) {
+    z = minZ;
+  }
+
+  if (z > maxZ) {
+    z = maxZ;
+  }
+
+  return Math.floor(((z - minZ) / len) * 255);
+}
+// COLOR_MAP_JET
+function createColorMapJet() {
+  let s;
+  const p = new Array(256).fill('').map(() => new Array(3).fill(''));
+  for (let i = 0; i < 20; i++) {
+    for (s = 0; s < 32; s++) {
+      p[s][0] = 128 + 4 * s;
+      p[s][1] = 0;
+      p[s][2] = 0;
+    }
+    p[32][0] = 255;
+    p[32][1] = 0;
+    p[32][2] = 0;
+    for (s = 0; s < 63; s++) {
+      p[33 + s][0] = 255;
+      p[33 + s][1] = 4 + 4 * s;
+      p[33 + s][2] = 0;
+    }
+    p[96][0] = 254;
+    p[96][1] = 255;
+    p[96][2] = 2;
+    for (s = 0; s < 62; s++) {
+      p[97 + s][0] = 250 - 4 * s;
+      p[97 + s][1] = 255;
+      p[97 + s][2] = 6 + 4 * s;
+    }
+    p[159][0] = 1;
+    p[159][1] = 255;
+    p[159][2] = 254;
+    for (s = 0; s < 64; s++) {
+      p[160 + s][0] = 0;
+      p[160 + s][1] = 252 - s * 4;
+      p[160 + s][2] = 255;
+    }
+    for (s = 0; s < 32; s++) {
+      p[224 + s][0] = 0;
+      p[224 + s][1] = 0;
+      p[224 + s][2] = 252 - 4 * s;
+    }
+  }
+  return p;
+}
+const COLOR_MAP_JET = createColorMapJet();
+
 export function isInPolygon(checkPoint, polygonPoints, lineType = 0) {
   let counter = 0;
   let i;
@@ -59,9 +124,21 @@ onmessage = function onmessage(e) {
       newPosition.push(x);
       newPosition.push(y);
       newPosition.push(z);
-      newColor.push(color[i]);
-      newColor.push(color[i + 1]);
-      newColor.push(color[i + 2]);
+
+      if (color.length === 0) {
+        // // DEFAULT COLOR RENDER
+        // Recover the originPoint
+        const index = getIndex(z);
+        const newColorRGB = COLOR_MAP_JET[index];
+        const [r, g, b] = newColorRGB;
+        newColor.push(r / 255);
+        newColor.push(g / 255);
+        newColor.push(b / 255);
+      } else {
+        newColor.push(color[i]);
+        newColor.push(color[i + 1]);
+        newColor.push(color[i + 2]);
+      }
       num++;
     }
   }

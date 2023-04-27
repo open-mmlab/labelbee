@@ -34,6 +34,7 @@ interface CommonActions {
   payload?: any;
 }
 
+export type IPointCloudBoxWithIndex = IPointCloudBox & { index: number };
 
 export interface AnnotationState {
   toolInstance: ToolInstance | null;
@@ -64,6 +65,9 @@ export interface AnnotationState {
   beforeRotate?: () => boolean;
 
   pointCloudLoading: boolean;
+  checkMode: boolean; // Judge current Mode is checkMode or not.
+  predictionResult: IPointCloudBoxWithIndex[];
+  predictionResultVisible: boolean;
 }
 
 interface UpdateToolInstance {
@@ -172,22 +176,22 @@ interface InitAnnotationState extends CommonActions {
   type: typeof ANNOTATION_ACTIONS.INIT_ALL_STATE;
 }
 interface BatchUpdateTrackID {
-  type: typeof ANNOTATION_ACTIONS.BATCH_UPDATE_TRACK_ID,
+  type: typeof ANNOTATION_ACTIONS.BATCH_UPDATE_TRACK_ID;
   payload: {
     id: number;
     newID: number;
-    range: [number, number],
-    imgList: IFileItem[],
-  }
+    range: [number, number];
+    imgList: IFileItem[];
+  };
 }
 
 interface BatchUpdateResultByTrackID {
-  type: typeof ANNOTATION_ACTIONS.BATCH_UPDATE_RESULT_BY_TRACK_ID,
+  type: typeof ANNOTATION_ACTIONS.BATCH_UPDATE_RESULT_BY_TRACK_ID;
   payload: {
     id: number;
     newData: Partial<IPointCloudBox>;
-    range: [number, number],
-  }
+    range: [number, number];
+  };
 }
 
 export type AnnotationActionTypes =

@@ -15,6 +15,7 @@ export enum ESubmitType {
   StepChanged = 6, // 切换步骤
   Save = 7, // 点击保存
   BatchUpdateTrackID = 8, // 批量更改 TrackID (PointCloud)
+  BatchUpdateImgList = 9, // 批量更改 ImgList (PointCloud)
   SyncImgList = 10001, // 仅更改数据
   SyncCurrentPageData = 10002, // 同步当页数据
 }

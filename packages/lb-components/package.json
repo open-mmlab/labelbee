@@ -1,6 +1,6 @@
 {
   "name": "@labelbee/lb-components",
-  "version": "1.8.0-alpha.1",
+  "version": "1.10.0-alpha.4",
   "description": "Provide a complete library of annotation components",
   "main": "./dist/index.js",
   "es": "./es/index.js",
@@ -18,8 +18,7 @@
     "commit": "git-cz",
     "lint": "eslint 'src/**/*.{ts,tsx,js,jsx}' && npm run build:type",
     "lint:fix": "eslint 'src/**/*.{ts,tsx,js,jsx}' --fix",
-    "commitmsg": "commitlint -e $GIT_PARAMS",
-    "prepublishOnly": "npm run build"
+    "commitmsg": "commitlint -e $GIT_PARAMS"
   },
   "author": "laoluo",
   "contributors": [
@@ -33,6 +32,9 @@
     "canvas",
     "react"
   ],
+  "publishConfig": {
+    "access": "public"
+  },
   "license": "Apache-2.0",
   "homepage": "https://github.com/open-mmlab/labelbee/tree/main/packages/lb-components",
   "bugs": {
@@ -41,8 +43,8 @@
   },
   "dependencies": {
     "@ant-design/icons": "^4.6.2",
-    "@labelbee/lb-annotation": "^1.12.0-alpha.1",
-    "@labelbee/lb-utils": "^1.5.0-alpha.1",
+    "@labelbee/lb-annotation": "^1.14.0-alpha.3",
+    "@labelbee/lb-utils": "^1.7.0-alpha.3",
     "ahooks": "^3.4.0",
     "classnames": "^2.3.0",
     "lodash": "^4.17.21",

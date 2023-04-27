@@ -174,22 +174,6 @@ const pointCloudConfig = {
       key: '类别4H',
       value: 'class-4H',
     },
-    {
-      key: '类别Au',
-      value: 'class-Au',
-    },
-    {
-      key: '类别FM',
-      value: 'class-FM',
-    },
-    {
-      key: '类别Nj',
-      value: 'class-Nj',
-    },
-    {
-      key: '类别CP',
-      value: 'class-CP',
-    },
   ],
   // 标注半径范围
   radius: 90,
@@ -225,8 +209,45 @@ const pointCloudConfig = {
   ],
   // 框内点数下限
   lowerLimitPointsNumInBox: 5,
+  // attributeConfigurable: true,
   trackConfigurable: true,
 };
+
+const cuboidToolConfig = {
+  "isShowCursor": false,
+  "showConfirm": false,
+  "skipWhileNoDependencies": false,
+  "drawOutsideTarget": false,
+  "copyBackwardResult": true,
+  "minWidth": 1,
+  "attributeConfigurable": true,
+  "textConfigurable": true,
+  "textCheckType": 0,
+  "customFormat": "",
+  "attributeList": [
+    {
+      "key": "跑车",
+      "value": "sports car"
+    },
+
+    {
+      "key": "吉普车",
+      "value": "jeep"
+    },
+    {
+      "key": "紧凑车型",
+      "value": "single"
+    },
+    {
+      "key": "SUV等车型",
+      "value": "suv"
+    },
+    {
+      "key": "货车",
+      "value": "trucks"
+    },
+  ]
+}
 
 export const getConfig = (tool) => {
   if (tool === EToolName.Line) {
@@ -259,6 +280,10 @@ export const getConfig = (tool) => {
 
   if (tool === EToolName.ScribbleTool) {
     return scribbleToolConfig;
+  }
+
+  if (tool === EToolName.Cuboid) {
+    return cuboidToolConfig;
   }
 
   return rectToolConfig;

@@ -99,9 +99,18 @@ class Selection {
   public setSelectedIDs(id?: string, isAppend = false) {
     if (isAppend) {
       this.updateSelectedIDs(id);
-    } else {
-      this.selectedIDs = id ? [id] : [];
+      return;
     }
+
+    this.selectedIDs = id ? [id] : [];
+  }
+
+  /**
+   * Force set selectedIDs not calc
+   * @param ids
+   */
+  public hardSetSelectedIDs(ids: string[]) {
+    this.selectedIDs = ids;
   }
 
   public selectAll() {

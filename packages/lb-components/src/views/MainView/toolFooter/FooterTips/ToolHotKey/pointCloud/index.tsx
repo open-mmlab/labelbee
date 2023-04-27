@@ -12,10 +12,20 @@ import rotate180_black from '@/assets/annotation/pointCloudTool/rotate180_black.
 import selectAll from '@/assets/annotation/pointCloudTool/selectAll.svg';
 import selectMultiple from '@/assets/annotation/pointCloudTool/selectMultiple.svg';
 import TabChangeSelectedSvg from '@/assets/annotation/toolHotKeyIcon/icon_tab_kj.svg';
+import DeleteSvg from '@/assets/annotation/toolHotKeyIcon/icon_del_kj.svg';
 
 import { IShortcut } from '@/types/tool';
 import React from 'react';
 import { ReloadOutlined, RotateLeftOutlined, RotateRightOutlined } from '@ant-design/icons';
+import {
+  polygon,
+  invalidPolygon,
+  selectedPolygon,
+  changePolygonAttribute,
+  deletePolygon,
+  insertPolygonPoint,
+  deletePolygonPoint,
+} from '../polygon';
 
 const changePointSize: IShortcut = {
   name: 'PointThickness',
@@ -129,6 +139,13 @@ const SelectAll = {
   shortCut: ['Ctrl', 'A'],
 };
 
+const deleteBox = {
+  name: 'Delete',
+  icon: DeleteSvg,
+  shortCut: ['Del'],
+  noticeInfo: 'SelectedStatus',
+};
+
 const pointCloudShortCutTable: IShortcut[] = [
   { name: 'GeneralOperation' },
   backward,
@@ -149,9 +166,32 @@ const pointCloudShortCutTable: IShortcut[] = [
   Rotate180,
   CopyPrevPage,
   ChangeBoxInvalid,
+  deleteBox,
   SelectMulti,
   SelectAll,
   fullScreen,
 ];
 
+const pointCloudShortCutTable_POLYGON: IShortcut[] = [
+  { name: 'GeneralOperation' },
+  backward,
+  forward,
+  changePointSize,
+  scale,
+  rotateRoundCenter,
+  Drag3D,
+  DragTopView,
+  ChangeInvalid,
+  { name: 'PolygonPattern' },
+  polygon,
+  invalidPolygon,
+  selectedPolygon,
+  changePolygonAttribute,
+  deletePolygon,
+  insertPolygonPoint,
+  deletePolygonPoint,
+];
+
 export default pointCloudShortCutTable;
+
+export { pointCloudShortCutTable_POLYGON };

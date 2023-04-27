@@ -12,6 +12,7 @@ import EKeyCode from '@/constant/keyCode';
 import MathUtils from '@/utils/MathUtils';
 import { BasicToolOperation, IBasicToolOperationProps } from './basicToolOperation';
 import LineToolUtils from '../../utils/tool/LineToolUtils';
+
 import {
   isInPolygon,
   createSmoothCurvePoints,
@@ -112,9 +113,16 @@ class LineToolOperation extends BasicToolOperation {
     });
   };
 
+  public _textAttributInstance?: TextAttributeClass;
+
   /** 选中所有线条 */
   get selectedLines() {
     return this.lineList.filter((i) => this.selection.isIdSelected(i.id));
+  }
+
+  /** 线条是否被选中 */
+  get isLineSelected() {
+    return this.selectedID && this.activeLine;
   }
 
   /** 选中单个线条 */
@@ -147,6 +155,14 @@ class LineToolOperation extends BasicToolOperation {
   };
 
   // public selectedID?: string;
+
+  public updatedLine: ILine = {
+    id: '',
+    valid: false,
+    order: 0,
+  };
+
+  public toolName: string = 'lineTool';
 
   private lineList: ILine[] = [];
 
@@ -798,6 +814,7 @@ class LineToolOperation extends BasicToolOperation {
       });
       this.render();
     }
+    this.emit('updateLineByDrag', this.updatedLine);
   }
 
   /**
@@ -933,6 +950,15 @@ class LineToolOperation extends BasicToolOperation {
     }
   };
 
+  public getSelectedLinesArea = () => {
+    return MathUtils.calcViewportBoundaries(
+      this.selectedLines.reduce(
+        (pre: ICoordinate[], next) => (next?.pointList ? pre.concat(...next?.pointList) : pre),
+        [],
+      ),
+    );
+  };
+
   /**
    * 在矩形内移动线条
    * @param offsetX x轴的偏移量
@@ -946,10 +972,10 @@ class LineToolOperation extends BasicToolOperation {
     rectHorizontalRange: number[],
     rectVerticalRange: number[],
   ) => {
-    if (this.activeArea === undefined) {
+    if (this.selectedLines.length === 0) {
       return;
     }
-    const { top, left, right, bottom } = this.activeArea;
+    const { top, left, right, bottom } = this.getSelectedLinesArea();
     const hBoundaries = [left, right].map((i) => (_.isNumber(i) ? i + offsetX : 0));
     const vBoundaries = [top, bottom].map((i) => (_.isNumber(i) ? i + offsetY : 0));
     const horizontalInRange = left >= 0 && right && MathUtils.isInRange(hBoundaries, rectHorizontalRange);
@@ -968,7 +994,6 @@ class LineToolOperation extends BasicToolOperation {
   public moveSelectedLine(coord: ICoordinate) {
     const offsetX = (coord.x - this.prevAxis.x) / this.zoom;
     const offsetY = (coord.y - this.prevAxis.y) / this.zoom;
-
     /** 允许目标外 */
     if (this.enableOutOfTarget) {
       this.lineDragging = true;
@@ -1112,7 +1137,6 @@ class LineToolOperation extends BasicToolOperation {
 
   public onRightClick = (e: MouseEvent) => {
     this.cursor = undefined;
-
     if (this.isCreate) {
       if (this.isLinePointsNotEnough()) {
         return;
@@ -1354,6 +1378,7 @@ class LineToolOperation extends BasicToolOperation {
     const line = this.lineList.find((i) => i.id === this.selectedID);
     if (line) {
       line.pointList = _.cloneDeep(this.activeLine);
+      this.updatedLine = line;
       this.emit('dataUpdated', this.lineList);
     }
   }
@@ -1408,7 +1433,6 @@ class LineToolOperation extends BasicToolOperation {
   public stopLineCreating(isAppend: boolean = true) {
     /** 新建线条后在文本标注未开启时默认不选中, 续标后默认选中 */
     const setActiveAfterCreating = this.selectedID ? true : !!this.isTextConfigurable;
-
     let selectedID;
     if (isAppend) {
       if (this.selectedID) {
@@ -1424,13 +1448,15 @@ class LineToolOperation extends BasicToolOperation {
         const newLine = this.createLineData();
         selectedID = newLine.id;
         this.setLineList([...this.lineList, newLine]);
+        this.emit('lineCreated', newLine, this.zoom, this.currentPos);
         this.history?.pushHistory(this.lineList);
       }
     }
 
+    this.setNoneStatus();
+
     if (setActiveAfterCreating) {
       this.activeLine = [];
-      this.setNoneStatus();
       this.setSelectedLineID(selectedID);
     }
 
@@ -1645,7 +1671,7 @@ class LineToolOperation extends BasicToolOperation {
 
       /* 删除点 */
       if (hoverPoint) {
-        this.deleteSelectedLinePoint(hoverPoint.id);
+        this.deleteSelectedLinePoint(hoverPoint.id!);
         return;
       }
 
@@ -1660,6 +1686,7 @@ class LineToolOperation extends BasicToolOperation {
     this.history?.pushHistory(this.lineList);
     this.setNoneStatus();
     this.emit('dataUpdated', this.lineList);
+    this.emit('lineDeleted', this.selectedID);
     this.render();
   }
 
@@ -1841,6 +1868,7 @@ class LineToolOperation extends BasicToolOperation {
   public setDefaultAttribute(attribute: string = '') {
     if (this.attributeConfigurable) {
       this.defaultAttribute = attribute;
+      this.changeStyle(this.defaultAttribute);
       this.setLineAttribute('attribute', attribute);
       if (this.selectedIDs.length > 0) {
         this.history?.pushHistory(this.lineList);

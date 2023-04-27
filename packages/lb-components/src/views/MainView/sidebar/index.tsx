@@ -150,6 +150,7 @@ const Sidebar: React.FC<IProps> = ({ sider }) => {
         EToolName.Line,
         EToolName.Rect,
         EToolName.Polygon,
+        EToolName.Cuboid,
       ] as string[]
     ).includes(toolName)
   ) {

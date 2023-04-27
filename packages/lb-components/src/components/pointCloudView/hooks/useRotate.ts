@@ -18,7 +18,7 @@ export const useRotate = ({ currentData }: IAnnotationStateProps) => {
 
   const updateRotate = useCallback(
     (angle: number) => {
-      const { topViewInstance, mainViewInstance } = ptCtx;
+      const { topViewInstance, mainViewInstance, syncAllViewPointCloudColor } = ptCtx;
       if (!topViewInstance || !mainViewInstance) {
         return;
       }
@@ -31,7 +31,7 @@ export const useRotate = ({ currentData }: IAnnotationStateProps) => {
         return;
       }
 
-      updateSelectedBox({
+      const newPointCloudList = updateSelectedBox({
         rotation: PointCloudUtils.restrictAngleRange(
           selectedPointCloudBox.rotation + Number(Math.PI * angle) / 180,
         ),
@@ -41,7 +41,7 @@ export const useRotate = ({ currentData }: IAnnotationStateProps) => {
       const selectedPolygon = TopPointCloudPolygonOperation.selectedPolygon;
 
       mainViewInstance.generateBox(selectedPointCloudBox);
-      mainViewInstance.highlightOriginPointCloud(selectedPointCloudBox);
+      syncAllViewPointCloudColor(newPointCloudList);
       synchronizeSideView(
         selectedPointCloudBox,
         selectedPolygon,

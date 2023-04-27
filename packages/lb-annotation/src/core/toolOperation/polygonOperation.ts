@@ -52,7 +52,7 @@ class PolygonOperation extends BasicToolOperation {
 
   public isCombined: boolean; // 是否开启合并操作
 
-  private dragInfo?: {
+  public dragInfo?: {
     dragStartCoord: ICoordinate;
     initPointList: IPolygonPoint[];
     changePointIndex?: number[]; // 用于存储拖拽点 / 边的下标
@@ -60,6 +60,8 @@ class PolygonOperation extends BasicToolOperation {
 
     originPolygon?: IPolygonData; // For comparing data before and after drag and drop.
     selectedPolygons?: IPolygonData[]; // For comparing data before and after drag and drop.
+    dragPrevCoord: ICoordinate;
+    originPolygonList: IPolygonData[];
   };
 
   private drawingHistory: ActionsHistory; // 用于正在编辑中的历史记录
@@ -124,7 +126,7 @@ class PolygonOperation extends BasicToolOperation {
   }
 
   public get selectedPolygon() {
-    return PolygonUtils.getPolygonByID(this.polygonList, this.selectedID);
+    return PolygonUtils.getPolygonByID(this.visiblePolygonList, this.selectedID);
   }
 
   public get selectedPolygons() {
@@ -132,11 +134,19 @@ class PolygonOperation extends BasicToolOperation {
   }
 
   public get hoverPolygon() {
-    return this.polygonList.find((v) => v.id === this.hoverID && v.id !== this.selectedID);
+    return this.visiblePolygonList.find((v) => v.id === this.hoverID && v.id !== this.selectedID);
+  }
+
+  public get enableDrag() {
+    return Boolean(this.selectedID && this.dragInfo);
+  }
+
+  public get visiblePolygonList() {
+    return this.polygonList;
   }
 
   public get polygonListUnderZoom() {
-    return this.polygonList.map((polygon) => ({
+    return this.visiblePolygonList.map((polygon) => ({
       ...polygon,
       pointList: AxisUtils.changePointListByZoom(polygon.pointList, this.zoom),
     }));
@@ -615,7 +625,7 @@ class PolygonOperation extends BasicToolOperation {
     return AxisUtils.returnClosePointIndex(currentCoord, editPointListUnderZoom);
   }
 
-  public deletePolygon(id?: string[]) {
+  public deletePolygons(id?: string[]) {
     if (!id || id.length === 0) {
       return;
     }
@@ -771,7 +781,7 @@ class PolygonOperation extends BasicToolOperation {
         break;
 
       case EKeyCode.Delete:
-        this.deletePolygon(this.selectedIDs);
+        this.deletePolygons(this.selectedIDs);
         this.render();
         break;
 
@@ -921,7 +931,7 @@ class PolygonOperation extends BasicToolOperation {
     }
 
     if (this.hoverID === this.selectedID) {
-      this.deletePolygon([hoverID]);
+      this.deletePolygons([hoverID]);
     }
 
     this.render();
@@ -982,6 +992,8 @@ class PolygonOperation extends BasicToolOperation {
       changePointIndex,
       originPolygon: this.selectedPolygon,
       selectedPolygons: this.selectedPolygons,
+      dragPrevCoord: dragStartCoord,
+      originPolygonList: this.polygonList,
     };
   }
 
@@ -1192,18 +1204,22 @@ class PolygonOperation extends BasicToolOperation {
     }
   }
 
+  /**
+   * Update polygon position while enableDrag is true
+   * @param e {MouseEvent}
+   */
   public onDragMove(e: MouseEvent) {
-    const { initPointList, dragStartCoord, dragTarget, changePointIndex } = this.dragInfo!;
     const coordinate = this.getCoordinateUnderZoom(e);
 
-    let offset = {
-      x: (coordinate.x - dragStartCoord.x) / this.zoom,
-      y: (coordinate.y - dragStartCoord.y) / this.zoom,
-    };
+    const { dragTarget, dragPrevCoord, changePointIndex, initPointList, dragStartCoord } = this.dragInfo!;
 
     this.dragStatus = EDragStatus.Move;
 
     if (dragTarget === EDragTarget.Plane) {
+      const offset = {
+        x: (coordinate.x - dragStartCoord.x) / this.zoom,
+        y: (coordinate.y - dragStartCoord.y) / this.zoom,
+      };
       this.moveSelectedPolygons(offset);
       return;
     }
@@ -1213,8 +1229,6 @@ class PolygonOperation extends BasicToolOperation {
     if (!selectedPolygon) {
       return;
     }
-
-    let selectedPointList: IPolygonPoint[] | undefined = selectedPolygon?.pointList;
 
     /**
      * 矩形拖动
@@ -1232,14 +1246,96 @@ class PolygonOperation extends BasicToolOperation {
       const secondPointIndex = MathUtils.getArrayIndex(changePointIndex[0] - 1, 4);
       const basicLine: [ICoordinate, ICoordinate] = [initPointList[firstPointIndex], initPointList[secondPointIndex]];
 
-      offset = MathUtils.getRectPerpendicularOffset(dragStartCoord, coordinate, basicLine);
-      offset = {
-        x: offset.x / this.zoom,
-        y: offset.y / this.zoom,
+      const perpendicularOffset = MathUtils.getRectPerpendicularOffset(dragStartCoord, coordinate, basicLine);
+      return {
+        x: perpendicularOffset.x / this.zoom,
+        y: perpendicularOffset.y / this.zoom,
       };
     }
 
+    if (this.dragInfo?.dragTarget === EDragTarget.Plane) {
+      return {
+        x: (coordinate.x - dragPrevCoord.x) / this.zoom,
+        y: (coordinate.y - dragPrevCoord.y) / this.zoom,
+      };
+    }
+
+    return {
+      x: (coordinate.x - dragStartCoord.x) / this.zoom,
+      y: (coordinate.y - dragStartCoord.y) / this.zoom,
+    };
+  }
+
+  /**
+   * According to the mode of dragTarget, get the offset when dragging
+   * @param e {MouseEvent}
+   * @param selectedPolygon {IPolygonData}
+   * @returns
+   */
+  public getDragOffset(e: MouseEvent, selectedPolygon: IPolygonData) {
+    const coordinate = this.getCoordinateUnderZoom(e);
+
+    const { dragTarget, dragPrevCoord, changePointIndex, initPointList, dragStartCoord } = this.dragInfo!;
+
+    /**
+     * 矩形拖动
+     * 1. 模式匹配
+     * 2. 当前选中多边形是否为矩形
+     * 3. 是否带有拖动
+     *  */
+    if (
+      this.pattern === EPolygonPattern.Rect &&
+      selectedPolygon?.isRect === true &&
+      changePointIndex &&
+      [EDragTarget.Line].includes(dragTarget)
+    ) {
+      const firstPointIndex = MathUtils.getArrayIndex(changePointIndex[0] - 2, 4);
+      const secondPointIndex = MathUtils.getArrayIndex(changePointIndex[0] - 1, 4);
+      const basicLine: [ICoordinate, ICoordinate] = [initPointList[firstPointIndex], initPointList[secondPointIndex]];
+
+      const perpendicularOffset = MathUtils.getRectPerpendicularOffset(dragStartCoord, coordinate, basicLine);
+      return {
+        x: perpendicularOffset.x / this.zoom,
+        y: perpendicularOffset.y / this.zoom,
+      };
+    }
+
+    if (this.dragInfo?.dragTarget === EDragTarget.Plane) {
+      return {
+        x: (coordinate.x - dragPrevCoord.x) / this.zoom,
+        y: (coordinate.y - dragPrevCoord.y) / this.zoom,
+      };
+    }
+
+    return {
+      x: (coordinate.x - dragStartCoord.x) / this.zoom,
+      y: (coordinate.y - dragStartCoord.y) / this.zoom,
+    };
+  }
+
+  public dragPolygon(e: MouseEvent, selectedPolygon: IPolygonData) {
+    let selectedPointList: IPolygonPoint[] | undefined = _.cloneDeep(selectedPolygon?.pointList);
+
+    if (!selectedPointList || !this.dragInfo) {
+      return;
+    }
+
+    const { initPointList, dragTarget, changePointIndex } = this.dragInfo!;
+
+    const offset = this.getDragOffset(e, selectedPolygon);
+
+    this.dragStatus = EDragStatus.Move;
+
     switch (dragTarget) {
+      case EDragTarget.Plane:
+        selectedPointList = selectedPointList.map((v) => ({
+          ...v,
+          x: v.x + offset.x,
+          y: v.y + offset.y,
+        }));
+
+        break;
+
       case EDragTarget.Point:
       case EDragTarget.Line:
         selectedPointList = selectedPointList.map((n, i) => {
@@ -1283,26 +1379,7 @@ class PolygonOperation extends BasicToolOperation {
       }
     }
 
-    const newPolygonList = this.polygonList.map((v) => {
-      if (v.id === this.selectedID) {
-        const newData = {
-          ...v,
-          pointList: selectedPointList as IPolygonPoint[],
-        };
-
-        // 非矩形模式下拖动，矩形模式下生成的框将会转换为非矩形框
-        if (v.isRect === true && this.pattern === EPolygonPattern.Normal) {
-          Object.assign(newData, { isRect: false });
-        }
-
-        return newData;
-      }
-
-      return v;
-    });
-
-    this.setPolygonList(newPolygonList);
-    this.render();
+    return selectedPointList;
   }
 
   public onMouseMove(e: MouseEvent) {
@@ -1345,15 +1422,34 @@ class PolygonOperation extends BasicToolOperation {
     }
   }
 
-  public leftMouseUp(e: MouseEvent) {
+  /**
+   * Emit updateList for views update
+   * @Emit updateList {UpdatePolygonByDragList}
+   */
+  public emitUpdatePolygonByDrag = () => {
+    if (this.dragInfo) {
+      const { originPolygon } = this.dragInfo;
+      this.emit('updatePolygonByDrag', [{ newPolygon: this.selectedPolygon, originPolygon }]);
+    }
+  };
+
+  public leftMouseUpdateValid(e: MouseEvent) {
     const hoverID = this.getHoverID(e);
     if (this.drawingPointList.length === 0 && e.ctrlKey === true && hoverID) {
       // ctrl + 左键 + hover存在，更改框属性
       this.setPolygonValidAndRender(hoverID);
+      return true;
+    }
+    return false;
+  }
+
+  public leftMouseUp(e: MouseEvent) {
+    const isCtrl = this.leftMouseUpdateValid(e);
+
+    if (isCtrl) {
       return;
     }
-
-    // 创建多边形
+    // Create New Polygon
     this.addPointInDrawing(e);
   }
 
@@ -1373,23 +1469,22 @@ class PolygonOperation extends BasicToolOperation {
 
       return;
     }
-
     if (super.onMouseUp(e) || this.forbidMouseOperation || !this.imgInfo) {
       return undefined;
     }
 
     if (this.dragInfo && this.dragStatus === EDragStatus.Move) {
-      // 拖拽停止
-      const { originPolygon } = this.dragInfo;
-      this.dragInfo = undefined;
-      this.dragStatus = EDragStatus.Wait;
-      this.history.pushHistory(this.polygonList);
-
       // 同步 结果
       this.emit('updateResult');
 
       // Emit polygon.
-      this.emit('updatePolygonByDrag', { newPolygon: this.selectedPolygon, originPolygon });
+      this.emitUpdatePolygonByDrag();
+
+      // 拖拽停止
+      this.dragInfo = undefined;
+      this.dragStatus = EDragStatus.Wait;
+      this.history.pushHistory(this.polygonList);
+
       return;
     }
 
@@ -1511,7 +1606,7 @@ class PolygonOperation extends BasicToolOperation {
 
   public renderStaticPolygon() {
     if (this.isHidden === false) {
-      this.polygonList?.forEach((polygon) => {
+      this.visiblePolygonList?.forEach((polygon) => {
         if ([this.selectedID, this.editPolygonID].includes(polygon.id)) {
           return;
         }

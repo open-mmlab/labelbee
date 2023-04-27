@@ -1,0 +1,37 @@
+name: "semantic-public-ci"
+
+env:
+  NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
+  GH_TOKEN: ${{ secrets.GH_TOKEN }}
+
+on:
+  push:
+    branches:
+      - main
+      - alpha
+  workflow_dispatch:
+    inputs:
+
+jobs:
+  release-pub:
+    name: "public"
+    runs-on: ubuntu-20.04
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v2
+        with:
+          persist-credentials: false
+      - name: install node js
+        uses: actions/setup-node@v2
+        with:
+          node-version: '18.9.0'
+      - name: npm install
+        run: npm install
+      - name: lerna bootstrap
+        run: npm run bootstrap
+      - name: lerna build
+        run: npm run build
+      - name: semantic publish
+        run: npm run semantic
+        env:
+          WEBHOOK_URL: ${{ secrets.WEBHOOK_URL }}

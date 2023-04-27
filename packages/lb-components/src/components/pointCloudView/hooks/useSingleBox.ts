@@ -1,9 +1,10 @@
-import { IPointCloudBox } from '@labelbee/lb-utils';
+import { IPointCloudBox, PartialIPointCloudBoxList } from '@labelbee/lb-utils';
 import { useCallback, useContext, useMemo } from 'react';
 import _ from 'lodash';
 import { PointCloudContext } from '../PointCloudContext';
 import { cAnnotation } from '@labelbee/lb-annotation';
 import { useHistory } from './useHistory';
+import { usePolygon } from './usePolygon';
 
 const { ESortDirection } = cAnnotation;
 
@@ -19,7 +20,11 @@ export const useSingleBox = () => {
     selectedID,
     mainViewInstance,
     setSelectedIDs,
+    syncAllViewPointCloudColor,
+    polygonList,
   } = useContext(PointCloudContext);
+  const { selectedPolygon, updateSelectedPolygon, updatePolygonValidByID, deletePolygon } =
+    usePolygon();
 
   const { pushHistoryWithList } = useHistory();
 
@@ -31,15 +36,18 @@ export const useSingleBox = () => {
     }
   }, [selectedID, pointCloudBoxList]);
 
-  /** Use Partial<IPointCloudBox> to update selected box  */
+  /** Use Partial<IPointCloudBox> to update selected box */
   const updateSelectedBox = useCallback(
     (params: Partial<IPointCloudBox>) => {
       if (selectedBox?.info) {
         pointCloudBoxList.splice(selectedBox.index, 1, _.merge(selectedBox.info, params));
-        const newPointCloudBoxList = _.cloneDeep(pointCloudBoxList)
+        const newPointCloudBoxList = _.cloneDeep(pointCloudBoxList);
         setPointCloudResult(newPointCloudBoxList);
         pushHistoryWithList({ pointCloudBoxList: newPointCloudBoxList });
+        return newPointCloudBoxList;
       }
+
+      return pointCloudBoxList;
     },
     [selectedID, pointCloudBoxList],
   );
@@ -51,8 +59,11 @@ export const useSingleBox = () => {
 
       if (boxIndex > -1) {
         pointCloudBoxList.splice(boxIndex, 1, _.merge(pointCloudBoxList[boxIndex], params));
-        setPointCloudResult(_.cloneDeep(pointCloudBoxList));
+        const newPointCloudBoxList = _.cloneDeep(pointCloudBoxList);
+        setPointCloudResult(newPointCloudBoxList);
+        return newPointCloudBoxList;
       }
+      return pointCloudBoxList;
     },
     [pointCloudBoxList],
   );
@@ -75,13 +86,20 @@ export const useSingleBox = () => {
       const { id, valid = true } = selectedBox.info;
 
       // PointCloud
-      updateSelectedBox({ valid: !valid });
+      const newPointCloudList = updateSelectedBox({ valid: !valid });
 
+      // Async
+      syncAllViewPointCloudColor(newPointCloudList);
       changePolygonViewValid(id);
     }
-  }, [changePolygonViewValid, selectedBox]);
 
-  const changeBoxValidByID = useCallback(
+    if (selectedPolygon) {
+      updateSelectedPolygon({ ...selectedPolygon, valid: !selectedPolygon.valid });
+      topViewInstance?.pointCloud2dOperation.setPolygonValidAndRender(selectedPolygon.id, true);
+    }
+  }, [changePolygonViewValid, selectedBox, selectedPolygon]);
+
+  const changeValidByID = useCallback(
     (id: string) => {
       const boxInfo = pointCloudBoxList.find((v) => v.id === id);
 
@@ -89,12 +107,15 @@ export const useSingleBox = () => {
         const { id, valid = true } = boxInfo;
 
         // PointCloud
-        updateBoxByID({ valid: !valid }, id);
+        const newPointCloudBoxList = updateBoxByID({ valid: !valid }, id);
 
         changePolygonViewValid(id);
+
+        return newPointCloudBoxList;
       }
+      updatePolygonValidByID(id);
     },
-    [changePolygonViewValid, pointCloudBoxList],
+    [changePolygonViewValid, pointCloudBoxList, polygonList],
   );
 
   /** PointCloud select next/prev one */
@@ -119,19 +140,89 @@ export const useSingleBox = () => {
   };
 
   const deletePointCloudBox = (id: string) => {
-    setPointCloudResult(pointCloudBoxList.filter((v) => v.id !== id));
+    const newPointCloudList = pointCloudBoxList.filter((v) => v.id !== id);
+    setPointCloudResult(newPointCloudList);
     mainViewInstance?.removeObjectByName(id);
     mainViewInstance?.render();
-    // TODO Clear Highlight.
+    syncAllViewPointCloudColor(newPointCloudList);
   };
+
+  /**
+   * Delete all polygon by hotkey.
+   */
+  const deleteSelectedPointCloudBoxAndPolygon = () => {
+    if (selectedBox) {
+      deletePointCloudBox(selectedBox.info.id);
+      topViewInstance?.pointCloud2dOperation.deletePolygon(selectedBox.info.id);
+    }
+
+    if (selectedPolygon) {
+      deletePolygon(selectedPolygon.id);
+      topViewInstance?.pointCloud2dOperation.deletePolygon(selectedPolygon.id);
+    }
+  };
+
+  /**
+   * According to selectedIDs, return selected pointCloudList
+   * @returns pointCloudList {IPointCloudBoxList}
+   */
+  const selectedBoxes = useMemo(() => {
+    return pointCloudBoxList.filter((i) => selectedIDs.includes(i.id));
+  }, [selectedIDs, pointCloudBoxList]);
+
+  /**
+   * Update point cloud boxes list by updateList
+   * @param updateList {PartialIPointCloudBoxList}
+   */
+  const updateSelectedBoxes = useCallback(
+    (updateList: PartialIPointCloudBoxList) => {
+      const newPointCloudBoxList = _.cloneDeep(pointCloudBoxList);
+      let hasModify = false;
+
+      updateList.forEach((i) => {
+        const index = newPointCloudBoxList.findIndex((p) => p.id === i.id);
+
+        if (index > -1) {
+          const updatedBoxParam = _.merge(newPointCloudBoxList[index], i);
+          newPointCloudBoxList.splice(index, 1, updatedBoxParam);
+          mainViewInstance?.generateBox(updatedBoxParam);
+          hasModify = true;
+        }
+      });
+
+      if (hasModify) {
+        setPointCloudResult(newPointCloudBoxList);
+        pushHistoryWithList({ pointCloudBoxList: newPointCloudBoxList });
+        mainViewInstance?.render();
+        return newPointCloudBoxList;
+      }
+    },
+
+    [selectedIDs, pointCloudBoxList],
+  );
+
+  /**
+   * @param id {string}
+   * @returns pointCloud {IPointCloudBox | undefined }
+   */
+  const getPointCloudByID = useCallback(
+    (id: string) => {
+      return pointCloudBoxList.find((i) => i.id === id);
+    },
+    [pointCloudBoxList],
+  );
 
   return {
     selectedBox,
     updateSelectedBox,
     changeSelectedBoxValid,
-    changeBoxValidByID,
+    changeValidByID,
     selectNextBox: switchToNextBox,
     selectPrevBox,
     deletePointCloudBox,
+    selectedBoxes,
+    updateSelectedBoxes,
+    getPointCloudByID,
+    deleteSelectedPointCloudBoxAndPolygon,
   };
 };

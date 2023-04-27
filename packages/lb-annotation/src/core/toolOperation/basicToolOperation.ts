@@ -1,6 +1,5 @@
-import { IBasicText } from '@labelbee/lb-utils';
+import { IBasicText, toolStyleConverter } from '@labelbee/lb-utils';
 import { isNumber } from 'lodash';
-import { styleDefaultConfig } from '@/constant/defaultConfig';
 import { EOperationMode, EToolName } from '@/constant/tool';
 import { IPolygonConfig, IPolygonData } from '@/types/tool/polygon';
 import MathUtils from '@/utils/MathUtils';
@@ -515,6 +514,32 @@ class BasicToolOperation extends EventListener {
     this.emit('hiddenChange');
   }
 
+  public setDefaultAttribute(attribute: string) {
+    this.defaultAttribute = attribute;
+  }
+
+  public getCoordinateInOrigin(e: MouseEvent) {
+    const bounding = this.canvas.getBoundingClientRect();
+
+    return {
+      x: (e.clientX - bounding.left - this.currentPos.x) / this.zoom,
+      y: (e.clientY - bounding.top - this.currentPos.y) / this.zoom,
+    };
+  }
+
+  /**
+   * Get the textIconSvg by attribute.
+   * @param attribute
+   */
+  public getTextIconSvg(attribute = '') {
+    return AttributeUtils.getTextIconSvg(
+      attribute,
+      this.config?.attributeList,
+      this.config.attributeConfigurable,
+      this.baseIcon,
+    );
+  }
+
   /**
    * 用于外界直接控制序号的是否展示
    * @param isShowOrder
@@ -839,7 +864,6 @@ class BasicToolOperation extends EventListener {
     this.isDrag = false;
     this.isDragStart = false;
     this.isSpaceClick = false;
-
     if (this.startTime !== 0 && this._firstClickCoordinate) {
       const time = new Date().getTime();
       const currentCoord = this.getCoordinate(e);
@@ -974,7 +998,6 @@ class BasicToolOperation extends EventListener {
       // 放大
       operator = 1;
     }
-
     this.wheelChangePos(coord, operator);
     this.emit('dependRender');
     if (isRender) {
@@ -1175,22 +1198,18 @@ class BasicToolOperation extends EventListener {
     this.emit('updateResult');
   }
 
-  /** 获取当前属性颜色 */
+  /** Get the current property color */
   public getColor(attribute = '', config = this.config) {
-    if (config?.attributeConfigurable === true && this.style.attributeColor) {
-      const attributeIndex = AttributeUtils.getAttributeIndex(attribute, config.attributeList ?? []) + 1;
-      return this.style.attributeColor[attributeIndex];
-    }
-    const { color, toolColor } = this.style;
-    if (toolColor) {
-      return toolColor[color];
-    }
-    return styleDefaultConfig.toolColor['1'];
+    return toolStyleConverter.getColorByConfig({ attribute, config, style: this.style });
   }
 
   public getLineColor(attribute = '') {
     if (this.config?.attributeConfigurable === true) {
       const attributeIndex = AttributeUtils.getAttributeIndex(attribute, this.config?.attributeList ?? []) + 1;
+      const color = this.config?.attributeList?.find((i: any) => i.value === attribute)?.color;
+      if (color) {
+        return toolStyleConverter.getColorByConfig({ attribute, config: this.config })?.valid?.stroke;
+      }
       return this.style.attributeLineColor ? this.style.attributeLineColor[attributeIndex] : '';
     }
     const { color, lineColor } = this.style;

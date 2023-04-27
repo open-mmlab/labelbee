@@ -314,3 +314,13 @@ export default class TextAttributeClass {
     }
   }
 }
+
+/**
+ * TextAttribute injection requires content changes.
+ *
+ * Custom Changes.
+ * 1. Need to init textAttribute when creating data.
+ */
+export interface ITextAttributeFuc extends IBaseInfo {
+  selectedText: string;
+}

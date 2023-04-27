@@ -1,45 +1,45 @@
 import { IPointCloudBox } from '@labelbee/lb-utils';
-import { useContext, useEffect, useState } from 'react';
+import { useContext, useEffect } from 'react';
 import { PointCloudContext } from '../PointCloudContext';
 
 export const useAttribute = () => {
-  const { topViewInstance, sideViewInstance, backViewInstance, mainViewInstance } =
-    useContext(PointCloudContext);
-  const [defaultAttribute, setDefaultAttribute] = useState(
-    topViewInstance?.pointCloud2dOperation?.defaultAttribute ?? '',
-  );
+  const {
+    topViewInstance,
+    sideViewInstance,
+    backViewInstance,
+    mainViewInstance,
+    defaultAttribute,
+    setDefaultAttribute,
+  } = useContext(PointCloudContext);
 
   useEffect(() => {
-    if (!topViewInstance?.pointCloud2dOperation) {
+    if (!topViewInstance?.toolInstance) {
       return;
     }
 
     const updateDefaultAttribute = () => {
-      setDefaultAttribute(topViewInstance?.pointCloud2dOperation.defaultAttribute);
+      setDefaultAttribute(topViewInstance?.toolInstance.defaultAttribute);
     };
 
-    topViewInstance?.pointCloud2dOperation.on('changeAttributeSidebar', updateDefaultAttribute);
+    topViewInstance?.toolInstance.on('changeAttributeSidebar', updateDefaultAttribute);
 
     return () => {
-      topViewInstance?.pointCloud2dOperation.unbind(
-        'changeAttributeSidebar',
-        updateDefaultAttribute,
-      );
+      topViewInstance?.toolInstance.unbind('changeAttributeSidebar', updateDefaultAttribute);
     };
-  }, [topViewInstance?.pointCloud2dOperation]);
+  }, [topViewInstance?.toolInstance]);
 
   const syncThreeViewsAttribute = (attribute?: string) => {
     [
-      topViewInstance?.pointCloud2dOperation,
-      sideViewInstance?.pointCloud2dOperation,
-      backViewInstance?.pointCloud2dOperation,
+      topViewInstance?.toolInstance,
+      sideViewInstance?.toolInstance,
+      backViewInstance?.toolInstance,
     ].forEach((instance) => {
       instance?.setDefaultAttribute(attribute);
     });
   };
 
   const updateDefaultAttribute = (attribute?: string) => {
-    topViewInstance?.pointCloud2dOperation.setDefaultAttribute(attribute);
+    topViewInstance?.toolInstance.setDefaultAttribute(attribute);
   };
 
   const reRenderPointCloud3DBox = (newBox: IPointCloudBox) => {

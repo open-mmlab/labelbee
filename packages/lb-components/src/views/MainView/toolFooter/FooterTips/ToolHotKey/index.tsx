@@ -1,6 +1,5 @@
-import { Popover } from 'antd/es';
 import _ from 'lodash';
-import React, { useState } from 'react';
+import React, { useContext } from 'react';
 
 import hotKeySvg from '@/assets/annotation/toolHotKeyIcon/icon_kj1.svg';
 import hotKeyHoverSvg from '@/assets/annotation/toolHotKeyIcon/icon_kj_h.svg';
@@ -12,12 +11,15 @@ import lineToolShortCutTable from './line';
 import tagToolSingleShortCutTable from './tag';
 import textToolShortCutTable from './text';
 import videoToolShortCutTable from './videoTag';
-import pointCloudShortCutTable from './pointCloud';
+import pointCloudShortCutTable, { pointCloudShortCutTable_POLYGON } from './pointCloud';
 import scribbleShortCutTable from './scribble';
+import cuboidShortCutTable from './cuboid';
 
 import { footerCls } from '../../index';
 import { useTranslation } from 'react-i18next';
 import { cTool } from '@labelbee/lb-annotation';
+import { PointCloudContext } from '@/components/pointCloudView/PointCloudContext';
+import FooterPopover from '@/views/MainView/toolFooter/FooterPopover';
 
 const { EVideoToolName, EPointCloudName } = cTool;
 
@@ -49,7 +51,9 @@ export const shortCutTable: { [a: string]: IShortCutInfo[] } = {
   [EToolName.Text]: textToolShortCutTable,
   [EVideoToolName.VideoTagTool]: videoToolShortCutTable,
   [EPointCloudName.PointCloud]: pointCloudShortCutTable,
+  [EPointCloudName.PointCloud + '_POLYGON']: pointCloudShortCutTable_POLYGON,
   [EToolName.ScribbleTool]: scribbleShortCutTable,
+  [EToolName.Cuboid]: cuboidShortCutTable,
 };
 
 const ToolHotKeyIcon = ({ icon }: { icon: React.ReactElement | string }) => {
@@ -65,7 +69,6 @@ const ToolHotKeyIcon = ({ icon }: { icon: React.ReactElement | string }) => {
 };
 
 export const ToolHotKeyCom: React.FC<IComponentsProps> = ({ title, style, shortCutList }) => {
-  const [svgFlag, setFlag] = useState(false);
   const { t } = useTranslation();
 
   const shortCutStyle = {
@@ -182,46 +185,21 @@ export const ToolHotKeyCom: React.FC<IComponentsProps> = ({ title, style, shortC
       {shortCutList?.map((info: any, index: number) => setHotKey(info, index))}
     </div>
   );
-  const containerStyle = style || { width: 100 };
+  const containerStyle = style || {};
 
   return (
-    // @ts-ignore
-    <Popover
-      placement='topLeft'
+    <FooterPopover
+      hoverIcon={hotKeyHoverSvg}
+      icon={hotKeySvg}
+      title={t('Hotkeys')}
       content={content}
-      // @ts-ignore
-      onMouseMove={() => setFlag(true)}
-      onMouseLeave={() => {
-        setFlag(false);
-      }}
-      overlayClassName='tool-hotkeys-popover'
-      className='tipsBar'
-      // visible={svgFlag}
-    >
-      <div
-        className='shortCutTitle'
-        onMouseMove={() => setFlag(true)}
-        onMouseLeave={() => setFlag(false)}
-        style={containerStyle}
-      >
-        {title ?? (
-          <a className='svg'>
-            <img
-              src={svgFlag ? hotKeyHoverSvg : hotKeySvg}
-              width={15}
-              height={13}
-              style={{ marginRight: '5px' }}
-            />
-
-            {t('Hotkeys')}
-          </a>
-        )}
-      </div>
-    </Popover>
+      containerStyle={containerStyle}
+    />
   );
 };
 
 const ToolHotKey: React.FC<IProps> = ({ style, title, toolName }) => {
+  const { pointCloudPattern } = useContext(PointCloudContext);
   if (!toolName) {
     return null;
   }
@@ -231,10 +209,18 @@ const ToolHotKey: React.FC<IProps> = ({ style, title, toolName }) => {
     return null;
   }
 
+  let newToolName = toolName;
+  if (newToolName === `${EPointCloudName.PointCloud}` && pointCloudPattern === EToolName.Polygon) {
+    newToolName += '_POLYGON';
+  } else if (pointCloudPattern === EToolName.Line) {
+    newToolName = EToolName.Line;
+  } else if (pointCloudPattern === EToolName.Point) {
+    newToolName = EToolName.Point;
+  }
   const props = {
     style,
     title,
-    shortCutList: shortCutTable[toolName],
+    shortCutList: shortCutTable[newToolName],
   };
 
   return <ToolHotKeyCom {...props} />;

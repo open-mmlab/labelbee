@@ -24,7 +24,7 @@ interface IProps {
 
 enum EColor {
   Hover = '#666fff',
-  Normal = '#cccccc',
+  Normal = '#999999',
 }
 
 const HeaderOption: React.FC<IProps> = (props) => {

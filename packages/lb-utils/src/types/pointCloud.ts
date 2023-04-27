@@ -6,7 +6,9 @@
  * @LastEditTime: 2022-06-16 19:32:15
  */
 
-import { IInputList } from "./base";
+import { IInputList } from './base';
+import { IPolygonData } from './polygon';
+import { ICoordinate } from './common';
 
 export type TMatrix4Tuple = [
   number,
@@ -84,19 +86,36 @@ export interface IPointCloudBox extends IVolume {
     [k: string]: string;
   };
   count?: number;
+  newPointList?: ICoordinate[];
 }
+
+export interface IPointCloudSphere {
+  attribute: string;
+  center: I3DSpaceCoord;
+  id: string;
+  valid: boolean;
+  trackID?: number;
+  subAttribute?: {
+    [k: string]: string;
+  };
+}
+
+export type IPointCloudSphereList = IPointCloudSphere[];
+
+/** IPointCloudBox */
+export type PartialIPointCloudBoxList = Partial<IPointCloudBox> & Pick<IPointCloudBox, 'id'>[];
 
 export type IPointCloudBoxList = IPointCloudBox[];
 
 export interface IPointCloudConfig {
-    // 多边形持有
-    attributeList: IInputList[];
-    radius: number;
-    secondaryAttributeConfigurable: boolean;
-    inputList: IInputList[];
-  
-    lowerLimitPointsNumInBox: number;
-    trackConfigurable: boolean;
+  // 多边形持有
+  attributeList: IInputList[];
+  radius: number;
+  secondaryAttributeConfigurable: boolean;
+  inputList: IInputList[];
+
+  lowerLimitPointsNumInBox: number;
+  trackConfigurable: boolean;
 }
 
 export interface ICalib {
@@ -104,3 +123,8 @@ export interface ICalib {
   R: [TMatrix13Tuple, TMatrix13Tuple, TMatrix13Tuple]; // 3x3 rotation matrix
   T: [TMatrix14Tuple, TMatrix14Tuple, TMatrix14Tuple]; // 3x4 Lidar to camera matrix
 }
+
+export type UpdatePolygonByDragList = Array<{
+  newPolygon: IPolygonData;
+  originPolygon: IPolygonData;
+}>;

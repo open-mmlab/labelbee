@@ -16,10 +16,25 @@ interface IProps {
     width: number;
     height: number;
   };
+  backgroundColor?: string;
+
+  // Camera Update
+  isOrthographicCamera?: boolean;
+}
+
+function getDefaultOrthographicParams(size: { width: number; height: number }) {
+  return {
+    left: -size.width / 2,
+    right: size.width / 2,
+    top: size.height / 2,
+    bottom: -size.height / 2,
+    near: 100,
+    far: -100,
+  };
 }
 
 const PointCloudAnnotationView = (props: IProps) => {
-  const { src, result, size } = props;
+  const { src, result, size, isOrthographicCamera = false, backgroundColor = '#ccc' } = props;
   let viewOperation = useRef<any>();
   const instance = useRef<any>();
 
@@ -28,10 +43,22 @@ const PointCloudAnnotationView = (props: IProps) => {
   }, []);
 
   useEffect(() => {
-    const pointCloud = new PointCloud({
+    let pointCloudProps = {
       container: viewOperation.current,
-      backgroundColor: '#ccc',
-    });
+      backgroundColor,
+      isOrthographicCamera,
+    };
+
+    /**
+     * Orthographic Camera Params.
+     *  */
+    if (isOrthographicCamera) {
+      Object.assign(pointCloudProps, {
+        orthographicParams: getDefaultOrthographicParams(size),
+      });
+    }
+
+    const pointCloud = new PointCloud(pointCloudProps);
     instance.current = pointCloud;
     return () => {
       instance.current.renderer?.forceContextLoss();
@@ -39,7 +66,16 @@ const PointCloudAnnotationView = (props: IProps) => {
   }, []);
 
   useEffect(() => {
-    instance.current?.init();
+    // PointCloud camera init.
+
+    if (instance.current) {
+      // Init the camera
+      instance.current?.init();
+
+      // Update range of orthographicCamera.
+      instance.current?.initOrthographicCamera(getDefaultOrthographicParams(size));
+      instance.current?.render();
+    }
   }, [size]);
 
   useEffect(() => {

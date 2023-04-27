@@ -45,7 +45,7 @@ interface IAnnotationDataTemporarily {
 
 const PointCloud2DView = ({ currentData, config }: IA2MapStateProps) => {
   const [annotations2d, setAnnotations2d] = useState<IAnnotationDataTemporarily[]>([]);
-  const { pointCloudBoxList, topViewInstance } = useContext(PointCloudContext);
+  const { topViewInstance, displayPointCloudList } = useContext(PointCloudContext);
   const [mappingIndex, setMappingIndex] = useState(0);
   const ref = useRef(null);
   const viewRef = useRef<{ toolInstance: ViewOperation }>();
@@ -66,7 +66,7 @@ const PointCloud2DView = ({ currentData, config }: IA2MapStateProps) => {
         color: 'green',
       };
 
-      const newAnnotations2d: IAnnotationDataTemporarily[] = pointCloudBoxList.reduce(
+      const newAnnotations2d: IAnnotationDataTemporarily[] = displayPointCloudList.reduce(
         (acc: IAnnotationDataTemporarily[], pointCloudBox) => {
           const viewDataPointList = pointCloudLidar2image(pointCloudBox, mappingData.calib);
 
@@ -81,7 +81,7 @@ const PointCloud2DView = ({ currentData, config }: IA2MapStateProps) => {
 
           return [
             ...acc,
-            ...viewDataPointList.map((v: any) => {
+            ...viewDataPointList!.map((v: any) => {
               return {
                 type: v.type,
                 annotation: {
@@ -99,7 +99,7 @@ const PointCloud2DView = ({ currentData, config }: IA2MapStateProps) => {
 
       setAnnotations2d(newAnnotations2d);
     }
-  }, [pointCloudBoxList, mappingData]);
+  }, [displayPointCloudList, mappingData]);
 
   const hiddenData =
     !currentData || !currentData?.mappingImgList || !(currentData?.mappingImgList?.length > 0);
@@ -160,7 +160,9 @@ const PointCloud2DView = ({ currentData, config }: IA2MapStateProps) => {
           annotations={annotations2d}
           size={size}
           ref={viewRef}
-          globalStyle={{ display: hiddenData ? 'none' : 'block' }}
+          globalStyle={{
+            display: hiddenData ? 'none' : 'block',
+          }}
           afterImgOnLoad={afterImgOnLoad}
         />
       </div>

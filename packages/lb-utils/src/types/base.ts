@@ -4,7 +4,6 @@ export interface IInfoList {
   isDefault?: boolean; // 是否为默认值
 }
 
-
 export interface IInputList {
   key: string;
   value: string;

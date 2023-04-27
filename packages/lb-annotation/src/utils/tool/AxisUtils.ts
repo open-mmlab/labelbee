@@ -1,8 +1,10 @@
 import { EToolName, ELineTypes } from '@/constant/tool';
+import type { ICuboid, IDrawingCuboid, IPlanePoints } from '@/types/tool/cuboid';
 import { IPolygonPoint, IPolygonData, IPolygonConfig } from '../../types/tool/polygon';
 import MathUtils from '../MathUtils';
 import PolygonUtils from './PolygonUtils';
 import LineToolUtils, { POINT_RADIUS } from './LineToolUtils';
+import { getCuboidHoverRange, getHighlightLines, getHighlightPoints } from './CuboidUtils';
 
 export default class AxisUtils {
   /**
@@ -138,9 +140,41 @@ export default class AxisUtils {
     zoom: number,
     currentPos: ICoordinate = { x: 0, y: 0 },
   ) {
-    return pointList.map((point: IPolygonPoint | IPoint) => {
+    return pointList?.map((point: IPolygonPoint | IPoint) => {
       return this.changePointByZoom(point, zoom, currentPos);
     });
+  }
+
+  public static changePlanePointByZoom(
+    planePoints: IPlanePoints,
+    zoom: number,
+    currentPos: ICoordinate = { x: 0, y: 0 },
+  ): IPlanePoints {
+    return Object.entries(planePoints).reduce((acc, [key, coord]) => {
+      const newCoord = AxisUtils.changePointByZoom(coord, zoom, currentPos);
+      return {
+        ...acc,
+        [key]: newCoord,
+      };
+    }, {}) as IPlanePoints;
+  }
+
+  public static changeCuboidByZoom(
+    cuboid: ICuboid | IDrawingCuboid,
+    zoom: number,
+    currentPos: ICoordinate = { x: 0, y: 0 },
+  ): ICuboid | IDrawingCuboid {
+    return {
+      ...cuboid,
+      frontPoints: this.changePlanePointByZoom(cuboid.frontPoints, zoom, currentPos),
+      backPoints: cuboid.backPoints
+        ? this.changePlanePointByZoom(cuboid.backPoints, zoom, currentPos)
+        : cuboid.backPoints,
+    };
+  }
+
+  public static transformPlain2PointList({ tl, tr, br, bl }: IPlanePoints) {
+    return [tl, tr, br, bl];
   }
 
   /**
@@ -189,8 +223,8 @@ export default class AxisUtils {
    * @returns {number}
    */
   public static returnClosePointIndex(
-    checkPoint: IPolygonPoint,
-    polygonPoints: IPolygonPoint[],
+    checkPoint: IPolygonPoint | ICoordinate,
+    polygonPoints: IPolygonPoint[] | ICoordinate[],
     scope: number = 3,
   ): number {
     let pointIndex = -1;
@@ -203,6 +237,116 @@ export default class AxisUtils {
     }
 
     return pointIndex;
+  }
+
+  /**
+   * Judge the mousePoint is in the hoverRange of cuboid.
+   * @param checkPoint
+   * @param cuboid
+   * @param options
+   * @returns
+   */
+  public static isCloseCuboid(
+    checkPoint: ICoordinate,
+    cuboid: ICuboid,
+    options: Partial<{ scope: number; zoom: number }> = { scope: 5, zoom: 1 },
+  ) {
+    const points = getHighlightPoints(cuboid);
+    const { scope = 5 } = options;
+
+    // 1. Points.
+    for (let i = 0; i < points.length; i++) {
+      const pointData = points[i];
+      if (this.getIsInScope(checkPoint, pointData.point, scope)) {
+        return true;
+      }
+    }
+
+    // 2. Line.
+    const lines = getHighlightLines(cuboid);
+    for (let i = 0; i < lines.length; i++) {
+      const line = lines[i];
+      const { length } = MathUtils.getFootOfPerpendicular(checkPoint, line.p1, line.p2, true);
+      if (length < scope) {
+        return true;
+      }
+    }
+
+    // 3. Plain.
+    if (PolygonUtils.isInPolygon(checkPoint, getCuboidHoverRange(cuboid))) {
+      return true;
+    }
+
+    return false;
+  }
+
+  /**
+   * Judge the mousePoint is in the hoverRange of cuboidList.
+   * @param checkPoint
+   * @param cuboid
+   * @param options
+   * @returns
+   */
+  public static isCloseCuboidList(
+    checkPoint: ICoordinate,
+    cuboidList: ICuboid[],
+    options: Partial<{ scope: number; zoom: number }> = { scope: 5, zoom: 1 },
+  ) {
+    return cuboidList.some((cuboid) => this.isCloseCuboid(checkPoint, cuboid, options));
+  }
+
+  /**
+   * Point > Line
+   * @param checkPoint
+   * @param cuboid
+   * @param scope
+   */
+  public static returnClosePointOrLineInCuboid(
+    checkPoint: ICoordinate,
+    cuboid: ICuboid,
+    options: Partial<{ scope: number; zoom: number }> = { scope: 5, zoom: 1 },
+  ) {
+    const points = getHighlightPoints(cuboid);
+    const { scope = 5, zoom = 1 } = options;
+
+    // 1. Points
+    for (let i = 0; i < points.length; i++) {
+      const pointData = points[i];
+      if (this.getIsInScope(checkPoint, pointData.point, scope)) {
+        return [
+          {
+            type: 'point',
+            points: [this.changePointByZoom(points[i].point, zoom)],
+            originCuboid: cuboid,
+            positions: pointData.positions,
+          },
+        ];
+      }
+    }
+
+    // 2. Line
+    let minLength = scope;
+    const lines = getHighlightLines(cuboid);
+    let linePoints;
+    for (let i = 0; i < lines.length; i++) {
+      const line = lines[i];
+      const { length } = MathUtils.getFootOfPerpendicular(checkPoint, line.p1, line.p2, true);
+      if (length < minLength) {
+        minLength = length;
+        linePoints = [
+          {
+            type: 'line',
+            points: this.changePointListByZoom([line.p1, line.p2], zoom),
+            originCuboid: cuboid,
+            positions: line.positions,
+          },
+        ];
+      }
+    }
+
+    if (linePoints) {
+      return linePoints;
+    }
   }
 
   /**

@@ -5,14 +5,12 @@
  */
 
 import { getConfig, styleDefaultConfig } from '@/constant/defaultConfig';
-import { EToolName } from '@/constant/tool';
+import { EToolName, THybridToolName } from '@/constant/tool';
 import { getCurrentOperation } from '@/utils/tool/EnhanceCommonToolUtils';
 import { RectOperation } from './toolOperation/rectOperation';
 import PolygonOperation from './toolOperation/polygonOperation';
 import { BasicToolOperation } from './toolOperation/basicToolOperation';
 import SegmentByRect from './toolOperation/segmentByRect';
-
-export type THybridToolName = EToolName | Array<EToolName>;
 
 interface IToolSchedulerOperation {}
 
@@ -70,6 +68,8 @@ export class ToolScheduler implements IToolSchedulerOperation {
   private toolOperationList: Array<RectOperation | PolygonOperation | SegmentByRect> = [];
 
   private toolOperationDom: Array<HTMLElement> = [];
+
+  private toolOperationNameList: Array<EToolName> = [];
 
   private size: ISize;
 
@@ -143,7 +143,6 @@ export class ToolScheduler implements IToolSchedulerOperation {
     dom.style.height = `${height}px`;
     const zIndex = this.toolOperationList.length + 1;
     dom.style.zIndex = `${zIndex}`;
-
     return dom;
   }
 
@@ -221,6 +220,7 @@ export class ToolScheduler implements IToolSchedulerOperation {
     this.container.appendChild(dom);
 
     this.toolOperationList.push(toolInstance);
+    this.toolOperationNameList.push(tool);
     this.toolOperationDom.push(dom);
 
     return toolInstance;
@@ -276,6 +276,64 @@ export class ToolScheduler implements IToolSchedulerOperation {
     }
 
     return this.toolOperationList[0];
+  }
+
+  /**
+   * Switch to canvas by given toolName
+   * TODO: change operationList to operationMap
+   */
+  public switchToCanvas(toolName: EToolName) {
+    const chosenIndex = this.toolOperationNameList.indexOf(toolName);
+    if (chosenIndex < 0 || this.toolOperationList.length < 1 || chosenIndex > this.toolOperationDom.length - 1) {
+      return;
+    }
+    const lastOneIndex = this.toolOperationDom.length - 1;
+    const chosenDom = this.toolOperationDom[chosenIndex];
+    const lastOneDom = this.toolOperationDom[lastOneIndex];
+
+    if (!chosenDom || !lastOneDom) {
+      return;
+    }
+
+    const temp = lastOneDom.style.zIndex;
+    lastOneDom.style.zIndex = `${chosenDom.style.zIndex}`;
+    chosenDom.style.zIndex = `${temp}`;
+
+    // The original top-level operation clears the data
+    this.toolOperationList[lastOneIndex].clearActiveStatus?.();
+    this.toolOperationList[lastOneIndex].clearCursorLine?.();
+    this.toolOperationList[lastOneIndex].render();
+
+    // swap
+    this.toolOperationList = arraySwap(this.toolOperationList, lastOneIndex, chosenIndex);
+    this.toolOperationDom = arraySwap(this.toolOperationDom, lastOneIndex, chosenIndex);
+    this.toolOperationNameList = arraySwap(this.toolOperationNameList, lastOneIndex, chosenIndex);
+
+    return this.toolOperationList[lastOneIndex];
+  }
+
+  /**
+   *
+   * @param toolName
+   * @param result
+   * Update result by give toolName
+   * All the operation instances are maintained in toolOperationList,
+   * there is no more specific instance like pointCloud2dOperation you can reach,
+   * so if you need to update result in specific operation instance, you can try this.
+   */
+  public updateDataByToolName(toolName: EToolName, result: any) {
+    const operationIndex = this.toolOperationNameList.indexOf(toolName);
+    if (operationIndex >= 0) {
+      const operationInstance = this.toolOperationList[operationIndex];
+      operationInstance.setResult(result);
+    }
+  }
+
+  public clearStatusAndResult() {
+    this.toolOperationList.forEach((toolInstance) => {
+      toolInstance.clearActiveStatus?.();
+      toolInstance.clearResult();
+    });
   }
 
   public destroyAllLayer() {

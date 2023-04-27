@@ -13,3 +13,10 @@ export enum EPerspectiveView {
   LFT = 'LEFT_FRONT_TOP',
   RBT = 'RIGHT_BACK_TOP',
 }
+
+export const DEFAULT_SPHERE_PARAMS = {
+  radius: 3,
+  widthSegments: 32,
+  heightSegments: 16,
+  defaultZ: 5,
+}
