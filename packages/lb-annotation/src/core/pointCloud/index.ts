@@ -274,7 +274,7 @@ export class PointCloud {
    * @param boxParams
    * @param color
    */
-  public generateBox(boxParams: IPointCloudBox, color = 0xffffff) {
+  public generateBox(boxParams: IPointCloudBox, color: THREE.ColorRepresentation = 0xffffff) {
     const newColor = color;
     // Temporarily turn the Box white
     // if (this.config?.attributeList && this.config?.attributeList?.length > 0 && boxParams.attribute) {
@@ -350,7 +350,7 @@ export class PointCloud {
    * @param id
    * @param color
    */
-  public AddBoxToSense = (boxParams: IPointCloudBox, color = 0xffffff) => {
+  public AddBoxToSense = (boxParams: IPointCloudBox, color: THREE.ColorRepresentation = 0xffffff) => {
     const id = boxParams.id ?? uuid();
 
     this.removeObjectByName(id);
