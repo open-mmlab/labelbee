@@ -13,6 +13,7 @@ import {
   SetPredictResult,
   SetPredictResultVisible,
 } from '@/store/annotation/actionCreators';
+import { IPointCloudBoxWithIndex } from '@/store/annotation/types';
 import { LabelBeeContext, useDispatch } from '@/store/ctx';
 
 import { predict } from '../previewResult/util';
@@ -38,20 +39,26 @@ const PredictTrackingIcon = (props: { loading: boolean }) => {
 
     await dispatch(ChangeSave);
 
-    const boxes: any = await dispatch(GetBoxesByID(selectedBoxTrackID));
+    const selectedBoxID = selectedBox?.info.id;
+
+    const boxes: any = await dispatch(GetBoxesByID(selectedBoxTrackID, selectedBoxID));
 
     if (boxes.length < 2) {
-      message.error(t('BeforePredictStarting'));
+      message.error(t('MarkOnlyOne'));
       return;
     }
 
-    const start = boxes[boxes.length - 2];
-    const end = boxes[boxes.length - 1];
+    const selectedBoxIDIndex = boxes.findIndex(
+      (item: IPointCloudBoxWithIndex) => item.id === selectedBoxID,
+    );
+
+    const start = boxes[selectedBoxIDIndex - 1];
+    const end = boxes[selectedBoxIDIndex];
 
     const difference = end.index - start.index;
 
     if (difference < 2) {
-      message.error(t('BeforePredictStarting'));
+      message.error(t('HaveNoNeed'));
       return;
     }
 
@@ -59,6 +66,14 @@ const PredictTrackingIcon = (props: { loading: boolean }) => {
       message.error(t('ThePredictedPointCloud'));
       return;
     }
+
+    message.success(
+      t('PredictingDataFrom', {
+        startPage: start.index + 1,
+        endPage: end.index + 1,
+        selectedBoxTrackID,
+      }),
+    );
 
     SetPointCloudLoading(dispatch, true);
     const result = predict(start, end);

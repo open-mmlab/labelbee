@@ -642,8 +642,8 @@ export const SetPredictResultVisible = (dispatch: Function, visible: boolean) =>
 };
 
 export const GetBoxesByID =
-  (selectedBoxTrackID: number) =>
+  (selectedBoxTrackID: number, selectedBoxID: string) =>
   (dispatch: any, getState: any): IPointCloudBox[] => {
     const { imgList, step } = getState().annotation;
-    return getBoxesByTrackID(imgList, step, selectedBoxTrackID);
+    return getBoxesByTrackID(imgList, step, selectedBoxTrackID, selectedBoxID);
   };
