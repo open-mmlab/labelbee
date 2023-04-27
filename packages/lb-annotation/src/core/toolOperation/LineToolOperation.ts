@@ -24,6 +24,8 @@ import DrawUtils from '../../utils/tool/DrawUtils';
 import StyleUtils from '../../utils/tool/StyleUtils';
 import AttributeUtils from '../../utils/tool/AttributeUtils';
 import TextAttributeClass from './textAttributeClass';
+import locale from '../../locales';
+import { EMessage } from '../../locales/constants';
 
 enum EStatus {
   Create = 0,
@@ -310,6 +312,10 @@ class LineToolOperation extends BasicToolOperation {
 
   get lowerLimitPointNum() {
     return this.config.lowerLimitPointNum;
+  }
+
+  get minLength() {
+    return this.config.minLength;
   }
 
   get upperLimitPointNum() {
@@ -1204,6 +1210,13 @@ class LineToolOperation extends BasicToolOperation {
       if (this.isLinePointsNotEnough()) {
         // message.info(`顶点数不能少于${this.lowerLimitPointNum}`);
         return;
+      }
+      if (LineToolUtils.lineLengthSum(this.activeLine || []) < this.minLength) {
+        this.emit(
+          'messageInfo',
+          `${locale.getMessagesByLocale(EMessage.MinLengthLimitErrorNotice, this.lang)}${this.minLength}`,
+        );
+        return true;
       }
       this.stopLineCreating(true);
       return;

@@ -1,7 +1,7 @@
 import { i18n } from '@labelbee/lb-utils';
+import _ from 'lodash';
 import MathUtils from '@/utils/MathUtils';
 import RectUtils from '@/utils/tool/RectUtils';
-import _ from 'lodash';
 import {
   DEFAULT_TEXT_OFFSET,
   EDragStatus,
@@ -477,10 +477,13 @@ class PolygonOperation extends BasicToolOperation {
    * @returns
    */
   public addDrawingPointToPolygonList(isRect?: boolean) {
-    let { lowerLimitPointNum = 3 } = this.config;
+    let { lowerLimitPointNum = 3, minArea = 1 } = this.config;
 
     if (lowerLimitPointNum < 3) {
       lowerLimitPointNum = 3;
+    }
+    if (minArea < 1) {
+      minArea = 1;
     }
 
     let createPolygon: IPolygonData | undefined;
@@ -492,7 +495,11 @@ class PolygonOperation extends BasicToolOperation {
 
       return;
     }
-
+    if (PolygonUtils.calcPolygonSize(this.drawingPointList || []) < minArea) {
+      // 小于最小面积无法添加
+      this.emit('messageInfo', `${locale.getMessagesByLocale(EMessage.MinAreaLimitErrorNotice, this.lang)}${minArea}`);
+      return;
+    }
     const basicSourceID = CommonToolUtils.getSourceID(this.basicResult);
 
     const polygonList = [...this.polygonList];
