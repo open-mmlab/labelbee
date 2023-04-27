@@ -1,6 +1,6 @@
 import React from 'react';
 
-export const ColorTag = ({ color, style }: any) => (
+export const ColorTag = ({ color, style, onClick }: any) => (
   <div
     style={{
       display: 'inline-block',
@@ -10,5 +10,6 @@ export const ColorTag = ({ color, style }: any) => (
       verticalAlign: 'middle',
       ...style,
     }}
+    onClick={onClick}
   />
 );

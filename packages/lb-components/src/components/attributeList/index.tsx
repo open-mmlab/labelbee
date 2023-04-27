@@ -1,7 +1,11 @@
 import { COLORS_ARRAY, NULL_COLOR } from '@/data/Style';
 import { ColorTag } from '@/components/colorTag';
 import { Radio } from 'antd/es';
-import React from 'react';
+import React, { useState } from 'react';
+import { Popover } from 'antd';
+import ColorPalette from '../colorPalette';
+import { CloseOutlined } from '@ant-design/icons';
+import { i18n } from '@labelbee/lb-utils';
 
 export const ATTRIBUTE_COLORS = [NULL_COLOR].concat(COLORS_ARRAY);
 
@@ -18,12 +22,17 @@ interface IProps {
   noHeightLimit?: boolean;
   num?: number | string;
   style?: React.CSSProperties;
+  enableColorPicker?: boolean;
+  updateColorConfig?: (value: string, color: string) => void;
 }
 
 const AttributeList = React.forwardRef((props: IProps, ref) => {
   const radioRef = React.useRef<any>();
 
   const list = props.list || [];
+
+  const [paletteVisible, setPaletteVisible] = useState<boolean>(false);
+  const [editConfigIndex, setEditConfigIndex] = useState<number | undefined>(undefined);
 
   let NEW_ATTRIBUTE_COLORS = [...ATTRIBUTE_COLORS];
 
@@ -36,6 +45,10 @@ const AttributeList = React.forwardRef((props: IProps, ref) => {
   if (props.noHeightLimit) {
     className = 'sensebee-radio-group-no-limit-height';
   }
+
+  const changeColor = (value: string, color: string) => {
+    props.updateColorConfig(value, color);
+  };
 
   return (
     <div className={className} style={props.style}>
@@ -69,9 +82,48 @@ const AttributeList = React.forwardRef((props: IProps, ref) => {
           }
 
           return (
-            <Radio value={i.value} ref={radioRef} key={index}>
+            <Radio value={i.value} ref={radioRef} key={i.label + index}>
               <span className='sensebee-radio-label' title={i.label}>
-                {!props?.forbidColor && <ColorTag color={color} style={{ marginRight: '8px' }} />}
+                {!props?.forbidColor && (
+                  <Popover
+                    content={
+                      <ColorPalette
+                        defaultColor={color}
+                        setColor={(color) => changeColor(i.value, color)}
+                      />
+                    }
+                    title={
+                      <div
+                        style={{
+                          display: 'flex',
+                          justifyContent: 'space-between',
+                          alignItems: 'center',
+                        }}
+                      >
+                        <span>{i18n.t('Palette')}</span>
+                        <CloseOutlined onClick={() => setPaletteVisible(false)} />
+                      </div>
+                    }
+                    visible={paletteVisible && editConfigIndex === index}
+                    onVisibleChange={(visible: any) => {
+                      if (!visible) {
+                        return;
+                      }
+                      setPaletteVisible(visible);
+                    }}
+                  >
+                    <ColorTag
+                      color={color}
+                      style={{ cursor: 'pointer', marginRight: '8px' }}
+                      onClick={() => {
+                        if (props?.enableColorPicker) {
+                          setEditConfigIndex(index);
+                          setPaletteVisible(true);
+                        }
+                      }}
+                    />
+                  </Popover>
+                )}
                 {i.label}
               </span>
               <span className='sensebee-radio-num'>{hotKey}</span>
