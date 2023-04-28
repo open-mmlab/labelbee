@@ -12,13 +12,14 @@
  */
 
 import { getClassName } from '@/utils/dom';
-import React from 'react';
+import React, { useContext } from 'react';
 import PointCloud3DView from './PointCloud3DView';
 import PointCloudBackView from './PointCloudBackView';
 import PointCloudTopView from './PointCloudTopView';
 import PointCloudSideView from './PointCloudSideView';
 import PointCloud2DView from './PointCloud2DView';
 import PointCloudListener from './PointCloudListener';
+import PointCloudSegment from './PointCloudSegment';
 import { AppState } from '@/store';
 import { connect } from 'react-redux';
 import { IFileItem } from '@/types/data';
@@ -28,6 +29,8 @@ import {
   AnnotatedAttributesPanelFixedRight,
 } from '@/views/MainView/toolFooter/AnnotatedAttributes';
 import { TDrawLayerSlot } from '@/types/main';
+import { PointCloudContext } from './PointCloudContext';
+import { EPointCloudPattern } from '@labelbee/lb-utils';
 
 interface IProps {
   imgList: IFileItem[];
@@ -42,8 +45,14 @@ const PointCloudView: React.FC<IProps> = ({
   checkMode,
   intelligentFit,
 }) => {
+  const { globalPattern } = useContext(PointCloudContext);
+
   if (imgList.length === 0) {
     return null;
+  }
+
+  if (globalPattern === EPointCloudPattern.Segmentation) {
+    return <PointCloudSegment />;
   }
 
   return (

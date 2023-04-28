@@ -5,6 +5,7 @@ import {
   IPointCloudSphereList,
   IPointCloudSphere,
   ILine,
+  EPointCloudPattern,
 } from '@labelbee/lb-utils';
 import React, { useEffect, useMemo, useRef, useState } from 'react';
 import {
@@ -19,15 +20,28 @@ interface IPointCloudContextInstances {
   sideViewInstance?: PointCloudAnnotation;
   backViewInstance?: PointCloudAnnotation;
   mainViewInstance?: PointCloud;
-  setTopViewInstance: (instance: PointCloudAnnotation) => void;
-  setSideViewInstance: (instance: PointCloudAnnotation) => void;
-  setBackViewInstance: (instance: PointCloudAnnotation) => void;
-  setMainViewInstance: (instance: PointCloud) => void;
+  setTopViewInstance: (instance?: PointCloudAnnotation) => void;
+  setSideViewInstance: (instance?: PointCloudAnnotation) => void;
+  setBackViewInstance: (instance?: PointCloudAnnotation) => void;
+  setMainViewInstance: (instance?: PointCloud) => void;
+}
+
+interface IPointCloudStatus {
+  globalPattern: EPointCloudPattern; // Switch PointCloud Pattern (Segmentation / Detection)
+  setGlobalPattern: (pattern: EPointCloudPattern) => void;
+}
+
+interface IPointCloudSegment {
+  ptSegmentInstance?: PointCloud;
+  setPtSegmentInstance: (instance: PointCloud) => void;
 }
 
 type AttrPanelLayout = '' | 'left' | 'right';
 
-export interface IPointCloudContext extends IPointCloudContextInstances {
+export interface IPointCloudContext
+  extends IPointCloudContextInstances,
+    IPointCloudStatus,
+    IPointCloudSegment {
   pointCloudBoxList: IPointCloudBoxList;
   pointCloudSphereList: IPointCloudSphereList;
   displayPointCloudList: IPointCloudBoxList;
@@ -125,6 +139,11 @@ export const PointCloudContext = React.createContext<IPointCloudContext>({
   pointCloudPattern: EToolName.Rect,
   setPointCloudPattern: () => {},
   selectSpecAttr: () => {},
+
+  globalPattern: EPointCloudPattern.Detection,
+  setGlobalPattern: () => {},
+
+  setPtSegmentInstance: () => {},
 });
 
 export const PointCloudProvider: React.FC<{}> = ({ children }) => {
@@ -146,6 +165,8 @@ export const PointCloudProvider: React.FC<{}> = ({ children }) => {
   const history = useRef(new ActionsHistory()).current;
   const [hideAttributes, setHideAttributes] = useState<string[]>([]);
   const [attrPanelLayout, setAttrPanelLayout] = useState<AttrPanelLayout>('');
+  const [globalPattern, setGlobalPattern] = useState(EPointCloudPattern.Segmentation);
+  const [ptSegmentInstance, setPtSegmentInstance] = useState<PointCloud>();
 
   const selectedID = useMemo(() => {
     return selectedIDs.length === 1 ? selectedIDs[0] : '';
@@ -252,15 +273,19 @@ export const PointCloudProvider: React.FC<{}> = ({ children }) => {
     const syncAllViewPointCloudColor = (pointCloudList?: IPointCloudBox[]) => {
       const colorPromise = mainViewInstance?.highlightOriginPointCloud(pointCloudList);
       return new Promise((resolve) => {
-        colorPromise?.then((color) => {
-          [topViewInstance].forEach((instance) => {
-            if (color) {
-              instance?.pointCloudInstance?.updateColor(color);
-              resolve({ color });
-            }
+        colorPromise
+          ?.then((color) => {
+            [topViewInstance].forEach((instance) => {
+              if (color) {
+                instance?.pointCloudInstance?.updateColor(color);
+                resolve({ color });
+              }
+            });
+            // TODO： Sync sideView & backView Color.
+          })
+          .catch((err) => {
+            console.error(err);
           });
-          // TODO： Sync sideView & backView Color.
-        });
       });
     };
 
@@ -308,6 +333,10 @@ export const PointCloudProvider: React.FC<{}> = ({ children }) => {
       pointCloudPattern,
       setPointCloudPattern,
       selectSpecAttr,
+      globalPattern,
+      setGlobalPattern,
+      ptSegmentInstance,
+      setPtSegmentInstance,
     };
   }, [
     valid,
@@ -325,6 +354,8 @@ export const PointCloudProvider: React.FC<{}> = ({ children }) => {
     attrPanelLayout,
     defaultAttribute,
     pointCloudPattern,
+    globalPattern,
+    ptSegmentInstance,
   ]);
 
   const updateSelectedIDsAndRenderAfterHide = () => {

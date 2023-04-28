@@ -21,6 +21,7 @@ import ExportData from './ExportData';
 import HeaderOption from './headerOption';
 import StepSwitch from './StepSwitch';
 import PredictTrackingIcon from '@/components/predictTracking/predictTrackingIcon';
+import SwitchPattern from './SwitchPattern';
 
 interface INextStep {
   stepProgress: number;
@@ -157,6 +158,8 @@ const ToolHeader: React.FC<IToolHeaderProps> = ({
 
   const headerOptionNode = <HeaderOption stepInfo={stepInfo} />;
 
+  const pointCloudSwitchPattern = <SwitchPattern />
+
   const langNode = (
     <div className={`${prefix}-header__lang`}>
       <span
@@ -217,6 +220,7 @@ const ToolHeader: React.FC<IToolHeaderProps> = ({
           {headerOptionNode}
         </div>
         <div className={`${prefix}-header__titlePlacement`} />
+        {pointCloudSwitchPattern}
         {rightActions}
       </div>
     </div>
