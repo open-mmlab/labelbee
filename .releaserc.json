@@ -1,7 +1,10 @@
 {
   "workspaces": [
     "packages/*",
-    "!packages/lb-demo/**"
+    "!packages/lb-demo/**",
+    "!packages/lb-utils/**",
+    "!packages/lb-components/**",
+    "!packages/lb-annotation/**"
   ],
   "branches": [
     "main",
