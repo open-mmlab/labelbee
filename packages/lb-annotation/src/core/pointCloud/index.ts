@@ -4,7 +4,7 @@
  * @author Ron <ron.f.luo@gmail.com>
  */
 
-/*eslint import/no-unresolved: 0*/
+// /*eslint import/no-unresolved: 0*/
 import * as THREE from 'three';
 import {
   PerspectiveShiftUtils,
@@ -30,6 +30,10 @@ import { PCDLoader } from './PCDLoader';
 import { OrbitControls } from './OrbitControls';
 import { PointCloudCache } from './cache';
 import { getCuboidFromPointCloudBox } from './matrix';
+import { PointCloudSegmentOperation } from './segmentation';
+import PointCloudStore from './store';
+import PointCloudRender from './render';
+import EventListener from '../toolOperation/eventListener';
 
 interface IOrthographicCamera {
   left: number;
@@ -50,10 +54,23 @@ interface IProps {
   config?: IPointCloudConfig;
 }
 
+export interface IEventBus {
+  on: EventListener['on'];
+  emit: EventListener['emit'];
+  unbind: EventListener['unbind'];
+}
+
+export interface IPointCloudDelegate extends IEventBus {
+  renderer: THREE.WebGLRenderer;
+  scene: THREE.Scene;
+  camera: THREE.OrthographicCamera | THREE.PerspectiveCamera;
+  container: HTMLElement;
+}
+
 const DEFAULT_DISTANCE = 30;
 const highlightWorker = new HighlightWorker({ type: 'module' });
 
-export class PointCloud {
+export class PointCloud extends EventListener {
   public renderer: THREE.WebGLRenderer;
 
   public scene: THREE.Scene;
@@ -68,6 +85,10 @@ export class PointCloud {
   public pcdLoader: PCDLoader;
 
   public config?: IPointCloudConfig;
+
+  public store: PointCloudStore;
+
+  public pointCloudRender: PointCloudRender;
 
   /**
    * zAxis Limit for filter point over a value
@@ -103,6 +124,8 @@ export class PointCloud {
    */
   private highlightPCDSrc?: string;
 
+  private segmentOperation: PointCloudSegmentOperation;
+
   constructor({
     container,
     noAppend,
@@ -111,6 +134,7 @@ export class PointCloud {
     backgroundColor = '#4C4C4C', // GRAY_BACKGROUND
     config,
   }: IProps) {
+    super();
     this.container = container;
     this.renderer = new THREE.WebGLRenderer({ antialias: true });
     this.backgroundColor = backgroundColor;
@@ -134,7 +158,9 @@ export class PointCloud {
     this.initCamera();
 
     this.scene = new THREE.Scene();
-    this.controls = new OrbitControls(this.camera, this.renderer.domElement);
+    this.controls = new OrbitControls(this.camera, this.container);
+    this.controls.enablePan = false;
+
     this.pcdLoader = new PCDLoader();
 
     this.axesHelper = new THREE.AxesHelper(1000);
@@ -151,7 +177,77 @@ export class PointCloud {
     this.init();
 
     this.cacheInstance = PointCloudCache.getInstance();
+
+    this.store = new PointCloudStore(this.pointCloudDelegate);
+
+    this.segmentOperation = new PointCloudSegmentOperation({
+      dom: this.container,
+      store: this.store,
+    });
+
+    this.pointCloudRender = new PointCloudRender({ store: this.store, ...this.eventBus });
+
+    document.addEventListener('keydown', this.keydown);
+    document.addEventListener('keyup', this.keyup);
+
+    this.initMsg();
   }
+
+  public initMsg() {
+    this.on('CircleSelector', this.segmentOperation.updateSelector2Circle.bind(this.segmentOperation));
+    this.on('LassoSelector', this.segmentOperation.updateSelector2Lasso.bind(this.segmentOperation));
+  }
+
+  public unbindMsg() {
+    this.unbind('CircleSelector', this.segmentOperation.updateSelector2Circle.bind(this.segmentOperation));
+    this.unbind('LassoSelector', this.segmentOperation.updateSelector2Lasso.bind(this.segmentOperation));
+  }
+
+  public keydown = (e: KeyboardEvent) => {
+    // alert(`type: ${typeof e.key}.${e.key}:-`);
+    switch (e.key) {
+      case ' ':
+        this.controls.enablePan = true;
+        this.store.setForbidOperation(true);
+        break;
+
+      default: {
+        break;
+      }
+    }
+  };
+
+  public get eventBus() {
+    return {
+      on: this.on.bind(this),
+      emit: this.emit.bind(this),
+      unbind: this.unbind.bind(this),
+    };
+  }
+
+  public get pointCloudDelegate() {
+    return {
+      container: this.container,
+      scene: this.scene,
+      camera: this.camera,
+      renderer: this.renderer,
+      ...this.eventBus,
+    };
+  }
+
+  public keyup = (e: KeyboardEvent) => {
+    switch (e.key) {
+      case ' ':
+        this.controls.enablePan = false;
+        this.store.setForbidOperation(false);
+
+        break;
+
+      default: {
+        break;
+      }
+    }
+  };
 
   get DEFAULT_INIT_CAMERA_POSITION() {
     return new THREE.Vector3(-0.01, 0, 10);
@@ -689,7 +785,7 @@ export class PointCloud {
     });
 
     pointsMaterial.onBeforeCompile = this.overridePointShader;
-    pointsMaterial.size = 1.2;
+    pointsMaterial.size = 5;
 
     if (radius) {
       // @ts-ignore
@@ -697,7 +793,8 @@ export class PointCloud {
     }
 
     this.pointsUuid = points.uuid;
-    points.material = pointsMaterial;
+    // Temporarily hide it. It needs to restore.
+    // points.material = pointsMaterial;
     this.filterZAxisPoints(points);
 
     this.scene.add(points);
