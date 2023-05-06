@@ -5,9 +5,9 @@
  */
 import * as THREE from 'three';
 import DrawUtils from '@/utils/tool/DrawUtils';
+import EventListener from '@/core/toolOperation/eventListener';
 import PointCloudStore from '../store';
 import { IEventBus } from '..';
-import EventListener from '@/core/toolOperation/eventListener';
 
 interface IPointCloudRenderProps extends IEventBus {
   store: PointCloudStore;

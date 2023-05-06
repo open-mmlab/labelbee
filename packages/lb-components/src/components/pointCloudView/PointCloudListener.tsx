@@ -367,6 +367,15 @@ const PointCloudListener: React.FC<IProps> = ({
     ptCtx.mainViewInstance,
   ]);
 
+  /**
+   * PointCloud Segmentation
+   */
+  useEffect(() => {
+    toolInstanceRef.current.updateSegmentTool = (tool: 'lassoSelector' | 'circleSelector') => {
+      ptCtx.ptSegmentInstance?.emit(tool);
+    };
+  }, [ptCtx.ptSegmentInstance]);
+
   useEffect(() => {
     toolInstanceRef.current.history = {
       // Origin Result

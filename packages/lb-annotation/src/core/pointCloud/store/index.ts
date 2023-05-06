@@ -6,8 +6,8 @@
 
 import * as THREE from 'three';
 import { isInPolygon } from '@/utils/tool/polygonTool';
-import { IPointCloudDelegate } from '..';
 import EventListener from '@/core/toolOperation/eventListener';
+import { IPointCloudDelegate } from '..';
 
 const DEFAULT_PREFIX = 'LABELBEE_CANVAS_';
 
@@ -79,7 +79,6 @@ class PointCloudStore {
 
   // TODO. Not the last version.
   public getPointsInPolygon(originPolygon: ICoordinate[]) {
-    console.time('GetPolygon');
     const polygon = originPolygon;
     const originPoints = this.scene.getObjectByName(this.pointCloudObjectName) as THREE.Points;
 

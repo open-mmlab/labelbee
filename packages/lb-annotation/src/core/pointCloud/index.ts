@@ -4,7 +4,7 @@
  * @author Ron <ron.f.luo@gmail.com>
  */
 
-// /*eslint import/no-unresolved: 0*/
+/*eslint import/no-unresolved: 0*/
 import * as THREE from 'three';
 import {
   PerspectiveShiftUtils,

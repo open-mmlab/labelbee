@@ -52,7 +52,12 @@ const PointCloudView: React.FC<IProps> = ({
   }
 
   if (globalPattern === EPointCloudPattern.Segmentation) {
-    return <PointCloudSegment />;
+    return (
+      <>
+        <PointCloudListener checkMode={checkMode} />
+        <PointCloudSegment />;
+      </>
+    );
   }
 
   return (

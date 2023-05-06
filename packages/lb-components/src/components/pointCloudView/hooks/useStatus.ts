@@ -8,6 +8,7 @@ import { useContext } from 'react';
 import { PointCloudContext } from '../PointCloudContext';
 import { cTool } from '@labelbee/lb-annotation';
 import { useHistory } from './useHistory';
+import { EPointCloudPattern } from '@labelbee/lb-utils';
 
 const { EToolName, EPolygonPattern } = cTool;
 
@@ -25,6 +26,7 @@ export const useStatus = () => {
     pointCloudPattern,
     setPointCloudPattern,
     syncAllViewPointCloudColor,
+    globalPattern,
   } = useContext(PointCloudContext);
   const { pushHistoryWithList } = useHistory();
 
@@ -101,5 +103,6 @@ export const useStatus = () => {
     clearAllResult,
     updatePointCloudPattern,
     pointCloudPattern,
+    isSegmentPattern: globalPattern === EPointCloudPattern.Segmentation,
   };
 };
