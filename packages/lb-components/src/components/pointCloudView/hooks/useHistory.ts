@@ -4,7 +4,6 @@ import {
   IPointCloudSphere,
   IPointCloudSphereList,
   IPolygonData,
-  IPointUnit,
   ILine,
 } from '@labelbee/lb-utils';
 import { useContext } from 'react';
