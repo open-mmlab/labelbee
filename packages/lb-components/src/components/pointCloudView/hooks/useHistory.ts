@@ -1,6 +1,8 @@
 import {
   IPointCloudBox,
   IPointCloudBoxList,
+  IPointCloudSphere,
+  IPointCloudSphereList,
   IPolygonData,
   IPointUnit,
   ILine,
@@ -15,6 +17,7 @@ export const useHistory = () => {
     setSelectedIDs,
     pointCloudBoxList,
     pointCloudSphereList,
+    setPointCloudSphereList,
     mainViewInstance,
     topViewInstance,
     polygonList,
@@ -28,15 +31,18 @@ export const useHistory = () => {
     newBoxParams,
     newPolygon,
     newLine,
+    newSphereParams,
   }: {
     newBoxParams?: IPointCloudBox;
     newPolygon?: IPolygonData;
     newLine?: ILine;
+    newSphereParams?: IPointCloudSphere,
   }) => {
     const historyRecord = {
       pointCloudBoxList,
       polygonList,
       lineList,
+      pointCloudSphereList,
     };
 
     if (newBoxParams) {
@@ -50,6 +56,10 @@ export const useHistory = () => {
       historyRecord.lineList = lineList.concat(newLine);
     }
 
+    if (newSphereParams) {
+      historyRecord.pointCloudSphereList = pointCloudSphereList.concat(newSphereParams)
+    }
+
     history.pushHistory(historyRecord);
   };
 
@@ -58,12 +68,14 @@ export const useHistory = () => {
       pointCloudBoxList: IPointCloudBoxList;
       polygonList: IPolygonData[];
       lineList: ILine[];
+      pointCloudSphereList: IPointCloudSphereList;
     }>,
   ) => {
     const historyRecord = {
       pointCloudBoxList,
       polygonList,
       lineList,
+      pointCloudSphereList,
     };
 
     if (params.pointCloudBoxList) {
@@ -77,6 +89,11 @@ export const useHistory = () => {
     if (params.lineList) {
       historyRecord.lineList = params.lineList;
     }
+
+    if (params.pointCloudSphereList) {
+      historyRecord.pointCloudSphereList = params.pointCloudSphereList
+    }
+
     history.pushHistory(historyRecord);
   };
   const pushHistoryUnderUpdateLine = (line: ILine) => {
@@ -94,15 +111,6 @@ export const useHistory = () => {
         lineList: newLineList,
       });
       setLineList(newLineList);
-    }
-  };
-
-  // todo: need to be completed in future when adding history
-  const pushHistoryUnderUpdatePoint = (point: IPointUnit) => {
-    if (point) {
-      history.pushHistory({
-        pointCloudSphereList,
-      });
     }
   };
 
@@ -129,17 +137,20 @@ export const useHistory = () => {
   const initHistory = ({
     pointCloudBoxList,
     polygonList,
+    pointCloudSphereList,
   }: {
     pointCloudBoxList: IPointCloudBoxList;
     polygonList: IPolygonData[];
+    pointCloudSphereList: IPointCloudSphereList;
   }) => {
-    history.initRecord({ pointCloudBoxList, polygonList }, true);
+    history.initRecord({ pointCloudBoxList, polygonList, pointCloudSphereList }, true);
   };
 
   const updatePointCloud = (params?: {
     pointCloudBoxList: IPointCloudBoxList;
     polygonList: IPolygonData[];
     lineList: ILine[];
+    pointCloudSphereList: IPointCloudSphereList;
   }) => {
     if (!params) {
       return;
@@ -149,6 +160,7 @@ export const useHistory = () => {
       pointCloudBoxList: newPointCloudBoxList = [],
       polygonList: newPolygonList = [],
       lineList: newLineList = [],
+      pointCloudSphereList: newPointCloudSphereList = [],
     } = params;
 
     if (newPointCloudBoxList) {
@@ -177,6 +189,23 @@ export const useHistory = () => {
       syncAllViewPointCloudColor(newPointCloudBoxList);
     }
 
+    if (newPointCloudSphereList) {
+      if (pointCloudSphereList.length !== newPointCloudSphereList.length) {
+        setSelectedIDs();
+      }
+
+      let deletedPointCloudList = pointCloudSphereList.filter((v) => newPointCloudSphereList.every((d) => d.id !== v.id))
+      let addPointCloudList = newPointCloudSphereList.filter((v) => pointCloudSphereList.every((d) => d.id !== v.id))
+      deletedPointCloudList.forEach((v) => {
+        mainViewInstance?.removeObjectByName(v.id);
+      });
+
+      addPointCloudList.forEach((v) => {
+        mainViewInstance?.generateSphere(v);
+      });
+      setPointCloudSphereList(newPointCloudSphereList)
+    }
+
     if (newPolygonList) {
       setPolygonList(newPolygonList);
     }
@@ -201,7 +230,6 @@ export const useHistory = () => {
     addHistory,
     pushHistoryWithList,
     initHistory,
-    pushHistoryUnderUpdatePoint,
     pushHistoryUnderUpdatePolygon,
     pushHistoryUnderUpdateLine,
     redo,

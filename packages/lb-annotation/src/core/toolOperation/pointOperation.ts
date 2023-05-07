@@ -633,7 +633,9 @@ class PointOperation extends BasicToolOperation {
     const hoverPoint = this.pointList.find((point) => point.id === this.hoverID);
     this.setSelectedID(this.hoverID);
     this.emit('pointSelected', this.hoverID);
-    this.setDefaultAttribute(hoverPoint?.attribute);
+    if (hoverPoint) {
+      this.setDefaultAttribute(hoverPoint?.attribute);
+    }
 
     if (hoverPoint?.label && this.hasMarkerConfig) {
       const markerIndex = CommonToolUtils.getCurrentMarkerIndex(hoverPoint.label, this.config.markerList);
