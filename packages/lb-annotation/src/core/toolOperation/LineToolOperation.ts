@@ -1895,7 +1895,7 @@ class LineToolOperation extends BasicToolOperation {
   }
 
   public renderTextAttribute() {
-    if (!this.ctx || !this.selectedLine) {
+    if (!this.ctx || !this.selectedLine || (this.activeLine && this.activeLine?.length < 2)) {
       return;
     }
 

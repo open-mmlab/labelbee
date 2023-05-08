@@ -1180,90 +1180,39 @@ class PolygonOperation extends BasicToolOperation {
     return false;
   }
 
-  public moveSelectedPolygons(offset: ICoordinate) {
-    const newPolygonList = _.cloneDeep(this.polygonList);
-    const selectedPolygons = _.cloneDeep(this.dragInfo?.selectedPolygons);
-
-    if (selectedPolygons && selectedPolygons?.length > 0) {
-      newPolygonList.forEach((v) => {
-        const selectedPolygon = selectedPolygons?.find((s) => v.id === s.id);
-
-        if (selectedPolygon) {
-          v.pointList = v.pointList.map((p, index) => ({
-            ...p,
-            x: selectedPolygon?.pointList[index].x + offset.x,
-            y: selectedPolygon?.pointList[index].y + offset.y,
-          }));
-        }
-
-        return v;
-      });
-
-      this.setPolygonList(newPolygonList);
-      this.render();
-    }
-  }
-
   /**
    * Update polygon position while enableDrag is true
    * @param e {MouseEvent}
    */
   public onDragMove(e: MouseEvent) {
-    const coordinate = this.getCoordinateUnderZoom(e);
+    const newPolygonList = this.polygonList.map((v) => {
+      if (this.selectedIDs.includes(v.id)) {
+        const selectedPointList = this.dragPolygon(e, v);
 
-    const { dragTarget, dragPrevCoord, changePointIndex, initPointList, dragStartCoord } = this.dragInfo!;
+        if (!selectedPointList) {
+          return v;
+        }
 
-    this.dragStatus = EDragStatus.Move;
+        const newData = {
+          ...v,
+          pointList: selectedPointList as IPolygonPoint[],
+        };
 
-    if (dragTarget === EDragTarget.Plane) {
-      const offset = {
-        x: (coordinate.x - dragStartCoord.x) / this.zoom,
-        y: (coordinate.y - dragStartCoord.y) / this.zoom,
-      };
-      this.moveSelectedPolygons(offset);
-      return;
-    }
+        // 非矩形模式下拖动，矩形模式下生成的框将会转换为非矩形框
+        if (v.isRect === true && this.pattern === EPolygonPattern.Normal) {
+          Object.assign(newData, { isRect: false });
+        }
 
-    const { selectedPolygon } = this;
+        return newData;
+      }
 
-    if (!selectedPolygon) {
-      return;
-    }
+      return v;
+    });
 
-    /**
-     * 矩形拖动
-     * 1. 模式匹配
-     * 2. 当前选中多边形是否为矩形
-     * 3. 是否带有拖动
-     *  */
-    if (
-      this.pattern === EPolygonPattern.Rect &&
-      selectedPolygon?.isRect === true &&
-      changePointIndex &&
-      [EDragTarget.Line].includes(dragTarget)
-    ) {
-      const firstPointIndex = MathUtils.getArrayIndex(changePointIndex[0] - 2, 4);
-      const secondPointIndex = MathUtils.getArrayIndex(changePointIndex[0] - 1, 4);
-      const basicLine: [ICoordinate, ICoordinate] = [initPointList[firstPointIndex], initPointList[secondPointIndex]];
+    this.dragInfo!.dragPrevCoord = this.getCoordinateUnderZoom(e);
 
-      const perpendicularOffset = MathUtils.getRectPerpendicularOffset(dragStartCoord, coordinate, basicLine);
-      return {
-        x: perpendicularOffset.x / this.zoom,
-        y: perpendicularOffset.y / this.zoom,
-      };
-    }
-
-    if (this.dragInfo?.dragTarget === EDragTarget.Plane) {
-      return {
-        x: (coordinate.x - dragPrevCoord.x) / this.zoom,
-        y: (coordinate.y - dragPrevCoord.y) / this.zoom,
-      };
-    }
-
-    return {
-      x: (coordinate.x - dragStartCoord.x) / this.zoom,
-      y: (coordinate.y - dragStartCoord.y) / this.zoom,
-    };
+    this.setPolygonList(newPolygonList);
+    this.render();
   }
 
   /**

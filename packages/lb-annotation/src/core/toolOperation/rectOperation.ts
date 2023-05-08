@@ -452,17 +452,86 @@ class RectOperation extends BasicToolOperation {
     return undefined;
   }
 
+  public appendOffsetRect(rect: IRect, offset: ICoordinate) {
+    return {
+      ...rect,
+      x: rect.x + offset.x / this.zoom,
+      y: rect.y + offset.y / this.zoom,
+    };
+  }
+
+  public getRectsBoundaries(rects: IRect[], offset: ICoordinate) {
+    const rectsPoint: ICoordinate[] = rects.reduce((pre: ICoordinate[], next) => {
+      return pre.concat(...RectUtils.getRectPointList(this.appendOffsetRect(next, offset)));
+    }, []);
+
+    return MathUtils.calcViewportBoundaries(rectsPoint);
+  }
+
+  /**
+   * 判断框是否超过依赖范围
+   * @param rects
+   * @param offset
+   * @returns
+   */
+  public isRectsOutOfTarget(rects: IRect[], offset: ICoordinate) {
+    if (this.config.drawOutsideTarget !== false) {
+      return false;
+    }
+
+    const rectsBoundaries = this.getRectsBoundaries(rects, offset);
+
+    const selectedRectRange = {
+      y: rectsBoundaries.top,
+      x: rectsBoundaries.left,
+      height: rectsBoundaries.bottom - rectsBoundaries.top,
+      width: rectsBoundaries.right - rectsBoundaries.left,
+    };
+
+    // 多边形判断
+    if (this.basicResult?.pointList?.length > 0) {
+      return RectUtils.isRectNotInPolygon(
+        selectedRectRange as IRect,
+        getPolygonPointUnderZoom(this.basicResult.pointList, this.zoom),
+      );
+    }
+
+    // 原图、拉框范围判断
+    if (this.basicResult || this.imgInfo) {
+      const basicRect = this.basicResult
+        ? this.basicResult
+        : { x: 0, y: 0, height: this.imgNode?.height, width: this.imgNode?.width };
+
+      if (basicRect) {
+        return [
+          { x: rectsBoundaries.left, y: rectsBoundaries.top },
+          { x: rectsBoundaries.right, y: rectsBoundaries.bottom },
+        ].some((i) => {
+          return !RectUtils.isInRect(i, basicRect);
+        });
+      }
+    }
+
+    return false;
+  }
+
+  /**
+   * Update rect position while dragTarget is equal EDragTarget.Plane
+   * @param offset
+   */
   public moveRects(offset: ICoordinate) {
     if (this.dragInfo?.originRectList) {
       let selectedRects = _.cloneDeep(this.dragInfo.originRectList);
 
-      if (this.dragInfo.dragTarget === EDragTarget.Plane) {
-        selectedRects = this.dragInfo.originRectList!.map((i) => ({
-          ...i,
-          x: i.x + offset.x / this.zoom,
-          y: i.y + offset.y / this.zoom,
-        }));
+      if (this.isRectsOutOfTarget(selectedRects, offset)) {
+        return;
       }
+
+      selectedRects = this.dragInfo.originRectList!.map((i) => ({
+        ...i,
+        x: i.x + offset.x / this.zoom,
+        y: i.y + offset.y / this.zoom,
+      }));
 
       this.setRectList(
         this.rectList.map((v) => {
@@ -656,16 +725,14 @@ class RectOperation extends BasicToolOperation {
         const basicWidth = this.basicResult.width * this.zoom;
         const basicHeight = this.basicResult.height * this.zoom;
 
-        // if (
-        //   this.dragInfo.dragTarget !== EDragTarget.Plane &&
-        //   (selectedRect.x < basicX - 0.01 ||
-        //     selectedRect.y < basicY - 0.01 ||
-        //     selectedRect.width > basicX + basicWidth - selectedRect.x + 0.01 ||
-        //     selectedRect.height > basicY + basicHeight - selectedRect.y + 0.01)
-        // ) {
-        //   return;
-        // }
-
+        if (
+          selectedRect.x < basicX - 0.01 ||
+          selectedRect.y < basicY - 0.01 ||
+          selectedRect.width > basicX + basicWidth - selectedRect.x + 0.01 ||
+          selectedRect.height > basicY + basicHeight - selectedRect.y + 0.01
+        ) {
+          return;
+        }
         if (selectedRect.x < basicX) {
           selectedRect.x = basicX;
         }

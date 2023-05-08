@@ -118,6 +118,9 @@ class Selection {
     this.toolInstance.render();
   }
 
+  /**
+   * Stash data list and pop while paste
+   */
   public toStashDataList() {
     if (this.selectedIDs.length > 0) {
       this.stashDataList = _.cloneDeep(this.dataList.filter((i) => this.selectedIDs.includes(i.id)));
