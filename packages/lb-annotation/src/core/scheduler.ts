@@ -107,6 +107,16 @@ export class ToolScheduler implements IToolSchedulerOperation {
     });
   }
 
+  public syncAllAttributeListInConfig(attributeList: any[]) {
+    this.toolOperationList.forEach((toolInstance) => {
+      const newConfig = {
+        ...toolInstance.config,
+        attributeList,
+      };
+      toolInstance.setConfig(JSON.stringify(newConfig));
+    });
+  }
+
   public setSize(size: ISize) {
     this.toolOperationList.forEach((toolInstance) => {
       toolInstance.setSize(size);
