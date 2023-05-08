@@ -29,7 +29,7 @@ interface IProps {
   imgIndex: number;
   stepList: IStepInfo[];
 }
-const dispatch = useDispatch();
+
 // Temporarily hidden, this feature does not support the function for the time being.
 const AnnotatedBox = ({ imgList, imgIndex }: { imgList: IFileItem[]; imgIndex: number }) => {
   const ptCtx = useContext(PointCloudContext);
@@ -206,6 +206,7 @@ const AttributeUpdater = ({
   const ptx = useContext(PointCloudContext);
   const { t } = useTranslation();
   const { defaultAttribute } = useAttribute();
+  const dispatch = useDispatch();
 
   const titleStyle = {
     fontWeight: 500,

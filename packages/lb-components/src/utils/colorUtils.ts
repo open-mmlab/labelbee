@@ -1,17 +1,17 @@
 /**
- * transform rgba(a,g,b), to {r,g,b,a} / [r,g,b,a]
+ * transform rgba(a,g,b), to {r,g,b,a}
  * @param color
  */
-export const toRGBAObj = (rgbStr: string, toArray?: boolean) => {
+export const toRGBAObj = (rgbStr: string | undefined) => {
+  if (!rgbStr) {
+    return;
+  }
   const match = rgbStr.replace(/[rgba()]/g, '').split(',');
   if (match) {
     const [r, g, b, a] = match;
-    if (toArray) {
-      return [r, g, b, a];
-    }
     return { r: Number(r), g: Number(g), b: Number(b), a: Number(a) };
   }
-  return '';
+  return undefined;
 };
 
 /**

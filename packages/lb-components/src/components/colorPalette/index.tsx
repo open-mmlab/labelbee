@@ -17,7 +17,7 @@ const Palette = (props: IProps) => {
 
   return (
     <RgbaColorPicker
-      color={defaultColor && toRGBAObj(defaultColor)}
+      color={toRGBAObj(defaultColor)}
       onChange={(values) => {
         const colorStr = toRGBAStr(values);
         setColor(colorStr);

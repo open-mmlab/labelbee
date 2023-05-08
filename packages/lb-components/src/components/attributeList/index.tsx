@@ -5,7 +5,7 @@ import React, { useState } from 'react';
 import { Popover } from 'antd';
 import ColorPalette from '../colorPalette';
 import { CloseOutlined } from '@ant-design/icons';
-import { i18n } from '@labelbee/lb-utils';
+import { useTranslation } from 'react-i18next';
 
 export const ATTRIBUTE_COLORS = [NULL_COLOR].concat(COLORS_ARRAY);
 
@@ -28,7 +28,7 @@ interface IProps {
 
 const AttributeList = React.forwardRef((props: IProps, ref) => {
   const radioRef = React.useRef<any>();
-
+  const { t } = useTranslation();
   const list = props.list || [];
 
   const [paletteVisible, setPaletteVisible] = useState<boolean>(false);
@@ -47,7 +47,9 @@ const AttributeList = React.forwardRef((props: IProps, ref) => {
   }
 
   const changeColor = (value: string, color: string) => {
-    props.updateColorConfig(value, color);
+    if (props.updateColorConfig) {
+      props.updateColorConfig(value, color);
+    }
   };
 
   return (
@@ -100,7 +102,7 @@ const AttributeList = React.forwardRef((props: IProps, ref) => {
                           alignItems: 'center',
                         }}
                       >
-                        <span>{i18n.t('Palette')}</span>
+                        <span>{t('Palette')}</span>
                         <CloseOutlined onClick={() => setPaletteVisible(false)} />
                       </div>
                     }
