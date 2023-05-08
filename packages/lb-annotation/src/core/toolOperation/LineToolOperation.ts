@@ -681,7 +681,6 @@ class LineToolOperation extends BasicToolOperation {
   public drawLines = () => {
     try {
       const lineList = _.cloneDeep(this.attributeFilteredLines);
-
       if (this.isHidden) {
         return;
       }
@@ -1459,14 +1458,6 @@ class LineToolOperation extends BasicToolOperation {
       reset();
       return;
     }
-    // /** 非创建状态，记录当前被修改的线条 */
-    // if (this.isMousedown && !this.isCreate) {
-    //   const lineChanged = this.lineHasChanged();
-    //   if (lineChanged) {
-    //     this.updateLines();
-    //     this.history?.pushHistory(this.lineList);
-    //   }
-    // }
 
     if (e.which === 1) {
       this.onLeftClick(e);
@@ -1518,7 +1509,7 @@ class LineToolOperation extends BasicToolOperation {
         const newLine = this.createLineData();
         selectedID = newLine.id;
         this.setLineList([...this.lineList, newLine]);
-        this.emit('lineCreated', newLine, this.zoom, this.currentPos);
+        // this.emit('lineCreated', newLine, this.zoom, this.currentPos);
         this.history?.pushHistory(this.lineList);
       }
     }
@@ -1530,7 +1521,7 @@ class LineToolOperation extends BasicToolOperation {
     }
 
     this.actionsHistory?.empty();
-    this.emit('dataUpdated', this.lineList);
+    this.emit('dataUpdated', this.lineList, this.selectedIDs);
     this.render();
   }
 

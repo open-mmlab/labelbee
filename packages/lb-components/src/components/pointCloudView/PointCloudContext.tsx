@@ -32,6 +32,7 @@ export interface IPointCloudContext extends IPointCloudContextInstances {
   pointCloudSphereList: IPointCloudSphereList;
   displayPointCloudList: IPointCloudBoxList;
   displaySphereList: IPointCloudSphereList;
+  displayLineList: ILine[];
   selectedIDs: string[];
   setSelectedIDs: (ids?: string[] | string) => void;
   valid: boolean;
@@ -84,6 +85,7 @@ export const PointCloudContext = React.createContext<IPointCloudContext>({
   pointCloudSphereList: [],
   displayPointCloudList: [],
   displaySphereList: [],
+  displayLineList: [],
   polygonList: [],
   lineList: [],
   selectedID: '',
@@ -213,6 +215,10 @@ export const PointCloudProvider: React.FC<{}> = ({ children }) => {
       (i) => !hideAttributes.includes(i.attribute),
     );
 
+    const displayLineList = lineList.filter(
+      (i) => i.attribute && !hideAttributes.includes(i.attribute),
+    );
+
     const toggleAttributesVisible = (tAttribute: string) => {
       if (hideAttributes.includes(tAttribute)) {
         setHideAttributes(hideAttributes.filter((attribute) => attribute !== tAttribute));
@@ -226,7 +232,7 @@ export const PointCloudProvider: React.FC<{}> = ({ children }) => {
       _displayPointCloudList: IPointCloudBoxList = displayPointCloudList,
       _polygonList: IPolygonData[] = polygonList,
       _displaySphereList: IPointCloudSphereList = displaySphereList,
-      _lineList: ILine[] = lineList,
+      _lineList: ILine[] = displayLineList,
     ) => {
       pointCloudBoxList.forEach((v) => {
         mainViewInstance?.removeObjectByName(v.id);
@@ -270,6 +276,7 @@ export const PointCloudProvider: React.FC<{}> = ({ children }) => {
       pointCloudSphereList,
       displayPointCloudList,
       displaySphereList,
+      displayLineList,
       selectedIDs,
       setPointCloudResult,
       setSelectedIDs,
