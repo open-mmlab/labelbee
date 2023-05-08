@@ -1,6 +1,7 @@
 import { useCallback, useContext, useMemo } from 'react';
 import { PointCloudContext } from '@/components/pointCloudView/PointCloudContext';
 import _ from 'lodash';
+import { useHistory } from '@/components/pointCloudView/hooks/useHistory';
 
 export const useSphere = () => {
   const {
@@ -9,6 +10,8 @@ export const useSphere = () => {
     selectedID,
     mainViewInstance,
   } = useContext(PointCloudContext);
+
+  const { pushHistoryWithList } = useHistory();
 
   const selectedSphere = useMemo(() => {
     return pointCloudSphereList.find((v) => v.id === selectedID)
@@ -28,6 +31,7 @@ export const useSphere = () => {
         pointCloudSphereList.splice(sphereIndex, 1, _.merge(pointCloudSphereList[sphereIndex], sphereParams));
         const newPointCloudSphereList = _.cloneDeep(pointCloudSphereList);
         setPointCloudSphereList(newPointCloudSphereList);
+        pushHistoryWithList({ pointCloudSphereList: newPointCloudSphereList });
         return newPointCloudSphereList;
       }
       return pointCloudSphereList
