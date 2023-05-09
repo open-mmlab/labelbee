@@ -113,7 +113,8 @@ export class PointCloudAnnotation implements IPointCloudAnnotationOperation {
         // need to be deleted
         this.pointCloud2dOperation = pointCloudPolygonOperation;
       } else {
-        toolInstance = toolScheduler.createOperation(tool, image, defaultProps);
+        /** Tools can't enable textConfigurable */
+        toolInstance = toolScheduler.createOperation(tool, image, { ...defaultProps, textConfigurable: false });
       }
       if (i === toolList.length - 1) {
         if (!this.toolInstance) {

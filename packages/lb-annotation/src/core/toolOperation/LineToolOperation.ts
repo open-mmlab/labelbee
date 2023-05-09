@@ -497,6 +497,16 @@ class LineToolOperation extends BasicToolOperation {
     this.render();
   }
 
+  public updateAttrWhileIDChanged(id?: string) {
+    if (id) {
+      const line = this.lineList.find((i) => i.id === id);
+
+      if (line) {
+        this.setDefaultAttribute(line.attribute);
+      }
+    }
+  }
+
   public setSelectedID(newID?: string) {
     const oldID = this.selectedID;
     if (newID !== oldID && oldID) {
@@ -508,6 +518,8 @@ class LineToolOperation extends BasicToolOperation {
     if (!newID) {
       this._textAttributInstance?.clearTextAttribute();
     }
+
+    this.updateAttrWhileIDChanged();
 
     this.selectedID = newID;
 
@@ -1869,6 +1881,8 @@ class LineToolOperation extends BasicToolOperation {
     if (!id) {
       this._textAttributeInstance?.clearTextAttribute();
     }
+
+    this.updateAttrWhileIDChanged(id);
 
     this.selectedID = id;
     this.emit('selectedChange');
