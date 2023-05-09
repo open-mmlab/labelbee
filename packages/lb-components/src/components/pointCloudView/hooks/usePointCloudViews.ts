@@ -605,12 +605,8 @@ export const usePointCloudViews = () => {
     pointCloudSphereList,
     hideAttributes,
   } = ptCtx;
-  const {
-    addHistory,
-    initHistory,
-    pushHistoryUnderUpdatePolygon,
-    pushHistoryUnderUpdateLine,
-  } = useHistory();
+  const { addHistory, initHistory, pushHistoryUnderUpdatePolygon, pushHistoryUnderUpdateLine } =
+    useHistory();
   const { selectedPolygon } = usePolygon();
 
   const { updateSelectedBox, updateSelectedBoxes, getPointCloudByID } = useSingleBox();
@@ -1149,7 +1145,11 @@ export const usePointCloudViews = () => {
       ptCtx.setPointCloudSphereList([]);
       ptCtx.setLineList([]);
     }
-    initHistory({ pointCloudBoxList: boxParamsList, polygonList, pointCloudSphereList: sphereParamsList });
+    initHistory({
+      pointCloudBoxList: boxParamsList,
+      polygonList,
+      pointCloudSphereList: sphereParamsList,
+    });
 
     mainViewInstance.updateTopCamera();
 

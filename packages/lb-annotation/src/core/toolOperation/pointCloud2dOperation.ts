@@ -7,6 +7,7 @@
  */
 
 import { IPointCloudConfig, toolStyleConverter, UpdatePolygonByDragList, INVALID_COLOR } from '@labelbee/lb-utils';
+import _ from 'lodash';
 import { EDragTarget, ESortDirection } from '@/constant/annotation';
 import { EPolygonPattern } from '@/constant/tool';
 import { IPolygonData, IPolygonPoint } from '@/types/tool/polygon';
@@ -15,7 +16,6 @@ import CommonToolUtils from '@/utils/tool/CommonToolUtils';
 import DrawUtils from '@/utils/tool/DrawUtils';
 import PolygonUtils from '@/utils/tool/PolygonUtils';
 import { polygonConfig } from '@/constant/defaultConfig';
-import _ from 'lodash';
 import PolygonOperation, { IPolygonOperationProps } from './polygonOperation';
 import { BasicToolOperation } from './basicToolOperation';
 

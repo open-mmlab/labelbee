@@ -35,7 +35,7 @@ export const useHistory = () => {
     newBoxParams?: IPointCloudBox;
     newPolygon?: IPolygonData;
     newLine?: ILine;
-    newSphereParams?: IPointCloudSphere,
+    newSphereParams?: IPointCloudSphere;
   }) => {
     const historyRecord = {
       pointCloudBoxList,
@@ -56,7 +56,7 @@ export const useHistory = () => {
     }
 
     if (newSphereParams) {
-      historyRecord.pointCloudSphereList = pointCloudSphereList.concat(newSphereParams)
+      historyRecord.pointCloudSphereList = pointCloudSphereList.concat(newSphereParams);
     }
 
     history.pushHistory(historyRecord);
@@ -90,7 +90,7 @@ export const useHistory = () => {
     }
 
     if (params.pointCloudSphereList) {
-      historyRecord.pointCloudSphereList = params.pointCloudSphereList
+      historyRecord.pointCloudSphereList = params.pointCloudSphereList;
     }
 
     history.pushHistory(historyRecord);
@@ -193,8 +193,12 @@ export const useHistory = () => {
         setSelectedIDs();
       }
 
-      let deletedPointCloudList = pointCloudSphereList.filter((v) => newPointCloudSphereList.every((d) => d.id !== v.id))
-      let addPointCloudList = newPointCloudSphereList.filter((v) => pointCloudSphereList.every((d) => d.id !== v.id))
+      let deletedPointCloudList = pointCloudSphereList.filter((v) =>
+        newPointCloudSphereList.every((d) => d.id !== v.id),
+      );
+      let addPointCloudList = newPointCloudSphereList.filter((v) =>
+        pointCloudSphereList.every((d) => d.id !== v.id),
+      );
       deletedPointCloudList.forEach((v) => {
         mainViewInstance?.removeObjectByName(v.id);
       });
@@ -202,7 +206,7 @@ export const useHistory = () => {
       addPointCloudList.forEach((v) => {
         mainViewInstance?.generateSphere(v);
       });
-      setPointCloudSphereList(newPointCloudSphereList)
+      setPointCloudSphereList(newPointCloudSphereList);
     }
 
     if (newPolygonList) {
