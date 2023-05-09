@@ -5,9 +5,8 @@
  * @createdate 2022-07-11
  * @author Ron <ron.f.luo@gmail.com>
  */
-
-import { IPointCloudConfig, toolStyleConverter, UpdatePolygonByDragList, INVALID_COLOR } from '@labelbee/lb-utils';
 import _ from 'lodash';
+import { IPointCloudConfig, toolStyleConverter, UpdatePolygonByDragList, INVALID_COLOR } from '@labelbee/lb-utils';
 import { EDragTarget, ESortDirection } from '@/constant/annotation';
 import { EPolygonPattern } from '@/constant/tool';
 import { IPolygonData, IPolygonPoint } from '@/types/tool/polygon';
@@ -35,8 +34,6 @@ class PointCloud2dOperation extends PolygonOperation {
   public pointCloudConfig: IPointCloudConfig;
 
   private checkMode: boolean;
-
-  private selectedIDs: string[] = [];
 
   constructor(props: IPolygonOperationProps & IPointCloud2dOperationProps) {
     super(props);
@@ -99,7 +96,7 @@ class PointCloud2dOperation extends PolygonOperation {
       return;
     }
 
-    super.deletePolygon(id);
+    super.deletePolygons(id ? [id] : undefined);
   }
 
   public deletePolygonPoint(index: number) {
@@ -115,7 +112,7 @@ class PointCloud2dOperation extends PolygonOperation {
    * @param selectedIDs
    */
   public setSelectedIDs(selectedIDs: string[]) {
-    this.selectedIDs = selectedIDs;
+    this.selection.hardSetSelectedIDs(selectedIDs);
 
     if (this.selectedIDs.length < 2) {
       this.setSelectedID(this.selectedIDs.length === 1 ? this.selectedIDs[0] : '');
@@ -127,7 +124,7 @@ class PointCloud2dOperation extends PolygonOperation {
   public deleteSelectedID() {
     super.deleteSelectedID();
     /** ID not existed and empty selectedID */
-    this.selectedIDs = [];
+    this.selection.setSelectedIDs();
     this.emit('deleteSelectedIDs');
   }
 
@@ -141,15 +138,9 @@ class PointCloud2dOperation extends PolygonOperation {
       return;
     }
 
-    /**
-     * Multi Selected.
-     */
-    if (e.ctrlKey) {
-      this.emit('addSelectedIDs', this.hoverID);
-      return;
-    }
+    this.selection.setSelectedIDs(this.hoverID, e.ctrlKey);
 
-    this.emit('setSelectedIDs', this.hoverID);
+    this.emit('setSelectedIDs', this.selection.selectedIDs);
     const hoverAttribute = this.polygonList.find((v) => v.id === this.hoverID)?.attribute;
     if (hoverAttribute && hoverAttribute !== this.defaultAttribute) {
       this.emit('syncAttribute', hoverAttribute);
@@ -361,11 +352,11 @@ class PointCloud2dOperation extends PolygonOperation {
     if (newID !== oldID && oldID) {
       // 触发文本切换的操作
 
-      this._textAttributInstance?.changeSelected();
+      this._textAttributeInstance?.changeSelected();
     }
 
     if (!newID) {
-      this._textAttributInstance?.clearTextAttribute();
+      this._textAttributeInstance?.clearTextAttribute();
     }
   }
 
@@ -375,7 +366,7 @@ class PointCloud2dOperation extends PolygonOperation {
    */
   public setSelectedID(newID?: string) {
     this.updateTextAttribute(newID);
-    this.selectedID = newID;
+    this.selection.setSelectedIDs(newID);
 
     this.render();
   }
@@ -430,37 +421,6 @@ class PointCloud2dOperation extends PolygonOperation {
     this.emit('validUpdate', id);
   }
 
-  public onDragMove(e: MouseEvent) {
-    const newPolygonList = this.polygonList.map((v) => {
-      if (this.selectedIDs.includes(v.id)) {
-        const selectedPointList = this.dragPolygon(e, v);
-
-        if (!selectedPointList) {
-          return v;
-        }
-
-        const newData = {
-          ...v,
-          pointList: selectedPointList as IPolygonPoint[],
-        };
-
-        // 非矩形模式下拖动，矩形模式下生成的框将会转换为非矩形框
-        if (v.isRect === true && this.pattern === EPolygonPattern.Normal) {
-          Object.assign(newData, { isRect: false });
-        }
-
-        return newData;
-      }
-
-      return v;
-    });
-
-    this.dragInfo!.dragPrevCoord = this.getCoordinateUnderZoom(e);
-
-    this.setPolygonList(newPolygonList);
-    this.render();
-  }
-
   public onMouseDown(e: MouseEvent) {
     if (
       BasicToolOperation.prototype.onMouseDown.call(this, e) ||
@@ -485,6 +445,7 @@ class PointCloud2dOperation extends PolygonOperation {
       originPolygon: this.selectedPolygon,
       dragPrevCoord: dragStartCoord,
       originPolygonList: this.polygonList,
+      selectedPolygons: this.selectedPolygons,
     };
   }
 
