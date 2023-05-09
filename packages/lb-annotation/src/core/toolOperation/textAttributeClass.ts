@@ -1,3 +1,4 @@
+import { isEqual } from 'lodash';
 import EKeyCode from '../../constant/keyCode';
 import { TEXT_ATTRIBUTE_LINE_HEIGHT, TEXT_ATTRIBUTE_MAX_LENGTH } from '../../constant/tool';
 
@@ -276,6 +277,30 @@ export default class TextAttributeClass {
     if (this._textareaDOM) {
       this._textareaDOM.style.width = `${newWidth}px`;
       this._textareaDOM.style.borderColor = `${color}`;
+    }
+  }
+
+  /**
+   * According to oldIDs' and newIDs' value, remove or re-render textarea
+   * @param oldIDs
+   * @param newIDs
+   */
+  public selectedIDsChanged(oldIDs: string[], newIDs: string[]) {
+    const isSingleIDSelected = oldIDs.length === 1 && newIDs.length === 1;
+
+    if (isSingleIDSelected) {
+      const isIDEqual = isEqual(oldIDs, newIDs);
+
+      if (isIDEqual) {
+        return;
+      }
+
+      this?.changeSelected();
+    }
+
+    if (newIDs?.length !== 1) {
+      this.removeTextareaDOM();
+      this?.clearTextAttribute();
     }
   }
 

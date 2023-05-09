@@ -364,6 +364,7 @@ const PointCloudTopView: React.FC<IProps> = ({
       const { x, y, z } = pointCloud.initCameraPosition;
       pointCloud.camera.position.set(x + offsetY, y - offsetX, z);
       pointCloud.render();
+      syncTopviewToolZoom(currentPos, zoom, size);
       setAnnotationPos({ zoom, currentPos });
     });
   }, [size, ptCtx.topViewInstance, ptCtx.topViewInstance?.toolInstance]);

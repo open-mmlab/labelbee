@@ -15,8 +15,8 @@ export enum EPerspectiveView {
 }
 
 export const DEFAULT_SPHERE_PARAMS = {
-  radius: 3,
+  radius: 0.3,
   widthSegments: 32,
   heightSegments: 16,
-  defaultZ: 5,
+  defaultZ: 1,
 }

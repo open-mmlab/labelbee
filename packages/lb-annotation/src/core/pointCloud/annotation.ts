@@ -135,7 +135,15 @@ export class PointCloudAnnotation implements IPointCloudAnnotationOperation {
 
   public updateConfig(config: IPointCloudConfig) {
     this.config = config;
-    this.pointCloud2dOperation.setConfig(JSON.stringify(config));
+  }
+
+  // compose attributeList
+  public updateAttributeList(attributeList: IInputList[]) {
+    this.config = {
+      ...this.config,
+      attributeList,
+    };
+    this.toolScheduler.syncAllAttributeListInConfig(attributeList);
   }
 
   /**

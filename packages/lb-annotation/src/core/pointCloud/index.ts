@@ -948,9 +948,9 @@ export class PointCloud {
       const p3 = _polygon[index + 2];
       return PointCloudUtils.getIntersectionBySlope({
         p1: _minDistanceList[index].point,
-        k1: (p1.y - p2.y) / (p1.x - p2.x),
+        line1: [p1, p2],
         p2: _minDistanceList[index + 1].point,
-        k2: (p2.y - p3.y) / (p2.x - p3.x),
+        line2: [p2, p3],
       });
     });
     return fittedCoordinates;

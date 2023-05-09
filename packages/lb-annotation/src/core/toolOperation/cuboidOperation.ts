@@ -105,11 +105,11 @@ class CuboidOperation extends BasicToolOperation implements ITextAttributeFuc {
    */
   public get currentShowList() {
     let cuboidList: ICuboid[] = [];
-    const [showingCuboid, selectedCuboid] = CommonToolUtils.getRenderResultList<ICuboid>(
+    const [showingCuboid, selectedCuboids] = CommonToolUtils.getRenderResultList<ICuboid>(
       this.cuboidList,
       CommonToolUtils.getSourceID(this.basicResult),
       this.attributeLockList,
-      this.selectedID,
+      this.selectedID ? [this.selectedID] : undefined,
     );
     cuboidList = showingCuboid;
 
@@ -117,8 +117,8 @@ class CuboidOperation extends BasicToolOperation implements ITextAttributeFuc {
       cuboidList = [];
     }
 
-    if (selectedCuboid) {
-      cuboidList.push(selectedCuboid);
+    if (selectedCuboids.length === 1) {
+      cuboidList.push(selectedCuboids[0]);
     }
     return cuboidList;
   }

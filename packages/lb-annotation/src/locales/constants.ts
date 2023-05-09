@@ -12,6 +12,8 @@ export enum EMessage {
   TextCheckCustomErrorNotice = 'textCheckCustomErrorNotice',
   UpperLimitErrorNotice = 'UpperLimitErrorNotice',
   LowerLimitErrorNotice = 'LowerLimitErrorNotice',
+  MinAreaLimitErrorNotice = 'MinAreaLimitErrorNotice',
+  MinLengthLimitErrorNotice = 'MinLengthLimitErrorNotice',
   InvalidImage = 'InvalidImage',
   DisableDelete = 'DisableDelete',
   ClearPartialData = 'ClearPartialData',
