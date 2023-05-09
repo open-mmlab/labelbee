@@ -80,13 +80,13 @@ export class ToolScheduler implements IToolSchedulerOperation {
   private imgNode?: HTMLImageElement;
 
   constructor(props: IToolSchedulerProps) {
-    this.init();
-
     this.container = props.container;
     this.size = props.size;
     this.imgNode = props.imgNode;
     this.config = props.config ?? JSON.stringify(getConfig(HybridToolUtils.getTopToolName(props.toolName))); // 设置默认操作
     this.style = props.style ?? styleDefaultConfig; // 设置默认操作
+    this.onWheel = this.onWheel.bind(this);
+    this.init();
   }
 
   public setImgNode(
@@ -104,6 +104,16 @@ export class ToolScheduler implements IToolSchedulerOperation {
   public setImgAttribute(imgAttribute: IImageAttribute) {
     this.toolOperationList.forEach((toolInstance) => {
       toolInstance.setImgAttribute(imgAttribute);
+    });
+  }
+
+  public syncAllAttributeListInConfig(attributeList: any[]) {
+    this.toolOperationList.forEach((toolInstance) => {
+      const newConfig = {
+        ...toolInstance.config,
+        attributeList,
+      };
+      toolInstance.setConfig(JSON.stringify(newConfig));
     });
   }
 
@@ -346,5 +356,30 @@ export class ToolScheduler implements IToolSchedulerOperation {
   public init() {
     this.toolOperationList = [];
     this.toolOperationDom = [];
+    this.eventBinding();
+  }
+
+  public destroy() {
+    this.destroyAllLayer();
+    this.eventUnBinding();
+  }
+
+  public eventBinding() {
+    // this event will be touched when the remark layer blocks the onWheel events in specific operations, otherwise it will be blocked by the onWheel events inside
+    this.container.addEventListener('wheel', this.onWheel);
+  }
+
+  public eventUnBinding() {
+    this.container.removeEventListener('wheel', this.onWheel);
+  }
+
+  public onWheel(e: MouseEvent) {
+    e.preventDefault();
+    e.stopPropagation();
+    if (this.toolOperationList.length !== 0) {
+      const lastOneIndex = this.toolOperationDom.length - 1;
+      // the last one operation is the active one
+      this.toolOperationList[lastOneIndex].onWheel(e);
+    }
   }
 }

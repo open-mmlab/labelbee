@@ -14,6 +14,8 @@ const message: Record<string, string> = {
   [EMessage.TextCheckCustomErrorNotice]: '请按要求的格式输入',
   [EMessage.UpperLimitErrorNotice]: '顶点数不多于',
   [EMessage.LowerLimitErrorNotice]: '顶点数不少于',
+  [EMessage.MinAreaLimitErrorNotice]: '最小面积不小于',
+  [EMessage.MinLengthLimitErrorNotice]: '长度不小于',
   [EMessage.InvalidImage]: '无效图片，请跳过此图',
   [EMessage.DisableDelete]: '该数据禁止删除',
   [EMessage.ClearPartialData]: '存在部分数据无法清除',

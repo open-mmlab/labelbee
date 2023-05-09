@@ -25,6 +25,8 @@ import StyleUtils from '../../utils/tool/StyleUtils';
 import AttributeUtils from '../../utils/tool/AttributeUtils';
 import TextAttributeClass from './textAttributeClass';
 import Selection, { SetDataList } from './Selection';
+import locale from '../../locales';
+import { EMessage } from '../../locales/constants';
 
 enum EStatus {
   Create = 0,
@@ -337,6 +339,10 @@ class LineToolOperation extends BasicToolOperation {
 
   get lowerLimitPointNum() {
     return this.config.lowerLimitPointNum;
+  }
+
+  get minLength() {
+    return this.config?.minLength || 1;
   }
 
   get upperLimitPointNum() {
@@ -674,7 +680,6 @@ class LineToolOperation extends BasicToolOperation {
   public drawLines = () => {
     try {
       const lineList = _.cloneDeep(this.attributeFilteredLines);
-
       if (this.isHidden) {
         return;
       }
@@ -1141,6 +1146,13 @@ class LineToolOperation extends BasicToolOperation {
       if (this.isLinePointsNotEnough()) {
         return;
       }
+      if (LineToolUtils.lineLengthSum(this.activeLine || []) < this.minLength) {
+        this.emit(
+          'messageInfo',
+          `${locale.getMessagesByLocale(EMessage.MinLengthLimitErrorNotice, this.lang)}${this.minLength}`,
+        );
+        return true;
+      }
       this.stopLineCreating(true);
       return;
     }
@@ -1448,7 +1460,7 @@ class LineToolOperation extends BasicToolOperation {
         const newLine = this.createLineData();
         selectedID = newLine.id;
         this.setLineList([...this.lineList, newLine]);
-        this.emit('lineCreated', newLine, this.zoom, this.currentPos);
+        // this.emit('lineCreated', newLine, this.zoom, this.currentPos);
         this.history?.pushHistory(this.lineList);
       }
     }
@@ -1461,7 +1473,7 @@ class LineToolOperation extends BasicToolOperation {
     }
 
     this.actionsHistory?.empty();
-    this.emit('dataUpdated', this.lineList);
+    this.emit('dataUpdated', this.lineList, this.selectedIDs);
     this.render();
   }
 

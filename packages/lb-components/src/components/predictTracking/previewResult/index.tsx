@@ -189,13 +189,13 @@ const GenerateViewsDataUrl = (props: {
 
           await pointCloud.updateCameraZoom(ptCtx.zoom);
 
-          const hex = toolStyleConverter.getColorFromConfig(
+          const fill = toolStyleConverter.getColorFromConfig(
             { attribute: item.attribute },
             { ...config, attributeConfigurable: true },
             {},
-          )?.hex;
+          )?.fill;
 
-          pointCloud.generateBox(item, hex);
+          pointCloud.generateBox(item, fill);
           // TODO
           // getViewsDataUrl requires pointCloud to finish loading the 3D view, otherwise it will not capture the correct image
           await sleep(500);

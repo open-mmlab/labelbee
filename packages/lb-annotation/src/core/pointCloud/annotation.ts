@@ -101,6 +101,7 @@ export class PointCloudAnnotation implements IPointCloudAnnotationOperation {
     } else {
       toolList = toolName as EToolName[];
     }
+
     toolList.forEach((tool, i) => {
       let toolInstance;
       if (tool === EToolName.PointCloudPolygon) {
@@ -133,7 +134,15 @@ export class PointCloudAnnotation implements IPointCloudAnnotationOperation {
 
   public updateConfig(config: IPointCloudConfig) {
     this.config = config;
-    this.pointCloud2dOperation.setConfig(JSON.stringify(config));
+  }
+
+  // compose attributeList
+  public updateAttributeList(attributeList: IInputList[]) {
+    this.config = {
+      ...this.config,
+      attributeList,
+    };
+    this.toolScheduler.syncAllAttributeListInConfig(attributeList);
   }
 
   /**
@@ -198,14 +207,7 @@ export class PointCloudAnnotation implements IPointCloudAnnotationOperation {
   }
 
   public updateLineList = (lineList: ILine[]) => {
-    const list = lineList.map((v: ILine) => ({
-      ...v,
-      pointList: v?.pointList?.map((point: IPoint) =>
-        PointCloudUtils.transferWorld2Canvas(point, this.toolInstance.size),
-      ),
-    }));
-
-    this.toolScheduler.updateDataByToolName(EToolName.Line, list);
+    this.toolScheduler.updateDataByToolName(EToolName.Line, lineList ?? []);
   };
 
   public addLineListOnTopView(result: string) {

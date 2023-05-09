@@ -47,7 +47,7 @@ export const useStatus = () => {
     syncAllViewPointCloudColor([]);
 
     // Add History
-    pushHistoryWithList({ pointCloudBoxList: [], polygonList: [] });
+    pushHistoryWithList({ pointCloudBoxList: [], polygonList: [], pointCloudSphereList: [] });
   };
 
   // Clear results of sideview and backview

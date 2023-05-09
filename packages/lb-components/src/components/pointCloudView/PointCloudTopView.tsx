@@ -22,7 +22,6 @@ import { useSingleBox } from './hooks/useSingleBox';
 import { PointCloudContainer } from './PointCloudLayout';
 import { BoxInfos, PointCloudValidity } from './PointCloudInfos';
 import { usePolygon } from './hooks/usePolygon';
-import { useLine } from './hooks/useLine';
 import { useSphere } from './hooks/useSphere';
 import { useZoom } from './hooks/useZoom';
 import { Slider } from 'antd';
@@ -173,7 +172,6 @@ const PointCloudTopView: React.FC<IProps> = ({
   const { hideAttributes } = ptCtx;
 
   const { addPolygon, deletePolygon } = usePolygon();
-  const { addLine, deleteLine } = useLine();
   const { deletePointCloudSphere } = useSphere();
   const { deletePointCloudBox, changeValidByID } = useSingleBox();
   const [zAxisLimit, setZAxisLimit] = useState<number>(10);
@@ -211,28 +209,11 @@ const PointCloudTopView: React.FC<IProps> = ({
     const { toolInstance: TopView2dOperation } = ptCtx.topViewInstance;
 
     // line register
-    TopView2dOperation.singleOn('lineCreated', (line: ILine, zoom: number) => {
-      const newLine = {
-        ...line,
-        pointList: line.pointList!.map((v) => PointCloudUtils.transferCanvas2World(v, size)),
-      };
-
-      addLine(newLine);
-      ptCtx.setSelectedIDs(hideAttributes.includes(line.attribute!) ? '' : line.id);
-      return;
+    TopView2dOperation.singleOn('dataUpdated', (updateLine: ILine[], selectedIDs: string[]) => {
+      ptCtx.setSelectedIDs(selectedIDs);
+      ptCtx.setLineList(updateLine);
     });
 
-    TopView2dOperation.singleOn('lineDeleted', (selectedID: string) => {
-      deletePointCloudBox(selectedID);
-      deleteLine(selectedID);
-    });
-
-    TopView2dOperation.singleOn('lineSelected', (selectedID: string) => {
-      ptCtx.setSelectedIDs([selectedID]);
-    });
-    TopView2dOperation.singleOn('updateLineByDrag', (updateLine: ILine) => {
-      pointCloudViews.topViewUpdateLine?.(updateLine, size);
-    });
     // point tool events
     TopView2dOperation.singleOn('pointCreated', (point: IPointUnit, zoom: number) => {
       // addPoint(point)
@@ -349,6 +330,7 @@ const PointCloudTopView: React.FC<IProps> = ({
     ptCtx.topViewInstance.initSize(size);
     ptCtx.topViewInstance.updatePolygonList(ptCtx.displayPointCloudList, ptCtx.polygonList);
     ptCtx.topViewInstance.updatePointList(ptCtx.displaySphereList);
+    ptCtx.topViewInstance.updateLineList(ptCtx.displayLineList);
 
     const {
       topViewInstance: { pointCloudInstance: pointCloud, toolInstance },
@@ -382,6 +364,7 @@ const PointCloudTopView: React.FC<IProps> = ({
       const { x, y, z } = pointCloud.initCameraPosition;
       pointCloud.camera.position.set(x + offsetY, y - offsetX, z);
       pointCloud.render();
+      syncTopviewToolZoom(currentPos, zoom, size);
       setAnnotationPos({ zoom, currentPos });
     });
   }, [size, ptCtx.topViewInstance, ptCtx.topViewInstance?.toolInstance]);

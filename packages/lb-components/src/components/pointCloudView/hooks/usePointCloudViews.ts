@@ -605,13 +605,8 @@ export const usePointCloudViews = () => {
     pointCloudSphereList,
     hideAttributes,
   } = ptCtx;
-  const {
-    addHistory,
-    initHistory,
-    pushHistoryUnderUpdatePolygon,
-    pushHistoryUnderUpdatePoint,
-    pushHistoryUnderUpdateLine,
-  } = useHistory();
+  const { addHistory, initHistory, pushHistoryUnderUpdatePolygon, pushHistoryUnderUpdateLine } =
+    useHistory();
   const { selectedPolygon } = usePolygon();
 
   const { updateSelectedBox, updateSelectedBoxes, getPointCloudByID } = useSingleBox();
@@ -693,6 +688,7 @@ export const usePointCloudViews = () => {
     setSelectedIDs(newPoint.id);
     const newSphereList = addPointCloudSphere(sphereParams);
     syncPointCloudPoint(PointCloudView.Top, newPoint, sphereParams, zoom, newSphereList, config);
+    addHistory({ newSphereParams: sphereParams });
   };
 
   /** Top-view create box from 2D */
@@ -918,9 +914,6 @@ export const usePointCloudViews = () => {
     return;
   };
   const topViewUpdatePoint = (updatePoint: IPointUnit, size: ISize) => {
-    const { x: realX, y: realY } = PointCloudUtils.transferCanvas2World(updatePoint, size);
-    pushHistoryUnderUpdatePoint({ ...updatePoint, x: realX, y: realY });
-
     const pointCloudSphere = getPointCloudSphereByID(updatePoint.id);
     const newSphereParams = topViewPoint2PointCloud(
       updatePoint,
@@ -1069,7 +1062,7 @@ export const usePointCloudViews = () => {
         viewToBeUpdated[key]();
       }
     });
-    
+
     if (zoom) {
       mainViewInstance?.updateCameraZoom(zoom);
     }
@@ -1152,7 +1145,11 @@ export const usePointCloudViews = () => {
       ptCtx.setPointCloudSphereList([]);
       ptCtx.setLineList([]);
     }
-    initHistory({ pointCloudBoxList: boxParamsList, polygonList });
+    initHistory({
+      pointCloudBoxList: boxParamsList,
+      polygonList,
+      pointCloudSphereList: sphereParamsList,
+    });
 
     mainViewInstance.updateTopCamera();
 
