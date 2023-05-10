@@ -20,6 +20,7 @@ import PointCloudSideView from './PointCloudSideView';
 import PointCloud2DView from './PointCloud2DView';
 import PointCloudListener from './PointCloudListener';
 import PointCloudSegment from './PointCloudSegment';
+import PointCloudSegmentStatus from './PointCloudSegmentStatus';
 import { AppState } from '@/store';
 import { connect } from 'react-redux';
 import { IFileItem } from '@/types/data';
@@ -55,7 +56,8 @@ const PointCloudView: React.FC<IProps> = ({
     return (
       <>
         <PointCloudListener checkMode={checkMode} />
-        <PointCloudSegment />;
+        <PointCloudSegment />
+        <PointCloudSegmentStatus /> 
       </>
     );
   }

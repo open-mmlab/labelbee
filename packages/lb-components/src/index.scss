@@ -1720,6 +1720,12 @@ $headerHeight: 40px;
     }
   }
 }
+
+.#{$ptPrefix}-status {
+  z-index: 200;
+  position: absolute;
+  
+}
 /** PointCloud样式 end */
 
 $predictTrackingPrefix: #{$prefix}-point-cloud-predict-tracking;

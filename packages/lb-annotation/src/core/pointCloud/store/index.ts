@@ -8,8 +8,8 @@ import * as THREE from 'three';
 import { IPointCloudSegmentation } from '@labelbee/lb-utils';
 import { isInPolygon } from '@/utils/tool/polygonTool';
 import EventListener from '@/core/toolOperation/eventListener';
-import { IPointCloudDelegate } from '..';
 import uuid from '@/utils/uuid';
+import { IPointCloudDelegate } from '..';
 
 const DEFAULT_PREFIX = 'LABELBEE_CANVAS_';
 
@@ -221,7 +221,6 @@ class PointCloudStore {
   public editPoints() {
     const hoverPoints = this.segmentData.get(this.hoverPointsID);
     if (hoverPoints) {
-      debugger;
       this.cacheSegData = {
         ...hoverPoints,
         points: new Float32Array(hoverPoints.points),

@@ -362,10 +362,6 @@ export class PointCloud extends EventListener {
     // Remove Old Box
     if (oldBox) {
       oldBox.removeFromParent();
-      // if (name === this.pointCloudObjectName) {
-      //   // debugger;
-      //   this.removeObjectByName(name);
-      // }
     }
   }
 

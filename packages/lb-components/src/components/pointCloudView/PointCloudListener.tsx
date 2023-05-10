@@ -374,6 +374,8 @@ const PointCloudListener: React.FC<IProps> = ({
     toolInstanceRef.current.updateSegmentTool = (tool: 'lassoSelector' | 'circleSelector') => {
       ptCtx.ptSegmentInstance?.emit(tool);
     };
+
+    toolInstanceRef.current.segmentInstance = ptCtx.ptSegmentInstance;
   }, [ptCtx.ptSegmentInstance]);
 
   useEffect(() => {
