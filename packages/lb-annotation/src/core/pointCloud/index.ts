@@ -166,7 +166,7 @@ export class PointCloud extends EventListener {
     this.axesHelper = new THREE.AxesHelper(1000);
 
     // For Developer
-    // this.scene.add(this.axesHelper);
+    this.scene.add(this.axesHelper);
 
     this.scene.add(this.camera);
     // TODO
@@ -185,7 +185,7 @@ export class PointCloud extends EventListener {
       store: this.store,
     });
 
-    this.pointCloudRender = new PointCloudRender({ store: this.store, ...this.eventBus });
+    this.pointCloudRender = new PointCloudRender({ store: this.store, ...this.eventBus, nextTick: this.nextTick });
 
     document.addEventListener('keydown', this.keydown);
     document.addEventListener('keyup', this.keyup);
@@ -202,6 +202,10 @@ export class PointCloud extends EventListener {
     this.unbind('CircleSelector', this.segmentOperation.updateSelector2Circle.bind(this.segmentOperation));
     this.unbind('LassoSelector', this.segmentOperation.updateSelector2Lasso.bind(this.segmentOperation));
   }
+
+  public nextTick = () => {
+    this.segmentOperation._raycasting();
+  };
 
   public keydown = (e: KeyboardEvent) => {
     // alert(`type: ${typeof e.key}.${e.key}:-`);
@@ -811,6 +815,16 @@ export class PointCloud extends EventListener {
     this.render();
   }
 
+  public initCloudData(points: Float32Array) {
+    for (let i = 0; i < points.length; i += 3) {
+      const x = points[i];
+      const y = points[i + 1];
+      const z = points[i + 2];
+
+      this.store.cloudData.set(`${x}@${y}@${z}`, { visible: false });
+    }
+  }
+
   /**
    *
    * @param src
@@ -827,6 +841,9 @@ export class PointCloud extends EventListener {
     const geometry = new THREE.BufferGeometry();
     geometry.setAttribute('position', new THREE.BufferAttribute(points, 3));
     geometry.setAttribute('color', new THREE.BufferAttribute(color, 3));
+
+    // TODO: Need to move to store.
+    this.initCloudData(points);
 
     const newPoints = new THREE.Points(geometry);
     this.renderPointCloud(newPoints, radius);

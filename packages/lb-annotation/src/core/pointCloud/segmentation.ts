@@ -5,7 +5,7 @@
  */
 
 import LassoSelector from './selector/lassoSelector';
-import PointCloudStore from './store';
+import PointCloudStore, { ThreePoints } from './store';
 import CircleSelector from './selector/circleSelector';
 
 interface IProps {
@@ -73,6 +73,9 @@ class PointCloudSegmentOperation {
       button: iev.buttons,
     };
 
+    // TODO: Need add more status to sync mouse
+    this.store.updateMouse({ x: ev.offsetX, y: ev.offsetY });
+
     this.currentTool.mouseMove(ev as MouseEvent);
   };
 
@@ -89,7 +92,35 @@ class PointCloudSegmentOperation {
       return;
     }
 
+    if (this.baseMouseDown(iev)) {
+      return;
+    }
+
     this.currentTool.mouseUp(iev);
+  };
+
+  public baseMouseDown = (e: MouseEvent) => {
+    // TODO: Need to forbid operation when orbit
+    if (e.button === 0 && this.store.hoverPointsID) {
+      this.store.editPoints();
+
+      return true;
+    }
+  };
+
+  public _raycasting = () => {
+    const { mouse, camera, raycaster } = this.store;
+    raycaster.setFromCamera(mouse, camera);
+    const intersects = raycaster.intersectObjects(this.store.allSegmentPoints, false);
+
+    const intersect = intersects[0];
+
+    if (intersect) {
+      this.store.highlightPoints(intersect.object as ThreePoints);
+    } else {
+      // TODO. Need to optimize.
+      this.store.resetSegDataSizeAndRender();
+    }
   };
 
   // public setupRaycaster() {

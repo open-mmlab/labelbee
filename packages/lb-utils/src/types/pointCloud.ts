@@ -128,3 +128,15 @@ export type UpdatePolygonByDragList = Array<{
   newPolygon: IPolygonData;
   originPolygon: IPolygonData;
 }>;
+
+// TODO: Need to think more about the store of points. Not the last version.
+export type TSegmentPoints = Float32Array;
+
+export interface IPointCloudSegmentation {
+  id: string;
+  points: TSegmentPoints;
+  attribute: string;
+  subAttribute?: {
+    [key in string]: string;
+  };
+}
