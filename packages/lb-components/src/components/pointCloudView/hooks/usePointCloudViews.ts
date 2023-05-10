@@ -783,7 +783,7 @@ export const usePointCloudViews = () => {
     }
     if (newSelectedBox || selectedBox?.info) {
       const boxParams = newSelectedBox ?? selectedBox?.info;
-      operation.setSelectedIDs(selectedIDs);
+      operation?.setSelectedIDs(selectedIDs);
       const polygon = operation.selectedPolygon;
       if (selectedIDs.length === 1 && boxParams) {
         syncPointCloudViews(PointCloudView.Top, polygon, boxParams, undefined, newPointCloudList);

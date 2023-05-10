@@ -819,7 +819,7 @@ class LineToolOperation extends BasicToolOperation {
       });
       this.render();
     }
-    this.emit('updateLineByDrag', this.updatedLine);
+    this.emit('dataUpdated', this.lineList, this.selectedIDs);
   }
 
   /**
@@ -1820,6 +1820,10 @@ class LineToolOperation extends BasicToolOperation {
   public setSelectedLineID(id?: string, isAppend = false) {
     this.selection.setSelectedIDs(id, isAppend);
     this.updateAttrWhileIDChanged(this.selectedID);
+    if (this.selectedLine) {
+      this.setActiveLine(this.selectedLine.pointList);
+    }
+
     this.emit('selectedChange');
   }
 

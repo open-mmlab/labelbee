@@ -25,6 +25,7 @@ export const useStatus = () => {
     pointCloudPattern,
     setPointCloudPattern,
     syncAllViewPointCloudColor,
+    setLineList,
   } = useContext(PointCloudContext);
   const { pushHistoryWithList } = useHistory();
 
@@ -41,6 +42,7 @@ export const useStatus = () => {
     setPointCloudResult([]);
     setPolygonList([]);
     setPointCloudSphereList([]);
+    setLineList([]);
 
     topViewInstance?.toolScheduler.clearStatusAndResult();
 
