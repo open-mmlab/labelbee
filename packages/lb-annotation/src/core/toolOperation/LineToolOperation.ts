@@ -1807,8 +1807,19 @@ class LineToolOperation extends BasicToolOperation {
     this.render();
   }
 
+  public updateAttrWhileIDChanged(id?: string) {
+    if (id) {
+      const line = this.lineList.find((i) => i.id === id);
+
+      if (line) {
+        this.setDefaultAttribute(line.attribute);
+      }
+    }
+  }
+
   public setSelectedLineID(id?: string, isAppend = false) {
     this.selection.setSelectedIDs(id, isAppend);
+    this.updateAttrWhileIDChanged(this.selectedID);
     this.emit('selectedChange');
   }
 
