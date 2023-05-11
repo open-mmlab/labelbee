@@ -88,7 +88,7 @@ class PointCloudSegmentOperation {
   };
 
   public onMouseUp = (iev: MouseEvent) => {
-    if (this.forbidOperation) {
+    if (this.forbidOperation || this.store.orbiting === true) {
       return;
     }
 

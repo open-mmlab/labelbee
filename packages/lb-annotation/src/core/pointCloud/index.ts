@@ -160,6 +160,9 @@ export class PointCloud extends EventListener {
     this.scene = new THREE.Scene();
     this.controls = new OrbitControls(this.camera, this.container);
     this.controls.enablePan = false;
+    this.controls.addEventListener('start', this.orbiterStart.bind(this));
+    this.controls.addEventListener('change', this.orbiterChange.bind(this));
+    this.controls.addEventListener('end', this.orbiterEnd.bind(this));
 
     this.pcdLoader = new PCDLoader();
 
@@ -191,6 +194,18 @@ export class PointCloud extends EventListener {
     document.addEventListener('keyup', this.keyup);
 
     this.initMsg();
+  }
+
+  public orbiterStart() {
+    // Reserved.
+  }
+
+  public orbiterChange() {
+    this.store.orbiting = true;
+  }
+
+  public orbiterEnd() {
+    this.store.orbiting = false;
   }
 
   public initMsg() {

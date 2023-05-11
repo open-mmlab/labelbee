@@ -5,7 +5,7 @@
  */
 
 import * as THREE from 'three';
-import { IPointCloudSegmentation } from '@labelbee/lb-utils';
+import { IPointCloudSegmentation, PointCloudUtils } from '@labelbee/lb-utils';
 import { isInPolygon } from '@/utils/tool/polygonTool';
 import EventListener from '@/core/toolOperation/eventListener';
 import uuid from '@/utils/uuid';
@@ -15,6 +15,12 @@ const DEFAULT_PREFIX = 'LABELBEE_CANVAS_';
 
 export type ThreePoints = THREE.Points<THREE.BufferGeometry, THREE.PointsMaterial>;
 
+/**
+ * TODO:
+ * Need to think about store:
+ * 1. The definition of points in IPointCloudSegmentation is Float32Array ?
+ * 2. CloudData store the status ?
+ */
 class PointCloudStore {
   public canvas2d: HTMLCanvasElement | null = null;
 
@@ -52,6 +58,8 @@ class PointCloudStore {
   public updatePointCloud: boolean = false;
 
   public addPointCloud = false;
+
+  public orbiting = false;
 
   // TODO. clear later.
   private pointCloudObjectName = 'pointCloud';
@@ -153,11 +161,14 @@ class PointCloudStore {
         projection.y = Math.round((-vector3d.y * this.container.clientHeight) / 2 + this.container.clientHeight / 2);
         const isIn = isInPolygon(projection, polygon);
         if (isIn) {
-          const key = `${cloudDataArrayLike[i]}@${cloudDataArrayLike[i + 1]}@${cloudDataArrayLike[i + 2]}`;
+          const x = cloudDataArrayLike[i];
+          const y = cloudDataArrayLike[i + 1];
+          const z = cloudDataArrayLike[i + 2];
+          const key = PointCloudUtils.getCloudKeys(x, y, z);
 
           /**
            * TODO: Has visible.
-           * If it
+           *
            */
           if (this.cloudData.get(key).visible === false) {
             vertices.push(cloudDataArrayLike[i], cloudDataArrayLike[i + 1], cloudDataArrayLike[i + 2]);
@@ -205,11 +216,29 @@ class PointCloudStore {
     }
   }
 
+  public updateCloudDataStatus(points: Float32Array, status: { [key: string]: any }) {
+    for (let i = 0; i < points.length; i += 3) {
+      const x = points[i];
+      const y = points[i + 1];
+      const z = points[i + 2];
+      const key = PointCloudUtils.getCloudKeys(x, y, z);
+      const data = this.cloudData.get(key);
+      Object.keys(status).forEach((k: string) => {
+        data[k] = status[k];
+      });
+    }
+  }
+
   public clearStash() {
     if (this.cacheSegData) {
+      this.updateCloudDataStatus(this.cacheSegData.points, { visible: false });
       if (this.segmentData.has(this.cacheSegData.id)) {
         // restore data.
-        this.emit('updateNewPoints', this.segmentData.get(this.cacheSegData.id));
+        const originSegmentData = this.segmentData.get(this.cacheSegData.id);
+        if (originSegmentData) {
+          this.emit('updateNewPoints', originSegmentData);
+          this.updateCloudDataStatus(originSegmentData?.points, { visible: true });
+        }
       } else {
         this.emit('clearStashRender');
       }

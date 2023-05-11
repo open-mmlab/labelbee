@@ -584,6 +584,10 @@ class PointCloudUtils {
 
     return { x, y };
   }
+
+  public static getCloudKeys(x: number, y: number, z: number) {
+    return [x, y, z].join("@");
+  }
 }
 
 export default PointCloudUtils;
