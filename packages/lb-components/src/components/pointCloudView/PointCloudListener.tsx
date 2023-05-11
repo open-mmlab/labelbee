@@ -354,6 +354,7 @@ const PointCloudListener: React.FC<IProps> = ({
     toolInstanceRef.current.asyncData = (newData: IFileItem) => {
       // Next Tick to update.
       setTimeout(() => {
+        console.log('update point cloud data')
         updatePointCloudData?.(newData);
       });
     };

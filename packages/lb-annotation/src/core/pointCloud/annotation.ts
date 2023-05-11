@@ -28,6 +28,7 @@ interface IPointCloudAnnotationProps {
 
   checkMode?: boolean;
   toolName: THybridToolName;
+  proxyMode?: boolean;
 }
 
 const createEmptyImage = (size: { width: number; height: number }) => {
@@ -56,7 +57,16 @@ export class PointCloudAnnotation implements IPointCloudAnnotationOperation {
 
   public config: IPointCloudConfig;
 
-  constructor({ size, container, pcdPath, extraProps, config, checkMode, toolName }: IPointCloudAnnotationProps) {
+  constructor({
+    size,
+    container,
+    pcdPath,
+    extraProps,
+    config,
+    checkMode,
+    toolName,
+    proxyMode,
+  }: IPointCloudAnnotationProps) {
     const defaultOrthographic = this.getDefaultOrthographic(size);
 
     const imgSrc = createEmptyImage(size);
@@ -64,7 +74,7 @@ export class PointCloudAnnotation implements IPointCloudAnnotationOperation {
     const image = new Image();
     image.src = imgSrc;
 
-    const toolScheduler = new ToolScheduler({ container, size, toolName });
+    const toolScheduler = new ToolScheduler({ container, size, toolName, proxyMode });
     const canvasScheduler = new CanvasScheduler({ container });
 
     // 1. PointCloud initialization

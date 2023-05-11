@@ -21,6 +21,7 @@ interface IToolSchedulerProps {
   imgNode?: HTMLImageElement; // 展示图片的内容
   config?: string; // 任务配置
   style?: any;
+  proxyMode?: boolean;
 }
 
 /**
@@ -79,13 +80,19 @@ export class ToolScheduler implements IToolSchedulerOperation {
 
   private imgNode?: HTMLImageElement;
 
+  private proxyMode?: boolean;
+
   constructor(props: IToolSchedulerProps) {
     this.container = props.container;
     this.size = props.size;
     this.imgNode = props.imgNode;
     this.config = props.config ?? JSON.stringify(getConfig(HybridToolUtils.getTopToolName(props.toolName))); // 设置默认操作
     this.style = props.style ?? styleDefaultConfig; // 设置默认操作
+    this.proxyMode = props.proxyMode;
     this.onWheel = this.onWheel.bind(this);
+    this.onMouseDown = this.onMouseDown.bind(this);
+    this.onMouseMove = this.onMouseMove.bind(this);
+    this.onMouseUp = this.onMouseUp.bind(this);
     this.init();
   }
 
@@ -366,11 +373,22 @@ export class ToolScheduler implements IToolSchedulerOperation {
 
   public eventBinding() {
     // this event will be touched when the remark layer blocks the onWheel events in specific operations, otherwise it will be blocked by the onWheel events inside
-    this.container.addEventListener('wheel', this.onWheel);
+    // for now it will only be called in pointcloud top view
+    if (this.proxyMode) {
+      this.container.addEventListener('wheel', this.onWheel);
+      this.container.addEventListener('mousedown', this.onMouseDown);
+      this.container.addEventListener('mousemove', this.onMouseMove);
+      this.container.addEventListener('mouseup', this.onMouseUp);
+    }
   }
 
   public eventUnBinding() {
-    this.container.removeEventListener('wheel', this.onWheel);
+    if (this.proxyMode) {
+      this.container.removeEventListener('wheel', this.onWheel);
+      this.container.removeEventListener('mousedown', this.onMouseDown);
+      this.container.removeEventListener('mousemove', this.onMouseMove);
+      this.container.removeEventListener('mouseup', this.onMouseUp);
+    }
   }
 
   public onWheel(e: MouseEvent) {
@@ -381,5 +399,39 @@ export class ToolScheduler implements IToolSchedulerOperation {
       // the last one operation is the active one
       this.toolOperationList[lastOneIndex].onWheel(e);
     }
+  }
+
+  public onMouseDown(e: MouseEvent) {
+    e.preventDefault();
+    e.stopPropagation();
+    if (this.toolOperationList.length !== 0) {
+      const lastOneIndex = this.toolOperationDom.length - 1;
+      this.toolOperationList[lastOneIndex].onMouseDown(e);
+    }
+  }
+
+  public onMouseMove(e: MouseEvent) {
+    e.preventDefault();
+    e.stopPropagation();
+    if (this.toolOperationList.length !== 0) {
+      const lastOneIndex = this.toolOperationDom.length - 1;
+      this.toolOperationList[lastOneIndex].onMouseMove(e);
+    }
+  }
+
+  public onMouseUp(e: MouseEvent) {
+    e.preventDefault();
+    e.stopPropagation();
+    if (this.toolOperationList.length !== 0) {
+      const lastOneIndex = this.toolOperationDom.length - 1;
+      this.toolOperationList[lastOneIndex].onMouseUp(e);
+    }
+  }
+
+  /**
+   * Get current tool name of toolInstance
+   */
+  public getCurrentToolName() {
+    return this.toolOperationNameList[this.toolOperationNameList.length - 1];
   }
 }

@@ -219,6 +219,7 @@ export const useHistory = () => {
 
     topViewInstance?.updatePolygonList(newPointCloudBoxList ?? [], newPolygonList ?? []);
     topViewInstance?.updateLineList(newLineList ?? []);
+    topViewInstance?.updatePointList(newPointCloudSphereList)
   };
 
   const redo = () => {
