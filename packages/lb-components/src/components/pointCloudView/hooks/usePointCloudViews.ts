@@ -1119,11 +1119,11 @@ export const usePointCloudViews = () => {
     let lineList: any[] = [];
     let polygonList = [];
     let sphereParamsList: IPointCloudSphere[] = [];
-    if (currentData.result) {
-      boxParamsList = PointCloudUtils.getBoxParamsFromResultList(currentData.result);
-      polygonList = PointCloudUtils.getPolygonListFromResultList(currentData.result);
-      lineList = PointCloudUtils.getLineListFromResultList(currentData.result);
-      sphereParamsList = PointCloudUtils.getSphereParamsFromResultList(currentData.result);
+    if (newData.result) {
+      boxParamsList = PointCloudUtils.getBoxParamsFromResultList(newData.result);
+      polygonList = PointCloudUtils.getPolygonListFromResultList(newData.result);
+      lineList = PointCloudUtils.getLineListFromResultList(newData.result);
+      sphereParamsList = PointCloudUtils.getSphereParamsFromResultList(newData.result);
 
       // Add Init Box
       boxParamsList.forEach((v: IPointCloudBox) => {

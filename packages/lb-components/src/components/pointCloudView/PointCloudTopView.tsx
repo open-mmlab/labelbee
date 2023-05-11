@@ -7,7 +7,7 @@ import { getClassName } from '@/utils/dom';
 import { FooterDivider } from '@/views/MainView/toolFooter';
 import { ZoomController } from '@/views/MainView/toolFooter/ZoomController';
 import { DownSquareOutlined, UpSquareOutlined } from '@ant-design/icons';
-import { cTool, PointCloudAnnotation, THybridToolName } from '@labelbee/lb-annotation';
+import { cTool, cAnnotation, PointCloudAnnotation, THybridToolName } from '@labelbee/lb-annotation';
 import {
   IPolygonData,
   PointCloudUtils,
@@ -35,7 +35,8 @@ import { jsonParser } from '@/utils';
 import { TDrawLayerSlot } from '@/types/main';
 import ToolUtils from '@/utils/ToolUtils';
 
-const { EPolygonPattern } = cTool;
+const { EPolygonPattern, EToolName } = cTool;
+const { ESortDirection } = cAnnotation;
 
 /**
  * Get the offset from canvas2d-coordinate to world coordinate (Top View)
@@ -70,7 +71,10 @@ const TransferCanvas2WorldOffset = (
 const TopViewToolbar = ({ currentData }: IAnnotationStateProps) => {
   const { zoom, zoomIn, zoomOut, initialPosition } = useZoom();
   const { selectNextBox, selectPrevBox } = useSingleBox();
+  const { switchToNextSphere } = useSphere();
   const { updateRotate } = useRotate({ currentData });
+  const ptCtx = React.useContext(PointCloudContext);
+  const currentToolName = ptCtx?.topViewInstance?.toolScheduler?.getCurrentToolName()
 
   const ratio = 2;
 
@@ -96,13 +100,23 @@ const TopViewToolbar = ({ currentData }: IAnnotationStateProps) => {
       <FooterDivider />
       <UpSquareOutlined
         onClick={() => {
-          selectPrevBox();
+          if (currentToolName === EToolName.PointCloudPolygon) {
+            selectPrevBox();
+          }
+          if (currentToolName === EToolName.Point) {
+            switchToNextSphere(ESortDirection.descend);
+          }
         }}
         className={getClassName('point-cloud', 'prev')}
       />
       <DownSquareOutlined
         onClick={() => {
-          selectNextBox();
+          if (currentToolName === EToolName.PointCloudPolygon) {
+            selectNextBox();
+          }
+          if (currentToolName === EToolName.Point) {
+            switchToNextSphere(ESortDirection.ascend)
+          }
         }}
         className={getClassName('point-cloud', 'next')}
       />
@@ -196,6 +210,7 @@ const PointCloudTopView: React.FC<IProps> = ({
         config: { ...config, pointCloudPattern: ptCtx.pointCloudPattern },
         checkMode,
         toolName: ToolUtils.getPointCloudToolList() as THybridToolName,
+        proxyMode: checkMode,
       });
       ptCtx.setTopViewInstance(pointCloudAnnotation);
     }
