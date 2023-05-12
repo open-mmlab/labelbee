@@ -122,18 +122,6 @@ class PointCloudSegmentOperation {
       this.store.resetSegDataSizeAndRender();
     }
   };
-
-  // public setupRaycaster() {
-  //   const boundingBox = { x: 10, y: 10, z: 10 };
-  //   const numberOfPoints = 10;
-
-  //   this.raycaster = new THREE.Raycaster();
-  //   const threshold = Math.cbrt((boundingBox.x * boundingBox.y * boundingBox.z) / numberOfPoints) / 3;
-  //   if (this.raycaster) {
-  //     // this.raycaster.params.Points.threshold = threshold;
-  //     // this.raycaster.linePrecision = 0.1;
-  //   }
-  // }
 }
 
 export { PointCloudSegmentOperation };

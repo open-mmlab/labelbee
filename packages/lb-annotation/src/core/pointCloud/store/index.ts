@@ -84,6 +84,7 @@ class PointCloudStore {
     this.clearStash = this.clearStash.bind(this);
     this.addStash2Store = this.addStash2Store.bind(this);
     this.initMsg();
+    this.setupRaycaster();
   }
 
   public initMsg() {
@@ -121,6 +122,16 @@ class PointCloudStore {
   public createCanvas2d() {
     this.canvas2d = this.createCanvas(`${DEFAULT_PREFIX}2d`);
     this.container.appendChild(this.canvas2d);
+  }
+
+  public setupRaycaster() {
+    this.raycaster.params = {
+      Mesh: {},
+      Line: { threshold: 1 },
+      LOD: {},
+      Points: { threshold: 0.2 },
+      Sprite: {},
+    };
   }
 
   public setHoverPointsID(id: string) {
