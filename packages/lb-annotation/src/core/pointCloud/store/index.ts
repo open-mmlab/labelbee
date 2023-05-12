@@ -62,6 +62,7 @@ class PointCloudStore {
   public addPointCloud = false;
 
   public orbiting = false;
+
   // current attribute of segmentation points
   public currentAttribute: string = '';
 

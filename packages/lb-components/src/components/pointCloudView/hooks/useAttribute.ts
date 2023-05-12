@@ -57,7 +57,6 @@ export const useAttribute = () => {
     if (!ptSegmentInstance) {
       return
     }
-    console.log(ptSegmentInstance.store)
     ptSegmentInstance.store.setAttribute(attribute)
     ptSegmentInstance.pointCloudRender.updatePointsColor()
     setDefaultAttribute(attribute)
