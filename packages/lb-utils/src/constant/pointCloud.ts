@@ -25,3 +25,8 @@ export enum EPointCloudPattern {
   Detection = 'Detection',
   Segmentation = 'Segmentation',
 }
+
+export enum EPointCloudSegmentMode {
+  Add = "ADD", 
+  Remove = "REMOVE"
+}

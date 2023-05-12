@@ -5,7 +5,7 @@
  */
 
 import * as THREE from 'three';
-import { IPointCloudSegmentation, PointCloudUtils } from '@labelbee/lb-utils';
+import { EPointCloudSegmentMode, IPointCloudSegmentation, PointCloudUtils } from '@labelbee/lb-utils';
 import { isInPolygon } from '@/utils/tool/polygonTool';
 import EventListener from '@/core/toolOperation/eventListener';
 import uuid from '@/utils/uuid';
@@ -55,6 +55,8 @@ class PointCloudStore {
   public hoverPointsID: string = '';
 
   /** Render Status */
+  public segmentMode = EPointCloudSegmentMode.Add;
+
   public updatePointCloud: boolean = false;
 
   public addPointCloud = false;
@@ -138,6 +140,10 @@ class PointCloudStore {
     this.hoverPointsID = id;
   }
 
+  public setSegmentMode(mode: EPointCloudSegmentMode) {
+    this.segmentMode = mode;
+  }
+
   public updateCanvasBasicStyle(canvas: HTMLCanvasElement, size: ISize, zIndex: number) {
     const pixel = 1;
     canvas.style.position = 'absolute';
@@ -181,36 +187,79 @@ class PointCloudStore {
            * TODO: Has visible.
            *
            */
-          if (this.cloudData.get(key).visible === false) {
+          if (this.cloudData.get(key).visible === false || this.segmentMode === EPointCloudSegmentMode.Remove) {
+            if (this.segmentMode === EPointCloudSegmentMode.Add) {
+              this.cloudData.get(key).visible = true;
+            }
+            if (this.segmentMode === EPointCloudSegmentMode.Remove) {
+              this.cloudData.get(key).visible = false;
+            }
             vertices.push(cloudDataArrayLike[i], cloudDataArrayLike[i + 1], cloudDataArrayLike[i + 2]);
-            this.cloudData.get(key).visible = true;
           }
         }
       }
       const verticesArray = new Float32Array(vertices);
 
-      if (this.cacheSegData) {
-        const { points } = this.cacheSegData;
-        const combinedLength = points.length + verticesArray.length;
-        const combined = new Float32Array(combinedLength);
-        combined.set(points, 0);
-        combined.set(verticesArray, points.length);
-        this.cacheSegData = {
-          ...this.cacheSegData,
-          points: combined,
-        };
-        this.updatePointCloud = true;
-      } else {
-        this.cacheSegData = {
-          id: uuid(),
-          attribute: '',
-          points: verticesArray,
-        };
-        this.addPointCloud = true;
+      // TODO: Need to performance.
+      switch (this.segmentMode) {
+        case EPointCloudSegmentMode.Add:
+          if (this.cacheSegData) {
+            const { points } = this.cacheSegData;
+            const combinedLength = points.length + verticesArray.length;
+            const combined = new Float32Array(combinedLength);
+            combined.set(points, 0);
+            combined.set(verticesArray, points.length);
+            this.cacheSegData = {
+              ...this.cacheSegData,
+              points: combined,
+            };
+            this.updatePointCloud = true;
+          } else {
+            this.cacheSegData = {
+              id: uuid(),
+              attribute: '',
+              points: verticesArray,
+            };
+            this.addPointCloud = true;
+          }
+          break;
+
+        case EPointCloudSegmentMode.Remove:
+          // Split the point in originPoint
+          if (this.cacheSegData) {
+            const { points } = this.cacheSegData;
+            this.cacheSegData = {
+              ...this.cacheSegData,
+              points: this.splitPointsFromPoints(points, verticesArray),
+            };
+            this.updatePointCloud = true;
+          }
+          break;
+
+        default: {
+          //
+        }
       }
 
       this.syncCacheMsg();
     }
+  }
+
+  public splitPointsFromPoints(originPoints: Float32Array, splitPoints: Float32Array) {
+    const splitMap = new Map();
+    for (let i = 0; i < splitPoints.length; i += 3) {
+      splitMap.set(PointCloudUtils.getCloudKeys(splitPoints[i], splitPoints[i + 1], splitPoints[i + 2]), 1);
+    }
+
+    const result = [];
+    for (let i = 0; i < originPoints.length; i += 3) {
+      const key = PointCloudUtils.getCloudKeys(originPoints[i], originPoints[i + 1], originPoints[i + 2]);
+      if (!splitMap.has(key)) {
+        result.push(originPoints[i], originPoints[i + 1], originPoints[i + 2]);
+      }
+    }
+
+    return new Float32Array(result);
   }
 
   public syncCacheMsg() {

@@ -1466,6 +1466,7 @@ $headerHeight: 40px;
   flex-direction: column;
   overflow: hidden;
   flex: 1;
+  position: relative;
 }
 
 .#{$ptPrefix}-wrapper {
@@ -1724,7 +1725,18 @@ $headerHeight: 40px;
 .#{$ptPrefix}-status {
   z-index: 200;
   position: absolute;
-  
+  left: 50%;
+  top: 20px;
+  transform: translateX(-50%);
+}
+
+.#{$ptPrefix}-toolbar {
+  height: 40px;
+  padding: 10px 26px;
+  display: flex;
+  justify-content: flex-end;
+  align-items: center;
+  background-color: rgb(102, 102, 102);
 }
 /** PointCloud样式 end */
 
