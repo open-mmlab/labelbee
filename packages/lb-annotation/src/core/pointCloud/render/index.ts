@@ -4,7 +4,7 @@
  * @createdate 2023-05-05
  */
 import * as THREE from 'three';
-import { IPointCloudSegmentation, colorArr } from '@labelbee/lb-utils';
+import { IPointCloudSegmentation, colorArr, IPointCloudConfig, toolStyleConverter } from '@labelbee/lb-utils';
 import DrawUtils from '@/utils/tool/DrawUtils';
 import EventListener from '@/core/toolOperation/eventListener';
 import PointCloudStore from '../store';
@@ -13,6 +13,7 @@ import { IEventBus } from '..';
 interface IPointCloudRenderProps extends IEventBus {
   store: PointCloudStore;
   nextTick: () => void;
+  config?: IPointCloudConfig;
 }
 
 class PointCloudRender {
@@ -24,11 +25,14 @@ class PointCloudRender {
 
   public unbind: EventListener['unbind'];
 
-  constructor({ store, on, unbind, nextTick }: IPointCloudRenderProps) {
+  public config?: IPointCloudConfig;
+
+  constructor({ store, on, unbind, nextTick, config }: IPointCloudRenderProps) {
     this.store = store;
     this.on = on;
     this.unbind = unbind;
     this.nextTick = nextTick;
+    this.config = config;
     this.initMsg();
     this.animate();
 
@@ -36,10 +40,23 @@ class PointCloudRender {
     this.clearStash = this.clearStash.bind(this);
     this.render3d = this.render3d.bind(this);
     this.updateNewPoints = this.updateNewPoints.bind(this);
+    this.updatePointsColor = this.updatePointsColor.bind(this);
   }
 
   public get scene() {
     return this.store.scene;
+  }
+
+  public get currentColor() {
+    if (!this.store.currentAttribute || !this.config) {
+      return colorArr[0].hexString;
+    }
+    const { fill } = toolStyleConverter.getColorFromConfig(
+      { attribute: this.store.currentAttribute },
+      { ...this.config, attributeConfigurable: true },
+      {},
+    );
+    return fill;
   }
 
   public initMsg() {
@@ -66,7 +83,7 @@ class PointCloudRender {
 
   public renderCanvas2dPolygon() {
     if (this.store.polygon2d?.length > 0 && this.canvas2d) {
-      DrawUtils.drawPolygon(this.canvas2d, this.store.polygon2d, { isClose: false, color: 'red' });
+      DrawUtils.drawPolygon(this.canvas2d, this.store.polygon2d, { isClose: false, color: this.currentColor });
     }
   }
 
@@ -85,10 +102,7 @@ class PointCloudRender {
     // itemSize = 3 因为每个顶点都是一个三元组。
     geometry.setAttribute('position', new THREE.BufferAttribute(segmentData.points, 3));
 
-    // Temporary: Just for showing the different entities.
-    const customIndex = Math.floor(Math.random() * 255);
-
-    const pointsMaterial = new THREE.PointsMaterial({ color: colorArr[customIndex].hexString, size: 10 });
+    const pointsMaterial = new THREE.PointsMaterial({ color: this.currentColor, size: 10 });
     const newPoints = new THREE.Points(geometry, pointsMaterial);
     newPoints.name = segmentData.id;
 
@@ -101,7 +115,16 @@ class PointCloudRender {
 
     if (originPoints && segmentData) {
       originPoints.geometry.setAttribute('position', new THREE.Float32BufferAttribute(segmentData.points, 3));
+      originPoints.material = new THREE.PointsMaterial({ color: this.currentColor, size: 10 });
       originPoints.geometry.attributes.position.needsUpdate = true;
+      this.render3d();
+    }
+  };
+
+  public updatePointsColor = (segmentData = this.store.cacheSegData) => {
+    const originPoints = this.store.scene.getObjectByName(segmentData?.id ?? '') as THREE.Points;
+    if (originPoints) {
+      originPoints.material = new THREE.PointsMaterial({ color: this.currentColor, size: 10 });
       this.render3d();
     }
   };

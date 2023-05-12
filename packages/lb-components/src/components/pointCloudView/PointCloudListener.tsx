@@ -43,14 +43,14 @@ const PointCloudListener: React.FC<IProps> = ({
     deleteSelectedPointCloudBoxAndPolygon,
   } = useSingleBox();
   const { selectedSphere, updatePointCloudSphere } = useSphere();
-  const { clearAllResult, updatePointCloudPattern } = useStatus();
+  const { clearAllResult, updatePointCloudPattern, isSegmentPattern } = useStatus();
   const basicInfo = jsonParser(currentData.result);
   const { copySelectedBoxes, pasteSelectedBoxes, copiedBoxes } = useBoxes({ config });
   const { toolInstanceRef } = useCustomToolInstance({ basicInfo });
   const { updateRotate } = useRotate({ currentData });
   const { updatePointCloudData, topViewSelectedChanged } = usePointCloudViews();
   const { redo, undo, pushHistoryWithList, pushHistoryUnderUpdatePolygon } = useHistory();
-  const { syncThreeViewsAttribute } = useAttribute();
+  const { syncThreeViewsAttribute, updateSegmentAttribute } = useAttribute();
   const { syncAllViewsConfig, reRenderTopViewRange } = useConfig();
   const { selectedPolygon } = usePolygon();
   const { t } = useTranslation();
@@ -264,6 +264,10 @@ const PointCloudListener: React.FC<IProps> = ({
     };
 
     toolInstanceRef.current.setDefaultAttribute = (newAttribute: string) => {
+      if (isSegmentPattern) {
+        updateSegmentAttribute(newAttribute)
+        return
+      }
       syncThreeViewsAttribute(newAttribute);
       const selectBox = ptCtx.selectedPointCloudBox;
       if (selectBox) {
@@ -365,6 +369,7 @@ const PointCloudListener: React.FC<IProps> = ({
     ptCtx.polygonList,
     ptCtx.lineList,
     ptCtx.mainViewInstance,
+    ptCtx.ptSegmentInstance,
   ]);
 
   /**

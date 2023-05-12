@@ -188,7 +188,12 @@ export class PointCloud extends EventListener {
       store: this.store,
     });
 
-    this.pointCloudRender = new PointCloudRender({ store: this.store, ...this.eventBus, nextTick: this.nextTick });
+    this.pointCloudRender = new PointCloudRender({
+      store: this.store,
+      ...this.eventBus,
+      nextTick: this.nextTick,
+      config: this.config,
+    });
 
     document.addEventListener('keydown', this.keydown);
     document.addEventListener('keyup', this.keyup);

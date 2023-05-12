@@ -62,6 +62,8 @@ class PointCloudStore {
   public addPointCloud = false;
 
   public orbiting = false;
+  // current attribute of segmentation points
+  public currentAttribute: string = '';
 
   // TODO. clear later.
   private pointCloudObjectName = 'pointCloud';
@@ -85,6 +87,7 @@ class PointCloudStore {
 
     this.clearStash = this.clearStash.bind(this);
     this.addStash2Store = this.addStash2Store.bind(this);
+    this.setAttribute = this.setAttribute.bind(this);
     this.initMsg();
     this.setupRaycaster();
   }
@@ -355,6 +358,10 @@ class PointCloudStore {
     newPoints.material.size = 10;
     this.hoverPointsID = newPoints.name;
     this.emit('reRender3d');
+  }
+
+  public setAttribute(attribute: string) {
+    this.currentAttribute = attribute;
   }
 }
 
