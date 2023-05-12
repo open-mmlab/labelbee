@@ -34,6 +34,7 @@ import { LabelBeeContext } from '@/store/ctx';
 import { jsonParser } from '@/utils';
 import { TDrawLayerSlot } from '@/types/main';
 import ToolUtils from '@/utils/ToolUtils';
+import _ from 'lodash';
 
 const { EPolygonPattern } = cTool;
 
@@ -210,8 +211,14 @@ const PointCloudTopView: React.FC<IProps> = ({
 
     // line register
     TopView2dOperation.singleOn('dataUpdated', (updateLine: ILine[], selectedIDs: string[]) => {
+      const transferLine = _.cloneDeep(updateLine).map((i) => {
+        return {
+          ...i,
+          ...PointCloudUtils.pointListTransferCanvas2World(i.pointList, size),
+        };
+      });
       ptCtx.setSelectedIDs(selectedIDs);
-      ptCtx.setLineList(updateLine);
+      ptCtx.setLineList(transferLine);
     });
 
     // point tool events
