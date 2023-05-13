@@ -79,6 +79,13 @@ class PointCloudUtils {
     };
   };
 
+  public static pointListTransferCanvas2World = (
+    pointList: { x: number; y: number }[] | undefined,
+    size: { width: number; height: number },
+  ) => {
+    return pointList?.map((i) => ({ ...i, ...this.transferCanvas2World(i, size) }));
+  };
+
   /**
    * Get the coordinate from canvas2d-coordinate to world coordinate
    */
