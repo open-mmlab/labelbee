@@ -208,7 +208,21 @@ export class PointCloudAnnotation implements IPointCloudAnnotationOperation {
   }
 
   public updateLineList = (lineList: ILine[]) => {
-    this.toolScheduler.updateDataByToolName(EToolName.Line, lineList ?? []);
+    const canvasLineList = (lineList ?? []).map((line) => {
+      const pointList = line.pointList?.map((i) => {
+        return {
+          i,
+          ...PointCloudUtils.transferWorld2Canvas(i, this.toolInstance.size),
+        };
+      });
+
+      return {
+        ...line,
+        pointList,
+      };
+    });
+
+    this.toolScheduler.updateDataByToolName(EToolName.Line, canvasLineList);
   };
 
   public addLineListOnTopView(result: string) {
