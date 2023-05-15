@@ -229,7 +229,7 @@ const PointCloudTopView: React.FC<IProps> = ({
       const transferLine = _.cloneDeep(updateLine).map((i) => {
         return {
           ...i,
-          ...PointCloudUtils.pointListTransferCanvas2World(i.pointList, size),
+          pointList: PointCloudUtils.pointListTransferCanvas2World(i.pointList, size),
         };
       });
       ptCtx.setSelectedIDs(selectedIDs);
