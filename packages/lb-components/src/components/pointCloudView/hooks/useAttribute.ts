@@ -1,5 +1,5 @@
 import { IPointCloudBox } from '@labelbee/lb-utils';
-import { useContext, useEffect } from 'react';
+import { useContext, useEffect, useCallback } from 'react';
 import { PointCloudContext } from '../PointCloudContext';
 
 export const useAttribute = () => {
@@ -8,9 +8,16 @@ export const useAttribute = () => {
     sideViewInstance,
     backViewInstance,
     mainViewInstance,
+    ptSegmentInstance,
     defaultAttribute,
     setDefaultAttribute,
   } = useContext(PointCloudContext);
+
+  useEffect(() => {
+    if (!ptSegmentInstance) {
+      return
+    }
+  }, [ptSegmentInstance])
 
   useEffect(() => {
     if (!topViewInstance?.toolInstance) {
@@ -46,10 +53,20 @@ export const useAttribute = () => {
     mainViewInstance?.generateBox(newBox);
   };
 
+  const updateSegmentAttribute = useCallback((attribute: string) => {
+    if (!ptSegmentInstance) {
+      return
+    }
+    ptSegmentInstance.store.setAttribute(attribute)
+    ptSegmentInstance.pointCloudRender.updatePointsColor()
+    setDefaultAttribute(attribute)
+  }, [ptSegmentInstance])
+
   return {
     syncThreeViewsAttribute,
     updateDefaultAttribute,
     reRenderPointCloud3DBox,
     defaultAttribute,
+    updateSegmentAttribute,
   };
 };

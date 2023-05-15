@@ -9,8 +9,10 @@ import { PointCloudContext } from './PointCloudContext';
 
 const PointCloudSegment: React.FC<IA2MapStateProps> = ({ currentData, config }) => {
   const domRef = useRef<HTMLDivElement>(null);
-  const { setPtSegmentInstance, ptSegmentInstance } = useContext(PointCloudContext);
+  const { setPtSegmentInstance, ptSegmentInstance, setDefaultAttribute } = useContext(PointCloudContext);
   const size = useSize(domRef);
+
+  const defaultAttribute = config?.attributeList?.[0]?.value;
 
   useEffect(() => {
     if (!size?.width || !domRef.current) {
@@ -32,6 +34,9 @@ const PointCloudSegment: React.FC<IA2MapStateProps> = ({ currentData, config }) 
       orthographicParams,
       config,
     });
+
+    ptSegmentInstance.store.setAttribute(defaultAttribute)
+    setDefaultAttribute(defaultAttribute)
 
     setPtSegmentInstance(ptSegmentInstance);
 

@@ -311,7 +311,7 @@ export const PointCloudSegToolIcon = ({ toolInstance }: { toolInstance: ICustomT
     toolInstance.updateSegmentTool(toolName);
     setCurrentTool(toolName);
   }
-  
+
   return (
     <div className={`${sidebarCls}__level`}>
       {renderSegmentTools.map((tool) => {
@@ -352,7 +352,11 @@ const PointCloudToolSidebar: React.FC<IProps> = ({ stepInfo, toolInstance, imgLi
     return (
       <>
         <PointCloudSegToolIcon toolInstance={toolInstance} />
-        123
+        <AttributeUpdater
+          toolInstance={toolInstance}
+          attributeList={attributeList}
+          subAttributeList={subAttributeList}
+        />
       </>
     );
   }
