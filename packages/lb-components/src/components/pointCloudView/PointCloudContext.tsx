@@ -200,7 +200,11 @@ export const PointCloudProvider: React.FC<{}> = ({ children }) => {
     };
 
     const selectedAllBoxes = () => {
-      setSelectedIDs(pointCloudBoxList.map((i) => i.id));
+      if (pointCloudPattern === EToolName.Rect) {
+        const ids = pointCloudBoxList.map((i) => i.id);
+        setSelectedIDs(ids);
+        topViewInstance?.pointCloud2dOperation.setSelectedIDs(ids);
+      }
     };
 
     const selectSpecAttr = (attr: string) => {
