@@ -109,7 +109,7 @@ class PointCloudRender {
     const renderPoints =
       this.store.segmentCoverMode === EPointCloudSegmentCoverMode.Cover
         ? segmentData.points
-        : this.store.splitPointsFromPoints(segmentData.points, segmentData.coverPoints);
+        : this.store.splitPointsFromPoints(segmentData.points, segmentData.coverPoints ?? new Float32Array([]));
     // itemSize = 3 因为每个顶点都是一个三元组。
     geometry.setAttribute('position', new THREE.BufferAttribute(renderPoints, 3));
 
@@ -126,7 +126,7 @@ class PointCloudRender {
     const renderPoints =
       this.store.segmentCoverMode === EPointCloudSegmentCoverMode.Cover
         ? segmentData.points
-        : this.store.splitPointsFromPoints(segmentData.points, segmentData.coverPoints);
+        : this.store.splitPointsFromPoints(segmentData.points, segmentData.coverPoints ?? new Float32Array([]));
 
     if (originPoints && segmentData) {
       originPoints.geometry.setAttribute('position', new THREE.Float32BufferAttribute(renderPoints, 3));
