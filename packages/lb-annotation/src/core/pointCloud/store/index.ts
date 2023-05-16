@@ -157,9 +157,6 @@ class PointCloudStore {
 
   public setSegmentCoverMode(coverMode: EPointCloudSegmentCoverMode) {
     this.segmentCoverMode = coverMode;
-    if (this.cacheSegData) {
-      this.updatePointCloud = true;
-    }
   }
 
   public updateCanvasBasicStyle(canvas: HTMLCanvasElement, size: ISize, zIndex: number) {
@@ -211,10 +208,17 @@ class PointCloudStore {
             vertices.push(cloudDataArrayLike[i], cloudDataArrayLike[i + 1], cloudDataArrayLike[i + 2]);
           }
           if (this.segmentMode === EPointCloudSegmentMode.Add) {
-            if (this.cloudData.get(key).visible === true) {
-              covers.push(cloudDataArrayLike[i], cloudDataArrayLike[i + 1], cloudDataArrayLike[i + 2]);
+            if (this.segmentCoverMode === EPointCloudSegmentCoverMode.Cover) {
+              vertices.push(cloudDataArrayLike[i], cloudDataArrayLike[i + 1], cloudDataArrayLike[i + 2]);
+              if (this.cloudData.get(key).visible === true) {
+                covers.push(cloudDataArrayLike[i], cloudDataArrayLike[i + 1], cloudDataArrayLike[i + 2]);
+              }
             }
-            vertices.push(cloudDataArrayLike[i], cloudDataArrayLike[i + 1], cloudDataArrayLike[i + 2]);
+            if (this.segmentCoverMode === EPointCloudSegmentCoverMode.Uncover) {
+              if (this.cloudData.get(key).visible === false) {
+                vertices.push(cloudDataArrayLike[i], cloudDataArrayLike[i + 1], cloudDataArrayLike[i + 2]);
+              }
+            }
             if (this.cloudData.get(key).visible === false) {
               this.cloudData.get(key).visible = true;
             }
@@ -228,15 +232,19 @@ class PointCloudStore {
       switch (this.segmentMode) {
         case EPointCloudSegmentMode.Add:
           if (this.cacheSegData) {
-            const { points } = this.cacheSegData;
+            const { points, coverPoints = new Float32Array([]) } = this.cacheSegData;
             const combinedLength = points.length + verticesArray.length;
             const combined = new Float32Array(combinedLength);
             combined.set(points, 0);
             combined.set(verticesArray, points.length);
+            const coverCombinedLength = coverPoints.length + coversArray.length;
+            const coverCombined = new Float32Array(coverCombinedLength);
+            coverCombined.set(coverPoints, 0);
+            coverCombined.set(coversArray, coverPoints.length);
             this.cacheSegData = {
               ...this.cacheSegData,
               points: combined,
-              coverPoints: coversArray,
+              coverPoints: coverCombined,
             };
             this.updatePointCloud = true;
           } else {
@@ -295,11 +303,7 @@ class PointCloudStore {
   // Save temporary data to pointCloud Store.
   public addStash2Store() {
     if (this.cacheSegData) {
-      if (
-        this.cacheSegData.coverPoints &&
-        this.cacheSegData.coverPoints.length !== 0 &&
-        this.segmentCoverMode === EPointCloudSegmentCoverMode.Cover
-      ) {
+      if (this.cacheSegData.coverPoints && this.cacheSegData.coverPoints.length !== 0) {
         this.updateCoverPoints(this.cacheSegData.coverPoints);
       }
       this.segmentData.set(this.cacheSegData.id, this.cacheSegData);

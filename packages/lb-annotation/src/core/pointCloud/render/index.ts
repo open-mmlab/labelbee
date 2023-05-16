@@ -4,13 +4,7 @@
  * @createdate 2023-05-05
  */
 import * as THREE from 'three';
-import {
-  colorArr,
-  EPointCloudSegmentCoverMode,
-  IPointCloudConfig,
-  IPointCloudSegmentation,
-  toolStyleConverter,
-} from '@labelbee/lb-utils';
+import { colorArr, IPointCloudConfig, IPointCloudSegmentation, toolStyleConverter } from '@labelbee/lb-utils';
 import DrawUtils from '@/utils/tool/DrawUtils';
 import EventListener from '@/core/toolOperation/eventListener';
 import PointCloudStore from '../store';
@@ -105,13 +99,8 @@ class PointCloudRender {
   // TODO, Just for showing.
   public generateNewPoints(segmentData: IPointCloudSegmentation) {
     const geometry = new THREE.BufferGeometry();
-    // get points by cover mode
-    const renderPoints =
-      this.store.segmentCoverMode === EPointCloudSegmentCoverMode.Cover
-        ? segmentData.points
-        : this.store.splitPointsFromPoints(segmentData.points, segmentData.coverPoints ?? new Float32Array([]));
     // itemSize = 3 因为每个顶点都是一个三元组。
-    geometry.setAttribute('position', new THREE.BufferAttribute(renderPoints, 3));
+    geometry.setAttribute('position', new THREE.BufferAttribute(segmentData.points, 3));
 
     const pointsMaterial = new THREE.PointsMaterial({ color: this.getCurrentColor(segmentData.attribute), size: 10 });
     const newPoints = new THREE.Points(geometry, pointsMaterial);
@@ -123,13 +112,9 @@ class PointCloudRender {
 
   public updateNewPoints = (segmentData: IPointCloudSegmentation) => {
     const originPoints = this.store.scene.getObjectByName(segmentData?.id ?? '') as THREE.Points;
-    const renderPoints =
-      this.store.segmentCoverMode === EPointCloudSegmentCoverMode.Cover
-        ? segmentData.points
-        : this.store.splitPointsFromPoints(segmentData.points, segmentData.coverPoints ?? new Float32Array([]));
 
     if (originPoints && segmentData) {
-      originPoints.geometry.setAttribute('position', new THREE.Float32BufferAttribute(renderPoints, 3));
+      originPoints.geometry.setAttribute('position', new THREE.Float32BufferAttribute(segmentData.points, 3));
       originPoints.material = new THREE.PointsMaterial({
         color: this.getCurrentColor(segmentData.attribute),
         size: 10,
