@@ -342,7 +342,7 @@ class LineToolOperation extends BasicToolOperation {
   }
 
   get minLength() {
-    return this.config?.minLength || 1;
+    return this.config?.minLength || 0;
   }
 
   get upperLimitPointNum() {
