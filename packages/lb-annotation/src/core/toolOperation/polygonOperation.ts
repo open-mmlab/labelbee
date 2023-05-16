@@ -104,6 +104,10 @@ class PolygonOperation extends BasicToolOperation {
     return this.selection.selectedID;
   }
 
+  get minArea() {
+    return this.config.minArea || 0;
+  }
+
   public eventBinding() {
     super.eventBinding();
     // 解绑原本的 onMouseUp，将 onMoueUp 用于 dblClickListener 进行绑定
@@ -493,13 +497,10 @@ class PolygonOperation extends BasicToolOperation {
    * @returns
    */
   public addDrawingPointToPolygonList(isRect?: boolean) {
-    let { lowerLimitPointNum = 3, minArea = 1 } = this.config;
+    let { lowerLimitPointNum = 3 } = this.config;
 
     if (lowerLimitPointNum < 3) {
       lowerLimitPointNum = 3;
-    }
-    if (minArea < 1) {
-      minArea = 1;
     }
 
     let createPolygon: IPolygonData | undefined;
@@ -511,9 +512,12 @@ class PolygonOperation extends BasicToolOperation {
 
       return;
     }
-    if (PolygonUtils.calcPolygonSize(this.drawingPointList || []) < minArea) {
+    if (PolygonUtils.calcPolygonSize(this.drawingPointList || []) < this.minArea) {
       // 小于最小面积无法添加
-      this.emit('messageInfo', `${locale.getMessagesByLocale(EMessage.MinAreaLimitErrorNotice, this.lang)}${minArea}`);
+      this.emit(
+        'messageInfo',
+        `${locale.getMessagesByLocale(EMessage.MinAreaLimitErrorNotice, this.lang)}${this.minArea}`,
+      );
       return;
     }
     const basicSourceID = CommonToolUtils.getSourceID(this.basicResult);
