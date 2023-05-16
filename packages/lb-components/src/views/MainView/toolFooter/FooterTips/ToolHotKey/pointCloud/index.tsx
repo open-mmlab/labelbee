@@ -192,6 +192,8 @@ const pointCloudShortCutTable_POLYGON: IShortcut[] = [
   deletePolygonPoint,
 ];
 
+const pointCloudShortCutTable_SEGMENT: IShortcut[] = [backward, forward];
+
 export default pointCloudShortCutTable;
 
-export { pointCloudShortCutTable_POLYGON };
+export { pointCloudShortCutTable_POLYGON, pointCloudShortCutTable_SEGMENT };

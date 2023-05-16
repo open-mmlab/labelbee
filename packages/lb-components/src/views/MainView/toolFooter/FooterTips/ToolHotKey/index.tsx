@@ -11,7 +11,10 @@ import lineToolShortCutTable from './line';
 import tagToolSingleShortCutTable from './tag';
 import textToolShortCutTable from './text';
 import videoToolShortCutTable from './videoTag';
-import pointCloudShortCutTable, { pointCloudShortCutTable_POLYGON } from './pointCloud';
+import pointCloudShortCutTable, {
+  pointCloudShortCutTable_POLYGON,
+  pointCloudShortCutTable_SEGMENT,
+} from './pointCloud';
 import scribbleShortCutTable from './scribble';
 import cuboidShortCutTable from './cuboid';
 
@@ -20,6 +23,7 @@ import { useTranslation } from 'react-i18next';
 import { cTool } from '@labelbee/lb-annotation';
 import { PointCloudContext } from '@/components/pointCloudView/PointCloudContext';
 import FooterPopover from '@/views/MainView/toolFooter/FooterPopover';
+import { EPointCloudPattern } from '@labelbee/lb-utils';
 
 const { EVideoToolName, EPointCloudName } = cTool;
 
@@ -52,6 +56,7 @@ export const shortCutTable: { [a: string]: IShortCutInfo[] } = {
   [EVideoToolName.VideoTagTool]: videoToolShortCutTable,
   [EPointCloudName.PointCloud]: pointCloudShortCutTable,
   [EPointCloudName.PointCloud + '_POLYGON']: pointCloudShortCutTable_POLYGON,
+  [EPointCloudName.PointCloud + '_SEGMENT']: pointCloudShortCutTable_SEGMENT,
   [EToolName.ScribbleTool]: scribbleShortCutTable,
   [EToolName.Cuboid]: cuboidShortCutTable,
 };
@@ -199,7 +204,7 @@ export const ToolHotKeyCom: React.FC<IComponentsProps> = ({ title, style, shortC
 };
 
 const ToolHotKey: React.FC<IProps> = ({ style, title, toolName }) => {
-  const { pointCloudPattern } = useContext(PointCloudContext);
+  const { pointCloudPattern, globalPattern } = useContext(PointCloudContext);
   if (!toolName) {
     return null;
   }
@@ -210,13 +215,37 @@ const ToolHotKey: React.FC<IProps> = ({ style, title, toolName }) => {
   }
 
   let newToolName = toolName;
-  if (newToolName === `${EPointCloudName.PointCloud}` && pointCloudPattern === EToolName.Polygon) {
-    newToolName += '_POLYGON';
-  } else if (pointCloudPattern === EToolName.Line) {
-    newToolName = EToolName.Line;
-  } else if (pointCloudPattern === EToolName.Point) {
-    newToolName = EToolName.Point;
+
+  /**
+   * PointCloud Segment.
+   */
+  switch (globalPattern) {
+    case EPointCloudPattern.Detection:
+      /**
+       * PointCloud Detection.
+       */
+      switch (pointCloudPattern) {
+        case EToolName.Polygon:
+          newToolName += '_POLYGON';
+
+          break;
+        case EToolName.Line:
+          newToolName = EToolName.Line;
+
+          break;
+        case EToolName.Point:
+          newToolName = EToolName.Point;
+
+          break;
+        default:
+          break;
+      }
+      break;
+    case EPointCloudPattern.Segmentation:
+      newToolName = EPointCloudName.PointCloud + '_SEGMENT';
+      break;
   }
+
   const props = {
     style,
     title,
