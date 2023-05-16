@@ -323,7 +323,7 @@ class PointCloudStore {
         }
       }
     });
-    this.renderer.render(this.scene, this.camera);
+    this.emit('reRender3d');
   };
 
   public updateCloudDataStatus(points: Float32Array, status: { [key: string]: any }) {
