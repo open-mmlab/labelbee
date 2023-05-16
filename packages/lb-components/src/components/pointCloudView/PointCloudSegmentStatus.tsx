@@ -7,18 +7,21 @@ import { PointCloudContext } from './PointCloudContext';
 
 const PointCloudSegmentStatus = () => {
   const [visible, setVisible] = useState(false);
-  const { ptSegmentInstance } = useContext(PointCloudContext);
+  const { ptSegmentInstance, setDefaultAttribute } = useContext(PointCloudContext);
 
   useEffect(() => {
     if (ptSegmentInstance) {
-      const updateVisible = (cacheData: any) => {
+      const syncCacheData = (cacheData: any) => {
         setVisible(!!cacheData);
+        if (cacheData) {
+          setDefaultAttribute(cacheData.attribute)
+        }
       };
 
-      ptSegmentInstance?.on('syncCacheData', updateVisible);
+      ptSegmentInstance?.on('syncCacheData', syncCacheData);
 
       return () => {
-        ptSegmentInstance?.unbind('syncCacheData', updateVisible);
+        ptSegmentInstance?.unbind('syncCacheData', syncCacheData);
       };
     }
   }, [ptSegmentInstance]);

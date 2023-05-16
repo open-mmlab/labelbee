@@ -14,12 +14,6 @@ export const useAttribute = () => {
   } = useContext(PointCloudContext);
 
   useEffect(() => {
-    if (!ptSegmentInstance) {
-      return
-    }
-  }, [ptSegmentInstance])
-
-  useEffect(() => {
     if (!topViewInstance?.toolInstance) {
       return;
     }

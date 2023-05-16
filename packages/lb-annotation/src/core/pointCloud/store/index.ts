@@ -5,7 +5,12 @@
  */
 
 import * as THREE from 'three';
-import { EPointCloudSegmentMode, IPointCloudSegmentation, PointCloudUtils } from '@labelbee/lb-utils';
+import {
+  EPointCloudSegmentCoverMode,
+  EPointCloudSegmentMode,
+  IPointCloudSegmentation,
+  PointCloudUtils,
+} from '@labelbee/lb-utils';
 import { isInPolygon } from '@/utils/tool/polygonTool';
 import EventListener from '@/core/toolOperation/eventListener';
 import uuid from '@/utils/uuid';
@@ -56,6 +61,8 @@ class PointCloudStore {
 
   /** Render Status */
   public segmentMode = EPointCloudSegmentMode.Add;
+
+  public segmentCoverMode = EPointCloudSegmentCoverMode.Cover;
 
   public updatePointCloud: boolean = false;
 
@@ -148,6 +155,10 @@ class PointCloudStore {
     this.segmentMode = mode;
   }
 
+  public setSegmentCoverMode(coverMode: EPointCloudSegmentCoverMode) {
+    this.segmentCoverMode = coverMode;
+  }
+
   public updateCanvasBasicStyle(canvas: HTMLCanvasElement, size: ISize, zIndex: number) {
     const pixel = 1;
     canvas.style.position = 'absolute';
@@ -173,6 +184,7 @@ class PointCloudStore {
     if (cloudDataArrayLike) {
       const len = cloudDataArrayLike.length;
       const vertices = [];
+      const covers = [];
 
       for (let i = 0; i < len; i += 3) {
         const vector3d = new THREE.Vector3(cloudDataArrayLike[i], cloudDataArrayLike[i + 1], cloudDataArrayLike[i + 2]);
@@ -191,38 +203,56 @@ class PointCloudStore {
            * TODO: Has visible.
            *
            */
-          if (this.cloudData.get(key).visible === false || this.segmentMode === EPointCloudSegmentMode.Remove) {
-            if (this.segmentMode === EPointCloudSegmentMode.Add) {
+          if (this.segmentMode === EPointCloudSegmentMode.Remove) {
+            this.cloudData.get(key).visible = false;
+            vertices.push(cloudDataArrayLike[i], cloudDataArrayLike[i + 1], cloudDataArrayLike[i + 2]);
+          }
+          if (this.segmentMode === EPointCloudSegmentMode.Add) {
+            if (this.segmentCoverMode === EPointCloudSegmentCoverMode.Cover) {
+              vertices.push(cloudDataArrayLike[i], cloudDataArrayLike[i + 1], cloudDataArrayLike[i + 2]);
+              if (this.cloudData.get(key).visible === true) {
+                covers.push(cloudDataArrayLike[i], cloudDataArrayLike[i + 1], cloudDataArrayLike[i + 2]);
+              }
+            }
+            if (this.segmentCoverMode === EPointCloudSegmentCoverMode.Uncover) {
+              if (this.cloudData.get(key).visible === false) {
+                vertices.push(cloudDataArrayLike[i], cloudDataArrayLike[i + 1], cloudDataArrayLike[i + 2]);
+              }
+            }
+            if (this.cloudData.get(key).visible === false) {
               this.cloudData.get(key).visible = true;
             }
-            if (this.segmentMode === EPointCloudSegmentMode.Remove) {
-              this.cloudData.get(key).visible = false;
-            }
-            vertices.push(cloudDataArrayLike[i], cloudDataArrayLike[i + 1], cloudDataArrayLike[i + 2]);
           }
         }
       }
       const verticesArray = new Float32Array(vertices);
+      const coversArray = new Float32Array(covers);
 
       // TODO: Need to performance.
       switch (this.segmentMode) {
         case EPointCloudSegmentMode.Add:
           if (this.cacheSegData) {
-            const { points } = this.cacheSegData;
+            const { points, coverPoints = new Float32Array([]) } = this.cacheSegData;
             const combinedLength = points.length + verticesArray.length;
             const combined = new Float32Array(combinedLength);
             combined.set(points, 0);
             combined.set(verticesArray, points.length);
+            const coverCombinedLength = coverPoints.length + coversArray.length;
+            const coverCombined = new Float32Array(coverCombinedLength);
+            coverCombined.set(coverPoints, 0);
+            coverCombined.set(coversArray, coverPoints.length);
             this.cacheSegData = {
               ...this.cacheSegData,
               points: combined,
+              coverPoints: coverCombined,
             };
             this.updatePointCloud = true;
           } else {
             this.cacheSegData = {
               id: uuid(),
-              attribute: '',
+              attribute: this.currentAttribute,
               points: verticesArray,
+              coverPoints: coversArray,
             };
             this.addPointCloud = true;
           }
@@ -273,12 +303,33 @@ class PointCloudStore {
   // Save temporary data to pointCloud Store.
   public addStash2Store() {
     if (this.cacheSegData) {
+      if (this.cacheSegData.coverPoints && this.cacheSegData.coverPoints.length !== 0) {
+        this.updateCoverPoints(this.cacheSegData.coverPoints);
+      }
+      delete this.cacheSegData.coverPoints;
       this.segmentData.set(this.cacheSegData.id, this.cacheSegData);
 
       this.cacheSegData = undefined;
       this.syncCacheMsg();
     }
   }
+
+  public updateCoverPoints = (coverPoints: Float32Array = new Float32Array([])) => {
+    this.segmentData.forEach((seg, id) => {
+      if (id !== this.cacheSegData?.id) {
+        const newPoints = this.splitPointsFromPoints(seg.points, coverPoints);
+        seg.points = newPoints;
+
+        // update points in threeJs
+        const originPoints = this.scene.getObjectByName(id) as THREE.Points;
+        if (originPoints) {
+          originPoints.geometry.setAttribute('position', new THREE.Float32BufferAttribute(newPoints, 3));
+          originPoints.geometry.attributes.position.needsUpdate = true;
+        }
+      }
+    });
+    this.emit('reRender3d');
+  };
 
   public updateCloudDataStatus(points: Float32Array, status: { [key: string]: any }) {
     for (let i = 0; i < points.length; i += 3) {

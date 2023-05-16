@@ -208,7 +208,9 @@
     "CameraFollowTopView": "Positioned by top view",
     "MarkOnlyOne": "Mark only one frame of data, need to mark the first and last frame of data",
     "HaveNoNeed": "Have no need to predict the data between two frames, please mark the first and last frame first, and need the same serial number",
-    "PredictingDataFrom": "Predicting data from page {{startPage}} to page {{endPage}} with box ID {{selectedBoxTrackID}}"
+    "PredictingDataFrom": "Predicting data from page {{startPage}} to page {{endPage}} with box ID {{selectedBoxTrackID}}",
+    "PointCloudCoverMode": "When the same point cloud is selected, the later marker overwrites the previous one",
+    "PointCloudUncoverMode": "When the same point cloud is selected, the latter marker cannot overwrite the former marker"
   },
   "cn": {
     "TextInput": "文本输入",
@@ -419,6 +421,8 @@
     "CameraFollowTopView": "按俯视图定位",
     "MarkOnlyOne": "仅标注一帧数据，需标出首尾的帧数据",
     "HaveNoNeed": "两帧之间暂无需预测的数据，请先标出首尾的框，需同序号",
-    "PredictingDataFrom": "正在预测第 {{startPage}} 页到第 {{endPage}} 页之间框ID为 {{selectedBoxTrackID}} 的数据"
+    "PredictingDataFrom": "正在预测第 {{startPage}} 页到第 {{endPage}} 页之间框ID为 {{selectedBoxTrackID}} 的数据",
+    "PointCloudCoverMode": "选中相同点云时，后一标记覆盖前一标记",
+    "PointCloudUncoverMode": "选中相同点云时，后一标记不可覆盖前一标记"
   }
 }
