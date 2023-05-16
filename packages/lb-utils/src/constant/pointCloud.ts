@@ -30,3 +30,8 @@ export enum EPointCloudSegmentMode {
   Add = "ADD", 
   Remove = "REMOVE"
 }
+
+export enum EPointCloudSegmentCoverMode {
+  Cover = "Cover",
+  Uncover = "Uncover"
+}
