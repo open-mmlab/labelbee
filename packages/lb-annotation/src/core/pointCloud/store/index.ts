@@ -306,6 +306,7 @@ class PointCloudStore {
       if (this.cacheSegData.coverPoints && this.cacheSegData.coverPoints.length !== 0) {
         this.updateCoverPoints(this.cacheSegData.coverPoints);
       }
+      delete this.cacheSegData.coverPoints;
       this.segmentData.set(this.cacheSegData.id, this.cacheSegData);
 
       this.cacheSegData = undefined;
