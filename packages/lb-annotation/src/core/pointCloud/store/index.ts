@@ -15,6 +15,7 @@ import { isInPolygon } from '@/utils/tool/polygonTool';
 import EventListener from '@/core/toolOperation/eventListener';
 import uuid from '@/utils/uuid';
 import { IPointCloudDelegate } from '..';
+import pointCloudFSM from './fsm';
 
 const DEFAULT_PREFIX = 'LABELBEE_CANVAS_';
 
@@ -95,7 +96,10 @@ class PointCloudStore {
 
     this.clearStash = this.clearStash.bind(this);
     this.addStash2Store = this.addStash2Store.bind(this);
+    this.updateCheck2Edit = this.updateCheck2Edit.bind(this);
     this.setAttribute = this.setAttribute.bind(this);
+    this.setSegmentMode = this.setSegmentMode.bind(this);
+    this.setSegmentCoverMode = this.setSegmentCoverMode.bind(this);
     this.initMsg();
     this.setupRaycaster();
   }
@@ -104,11 +108,17 @@ class PointCloudStore {
     // TODO, Just for showing.
     this.on('clearStash', this.clearStash);
     this.on('addStash2Store', this.addStash2Store);
+    this.on('updateCheck2Edit', this.updateCheck2Edit);
+    this.on('setSegmentMode', this.setSegmentMode);
+    this.on('setSegmentCoverMode', this.setSegmentCoverMode);
   }
 
   public unbindMsg() {
     this.unbind('clearStash', this.clearStash);
     this.unbind('addStash2Store', this.addStash2Store);
+    this.unbind('updateCheck2Edit', this.updateCheck2Edit);
+    this.unbind('setSegmentMode', this.setSegmentMode);
+    this.unbind('setSegmentCoverMode', this.setSegmentCoverMode);
   }
 
   public get containerWidth() {
@@ -123,6 +133,30 @@ class PointCloudStore {
     return this.scene.children.filter(
       (v) => v.type === 'Points' && v.name !== this.pointCloudObjectName,
     ) as ThreePoints[];
+  }
+
+  public get segmentStatus() {
+    return pointCloudFSM.segmentStatus;
+  }
+
+  public get isReadyStatus() {
+    return pointCloudFSM.isReadyStatus;
+  }
+
+  public get isCheckStatus() {
+    return pointCloudFSM.isCheckStatus;
+  }
+
+  public get isEditStatus() {
+    return pointCloudFSM.isEditStatus;
+  }
+
+  public statusToggle() {
+    pointCloudFSM.statusToggle();
+  }
+
+  public updateStatus2Edit() {
+    pointCloudFSM.updateStatus2Edit();
   }
 
   public createCanvas(id: string) {
@@ -228,55 +262,63 @@ class PointCloudStore {
       const verticesArray = new Float32Array(vertices);
       const coversArray = new Float32Array(covers);
 
-      // TODO: Need to performance.
-      switch (this.segmentMode) {
-        case EPointCloudSegmentMode.Add:
-          if (this.cacheSegData) {
-            const { points, coverPoints = new Float32Array([]) } = this.cacheSegData;
-            const combinedLength = points.length + verticesArray.length;
-            const combined = new Float32Array(combinedLength);
-            combined.set(points, 0);
-            combined.set(verticesArray, points.length);
-            const coverCombinedLength = coverPoints.length + coversArray.length;
-            const coverCombined = new Float32Array(coverCombinedLength);
-            coverCombined.set(coverPoints, 0);
-            coverCombined.set(coversArray, coverPoints.length);
-            this.cacheSegData = {
-              ...this.cacheSegData,
-              points: combined,
-              coverPoints: coverCombined,
-            };
-            this.updatePointCloud = true;
-          } else {
-            this.cacheSegData = {
-              id: uuid(),
-              attribute: this.currentAttribute,
-              points: verticesArray,
-              coverPoints: coversArray,
-            };
-            this.addPointCloud = true;
-          }
-          break;
-
-        case EPointCloudSegmentMode.Remove:
-          // Split the point in originPoint
-          if (this.cacheSegData) {
-            const { points } = this.cacheSegData;
-            this.cacheSegData = {
-              ...this.cacheSegData,
-              points: this.splitPointsFromPoints(points, verticesArray),
-            };
-            this.updatePointCloud = true;
-          }
-          break;
-
-        default: {
-          //
-        }
-      }
-
-      this.syncCacheMsg();
+      this.updateStatusBySelector(verticesArray, coversArray);
     }
+  }
+
+  public updateStatusBySelector(verticesArray: Float32Array, coversArray: Float32Array) {
+    switch (this.segmentMode) {
+      case EPointCloudSegmentMode.Add:
+        if (this.cacheSegData) {
+          const { points, coverPoints = new Float32Array([]) } = this.cacheSegData;
+          const combinedLength = points.length + verticesArray.length;
+          const combined = new Float32Array(combinedLength);
+          combined.set(points, 0);
+          combined.set(verticesArray, points.length);
+          const coverCombinedLength = coverPoints.length + coversArray.length;
+          const coverCombined = new Float32Array(coverCombinedLength);
+          coverCombined.set(coverPoints, 0);
+          coverCombined.set(coversArray, coverPoints.length);
+          this.cacheSegData = {
+            ...this.cacheSegData,
+            points: combined,
+            coverPoints: coverCombined,
+          };
+          this.emit('updateNewPoints', this.cacheSegData);
+        } else {
+          this.cacheSegData = {
+            id: uuid(),
+            attribute: this.currentAttribute,
+            points: verticesArray,
+            coverPoints: coversArray,
+          };
+          this.emit('addNewPointsCloud', this.cacheSegData);
+        }
+        break;
+
+      case EPointCloudSegmentMode.Remove:
+        // Split the point in originPoint
+        if (this.cacheSegData) {
+          const { points } = this.cacheSegData;
+          this.cacheSegData = {
+            ...this.cacheSegData,
+            points: this.splitPointsFromPoints(points, verticesArray),
+          };
+          this.emit('updateNewPoints', this.cacheSegData);
+        }
+        break;
+
+      default: {
+        //
+      }
+    }
+
+    this.updateStatus2Edit();
+
+    this.emit('syncPointCloudStatus', {
+      segmentStatus: this.segmentStatus,
+      cacheSegData: this.cacheSegData,
+    });
   }
 
   public splitPointsFromPoints(originPoints: Float32Array, splitPoints: Float32Array) {
@@ -296,21 +338,22 @@ class PointCloudStore {
     return new Float32Array(result);
   }
 
-  public syncCacheMsg() {
-    this.emit('syncCacheData', this.cacheSegData);
+  public syncPointCloudStatus() {
+    this.statusToggle();
+    const { segmentStatus, cacheSegData } = this;
+    this.emit('syncPointCloudStatus', { segmentStatus, cacheSegData });
   }
 
   // Save temporary data to pointCloud Store.
   public addStash2Store() {
-    if (this.cacheSegData) {
+    if (this.isEditStatus && this.cacheSegData) {
       if (this.cacheSegData.coverPoints && this.cacheSegData.coverPoints.length !== 0) {
         this.updateCoverPoints(this.cacheSegData.coverPoints);
       }
       delete this.cacheSegData.coverPoints;
       this.segmentData.set(this.cacheSegData.id, this.cacheSegData);
-
       this.cacheSegData = undefined;
-      this.syncCacheMsg();
+      this.syncPointCloudStatus();
     }
   }
 
@@ -345,7 +388,7 @@ class PointCloudStore {
   }
 
   public clearStash() {
-    if (this.cacheSegData) {
+    if (this.isEditStatus && this.cacheSegData) {
       this.updateCloudDataStatus(this.cacheSegData.points, { visible: false });
       if (this.segmentData.has(this.cacheSegData.id)) {
         // restore data.
@@ -355,13 +398,38 @@ class PointCloudStore {
           this.updateCloudDataStatus(originSegmentData?.points, { visible: true });
         }
       } else {
+        // Clear All Data.
         this.emit('clearStashRender');
       }
       this.cacheSegData = undefined;
-      this.syncCacheMsg();
+      this.syncPointCloudStatus();
     }
   }
 
+  public updateCheck2Edit() {
+    if (this.isCheckStatus) {
+      this.syncPointCloudStatus();
+    }
+  }
+
+  public checkPoints() {
+    const hoverPoints = this.segmentData.get(this.hoverPointsID);
+    if (hoverPoints) {
+      this.cacheSegData = {
+        ...hoverPoints,
+        points: new Float32Array(hoverPoints.points),
+      };
+      pointCloudFSM.updateStatus2Check();
+      this.emit('syncPointCloudStatus', {
+        segmentStatus: this.segmentStatus,
+        cacheSegData: this.cacheSegData,
+      });
+    }
+  }
+
+  /**
+   * Change CheckInstance to EditInstance.
+   */
   public editPoints() {
     const hoverPoints = this.segmentData.get(this.hoverPointsID);
     if (hoverPoints) {
@@ -369,8 +437,8 @@ class PointCloudStore {
         ...hoverPoints,
         points: new Float32Array(hoverPoints.points),
       };
-      this.updatePointCloud = true;
-      this.syncCacheMsg();
+      this.emit('updateNewPoints');
+      this.syncPointCloudStatus();
     }
   }
 
@@ -389,24 +457,32 @@ class PointCloudStore {
     this.mouse.setY(y);
   }
 
-  public resetSegDataSize() {
+  public resetAllSegDataSize() {
     this.allSegmentPoints.forEach((points) => {
+      // If it has data in cache. Not to update style.
+      if (this.cacheSegData?.id === points.name) {
+        return;
+      }
       points.material.size = 5;
     });
   }
 
-  public resetSegDataSizeAndRender() {
-    this.resetSegDataSize();
+  public resetHoverPointsID() {
+    this.hoverPointsID = '';
+  }
+
+  public resetAllSegDataSizeAndRender() {
+    this.resetAllSegDataSize();
     this.emit('reRender3d');
   }
 
   public highlightPoints(newPoints: ThreePoints) {
     // Just No data can highlight.
-    if (this.cacheSegData) {
+    if (!(this.isCheckStatus || this.isReadyStatus)) {
       return;
     }
 
-    this.resetSegDataSize();
+    this.resetAllSegDataSize();
     newPoints.material.size = 10;
     this.hoverPointsID = newPoints.name;
     this.emit('reRender3d');

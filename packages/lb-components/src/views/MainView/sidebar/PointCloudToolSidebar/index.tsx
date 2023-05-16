@@ -304,13 +304,30 @@ const renderSegmentTools = [
 ];
 
 export const PointCloudSegToolIcon = ({ toolInstance }: { toolInstance: ICustomToolInstance }) => {
+  const { ptSegmentInstance } = useContext(PointCloudContext);
   const [currentTool, setCurrentTool] = useState('CircleSelector');
   const { t } = useTranslation();
 
-  const updateTool = (toolName: string) => {
-    toolInstance.updateSegmentTool(toolName);
-    setCurrentTool(toolName);
-  }
+  useEffect(() => {
+    if (!ptSegmentInstance) {
+      return;
+    }
+
+    const updateLassoSelector = () => {
+      setCurrentTool('LassoSelector');
+    };
+
+    const updateCircleSelector = () => {
+      setCurrentTool('CircleSelector');
+    };
+
+    ptSegmentInstance.on('LassoSelector', updateLassoSelector);
+    ptSegmentInstance.on('CircleSelector', updateCircleSelector);
+    return () => {
+      ptSegmentInstance.unbind('LassoSelector', updateLassoSelector);
+      ptSegmentInstance.unbind('CircleSelector', updateCircleSelector);
+    };
+  }, [ptSegmentInstance]);
 
   return (
     <div className={`${sidebarCls}__level`}>
@@ -320,7 +337,7 @@ export const PointCloudSegToolIcon = ({ toolInstance }: { toolInstance: ICustomT
           <span
             className={`${sidebarCls}__toolOption`}
             key={tool.toolName}
-            onClick={() => updateTool(tool.toolName)}
+            onClick={() => ptSegmentInstance?.emit(tool.toolName)}
           >
             <img
               className={`${sidebarCls}__singleTool`}

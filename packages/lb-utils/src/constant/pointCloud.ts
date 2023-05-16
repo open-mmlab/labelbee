@@ -27,11 +27,17 @@ export enum EPointCloudPattern {
 }
 
 export enum EPointCloudSegmentMode {
-  Add = "ADD", 
-  Remove = "REMOVE"
+  Add = 'ADD',
+  Remove = 'REMOVE',
 }
 
 export enum EPointCloudSegmentCoverMode {
-  Cover = "Cover",
-  Uncover = "Uncover"
+  Cover = 'Cover',
+  Uncover = 'Uncover',
+}
+
+export enum EPointCloudSegmentStatus {
+  Ready = 'READY',
+  Check = 'CHECK',
+  Edit = 'EDIT',
 }

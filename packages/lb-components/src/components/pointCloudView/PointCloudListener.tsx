@@ -265,8 +265,8 @@ const PointCloudListener: React.FC<IProps> = ({
 
     toolInstanceRef.current.setDefaultAttribute = (newAttribute: string) => {
       if (isSegmentPattern) {
-        updateSegmentAttribute(newAttribute)
-        return
+        updateSegmentAttribute(newAttribute);
+        return;
       }
       syncThreeViewsAttribute(newAttribute);
       const selectBox = ptCtx.selectedPointCloudBox;
@@ -376,7 +376,7 @@ const PointCloudListener: React.FC<IProps> = ({
    * PointCloud Segmentation
    */
   useEffect(() => {
-    toolInstanceRef.current.updateSegmentTool = (tool: 'lassoSelector' | 'circleSelector') => {
+    toolInstanceRef.current.updateSegmentTool = (tool: 'CircleSelector' | 'CircleSelector') => {
       ptCtx.ptSegmentInstance?.emit(tool);
     };
 

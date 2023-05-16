@@ -213,6 +213,10 @@ export class PointCloud extends EventListener {
     this.store.orbiting = false;
   }
 
+  public get currentSegmentTool() {
+    return this.segmentOperation.currentToolName;
+  }
+
   public initMsg() {
     this.on('CircleSelector', this.segmentOperation.updateSelector2Circle.bind(this.segmentOperation));
     this.on('LassoSelector', this.segmentOperation.updateSelector2Lasso.bind(this.segmentOperation));

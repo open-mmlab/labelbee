@@ -62,13 +62,14 @@ class PointCloudRender {
   public initMsg() {
     // TODO, Just for showing.
     this.on('addNewPointsCloud', this.generateNewPoints);
+    this.on('updateNewPoints', this.updateNewPoints);
     this.on('clearStashRender', this.clearStash);
     this.on('reRender3d', this.render3d);
-    this.on('updateNewPoints', this.updateNewPoints);
   }
 
   public unbindMsg() {
     this.unbind('addNewPointsCloud', this.generateNewPoints);
+    this.unbind('updateNewPoints', this.updateNewPoints);
     this.unbind('clearStashRender', this.clearStash);
     this.unbind('reRender3d', this.render3d);
   }
@@ -83,7 +84,11 @@ class PointCloudRender {
 
   public renderCanvas2dPolygon() {
     if (this.store.polygon2d?.length > 0 && this.canvas2d) {
-      DrawUtils.drawPolygon(this.canvas2d, this.store.polygon2d, { isClose: false, color: this.getCurrentColor() });
+      DrawUtils.drawPolygon(this.canvas2d, this.store.polygon2d, {
+        isClose: false,
+        color: this.getCurrentColor(),
+        thickness: 4,
+      });
     }
   }
 
@@ -97,7 +102,7 @@ class PointCloudRender {
   };
 
   // TODO, Just for showing.
-  public generateNewPoints(segmentData: IPointCloudSegmentation) {
+  public generateNewPoints = (segmentData: IPointCloudSegmentation) => {
     const geometry = new THREE.BufferGeometry();
     // itemSize = 3 因为每个顶点都是一个三元组。
     geometry.setAttribute('position', new THREE.BufferAttribute(segmentData.points, 3));
@@ -108,7 +113,7 @@ class PointCloudRender {
 
     this.store.scene.add(newPoints);
     this.render3d();
-  }
+  };
 
   public updateNewPoints = (segmentData: IPointCloudSegmentation) => {
     const originPoints = this.store.scene.getObjectByName(segmentData?.id ?? '') as THREE.Points;
@@ -142,19 +147,6 @@ class PointCloudRender {
 
   public animate() {
     requestAnimationFrame(this.animate.bind(this));
-
-    // Add PointCloud
-    if (this.store.cacheSegData) {
-      if (this.store.addPointCloud === true) {
-        this.store.addPointCloud = false;
-        this.generateNewPoints(this.store.cacheSegData);
-      }
-
-      if (this.store.updatePointCloud === true) {
-        this.store.updatePointCloud = false;
-        this.updateNewPoints(this.store.cacheSegData);
-      }
-    }
 
     this.clearCanvasMouse();
     this.renderCanvas2dPolygon();
