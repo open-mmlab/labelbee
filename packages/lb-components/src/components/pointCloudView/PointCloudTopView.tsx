@@ -9,7 +9,7 @@ import { ZoomController } from '@/views/MainView/toolFooter/ZoomController';
 import { DownSquareOutlined, UpSquareOutlined } from '@ant-design/icons';
 import { cTool, PointCloudAnnotation } from '@labelbee/lb-annotation';
 import { IPolygonData, PointCloudUtils, UpdatePolygonByDragList } from '@labelbee/lb-utils';
-import React, { useEffect, useLayoutEffect, useRef, useState } from 'react';
+import React, { useContext, useEffect, useLayoutEffect, useRef, useState } from 'react';
 import { PointCloudContext } from './PointCloudContext';
 import { useRotate } from './hooks/useRotate';
 import { useSingleBox } from './hooks/useSingleBox';
@@ -26,6 +26,7 @@ import { useTranslation } from 'react-i18next';
 import { LabelBeeContext } from '@/store/ctx';
 import { jsonParser } from '@/utils';
 import { TDrawLayerSlot } from '@/types/main';
+import PointCloudSizeSlider from './components/PointCloudSizeSlider';
 
 const { EPolygonPattern } = cTool;
 
@@ -63,6 +64,7 @@ const TopViewToolbar = ({ currentData }: IAnnotationStateProps) => {
   const { zoom, zoomIn, zoomOut, initialPosition } = useZoom();
   const { selectNextBox, selectPrevBox } = useSingleBox();
   const { updateRotate } = useRotate({ currentData });
+  const { topViewInstance } = useContext(PointCloudContext);
 
   const ratio = 2;
 
@@ -79,6 +81,11 @@ const TopViewToolbar = ({ currentData }: IAnnotationStateProps) => {
 
   return (
     <>
+      <PointCloudSizeSlider
+        onChange={(v: number) => {
+          topViewInstance?.pointCloudInstance?.updatePointSize({ customSize: v });
+        }}
+      />
       <span
         onClick={anticlockwiseRotate}
         className={getClassName('point-cloud', 'rotate-reserve')}

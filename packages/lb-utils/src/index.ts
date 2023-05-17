@@ -9,6 +9,7 @@ import toolStyleConverter from './toolStyle';
 import PerspectiveShiftUtils from './PerspectiveShiftUtils';
 import PointCloudUtils from './PointCloudUtils';
 import MatrixUtils from './MatrixUtils';
+import { resourceManagerInstance } from './annotation/ResourceManager';
 
 // Constant
 export * from './constant/pointCloud';
@@ -17,7 +18,14 @@ export * from './constant/pointCloud';
 export * from './types/index';
 
 // Utils
-export { i18n, toolStyleConverter, PerspectiveShiftUtils, PointCloudUtils, MatrixUtils };
+export {
+  i18n,
+  toolStyleConverter,
+  PerspectiveShiftUtils,
+  PointCloudUtils,
+  MatrixUtils,
+  resourceManagerInstance,
+};
 
 export * from './annotation';
 

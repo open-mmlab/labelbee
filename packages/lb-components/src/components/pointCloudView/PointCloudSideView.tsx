@@ -70,7 +70,7 @@ const updateSideViewByCanvas2D = (
 };
 
 interface IProps {
-  checkMode?: boolean
+  checkMode?: boolean;
 }
 
 const PointCloudSideView: React.FC<IA2MapStateProps & IProps> = ({ config, checkMode }) => {
@@ -93,7 +93,7 @@ const PointCloudSideView: React.FC<IA2MapStateProps & IProps> = ({ config, check
         size,
         polygonOperationProps: { showDirectionLine: false, forbidAddNew: true },
         config,
-        checkMode
+        checkMode,
       });
       ptCtx.setSideViewInstance(pointCloudAnnotation);
       // };
@@ -157,11 +157,11 @@ const PointCloudSideView: React.FC<IA2MapStateProps & IProps> = ({ config, check
     <PointCloudContainer
       className={getClassName('point-cloud-container', 'side-view')}
       title={t('SideView')}
-      toolbar={<SizeInfoForView perspectiveView={EPerspectiveView.Left} />}
     >
       <div className={getClassName('point-cloud-container', 'bottom-view-content')}>
         <div className={getClassName('point-cloud-container', 'core-instance')} ref={ref} />
         {!selectedBox && <EmptyPage />}
+        <SizeInfoForView perspectiveView={EPerspectiveView.Left} />
       </div>
     </PointCloudContainer>
   );

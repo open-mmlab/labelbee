@@ -1534,6 +1534,24 @@ $headerHeight: 40px;
         }
       }
     }
+
+    &__slider-container {
+      width: 100px;
+      padding: 0px 4px;
+      display: flex;
+      align-items: center;
+      &__circle {
+        display: block;
+        width: 5px;
+        height: 5px;
+        background: #d9d9d9;
+        border-radius: 50%;
+      }
+      &__slider {
+        width: 70px;
+        padding: 0 4px;
+      }
+    }
   }
   .#{$ptPrefix}-container__left {
     width: 40%;
@@ -1717,4 +1735,5 @@ $headerHeight: 40px;
     }
   }
 }
+
 /** PointCloud样式 end */
