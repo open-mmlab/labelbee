@@ -755,7 +755,7 @@ export const usePointCloudViews = () => {
       setSelectedIDs([]);
     } else {
       setSelectedIDs(boxParams.id);
-      polygonOperation.setSelectedIDs([newPolygon.id]);
+      polygonOperation.selection.setSelectedIDs(newPolygon.id);
       syncPointCloudViews(PointCloudView.Top, newPolygon, boxParams, zoom, newPointCloudList);
       if (intelligentFit) {
         synchronizeTopView(boxParams, newPolygon, topViewInstance, mainViewInstance);
@@ -783,7 +783,7 @@ export const usePointCloudViews = () => {
     }
     if (newSelectedBox || selectedBox?.info) {
       const boxParams = newSelectedBox ?? selectedBox?.info;
-      operation?.setSelectedIDs(selectedIDs);
+      operation?.selection?.setSelectedIDs(selectedIDs[0]);
       const polygon = operation.selectedPolygon;
       if (selectedIDs.length === 1 && boxParams) {
         syncPointCloudViews(PointCloudView.Top, polygon, boxParams, undefined, newPointCloudList);

@@ -35,7 +35,11 @@ import { jsonParser } from '@/utils';
 import { TDrawLayerSlot } from '@/types/main';
 import ToolUtils from '@/utils/ToolUtils';
 import _ from 'lodash';
+<<<<<<< HEAD
 import PointCloudSizeSlider from './components/PointCloudSizeSlider';
+=======
+import { useHistory } from './hooks/useHistory';
+>>>>>>> d4fdcd4 (fix(pointcloud): Switch next target's event error)
 
 const { EPolygonPattern, EToolName } = cTool;
 const { ESortDirection } = cAnnotation;
@@ -109,23 +113,13 @@ const TopViewToolbar = ({ currentData }: IAnnotationStateProps) => {
       <FooterDivider />
       <UpSquareOutlined
         onClick={() => {
-          if (currentToolName === EToolName.PointCloudPolygon) {
-            selectPrevBox();
-          }
-          if (currentToolName === EToolName.Point) {
-            switchToNextSphere(ESortDirection.descend);
-          }
+          selectPrevBox(true);
         }}
         className={getClassName('point-cloud', 'prev')}
       />
       <DownSquareOutlined
         onClick={() => {
-          if (currentToolName === EToolName.PointCloudPolygon) {
-            selectNextBox();
-          }
-          if (currentToolName === EToolName.Point) {
-            switchToNextSphere(ESortDirection.ascend)
-          }
+          selectNextBox(true);
         }}
         className={getClassName('point-cloud', 'next')}
       />
@@ -200,6 +194,7 @@ const PointCloudTopView: React.FC<IProps> = ({
   const [zAxisLimit, setZAxisLimit] = useState<number>(10);
   const { t } = useTranslation();
   const pointCloudViews = usePointCloudViews();
+  const { pushHistoryWithList } = useHistory();
 
   useLayoutEffect(() => {
     if (ptCtx.topViewInstance) {
@@ -242,6 +237,7 @@ const PointCloudTopView: React.FC<IProps> = ({
       });
       ptCtx.setSelectedIDs(selectedIDs);
       ptCtx.setLineList(transferLine);
+      pushHistoryWithList({ lineList: transferLine });
     });
 
     // point tool events
