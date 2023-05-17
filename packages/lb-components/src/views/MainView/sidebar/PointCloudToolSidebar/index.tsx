@@ -344,13 +344,6 @@ const PointCloudToolSidebar: React.FC<IProps> = ({
         selectedToolName={pointCloudPattern}
         onChange={(v) => updatePointCloudPattern?.(v)}
       />
-      {config?.trackConfigurable === true && (
-        <>
-          <AnnotatedBox imgList={imgList} imgIndex={imgIndex} />
-          <BoxTrackIDInput />
-          <Divider style={{ margin: 0 }} />
-        </>
-      )}
       <AttributeUpdater
         toolInstance={toolInstance}
         attributeList={attributeList}
@@ -360,6 +353,13 @@ const PointCloudToolSidebar: React.FC<IProps> = ({
         stepInfo={stepInfo}
         enableColorPicker={enableColorPicker}
       />
+      {config?.trackConfigurable === true && (
+        <>
+          <BoxTrackIDInput />
+          <Divider style={{ margin: 0 }} />
+          <AnnotatedBox imgList={imgList} imgIndex={imgIndex} />
+        </>
+      )}
     </>
   );
 };

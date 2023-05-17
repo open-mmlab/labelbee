@@ -96,6 +96,8 @@ export class PointCloud {
 
   private currentPCDSrc?: string; // Record the src of PointCloud
 
+  private pointsMaterialSize: number = 1;
+
   /**
    * Record the src of Highlight PCD.
    *
@@ -286,7 +288,7 @@ export class PointCloud {
     //     )?.hex ?? color;
     // }
 
-    this.AddBoxToSense(boxParams, newColor);
+    this.addBoxToSense(boxParams, newColor);
     this.render();
   }
 
@@ -350,7 +352,7 @@ export class PointCloud {
    * @param id
    * @param color
    */
-  public AddBoxToSense = (boxParams: IPointCloudBox, color: THREE.ColorRepresentation = 0xffffff) => {
+  public addBoxToSense = (boxParams: IPointCloudBox, color: THREE.ColorRepresentation = 0xffffff) => {
     const id = boxParams.id ?? uuid();
 
     this.removeObjectByName(id);
@@ -383,7 +385,7 @@ export class PointCloud {
 
   public generateBoxes(boxes: IPointCloudBox[]) {
     boxes.forEach((box) => {
-      this.generateBox(box);
+      this.addBoxToSense(box);
     });
     this.render();
   }
@@ -689,7 +691,7 @@ export class PointCloud {
     });
 
     pointsMaterial.onBeforeCompile = this.overridePointShader;
-    pointsMaterial.size = 1.2;
+    pointsMaterial.size = this.pointsMaterialSize;
 
     if (radius) {
       // @ts-ignore
@@ -747,7 +749,7 @@ export class PointCloud {
     }
     this.highlightPCDSrc = this.currentPCDSrc;
 
-    return new Promise<BufferAttribute[] | undefined>((resolve) => {
+    return new Promise<BufferAttribute[] | undefined>((resolve, reject) => {
       if (window.Worker) {
         const newPointCloudBoxList = pointCloudBoxList ? [...pointCloudBoxList] : [];
 
@@ -765,13 +767,27 @@ export class PointCloud {
           const { color } = e.data;
           const colorAttribute = new THREE.BufferAttribute(color, 3);
 
-          if (this.highlightPCDSrc) {
-            // Save the new highlight color.
-            this.cacheInstance.updateColor(this.highlightPCDSrc, color);
-
-            // Clear
-            this.highlightPCDSrc = undefined;
+          /**
+           * Need to return;
+           *
+           * 1. Not exist highlightPCDSrc
+           * 2. HighlightPCDSrc is not same with currentPCDSrc.
+           * 3. If the calculate color is not same with origin Points length.
+           */
+          if (
+            !this.highlightPCDSrc ||
+            this.highlightPCDSrc !== this.currentPCDSrc ||
+            oldPointCloud.geometry.attributes.position.array.length !== color.length
+          ) {
+            reject(new Error('Error Path'));
+            return;
           }
+
+          // Save the new highlight color.
+          this.cacheInstance.updateColor(this.highlightPCDSrc, color);
+
+          // Clear
+          this.highlightPCDSrc = undefined;
 
           colorAttribute.needsUpdate = true;
           oldPointCloud.geometry.setAttribute('color', colorAttribute);
@@ -1458,9 +1474,10 @@ export class PointCloud {
 
   /**
    * Update point size
-   * @param zoomIn
+   * @param param0
+   * @returns
    */
-  public updatePointSize = (zoomIn: boolean) => {
+  public updatePointSize = ({ zoomIn, customSize }: { zoomIn?: boolean; customSize?: number }) => {
     const points = this.scene.getObjectByName(this.pointCloudObjectName) as { material: PointsMaterial } | undefined;
 
     if (!points) {
@@ -1473,6 +1490,11 @@ export class PointCloud {
       points.material.size = Math.min(preSize * 1.2, 10);
     } else {
       points.material.size = Math.max(preSize / 1.2, 1);
+    }
+
+    if (customSize) {
+      points.material.size = customSize;
+      this.pointsMaterialSize = customSize;
     }
 
     this.render();

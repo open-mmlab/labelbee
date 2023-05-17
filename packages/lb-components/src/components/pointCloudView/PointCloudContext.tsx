@@ -270,6 +270,8 @@ export const PointCloudProvider: React.FC<{}> = ({ children }) => {
             }
           });
           // TODO： Sync sideView & backView Color.
+        }).catch(err => {
+          console.error(err);
         });
       });
     };

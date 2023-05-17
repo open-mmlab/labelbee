@@ -35,6 +35,7 @@ import { jsonParser } from '@/utils';
 import { TDrawLayerSlot } from '@/types/main';
 import ToolUtils from '@/utils/ToolUtils';
 import _ from 'lodash';
+import PointCloudSizeSlider from './components/PointCloudSizeSlider';
 
 const { EPolygonPattern, EToolName } = cTool;
 const { ESortDirection } = cAnnotation;
@@ -75,6 +76,8 @@ const TopViewToolbar = ({ currentData }: IAnnotationStateProps) => {
   const { switchToNextSphere } = useSphere();
   const { updateRotate } = useRotate({ currentData });
   const ptCtx = React.useContext(PointCloudContext);
+  const { topViewInstance } = ptCtx;
+
   const currentToolName = ptCtx?.topViewInstance?.toolScheduler?.getCurrentToolName()
 
   const ratio = 2;
@@ -92,6 +95,11 @@ const TopViewToolbar = ({ currentData }: IAnnotationStateProps) => {
 
   return (
     <>
+      <PointCloudSizeSlider
+        onChange={(v: number) => {
+          topViewInstance?.pointCloudInstance?.updatePointSize({ customSize: v });
+        }}
+      />
       <span
         onClick={anticlockwiseRotate}
         className={getClassName('point-cloud', 'rotate-reserve')}

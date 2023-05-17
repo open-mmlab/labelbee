@@ -178,11 +178,11 @@ const PointCloudSideView: React.FC<IA2MapStateProps & IProps> = ({ config, check
     <PointCloudContainer
       className={getClassName('point-cloud-container', 'side-view')}
       title={t('SideView')}
-      toolbar={<SizeInfoForView perspectiveView={EPerspectiveView.Left} />}
     >
       <div className={getClassName('point-cloud-container', 'bottom-view-content')}>
         <div className={getClassName('point-cloud-container', 'core-instance')} ref={ref} />
         {!selectedBox && !selectedSphere && <EmptyPage />}
+        <SizeInfoForView perspectiveView={EPerspectiveView.Left} />
       </div>
     </PointCloudContainer>
   );
