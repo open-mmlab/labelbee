@@ -97,7 +97,7 @@ const MainView: React.FC<AppProps & IProps> = (props) => {
               width={siderWidth ?? 240}
               style={props.style?.sider}
             >
-              <Sidebar sider={props?.sider} />
+              <Sidebar sider={props?.sider} enableColorPicker={props?.enableColorPicker} />
             </Sider>
             <PreviewResult />
           </Layout>

@@ -79,6 +79,13 @@ class PointCloudUtils {
     };
   };
 
+  public static pointListTransferCanvas2World = (
+    pointList: { x: number; y: number }[] | undefined,
+    size: { width: number; height: number },
+  ) => {
+    return pointList?.map((i) => ({ ...i, ...this.transferCanvas2World(i, size) }));
+  };
+
   /**
    * Get the coordinate from canvas2d-coordinate to world coordinate
    */
@@ -564,23 +571,42 @@ class PointCloudUtils {
 
   /**
    * Get intersection coordinates by slope
-   * @param p1  A point on line1
-   * @param k1  The slope of line1
-   * @param p2  A point on line2
-   * @param k2  The slope of line2
+   * @param p1  A point on line
+   * @param line1  A line parallel to p1
+   * @param p2  A point on line
+   * @param line2  A line parallel to p2
    */
   static getIntersectionBySlope(params: {
     p1: ICoordinate;
-    k1: number;
+    line1: [ICoordinate, ICoordinate];
     p2: ICoordinate;
-    k2: number;
+    line2: [ICoordinate, ICoordinate];
   }) {
-    const { p1, k1, p2, k2 } = params;
+    const { p1, line1, p2, line2 } = params;
     if (p1.x === p2.x && p1.y === p2.y) {
       return p1;
     }
-    const x = (p1.y - p2.y - k1 * p1.x + k2 * p2.x) / (k2 - k1);
-    const y = p1.y - k1 * (p1.x - x);
+
+    let x, y;
+    // When the line is parallel to the coordinate axis
+    if (line1[0].x === line1[1].x) {
+      x = p1.x;
+    }
+    if (line1[0].y === line1[1].y) {
+      y = p1.y;
+    }
+    if (line2[0].x === line2[1].x) {
+      x = p2.x;
+    }
+    if (line2[0].y === line2[1].y) {
+      y = p2.y;
+    }
+
+    const k1 = (line1[0].y - line1[1].y) / (line1[0].x - line1[1].x);
+    const k2 = (line2[0].y - line2[1].y) / (line2[0].x - line2[1].x);
+
+    x = x ?? (p1.y - p2.y - k1 * p1.x + k2 * p2.x) / (k2 - k1);
+    y = y ?? p1.y - k1 * (p1.x - x);
 
     return { x, y };
   }

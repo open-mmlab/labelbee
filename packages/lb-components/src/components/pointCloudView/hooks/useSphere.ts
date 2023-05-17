@@ -1,14 +1,23 @@
 import { useCallback, useContext, useMemo } from 'react';
 import { PointCloudContext } from '@/components/pointCloudView/PointCloudContext';
 import _ from 'lodash';
+import { useHistory } from '@/components/pointCloudView/hooks/useHistory';
+import { cAnnotation } from '@labelbee/lb-annotation';
+import { IPointUnit } from '@labelbee/lb-utils';
+
+const { ESortDirection } = cAnnotation;
 
 export const useSphere = () => {
   const {
     pointCloudSphereList,
     setPointCloudSphereList,
     selectedID,
+    setSelectedIDs,
     mainViewInstance,
+    topViewInstance,
   } = useContext(PointCloudContext);
+
+  const { pushHistoryWithList } = useHistory();
 
   const selectedSphere = useMemo(() => {
     return pointCloudSphereList.find((v) => v.id === selectedID)
@@ -28,6 +37,7 @@ export const useSphere = () => {
         pointCloudSphereList.splice(sphereIndex, 1, _.merge(pointCloudSphereList[sphereIndex], sphereParams));
         const newPointCloudSphereList = _.cloneDeep(pointCloudSphereList);
         setPointCloudSphereList(newPointCloudSphereList);
+        pushHistoryWithList({ pointCloudSphereList: newPointCloudSphereList });
         return newPointCloudSphereList;
       }
       return pointCloudSphereList
@@ -43,10 +53,27 @@ export const useSphere = () => {
     }, [pointCloudSphereList]
   )
 
+  const switchToNextSphere = useCallback((sort = ESortDirection.ascend) => {
+    if (!topViewInstance) return
+    const pointList = topViewInstance.toolInstance.pointList
+    const currentSelectedId = topViewInstance.toolInstance.selectedID
+    const selectedIndex = pointList.findIndex((v: IPointUnit) => v?.id === currentSelectedId)
+    if (selectedIndex > -1) {
+      let sign = 1;
+      if (sort === ESortDirection.descend) {
+        sign = -1;
+      }
+      const len = pointList.length;
+      const newSelectedPoint = pointList[(selectedIndex + sign + len) % len]
+      setSelectedIDs(newSelectedPoint.id)
+    }
+  }, [topViewInstance])
+
   return {
     selectedSphere,
     getPointCloudSphereByID,
     updatePointCloudSphere,
     deletePointCloudSphere,
+    switchToNextSphere,
   }
 }

@@ -37,6 +37,7 @@ const HeaderOption: React.FC<IProps> = (props) => {
     annotation: state.annotation,
     imgAttribute: state.imgAttribute,
   }));
+
   const { t } = useTranslation();
 
   const isTagTool = [EToolName.Tag, EVideoToolName.VideoTagTool].includes(stepInfo?.tool as any);
