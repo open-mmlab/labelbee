@@ -36,6 +36,11 @@ export enum EPointCloudSegmentCoverMode {
   Uncover = 'Uncover',
 }
 
+export enum EPointCloudSegmentFocusMode {
+  Focus = 'Focus',
+  Unfocus = 'Unfocus'
+}
+
 export enum EPointCloudSegmentStatus {
   Ready = 'READY',
   Check = 'CHECK',

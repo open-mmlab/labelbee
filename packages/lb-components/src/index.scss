@@ -1765,7 +1765,19 @@ $ptToolHeight: 40px;
   justify-content: flex-end;
   align-items: center;
   background-color: rgb(102, 102, 102);
+  .#{$ptPrefix}-toolbox{
+    margin-left:16px;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    cursor:pointer;
+    img{
+      height:24px;
+      width:24px;
+    }
+  }
 }
+
 /** PointCloud样式 end */
 
 $predictTrackingPrefix: #{$prefix}-point-cloud-predict-tracking;

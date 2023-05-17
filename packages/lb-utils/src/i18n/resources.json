@@ -210,7 +210,14 @@
     "HaveNoNeed": "Have no need to predict the data between two frames, please mark the first and last frame first, and need the same serial number",
     "PredictingDataFrom": "Predicting data from page {{startPage}} to page {{endPage}} with box ID {{selectedBoxTrackID}}",
     "PointCloudCoverMode": "When the same point cloud is selected, the later marker overwrites the previous one",
-    "PointCloudUncoverMode": "When the same point cloud is selected, the latter marker cannot overwrite the former marker"
+    "PointCloudUncoverMode": "When the same point cloud is selected, the latter marker cannot overwrite the former marker",
+    "PointCloudFocusMode": "Focus mode has been turned on",
+    "PointCloudUnfocusMode": "Focus mode is turned off",
+    "PointCloudHideSegment": "Marked point cloud is hidden",
+    "PointCloudShowSegment": "All point clouds have been displayed",
+    "PointCloudHideSegmentInvalid": "Unavailable in focus mode",
+    "PointCloudHideFocusInvalid_hide": "Focus mode is not available, please show the marked point first",
+    "PointCloudHideFocusInvalid_none": "Focus mode is not available, please select the marker to be focused first"
   },
   "cn": {
     "TextInput": "文本输入",
@@ -423,6 +430,13 @@
     "HaveNoNeed": "两帧之间暂无需预测的数据，请先标出首尾的框，需同序号",
     "PredictingDataFrom": "正在预测第 {{startPage}} 页到第 {{endPage}} 页之间框ID为 {{selectedBoxTrackID}} 的数据",
     "PointCloudCoverMode": "选中相同点云时，后一标记覆盖前一标记",
-    "PointCloudUncoverMode": "选中相同点云时，后一标记不可覆盖前一标记"
+    "PointCloudUncoverMode": "选中相同点云时，后一标记不可覆盖前一标记",
+    "PointCloudFocusMode": "已开启聚焦模式",
+    "PointCloudUnfocusMode": "已关闭聚焦模式",
+    "PointCloudHideSegment": "已隐藏标注点云",
+    "PointCloudShowSegment": "已显示全部点云",
+    "PointCloudHideSegmentInvalid": "隐藏已标注不可用，请先关闭聚焦",
+    "PointCloudHideFocusInvalid_hide": "聚焦不可用，请先关闭“隐藏已标注”",
+    "PointCloudHideFocusInvalid_none": "聚焦不可用，请先选择需要聚焦的标记"
   }
 }

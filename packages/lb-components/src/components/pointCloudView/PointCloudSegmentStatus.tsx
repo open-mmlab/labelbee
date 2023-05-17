@@ -1,9 +1,9 @@
-import React, { useEffect, useState, useContext } from 'react';
+import React, { useContext, useEffect, useState } from 'react';
 import { getClassName } from '@/utils/dom';
 import FinishSvg from '@/assets/annotation/pointCloudTool/finish.svg';
 import CancelSvg from '@/assets/annotation/pointCloudTool/cancel.svg';
 import { PointCloudContext } from './PointCloudContext';
-import { EPointCloudSegmentStatus, IPointCloudSegmentation } from '@labelbee/lb-utils';
+import { EPointCloudSegmentFocusMode, EPointCloudSegmentStatus, IPointCloudSegmentation } from '@labelbee/lb-utils';
 
 const SegmentInfo: React.FC<{ infoList?: Array<{ key: string; value: string | number }> }> = ({
   infoList,
@@ -98,6 +98,9 @@ const PointCloudSegmentStatus = () => {
           className={getClassName('point-cloud-status', 'button')}
           onClick={() => {
             ptSegmentInstance?.emit('addStash2Store');
+            if (ptSegmentInstance?.store?.segmentFocusMode === EPointCloudSegmentFocusMode.Focus) {
+              ptSegmentInstance?.emit('setSegmentFocusMode', EPointCloudSegmentFocusMode.Unfocus)
+            }
           }}
         >
           <img className={getClassName('point-cloud-status', 'icon')} src={FinishSvg} />

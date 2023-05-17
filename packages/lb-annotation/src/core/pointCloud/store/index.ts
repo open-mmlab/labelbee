@@ -7,6 +7,7 @@
 import * as THREE from 'three';
 import {
   EPointCloudSegmentCoverMode,
+  EPointCloudSegmentFocusMode,
   EPointCloudSegmentMode,
   IPointCloudSegmentation,
   PointCloudUtils,
@@ -65,6 +66,10 @@ class PointCloudStore {
 
   public segmentCoverMode = EPointCloudSegmentCoverMode.Cover;
 
+  public segmentFocusMode = EPointCloudSegmentFocusMode.Unfocus;
+
+  public hideSegment = false;
+
   public updatePointCloud: boolean = false;
 
   public addPointCloud = false;
@@ -100,6 +105,8 @@ class PointCloudStore {
     this.setAttribute = this.setAttribute.bind(this);
     this.setSegmentMode = this.setSegmentMode.bind(this);
     this.setSegmentCoverMode = this.setSegmentCoverMode.bind(this);
+    this.setSegmentFocusMode = this.setSegmentFocusMode.bind(this);
+    this.switchSegmentHideMode = this.switchSegmentHideMode.bind(this);
     this.initMsg();
     this.setupRaycaster();
   }
@@ -111,6 +118,8 @@ class PointCloudStore {
     this.on('updateCheck2Edit', this.updateCheck2Edit);
     this.on('setSegmentMode', this.setSegmentMode);
     this.on('setSegmentCoverMode', this.setSegmentCoverMode);
+    this.on('setSegmentFocusMode', this.setSegmentFocusMode);
+    this.on('switchHideSegment', this.switchSegmentHideMode);
   }
 
   public unbindMsg() {
@@ -119,6 +128,8 @@ class PointCloudStore {
     this.unbind('updateCheck2Edit', this.updateCheck2Edit);
     this.unbind('setSegmentMode', this.setSegmentMode);
     this.unbind('setSegmentCoverMode', this.setSegmentCoverMode);
+    this.unbind('setSegmentFocusMode', this.setSegmentFocusMode);
+    this.unbind('switchHideSegment', this.switchSegmentHideMode);
   }
 
   public get containerWidth() {
@@ -191,6 +202,25 @@ class PointCloudStore {
 
   public setSegmentCoverMode(coverMode: EPointCloudSegmentCoverMode) {
     this.segmentCoverMode = coverMode;
+  }
+
+  public setSegmentFocusMode(focusMode: EPointCloudSegmentFocusMode) {
+    this.segmentFocusMode = focusMode;
+    if (focusMode === EPointCloudSegmentFocusMode.Focus) {
+      this.emit('clearPointCloud');
+    }
+    if (focusMode === EPointCloudSegmentFocusMode.Unfocus) {
+      this.emit('loadPCDFile');
+    }
+    this.emit('reRender3d');
+    this.updatePointCloudBySegment(
+      focusMode === EPointCloudSegmentFocusMode.Focus ? [] : [...this.segmentData.values()],
+    );
+  }
+
+  public switchSegmentHideMode(hideSegment: boolean) {
+    this.hideSegment = hideSegment;
+    this.updatePointCloudBySegment(hideSegment === true ? [] : [...this.segmentData.values()]);
   }
 
   public updateCanvasBasicStyle(canvas: HTMLCanvasElement, size: ISize, zIndex: number) {
@@ -356,6 +386,25 @@ class PointCloudStore {
       this.syncPointCloudStatus();
     }
   }
+
+  // rerender pointcloud by filtered segment data
+  public updatePointCloudBySegment = (segArr: IPointCloudSegmentation[]) => {
+    this.segmentData.forEach((seg, id) => {
+      if (id !== this.cacheSegData?.id) {
+        const segPoints = this.scene.getObjectByName(id);
+        if (segPoints) {
+          segPoints.removeFromParent();
+        }
+      }
+    });
+    if (segArr.length !== 0) {
+      segArr.map((seg) => {
+        this.emit('addNewPointsCloud', seg);
+        return seg;
+      });
+    }
+    this.emit('reRender3d');
+  };
 
   public updateCoverPoints = (coverPoints: Float32Array = new Float32Array([])) => {
     this.segmentData.forEach((seg, id) => {

@@ -47,9 +47,9 @@ const PointCloudSegment: React.FC<IProps> = ({ currentData, config, checkMode })
     setPtSegmentInstance(ptSegmentInstance);
 
     // TODO
-    if (currentData?.url) {
-      ptSegmentInstance.loadPCDFile(currentData?.url ?? '');
-    }
+    // if (currentData?.url) {
+    //   ptSegmentInstance.loadPCDFile(currentData?.url ?? '');
+    // }
   }, [size]);
 
   // Template just for Test
