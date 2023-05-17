@@ -1700,7 +1700,6 @@ class LineToolOperation extends BasicToolOperation {
     this.history?.pushHistory(this.lineList);
     this.setNoneStatus();
     this.emit('dataUpdated', this.lineList);
-    this.emit('lineDeleted', this.selectedID);
     this.render();
   }
 
@@ -1709,6 +1708,7 @@ class LineToolOperation extends BasicToolOperation {
     if (line) {
       line.valid = valid !== undefined ? valid : !line.valid;
       this.history?.pushHistory(this.lineList);
+      this.emit('dataUpdated', this.lineList);
       if (isRender) {
         this.render();
       }

@@ -35,11 +35,8 @@ import { jsonParser } from '@/utils';
 import { TDrawLayerSlot } from '@/types/main';
 import ToolUtils from '@/utils/ToolUtils';
 import _ from 'lodash';
-<<<<<<< HEAD
 import PointCloudSizeSlider from './components/PointCloudSizeSlider';
-=======
 import { useHistory } from './hooks/useHistory';
->>>>>>> d4fdcd4 (fix(pointcloud): Switch next target's event error)
 
 const { EPolygonPattern, EToolName } = cTool;
 const { ESortDirection } = cAnnotation;
@@ -82,7 +79,7 @@ const TopViewToolbar = ({ currentData }: IAnnotationStateProps) => {
   const ptCtx = React.useContext(PointCloudContext);
   const { topViewInstance } = ptCtx;
 
-  const currentToolName = ptCtx?.topViewInstance?.toolScheduler?.getCurrentToolName()
+  const currentToolName = ptCtx?.topViewInstance?.toolScheduler?.getCurrentToolName();
 
   const ratio = 2;
 
@@ -113,12 +110,20 @@ const TopViewToolbar = ({ currentData }: IAnnotationStateProps) => {
       <FooterDivider />
       <UpSquareOutlined
         onClick={() => {
+          if (currentToolName === EToolName.Point) {
+            switchToNextSphere(ESortDirection.descend);
+            return;
+          }
           selectPrevBox(true);
         }}
         className={getClassName('point-cloud', 'prev')}
       />
       <DownSquareOutlined
         onClick={() => {
+          if (currentToolName === EToolName.Point) {
+            switchToNextSphere(ESortDirection.ascend);
+            return;
+          }
           selectNextBox(true);
         }}
         className={getClassName('point-cloud', 'next')}
