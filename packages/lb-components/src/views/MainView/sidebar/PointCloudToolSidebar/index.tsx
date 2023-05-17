@@ -28,6 +28,7 @@ interface IProps {
   imgList: IFileItem[];
   imgIndex: number;
   stepList: IStepInfo[];
+  enableColorPicker?: boolean;
 }
 
 // Temporarily hidden, this feature does not support the function for the time being.
@@ -194,6 +195,7 @@ const AttributeUpdater = ({
   config,
   stepList,
   stepInfo,
+  enableColorPicker,
 }: {
   toolInstance: ICustomToolInstance;
   attributeList: any[]; // TODO
@@ -201,6 +203,7 @@ const AttributeUpdater = ({
   config: any;
   stepList: IStepInfo[];
   stepInfo: IStepInfo;
+  enableColorPicker?: boolean;
 }) => {
   const { selectedBox } = useSingleBox();
   const ptx = useContext(PointCloudContext);
@@ -267,7 +270,7 @@ const AttributeUpdater = ({
         selectedAttribute={defaultAttribute ?? ''}
         attributeChanged={(attribute: string) => setAttribute(attribute)}
         updateColorConfig={updateColorConfig}
-        enableColorPicker={true}
+        enableColorPicker={enableColorPicker}
       />
       <Divider style={{ margin: 0 }} />
       {selectedBox && (
@@ -325,6 +328,7 @@ const PointCloudToolSidebar: React.FC<IProps> = ({
   imgList,
   imgIndex,
   stepList,
+  enableColorPicker,
 }) => {
   const { updatePointCloudPattern, pointCloudPattern } = useStatus();
 
@@ -354,6 +358,7 @@ const PointCloudToolSidebar: React.FC<IProps> = ({
         config={config}
         stepList={stepList}
         stepInfo={stepInfo}
+        enableColorPicker={enableColorPicker}
       />
     </>
   );

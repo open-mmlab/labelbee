@@ -91,6 +91,7 @@ export interface AppProps {
 
   checkMode?: boolean;
   intelligentFit?: boolean;
+  enableColorPicker?: boolean;
 }
 
 const App: React.FC<AppProps> = (props) => {
