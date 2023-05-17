@@ -1,10 +1,11 @@
-import { useCallback, useContext } from 'react';
+import { useContext } from 'react';
 import { IAnnotationStateProps } from '@/store/annotation/map';
 import { synchronizeBackView, synchronizeSideView } from './usePointCloudViews';
 import { useSingleBox } from './useSingleBox';
 import { PointCloudContext } from '../PointCloudContext';
 import { cAnnotation } from '@labelbee/lb-annotation';
 import { PointCloudUtils } from '@labelbee/lb-utils';
+import { useThrottleFn } from 'ahooks';
 
 const { ERotateDirection } = cAnnotation;
 
@@ -15,8 +16,7 @@ const { ERotateDirection } = cAnnotation;
 export const useRotate = ({ currentData }: IAnnotationStateProps) => {
   const ptCtx = useContext(PointCloudContext);
   const { selectedBox, updateSelectedBox } = useSingleBox();
-
-  const updateRotate = useCallback(
+  const { run: updateRotate } = useThrottleFn(
     (angle: number) => {
       const { topViewInstance, mainViewInstance, syncAllViewPointCloudColor } = ptCtx;
       if (!topViewInstance || !mainViewInstance) {
@@ -56,14 +56,12 @@ export const useRotate = ({ currentData }: IAnnotationStateProps) => {
       );
       mainViewInstance.render();
     },
-    [
-      ptCtx.selectedID,
-      ptCtx.pointCloudBoxList,
-      ptCtx.setPointCloudResult,
-      ptCtx.topViewInstance,
-      currentData,
-    ],
+    {
+      wait: 800,
+    }
   );
 
-  return { updateRotate };
+  return { 
+    updateRotate,
+  };
 };

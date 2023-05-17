@@ -13,6 +13,14 @@ import { useTranslation } from 'react-i18next';
 
 const DECIMAL_PLACES = 2;
 
+const DEFAULT_BOX_INFO_STYLE = {
+  color: 'white',
+  backgroundColor: 'rgba(153, 153, 153, 0.3)',
+  padding: '8px 10px',
+  zIndex: 20,
+  fontSize: 14,
+};
+
 /**
  * Display size info for views
  * @param param0
@@ -50,13 +58,21 @@ export const SizeInfoForView = ({ perspectiveView }: { perspectiveView: EPerspec
           ];
 
     return (
-      <>
+      <div
+        style={{
+          position: 'absolute',
+          ...DEFAULT_BOX_INFO_STYLE,
+          bottom: '4%',
+          left: '50%',
+          transform: 'translate(-50%, 0)',
+        }}
+      >
         {infos.map((info, index) => (
-          <span key={index} style={{ marginRight: index === 0 ? 16 : 0, fontSize: 12 }}>{`${
+          <span key={index} style={{ marginRight: index === 0 ? 16 : 0 }}>{`${
             info.label
           }: ${info.value.toFixed(DECIMAL_PLACES)}`}</span>
         ))}
-      </>
+      </div>
     );
   }
   return null;
@@ -126,7 +142,7 @@ export const BoxInfos = ({
         );
         subAttributeNameList.forEach((data) => infos.push(data));
       }
-      
+
       setInfos(infos);
     });
   }, [selectedBox, i18n.language]);
@@ -136,13 +152,9 @@ export const BoxInfos = ({
       <div
         style={{
           position: 'absolute',
-          color: 'white',
-          backgroundColor: 'rgba(153, 153, 153, 0.3)',
+          ...DEFAULT_BOX_INFO_STYLE,
           right: 8,
-          top: 8,
-          fontSize: 12,
-          padding: 8,
-          zIndex: 20,
+          bottom: 8,
         }}
       >
         {infos.map((i) => (
