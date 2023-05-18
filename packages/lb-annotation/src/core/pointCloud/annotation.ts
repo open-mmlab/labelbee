@@ -312,6 +312,7 @@ export class PointCloudAnnotation implements IPointCloudAnnotationOperation {
   public switchToCanvas(toolName: EToolName) {
     const newInstance = this.toolScheduler.switchToCanvas(toolName);
     if (newInstance) {
+      this.toolInstance.eventUnbinding();
       newInstance.eventBinding();
       this.toolInstance = newInstance;
       return newInstance;

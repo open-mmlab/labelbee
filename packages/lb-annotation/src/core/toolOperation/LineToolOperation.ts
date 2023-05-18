@@ -718,7 +718,7 @@ class LineToolOperation extends BasicToolOperation {
   public render = (nextPoint?: IPoint) => {
     super.render();
     this.drawLines();
-    this.drawActivatedLine(nextPoint, undefined, true);
+    this.drawActivatedLine(nextPoint, undefined, false);
     this.renderTextAttribute();
     this.renderCursorLine(this.getLineColor(this.defaultAttribute));
   };
@@ -1341,6 +1341,8 @@ class LineToolOperation extends BasicToolOperation {
       if (this.coordsInsideActiveArea && e.ctrlKey) {
         this.setInvalidLine(this.selectedID);
       }
+
+      this.addLinePointToActiveLine();
     }
   };
 
@@ -1469,7 +1471,7 @@ class LineToolOperation extends BasicToolOperation {
 
     if (setActiveAfterCreating) {
       this.activeLine = [];
-      this.setSelectedLineID(selectedID);
+      this.setSelectedLineID(selectedID, false, false);
     }
 
     this.actionsHistory?.empty();
@@ -1698,7 +1700,6 @@ class LineToolOperation extends BasicToolOperation {
     this.history?.pushHistory(this.lineList);
     this.setNoneStatus();
     this.emit('dataUpdated', this.lineList);
-    this.emit('lineDeleted', this.selectedID);
     this.render();
   }
 
@@ -1707,6 +1708,7 @@ class LineToolOperation extends BasicToolOperation {
     if (line) {
       line.valid = valid !== undefined ? valid : !line.valid;
       this.history?.pushHistory(this.lineList);
+      this.emit('dataUpdated', this.lineList);
       if (isRender) {
         this.render();
       }
@@ -1817,11 +1819,19 @@ class LineToolOperation extends BasicToolOperation {
     }
   }
 
-  public setSelectedLineID(id?: string, isAppend = false) {
+  public setSelectedLineID(id?: string, isAppend = false, triggerAttrUpdate = true) {
     this.selection.setSelectedIDs(id, isAppend);
-    this.updateAttrWhileIDChanged(this.selectedID);
+
+    if (triggerAttrUpdate && id) {
+      this.updateAttrWhileIDChanged(this.selectedID);
+    }
+
     if (this.selectedLine) {
       this.setActiveLine(this.selectedLine.pointList);
+    }
+
+    if (this.selectedIDs.length === 0) {
+      this.setActiveLine([]);
     }
 
     this.emit('selectedChange');

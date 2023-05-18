@@ -36,6 +36,7 @@ import { TDrawLayerSlot } from '@/types/main';
 import ToolUtils from '@/utils/ToolUtils';
 import _ from 'lodash';
 import PointCloudSizeSlider from './components/PointCloudSizeSlider';
+import { useHistory } from './hooks/useHistory';
 
 const { EPolygonPattern, EToolName } = cTool;
 const { ESortDirection } = cAnnotation;
@@ -78,7 +79,7 @@ const TopViewToolbar = ({ currentData }: IAnnotationStateProps) => {
   const ptCtx = React.useContext(PointCloudContext);
   const { topViewInstance } = ptCtx;
 
-  const currentToolName = ptCtx?.topViewInstance?.toolScheduler?.getCurrentToolName()
+  const currentToolName = ptCtx?.topViewInstance?.toolScheduler?.getCurrentToolName();
 
   const ratio = 2;
 
@@ -109,23 +110,21 @@ const TopViewToolbar = ({ currentData }: IAnnotationStateProps) => {
       <FooterDivider />
       <UpSquareOutlined
         onClick={() => {
-          if (currentToolName === EToolName.PointCloudPolygon) {
-            selectPrevBox();
-          }
           if (currentToolName === EToolName.Point) {
             switchToNextSphere(ESortDirection.descend);
+            return;
           }
+          selectPrevBox(true);
         }}
         className={getClassName('point-cloud', 'prev')}
       />
       <DownSquareOutlined
         onClick={() => {
-          if (currentToolName === EToolName.PointCloudPolygon) {
-            selectNextBox();
-          }
           if (currentToolName === EToolName.Point) {
-            switchToNextSphere(ESortDirection.ascend)
+            switchToNextSphere(ESortDirection.ascend);
+            return;
           }
+          selectNextBox(true);
         }}
         className={getClassName('point-cloud', 'next')}
       />
@@ -200,6 +199,7 @@ const PointCloudTopView: React.FC<IProps> = ({
   const [zAxisLimit, setZAxisLimit] = useState<number>(10);
   const { t } = useTranslation();
   const pointCloudViews = usePointCloudViews();
+  const { pushHistoryWithList } = useHistory();
 
   useLayoutEffect(() => {
     if (ptCtx.topViewInstance) {
@@ -242,6 +242,7 @@ const PointCloudTopView: React.FC<IProps> = ({
       });
       ptCtx.setSelectedIDs(selectedIDs);
       ptCtx.setLineList(transferLine);
+      pushHistoryWithList({ lineList: transferLine });
     });
 
     // point tool events
