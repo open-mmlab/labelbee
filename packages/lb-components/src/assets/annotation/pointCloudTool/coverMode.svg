@@ -1,13 +1,25 @@
-<svg width="24.000000" height="24.000000" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
-	<desc>
-			Created with Pixso.
-	</desc>
-	<mask id="mask1_15478" mask-type="alpha" maskUnits="userSpaceOnUse" x="0.000000" y="0.000000" width="24.000000" height="24.000000">
-		<rect id="Frame 1312316531 (Background/Mask)" width="24.000000" height="24.000000" fill="#C4C4C4"/>
-	</mask>
-	<g mask="url(#mask1_15478)">
-		<path id="Vector 205" d="M17 3L17 17L3 17L3 3L17 3Z" stroke="#FFFFFF" stroke-width="2.000000" stroke-linejoin="round" stroke-dasharray="0 0"/>
-		<path id="Vector 206" d="M7 6L20 6C20.5522 6 21 6.44775 21 7L21 20C21 20.5523 20.5522 21 20 21L7 21C6.44775 21 6 20.5523 6 20L6 7C6 6.44775 6.44775 6 7 6Z" fill-rule="evenodd" fill="#FFFFFF"/>
-	</g>
-	<defs/>
+<?xml version="1.0" encoding="UTF-8"?>
+<svg width="24px" height="24px" viewBox="0 0 24 24" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
+    <title>Frame 1312316531</title>
+    <defs>
+        <rect id="path-1" x="0" y="0" width="24" height="24"></rect>
+    </defs>
+    <g id="标注工具优化" stroke="none" stroke-width="1" fill="none" fill-rule="evenodd">
+        <g id="点云工具-分割模式" transform="translate(-1432.000000, -88.000000)">
+            <g id="编组-10" transform="translate(1352.000000, 84.000000)">
+                <g id="Frame-1312316531" transform="translate(80.000000, 4.000000)">
+                    <mask id="mask-2" fill="white">
+                        <use xlink:href="#path-1"></use>
+                    </mask>
+                    <g id="Frame-1312316531-(Background/Mask)"></g>
+                    <g id="Group-1312317594" mask="url(#mask-2)">
+                        <g transform="translate(3.000000, 3.000000)">
+                            <path d="M0,0 L14,0 L14,14 L0,14 L0,0 Z" id="Vector-205" stroke="#FFFFFF" stroke-width="2" fill="none" stroke-linejoin="round" stroke-dasharray="0,0"></path>
+                            <path d="M4,3 L17,3 C17.5522847,3 18,3.44771525 18,4 L18,17 C18,17.5522847 17.5522847,18 17,18 L4,18 C3.44771525,18 3,17.5522847 3,17 L3,4 C3,3.44771525 3.44771525,3 4,3 Z" id="Vector-206" stroke="none" fill="#FFFFFF" fill-rule="evenodd"></path>
+                        </g>
+                    </g>
+                </g>
+            </g>
+        </g>
+    </g>
 </svg>
