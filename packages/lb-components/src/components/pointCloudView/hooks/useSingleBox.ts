@@ -120,7 +120,7 @@ export const useSingleBox = () => {
   );
 
   /** PointCloud select next/prev one */
-  const switchToNextBox = useCallback(
+  const switchToNext = useCallback(
     (sort = ESortDirection.ascend, manual = false) => {
       if (!topViewInstance || selectedIDs.length > 1) {
         return;
@@ -150,11 +150,11 @@ export const useSingleBox = () => {
   );
 
   const selectPrevBox = (manual = false) => {
-    switchToNextBox(ESortDirection.descend, manual);
+    switchToNext(ESortDirection.descend, manual);
   };
 
   const selectNextBox = (manual = false) => {
-    switchToNextBox(ESortDirection.ascend, manual);
+    switchToNext(ESortDirection.ascend, manual);
   };
 
   const deletePointCloudBox = (id: string) => {
