@@ -27,10 +27,10 @@ const PointCloudSegmentToolbar = () => {
   );
 
   const [focusMode, setFocusMode] = useState(
-    ptSegmentInstance?.store.segmentFocusMode ?? EPointCloudSegmentFocusMode.Unfocus,
+    ptSegmentInstance?.store?.segmentFocusMode ?? EPointCloudSegmentFocusMode.Unfocus,
   );
 
-  const [hideSegment, setHideSegment] = useState(ptSegmentInstance?.store.hideSegment ?? false)
+  const [hideSegment, setHideSegment] = useState(ptSegmentInstance?.store?.hideSegment ?? false)
 
   const [data, setData] = useState<{
     segmentStatus: EPointCloudSegmentStatus;
