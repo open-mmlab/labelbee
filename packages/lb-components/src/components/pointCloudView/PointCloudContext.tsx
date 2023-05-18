@@ -46,6 +46,7 @@ export interface IPointCloudContext
   pointCloudSphereList: IPointCloudSphereList;
   displayPointCloudList: IPointCloudBoxList;
   displaySphereList: IPointCloudSphereList;
+  displayLineList: ILine[];
   selectedIDs: string[];
   setSelectedIDs: (ids?: string[] | string) => void;
   valid: boolean;
@@ -98,6 +99,7 @@ export const PointCloudContext = React.createContext<IPointCloudContext>({
   pointCloudSphereList: [],
   displayPointCloudList: [],
   displaySphereList: [],
+  displayLineList: [],
   polygonList: [],
   lineList: [],
   selectedID: '',
@@ -219,7 +221,11 @@ export const PointCloudProvider: React.FC<{}> = ({ children }) => {
     };
 
     const selectedAllBoxes = () => {
-      setSelectedIDs(pointCloudBoxList.map((i) => i.id));
+      if (pointCloudPattern === EToolName.Rect) {
+        const ids = pointCloudBoxList.map((i) => i.id);
+        setSelectedIDs(ids);
+        topViewInstance?.pointCloud2dOperation.setSelectedIDs(ids);
+      }
     };
 
     const selectSpecAttr = (attr: string) => {
@@ -232,6 +238,10 @@ export const PointCloudProvider: React.FC<{}> = ({ children }) => {
 
     const displaySphereList = pointCloudSphereList.filter(
       (i) => !hideAttributes.includes(i.attribute),
+    );
+
+    const displayLineList = lineList.filter(
+      (i) => i.attribute && !hideAttributes.includes(i.attribute),
     );
 
     const toggleAttributesVisible = (tAttribute: string) => {
@@ -247,7 +257,7 @@ export const PointCloudProvider: React.FC<{}> = ({ children }) => {
       _displayPointCloudList: IPointCloudBoxList = displayPointCloudList,
       _polygonList: IPolygonData[] = polygonList,
       _displaySphereList: IPointCloudSphereList = displaySphereList,
-      _lineList: ILine[] = lineList,
+      _lineList: ILine[] = displayLineList,
     ) => {
       pointCloudBoxList.forEach((v) => {
         mainViewInstance?.removeObjectByName(v.id);
@@ -295,6 +305,7 @@ export const PointCloudProvider: React.FC<{}> = ({ children }) => {
       pointCloudSphereList,
       displayPointCloudList,
       displaySphereList,
+      displayLineList,
       selectedIDs,
       setPointCloudResult,
       setSelectedIDs,

@@ -27,6 +27,7 @@ export const useStatus = () => {
     setPointCloudPattern,
     syncAllViewPointCloudColor,
     globalPattern,
+    setLineList,
   } = useContext(PointCloudContext);
   const { pushHistoryWithList } = useHistory();
 
@@ -43,13 +44,14 @@ export const useStatus = () => {
     setPointCloudResult([]);
     setPolygonList([]);
     setPointCloudSphereList([]);
+    setLineList([]);
 
     topViewInstance?.toolScheduler.clearStatusAndResult();
 
     syncAllViewPointCloudColor([]);
 
     // Add History
-    pushHistoryWithList({ pointCloudBoxList: [], polygonList: [] });
+    pushHistoryWithList({ pointCloudBoxList: [], polygonList: [], pointCloudSphereList: [] });
   };
 
   // Clear results of sideview and backview

@@ -140,4 +140,5 @@ export interface IPointCloudSegmentation {
     [key in string]: string;
   };
   coverPoints?: TSegmentPoints;
+  indexes: number[]
 }

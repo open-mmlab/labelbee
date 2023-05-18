@@ -19,11 +19,11 @@ const PointCloudSegmentToolbar = () => {
   const { t } = useTranslation();
   const { ptSegmentInstance } = useContext(PointCloudContext);
   const [mode, setMode] = useState(
-    ptSegmentInstance?.store.segmentMode ?? EPointCloudSegmentMode.Add,
+    ptSegmentInstance?.store?.segmentMode ?? EPointCloudSegmentMode.Add,
   );
 
   const [coverMode, setCoverMode] = useState(
-    ptSegmentInstance?.store.segmentCoverMode ?? EPointCloudSegmentCoverMode.Cover,
+    ptSegmentInstance?.store?.segmentCoverMode ?? EPointCloudSegmentCoverMode.Cover,
   );
 
   const [focusMode, setFocusMode] = useState(

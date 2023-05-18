@@ -28,6 +28,7 @@ interface IPointCloudAnnotationProps {
 
   checkMode?: boolean;
   toolName: THybridToolName;
+  proxyMode?: boolean;
 }
 
 const createEmptyImage = (size: { width: number; height: number }) => {
@@ -56,7 +57,16 @@ export class PointCloudAnnotation implements IPointCloudAnnotationOperation {
 
   public config: IPointCloudConfig;
 
-  constructor({ size, container, pcdPath, extraProps, config, checkMode, toolName }: IPointCloudAnnotationProps) {
+  constructor({
+    size,
+    container,
+    pcdPath,
+    extraProps,
+    config,
+    checkMode,
+    toolName,
+    proxyMode,
+  }: IPointCloudAnnotationProps) {
     const defaultOrthographic = this.getDefaultOrthographic(size);
 
     const imgSrc = createEmptyImage(size);
@@ -64,7 +74,7 @@ export class PointCloudAnnotation implements IPointCloudAnnotationOperation {
     const image = new Image();
     image.src = imgSrc;
 
-    const toolScheduler = new ToolScheduler({ container, size, toolName });
+    const toolScheduler = new ToolScheduler({ container, size, toolName, proxyMode });
     const canvasScheduler = new CanvasScheduler({ container });
 
     // 1. PointCloud initialization
@@ -101,6 +111,7 @@ export class PointCloudAnnotation implements IPointCloudAnnotationOperation {
     } else {
       toolList = toolName as EToolName[];
     }
+
     toolList.forEach((tool, i) => {
       let toolInstance;
       if (tool === EToolName.PointCloudPolygon) {
@@ -112,7 +123,8 @@ export class PointCloudAnnotation implements IPointCloudAnnotationOperation {
         // need to be deleted
         this.pointCloud2dOperation = pointCloudPolygonOperation;
       } else {
-        toolInstance = toolScheduler.createOperation(tool, image, defaultProps);
+        /** Tools can't enable textConfigurable */
+        toolInstance = toolScheduler.createOperation(tool, image, { ...defaultProps, textConfigurable: false });
       }
       if (i === toolList.length - 1) {
         if (!this.toolInstance) {
@@ -134,6 +146,15 @@ export class PointCloudAnnotation implements IPointCloudAnnotationOperation {
   public updateConfig(config: IPointCloudConfig) {
     this.config = config;
     this.pointCloud2dOperation.setConfig(JSON.stringify(config));
+  }
+
+  // compose attributeList
+  public updateAttributeList(attributeList: IInputList[]) {
+    this.config = {
+      ...this.config,
+      attributeList,
+    };
+    this.toolScheduler.syncAllAttributeListInConfig(attributeList);
   }
 
   /**
@@ -198,14 +219,21 @@ export class PointCloudAnnotation implements IPointCloudAnnotationOperation {
   }
 
   public updateLineList = (lineList: ILine[]) => {
-    const list = lineList.map((v: ILine) => ({
-      ...v,
-      pointList: v?.pointList?.map((point: IPoint) =>
-        PointCloudUtils.transferWorld2Canvas(point, this.toolInstance.size),
-      ),
-    }));
+    const canvasLineList = (lineList ?? []).map((line) => {
+      const pointList = line.pointList?.map((i) => {
+        return {
+          i,
+          ...PointCloudUtils.transferWorld2Canvas(i, this.toolInstance.size),
+        };
+      });
 
-    this.toolScheduler.updateDataByToolName(EToolName.Line, list);
+      return {
+        ...line,
+        pointList,
+      };
+    });
+
+    this.toolScheduler.updateDataByToolName(EToolName.Line, canvasLineList);
   };
 
   public addLineListOnTopView(result: string) {

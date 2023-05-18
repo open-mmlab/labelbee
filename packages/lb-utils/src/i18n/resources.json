@@ -217,7 +217,8 @@
     "PointCloudShowSegment": "All point clouds have been displayed",
     "PointCloudHideSegmentInvalid": "Unavailable in focus mode",
     "PointCloudHideFocusInvalid_hide": "Focus mode is not available, please show the marked point first",
-    "PointCloudHideFocusInvalid_none": "Focus mode is not available, please select the marker to be focused first"
+    "PointCloudHideFocusInvalid_none": "Focus mode is not available, please select the marker to be focused first",
+    "Palette": "Palette"
   },
   "cn": {
     "TextInput": "文本输入",
@@ -437,6 +438,7 @@
     "PointCloudShowSegment": "已显示全部点云",
     "PointCloudHideSegmentInvalid": "隐藏已标注不可用，请先关闭聚焦",
     "PointCloudHideFocusInvalid_hide": "聚焦不可用，请先关闭“隐藏已标注”",
-    "PointCloudHideFocusInvalid_none": "聚焦不可用，请先选择需要聚焦的标记"
+    "PointCloudHideFocusInvalid_none": "聚焦不可用，请先选择需要聚焦的标记",
+    "Palette": "调色盘"
   }
 }

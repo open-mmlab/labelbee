@@ -1,7 +1,7 @@
+import _ from 'lodash';
 import { i18n } from '@labelbee/lb-utils';
 import MathUtils from '@/utils/MathUtils';
 import RectUtils from '@/utils/tool/RectUtils';
-import _ from 'lodash';
 import {
   DEFAULT_TEXT_OFFSET,
   EDragStatus,
@@ -26,6 +26,7 @@ import StyleUtils from '../../utils/tool/StyleUtils';
 import uuid from '../../utils/uuid';
 import { BasicToolOperation, IBasicToolOperationProps } from './basicToolOperation';
 import TextAttributeClass from './textAttributeClass';
+import Selection, { SetDataList } from './Selection';
 
 const TEXT_MAX_WIDTH = 164;
 
@@ -45,8 +46,6 @@ class PolygonOperation extends BasicToolOperation {
 
   public hoverEdgeIndex: number;
 
-  public selectedID?: string;
-
   public editPolygonID?: string; // 是否进入编辑模式
 
   public pattern: EPolygonPattern; // 当前多边形标注形式
@@ -60,6 +59,7 @@ class PolygonOperation extends BasicToolOperation {
     dragTarget: EDragTarget;
 
     originPolygon?: IPolygonData; // For comparing data before and after drag and drop.
+    selectedPolygons?: IPolygonData[]; // For comparing data before and after drag and drop.
     dragPrevCoord: ICoordinate;
     originPolygonList: IPolygonData[];
   };
@@ -70,9 +70,11 @@ class PolygonOperation extends BasicToolOperation {
 
   public isAlt: boolean; // 当前是否按住了 alt
 
-  public _textAttributInstance?: TextAttributeClass;
+  public _textAttributeInstance?: TextAttributeClass;
 
   public forbidAddNewPolygonFuc?: (e: MouseEvent) => boolean;
+
+  public selection: Selection;
 
   constructor(props: IPolygonOperationProps) {
     super(props);
@@ -90,11 +92,25 @@ class PolygonOperation extends BasicToolOperation {
 
     this.getCurrentSelectedData = this.getCurrentSelectedData.bind(this);
     this.updateSelectedTextAttribute = this.updateSelectedTextAttribute.bind(this);
+
+    this.selection = new Selection(this);
+  }
+
+  get selectedIDs() {
+    return this.selection.selectedIDs;
+  }
+
+  get selectedID() {
+    return this.selection.selectedID;
+  }
+
+  get minArea() {
+    return this.config.minArea || 0;
   }
 
   public eventBinding() {
     super.eventBinding();
-    // 解绑原本的 onMouseUp，将 onMoueUp 用于 dblClickListener ß进行绑定
+    // 解绑原本的 onMouseUp，将 onMoueUp 用于 dblClickListener 进行绑定
     this.container.removeEventListener('mouseup', this.onMouseUp);
 
     this.container.addEventListener('mouseup', this.dragMouseUp);
@@ -108,13 +124,17 @@ class PolygonOperation extends BasicToolOperation {
 
   public destroy() {
     super.destroy();
-    if (this._textAttributInstance) {
-      this._textAttributInstance.clearTextAttribute();
+    if (this._textAttributeInstance) {
+      this._textAttributeInstance.clearTextAttribute();
     }
   }
 
   public get selectedPolygon() {
     return PolygonUtils.getPolygonByID(this.visiblePolygonList, this.selectedID);
+  }
+
+  public get selectedPolygons() {
+    return PolygonUtils.getPolygonByIDs(this.polygonList, this.selectedIDs);
   }
 
   public get hoverPolygon() {
@@ -171,11 +191,11 @@ class PolygonOperation extends BasicToolOperation {
    */
   public get currentShowList() {
     let polygon: IPolygonData[] = [];
-    const [showingPolygon, selectdPolygon] = CommonToolUtils.getRenderResultList<IPolygonData>(
-      this.visiblePolygonList,
+    const [showingPolygon, selectedPolygons] = CommonToolUtils.getRenderResultList<IPolygonData>(
+      this.polygonList,
       CommonToolUtils.getSourceID(this.basicResult),
       this.attributeLockList,
-      this.selectedID,
+      this.selectedIDs,
     );
     polygon = showingPolygon;
 
@@ -183,8 +203,8 @@ class PolygonOperation extends BasicToolOperation {
       polygon = [];
     }
 
-    if (selectdPolygon) {
-      polygon.push(selectdPolygon);
+    if (selectedPolygons) {
+      polygon.push(...selectedPolygons);
     }
     return polygon;
   }
@@ -202,6 +222,18 @@ class PolygonOperation extends BasicToolOperation {
       [],
     );
     return showingPolygon;
+  }
+
+  /**
+   *  Just Update Data. Not Clear Status
+   * @param polygonList
+   */
+  public setResultAndSelectedID(polygonList: IPolygonData[], selectedID: string) {
+    this.setPolygonList(polygonList);
+    if (selectedID) {
+      this.setSelectedID(selectedID);
+    }
+    this.render();
   }
 
   public setResult(polygonList: IPolygonData[]) {
@@ -387,19 +419,8 @@ class PolygonOperation extends BasicToolOperation {
     }
   }
 
-  public setSelectedID(newID?: string) {
-    const oldID = this.selectedID;
-    if (newID !== oldID && oldID) {
-      // 触发文本切换的操作
-
-      this._textAttributInstance?.changeSelected();
-    }
-
-    if (!newID) {
-      this._textAttributInstance?.clearTextAttribute();
-    }
-
-    this.selectedID = newID;
+  public setSelectedID(newID?: string, isAppend = false) {
+    this.selection.setSelectedIDs(newID, isAppend);
 
     this.render();
     this.emit('selectedChange');
@@ -417,23 +438,22 @@ class PolygonOperation extends BasicToolOperation {
       this.emit('changeAttributeSidebar');
 
       // 如有选中目标，则需更改当前选中的属性
-      const { selectedID } = this;
-      if (selectedID) {
-        if (this.selectedPolygon) {
-          this.selectedPolygon.attribute = defaultAttribute;
-        }
+      if (this.selectedPolygons.length > 0) {
+        this.selectedPolygons.forEach((polygon) => {
+          polygon.attribute = defaultAttribute;
+        });
         this.history.pushHistory(this.polygonList);
         this.render();
       }
 
-      if (this._textAttributInstance) {
+      if (this._textAttributeInstance) {
         if (this.attributeLockList.length > 0 && !this.attributeLockList.includes(defaultAttribute)) {
           // 属性隐藏
-          this._textAttributInstance.clearTextAttribute();
+          this._textAttributeInstance.clearTextAttribute();
           return;
         }
 
-        this._textAttributInstance.updateIcon(this.getTextIconSvg(defaultAttribute));
+        this._textAttributeInstance.updateIcon(this.getTextIconSvg(defaultAttribute));
       }
     }
   }
@@ -442,8 +462,8 @@ class PolygonOperation extends BasicToolOperation {
     super.setStyle(toolStyle);
 
     // 当存在文本 icon 的时候需要更改当前样式
-    if (this._textAttributInstance && this.config.attributeConfigurable === false) {
-      this._textAttributInstance?.updateIcon(this.getTextIconSvg());
+    if (this._textAttributeInstance && this.config.attributeConfigurable === false) {
+      this._textAttributeInstance?.updateIcon(this.getTextIconSvg());
     }
   }
 
@@ -492,7 +512,14 @@ class PolygonOperation extends BasicToolOperation {
 
       return;
     }
-
+    if (PolygonUtils.calcPolygonSize(this.drawingPointList || []) < this.minArea) {
+      // 小于最小面积无法添加
+      this.emit(
+        'messageInfo',
+        `${locale.getMessagesByLocale(EMessage.MinAreaLimitErrorNotice, this.lang)}${this.minArea}`,
+      );
+      return;
+    }
     const basicSourceID = CommonToolUtils.getSourceID(this.basicResult);
 
     const polygonList = [...this.polygonList];
@@ -609,18 +636,17 @@ class PolygonOperation extends BasicToolOperation {
     return AxisUtils.returnClosePointIndex(currentCoord, editPointListUnderZoom);
   }
 
-  public deletePolygon(id?: string) {
-    if (!id) {
+  public deletePolygons(id?: string[]) {
+    if (!id || id.length === 0) {
       return;
     }
 
-    const deletedPolygon = this.polygonList.find((p) => p.id === id);
+    const deletedPolygon = this.polygonList.filter((p) => this.selection.isIdSelected(p.id));
+    this.emit('deletedObject', { deletedObject: deletedPolygon[0], id: deletedPolygon[0].id });
+    this.setPolygonList(this.polygonList.filter((polygon) => !this.selection.isIdSelected(polygon.id)));
 
-    this.emit('deletedObject', { deletedObject: deletedPolygon, id });
-
-    this.setPolygonList(this.polygonList.filter((polygon) => polygon.id !== id));
     this.history.pushHistory(this.polygonList);
-    this._textAttributInstance?.clearTextAttribute();
+    this._textAttributeInstance?.clearTextAttribute();
     this.emit('selectedChange');
     this.render();
   }
@@ -697,12 +723,12 @@ class PolygonOperation extends BasicToolOperation {
       this.polygonList,
       CommonToolUtils.getSourceID(this.basicResult),
       this.attributeLockList,
-      this.selectedID,
+      this.selectedIDs,
     );
 
     let polygonList = [...showingResult];
     if (selectedResult) {
-      polygonList = [...polygonList, selectedResult];
+      polygonList = [...polygonList, ...selectedResult];
     }
 
     const viewPort = CanvasUtils.getViewPort(this.canvas, this.currentPos, this.zoom);
@@ -766,7 +792,7 @@ class PolygonOperation extends BasicToolOperation {
         break;
 
       case EKeyCode.Delete:
-        this.deletePolygon(this.selectedID);
+        this.deletePolygons(this.selectedIDs);
         this.render();
         break;
 
@@ -810,6 +836,10 @@ class PolygonOperation extends BasicToolOperation {
   public onKeyUp(e: KeyboardEvent) {
     super.onKeyUp(e);
 
+    if (this.selection.triggerKeyboardEvent(e, this.setPolygonList.bind(this) as unknown as SetDataList)) {
+      return;
+    }
+
     switch (e.keyCode) {
       case EKeyCode.Ctrl:
         this.isCtrl = false;
@@ -840,7 +870,7 @@ class PolygonOperation extends BasicToolOperation {
     }
 
     // 右键选中设置
-    this.setSelectedID(this.hoverID);
+    this.setSelectedID(this.hoverID, e.ctrlKey);
     const { selectedPolygon } = this;
     if (selectedPolygon) {
       this.setDefaultAttribute(selectedPolygon.attribute);
@@ -912,7 +942,7 @@ class PolygonOperation extends BasicToolOperation {
     }
 
     if (this.hoverID === this.selectedID) {
-      this.deletePolygon(hoverID);
+      this.deletePolygons([hoverID]);
     }
 
     this.render();
@@ -933,34 +963,37 @@ class PolygonOperation extends BasicToolOperation {
    * @returns
    */
   public dragMouseDown(e: MouseEvent) {
-    const firstPolygon = this.selectedPolygon;
-
-    if (!firstPolygon || e.button !== 0) {
+    if (e.button !== 0) {
       return;
     }
     const hoverID = this.getHoverID(e);
 
-    if (hoverID !== this.selectedID) {
+    if (!this.selection.isIdSelected(hoverID)) {
       // 无选中则无法进行拖拽，提前退出
       return;
     }
 
-    const initPointList = firstPolygon.pointList;
-    const dragStartCoord = this.getCoordinateUnderZoom(e);
     let changePointIndex = [0];
-
     let dragTarget = EDragTarget.Plane;
-    this.dragStatus = EDragStatus.Start;
+    const initPointList = this.selectedPolygons[0].pointList;
+    const dragStartCoord = this.getCoordinateUnderZoom(e);
 
-    const closePointIndex = this.getHoverPointIndex(e);
-    const closeEdgeIndex = this.getHoverEdgeIndex(e);
+    /**
+     * Single select supporting drag point or line
+     */
+    if (this.selectedPolygons.length === 1) {
+      this.dragStatus = EDragStatus.Start;
 
-    if (closePointIndex > -1) {
-      dragTarget = EDragTarget.Point;
-      changePointIndex = [closePointIndex];
-    } else if (closeEdgeIndex > -1 && this.hoverEdgeIndex > -1) {
-      dragTarget = EDragTarget.Line;
-      changePointIndex = [closeEdgeIndex, (closeEdgeIndex + 1) % initPointList.length];
+      const closePointIndex = this.getHoverPointIndex(e);
+      const closeEdgeIndex = this.getHoverEdgeIndex(e);
+
+      if (closePointIndex > -1) {
+        dragTarget = EDragTarget.Point;
+        changePointIndex = [closePointIndex];
+      } else if (closeEdgeIndex > -1 && this.hoverEdgeIndex > -1) {
+        dragTarget = EDragTarget.Line;
+        changePointIndex = [closeEdgeIndex, (closeEdgeIndex + 1) % initPointList.length];
+      }
     }
 
     this.dragInfo = {
@@ -969,6 +1002,7 @@ class PolygonOperation extends BasicToolOperation {
       initPointList,
       changePointIndex,
       originPolygon: this.selectedPolygon,
+      selectedPolygons: this.selectedPolygons,
       dragPrevCoord: dragStartCoord,
       originPolygonList: this.polygonList,
     };
@@ -1158,6 +1192,41 @@ class PolygonOperation extends BasicToolOperation {
   }
 
   /**
+   * Update polygon position while enableDrag is true
+   * @param e {MouseEvent}
+   */
+  public onDragMove(e: MouseEvent) {
+    const newPolygonList = this.polygonList.map((v) => {
+      if (this.selectedIDs.includes(v.id)) {
+        const selectedPointList = this.dragPolygon(e, v);
+
+        if (!selectedPointList) {
+          return v;
+        }
+
+        const newData = {
+          ...v,
+          pointList: selectedPointList as IPolygonPoint[],
+        };
+
+        // 非矩形模式下拖动，矩形模式下生成的框将会转换为非矩形框
+        if (v.isRect === true && this.pattern === EPolygonPattern.Normal) {
+          Object.assign(newData, { isRect: false });
+        }
+
+        return newData;
+      }
+
+      return v;
+    });
+
+    this.dragInfo!.dragPrevCoord = this.getCoordinateUnderZoom(e);
+
+    this.setPolygonList(newPolygonList);
+    this.render();
+  }
+
+  /**
    * According to the mode of dragTarget, get the offset when dragging
    * @param e {MouseEvent}
    * @param selectedPolygon {IPolygonData}
@@ -1273,48 +1342,8 @@ class PolygonOperation extends BasicToolOperation {
     return selectedPointList;
   }
 
-  /**
-   * Update polygon position while enableDrag is true
-   * @param e {MouseEvent}
-   */
-  public onDragMove(e: MouseEvent) {
-    const newPolygonList = this.polygonList.map((v) => {
-      if (v.id === this.selectedID) {
-        const selectedPointList = this.dragPolygon(e, v);
-
-        if (!selectedPointList) {
-          return v;
-        }
-
-        const newData = {
-          ...v,
-          pointList: selectedPointList as IPolygonPoint[],
-        };
-
-        // 非矩形模式下拖动，矩形模式下生成的框将会转换为非矩形框
-        if (v.isRect === true && this.pattern === EPolygonPattern.Normal) {
-          Object.assign(newData, { isRect: false });
-        }
-
-        return newData;
-      }
-
-      return v;
-    });
-
-    this.dragInfo!.dragPrevCoord = this.getCoordinateUnderZoom(e);
-
-    this.setPolygonList(newPolygonList);
-    this.render();
-  }
-
   public onMouseMove(e: MouseEvent) {
     if (super.onMouseMove(e) || this.forbidMouseOperation || !this.imgInfo) {
-      return;
-    }
-
-    if (this.enableDrag) {
-      this.onDragMove(e);
       return;
     }
 
@@ -1339,7 +1368,6 @@ class PolygonOperation extends BasicToolOperation {
 
     if (this.drawingPointList.length > 0) {
       // 编辑中无需 hover操作
-
       return;
     }
 
@@ -1347,6 +1375,10 @@ class PolygonOperation extends BasicToolOperation {
     if (this.hoverID !== newHoverID) {
       this.hoverID = newHoverID;
       this.render();
+    }
+
+    if (this.selectedIDs.length > 0 && this.dragInfo) {
+      this.onDragMove(e);
     }
   }
 
@@ -1478,7 +1510,7 @@ class PolygonOperation extends BasicToolOperation {
 
   /** 更新文本输入，并且进行关闭 */
   public updateSelectedTextAttribute(newTextAttribute?: string) {
-    if (this._textAttributInstance && newTextAttribute && this.selectedID) {
+    if (this._textAttributeInstance && newTextAttribute && this.selectedID) {
       // 切换的时候如果存在
 
       let textAttribute = newTextAttribute;
@@ -1507,10 +1539,10 @@ class PolygonOperation extends BasicToolOperation {
     const coordinate = AxisUtils.getOffsetCoordinate({ x, y }, this.currentPos, this.zoom);
     const toolColor = this.getColor(attribute);
     const color = valid ? toolColor?.valid.stroke : toolColor?.invalid.stroke;
-    if (!this._textAttributInstance) {
+    if (!this._textAttributeInstance) {
       // 属性文本示例
 
-      this._textAttributInstance = new TextAttributeClass({
+      this._textAttributeInstance = new TextAttributeClass({
         width: newWidth,
         container: this.container,
         icon: this.getTextIconSvg(attribute),
@@ -1520,11 +1552,11 @@ class PolygonOperation extends BasicToolOperation {
       });
     }
 
-    if (this._textAttributInstance && !this._textAttributInstance?.isExit) {
-      this._textAttributInstance.appendToContainer();
+    if (this._textAttributeInstance && !this._textAttributeInstance?.isExit) {
+      this._textAttributeInstance.appendToContainer();
     }
 
-    this._textAttributInstance.update(`${textAttribute}`, {
+    this._textAttributeInstance.update(`${textAttribute}`, {
       left: coordinate.x,
       top: coordinate.y,
       color,
@@ -1578,19 +1610,21 @@ class PolygonOperation extends BasicToolOperation {
     }
   }
 
-  /**
-   * Render selected polygon
-   * @param selectedPolygon
-   */
-  public renderSelectedPolygon() {
-    const { selectedPolygon } = this;
-    if (selectedPolygon) {
-      const toolColor = this.getColor(selectedPolygon.attribute);
-      const toolData = StyleUtils.getStrokeAndFill(toolColor, selectedPolygon.valid, { isSelected: true });
+  public renderSelectedPolygons() {
+    this.selectedPolygons.forEach((polygon) => {
+      this.renderSelectedPolygon(polygon);
+    });
+  }
+
+  public renderSelectedPolygon(polygon: IPolygonData) {
+    // 3. 选中多边形的渲染
+    if (polygon) {
+      const toolColor = this.getColor(polygon.attribute);
+      const toolData = StyleUtils.getStrokeAndFill(toolColor, polygon.valid, { isSelected: true });
 
       DrawUtils.drawSelectedPolygonWithFillAndLine(
         this.canvas,
-        AxisUtils.changePointListByZoom(selectedPolygon.pointList, this.zoom, this.currentPos),
+        AxisUtils.changePointListByZoom(polygon.pointList, this.zoom, this.currentPos),
         {
           fillColor: toolData.fill,
           strokeColor: toolData.stroke,
@@ -1602,16 +1636,14 @@ class PolygonOperation extends BasicToolOperation {
         },
       );
 
-      let showText = `${
-        AttributeUtils.getAttributeShowText(selectedPolygon.attribute, this.config.attributeList) ?? ''
-      }`;
-      if (this.config?.isShowOrder && selectedPolygon?.order > 0) {
-        showText = `${selectedPolygon.order} ${showText}`;
+      let showText = `${AttributeUtils.getAttributeShowText(polygon.attribute, this.config.attributeList) ?? ''}`;
+      if (this.config?.isShowOrder && polygon?.order > 0) {
+        showText = `${polygon.order} ${showText}`;
       }
 
       DrawUtils.drawText(
         this.canvas,
-        AxisUtils.changePointByZoom(selectedPolygon.pointList[0], this.zoom, this.currentPos),
+        AxisUtils.changePointByZoom(polygon.pointList[0], this.zoom, this.currentPos),
         showText,
         {
           color: toolData.stroke,
@@ -1655,7 +1687,7 @@ class PolygonOperation extends BasicToolOperation {
     this.renderHoverPolygon();
 
     // 3. 选中多边形的渲染
-    this.renderSelectedPolygon();
+    this.renderSelectedPolygons();
 
     const defaultColor = this.getColor(this.defaultAttribute);
     const toolData = StyleUtils.getStrokeAndFill(defaultColor, !this.isCtrl);

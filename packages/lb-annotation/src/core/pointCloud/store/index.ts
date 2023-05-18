@@ -80,7 +80,7 @@ class PointCloudStore {
   public currentAttribute: string = '';
 
   // TODO. clear later.
-  private pointCloudObjectName = 'pointCloud';
+  public pointCloudObjectName = 'pointCloud';
 
   private emit: EventListener['emit'];
 
@@ -107,6 +107,7 @@ class PointCloudStore {
     this.setSegmentCoverMode = this.setSegmentCoverMode.bind(this);
     this.setSegmentFocusMode = this.setSegmentFocusMode.bind(this);
     this.switchSegmentHideMode = this.switchSegmentHideMode.bind(this);
+    this.clearSegmentResult = this.clearSegmentResult.bind(this);
     this.initMsg();
     this.setupRaycaster();
   }
@@ -120,6 +121,7 @@ class PointCloudStore {
     this.on('setSegmentCoverMode', this.setSegmentCoverMode);
     this.on('setSegmentFocusMode', this.setSegmentFocusMode);
     this.on('switchHideSegment', this.switchSegmentHideMode);
+    this.on('clearAllSegmentData', this.clearSegmentResult);
   }
 
   public unbindMsg() {
@@ -130,6 +132,7 @@ class PointCloudStore {
     this.unbind('setSegmentCoverMode', this.setSegmentCoverMode);
     this.unbind('setSegmentFocusMode', this.setSegmentFocusMode);
     this.unbind('switchHideSegment', this.switchSegmentHideMode);
+    this.unbind('clearAllSegmentData', this.clearSegmentResult);
   }
 
   public get containerWidth() {
@@ -160,6 +163,64 @@ class PointCloudStore {
 
   public get isEditStatus() {
     return pointCloudFSM.isEditStatus;
+  }
+
+  /**
+   * Need to update the name.
+   */
+  public get formatData() {
+    const newArray = this.segmentData.values();
+    const arr = [];
+    /**
+     * TODO： Need to update.
+     */
+    // @ts-ignore
+    for (const v of newArray) {
+      arr.push({
+        attribute: v.attribute,
+        id: v.id,
+        indexes: v.indexes,
+      });
+    }
+
+    return arr;
+  }
+
+  public get pointCloudArray() {
+    return this.scene.getObjectByName(this.pointCloudObjectName) as THREE.Points;
+  }
+
+  public clearSegmentResult() {
+    this.segmentData = new Map();
+  }
+
+  public updateCurrentSegment(segmentData: IPointCloudSegmentation[]) {
+    this.segmentData = new Map();
+    const { pointCloudArray } = this;
+
+    if (!pointCloudArray) {
+      return;
+    }
+
+    const position = pointCloudArray.geometry.attributes.position.array;
+
+    segmentData.forEach((data) => {
+      // indexes to points.
+      const points: number[] = [];
+      data.indexes.forEach((index) => {
+        points.push(position[index * 3], position[index * 3 + 1], position[index * 3 + 2]);
+      });
+
+      const newPoints = {
+        ...data,
+        points: new Float32Array(points),
+      };
+      this.segmentData.set(data.id, newPoints);
+      this.emit('addNewPointsCloud', {
+        ...data,
+        points: new Float32Array(points),
+      });
+    });
   }
 
   public statusToggle() {
@@ -250,6 +311,8 @@ class PointCloudStore {
       const vertices = [];
       const covers = [];
 
+      const indexes = [];
+
       for (let i = 0; i < len; i += 3) {
         const vector3d = new THREE.Vector3(cloudDataArrayLike[i], cloudDataArrayLike[i + 1], cloudDataArrayLike[i + 2]);
         vector3d.project(this.camera);
@@ -274,6 +337,7 @@ class PointCloudStore {
           if (this.segmentMode === EPointCloudSegmentMode.Add) {
             if (this.segmentCoverMode === EPointCloudSegmentCoverMode.Cover) {
               vertices.push(cloudDataArrayLike[i], cloudDataArrayLike[i + 1], cloudDataArrayLike[i + 2]);
+              indexes.push(i / 3);
               if (this.cloudData.get(key).visible === true) {
                 covers.push(cloudDataArrayLike[i], cloudDataArrayLike[i + 1], cloudDataArrayLike[i + 2]);
               }
@@ -292,11 +356,11 @@ class PointCloudStore {
       const verticesArray = new Float32Array(vertices);
       const coversArray = new Float32Array(covers);
 
-      this.updateStatusBySelector(verticesArray, coversArray);
+      this.updateStatusBySelector(verticesArray, coversArray, indexes);
     }
   }
 
-  public updateStatusBySelector(verticesArray: Float32Array, coversArray: Float32Array) {
+  public updateStatusBySelector(verticesArray: Float32Array, coversArray: Float32Array, indexes: number[]) {
     switch (this.segmentMode) {
       case EPointCloudSegmentMode.Add:
         if (this.cacheSegData) {
@@ -321,6 +385,7 @@ class PointCloudStore {
             attribute: this.currentAttribute,
             points: verticesArray,
             coverPoints: coversArray,
+            indexes,
           };
           this.emit('addNewPointsCloud', this.cacheSegData);
         }

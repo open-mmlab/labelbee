@@ -196,6 +196,7 @@ const ToolHeader: React.FC<IToolHeaderProps> = ({
               stepListNode,
               headerOptionNode,
               langNode: rightActions,
+              pointCloudSwitchPattern,
             })}
           </div>
         </div>

@@ -52,6 +52,8 @@ interface IProps {
   backgroundColor?: string;
 
   config?: IPointCloudConfig;
+
+  isSegment?: boolean;
 }
 
 export interface IEventBus {
@@ -86,9 +88,9 @@ export class PointCloud extends EventListener {
 
   public config?: IPointCloudConfig;
 
-  public store: PointCloudStore;
+  public store?: PointCloudStore; // TODO. Need to transfer all data to here
 
-  public pointCloudRender: PointCloudRender;
+  public pointCloudRender?: PointCloudRender;
 
   /**
    * zAxis Limit for filter point over a value
@@ -117,6 +119,8 @@ export class PointCloud extends EventListener {
 
   private currentPCDSrc?: string; // Record the src of PointCloud
 
+  private pointsMaterialSize: number = 1;
+
   /**
    * Record the src of Highlight PCD.
    *
@@ -124,7 +128,7 @@ export class PointCloud extends EventListener {
    */
   private highlightPCDSrc?: string;
 
-  private segmentOperation: PointCloudSegmentOperation;
+  private segmentOperation?: PointCloudSegmentOperation;
 
   constructor({
     container,
@@ -133,6 +137,7 @@ export class PointCloud extends EventListener {
     orthographicParams,
     backgroundColor = '#4C4C4C', // GRAY_BACKGROUND
     config,
+    isSegment,
   }: IProps) {
     super();
     this.container = container;
@@ -154,15 +159,9 @@ export class PointCloud extends EventListener {
     } else {
       this.camera = new THREE.PerspectiveCamera(30, this.containerWidth / this.containerHeight, 1, 1000);
     }
-    // this.camera = new THREE.OrthographicCamera(-500, 500, 500, -500, 100, -100);
     this.initCamera();
-
     this.scene = new THREE.Scene();
-    this.controls = new OrbitControls(this.camera, this.container);
-    this.controls.enablePan = false;
-    this.controls.addEventListener('start', this.orbiterStart.bind(this));
-    this.controls.addEventListener('change', this.orbiterChange.bind(this));
-    this.controls.addEventListener('end', this.orbiterEnd.bind(this));
+    this.controls = new OrbitControls(this.camera, isSegment ? this.container : this.renderer.domElement);
 
     this.pcdLoader = new PCDLoader();
 
@@ -181,8 +180,17 @@ export class PointCloud extends EventListener {
 
     this.cacheInstance = PointCloudCache.getInstance();
 
-    this.store = new PointCloudStore(this.pointCloudDelegate);
+    if (isSegment === true) {
+      this.initSegment();
+    }
+  }
 
+  public initSegment() {
+    this.store = new PointCloudStore(this.pointCloudDelegate);
+    this.controls.enablePan = false;
+    this.controls.addEventListener('start', this.orbiterStart.bind(this));
+    this.controls.addEventListener('change', this.orbiterChange.bind(this));
+    this.controls.addEventListener('end', this.orbiterEnd.bind(this));
     this.segmentOperation = new PointCloudSegmentOperation({
       dom: this.container,
       store: this.store,
@@ -194,11 +202,9 @@ export class PointCloud extends EventListener {
       nextTick: this.nextTick,
       config: this.config,
     });
-
+    this.initMsg();
     document.addEventListener('keydown', this.keydown);
     document.addEventListener('keyup', this.keyup);
-
-    this.initMsg();
   }
 
   public orbiterStart() {
@@ -206,18 +212,28 @@ export class PointCloud extends EventListener {
   }
 
   public orbiterChange() {
+    if (!this.store) {
+      return;
+    }
     this.store.orbiting = true;
   }
 
   public orbiterEnd() {
+    if (!this.store) {
+      return;
+    }
     this.store.orbiting = false;
   }
 
   public get currentSegmentTool() {
-    return this.segmentOperation.currentToolName;
+    return this.segmentOperation?.currentToolName;
   }
 
   public initMsg() {
+    if (!this.segmentOperation) {
+      return;
+    }
+
     this.on('CircleSelector', this.segmentOperation.updateSelector2Circle.bind(this.segmentOperation));
     this.on('LassoSelector', this.segmentOperation.updateSelector2Lasso.bind(this.segmentOperation));
     this.on('clearPointCloud', this.clearPointCloud.bind(this));
@@ -225,6 +241,10 @@ export class PointCloud extends EventListener {
   }
 
   public unbindMsg() {
+    if (!this.segmentOperation) {
+      return;
+    }
+
     this.unbind('CircleSelector', this.segmentOperation.updateSelector2Circle.bind(this.segmentOperation));
     this.unbind('LassoSelector', this.segmentOperation.updateSelector2Lasso.bind(this.segmentOperation));
     this.unbind('clearPointCloud', this.clearPointCloud.bind(this));
@@ -232,15 +252,39 @@ export class PointCloud extends EventListener {
   }
 
   public nextTick = () => {
+    if (!this.segmentOperation) {
+      return;
+    }
+
     this.segmentOperation._raycasting();
   };
 
   public keydown = (e: KeyboardEvent) => {
-    // alert(`type: ${typeof e.key}.${e.key}:-`);
+    if (!this.store) {
+      return;
+    }
     switch (e.key) {
       case ' ':
         this.controls.enablePan = true;
         this.store.setForbidOperation(true);
+        break;
+
+      default: {
+        break;
+      }
+    }
+  };
+
+  public keyup = (e: KeyboardEvent) => {
+    if (!this.store) {
+      return;
+    }
+
+    switch (e.key) {
+      case ' ':
+        this.controls.enablePan = false;
+        this.store.setForbidOperation(false);
+
         break;
 
       default: {
@@ -266,20 +310,6 @@ export class PointCloud extends EventListener {
       ...this.eventBus,
     };
   }
-
-  public keyup = (e: KeyboardEvent) => {
-    switch (e.key) {
-      case ' ':
-        this.controls.enablePan = false;
-        this.store.setForbidOperation(false);
-
-        break;
-
-      default: {
-        break;
-      }
-    }
-  };
 
   get DEFAULT_INIT_CAMERA_POSITION() {
     return new THREE.Vector3(-0.01, 0, 10);
@@ -398,7 +428,7 @@ export class PointCloud extends EventListener {
    * @param boxParams
    * @param color
    */
-  public generateBox(boxParams: IPointCloudBox, color = 0xffffff) {
+  public generateBox(boxParams: IPointCloudBox, color: THREE.ColorRepresentation = 0xffffff) {
     const newColor = color;
     // Temporarily turn the Box white
     // if (this.config?.attributeList && this.config?.attributeList?.length > 0 && boxParams.attribute) {
@@ -410,7 +440,7 @@ export class PointCloud extends EventListener {
     //     )?.hex ?? color;
     // }
 
-    this.AddBoxToSense(boxParams, newColor);
+    this.addBoxToSense(boxParams, newColor);
     this.render();
   }
 
@@ -474,7 +504,7 @@ export class PointCloud extends EventListener {
    * @param id
    * @param color
    */
-  public AddBoxToSense = (boxParams: IPointCloudBox, color = 0xffffff) => {
+  public addBoxToSense = (boxParams: IPointCloudBox, color: THREE.ColorRepresentation = 0xffffff) => {
     const id = boxParams.id ?? uuid();
 
     this.removeObjectByName(id);
@@ -507,7 +537,7 @@ export class PointCloud extends EventListener {
 
   public generateBoxes(boxes: IPointCloudBox[]) {
     boxes.forEach((box) => {
-      this.generateBox(box);
+      this.addBoxToSense(box);
     });
     this.render();
   }
@@ -813,7 +843,7 @@ export class PointCloud extends EventListener {
     });
 
     pointsMaterial.onBeforeCompile = this.overridePointShader;
-    pointsMaterial.size = 5;
+    pointsMaterial.size = this.pointsMaterialSize;
 
     if (radius) {
       // @ts-ignore
@@ -840,6 +870,9 @@ export class PointCloud extends EventListener {
   }
 
   public initCloudData(points: Float32Array) {
+    if (!this.store) {
+      return;
+    }
     for (let i = 0; i < points.length; i += 3) {
       const x = points[i];
       const y = points[i + 1];
@@ -886,7 +919,7 @@ export class PointCloud extends EventListener {
     }
     this.highlightPCDSrc = this.currentPCDSrc;
 
-    return new Promise<BufferAttribute[] | undefined>((resolve) => {
+    return new Promise<BufferAttribute[] | undefined>((resolve, reject) => {
       if (window.Worker) {
         const newPointCloudBoxList = pointCloudBoxList ? [...pointCloudBoxList] : [];
 
@@ -904,13 +937,27 @@ export class PointCloud extends EventListener {
           const { color } = e.data;
           const colorAttribute = new THREE.BufferAttribute(color, 3);
 
-          if (this.highlightPCDSrc) {
-            // Save the new highlight color.
-            this.cacheInstance.updateColor(this.highlightPCDSrc, color);
-
-            // Clear
-            this.highlightPCDSrc = undefined;
+          /**
+           * Need to return;
+           *
+           * 1. Not exist highlightPCDSrc
+           * 2. HighlightPCDSrc is not same with currentPCDSrc.
+           * 3. If the calculate color is not same with origin Points length.
+           */
+          if (
+            !this.highlightPCDSrc ||
+            this.highlightPCDSrc !== this.currentPCDSrc ||
+            oldPointCloud.geometry.attributes.position.array.length !== color.length
+          ) {
+            reject(new Error('Error Path'));
+            return;
           }
+
+          // Save the new highlight color.
+          this.cacheInstance.updateColor(this.highlightPCDSrc, color);
+
+          // Clear
+          this.highlightPCDSrc = undefined;
 
           colorAttribute.needsUpdate = true;
           oldPointCloud.geometry.setAttribute('color', colorAttribute);
@@ -1087,9 +1134,9 @@ export class PointCloud extends EventListener {
       const p3 = _polygon[index + 2];
       return PointCloudUtils.getIntersectionBySlope({
         p1: _minDistanceList[index].point,
-        k1: (p1.y - p2.y) / (p1.x - p2.x),
+        line1: [p1, p2],
         p2: _minDistanceList[index + 1].point,
-        k2: (p2.y - p3.y) / (p2.x - p3.x),
+        line2: [p2, p3],
       });
     });
     return fittedCoordinates;
@@ -1597,9 +1644,10 @@ export class PointCloud extends EventListener {
 
   /**
    * Update point size
-   * @param zoomIn
+   * @param param0
+   * @returns
    */
-  public updatePointSize = (zoomIn: boolean) => {
+  public updatePointSize = ({ zoomIn, customSize }: { zoomIn?: boolean; customSize?: number }) => {
     const points = this.scene.getObjectByName(this.pointCloudObjectName) as { material: PointsMaterial } | undefined;
 
     if (!points) {
@@ -1612,6 +1660,11 @@ export class PointCloud extends EventListener {
       points.material.size = Math.min(preSize * 1.2, 10);
     } else {
       points.material.size = Math.max(preSize / 1.2, 1);
+    }
+
+    if (customSize) {
+      points.material.size = customSize;
+      this.pointsMaterialSize = customSize;
     }
 
     this.render();

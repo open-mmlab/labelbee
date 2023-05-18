@@ -56,3 +56,5 @@ export default React.forwardRef(OutputApp);
 export { AnnotationView, PointCloudAnnotationView, i18n, VideoTagTool, PredictTracking };
 
 export * from './constant';
+
+export * from './typeTem';

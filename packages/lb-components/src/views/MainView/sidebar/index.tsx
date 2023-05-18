@@ -27,10 +27,11 @@ const { Panel } = Collapse;
 interface IProps {
   toolName?: EToolName;
   sider?: Sider;
+  enableColorPicker?: boolean;
 }
 
 export const sidebarCls = `${prefix}-sidebar`;
-const Sidebar: React.FC<IProps> = ({ sider }) => {
+const Sidebar: React.FC<IProps> = ({ sider, enableColorPicker }) => {
   const stepInfo = useSelector((state: AppState) =>
     StepUtils.getCurrentStepInfo(state.annotation.step, state.annotation.stepList),
   );
@@ -112,7 +113,7 @@ const Sidebar: React.FC<IProps> = ({ sider }) => {
 
   const horizontal = <div className={`${sidebarCls}__horizontal`} />;
 
-  const pointCloudToolSidebar = <PointCloudToolSidebar />;
+  const pointCloudToolSidebar = <PointCloudToolSidebar enableColorPicker={enableColorPicker} />;
 
   const pointCloudOperation = <PointCloudOperation />;
 

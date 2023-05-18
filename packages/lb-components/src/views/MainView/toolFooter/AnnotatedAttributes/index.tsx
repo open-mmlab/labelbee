@@ -81,6 +81,7 @@ const AnnotatedAttributesItem = ({ attribute }: { attribute: IInputList }) => {
       pointCloudBoxList: newPointCloudList,
       polygonList: newPolygonList,
       lineList: newLineList,
+      pointCloudSphereList: newSphereList,
     });
   };
 
@@ -135,13 +136,13 @@ const AnnotatedAttributesItem = ({ attribute }: { attribute: IInputList }) => {
 
 export const AnnotatedAttributesPanel = () => {
   const stepConfig: IPointCloudConfig = useSelector(stepConfigSelector);
-  const { attrPanelLayout, setAttrPanelLayout, pointCloudBoxList, polygonList, lineList } =
+  const { attrPanelLayout, setAttrPanelLayout, pointCloudBoxList, pointCloudSphereList, polygonList, lineList } =
     useContext(PointCloudContext);
   const { t } = useTranslation();
 
   const existAttributes = useMemo(() => {
-    return [...pointCloudBoxList, ...polygonList, ...lineList].map((i) => i.attribute);
-  }, [pointCloudBoxList, polygonList, lineList]);
+    return [...pointCloudBoxList, ...pointCloudSphereList, ...polygonList, ...lineList].map((i) => i.attribute);
+  }, [pointCloudBoxList, pointCloudSphereList, polygonList, lineList]);
 
   const displayAttrList = useMemo(() => {
     return (stepConfig.attributeList as IInputList[]).filter((i) =>
