@@ -19,6 +19,7 @@ import PointCloudTopView from './PointCloudTopView';
 import PointCloudSideView from './PointCloudSideView';
 import PointCloud2DView from './PointCloud2DView';
 import PointCloudListener from './PointCloudListener';
+import PointCloudSegmentListener from './PointCloudSegmentListener';
 import PointCloudSegment from './PointCloudSegment';
 import PointCloudSegmentStatus from './PointCloudSegmentStatus';
 import PointCloudSegmentToolbar from './PointCloudSegmentToolbar';
@@ -56,10 +57,10 @@ const PointCloudView: React.FC<IProps> = ({
   if (globalPattern === EPointCloudPattern.Segmentation) {
     return (
       <>
-        <PointCloudListener checkMode={checkMode} />
+        <PointCloudSegmentListener checkMode={checkMode} />
         <PointCloudSegmentToolbar />
         <PointCloudSegment />
-        <PointCloudSegmentStatus /> 
+        <PointCloudSegmentStatus />
       </>
     );
   }

@@ -33,14 +33,16 @@ class PointCloudRender {
     this.unbind = unbind;
     this.nextTick = nextTick;
     this.config = config;
-    this.initMsg();
-    this.animate();
 
     this.generateNewPoints = this.generateNewPoints.bind(this);
     this.clearStash = this.clearStash.bind(this);
     this.render3d = this.render3d.bind(this);
     this.updateNewPoints = this.updateNewPoints.bind(this);
     this.updatePointsColor = this.updatePointsColor.bind(this);
+    this.clearAllSegmentData = this.clearAllSegmentData.bind(this);
+
+    this.initMsg();
+    this.animate();
   }
 
   public get scene() {
@@ -64,6 +66,7 @@ class PointCloudRender {
     this.on('addNewPointsCloud', this.generateNewPoints);
     this.on('updateNewPoints', this.updateNewPoints);
     this.on('clearStashRender', this.clearStash);
+    this.on('clearAllSegmentData', this.clearAllSegmentData);
     this.on('reRender3d', this.render3d);
   }
 
@@ -71,6 +74,7 @@ class PointCloudRender {
     this.unbind('addNewPointsCloud', this.generateNewPoints);
     this.unbind('updateNewPoints', this.updateNewPoints);
     this.unbind('clearStashRender', this.clearStash);
+    this.unbind('clearAllSegmentData', this.clearAllSegmentData);
     this.unbind('reRender3d', this.render3d);
   }
 
@@ -100,6 +104,17 @@ class PointCloudRender {
       this.render3d();
     }
   };
+
+  public clearAllSegmentData() {
+    const len = this.scene.children.length;
+    for (let i = len - 1; i >= 0; i--) {
+      const point = this.scene.children[i];
+      if (point.type === 'Points' && point.name !== this.store.pointCloudObjectName) {
+        point.removeFromParent();
+      }
+    }
+    this.render3d();
+  }
 
   // TODO, Just for showing.
   public generateNewPoints = (segmentData: IPointCloudSegmentation) => {

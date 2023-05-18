@@ -417,6 +417,10 @@ const PointCloudToolSidebar: React.FC<IProps> = ({
           toolInstance={toolInstance}
           attributeList={attributeList}
           subAttributeList={subAttributeList}
+          config={config}
+          stepList={stepList}
+          stepInfo={stepInfo}
+          enableColorPicker={enableColorPicker}
         />
       </>
     );

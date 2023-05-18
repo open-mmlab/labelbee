@@ -61,6 +61,15 @@ class PointCloudUtils {
     return pointCloudDataList;
   }
 
+  public static getSegmentFromResultList(result: string) {
+    const data = this.jsonParser(result);
+
+    const DEFAULT_STEP = `step_1`;
+    const pointCloudDataList = data?.[DEFAULT_STEP]?.segmentation ?? [];
+
+    return pointCloudDataList;
+  }
+
   /**
    * Get the coordinate from canvas2d-coordinate to world coordinate
    */
