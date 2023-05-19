@@ -68,6 +68,7 @@ export interface AnnotationState {
   checkMode: boolean; // Judge current Mode is checkMode or not.
   predictionResult: IPointCloudBoxWithIndex[];
   predictionResultVisible: boolean;
+  highlightAttribute: string;
 }
 
 interface UpdateToolInstance {

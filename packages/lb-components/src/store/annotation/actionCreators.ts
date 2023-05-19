@@ -254,6 +254,15 @@ export const UpdateCheckMode = (checkMode: boolean): AnnotationActionTypes => {
   };
 };
 
+export const UpdateHighlightAttribute = (attribute: string): AnnotationActionTypes => {
+  return {
+    type: ANNOTATION_ACTIONS.SET_HIGHLIGHT_ATTRIBUTE,
+    payload: {
+      attribute,
+    }
+  }
+}
+
 /**
  * 初始化任务数据
  * @param param0
@@ -271,6 +280,7 @@ export function InitTaskData({
   skipBeforePageTurning,
   beforeRotate,
   checkMode,
+  highlightAttribute,
 }: any): any {
   const tasks: any[] = [];
 
@@ -312,6 +322,8 @@ export function InitTaskData({
     tasks.push(UpdateCheckMode(checkMode));
   }
 
+  tasks.push(UpdateHighlightAttribute(highlightAttribute))
+
   tasks.push(SetTaskConfig({ stepList, step }));
 
   tasks.push({
@@ -339,6 +351,7 @@ export function UpdateInjectFunc({
   loadFileList,
   stepList,
   beforeRotate,
+  highlightAttribute,
 }: any): any {
   const tasks: any[] = [];
 
@@ -371,6 +384,8 @@ export function UpdateInjectFunc({
   if (beforeRotate) {
     tasks.push(UpdateBeforeRotate(beforeRotate));
   }
+
+  tasks.push(UpdateHighlightAttribute(highlightAttribute))
 
   tasks.push(SetTaskStepList({ stepList }));
 

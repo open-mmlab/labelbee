@@ -5,7 +5,7 @@ import {
   IPointCloudSphereList,
   IPointCloudSphere,
   ILine,
-  EPointCloudPattern,
+  EPointCloudPattern, IPointCloudSegmentation,
 } from '@labelbee/lb-utils';
 import React, { useEffect, useMemo, useRef, useState } from 'react';
 import {
@@ -78,6 +78,7 @@ export interface IPointCloudContext
     _polygonList: IPolygonData[],
     _displaySphereList: IPointCloudSphereList,
     _lineList: ILine[],
+    _segmentation: IPointCloudSegmentation[],
   ) => void;
   attrPanelLayout: AttrPanelLayout;
   setAttrPanelLayout: (layout: AttrPanelLayout) => void;
@@ -92,6 +93,8 @@ export interface IPointCloudContext
     toolName: EToolName.Rect | EToolName.Polygon | EToolName.Point | EToolName.Line,
   ) => void;
   selectSpecAttr: (attr: string) => void;
+  segmentation: IPointCloudSegmentation[];
+  setSegmentation: (segmentation: IPointCloudSegmentation[]) => void;
 }
 
 export const PointCloudContext = React.createContext<IPointCloudContext>({
@@ -146,6 +149,8 @@ export const PointCloudContext = React.createContext<IPointCloudContext>({
   setGlobalPattern: () => {},
 
   setPtSegmentInstance: () => {},
+  segmentation: [],
+  setSegmentation: () => {},
 });
 
 export const PointCloudProvider: React.FC<{}> = ({ children }) => {
@@ -169,6 +174,7 @@ export const PointCloudProvider: React.FC<{}> = ({ children }) => {
   const [attrPanelLayout, setAttrPanelLayout] = useState<AttrPanelLayout>('');
   const [globalPattern, setGlobalPattern] = useState(EPointCloudPattern.Segmentation);
   const [ptSegmentInstance, setPtSegmentInstance] = useState<PointCloud>();
+  const [segmentation, setSegmentation] = useState<IPointCloudSegmentation[]>([])
 
   const selectedID = useMemo(() => {
     return selectedIDs.length === 1 ? selectedIDs[0] : '';
@@ -258,6 +264,7 @@ export const PointCloudProvider: React.FC<{}> = ({ children }) => {
       _polygonList: IPolygonData[] = polygonList,
       _displaySphereList: IPointCloudSphereList = displaySphereList,
       _lineList: ILine[] = displayLineList,
+      _segmentation: IPointCloudSegmentation[] = segmentation,
     ) => {
       pointCloudBoxList.forEach((v) => {
         mainViewInstance?.removeObjectByName(v.id);
@@ -272,6 +279,7 @@ export const PointCloudProvider: React.FC<{}> = ({ children }) => {
       topViewInstance?.updateLineList(_lineList);
       mainViewInstance?.generateBoxes(_displayPointCloudList);
       mainViewInstance?.generateSpheres(_displaySphereList);
+      ptSegmentInstance?.store?.updateCurrentSegment(_segmentation);
       syncAllViewPointCloudColor(_displayPointCloudList);
     };
 
@@ -348,6 +356,8 @@ export const PointCloudProvider: React.FC<{}> = ({ children }) => {
       setGlobalPattern,
       ptSegmentInstance,
       setPtSegmentInstance,
+      segmentation,
+      setSegmentation,
     };
   }, [
     valid,
@@ -367,6 +377,7 @@ export const PointCloudProvider: React.FC<{}> = ({ children }) => {
     pointCloudPattern,
     globalPattern,
     ptSegmentInstance,
+    segmentation,
   ]);
 
   const updateSelectedIDsAndRenderAfterHide = () => {
@@ -387,7 +398,8 @@ export const PointCloudProvider: React.FC<{}> = ({ children }) => {
 
   useEffect(() => {
     updateSelectedIDsAndRenderAfterHide();
-    topViewInstance?.pointCloud2dOperation?.setHiddenAttributes(hideAttributes);
+    topViewInstance?.toolInstance?.setHiddenAttributes(hideAttributes);
+    ptSegmentInstance?.store?.setHiddenAttributes(hideAttributes)
   }, [hideAttributes]);
 
   return <PointCloudContext.Provider value={ptCtx}>{children}</PointCloudContext.Provider>;

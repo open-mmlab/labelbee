@@ -79,6 +79,10 @@ class PointCloudStore {
   // current attribute of segmentation points
   public currentAttribute: string = '';
 
+  public highlightAttribute: string = '';
+
+  public hiddenAttributes: string[] = [];
+
   // TODO. clear later.
   public pointCloudObjectName = 'pointCloud';
 
@@ -108,6 +112,8 @@ class PointCloudStore {
     this.setSegmentFocusMode = this.setSegmentFocusMode.bind(this);
     this.switchSegmentHideMode = this.switchSegmentHideMode.bind(this);
     this.clearSegmentResult = this.clearSegmentResult.bind(this);
+    this.highlightPointsByAttribute = this.highlightPointsByAttribute.bind(this);
+    this.setHiddenAttributes = this.setHiddenAttributes.bind(this);
     this.initMsg();
     this.setupRaycaster();
   }
@@ -192,9 +198,11 @@ class PointCloudStore {
 
   public clearSegmentResult() {
     this.segmentData = new Map();
+    this.syncSegmentData();
   }
 
   public updateCurrentSegment(segmentData: IPointCloudSegmentation[]) {
+    this.updatePointCloudBySegment([]);
     this.segmentData = new Map();
     const { pointCloudArray } = this;
 
@@ -221,6 +229,7 @@ class PointCloudStore {
         points: new Float32Array(points),
       });
     });
+    this.syncSegmentData();
   }
 
   public statusToggle() {
@@ -282,6 +291,11 @@ class PointCloudStore {
   public switchSegmentHideMode(hideSegment: boolean) {
     this.hideSegment = hideSegment;
     this.updatePointCloudBySegment(hideSegment === true ? [] : [...this.segmentData.values()]);
+  }
+
+  public setHiddenAttributes(attributes: string[]) {
+    this.hiddenAttributes = attributes;
+    this.updatePointCloudBySegment([...this.segmentData.values()]);
   }
 
   public updateCanvasBasicStyle(canvas: HTMLCanvasElement, size: ISize, zIndex: number) {
@@ -439,6 +453,10 @@ class PointCloudStore {
     this.emit('syncPointCloudStatus', { segmentStatus, cacheSegData });
   }
 
+  public syncSegmentData() {
+    this.emit('syncSegmentData', this.formatData);
+  }
+
   // Save temporary data to pointCloud Store.
   public addStash2Store() {
     if (this.isEditStatus && this.cacheSegData) {
@@ -449,6 +467,7 @@ class PointCloudStore {
       this.segmentData.set(this.cacheSegData.id, this.cacheSegData);
       this.cacheSegData = undefined;
       this.syncPointCloudStatus();
+      this.syncSegmentData();
     }
   }
 
@@ -462,8 +481,11 @@ class PointCloudStore {
         }
       }
     });
-    if (segArr.length !== 0) {
-      segArr.map((seg) => {
+    const displaySeg = segArr?.filter(
+      (f) => !this.hiddenAttributes.some((a) => a === f.attribute) && f.id !== this.cacheSegData?.id,
+    );
+    if (displaySeg?.length !== 0) {
+      displaySeg.map((seg) => {
         this.emit('addNewPointsCloud', seg);
         return seg;
       });
@@ -485,6 +507,7 @@ class PointCloudStore {
         }
       }
     });
+    this.syncSegmentData();
     this.emit('reRender3d');
   };
 
@@ -515,6 +538,7 @@ class PointCloudStore {
         // Clear All Data.
         this.emit('clearStashRender');
       }
+      this.syncSegmentData();
       this.cacheSegData = undefined;
       this.syncPointCloudStatus();
     }
@@ -572,6 +596,7 @@ class PointCloudStore {
   }
 
   public resetAllSegDataSize() {
+    if (this.highlightAttribute !== '') return;
     this.allSegmentPoints.forEach((points) => {
       // If it has data in cache. Not to update style.
       if (this.cacheSegData?.id === points.name) {
@@ -599,6 +624,21 @@ class PointCloudStore {
     this.resetAllSegDataSize();
     newPoints.material.size = 10;
     this.hoverPointsID = newPoints.name;
+    this.emit('reRender3d');
+  }
+
+  public highlightPointsByAttribute(attribute: string) {
+    this.highlightAttribute = attribute;
+    if (this.segmentData.size === 0) return;
+    this.resetAllSegDataSize();
+    this.segmentData.forEach((seg, id) => {
+      if (seg.attribute === attribute) {
+        const points = this.scene.getObjectByName(id) as ThreePoints;
+        if (points && points?.material) {
+          points.material.size = 10;
+        }
+      }
+    });
     this.emit('reRender3d');
   }
 
