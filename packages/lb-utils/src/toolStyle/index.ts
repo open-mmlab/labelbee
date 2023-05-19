@@ -213,15 +213,17 @@ class ToolStyleConverter {
   }) {
     if (config?.attributeConfigurable === true) {
       const color = config?.attributeList?.find((i: any) => i.value === attribute)?.color;
-
       if (color) {
         return ToolStyleUtils.getToolColorList(color, style?.borderOpacity, style?.fillOpacity);
       }
 
-      // If the property does not have a custom color (color), then use a default Attribute Color
+      /**
+       * If the property does not have a custom color (color), then use a default Attribute Color
+       *  The first color in the attributeColor list is an no attribute, so index needs to be added by one
+       */
       if (style?.attributeColor) {
         const attributeIndex =
-          ToolStyleUtils.getAttributeIndex(attribute, config?.attributeList ?? []) + 1;
+          (ToolStyleUtils.getAttributeIndex(attribute, config?.attributeList ?? []) % 8) + 1;
         return style.attributeColor[attributeIndex];
       }
     }
