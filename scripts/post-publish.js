@@ -38,8 +38,8 @@ function createPullRequest({ branchName, body, title = branchName, base = 'dev' 
 
     return octokit.rest.pulls
         .create({
-            owner: 'buket-wu',
-            repo: 'labelwu',
+            owner: 'Kerwin-L',
+            repo: 'labelbee',
             head: branchName,
             title,
             base,
