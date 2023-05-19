@@ -98,7 +98,6 @@ export const BoxInfos = ({
     if (!selectedBox) {
       return;
     }
-
     const { length, width, height, rotation_y } = PointCloudUtils.transferBox2Kitti(
       selectedBox.info,
     );
@@ -121,7 +120,6 @@ export const BoxInfos = ({
         value: UnitUtils.rad2deg(rotation_y).toFixed(DECIMAL_PLACES),
       },
     ];
-
     // Get Point Count.
     ptCtx.mainViewInstance?.filterPointsByBox(selectedBox.info).then((data) => {
       if (!data) {

@@ -1,5 +1,5 @@
 declare interface ILinePoint extends IPoint {
-  id: string;
+  id?: string;
   specialEdge?: boolean;
   actual?: IPoint; // For internal use only
 }

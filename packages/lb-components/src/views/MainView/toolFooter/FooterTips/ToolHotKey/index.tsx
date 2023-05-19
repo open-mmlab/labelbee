@@ -13,6 +13,7 @@ import textToolShortCutTable from './text';
 import videoToolShortCutTable from './videoTag';
 import pointCloudShortCutTable, { pointCloudShortCutTable_POLYGON } from './pointCloud';
 import scribbleShortCutTable from './scribble';
+import cuboidShortCutTable from './cuboid';
 
 import { footerCls } from '../../index';
 import { useTranslation } from 'react-i18next';
@@ -52,6 +53,7 @@ export const shortCutTable: { [a: string]: IShortCutInfo[] } = {
   [EPointCloudName.PointCloud]: pointCloudShortCutTable,
   [EPointCloudName.PointCloud + '_POLYGON']: pointCloudShortCutTable_POLYGON,
   [EToolName.ScribbleTool]: scribbleShortCutTable,
+  [EToolName.Cuboid]: cuboidShortCutTable,
 };
 
 const ToolHotKeyIcon = ({ icon }: { icon: React.ReactElement | string }) => {
@@ -210,8 +212,11 @@ const ToolHotKey: React.FC<IProps> = ({ style, title, toolName }) => {
   let newToolName = toolName;
   if (newToolName === `${EPointCloudName.PointCloud}` && pointCloudPattern === EToolName.Polygon) {
     newToolName += '_POLYGON';
+  } else if (pointCloudPattern === EToolName.Line) {
+    newToolName = EToolName.Line;
+  } else if (pointCloudPattern === EToolName.Point) {
+    newToolName = EToolName.Point;
   }
-
   const props = {
     style,
     title,

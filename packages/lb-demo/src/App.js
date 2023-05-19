@@ -20,6 +20,7 @@ import {
   videoList,
 } from './mock/index';
 import { getDependStepList, getStepList } from './mock/taskConfig';
+import car1 from './mock/cuboidImages/1.png';
 
 const App = () => {
   const tool = qs.parse(window.location.search, { ignoreQueryPrefix: true, comma: true }).tool;
@@ -82,7 +83,7 @@ const App = () => {
       <div>
         <div style={{ height: 1000 }}>
           <AnnotationView
-            src='https://cdn.nba.com/manage/2020/10/andre-iguodala-iso-smile-0520-784x588.jpg'
+            src={car1}
             annotations={data}
             style={{
               stroke: 'blue',
@@ -102,7 +103,7 @@ const App = () => {
   if (tool === 'PointCloudAnnotationView') {
     return (
       <PointCloudAnnotationView
-        src='http://10.152.32.16:8080/top_center_lidar/2022-02-20-12-21-03-100.pcd'
+        src={pointCloudList[0]}
         size={{
           height: 1080,
           width: 1000,

@@ -24,11 +24,15 @@ const AnnotatedAttributesItem = ({ attribute }: { attribute: IInputList }) => {
   const pointCloudCtx = useContext(PointCloudContext);
   const {
     pointCloudBoxList,
+    pointCloudSphereList,
     hideAttributes,
     toggleAttributesVisible,
     polygonList,
     setPolygonList,
+    lineList,
+    setLineList,
     setPointCloudResult,
+    setPointCloudSphereList,
     reRender,
     selectSpecAttr,
   } = pointCloudCtx;
@@ -37,9 +41,12 @@ const AnnotatedAttributesItem = ({ attribute }: { attribute: IInputList }) => {
 
   const { pushHistoryWithList } = useHistory();
 
-  const pointCloudListForSpecAttribute = [...pointCloudBoxList, ...polygonList].filter(
-    (i) => i.attribute === attribute.value,
-  );
+  const pointCloudListForSpecAttribute = [
+    ...pointCloudBoxList,
+    ...polygonList,
+    ...pointCloudSphereList,
+    ...lineList,
+  ].filter((i) => i.attribute === attribute.value);
 
   const onVisibleChange = () => {
     toggleAttributesVisible(attribute.value);
@@ -47,11 +54,11 @@ const AnnotatedAttributesItem = ({ attribute }: { attribute: IInputList }) => {
 
   const isHidden = hideAttributes.includes(attribute.value);
 
-  const getBoxID = ({ trackID, order }: { trackID?: number; order?: number }) => {
+  const getItemID = ({ trackID, order }: { trackID?: number; order?: number }) => {
     return trackID ? trackID : order;
   };
 
-  const getBoxKey = ({ trackID, order }: { trackID?: number; order?: number }) => {
+  const getItemKey = ({ trackID, order }: { trackID?: number; order?: number }) => {
     return trackID ? `trackID_${trackID}` : `order_${order}`;
   };
 
@@ -62,13 +69,20 @@ const AnnotatedAttributesItem = ({ attribute }: { attribute: IInputList }) => {
 
     const newPolygonList = polygonList.filter((i) => attribute !== i.attribute);
     const newPointCloudList = pointCloudBoxList.filter((i) => attribute !== i.attribute);
-
-    reRender(newPointCloudList, newPolygonList);
-
+    const newLineList = lineList.filter((i) => attribute !== i.attribute);
+    const newSphereList = pointCloudSphereList.filter((i) => attribute !== i.attribute);
+    reRender(newPointCloudList, newPolygonList, newSphereList, newLineList);
     setPolygonList(newPolygonList);
     setPointCloudResult(newPointCloudList);
+    setPointCloudSphereList(newSphereList);
+    setLineList(newLineList);
 
-    pushHistoryWithList({ pointCloudBoxList: newPointCloudList, polygonList: newPolygonList });
+    pushHistoryWithList({
+      pointCloudBoxList: newPointCloudList,
+      polygonList: newPolygonList,
+      lineList: newLineList,
+      pointCloudSphereList: newSphereList,
+    });
   };
 
   const onDeleteGraphByAttr = (attribute: IInputList) => {
@@ -109,10 +123,10 @@ const AnnotatedAttributesItem = ({ attribute }: { attribute: IInputList }) => {
       </div>
 
       {expanded &&
-        pointCloudListForSpecAttribute.map((box) => {
+        pointCloudListForSpecAttribute.map((item, order) => {
           return (
-            <div key={getBoxKey(box)} style={{ paddingLeft: 54 }}>
-              {`${getBoxID(box)}.${attribute.key}`}
+            <div key={getItemKey({ ...item, order })} style={{ paddingLeft: 54 }}>
+              {`${getItemID({ ...item, order })}.${attribute.key}`}
             </div>
           );
         })}
@@ -122,13 +136,13 @@ const AnnotatedAttributesItem = ({ attribute }: { attribute: IInputList }) => {
 
 export const AnnotatedAttributesPanel = () => {
   const stepConfig: IPointCloudConfig = useSelector(stepConfigSelector);
-  const { attrPanelLayout, setAttrPanelLayout, pointCloudBoxList, polygonList } =
+  const { attrPanelLayout, setAttrPanelLayout, pointCloudBoxList, pointCloudSphereList, polygonList, lineList } =
     useContext(PointCloudContext);
   const { t } = useTranslation();
 
   const existAttributes = useMemo(() => {
-    return [...pointCloudBoxList, ...polygonList].map((i) => i.attribute);
-  }, [pointCloudBoxList, polygonList]);
+    return [...pointCloudBoxList, ...pointCloudSphereList, ...polygonList, ...lineList].map((i) => i.attribute);
+  }, [pointCloudBoxList, pointCloudSphereList, polygonList, lineList]);
 
   const displayAttrList = useMemo(() => {
     return (stepConfig.attributeList as IInputList[]).filter((i) =>

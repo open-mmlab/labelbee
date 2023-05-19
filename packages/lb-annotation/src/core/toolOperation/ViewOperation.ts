@@ -9,6 +9,7 @@ import {
   TAnnotationViewPolygon,
   TAnnotationViewBox3d,
   IBasicStyle,
+  TAnnotationViewCuboid,
 } from '@labelbee/lb-utils';
 import _ from 'lodash';
 import rgba from 'color-rgba';
@@ -499,6 +500,28 @@ export default class ViewOperation extends BasicToolOperation {
     }
   }
 
+  public renderSingleCuboid(annotation: TAnnotationViewCuboid) {
+    const { style } = this.getRenderStyle(annotation);
+    const cuboid = annotation.annotation;
+    const fillArr = rgba(style?.fill ?? style?.stroke ?? DEFAULT_STROKE_COLOR);
+    const fillColor = `rgba(${fillArr[0]}, ${fillArr[1]}, ${fillArr[2]},${fillArr[3] * 0.8})`;
+    const strokeColor = style.stroke;
+    const transformCuboid = AxisUtils.changeCuboidByZoom(cuboid, this.zoom, this.currentPos);
+    const { headerText, bottomText } = this.getRenderText(cuboid, cuboid?.hiddenText);
+
+    DrawUtils.drawCuboidWithText(
+      this.canvas,
+      transformCuboid,
+      { strokeColor, fillColor, thickness: style.thickness },
+      {
+        config: this.config,
+        hiddenText: cuboid?.hiddenText,
+        headerText,
+        bottomText,
+      },
+    );
+  }
+
   public renderBox3d(annotation: TAnnotationViewBox3d) {
     if (annotation.type !== 'box3d') {
       return;
@@ -513,7 +536,7 @@ export default class ViewOperation extends BasicToolOperation {
 
     const extraData = _.pick(data, ['stroke', 'thickness']);
 
-    viewDataPointList.forEach((v, i) => {
+    viewDataPointList!.forEach((v, i) => {
       const newAnnotation = {
         ...extraData,
         id: `${annotation.annotation.id}-${i}`,
@@ -723,6 +746,11 @@ export default class ViewOperation extends BasicToolOperation {
 
           case 'box3d': {
             this.renderBox3d(annotation);
+            break;
+          }
+
+          case 'cuboid': {
+            this.renderSingleCuboid(annotation);
             break;
           }
 

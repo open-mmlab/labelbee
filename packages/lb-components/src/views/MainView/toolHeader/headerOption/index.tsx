@@ -24,7 +24,7 @@ interface IProps {
 
 enum EColor {
   Hover = '#666fff',
-  Normal = '#cccccc',
+  Normal = '#999999',
 }
 
 const HeaderOption: React.FC<IProps> = (props) => {
@@ -37,6 +37,7 @@ const HeaderOption: React.FC<IProps> = (props) => {
     annotation: state.annotation,
     imgAttribute: state.imgAttribute,
   }));
+
   const { t } = useTranslation();
 
   const isTagTool = [EToolName.Tag, EVideoToolName.VideoTagTool].includes(stepInfo?.tool as any);

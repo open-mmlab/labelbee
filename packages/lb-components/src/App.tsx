@@ -90,6 +90,8 @@ export interface AppProps {
   customRenderStyle?: (data: any) => IAnnotationStyle;
 
   checkMode?: boolean;
+  intelligentFit?: boolean;
+  enableColorPicker?: boolean;
 }
 
 const App: React.FC<AppProps> = (props) => {
@@ -111,7 +113,8 @@ const App: React.FC<AppProps> = (props) => {
     defaultLang = 'cn',
     skipBeforePageTurning,
     beforeRotate,
-    checkMode = false
+    checkMode = false,
+    intelligentFit = true,
   } = props;
 
   useEffect(() => {
@@ -128,7 +131,7 @@ const App: React.FC<AppProps> = (props) => {
         onStepChange,
         skipBeforePageTurning,
         beforeRotate,
-        checkMode
+        checkMode,
       }),
     );
 
@@ -204,7 +207,7 @@ const App: React.FC<AppProps> = (props) => {
   return (
     <div>
       <ConfigProvider locale={i18n.language === 'en' ? enUS : zhCN}>
-        <MainView {...props} />
+        <MainView {...props} intelligentFit={intelligentFit} />
       </ConfigProvider>
     </div>
   );

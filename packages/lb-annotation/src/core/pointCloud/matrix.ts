@@ -79,7 +79,6 @@ export function lidar2image(point: { x: number; y: number; z: number }, composeM
 
 export function getCuboidFromPointCloudBox(boxParams: IPointCloudBox) {
   const { center, width, height, depth, rotation } = boxParams;
-
   const polygonPointList = [
     {
       x: center.x + width / 2,

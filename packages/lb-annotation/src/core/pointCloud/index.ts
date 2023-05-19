@@ -12,9 +12,12 @@ import {
   EPerspectiveView,
   IVolume,
   IPointCloudBox,
+  IPointCloudSphere,
   I3DSpaceCoord,
   IPointCloudConfig,
   toolStyleConverter,
+  PointCloudUtils,
+  DEFAULT_SPHERE_PARAMS,
 } from '@labelbee/lb-utils';
 import { BufferAttribute, OrthographicCamera, PerspectiveCamera, PointsMaterial, Shader } from 'three';
 import HighlightWorker from 'web-worker:./highlightWorker.js';
@@ -22,6 +25,7 @@ import FilterBoxWorker from 'web-worker:./filterBoxWorker.js';
 import { isInPolygon } from '@/utils/tool/polygonTool';
 import { IPolygonPoint } from '@/types/tool/polygon';
 import uuid from '@/utils/uuid';
+import MathUtils from '@/utils/MathUtils';
 import { PCDLoader } from './PCDLoader';
 import { OrbitControls } from './OrbitControls';
 import { PointCloudCache } from './cache';
@@ -272,7 +276,7 @@ export class PointCloud {
    * @param boxParams
    * @param color
    */
-  public generateBox(boxParams: IPointCloudBox, color = 0xffffff) {
+  public generateBox(boxParams: IPointCloudBox, color: THREE.ColorRepresentation = 0xffffff) {
     const newColor = color;
     // Temporarily turn the Box white
     // if (this.config?.attributeList && this.config?.attributeList?.length > 0 && boxParams.attribute) {
@@ -299,13 +303,56 @@ export class PointCloud {
     }, {});
   }
 
+  /**
+   * add new sphere just like adding new box
+   * @param sphereParams
+   */
+  public addSphereToSense = (sphereParams: IPointCloudSphere, color = 'blue') => {
+    const id = sphereParams.id ?? uuid();
+
+    this.removeObjectByName(id);
+
+    const { radius, widthSegments, heightSegments } = DEFAULT_SPHERE_PARAMS;
+    const { center } = sphereParams;
+    const group = new THREE.Group();
+    const spGeo = new THREE.SphereGeometry(radius, widthSegments, heightSegments);
+    const spMaterial = new THREE.MeshBasicMaterial({ color });
+    const sphere = new THREE.Mesh(spGeo, spMaterial);
+    sphere.position.set(center.x, center.y, center.z);
+    group.add(sphere);
+    group.name = id;
+    this.scene.add(group);
+  };
+
+  public generateSphere = (sphereParams: IPointCloudSphere) => {
+    const { fill } = toolStyleConverter.getColorFromConfig(
+      { attribute: sphereParams.attribute },
+      { ...this.config, attributeConfigurable: true },
+      {},
+    );
+    this.addSphereToSense(sphereParams, fill);
+    this.render();
+  };
+
+  public generateSpheres = (spheres: IPointCloudSphere[]) => {
+    spheres.forEach((sphere) => {
+      const { fill } = toolStyleConverter.getColorFromConfig(
+        { attribute: sphere.attribute },
+        { ...this.config, attributeConfigurable: true },
+        {},
+      );
+      this.addSphereToSense(sphere, fill);
+    });
+    this.render();
+  };
+
   /*
    * Remove exist box and add new one to scene
    * @param boxParams
    * @param id
    * @param color
    */
-  public addBoxToSense = (boxParams: IPointCloudBox, color = 0xffffff) => {
+  public addBoxToSense = (boxParams: IPointCloudBox, color: THREE.ColorRepresentation = 0xffffff) => {
     const id = boxParams.id ?? uuid();
 
     this.removeObjectByName(id);
@@ -326,10 +373,12 @@ export class PointCloud {
 
     group.add(box);
     group.add(arrow);
-    group.position.set(center.x, center.y, center.z);
-
-    group.rotation.set(0, 0, rotation);
-
+    if (center) {
+      group.position.set(center.x, center.y, center.z);
+    }
+    if (rotation) {
+      group.rotation.set(0, 0, rotation);
+    }
     group.name = id;
     this.scene.add(group);
   };
@@ -395,8 +444,32 @@ export class PointCloud {
     return cameraPositionVector;
   }
 
+  public updateCameraBySphere(sphereParams: IPointCloudSphere, perspectiveView: EPerspectiveView) {
+    const { center } = sphereParams;
+    const { radius } = DEFAULT_SPHERE_PARAMS;
+    const cameraPositionVector = this.getCameraVector(
+      center,
+      0,
+      { width: radius * 2, height: radius * 2, depth: radius * 2 },
+      perspectiveView,
+    );
+    this.updateCamera(cameraPositionVector, center);
+    return cameraPositionVector;
+  }
+
   public updateOrthoCamera(boxParams: IPointCloudBox, perspectiveView: EPerspectiveView) {
     const cameraPositionVector = this.updateCameraByBox(boxParams, perspectiveView);
+
+    // Initialize the camera zoom to get right projectionMatrix.(like functin - getBoxPolygon2DCoordinate)
+    this.camera.zoom = 1;
+    this.camera.updateProjectionMatrix();
+    return {
+      cameraPositionVector,
+    };
+  }
+
+  public updateOrthoCameraBySphere(sphereParams: IPointCloudSphere, perspectiveView: EPerspectiveView) {
+    const cameraPositionVector = this.updateCameraBySphere(sphereParams, perspectiveView);
 
     // Initialize the camera zoom to get right projectionMatrix.(like functin - getBoxPolygon2DCoordinate)
     this.camera.zoom = 1;
@@ -837,39 +910,106 @@ export class PointCloud {
     return canvas;
   }
 
-  public getSensesPointZAxisInPolygon(polygon: IPolygonPoint[], zScope?: [number, number]) {
+  /**
+   * Filter road points and noise in all directions
+   * 1. The first 5% of the z-axis is used as the road coordinate
+   * 2. Filter out points 10cm above the road surface.
+   * 3. Filter out the first 0.5% of noise points in other directions
+   */
+  public filterNoise(innerPointList: I3DSpaceCoord[]) {
+    let newPointList = [...innerPointList];
+    newPointList.sort((a, b) => a.z - b.z);
+
+    const startIndexZ = Math.floor(newPointList.length * 0.05);
+    const roadPoint = newPointList[startIndexZ];
+    newPointList = newPointList.filter(({ z }) => z > roadPoint.z + 0.1);
+
+    const noisePercent = 0.005;
+    const endIndexZ = Math.floor(newPointList.length * (1 - noisePercent));
+    newPointList = newPointList.slice(0, endIndexZ);
+
+    newPointList.sort((a, b) => a.x - b.x);
+    const startIndexX = Math.floor(newPointList.length * noisePercent);
+    const endIndexX = Math.floor(newPointList.length * (1 - noisePercent));
+    newPointList = newPointList.slice(startIndexX, endIndexX);
+
+    newPointList.sort((a, b) => a.y - b.y);
+    const startIndexY = Math.floor(newPointList.length * noisePercent);
+    const endIndexY = Math.floor(newPointList.length * (1 - noisePercent));
+    newPointList = newPointList.slice(startIndexY, endIndexY);
+
+    return newPointList.length > 100 ? newPointList : innerPointList;
+  }
+
+  // Get the polygon coordinates after fitting
+  public getFittedCoordinates(polygon: IPolygonPoint[], innerPointList: ICoordinate[]) {
+    const minDistanceList: Array<{ distance: number; point: ICoordinate }> = [];
+    let _polygon = [...polygon, polygon[0]];
+    innerPointList.forEach(({ x, y }) => {
+      polygon.forEach((p1, index) => {
+        const p2 = _polygon[index + 1];
+        const distance = MathUtils.getFootOfPerpendicular({ x, y }, p1, p2, false, true).length;
+        if (!minDistanceList[index] || distance < minDistanceList[index].distance) {
+          minDistanceList[index] = { distance, point: { x, y } };
+        }
+      });
+    });
+
+    // todo: should leave a little margin
+    _polygon = [polygon[polygon.length - 1], ...polygon, polygon[0]];
+    const _minDistanceList = [minDistanceList[minDistanceList.length - 1], ...minDistanceList];
+    const fittedCoordinates = polygon.map((_, index) => {
+      const p1 = _polygon[index];
+      const p2 = _polygon[index + 1];
+      const p3 = _polygon[index + 2];
+      return PointCloudUtils.getIntersectionBySlope({
+        p1: _minDistanceList[index].point,
+        line1: [p1, p2],
+        p2: _minDistanceList[index + 1].point,
+        line2: [p2, p3],
+      });
+    });
+    return fittedCoordinates;
+  }
+
+  public getSensesPointZAxisInPolygon(polygon: IPolygonPoint[], zScope?: [number, number], intelligentFit?: boolean) {
     const points = this.scene.children.find((i) => i.uuid === this.pointsUuid) as THREE.Points;
     let minZ = 0;
     let maxZ = 0;
     let count = 0; // The count of scope
     let zCount = 0; // The Count of Polygon range
+    let fittedCoordinates: ICoordinate[] = []; // Vertex coordinates after fitting(ThreeJs coordinates)
+    let innerPointList: I3DSpaceCoord[] = []; // Points within the polygon range
 
-    if (points && points?.geometry) {
-      const pointPosArray = points?.geometry.attributes.position.array;
+    const pointPosArray = points?.geometry?.attributes?.position?.array || [];
 
-      for (let idx = 0; idx < pointPosArray.length; idx += 3) {
-        const x = pointPosArray[idx];
-        const y = pointPosArray[idx + 1];
-        const z = pointPosArray[idx + 2];
-
-        const inPolygon = isInPolygon({ x, y }, polygon);
-
-        if (inPolygon && z) {
-          maxZ = Math.max(z, maxZ);
-          minZ = Math.min(z, minZ);
-
-          zCount++;
-
-          if (zScope) {
-            if (z >= zScope[0] && z <= zScope[1]) {
-              count++;
-            }
-          }
-        }
+    for (let idx = 0; idx < pointPosArray.length; idx += 3) {
+      const x = pointPosArray[idx];
+      const y = pointPosArray[idx + 1];
+      const z = pointPosArray[idx + 2];
+      const inPolygon = isInPolygon({ x, y }, polygon);
+      if (inPolygon && (z || z === 0)) {
+        innerPointList.push({ x, y, z });
       }
     }
 
-    return { maxZ, minZ, count, zCount };
+    if (!innerPointList.length) {
+      return { maxZ, minZ, count, zCount, fittedCoordinates };
+    }
+
+    if (intelligentFit) {
+      innerPointList = this.filterNoise(innerPointList);
+      fittedCoordinates = this.getFittedCoordinates(polygon, innerPointList);
+    }
+    innerPointList.sort((a, b) => a.z - b.z);
+    minZ = innerPointList[0].z - 0.01;
+    maxZ = innerPointList[innerPointList.length - 1].z + 0.01;
+    zCount = innerPointList.length;
+    if (zScope) {
+      count = innerPointList.filter(({ z }) => z >= zScope[0] && z <= zScope[1]).length;
+    }
+
+    return { maxZ, minZ, count, zCount, fittedCoordinates };
   }
 
   /**
@@ -1037,6 +1177,14 @@ export class PointCloud {
     return this.getBoxPolygon2DCoordinate(boxParams, EPerspectiveView.Back);
   }
 
+  public getSphereSidePoint2DCoordinate(sphereParams: IPointCloudSphere) {
+    return this.getSpherePoint2DCoordinate(sphereParams);
+  }
+
+  public getSphereBackPoint2DCoordinate(sphereParams: IPointCloudSphere) {
+    return this.getSpherePoint2DCoordinate(sphereParams);
+  }
+
   public boxParams2ViewPolygon(boxParams: IPointCloudBox, perspectiveView: EPerspectiveView) {
     switch (perspectiveView) {
       case EPerspectiveView.Left:
@@ -1087,6 +1235,57 @@ export class PointCloud {
 
     return {
       polygon2d,
+      zoom: Math.min(wZoom, hZoom) / 2,
+    };
+  }
+
+  public getSpherePoint2DCoordinate(sphereParams: IPointCloudSphere) {
+    const { center, attribute, id, valid } = sphereParams;
+    const { radius } = DEFAULT_SPHERE_PARAMS;
+
+    const transParams = {
+      center,
+      attribute,
+      id,
+      valid,
+      width: radius * 2,
+      height: radius * 2,
+      depth: radius * 2,
+      rotation: 0,
+    } as IPointCloudBox;
+    const projectMatrix = new THREE.Matrix4()
+      .premultiply(this.camera.matrixWorldInverse) // View / Camera Translation
+      .premultiply(this.camera.projectionMatrix); // Projection Translation
+
+    const boxSideMatrix = new THREE.Matrix4()
+      .premultiply(this.getModelTransformationMatrix(transParams)) // Model Translation
+      .premultiply(projectMatrix) // View Translation + Projection Translation
+      .premultiply(this.basicCoordinate2CanvasMatrix4); // Viewport Translation
+    this.sideMatrix = boxSideMatrix;
+
+    const point2d = new THREE.Vector3(center.x, center.y, center.z).applyMatrix4(this.sideMatrix as any);
+
+    const wZoom = this.containerWidth / (radius * 2);
+    const hZoom = this.containerHeight / (radius * 2);
+
+    return {
+      point2d,
+      zoom: Math.min(wZoom, hZoom) / 2,
+    };
+  }
+
+  public getSphereTopPoint2DCoordinate(sphereParams: IPointCloudSphere) {
+    const { center } = sphereParams;
+    const { radius } = DEFAULT_SPHERE_PARAMS;
+
+    const point2d = {
+      x: -(center.y - this.containerWidth / 2),
+      y: -(center.x - this.containerHeight / 2),
+    };
+    const wZoom = this.containerWidth / (radius * 2);
+    const hZoom = this.containerHeight / (radius * 2);
+    return {
+      point2d,
       zoom: Math.min(wZoom, hZoom) / 2,
     };
   }

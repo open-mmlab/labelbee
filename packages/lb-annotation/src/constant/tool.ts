@@ -58,6 +58,10 @@ export enum EToolName {
   OCRRelation = 'OCRRelationTool',
   /** 算法分割辅助工具 */
   SegmentByRect = 'segmentByRectTool',
+  /** 立体框工具  */
+  Cuboid = 'cuboidTool',
+  /** 点云多边形工具 */
+  PointCloudPolygon = 'pointCloudPolygon',
 }
 
 export enum ECheckModel {
@@ -71,6 +75,7 @@ export enum ERectPattern {
 }
 
 export type ToolName = EToolName | EVideoToolName | EPointCloudName;
+export type THybridToolName = EToolName | Array<EToolName>;
 
 export const TOOL_NAME: { [a: string]: string } = {
   [EToolName.Rect]: '拉框',
@@ -93,6 +98,7 @@ export const TOOL_NAME: { [a: string]: string } = {
   [EVideoToolName.VideoTagTool]: '视频标签',
   [EVideoToolName.VideoClipTool]: '视频截取',
   [EPointCloudName.PointCloud]: '点云',
+  [EToolName.Cuboid]: '立体框',
 };
 
 export const TOOL_NAME_EN: { [a: string]: string } = {
@@ -116,6 +122,7 @@ export const TOOL_NAME_EN: { [a: string]: string } = {
   [EVideoToolName.VideoTagTool]: 'VideoTagTool',
   [EVideoToolName.VideoClipTool]: 'VideoClipTool',
   [EPointCloudName.PointCloud]: 'PointCloud',
+  [EToolName.Cuboid]: 'Cuboid',
 };
 
 export enum EDependPattern {

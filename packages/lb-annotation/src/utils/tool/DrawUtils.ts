@@ -1,7 +1,11 @@
+import type { ICuboid, ICuboidConfig, IDrawingCuboid } from '@/types/tool/cuboid';
 import { DEFAULT_FONT, ELineTypes, SEGMENT_NUMBER } from '../../constant/tool';
 import { IPolygonPoint } from '../../types/tool/polygon';
 import PolygonUtils from './PolygonUtils';
 import UnitUtils from './UnitUtils';
+import AxisUtils from './AxisUtils';
+import { getCuboidAllSideLine, getCuboidTextAttributeOffset, getPointListsByDirection } from './CuboidUtils';
+import AttributeUtils from './AttributeUtils';
 
 const DEFAULT_ZOOM = 1;
 const DEFAULT_CURRENT_POS = {
@@ -716,5 +720,120 @@ export default class DrawUtils {
   ): void {
     const ctx: CanvasRenderingContext2D = canvas.getContext('2d')!;
     this.drawArrow(ctx, startPoint, endPoint, options);
+  }
+
+  /**
+   * Expansion of other base draw.
+   *
+   * Simple Version.
+   * @param param0
+   */
+  public static drawCuboid(
+    canvas: HTMLCanvasElement,
+    cuboid: ICuboid | IDrawingCuboid,
+    options: Partial<{
+      strokeColor: string;
+      fillColor: string;
+      thickness: number;
+    }> = {},
+  ) {
+    const { backPoints, direction, frontPoints } = cuboid;
+    const { strokeColor, thickness, fillColor } = options;
+
+    const defaultStyle = {
+      color: strokeColor,
+      thickness,
+    };
+
+    if (backPoints) {
+      // 1. Draw the backPoints.
+      const backPointList = AxisUtils.transformPlain2PointList(backPoints);
+      DrawUtils.drawPolygon(canvas, backPointList, { ...defaultStyle, isClose: true });
+
+      // 2. Draw the all sideLine.
+      const sideLine = getCuboidAllSideLine(cuboid as ICuboid);
+      sideLine?.forEach((line) => {
+        DrawUtils.drawLine(canvas, line.p1, line.p2, { ...defaultStyle });
+      });
+    }
+
+    const pointList = AxisUtils.transformPlain2PointList(frontPoints);
+
+    // 3. Draw Direction.
+    if (direction && backPoints && frontPoints) {
+      const points = getPointListsByDirection({ direction, frontPoints, backPoints });
+      if (points) {
+        DrawUtils.drawPolygonWithFill(canvas, points, { color: fillColor });
+      }
+    }
+
+    // 4. Drawing the frontPoints.
+    DrawUtils.drawPolygon(canvas, pointList, { ...defaultStyle, isClose: true });
+  }
+
+  /**
+   * Draw Cuboid and Text in header & bottom.
+   * @param canvas
+   * @param cuboid
+   * @param options
+   * @param dataConfig
+   */
+  public static drawCuboidWithText(
+    canvas: HTMLCanvasElement,
+    cuboid: ICuboid | IDrawingCuboid,
+    options: {
+      strokeColor: string;
+      fillColor?: string;
+      thickness?: number;
+    },
+    dataConfig: {
+      config: ICuboidConfig;
+      hiddenText?: boolean;
+      selectedID?: string;
+
+      headerText?: string;
+      bottomText?: string;
+    },
+  ) {
+    const { strokeColor } = options;
+    const textColor = strokeColor;
+    const { config, hiddenText, selectedID, headerText, bottomText } = dataConfig;
+    const { backPoints, frontPoints, textAttribute } = cuboid;
+    const frontPointsSizeWidth = frontPoints.br.x - frontPoints.bl.x;
+
+    DrawUtils.drawCuboid(canvas, cuboid, options);
+
+    let showText = '';
+
+    if (config?.isShowOrder && cuboid.order && cuboid?.order > 0) {
+      showText = `${cuboid.order}`;
+    }
+
+    if (cuboid.attribute) {
+      showText = `${showText}  ${AttributeUtils.getAttributeShowText(cuboid.attribute, config?.attributeList)}`;
+    }
+
+    if (!hiddenText && backPoints && showText) {
+      DrawUtils.drawText(canvas, { x: backPoints.tl.x, y: backPoints.tl.y - 5 }, headerText ?? showText, {
+        color: strokeColor,
+        textMaxWidth: 300,
+      });
+    }
+
+    const textPosition = getCuboidTextAttributeOffset({
+      cuboid,
+      currentPos: { x: 0, y: 0 },
+      zoom: 1,
+      topOffset: 16,
+      leftOffset: 0,
+    });
+
+    if (!hiddenText && textAttribute && cuboid.id !== selectedID) {
+      const textWidth = Math.max(20, frontPointsSizeWidth * 0.8);
+      DrawUtils.drawText(canvas, { x: textPosition.left, y: textPosition.top }, bottomText ?? textAttribute, {
+        color: textColor,
+        textMaxWidth: textWidth,
+      });
+    }
   }
 }

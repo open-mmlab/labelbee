@@ -1,3 +1,4 @@
+import { isEqual } from 'lodash';
 import EKeyCode from '../../constant/keyCode';
 import { TEXT_ATTRIBUTE_LINE_HEIGHT, TEXT_ATTRIBUTE_MAX_LENGTH } from '../../constant/tool';
 
@@ -280,6 +281,30 @@ export default class TextAttributeClass {
   }
 
   /**
+   * According to oldIDs' and newIDs' value, remove or re-render textarea
+   * @param oldIDs
+   * @param newIDs
+   */
+  public selectedIDsChanged(oldIDs: string[], newIDs: string[]) {
+    const isSingleIDSelected = oldIDs.length === 1 && newIDs.length === 1;
+
+    if (isSingleIDSelected) {
+      const isIDEqual = isEqual(oldIDs, newIDs);
+
+      if (isIDEqual) {
+        return;
+      }
+
+      this?.changeSelected();
+    }
+
+    if (newIDs?.length !== 1) {
+      this.removeTextareaDOM();
+      this?.clearTextAttribute();
+    }
+  }
+
+  /**
    * 用于外层切换选中框调用
    */
   public changeSelected() {
@@ -288,4 +313,14 @@ export default class TextAttributeClass {
       this.submitTextarea();
     }
   }
+}
+
+/**
+ * TextAttribute injection requires content changes.
+ *
+ * Custom Changes.
+ * 1. Need to init textAttribute when creating data.
+ */
+export interface ITextAttributeFuc extends IBaseInfo {
+  selectedText: string;
 }

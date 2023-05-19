@@ -4,6 +4,13 @@ import img3 from './images/20.jpg';
 import img4 from './images/66.jpg';
 import { pointCloudResult1 } from './pointCloud';
 
+// Cuboid_IMG
+import car1 from './cuboidImages/1.png';
+import car2 from './cuboidImages/2.png';
+import car3 from './cuboidImages/3.png';
+import car4 from './cuboidImages/4.png';
+import car5 from './cuboidImages/5.png';
+
 // POINTCLOUD_DATA
 import pcd1 from './pointCloud/lidar/1.pcd';
 import pcd2 from './pointCloud/lidar/2.pcd';
@@ -21,7 +28,8 @@ import calib2 from './pointCloud/calib/P2/2.json';
 
 // const MOCK_URL = 'http://bee-sdk-demo.sensebee.xyz/images/';
 // export const fileList = ['10', '19', '20', '66'].map((i) => `${MOCK_URL}${i}.jpg`);
-export const fileList = [img1, img2, img3, img4];
+export const fileList = [car1, car2, car3, car4, car5];
+// export const fileList = [img1, img2, img3, img4];
 export const videoList = [
   'http://127.0.0.1:8080/a.mp4',
   'http://127.0.0.1:8080/d.mp4',
@@ -367,6 +375,54 @@ export const DEFAULT_ANNOTATIONS = [
         ],
       },
       stroke: 'rgb(255, 226, 50)',
+    },
+  },
+  {
+    type: 'cuboid',
+    annotation: {
+      attribute: 'class-gF',
+      direction: 'front',
+      valid: true,
+      id: 'dmjIbMoD',
+      sourceID: '',
+      textAttribute: 'text',
+      order: 1,
+      frontPoints: {
+        tl: {
+          x: 189.98858647936788,
+          y: 192.48726953467954,
+        },
+        tr: {
+          x: 254.1510096575944,
+          y: 192.48726953467954,
+        },
+        bl: {
+          x: 189.98858647936788,
+          y: 253.65144863915717,
+        },
+        br: {
+          x: 254.1510096575944,
+          y: 253.65144863915717,
+        },
+      },
+      backPoints: {
+        br: {
+          x: 296.7260755048288,
+          y: 217.07287093942054,
+        },
+        tr: {
+          x: 296.7260755048288,
+          y: 155.9086918349429,
+        },
+        tl: {
+          x: 232.56365232660232,
+          y: 155.9086918349429,
+        },
+        bl: {
+          x: 232.56365232660232,
+          y: 217.07287093942054,
+        },
+      },
     },
   },
 ];

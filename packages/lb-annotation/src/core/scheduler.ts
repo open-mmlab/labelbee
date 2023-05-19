@@ -5,14 +5,12 @@
  */
 
 import { getConfig, styleDefaultConfig } from '@/constant/defaultConfig';
-import { EToolName } from '@/constant/tool';
+import { EToolName, THybridToolName } from '@/constant/tool';
 import { getCurrentOperation } from '@/utils/tool/EnhanceCommonToolUtils';
 import { RectOperation } from './toolOperation/rectOperation';
 import PolygonOperation from './toolOperation/polygonOperation';
 import { BasicToolOperation } from './toolOperation/basicToolOperation';
 import SegmentByRect from './toolOperation/segmentByRect';
-
-export type THybridToolName = EToolName | Array<EToolName>;
 
 interface IToolSchedulerOperation {}
 
@@ -23,6 +21,7 @@ interface IToolSchedulerProps {
   imgNode?: HTMLImageElement; // 展示图片的内容
   config?: string; // 任务配置
   style?: any;
+  proxyMode?: boolean;
 }
 
 /**
@@ -71,6 +70,8 @@ export class ToolScheduler implements IToolSchedulerOperation {
 
   private toolOperationDom: Array<HTMLElement> = [];
 
+  private toolOperationNameList: Array<EToolName> = [];
+
   private size: ISize;
 
   private config: string; // 定义 TODO！！
@@ -79,14 +80,20 @@ export class ToolScheduler implements IToolSchedulerOperation {
 
   private imgNode?: HTMLImageElement;
 
-  constructor(props: IToolSchedulerProps) {
-    this.init();
+  private proxyMode?: boolean;
 
+  constructor(props: IToolSchedulerProps) {
     this.container = props.container;
     this.size = props.size;
     this.imgNode = props.imgNode;
     this.config = props.config ?? JSON.stringify(getConfig(HybridToolUtils.getTopToolName(props.toolName))); // 设置默认操作
     this.style = props.style ?? styleDefaultConfig; // 设置默认操作
+    this.proxyMode = props.proxyMode;
+    this.onWheel = this.onWheel.bind(this);
+    this.onMouseDown = this.onMouseDown.bind(this);
+    this.onMouseMove = this.onMouseMove.bind(this);
+    this.onMouseUp = this.onMouseUp.bind(this);
+    this.init();
   }
 
   public setImgNode(
@@ -104,6 +111,16 @@ export class ToolScheduler implements IToolSchedulerOperation {
   public setImgAttribute(imgAttribute: IImageAttribute) {
     this.toolOperationList.forEach((toolInstance) => {
       toolInstance.setImgAttribute(imgAttribute);
+    });
+  }
+
+  public syncAllAttributeListInConfig(attributeList: any[]) {
+    this.toolOperationList.forEach((toolInstance) => {
+      const newConfig = {
+        ...toolInstance.config,
+        attributeList,
+      };
+      toolInstance.setConfig(JSON.stringify(newConfig));
     });
   }
 
@@ -143,7 +160,6 @@ export class ToolScheduler implements IToolSchedulerOperation {
     dom.style.height = `${height}px`;
     const zIndex = this.toolOperationList.length + 1;
     dom.style.zIndex = `${zIndex}`;
-
     return dom;
   }
 
@@ -221,6 +237,7 @@ export class ToolScheduler implements IToolSchedulerOperation {
     this.container.appendChild(dom);
 
     this.toolOperationList.push(toolInstance);
+    this.toolOperationNameList.push(tool);
     this.toolOperationDom.push(dom);
 
     return toolInstance;
@@ -278,6 +295,64 @@ export class ToolScheduler implements IToolSchedulerOperation {
     return this.toolOperationList[0];
   }
 
+  /**
+   * Switch to canvas by given toolName
+   * TODO: change operationList to operationMap
+   */
+  public switchToCanvas(toolName: EToolName) {
+    const chosenIndex = this.toolOperationNameList.indexOf(toolName);
+    if (chosenIndex < 0 || this.toolOperationList.length < 1 || chosenIndex > this.toolOperationDom.length - 1) {
+      return;
+    }
+    const lastOneIndex = this.toolOperationDom.length - 1;
+    const chosenDom = this.toolOperationDom[chosenIndex];
+    const lastOneDom = this.toolOperationDom[lastOneIndex];
+
+    if (!chosenDom || !lastOneDom) {
+      return;
+    }
+
+    const temp = lastOneDom.style.zIndex;
+    lastOneDom.style.zIndex = `${chosenDom.style.zIndex}`;
+    chosenDom.style.zIndex = `${temp}`;
+
+    // The original top-level operation clears the data
+    this.toolOperationList[lastOneIndex].clearActiveStatus?.();
+    this.toolOperationList[lastOneIndex].clearCursorLine?.();
+    this.toolOperationList[lastOneIndex].render();
+
+    // swap
+    this.toolOperationList = arraySwap(this.toolOperationList, lastOneIndex, chosenIndex);
+    this.toolOperationDom = arraySwap(this.toolOperationDom, lastOneIndex, chosenIndex);
+    this.toolOperationNameList = arraySwap(this.toolOperationNameList, lastOneIndex, chosenIndex);
+
+    return this.toolOperationList[lastOneIndex];
+  }
+
+  /**
+   *
+   * @param toolName
+   * @param result
+   * Update result by give toolName
+   * All the operation instances are maintained in toolOperationList,
+   * there is no more specific instance like pointCloud2dOperation you can reach,
+   * so if you need to update result in specific operation instance, you can try this.
+   */
+  public updateDataByToolName(toolName: EToolName, result: any) {
+    const operationIndex = this.toolOperationNameList.indexOf(toolName);
+    if (operationIndex >= 0) {
+      const operationInstance = this.toolOperationList[operationIndex];
+      operationInstance.setResult(result);
+    }
+  }
+
+  public clearStatusAndResult() {
+    this.toolOperationList.forEach((toolInstance) => {
+      toolInstance.clearActiveStatus?.();
+      toolInstance.clearResult();
+    });
+  }
+
   public destroyAllLayer() {
     this.toolOperationList.forEach((toolInstance) => {
       toolInstance.destroyCanvas();
@@ -288,5 +363,75 @@ export class ToolScheduler implements IToolSchedulerOperation {
   public init() {
     this.toolOperationList = [];
     this.toolOperationDom = [];
+    this.eventBinding();
+  }
+
+  public destroy() {
+    this.destroyAllLayer();
+    this.eventUnBinding();
+  }
+
+  public eventBinding() {
+    // this event will be touched when the remark layer blocks the onWheel events in specific operations, otherwise it will be blocked by the onWheel events inside
+    // for now it will only be called in pointcloud top view
+    if (this.proxyMode) {
+      this.container.addEventListener('wheel', this.onWheel);
+      this.container.addEventListener('mousedown', this.onMouseDown);
+      this.container.addEventListener('mousemove', this.onMouseMove);
+      this.container.addEventListener('mouseup', this.onMouseUp);
+    }
+  }
+
+  public eventUnBinding() {
+    if (this.proxyMode) {
+      this.container.removeEventListener('wheel', this.onWheel);
+      this.container.removeEventListener('mousedown', this.onMouseDown);
+      this.container.removeEventListener('mousemove', this.onMouseMove);
+      this.container.removeEventListener('mouseup', this.onMouseUp);
+    }
+  }
+
+  public onWheel(e: MouseEvent) {
+    e.preventDefault();
+    e.stopPropagation();
+    if (this.toolOperationList.length !== 0) {
+      const lastOneIndex = this.toolOperationDom.length - 1;
+      // the last one operation is the active one
+      this.toolOperationList[lastOneIndex].onWheel(e);
+    }
+  }
+
+  public onMouseDown(e: MouseEvent) {
+    e.preventDefault();
+    e.stopPropagation();
+    if (this.toolOperationList.length !== 0) {
+      const lastOneIndex = this.toolOperationDom.length - 1;
+      this.toolOperationList[lastOneIndex].onMouseDown(e);
+    }
+  }
+
+  public onMouseMove(e: MouseEvent) {
+    e.preventDefault();
+    e.stopPropagation();
+    if (this.toolOperationList.length !== 0) {
+      const lastOneIndex = this.toolOperationDom.length - 1;
+      this.toolOperationList[lastOneIndex].onMouseMove(e);
+    }
+  }
+
+  public onMouseUp(e: MouseEvent) {
+    e.preventDefault();
+    e.stopPropagation();
+    if (this.toolOperationList.length !== 0) {
+      const lastOneIndex = this.toolOperationDom.length - 1;
+      this.toolOperationList[lastOneIndex].onMouseUp(e);
+    }
+  }
+
+  /**
+   * Get current tool name of toolInstance
+   */
+  public getCurrentToolName() {
+    return this.toolOperationNameList[this.toolOperationNameList.length - 1];
   }
 }
