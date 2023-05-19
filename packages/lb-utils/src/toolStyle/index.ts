@@ -221,7 +221,7 @@ class ToolStyleConverter {
       // If the property does not have a custom color (color), then use a default Attribute Color
       if (style?.attributeColor) {
         const attributeIndex =
-          ToolStyleUtils.getAttributeIndex(attribute, config?.attributeList ?? []) + 1;
+          (ToolStyleUtils.getAttributeIndex(attribute, config?.attributeList ?? []) % 8) + 1;
         return style.attributeColor[attributeIndex];
       }
     }
