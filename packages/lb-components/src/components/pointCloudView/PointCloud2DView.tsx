@@ -164,6 +164,11 @@ const PointCloud2DView = ({ currentData, config }: IA2MapStateProps) => {
             display: hiddenData ? 'none' : 'block',
           }}
           afterImgOnLoad={afterImgOnLoad}
+          zoomInfo={{
+            min: 0.01,
+            max: 1000,
+            ratio: 0.4,
+          }}
         />
       </div>
     </PointCloudContainer>
