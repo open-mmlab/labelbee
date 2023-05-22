@@ -15,6 +15,7 @@ declare interface IPolygonData {
   textAttribute: string;
   attribute: string;
   isRect?: boolean; // 用于判断当前多边形矩形模式生成
+  trackID?: number;
 }
 
 declare interface IPolygonPoint {

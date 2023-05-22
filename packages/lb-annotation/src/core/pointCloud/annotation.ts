@@ -256,6 +256,7 @@ export class PointCloudAnnotation implements IPointCloudAnnotationOperation {
         isRect: true,
         valid: v.valid ?? true,
         attribute: v.attribute,
+        trackID: v?.trackID,
       };
     }) as IPolygonData[];
 
