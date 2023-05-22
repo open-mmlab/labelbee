@@ -761,7 +761,7 @@ export const usePointCloudViews = () => {
         synchronizeTopView(boxParams, newPolygon, topViewInstance, mainViewInstance);
       }
     }
-
+    topViewInstance?.updatePolygonList(newPointCloudList ?? []);
     addHistory({ newBoxParams: boxParams });
   };
 

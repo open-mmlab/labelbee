@@ -366,10 +366,10 @@ export class PointCloud {
     const arrow = this.generateBoxArrow(boxParams);
 
     // Temporarily hide
-    // const boxID = this.generateBoxTrackID(boxParams);
-    // if (boxID) {
-    //   group.add(boxID);
-    // }
+    const boxID = this.generateBoxTrackID(boxParams);
+    if (boxID) {
+      group.add(boxID);
+    }
 
     group.add(box);
     group.add(arrow);
