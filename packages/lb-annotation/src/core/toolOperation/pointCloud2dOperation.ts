@@ -225,7 +225,9 @@ class PointCloud2dOperation extends PolygonOperation {
           isClose: true,
           lineType: this.config?.lineType,
         });
-        this.renderdrawTrackID(polygon);
+        if (polygon?.trackID) {
+          this.renderdrawTrackID(polygon);
+        }
         // Only the rectangle shows the direction.
         if (polygon.isRect === true && this.showDirectionLine === true) {
           this.renderRectPolygonDirection(transformPointList);
@@ -262,7 +264,9 @@ class PointCloud2dOperation extends PolygonOperation {
       // Only the rectangle shows the direction.
       if (selectedPolygon.isRect === true && this.showDirectionLine === true) {
         this.renderRectPolygonDirection(polygon);
-        this.renderdrawTrackID(selectedPolygon);
+        if (selectedPolygon?.trackID) {
+          this.renderdrawTrackID(selectedPolygon);
+        }
       }
     }
   };

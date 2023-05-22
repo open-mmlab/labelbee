@@ -749,7 +749,7 @@ export const usePointCloudViews = () => {
 
     const isBoxHidden = hideAttributes.includes(newPolygon.attribute);
     const newPointCloudList = addPointCloudBox(boxParams);
-
+    topViewInstance?.updatePolygonList(newPointCloudList ?? []);
     /** If new box is hidden will not active target point box */
     if (isBoxHidden) {
       setSelectedIDs([]);
@@ -761,7 +761,7 @@ export const usePointCloudViews = () => {
         synchronizeTopView(boxParams, newPolygon, topViewInstance, mainViewInstance);
       }
     }
-    topViewInstance?.updatePolygonList(newPointCloudList ?? []);
+
     addHistory({ newBoxParams: boxParams });
   };
 
