@@ -528,7 +528,7 @@ export default class ViewOperation extends BasicToolOperation {
     }
 
     const data = annotation.annotation;
-    const viewDataPointList = pointCloudLidar2image(data as any, data.calib);
+    const { transferViewData: viewDataPointList } = pointCloudLidar2image(data as any, data.calib);
     const defaultViewStyle = {
       fill: 'transparent',
       // stroke: style.stroke,
