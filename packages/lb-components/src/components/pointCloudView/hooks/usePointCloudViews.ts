@@ -749,7 +749,8 @@ export const usePointCloudViews = () => {
 
     const isBoxHidden = hideAttributes.includes(newPolygon.attribute);
     const newPointCloudList = addPointCloudBox(boxParams);
-    topViewInstance?.updatePolygonList(newPointCloudList ?? []);
+    const polygonList = ptCtx?.polygonList ?? [];
+    topViewInstance?.updatePolygonList(newPointCloudList ?? [], polygonList);
     /** If new box is hidden will not active target point box */
     if (isBoxHidden) {
       setSelectedIDs([]);
