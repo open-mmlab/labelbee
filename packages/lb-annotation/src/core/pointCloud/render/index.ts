@@ -40,6 +40,7 @@ class PointCloudRender {
     this.updateNewPoints = this.updateNewPoints.bind(this);
     this.updatePointsColor = this.updatePointsColor.bind(this);
     this.clearAllSegmentData = this.clearAllSegmentData.bind(this);
+    this.clearSelectedSegmentRender = this.clearSelectedSegmentRender.bind(this);
 
     this.initMsg();
     this.animate();
@@ -68,6 +69,7 @@ class PointCloudRender {
     this.on('clearStashRender', this.clearStash);
     this.on('clearAllSegmentData', this.clearAllSegmentData);
     this.on('reRender3d', this.render3d);
+    this.on('clearSelectedSegmentData', this.clearSelectedSegmentRender);
   }
 
   public unbindMsg() {
@@ -76,6 +78,7 @@ class PointCloudRender {
     this.unbind('clearStashRender', this.clearStash);
     this.unbind('clearAllSegmentData', this.clearAllSegmentData);
     this.unbind('reRender3d', this.render3d);
+    this.unbind('clearSelectedSegmentData', this.clearSelectedSegmentRender);
   }
 
   public get canvas2d() {
@@ -114,6 +117,14 @@ class PointCloudRender {
       }
     }
     this.render3d();
+  }
+
+  public clearSelectedSegmentRender(id: string = '') {
+    const selectedPoints = this.scene.getObjectByName(id);
+    if (selectedPoints) {
+      selectedPoints.removeFromParent();
+      this.render3d();
+    }
   }
 
   // TODO, Just for showing.

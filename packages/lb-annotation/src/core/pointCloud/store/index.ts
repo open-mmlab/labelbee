@@ -111,9 +111,10 @@ class PointCloudStore {
     this.setSegmentCoverMode = this.setSegmentCoverMode.bind(this);
     this.setSegmentFocusMode = this.setSegmentFocusMode.bind(this);
     this.switchSegmentHideMode = this.switchSegmentHideMode.bind(this);
-    this.clearSegmentResult = this.clearSegmentResult.bind(this);
     this.highlightPointsByAttribute = this.highlightPointsByAttribute.bind(this);
     this.setHiddenAttributes = this.setHiddenAttributes.bind(this);
+    this.clearAllSegmentData = this.clearAllSegmentData.bind(this);
+    this.clearSelectedSegmentData = this.clearSelectedSegmentData.bind(this);
     this.initMsg();
     this.setupRaycaster();
   }
@@ -127,7 +128,8 @@ class PointCloudStore {
     this.on('setSegmentCoverMode', this.setSegmentCoverMode);
     this.on('setSegmentFocusMode', this.setSegmentFocusMode);
     this.on('switchHideSegment', this.switchSegmentHideMode);
-    this.on('clearAllSegmentData', this.clearSegmentResult);
+    this.on('clearAllSegmentData', this.clearAllSegmentData);
+    this.on('clearSelectedSegmentData', this.clearSelectedSegmentData);
   }
 
   public unbindMsg() {
@@ -138,7 +140,8 @@ class PointCloudStore {
     this.unbind('setSegmentCoverMode', this.setSegmentCoverMode);
     this.unbind('setSegmentFocusMode', this.setSegmentFocusMode);
     this.unbind('switchHideSegment', this.switchSegmentHideMode);
-    this.unbind('clearAllSegmentData', this.clearSegmentResult);
+    this.unbind('clearAllSegmentData', this.clearAllSegmentData);
+    this.unbind('clearSelectedSegmentData', this.clearSelectedSegmentData);
   }
 
   public get containerWidth() {
@@ -153,6 +156,10 @@ class PointCloudStore {
     return this.scene.children.filter(
       (v) => v.type === 'Points' && v.name !== this.pointCloudObjectName,
     ) as ThreePoints[];
+  }
+
+  public get selectedSegmentPoints() {
+    return this.scene.getObjectByName(this.cacheSegData?.id ?? '');
   }
 
   public get segmentStatus() {
@@ -196,7 +203,7 @@ class PointCloudStore {
     return this.scene.getObjectByName(this.pointCloudObjectName) as THREE.Points;
   }
 
-  public clearSegmentResult() {
+  public clearAllSegmentData() {
     this.segmentData = new Map();
     this.syncSegmentData();
   }
@@ -351,7 +358,7 @@ class PointCloudStore {
           if (this.segmentMode === EPointCloudSegmentMode.Add) {
             if (this.segmentCoverMode === EPointCloudSegmentCoverMode.Cover) {
               vertices.push(cloudDataArrayLike[i], cloudDataArrayLike[i + 1], cloudDataArrayLike[i + 2]);
-              indexes.push(i / 3);
+              indexes.push(i / 3); // Save the points Index.
               if (this.cloudData.get(key).visible === true) {
                 covers.push(cloudDataArrayLike[i], cloudDataArrayLike[i + 1], cloudDataArrayLike[i + 2]);
               }
@@ -541,6 +548,36 @@ class PointCloudStore {
       this.syncSegmentData();
       this.cacheSegData = undefined;
       this.syncPointCloudStatus();
+    }
+  }
+
+  public clearSelectedSegmentData(id = '') {
+    if ((this.isCheckStatus || this.isEditStatus) && this.cacheSegData) {
+      const segmentPoints = this.scene.getObjectByName(id) as THREE.Points | undefined;
+      const { indexes } = this.cacheSegData;
+      if (segmentPoints && indexes) {
+        // Clear Status.
+
+        const pointsArray = segmentPoints.geometry.attributes.position.array;
+        // Restore data of CloudData visible.
+
+        for (let i = 0; i < indexes.length; i++) {
+          const cloudData = this.cloudData.get(
+            PointCloudUtils.getCloudKeys(pointsArray[i], pointsArray[i + 1], pointsArray[i + 2]),
+          );
+          if (cloudData) {
+            // Clear the visible.
+            cloudData.visible = false;
+          }
+        }
+
+        this.cacheSegData = undefined;
+        pointCloudFSM.updateStatus2Ready();
+        this.emit('syncPointCloudStatus', {
+          segmentStatus: this.segmentStatus,
+          cacheSegData: this.cacheSegData,
+        });
+      }
     }
   }
 

@@ -65,6 +65,10 @@ const PointCloudSegmentListener: React.FC<IProps> = ({ checkMode, currentData, i
       case 'i':
         ptSegmentInstance?.emit('setSegmentMode', EPointCloudSegmentMode.Remove);
         break;
+
+      case 'delete':
+        ptSegmentInstance?.emit("clearSelectedSegmentData", ptSegmentInstance.store?.cacheSegData?.id)
+        break;
     }
   };
 
@@ -107,7 +111,7 @@ const PointCloudSegmentListener: React.FC<IProps> = ({ checkMode, currentData, i
       if (!ptCtx.ptSegmentInstance) {
         return;
       }
-      ptCtx.ptSegmentInstance.emit('clearSegmentResult');
+      ptCtx.ptSegmentInstance.emit('clearAllSegmentData');
     };
   }, [
     ptCtx.pointCloudBoxList,

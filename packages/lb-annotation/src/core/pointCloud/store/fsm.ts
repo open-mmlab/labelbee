@@ -40,6 +40,10 @@ class PointCloudFSM {
     this.segmentStatus = EPointCloudSegmentStatus.Check;
   }
 
+  public updateStatus2Ready() {
+    this.segmentStatus = EPointCloudSegmentStatus.Ready;
+  }
+
   public get isReadyStatus() {
     return this.segmentStatus === EPointCloudSegmentStatus.Ready;
   }
