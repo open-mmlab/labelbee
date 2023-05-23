@@ -1155,9 +1155,6 @@ class RectOperation extends BasicToolOperation {
     const hoverRectID = this.getHoverRectID(e);
 
     const hoverRect = this.rectList.find((v) => v.id === hoverRectID);
-    if (hoverRect) {
-      this.setDefaultAttribute(hoverRect.attribute);
-    }
 
     if (this.drawingRect) {
       // 取消绘制
@@ -1165,6 +1162,7 @@ class RectOperation extends BasicToolOperation {
       this.firstClickCoord = undefined;
     } else {
       // 选中操作
+
       if (
         this.dragInfo?.dragStartCoord &&
         distance(
@@ -1176,6 +1174,9 @@ class RectOperation extends BasicToolOperation {
       }
 
       this.setSelectedRectID(hoverRectID, e.ctrlKey);
+      if (hoverRect) {
+        this.setDefaultAttribute(hoverRect.attribute);
+      }
       this.hoverRectID = '';
 
       if (hoverRect?.label && this.hasMarkerConfig) {
@@ -1738,6 +1739,21 @@ class RectOperation extends BasicToolOperation {
 
       //  触发侧边栏同步
       this.emit('changeAttributeSidebar');
+      console.log('this.defaultAttribute', this.defaultAttribute);
+      console.log('this.rectList', this.rectList);
+      console.log(
+        'this.selectedRects',
+        this.rectList.map((v) => {
+          if (this.selection.isIdSelected(v.id)) {
+            return {
+              ...v,
+              attribute: this.defaultAttribute,
+            };
+          }
+
+          return v;
+        }),
+      );
 
       // 如有选中目标，则需更改当前选中的属性
       if (this.selectedRects) {
