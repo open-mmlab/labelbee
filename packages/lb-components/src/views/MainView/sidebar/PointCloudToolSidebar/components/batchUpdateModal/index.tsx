@@ -67,7 +67,11 @@ const BatchUpdateModal = ({
       imgIndex,
       stepList,
     });
-    const isExisted = composeImgList.some((v: IFileItem) => {
+    if (values.prevPage > values.nextPage) {
+      return;
+    }
+    const rangeComposeImgList = composeImgList.slice(values.prevPage - 1, values.nextPage);
+    const isExisted = rangeComposeImgList.some((v: IFileItem) => {
       const newTrackID = parseInt(values.newID, 10);
       return PointCloudUtils.batchUpdateTrackIDCheck({ newID: newTrackID, result: v.result });
     });
