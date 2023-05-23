@@ -621,7 +621,47 @@ class PointCloudUtils {
   }
 
   public static getCloudKeys(x: number, y: number, z: number) {
-    return [x, y, z].join("@");
+    return [x, y, z].join('@');
+  }
+
+  public static splitPointsFromIndexes(originIndexes: number[], splitIndexes: number[]) {
+    const splitSet = new Set();
+    for (let i = 0; i < splitIndexes.length; i += 1) {
+      splitSet.add(splitIndexes[i]);
+    }
+
+    const result = [];
+    for (let i = 0; i < originIndexes.length; i += 1) {
+      if (!splitSet.has(originIndexes[i])) {
+        result.push(originIndexes[i]);
+      }
+    }
+
+    return result;
+  }
+
+  public static splitPointsFromPoints(originPoints: Float32Array, splitPoints: Float32Array) {
+    const splitMap = new Map();
+    for (let i = 0; i < splitPoints.length; i += 3) {
+      splitMap.set(
+        PointCloudUtils.getCloudKeys(splitPoints[i], splitPoints[i + 1], splitPoints[i + 2]),
+        1,
+      );
+    }
+
+    const result = [];
+    for (let i = 0; i < originPoints.length; i += 3) {
+      const key = PointCloudUtils.getCloudKeys(
+        originPoints[i],
+        originPoints[i + 1],
+        originPoints[i + 2],
+      );
+      if (!splitMap.has(key)) {
+        result.push(originPoints[i], originPoints[i + 1], originPoints[i + 2]);
+      }
+    }
+
+    return new Float32Array(result);
   }
 }
 

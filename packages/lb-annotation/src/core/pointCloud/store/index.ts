@@ -354,6 +354,7 @@ class PointCloudStore {
           if (this.segmentMode === EPointCloudSegmentMode.Remove) {
             this.cloudData.get(key).visible = false;
             vertices.push(cloudDataArrayLike[i], cloudDataArrayLike[i + 1], cloudDataArrayLike[i + 2]);
+            indexes.push(i / 3); // Save the points Index.
           }
           if (this.segmentMode === EPointCloudSegmentMode.Add) {
             if (this.segmentCoverMode === EPointCloudSegmentCoverMode.Cover) {
@@ -374,6 +375,17 @@ class PointCloudStore {
           }
         }
       }
+
+      /**
+       * Return Function
+       *
+       * 1. Not point in the range.
+       * 2. Remove-mode && No cacheSegData.
+       */
+      if (indexes.length === 0 || (!this.cacheSegData && this.segmentMode === EPointCloudSegmentMode.Remove)) {
+        return;
+      }
+
       const verticesArray = new Float32Array(vertices);
       const coversArray = new Float32Array(covers);
 
@@ -398,6 +410,7 @@ class PointCloudStore {
             ...this.cacheSegData,
             points: combined,
             coverPoints: coverCombined,
+            indexes: this.cacheSegData.indexes.concat(indexes),
           };
           this.emit('updateNewPoints', this.cacheSegData);
         } else {
@@ -415,10 +428,11 @@ class PointCloudStore {
       case EPointCloudSegmentMode.Remove:
         // Split the point in originPoint
         if (this.cacheSegData) {
-          const { points } = this.cacheSegData;
+          const { points, indexes: originIndexes } = this.cacheSegData;
           this.cacheSegData = {
             ...this.cacheSegData,
-            points: this.splitPointsFromPoints(points, verticesArray),
+            points: PointCloudUtils.splitPointsFromPoints(points, verticesArray),
+            indexes: PointCloudUtils.splitPointsFromIndexes(originIndexes, indexes),
           };
           this.emit('updateNewPoints', this.cacheSegData);
         }
@@ -435,23 +449,6 @@ class PointCloudStore {
       segmentStatus: this.segmentStatus,
       cacheSegData: this.cacheSegData,
     });
-  }
-
-  public splitPointsFromPoints(originPoints: Float32Array, splitPoints: Float32Array) {
-    const splitMap = new Map();
-    for (let i = 0; i < splitPoints.length; i += 3) {
-      splitMap.set(PointCloudUtils.getCloudKeys(splitPoints[i], splitPoints[i + 1], splitPoints[i + 2]), 1);
-    }
-
-    const result = [];
-    for (let i = 0; i < originPoints.length; i += 3) {
-      const key = PointCloudUtils.getCloudKeys(originPoints[i], originPoints[i + 1], originPoints[i + 2]);
-      if (!splitMap.has(key)) {
-        result.push(originPoints[i], originPoints[i + 1], originPoints[i + 2]);
-      }
-    }
-
-    return new Float32Array(result);
   }
 
   public syncPointCloudStatus() {
@@ -503,7 +500,7 @@ class PointCloudStore {
   public updateCoverPoints = (coverPoints: Float32Array = new Float32Array([])) => {
     this.segmentData.forEach((seg, id) => {
       if (id !== this.cacheSegData?.id) {
-        const newPoints = this.splitPointsFromPoints(seg.points, coverPoints);
+        const newPoints = PointCloudUtils.splitPointsFromPoints(seg.points, coverPoints);
         seg.points = newPoints;
 
         // update points in threeJs
