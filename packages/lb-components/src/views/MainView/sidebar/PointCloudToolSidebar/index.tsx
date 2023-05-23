@@ -126,13 +126,17 @@ const BoxTrackIDInput = () => {
       return;
     }
 
-    const newPointCloudList = updateSelectedBox({ trackID: newTrackID });
-    ptCtx?.topViewInstance?.updatePolygonList(newPointCloudList ?? []);
+    updateCurrentPolygonList(newTrackID);
   };
 
   useEffect(() => {
     setIsEdit(false);
   }, [selectedBoxTrackID]);
+
+  const updateCurrentPolygonList = (newTrackID: number) => {
+    const newPointCloudList = updateSelectedBox({ trackID: newTrackID });
+    ptCtx?.topViewInstance?.updatePolygonList(newPointCloudList ?? []);
+  };
 
   return (
     <div style={{ padding: 24 }}>
@@ -145,7 +149,12 @@ const BoxTrackIDInput = () => {
         }}
       >
         <span>{t('CurrentBoxTrackIDs')}</span>
-        {selectedBoxTrackID && <BatchUpdateModal id={selectedBoxTrackID} />}
+        {selectedBoxTrackID && (
+          <BatchUpdateModal
+            id={selectedBoxTrackID}
+            updateCurrentPolygonList={(value) => updateCurrentPolygonList(value)}
+          />
+        )}
       </div>
       <div
         style={{
