@@ -11,6 +11,7 @@ import {
   PointCloudUtils,
   TMatrix14Tuple,
   TMatrix13Tuple,
+  IPolygonPoint,
 } from '@labelbee/lb-utils';
 import uuid from '@/utils/uuid';
 
@@ -115,6 +116,56 @@ export function getCuboidFromPointCloudBox(boxParams: IPointCloudBox) {
   };
 }
 
+function orientation(p: IPolygonPoint, q: IPolygonPoint, r: IPolygonPoint): number {
+  const val = (q.y - p.y) * (r.x - q.x) - (q.x - p.x) * (r.y - q.y);
+  if (val === 0) {
+    return 0; // Same line.
+  }
+  if (val > 0) {
+    return 1; // clockwise.
+  }
+
+  return 2; // anticlockwise
+}
+
+/**
+ * convexHull Algorithm.
+ * @param points
+ * @returns
+ */
+function convexHull(points: IPolygonPoint[]): IPolygonPoint[] {
+  const n = points.length;
+  if (n < 3) {
+    return [];
+  }
+
+  const hull: IPolygonPoint[] = [];
+  let l = 0;
+
+  for (let i = 1; i < n; i++) {
+    if (points[i].x < points[l].x) {
+      l = i;
+    }
+  }
+
+  let p = l;
+  let q: number;
+  do {
+    hull.push(points[p]);
+    q = (p + 1) % n;
+
+    for (let i = 0; i < n; i++) {
+      if (orientation(points[p], points[i], points[q]) === 2) {
+        q = i;
+      }
+    }
+
+    p = q;
+  } while (p !== l);
+
+  return hull;
+}
+
 export function pointCloudLidar2image(
   boxParams: IPointCloudBox,
   cameraMatrix: {
@@ -144,5 +195,14 @@ export function pointCloudLidar2image(
     // Clear Empty PointList
     .filter((v) => v.pointList.length !== 0);
 
-  return transferViewData;
+  let viewRangePointList: IPolygonPoint[] = [];
+
+  // All Line is showing.
+  if (transferViewData.length === 6) {
+    const frontPointList = transferViewData[0].pointList;
+    const backPointList = transferViewData[1].pointList;
+    viewRangePointList = convexHull([...frontPointList, ...backPointList]);
+  }
+
+  return { transferViewData, viewRangePointList };
 }
