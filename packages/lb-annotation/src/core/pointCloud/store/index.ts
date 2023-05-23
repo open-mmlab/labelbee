@@ -323,6 +323,15 @@ class PointCloudStore {
 
   // TODO. Not the last version.
   public getPointsInPolygon(originPolygon: ICoordinate[]) {
+    /**
+     * Status Limit;
+     *
+     * Just ready & edit Status can getPoints.
+     */
+    if (!this.isReadyStatus && !this.isEditStatus) {
+      return;
+    }
+
     const polygon = originPolygon;
     const originPoints = this.scene.getObjectByName(this.pointCloudObjectName) as THREE.Points;
 
