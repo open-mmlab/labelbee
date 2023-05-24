@@ -376,6 +376,7 @@ class PointCloudStore {
             if (this.segmentCoverMode === EPointCloudSegmentCoverMode.Uncover) {
               if (this.cloudData.get(key).visible === false) {
                 vertices.push(cloudDataArrayLike[i], cloudDataArrayLike[i + 1], cloudDataArrayLike[i + 2]);
+                indexes.push(i / 3); //Save the points Index.
               }
             }
             if (this.cloudData.get(key).visible === false) {
