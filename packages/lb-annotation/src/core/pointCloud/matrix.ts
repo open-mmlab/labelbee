@@ -173,7 +173,11 @@ export function pointCloudLidar2image(
     R: [TMatrix13Tuple, TMatrix13Tuple, TMatrix13Tuple];
     T: [TMatrix14Tuple, TMatrix14Tuple, TMatrix14Tuple];
   },
+  options: {
+    createRange: boolean; // Calculate the range of cuboid.
+  } = { createRange: false },
 ) {
+  const { createRange } = options;
   const allViewData = PointCloudUtils.getAllViewData(boxParams);
   const { P, R, T } = cameraMatrix;
   const { composeMatrix4 } = transferKitti2Matrix(P, R, T);
@@ -198,7 +202,7 @@ export function pointCloudLidar2image(
   let viewRangePointList: IPolygonPoint[] = [];
 
   // All Line is showing.
-  if (transferViewData.length === 6) {
+  if (transferViewData.length === 6 && createRange === true) {
     const frontPointList = transferViewData[0].pointList;
     const backPointList = transferViewData[1].pointList;
     viewRangePointList = convexHull([...frontPointList, ...backPointList]);
