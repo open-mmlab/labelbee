@@ -6,6 +6,7 @@
 import { useEffect, useRef } from 'react';
 import { useDispatch } from '@/store/ctx';
 import { ANNOTATION_ACTIONS } from '@/store/Actions';
+import { EPointCloudPattern } from '@labelbee/lb-utils';
 
 export interface ICustomToolInstance {
   valid: boolean;
@@ -32,7 +33,8 @@ export interface ICustomToolInstance {
 
   undo: () => void,
   redo: () => void,
-
+  setPointCloudGlobalPattern: (globalPattern: EPointCloudPattern) => void,
+  getPointCloudGlobalPattern: () => EPointCloudPattern,
   [str: string]: any;
 }
 
@@ -75,6 +77,8 @@ const useCustomToolInstance = ({ basicInfo }: ICustomToolInstanceProps = {}) => 
     updateRotate: () => {},
     redo: () => {},
     undo: () => {},
+    setPointCloudGlobalPattern: (globalPattern: EPointCloudPattern) => {},
+    getPointCloudGlobalPattern: () => EPointCloudPattern.Detection,
   });
 
   const onMounted = (instance: any) => {
