@@ -13,6 +13,7 @@
     "declarationDir": "dist/types",
     "skipLibCheck": true,
     "esModuleInterop": true,
+    "downlevelIteration": true,
     "paths": {
       "@/*": ["src/*"]
     }

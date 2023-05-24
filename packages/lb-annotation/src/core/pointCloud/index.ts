@@ -236,6 +236,8 @@ export class PointCloud extends EventListener {
 
     this.on('CircleSelector', this.segmentOperation.updateSelector2Circle.bind(this.segmentOperation));
     this.on('LassoSelector', this.segmentOperation.updateSelector2Lasso.bind(this.segmentOperation));
+    this.on('clearPointCloud', this.clearPointCloud.bind(this));
+    this.on('loadPCDFile', this.loadPCDFile.bind(this));
   }
 
   public unbindMsg() {
@@ -245,6 +247,8 @@ export class PointCloud extends EventListener {
 
     this.unbind('CircleSelector', this.segmentOperation.updateSelector2Circle.bind(this.segmentOperation));
     this.unbind('LassoSelector', this.segmentOperation.updateSelector2Lasso.bind(this.segmentOperation));
+    this.unbind('clearPointCloud', this.clearPointCloud.bind(this));
+    this.unbind('loadPCDFile', this.loadPCDFile.bind(this));
   }
 
   public nextTick = () => {
@@ -883,7 +887,8 @@ export class PointCloud extends EventListener {
    * @param src
    * @param radius Render the range of circle
    */
-  public loadPCDFile = async (src: string, radius?: number) => {
+  public loadPCDFile = async (src: string | undefined = this.currentPCDSrc, radius?: number) => {
+    if (!src) return;
     this.clearPointCloud();
     this.currentPCDSrc = src;
 

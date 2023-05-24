@@ -6,20 +6,21 @@ import { useCustomToolInstance } from '@/hooks/annotation';
 import { jsonParser } from '@/utils';
 import { PointCloudContext } from './PointCloudContext';
 import { CommonToolUtils } from '@labelbee/lb-annotation';
-import { EPointCloudSegmentMode, PointCloudUtils } from '@labelbee/lb-utils';
+import { EPointCloudSegmentMode, PointCloudUtils, IPointCloudSegmentation } from '@labelbee/lb-utils';
 import { useAttribute } from './hooks/useAttribute';
+import { IInputList } from '@/types/main';
 
 interface IProps extends IA2MapStateProps {
   checkMode?: boolean;
 }
 
-const PointCloudSegmentListener: React.FC<IProps> = ({ checkMode, currentData, imgIndex }) => {
+const PointCloudSegmentListener: React.FC<IProps> = ({ checkMode, currentData, imgIndex, highlightAttribute, config }) => {
   const basicInfo = jsonParser(currentData.result);
   const { toolInstanceRef } = useCustomToolInstance({ basicInfo });
   const { updateSegmentAttribute } = useAttribute();
 
   const ptCtx = useContext(PointCloudContext);
-  const { ptSegmentInstance } = ptCtx;
+  const { ptSegmentInstance, setSegmentation } = ptCtx;
 
   /**
    * Listen
@@ -34,8 +35,16 @@ const PointCloudSegmentListener: React.FC<IProps> = ({ checkMode, currentData, i
         ptSegmentInstance?.store?.updateCurrentSegment(segmentData);
       });
       // Update segmentData.
+      ptSegmentInstance.on('syncSegmentData', (segmentation: IPointCloudSegmentation[]) => {
+        setSegmentation(segmentation)
+      })
     }
   }, [imgIndex, ptSegmentInstance]);
+
+  useEffect(() => {
+    let attributeValue = config.attributeList.find((v: IInputList) => v?.key === highlightAttribute)?.value
+    ptSegmentInstance?.store?.highlightPointsByAttribute(attributeValue ?? '')
+  }, [highlightAttribute, ptSegmentInstance])
 
   const segmentKeydownEvents = (lowerCaseKey: string, e: KeyboardEvent) => {
     switch (lowerCaseKey) {
