@@ -72,6 +72,9 @@ const PointCloud2DView = ({ currentData, config }: IA2MapStateProps) => {
           const { transferViewData: viewDataPointList, viewRangePointList } = pointCloudLidar2image(
             pointCloudBox,
             mappingData.calib,
+            {
+              createRange: pointCloudBox.id === selectedID,
+            },
           );
 
           const stroke = toolStyleConverter.getColorFromConfig(
@@ -98,7 +101,7 @@ const PointCloud2DView = ({ currentData, config }: IA2MapStateProps) => {
             }),
           ];
 
-          if (pointCloudBox.id === selectedID) {
+          if (pointCloudBox.id === selectedID && viewRangePointList.length > 0) {
             newArr.push({
               type: 'polygon',
               annotation: {
