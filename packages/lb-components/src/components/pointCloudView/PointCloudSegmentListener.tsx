@@ -2,8 +2,7 @@ import React, { useContext, useEffect } from 'react';
 import { a2MapStateToProps, IA2MapStateProps } from '@/store/annotation/map';
 import { connect } from 'react-redux';
 import { LabelBeeContext } from '@/store/ctx';
-import { useCustomToolInstance } from '@/hooks/annotation';
-import { jsonParser } from '@/utils';
+import { ICustomToolInstance } from '@/hooks/annotation';
 import { PointCloudContext } from './PointCloudContext';
 import { CommonToolUtils } from '@labelbee/lb-annotation';
 import {
@@ -17,11 +16,10 @@ import { IInputList } from '@/types/main';
 
 interface IProps extends IA2MapStateProps {
   checkMode?: boolean;
+  toolInstanceRef: React.MutableRefObject<ICustomToolInstance>;
 }
 
-const PointCloudSegmentListener: React.FC<IProps> = ({ checkMode, currentData, imgIndex, highlightAttribute, config }) => {
-  const basicInfo = jsonParser(currentData.result);
-  const { toolInstanceRef } = useCustomToolInstance({ basicInfo });
+const PointCloudSegmentListener: React.FC<IProps> = ({ checkMode, currentData, imgIndex, highlightAttribute, config, toolInstanceRef }) => {
   const { updateSegmentAttribute } = useAttribute();
 
   const ptCtx = useContext(PointCloudContext);
@@ -112,9 +110,10 @@ const PointCloudSegmentListener: React.FC<IProps> = ({ checkMode, currentData, i
       }
       ptCtx.ptSegmentInstance.emit('clearSegmentResult');
     };
-    toolInstanceRef.current.setPointCloudGlobalPattern = (globalPattern: EPointCloudPattern) => {
-      setGlobalPattern(globalPattern)
+    toolInstanceRef.current.setPointCloudGlobalPattern = (pattern: EPointCloudPattern) => {
+      setGlobalPattern(pattern)
     }
+
     toolInstanceRef.current.getPointCloudGlobalPattern = () => {
       return globalPattern
     }
@@ -125,7 +124,7 @@ const PointCloudSegmentListener: React.FC<IProps> = ({ checkMode, currentData, i
     ptCtx.lineList,
     ptCtx.pointCloudSphereList,
     ptCtx.ptSegmentInstance,
-    ptCtx.globalPattern,
+    globalPattern,
   ]);
 
   return null;

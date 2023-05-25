@@ -23,9 +23,7 @@ import PointCloudSegmentListener from './PointCloudSegmentListener';
 import PointCloudSegment from './PointCloudSegment';
 import PointCloudSegmentStatus from './PointCloudSegmentStatus';
 import PointCloudSegmentToolbar from './PointCloudSegmentToolbar';
-import { AppState } from '@/store';
 import { connect } from 'react-redux';
-import { IFileItem } from '@/types/data';
 import { LabelBeeContext } from '@/store/ctx';
 import {
   AnnotatedAttributesPanelFixedLeft,
@@ -34,21 +32,27 @@ import {
 import { TDrawLayerSlot } from '@/types/main';
 import { PointCloudContext } from './PointCloudContext';
 import { EPointCloudPattern } from '@labelbee/lb-utils';
+import { useCustomToolInstance } from '@/hooks/annotation';
+import { jsonParser } from '@/utils';
+import { a2MapStateToProps, IA2MapStateProps } from '@/store/annotation/map';
 
-interface IProps {
-  imgList: IFileItem[];
+interface IProps extends IA2MapStateProps {
   drawLayerSlot?: TDrawLayerSlot;
   checkMode?: boolean;
   intelligentFit?: boolean;
 }
 
 const PointCloudView: React.FC<IProps> = ({
+  currentData,
   imgList,
   drawLayerSlot,
   checkMode,
   intelligentFit,
 }) => {
   const { globalPattern } = useContext(PointCloudContext);
+
+  const basicInfo = jsonParser(currentData.result);
+  const { toolInstanceRef } = useCustomToolInstance({ basicInfo });
 
   if (imgList.length === 0) {
     return null;
@@ -57,7 +61,7 @@ const PointCloudView: React.FC<IProps> = ({
   if (globalPattern === EPointCloudPattern.Segmentation) {
     return (
       <>
-        <PointCloudSegmentListener checkMode={checkMode} />
+        <PointCloudSegmentListener checkMode={checkMode} toolInstanceRef={toolInstanceRef}/>
         <PointCloudSegmentToolbar />
         <PointCloudSegment />
         <PointCloudSegmentStatus />
@@ -67,7 +71,7 @@ const PointCloudView: React.FC<IProps> = ({
 
   return (
     <>
-      <PointCloudListener checkMode={checkMode} />
+      <PointCloudListener checkMode={checkMode} toolInstanceRef={toolInstanceRef}/>
       <div className={getClassName('point-cloud-layout')} onContextMenu={(e) => e.preventDefault()}>
         <div className={getClassName('point-cloud-wrapper')}>
           <AnnotatedAttributesPanelFixedLeft />
@@ -98,8 +102,4 @@ const PointCloudView: React.FC<IProps> = ({
   );
 };
 
-const mapStateToProps = (state: AppState) => ({
-  imgList: state.annotation.imgList,
-});
-
-export default connect(mapStateToProps, null, null, { context: LabelBeeContext })(PointCloudView);
+export default connect(a2MapStateToProps, null, null, { context: LabelBeeContext })(PointCloudView);
