@@ -85,7 +85,8 @@ const AnnotatedBox = ({ imgList, imgIndex }: { imgList: IFileItem[]; imgIndex: n
 
 const BoxTrackIDInput = () => {
   const [isEdit, setIsEdit] = useState(false);
-  const { pointCloudBoxList } = useContext(PointCloudContext);
+  const ptCtx = useContext(PointCloudContext);
+  const { pointCloudBoxList } = ptCtx;
   const { selectedBox, updateSelectedBox } = useSingleBox();
   const [inputValue, setInputValue] = useState('');
   const { t } = useTranslation();
@@ -101,7 +102,6 @@ const BoxTrackIDInput = () => {
 
   const applyInputValue = (isBlurEvent = false) => {
     const newTrackID = parseInt(inputValue, 10);
-
     if (isBlurEvent) {
       setIsEdit(false);
     }
@@ -126,12 +126,17 @@ const BoxTrackIDInput = () => {
       return;
     }
 
-    updateSelectedBox({ trackID: newTrackID });
+    updateCurrentPolygonList(newTrackID);
   };
 
   useEffect(() => {
     setIsEdit(false);
   }, [selectedBoxTrackID]);
+
+  const updateCurrentPolygonList = (newTrackID: number) => {
+    const newPointCloudList = updateSelectedBox({ trackID: newTrackID });
+    ptCtx?.topViewInstance?.updatePolygonList(newPointCloudList ?? []);
+  };
 
   return (
     <div style={{ padding: 24 }}>
@@ -144,7 +149,12 @@ const BoxTrackIDInput = () => {
         }}
       >
         <span>{t('CurrentBoxTrackIDs')}</span>
-        {selectedBoxTrackID && <BatchUpdateModal id={selectedBoxTrackID} />}
+        {selectedBoxTrackID && (
+          <BatchUpdateModal
+            id={selectedBoxTrackID}
+            updateCurrentPolygonList={(value) => updateCurrentPolygonList(value)}
+          />
+        )}
       </div>
       <div
         style={{

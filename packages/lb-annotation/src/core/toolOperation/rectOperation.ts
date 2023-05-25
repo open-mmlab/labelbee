@@ -1155,9 +1155,6 @@ class RectOperation extends BasicToolOperation {
     const hoverRectID = this.getHoverRectID(e);
 
     const hoverRect = this.rectList.find((v) => v.id === hoverRectID);
-    if (hoverRect) {
-      this.setDefaultAttribute(hoverRect.attribute);
-    }
 
     if (this.drawingRect) {
       // 取消绘制
@@ -1165,6 +1162,7 @@ class RectOperation extends BasicToolOperation {
       this.firstClickCoord = undefined;
     } else {
       // 选中操作
+
       if (
         this.dragInfo?.dragStartCoord &&
         distance(
@@ -1176,6 +1174,9 @@ class RectOperation extends BasicToolOperation {
       }
 
       this.setSelectedRectID(hoverRectID, e.ctrlKey);
+      if (hoverRect) {
+        this.setDefaultAttribute(hoverRect.attribute);
+      }
       this.hoverRectID = '';
 
       if (hoverRect?.label && this.hasMarkerConfig) {

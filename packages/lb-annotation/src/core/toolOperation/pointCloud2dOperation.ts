@@ -7,7 +7,7 @@
  */
 import _ from 'lodash';
 import { IPointCloudConfig, toolStyleConverter, UpdatePolygonByDragList, INVALID_COLOR } from '@labelbee/lb-utils';
-import { EDragTarget, ESortDirection } from '@/constant/annotation';
+import { EDragTarget, ESortDirection, DEFAULT_TEXT_OFFSET } from '@/constant/annotation';
 import { EPolygonPattern } from '@/constant/tool';
 import { IPolygonData, IPolygonPoint } from '@/types/tool/polygon';
 import AxisUtils from '@/utils/tool/AxisUtils';
@@ -216,7 +216,6 @@ class PointCloud2dOperation extends PolygonOperation {
         }
         const lineColor = this.getPointCloudLineColor(polygon);
         const transformPointList = AxisUtils.changePointListByZoom(polygon.pointList || [], this.zoom, this.currentPos);
-
         DrawUtils.drawPolygonWithFillAndLine(this.canvas, transformPointList, {
           fillColor: 'transparent',
           strokeColor: lineColor,
@@ -226,7 +225,9 @@ class PointCloud2dOperation extends PolygonOperation {
           isClose: true,
           lineType: this.config?.lineType,
         });
-
+        if (polygon?.trackID) {
+          this.renderdrawTrackID(polygon);
+        }
         // Only the rectangle shows the direction.
         if (polygon.isRect === true && this.showDirectionLine === true) {
           this.renderRectPolygonDirection(transformPointList);
@@ -263,9 +264,23 @@ class PointCloud2dOperation extends PolygonOperation {
       // Only the rectangle shows the direction.
       if (selectedPolygon.isRect === true && this.showDirectionLine === true) {
         this.renderRectPolygonDirection(polygon);
+        if (selectedPolygon?.trackID) {
+          this.renderdrawTrackID(selectedPolygon);
+        }
       }
     }
   };
+
+  public renderdrawTrackID(polygon: IPolygonData) {
+    const pointList = AxisUtils.changePointListByZoom(polygon.pointList, this.zoom, this.currentPos);
+    const endPoint = pointList[pointList.length - 1];
+    const trackID = polygon?.trackID;
+    DrawUtils.drawText(this.canvas, endPoint, `${trackID}`, {
+      textAlign: 'center',
+      color: 'white',
+      ...DEFAULT_TEXT_OFFSET,
+    });
+  }
 
   public renderRectPolygonDirection(polygon: IPolygonPoint[]) {
     if (polygon.length < 2) {

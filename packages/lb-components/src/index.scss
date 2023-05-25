@@ -1455,6 +1455,7 @@ $headerHeight: 40px;
   width: $size;
   background-repeat: no-repeat;
   cursor: pointer;
+  flex: none;
 }
 
 .#{$ptPrefix}-footer {
@@ -1579,7 +1580,7 @@ $headerHeight: 40px;
       display: flex;
       flex-direction: column;
       overflow: hidden;
-      min-height: 400px;
+      flex: 1;
 
       .#{$ptPrefix}-3d-content {
         display: flex;
@@ -1594,7 +1595,12 @@ $headerHeight: 40px;
           box-sizing: content-box;
           display: flex;
           flex-direction: column;
-          justify-content: flex-end;
+          justify-content: flex-start;
+          overflow-y: scroll;
+          
+          &::-webkit-scrollbar {
+            display: none;  
+          }
 
           .#{$ptPrefix}-3d-view {
             &__reset,

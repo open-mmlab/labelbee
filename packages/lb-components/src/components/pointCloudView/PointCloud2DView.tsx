@@ -46,6 +46,7 @@ interface IAnnotationDataTemporarily {
 const PointCloud2DView = ({ currentData, config }: IA2MapStateProps) => {
   const [annotations2d, setAnnotations2d] = useState<IAnnotationDataTemporarily[]>([]);
   const { topViewInstance, displayPointCloudList } = useContext(PointCloudContext);
+  const [selectedID, setSelectedID] = useState('');
   const [mappingIndex, setMappingIndex] = useState(0);
   const ref = useRef(null);
   const viewRef = useRef<{ toolInstance: ViewOperation }>();
@@ -68,7 +69,13 @@ const PointCloud2DView = ({ currentData, config }: IA2MapStateProps) => {
 
       const newAnnotations2d: IAnnotationDataTemporarily[] = displayPointCloudList.reduce(
         (acc: IAnnotationDataTemporarily[], pointCloudBox) => {
-          const viewDataPointList = pointCloudLidar2image(pointCloudBox, mappingData.calib);
+          const { transferViewData: viewDataPointList, viewRangePointList } = pointCloudLidar2image(
+            pointCloudBox,
+            mappingData.calib,
+            {
+              createRange: pointCloudBox.id === selectedID,
+            },
+          );
 
           const stroke = toolStyleConverter.getColorFromConfig(
             { attribute: pointCloudBox.attribute },
@@ -79,7 +86,7 @@ const PointCloud2DView = ({ currentData, config }: IA2MapStateProps) => {
             {},
           )?.stroke;
 
-          return [
+          const newArr = [
             ...acc,
             ...viewDataPointList!.map((v: any) => {
               return {
@@ -93,13 +100,28 @@ const PointCloud2DView = ({ currentData, config }: IA2MapStateProps) => {
               };
             }),
           ];
+
+          if (pointCloudBox.id === selectedID && viewRangePointList.length > 0) {
+            newArr.push({
+              type: 'polygon',
+              annotation: {
+                id: selectedID,
+                pointList: viewRangePointList,
+                ...defaultViewStyle,
+                stroke,
+                fill: 'rgba(255, 255, 255, 0.6)',
+              },
+            });
+          }
+
+          return newArr;
         },
         [],
       );
 
       setAnnotations2d(newAnnotations2d);
     }
-  }, [displayPointCloudList, mappingData]);
+  }, [displayPointCloudList, mappingData, selectedID]);
 
   const hiddenData =
     !currentData || !currentData?.mappingImgList || !(currentData?.mappingImgList?.length > 0);
@@ -107,13 +129,19 @@ const PointCloud2DView = ({ currentData, config }: IA2MapStateProps) => {
   const afterImgOnLoad = useCallback(() => {
     const toolInstance = viewRef.current?.toolInstance;
 
+    // Clear Selected.
+    setSelectedID('');
+
     if (!selectedBox || !toolInstance) {
       return;
     }
     const selected2data = annotations2d.find((v) => v.annotation.id === selectedBox.info.id);
 
+    let id = '';
     if (selected2data?.annotation.pointList?.length > 0) {
       toolInstance.focusPositionByPointList(selected2data?.annotation.pointList);
+      id = selectedBox.info.id;
+      setSelectedID(id);
     }
   }, [selectedBox, viewRef.current, annotations2d, mappingIndex]);
 
@@ -152,7 +180,7 @@ const PointCloud2DView = ({ currentData, config }: IA2MapStateProps) => {
           />
         )
       }
-      style={{ display: hiddenData ? 'none' : 'flex' }}
+      style={hiddenData ? { display: 'none' } : { display: 'flex', minHeight: 200, maxHeight: 500 }}
     >
       <div className={getClassName('point-cloud-2d-image')} ref={ref}>
         <AnnotationView
@@ -164,6 +192,11 @@ const PointCloud2DView = ({ currentData, config }: IA2MapStateProps) => {
             display: hiddenData ? 'none' : 'block',
           }}
           afterImgOnLoad={afterImgOnLoad}
+          zoomInfo={{
+            min: 0.01,
+            max: 1000,
+            ratio: 0.4,
+          }}
         />
       </div>
     </PointCloudContainer>

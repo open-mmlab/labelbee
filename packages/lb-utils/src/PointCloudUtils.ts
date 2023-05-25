@@ -454,6 +454,26 @@ class PointCloudUtils {
     return JSON.stringify(originResult);
   }
 
+  public static batchUpdateTrackIDCheck({
+    newID,
+    result,
+    step = 1,
+  }: {
+    newID: number;
+    result?: string;
+    step?: number;
+  }) {
+    const DEFAULT_STEP_NAME = `step_${step}`;
+    const originResult = this.jsonParser(result);
+    const dataList = originResult?.[DEFAULT_STEP_NAME]?.result;
+
+    if (!dataList) {
+      return false;
+    }
+
+    return dataList.some((v: IPointCloudBox) => v.trackID === newID);
+  }
+
   public static batchUpdateResultByTrackID({
     id,
     newData,
