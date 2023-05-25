@@ -19,13 +19,12 @@ import { useConfig } from './hooks/useConfig';
 import { usePolygon } from './hooks/usePolygon';
 import { useTranslation } from 'react-i18next';
 import { IFileItem } from '@/types/data';
-import { EPointCloudPattern } from '@labelbee/lb-utils';
 
 const { EPolygonPattern } = cTool;
 
 interface IProps extends IA2MapStateProps {
   checkMode?: boolean;
-  toolInstanceRef: React.MutableRefObject<ICustomToolInstance>,
+  toolInstanceRef: React.MutableRefObject<ICustomToolInstance>;
 }
 
 const PointCloudListener: React.FC<IProps> = ({
@@ -357,13 +356,6 @@ const PointCloudListener: React.FC<IProps> = ({
         updatePointCloudData?.(newData);
       });
     };
-    toolInstanceRef.current.setPointCloudGlobalPattern = (pattern: EPointCloudPattern) => {
-      ptCtx.setGlobalPattern(pattern)
-    }
-
-    toolInstanceRef.current.getPointCloudGlobalPattern = () => {
-      return ptCtx.globalPattern
-    }
   }, [
     ptCtx.pointCloudBoxList,
     ptCtx.pointCloudSphereList,
@@ -373,7 +365,6 @@ const PointCloudListener: React.FC<IProps> = ({
     ptCtx.lineList,
     ptCtx.mainViewInstance,
     ptCtx.ptSegmentInstance,
-    ptCtx.globalPattern
   ]);
 
   /**

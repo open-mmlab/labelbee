@@ -12,7 +12,7 @@
  */
 
 import { getClassName } from '@/utils/dom';
-import React, { useContext } from 'react';
+import React, { useContext, useEffect } from 'react';
 import PointCloud3DView from './PointCloud3DView';
 import PointCloudBackView from './PointCloudBackView';
 import PointCloudTopView from './PointCloudTopView';
@@ -49,10 +49,21 @@ const PointCloudView: React.FC<IProps> = ({
   checkMode,
   intelligentFit,
 }) => {
-  const { globalPattern } = useContext(PointCloudContext);
+  const { globalPattern, setGlobalPattern } = useContext(PointCloudContext);
 
   const basicInfo = jsonParser(currentData.result);
-  const { toolInstanceRef } = useCustomToolInstance({ basicInfo });
+  const { toolInstanceRef, clearToolInstance } = useCustomToolInstance({ basicInfo });
+
+  useEffect(() => {
+    clearToolInstance()
+    toolInstanceRef.current.setPointCloudGlobalPattern = (pattern: EPointCloudPattern) => {
+      setGlobalPattern(pattern)
+    }
+
+    toolInstanceRef.current.getPointCloudGlobalPattern = () => {
+      return globalPattern
+    }
+  }, [globalPattern])
 
   if (imgList.length === 0) {
     return null;
@@ -61,7 +72,10 @@ const PointCloudView: React.FC<IProps> = ({
   if (globalPattern === EPointCloudPattern.Segmentation) {
     return (
       <>
-        <PointCloudSegmentListener checkMode={checkMode} toolInstanceRef={toolInstanceRef}/>
+        <PointCloudSegmentListener
+          checkMode={checkMode}
+          toolInstanceRef={toolInstanceRef}
+        />
         <PointCloudSegmentToolbar />
         <PointCloudSegment />
         <PointCloudSegmentStatus />
@@ -71,7 +85,10 @@ const PointCloudView: React.FC<IProps> = ({
 
   return (
     <>
-      <PointCloudListener checkMode={checkMode} toolInstanceRef={toolInstanceRef}/>
+      <PointCloudListener
+        checkMode={checkMode}
+        toolInstanceRef={toolInstanceRef}
+      />
       <div className={getClassName('point-cloud-layout')} onContextMenu={(e) => e.preventDefault()}>
         <div className={getClassName('point-cloud-wrapper')}>
           <AnnotatedAttributesPanelFixedLeft />

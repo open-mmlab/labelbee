@@ -9,7 +9,6 @@ import {
   EPointCloudSegmentMode,
   PointCloudUtils,
   IPointCloudSegmentation,
-  EPointCloudPattern,
 } from '@labelbee/lb-utils';
 import { useAttribute } from './hooks/useAttribute';
 import { IInputList } from '@/types/main';
@@ -23,7 +22,7 @@ const PointCloudSegmentListener: React.FC<IProps> = ({ checkMode, currentData, i
   const { updateSegmentAttribute } = useAttribute();
 
   const ptCtx = useContext(PointCloudContext);
-  const { ptSegmentInstance, setSegmentation, setGlobalPattern, globalPattern } = ptCtx;
+  const { ptSegmentInstance, setSegmentation } = ptCtx;
 
   /**
    * Listen
@@ -110,13 +109,6 @@ const PointCloudSegmentListener: React.FC<IProps> = ({ checkMode, currentData, i
       }
       ptCtx.ptSegmentInstance.emit('clearSegmentResult');
     };
-    toolInstanceRef.current.setPointCloudGlobalPattern = (pattern: EPointCloudPattern) => {
-      setGlobalPattern(pattern)
-    }
-
-    toolInstanceRef.current.getPointCloudGlobalPattern = () => {
-      return globalPattern
-    }
   }, [
     ptCtx.pointCloudBoxList,
     ptCtx.valid,
@@ -124,7 +116,6 @@ const PointCloudSegmentListener: React.FC<IProps> = ({ checkMode, currentData, i
     ptCtx.lineList,
     ptCtx.pointCloudSphereList,
     ptCtx.ptSegmentInstance,
-    globalPattern,
   ]);
 
   return null;
