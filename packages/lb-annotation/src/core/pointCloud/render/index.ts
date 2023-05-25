@@ -151,6 +151,7 @@ class PointCloudRender {
         size: 10,
       });
       originPoints.geometry.attributes.position.needsUpdate = true;
+      originPoints.geometry.computeBoundingSphere();
       this.render3d();
     }
   };
