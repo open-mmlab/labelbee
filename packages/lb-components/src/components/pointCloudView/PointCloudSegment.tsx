@@ -6,6 +6,7 @@ import { PointCloud } from '@labelbee/lb-annotation';
 import React, { useContext, useEffect, useRef } from 'react';
 import { connect } from 'react-redux';
 import { PointCloudContext } from './PointCloudContext';
+import { PointCloudUtils } from '@labelbee/lb-utils';
 
 interface IProps extends IA2MapStateProps {
   checkMode?: boolean;
@@ -13,13 +14,22 @@ interface IProps extends IA2MapStateProps {
 
 const PointCloudSegment: React.FC<IProps> = ({ currentData, config, checkMode }) => {
   const domRef = useRef<HTMLDivElement>(null);
-  const { setPtSegmentInstance, setDefaultAttribute } = useContext(PointCloudContext);
+  const { setPtSegmentInstance, setDefaultAttribute, ptSegmentInstance } =
+    useContext(PointCloudContext);
   const size = useSize(domRef);
 
   const defaultAttribute = config?.attributeList?.[0]?.value;
 
   useEffect(() => {
-    if (!size?.width || !domRef.current) {
+    return () => {
+      if (ptSegmentInstance) {
+        setPtSegmentInstance(undefined);
+      }
+    }
+  }, [])
+  
+  useEffect(() => {
+    if (!size?.width || !domRef.current || ptSegmentInstance) {
       return;
     }
 
@@ -32,7 +42,7 @@ const PointCloudSegment: React.FC<IProps> = ({ currentData, config, checkMode })
       far: -100,
     };
 
-    const ptSegmentInstance = new PointCloud({
+    const newPtSegmentInstance = new PointCloud({
       container: domRef.current,
       isOrthographicCamera: true,
       isSegment: true,
@@ -40,9 +50,18 @@ const PointCloudSegment: React.FC<IProps> = ({ currentData, config, checkMode })
       config,
     });
 
-    ptSegmentInstance.store?.setAttribute(defaultAttribute);
+    newPtSegmentInstance.store?.setAttribute(defaultAttribute);
     setDefaultAttribute(defaultAttribute);
-    setPtSegmentInstance(ptSegmentInstance);
+    setPtSegmentInstance(newPtSegmentInstance);
+  }, [size]);
+
+  useEffect(() => {
+    if (ptSegmentInstance) {
+      // Update size of segmentation.
+      ptSegmentInstance.initRenderer();
+      ptSegmentInstance.initOrthographicCamera(PointCloudUtils.getDefaultOrthographic(size));
+      ptSegmentInstance.render();
+    }
   }, [size]);
 
   return <div className={getClassName('point-cloud-layout')} ref={domRef} />;

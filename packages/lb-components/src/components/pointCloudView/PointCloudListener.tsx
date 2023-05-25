@@ -250,18 +250,6 @@ const PointCloudListener: React.FC<IProps> = ({
 
   // Update the listener of toolInstance.
   useEffect(() => {
-    toolInstanceRef.current.exportData = () => {
-      return [ptCtx.pointCloudBoxList, { valid: ptCtx.valid }];
-    };
-
-    toolInstanceRef.current.exportCustomData = () => {
-      return {
-        resultPolygon: ptCtx.polygonList ?? [],
-        resultLine: ptCtx.lineList ?? [],
-        resultPoint: ptCtx.pointCloudSphereList ?? [],
-      };
-    };
-
     toolInstanceRef.current.setDefaultAttribute = (newAttribute: string) => {
       syncThreeViewsAttribute(newAttribute);
       const selectBox = ptCtx.selectedPointCloudBox;

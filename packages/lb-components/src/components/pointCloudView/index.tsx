@@ -49,7 +49,8 @@ const PointCloudView: React.FC<IProps> = ({
   checkMode,
   intelligentFit,
 }) => {
-  const { globalPattern, setGlobalPattern } = useContext(PointCloudContext);
+  const ptCtx = useContext(PointCloudContext);
+  const { globalPattern, setGlobalPattern, ptSegmentInstance } = ptCtx;
 
   const basicInfo = jsonParser(currentData.result);
   const { toolInstanceRef, clearToolInstance } = useCustomToolInstance({ basicInfo });
@@ -57,15 +58,37 @@ const PointCloudView: React.FC<IProps> = ({
   useEffect(() => {
     toolInstanceRef.current.setPointCloudGlobalPattern = (pattern: EPointCloudPattern) => {
       if (pattern !== globalPattern) {
-        setGlobalPattern(pattern)
-        clearToolInstance()
+        setGlobalPattern(pattern);
+        clearToolInstance();
       }
-    }
+    };
 
     toolInstanceRef.current.getPointCloudGlobalPattern = () => {
-      return globalPattern
-    }
-  }, [globalPattern])
+      return globalPattern;
+    };
+  }, [globalPattern]);
+
+  useEffect(() => {
+    toolInstanceRef.current.exportData = () => {
+      return [ptCtx.pointCloudBoxList, { valid: ptCtx.valid }];
+    };
+
+    toolInstanceRef.current.exportCustomData = () => {
+      return {
+        resultPolygon: ptCtx.polygonList ?? [],
+        resultLine: ptCtx.lineList ?? [],
+        resultPoint: ptCtx.pointCloudSphereList ?? [],
+        segmentation: ptSegmentInstance?.store?.formatData,
+      };
+    };
+  }, [
+    ptCtx.pointCloudBoxList,
+    ptCtx.valid,
+    ptCtx.polygonList,
+    ptCtx.lineList,
+    ptCtx.pointCloudSphereList,
+    ptCtx.ptSegmentInstance,
+  ]);
 
   if (imgList.length === 0) {
     return null;
@@ -74,10 +97,7 @@ const PointCloudView: React.FC<IProps> = ({
   if (globalPattern === EPointCloudPattern.Segmentation) {
     return (
       <>
-        <PointCloudSegmentListener
-          checkMode={checkMode}
-          toolInstanceRef={toolInstanceRef}
-        />
+        <PointCloudSegmentListener checkMode={checkMode} toolInstanceRef={toolInstanceRef} />
         <PointCloudSegmentToolbar />
         <PointCloudSegment />
         <PointCloudSegmentStatus />
@@ -87,10 +107,7 @@ const PointCloudView: React.FC<IProps> = ({
 
   return (
     <>
-      <PointCloudListener
-        checkMode={checkMode}
-        toolInstanceRef={toolInstanceRef}
-      />
+      <PointCloudListener checkMode={checkMode} toolInstanceRef={toolInstanceRef} />
       <div className={getClassName('point-cloud-layout')} onContextMenu={(e) => e.preventDefault()}>
         <div className={getClassName('point-cloud-wrapper')}>
           <AnnotatedAttributesPanelFixedLeft />

@@ -5,7 +5,7 @@
  */
 
 import { IPointCloudBox, IPointCloudConfig, IPointCloudSphere } from './types/pointCloud';
-import { ICoordinate } from './types/common';
+import { ICoordinate, ISize } from './types/common';
 
 class PointCloudUtils {
   public static genColorByCoord(x: number, y: number, z: number) {
@@ -663,6 +663,18 @@ class PointCloudUtils {
 
     return new Float32Array(result);
   }
+
+  public static getDefaultOrthographic(size: ISize) {
+    return {
+      left: -size.width / 2,
+      right: size.width / 2,
+      top: size.height / 2,
+      bottom: -size.height / 2,
+      near: 100,
+      far: -100,
+    };
+  }
+
 }
 
 export default PointCloudUtils;

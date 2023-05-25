@@ -18,7 +18,14 @@ interface IProps extends IA2MapStateProps {
   toolInstanceRef: React.MutableRefObject<ICustomToolInstance>;
 }
 
-const PointCloudSegmentListener: React.FC<IProps> = ({ checkMode, currentData, imgIndex, highlightAttribute, config, toolInstanceRef }) => {
+const PointCloudSegmentListener: React.FC<IProps> = ({
+  checkMode,
+  currentData,
+  imgIndex,
+  highlightAttribute,
+  config,
+  toolInstanceRef,
+}) => {
   const { updateSegmentAttribute } = useAttribute();
 
   const ptCtx = useContext(PointCloudContext);
@@ -70,7 +77,6 @@ const PointCloudSegmentListener: React.FC<IProps> = ({ checkMode, currentData, i
 
       case 'enter':
         ptSegmentInstance?.emit('updateCheck2Edit');
-
         break;
 
       case 'delete':
@@ -104,19 +110,6 @@ const PointCloudSegmentListener: React.FC<IProps> = ({ checkMode, currentData, i
   }, [ptSegmentInstance]);
 
   useEffect(() => {
-    toolInstanceRef.current.exportData = () => {
-      return [ptCtx.pointCloudBoxList, { valid: ptCtx.valid }];
-    };
-
-    toolInstanceRef.current.exportCustomData = () => {
-      return {
-        resultPolygon: ptCtx.polygonList ?? [],
-        resultLine: ptCtx.lineList ?? [],
-        resultPoint: ptCtx.pointCloudSphereList ?? [],
-        segmentation: ptSegmentInstance?.store?.formatData,
-      };
-    };
-
     toolInstanceRef.current.clearResult = () => {
       if (!ptCtx.ptSegmentInstance) {
         return;
