@@ -12,12 +12,14 @@ import { AppState } from '@/store';
 import { connect } from 'react-redux';
 import { LabelBeeContext } from '@/store/ctx';
 import { PointCloudContext } from '@/components/pointCloudView/PointCloudContext';
+import { useTranslation } from 'react-i18next';
 
 interface IProps {
   toolName: string;
 }
 
 const SwitchPattern = ({ toolName }: IProps) => {
+  const { t } = useTranslation();
   const {
     globalPattern,
     setGlobalPattern,
@@ -53,13 +55,13 @@ const SwitchPattern = ({ toolName }: IProps) => {
         type={globalPattern === EPointCloudPattern.Detection ? 'primary' : undefined}
         onClick={updateDetection}
       >
-        检测模式
+        {t('DetectionMode')}
       </Button>
       <Button
         type={globalPattern === EPointCloudPattern.Segmentation ? 'primary' : undefined}
         onClick={updateSegmentation}
       >
-        分割模式
+        {t('SegmentationMode')}
       </Button>
     </span>
   );

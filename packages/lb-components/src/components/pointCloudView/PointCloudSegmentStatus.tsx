@@ -3,11 +3,18 @@ import { getClassName } from '@/utils/dom';
 import FinishSvg from '@/assets/annotation/pointCloudTool/finish.svg';
 import CancelSvg from '@/assets/annotation/pointCloudTool/cancel.svg';
 import { PointCloudContext } from './PointCloudContext';
-import { EPointCloudSegmentFocusMode, EPointCloudSegmentStatus, IPointCloudSegmentation } from '@labelbee/lb-utils';
+import {
+  EPointCloudSegmentFocusMode,
+  EPointCloudSegmentStatus,
+  IPointCloudSegmentation,
+} from '@labelbee/lb-utils';
+import { useTranslation } from 'react-i18next';
 
 const SegmentInfo: React.FC<{ infoList?: Array<{ key: string; value: string | number }> }> = ({
   infoList,
 }) => {
+  const { t } = useTranslation();
+
   if (!infoList) {
     return null;
   }
@@ -16,7 +23,7 @@ const SegmentInfo: React.FC<{ infoList?: Array<{ key: string; value: string | nu
     <div className={getClassName('point-cloud-status', 'info')}>
       {infoList.map((v) => (
         <div key={v.key}>
-          <span>{v.key}： </span>
+          <span>{t(v.key)}： </span>
           <span>{v.value}</span>
         </div>
       ))}
@@ -25,6 +32,7 @@ const SegmentInfo: React.FC<{ infoList?: Array<{ key: string; value: string | nu
 };
 
 const PointCloudSegmentStatus = () => {
+  const { t } = useTranslation();
   const { ptSegmentInstance, setDefaultAttribute } = useContext(PointCloudContext);
 
   const [data, setData] = useState<{
@@ -67,11 +75,11 @@ const PointCloudSegmentStatus = () => {
   const pointsLength = (data.cacheSegData?.points?.length ?? 0) / 3;
   let infoList = [
     {
-      key: '选中点数',
+      key: 'SelectedPoints',
       value: pointsLength,
     },
     {
-      key: '主属性',
+      key: 'Attribute',
       value: data.cacheSegData?.attribute ?? '',
     },
   ];
@@ -84,8 +92,9 @@ const PointCloudSegmentStatus = () => {
             ptSegmentInstance?.emit('updateCheck2Edit');
           }}
         >
-          <img className={getClassName('point-cloud-status', 'icon')} src={FinishSvg} />
-          进入编辑
+          {/* <img className={getClassName('point-cloud-status', 'icon')} src={FinishSvg} /> */}
+          {t('EnterEditMode')}
+          (Enter)
         </span>
       </div>
     );
@@ -99,12 +108,12 @@ const PointCloudSegmentStatus = () => {
           onClick={() => {
             ptSegmentInstance?.emit('addStash2Store');
             if (ptSegmentInstance?.store?.segmentFocusMode === EPointCloudSegmentFocusMode.Focus) {
-              ptSegmentInstance?.emit('setSegmentFocusMode', EPointCloudSegmentFocusMode.Unfocus)
+              ptSegmentInstance?.emit('setSegmentFocusMode', EPointCloudSegmentFocusMode.Unfocus);
             }
           }}
         >
           <img className={getClassName('point-cloud-status', 'icon')} src={FinishSvg} />
-          完成
+          {t('Finish')}
         </span>
         <span
           className={getClassName('point-cloud-status', 'button')}
@@ -113,7 +122,7 @@ const PointCloudSegmentStatus = () => {
           }}
         >
           <img className={getClassName('point-cloud-status', 'icon')} src={CancelSvg} />
-          取消
+          {t('Cancel')}
         </span>
       </div>
     );
