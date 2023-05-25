@@ -19,4 +19,30 @@ export const DEFAULT_SPHERE_PARAMS = {
   widthSegments: 32,
   heightSegments: 16,
   defaultZ: 1,
+};
+
+export enum EPointCloudPattern {
+  Detection = 'Detection',
+  Segmentation = 'Segmentation',
+}
+
+export enum EPointCloudSegmentMode {
+  Add = 'ADD',
+  Remove = 'REMOVE',
+}
+
+export enum EPointCloudSegmentCoverMode {
+  Cover = 'Cover',
+  Uncover = 'Uncover',
+}
+
+export enum EPointCloudSegmentFocusMode {
+  Focus = 'Focus',
+  Unfocus = 'Unfocus'
+}
+
+export enum EPointCloudSegmentStatus {
+  Ready = 'READY',
+  Check = 'CHECK',
+  Edit = 'EDIT',
 }

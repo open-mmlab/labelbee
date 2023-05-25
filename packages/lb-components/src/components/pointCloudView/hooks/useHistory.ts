@@ -5,6 +5,7 @@ import {
   IPointCloudSphereList,
   IPolygonData,
   ILine,
+  IPointCloudSegmentation,
 } from '@labelbee/lb-utils';
 import { useContext } from 'react';
 import { PointCloudContext } from '../PointCloudContext';
@@ -24,6 +25,7 @@ export const useHistory = () => {
     lineList,
     setLineList,
     syncAllViewPointCloudColor,
+    segmentation,
   } = useContext(PointCloudContext);
 
   const addHistory = ({
@@ -68,6 +70,7 @@ export const useHistory = () => {
       polygonList: IPolygonData[];
       lineList: ILine[];
       pointCloudSphereList: IPointCloudSphereList;
+      segmentation: IPointCloudSegmentation[];
     }>,
   ) => {
     const historyRecord = {
@@ -75,6 +78,7 @@ export const useHistory = () => {
       polygonList,
       lineList,
       pointCloudSphereList,
+      segmentation,
     };
 
     if (params.pointCloudBoxList) {
@@ -91,6 +95,10 @@ export const useHistory = () => {
 
     if (params.pointCloudSphereList) {
       historyRecord.pointCloudSphereList = params.pointCloudSphereList;
+    }
+
+    if (params.segmentation) {
+      historyRecord.segmentation = params.segmentation;
     }
 
     history.pushHistory(historyRecord);

@@ -32,4 +32,4 @@ export * from './annotation';
 
 export * from './toolStyle';
 
-// pub debug
+export * from './constant/color';

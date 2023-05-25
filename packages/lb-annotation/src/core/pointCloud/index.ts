@@ -30,6 +30,10 @@ import { PCDLoader } from './PCDLoader';
 import { OrbitControls } from './OrbitControls';
 import { PointCloudCache } from './cache';
 import { getCuboidFromPointCloudBox } from './matrix';
+import { PointCloudSegmentOperation } from './segmentation';
+import PointCloudStore from './store';
+import PointCloudRender from './render';
+import EventListener from '../toolOperation/eventListener';
 
 interface IOrthographicCamera {
   left: number;
@@ -48,12 +52,27 @@ interface IProps {
   backgroundColor?: string;
 
   config?: IPointCloudConfig;
+
+  isSegment?: boolean;
+}
+
+export interface IEventBus {
+  on: EventListener['on'];
+  emit: EventListener['emit'];
+  unbind: EventListener['unbind'];
+}
+
+export interface IPointCloudDelegate extends IEventBus {
+  renderer: THREE.WebGLRenderer;
+  scene: THREE.Scene;
+  camera: THREE.OrthographicCamera | THREE.PerspectiveCamera;
+  container: HTMLElement;
 }
 
 const DEFAULT_DISTANCE = 30;
 const highlightWorker = new HighlightWorker({ type: 'module' });
 
-export class PointCloud {
+export class PointCloud extends EventListener {
   public renderer: THREE.WebGLRenderer;
 
   public scene: THREE.Scene;
@@ -68,6 +87,10 @@ export class PointCloud {
   public pcdLoader: PCDLoader;
 
   public config?: IPointCloudConfig;
+
+  public store?: PointCloudStore; // TODO. Need to transfer all data to here
+
+  public pointCloudRender?: PointCloudRender;
 
   /**
    * zAxis Limit for filter point over a value
@@ -105,6 +128,8 @@ export class PointCloud {
    */
   private highlightPCDSrc?: string;
 
+  private segmentOperation?: PointCloudSegmentOperation;
+
   constructor({
     container,
     noAppend,
@@ -112,7 +137,9 @@ export class PointCloud {
     orthographicParams,
     backgroundColor = '#4C4C4C', // GRAY_BACKGROUND
     config,
+    isSegment,
   }: IProps) {
+    super();
     this.container = container;
     this.renderer = new THREE.WebGLRenderer({ antialias: true });
     this.backgroundColor = backgroundColor;
@@ -132,17 +159,16 @@ export class PointCloud {
     } else {
       this.camera = new THREE.PerspectiveCamera(30, this.containerWidth / this.containerHeight, 1, 1000);
     }
-    // this.camera = new THREE.OrthographicCamera(-500, 500, 500, -500, 100, -100);
     this.initCamera();
-
     this.scene = new THREE.Scene();
-    this.controls = new OrbitControls(this.camera, this.renderer.domElement);
+    this.controls = new OrbitControls(this.camera, isSegment ? this.container : this.renderer.domElement);
+
     this.pcdLoader = new PCDLoader();
 
     this.axesHelper = new THREE.AxesHelper(1000);
 
     // For Developer
-    // this.scene.add(this.axesHelper);
+    this.scene.add(this.axesHelper);
 
     this.scene.add(this.camera);
     // TODO
@@ -153,6 +179,136 @@ export class PointCloud {
     this.init();
 
     this.cacheInstance = PointCloudCache.getInstance();
+
+    if (isSegment === true) {
+      this.initSegment();
+    }
+  }
+
+  public initSegment() {
+    this.store = new PointCloudStore(this.pointCloudDelegate);
+    this.controls.enablePan = false;
+    this.controls.addEventListener('start', this.orbiterStart.bind(this));
+    this.controls.addEventListener('change', this.orbiterChange.bind(this));
+    this.controls.addEventListener('end', this.orbiterEnd.bind(this));
+    this.segmentOperation = new PointCloudSegmentOperation({
+      dom: this.container,
+      store: this.store,
+    });
+
+    this.pointCloudRender = new PointCloudRender({
+      store: this.store,
+      ...this.eventBus,
+      nextTick: this.nextTick,
+      config: this.config,
+    });
+    this.initMsg();
+    document.addEventListener('keydown', this.keydown);
+    document.addEventListener('keyup', this.keyup);
+  }
+
+  public orbiterStart() {
+    // Reserved.
+  }
+
+  public orbiterChange() {
+    if (!this.store) {
+      return;
+    }
+    this.store.orbiting = true;
+  }
+
+  public orbiterEnd() {
+    if (!this.store) {
+      return;
+    }
+    this.store.orbiting = false;
+  }
+
+  public get currentSegmentTool() {
+    return this.segmentOperation?.currentToolName;
+  }
+
+  public initMsg() {
+    if (!this.segmentOperation) {
+      return;
+    }
+
+    this.on('CircleSelector', this.segmentOperation.updateSelector2Circle.bind(this.segmentOperation));
+    this.on('LassoSelector', this.segmentOperation.updateSelector2Lasso.bind(this.segmentOperation));
+    this.on('clearPointCloud', this.clearPointCloud.bind(this));
+    this.on('loadPCDFile', this.loadPCDFile.bind(this));
+  }
+
+  public unbindMsg() {
+    if (!this.segmentOperation) {
+      return;
+    }
+
+    this.unbind('CircleSelector', this.segmentOperation.updateSelector2Circle.bind(this.segmentOperation));
+    this.unbind('LassoSelector', this.segmentOperation.updateSelector2Lasso.bind(this.segmentOperation));
+    this.unbind('clearPointCloud', this.clearPointCloud.bind(this));
+    this.unbind('loadPCDFile', this.loadPCDFile.bind(this));
+  }
+
+  public nextTick = () => {
+    if (!this.segmentOperation) {
+      return;
+    }
+
+    this.segmentOperation._raycasting();
+  };
+
+  public keydown = (e: KeyboardEvent) => {
+    if (!this.store) {
+      return;
+    }
+    switch (e.key) {
+      case ' ':
+        this.controls.enablePan = true;
+        this.store.setForbidOperation(true);
+        break;
+
+      default: {
+        break;
+      }
+    }
+  };
+
+  public keyup = (e: KeyboardEvent) => {
+    if (!this.store) {
+      return;
+    }
+
+    switch (e.key) {
+      case ' ':
+        this.controls.enablePan = false;
+        this.store.setForbidOperation(false);
+
+        break;
+
+      default: {
+        break;
+      }
+    }
+  };
+
+  public get eventBus() {
+    return {
+      on: this.on.bind(this),
+      emit: this.emit.bind(this),
+      unbind: this.unbind.bind(this),
+    };
+  }
+
+  public get pointCloudDelegate() {
+    return {
+      container: this.container,
+      scene: this.scene,
+      camera: this.camera,
+      renderer: this.renderer,
+      ...this.eventBus,
+    };
   }
 
   get DEFAULT_INIT_CAMERA_POSITION() {
@@ -264,10 +420,6 @@ export class PointCloud {
     // Remove Old Box
     if (oldBox) {
       oldBox.removeFromParent();
-      // if (name === this.pointCloudObjectName) {
-      //   // debugger;
-      //   this.removeObjectByName(name);
-      // }
     }
   }
 
@@ -699,7 +851,8 @@ export class PointCloud {
     }
 
     this.pointsUuid = points.uuid;
-    points.material = pointsMaterial;
+    // Temporarily hide it. It needs to restore.
+    // points.material = pointsMaterial;
     this.filterZAxisPoints(points);
 
     this.scene.add(points);
@@ -716,12 +869,26 @@ export class PointCloud {
     this.render();
   }
 
+  public initCloudData(points: Float32Array) {
+    if (!this.store) {
+      return;
+    }
+    for (let i = 0; i < points.length; i += 3) {
+      const x = points[i];
+      const y = points[i + 1];
+      const z = points[i + 2];
+
+      this.store.cloudData.set(`${x}@${y}@${z}`, { visible: false });
+    }
+  }
+
   /**
    *
    * @param src
    * @param radius Render the range of circle
    */
-  public loadPCDFile = async (src: string, radius?: number) => {
+  public loadPCDFile = async (src: string | undefined = this.currentPCDSrc, radius?: number) => {
+    if (!src) return;
     this.clearPointCloud();
     this.currentPCDSrc = src;
 
@@ -732,6 +899,9 @@ export class PointCloud {
     const geometry = new THREE.BufferGeometry();
     geometry.setAttribute('position', new THREE.BufferAttribute(points, 3));
     geometry.setAttribute('color', new THREE.BufferAttribute(color, 3));
+
+    // TODO: Need to move to store.
+    this.initCloudData(points);
 
     const newPoints = new THREE.Points(geometry);
     this.renderPointCloud(newPoints, radius);

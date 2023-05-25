@@ -42,6 +42,7 @@ const initialState: AnnotationState = {
   checkMode: false,
   predictionResult: [],
   predictionResultVisible: false,
+  highlightAttribute: '',
 };
 
 /**
@@ -715,7 +716,7 @@ export const annotationReducer = (
       /**
        * Async PointCloud Data.
        */
-      // @ts-ignore 
+      // @ts-ignore
       toolInstance?.asyncData?.(imgList[imgIndex]);
       return {
         ...state,
@@ -765,6 +766,14 @@ export const annotationReducer = (
         ...state,
         checkMode: !!checkMode,
       };
+    }
+
+    case ANNOTATION_ACTIONS.SET_HIGHLIGHT_ATTRIBUTE: {
+      const { attribute } = action.payload
+      return {
+        ...state,
+        highlightAttribute: attribute,
+      }
     }
 
     case ANNOTATION_ACTIONS.BATCH_UPDATE_TRACK_ID: {

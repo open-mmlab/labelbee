@@ -8,9 +8,8 @@ import { cTool, AttributeUtils, CommonToolUtils, EToolName } from '@labelbee/lb-
 import { message } from 'antd';
 import { connect } from 'react-redux';
 import { a2MapStateToProps, IA2MapStateProps } from '@/store/annotation/map';
-import { useCustomToolInstance } from '@/hooks/annotation';
+import { ICustomToolInstance } from '@/hooks/annotation';
 import { useStatus } from './hooks/useStatus';
-import { jsonParser } from '@/utils';
 import { usePointCloudViews } from './hooks/usePointCloudViews';
 import { LabelBeeContext } from '@/store/ctx';
 import { useHistory } from './hooks/useHistory';
@@ -25,6 +24,7 @@ const { EPolygonPattern } = cTool;
 
 interface IProps extends IA2MapStateProps {
   checkMode?: boolean;
+  toolInstanceRef: React.MutableRefObject<ICustomToolInstance>;
 }
 
 const PointCloudListener: React.FC<IProps> = ({
@@ -33,6 +33,7 @@ const PointCloudListener: React.FC<IProps> = ({
   checkMode,
   configString,
   imgIndex,
+  toolInstanceRef,
 }) => {
   const ptCtx = useContext(PointCloudContext);
   const {
@@ -44,9 +45,7 @@ const PointCloudListener: React.FC<IProps> = ({
   } = useSingleBox();
   const { selectedSphere, updatePointCloudSphere } = useSphere();
   const { clearAllResult, updatePointCloudPattern } = useStatus();
-  const basicInfo = jsonParser(currentData.result);
   const { copySelectedBoxes, pasteSelectedBoxes, copiedBoxes } = useBoxes({ config });
-  const { toolInstanceRef } = useCustomToolInstance({ basicInfo });
   const { updateRotate } = useRotate({ currentData });
   const { updatePointCloudData, topViewSelectedChanged } = usePointCloudViews();
   const { redo, undo, pushHistoryWithList, pushHistoryUnderUpdatePolygon } = useHistory();
@@ -168,7 +167,7 @@ const PointCloudListener: React.FC<IProps> = ({
           );
 
           if (keyCode2Attribute !== undefined) {
-            toolInstanceRef.current.setDefaultAttribute(keyCode2Attribute);
+            toolInstanceRef.current?.setDefaultAttribute(keyCode2Attribute);
           }
         }
         return;
@@ -251,18 +250,6 @@ const PointCloudListener: React.FC<IProps> = ({
 
   // Update the listener of toolInstance.
   useEffect(() => {
-    toolInstanceRef.current.exportData = () => {
-      return [ptCtx.pointCloudBoxList, { valid: ptCtx.valid }];
-    };
-
-    toolInstanceRef.current.exportCustomData = () => {
-      return {
-        resultPolygon: ptCtx.polygonList ?? [],
-        resultLine: ptCtx.lineList ?? [],
-        resultPoint: ptCtx.pointCloudSphereList ?? [],
-      };
-    };
-
     toolInstanceRef.current.setDefaultAttribute = (newAttribute: string) => {
       syncThreeViewsAttribute(newAttribute);
       const selectBox = ptCtx.selectedPointCloudBox;
@@ -365,7 +352,19 @@ const PointCloudListener: React.FC<IProps> = ({
     ptCtx.polygonList,
     ptCtx.lineList,
     ptCtx.mainViewInstance,
+    ptCtx.ptSegmentInstance,
   ]);
+
+  /**
+   * PointCloud Segmentation
+   */
+  useEffect(() => {
+    toolInstanceRef.current.updateSegmentTool = (tool: 'CircleSelector' | 'CircleSelector') => {
+      ptCtx.ptSegmentInstance?.emit(tool);
+    };
+
+    toolInstanceRef.current.segmentInstance = ptCtx.ptSegmentInstance;
+  }, [ptCtx.ptSegmentInstance]);
 
   useEffect(() => {
     toolInstanceRef.current.history = {

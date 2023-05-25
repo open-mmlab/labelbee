@@ -92,6 +92,7 @@ export interface AppProps {
   checkMode?: boolean;
   intelligentFit?: boolean;
   enableColorPicker?: boolean;
+  highlightAttribute?: string;
 }
 
 const App: React.FC<AppProps> = (props) => {
@@ -115,6 +116,7 @@ const App: React.FC<AppProps> = (props) => {
     beforeRotate,
     checkMode = false,
     intelligentFit = true,
+    highlightAttribute = '',
   } = props;
 
   useEffect(() => {
@@ -132,6 +134,7 @@ const App: React.FC<AppProps> = (props) => {
         skipBeforePageTurning,
         beforeRotate,
         checkMode,
+        highlightAttribute,
       }),
     );
 
@@ -164,6 +167,7 @@ const App: React.FC<AppProps> = (props) => {
         onPageChange,
         onStepChange,
         beforeRotate,
+        highlightAttribute,
       }),
     );
 
@@ -179,6 +183,7 @@ const App: React.FC<AppProps> = (props) => {
     onStepChange,
     defaultLang,
     beforeRotate,
+    highlightAttribute,
   ]);
 
   useEffect(() => {

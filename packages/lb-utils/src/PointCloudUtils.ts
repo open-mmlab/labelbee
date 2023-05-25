@@ -5,7 +5,7 @@
  */
 
 import { IPointCloudBox, IPointCloudConfig, IPointCloudSphere } from './types/pointCloud';
-import { ICoordinate } from './types/common';
+import { ICoordinate, ISize } from './types/common';
 
 class PointCloudUtils {
   public static genColorByCoord(x: number, y: number, z: number) {
@@ -57,6 +57,15 @@ class PointCloudUtils {
 
     const DEFAULT_STEP = `step_1`;
     const pointCloudDataList = data?.[DEFAULT_STEP]?.resultPoint ?? [];
+
+    return pointCloudDataList;
+  }
+
+  public static getSegmentFromResultList(result: string) {
+    const data = this.jsonParser(result);
+
+    const DEFAULT_STEP = `step_1`;
+    const pointCloudDataList = data?.[DEFAULT_STEP]?.segmentation ?? [];
 
     return pointCloudDataList;
   }
@@ -630,6 +639,62 @@ class PointCloudUtils {
 
     return { x, y };
   }
+
+  public static getCloudKeys(x: number, y: number, z: number) {
+    return [x, y, z].join('@');
+  }
+
+  public static splitPointsFromIndexes(originIndexes: number[], splitIndexes: number[]) {
+    const splitSet = new Set();
+    for (let i = 0; i < splitIndexes.length; i += 1) {
+      splitSet.add(splitIndexes[i]);
+    }
+
+    const result = [];
+    for (let i = 0; i < originIndexes.length; i += 1) {
+      if (!splitSet.has(originIndexes[i])) {
+        result.push(originIndexes[i]);
+      }
+    }
+
+    return result;
+  }
+
+  public static splitPointsFromPoints(originPoints: Float32Array, splitPoints: Float32Array) {
+    const splitMap = new Map();
+    for (let i = 0; i < splitPoints.length; i += 3) {
+      splitMap.set(
+        PointCloudUtils.getCloudKeys(splitPoints[i], splitPoints[i + 1], splitPoints[i + 2]),
+        1,
+      );
+    }
+
+    const result = [];
+    for (let i = 0; i < originPoints.length; i += 3) {
+      const key = PointCloudUtils.getCloudKeys(
+        originPoints[i],
+        originPoints[i + 1],
+        originPoints[i + 2],
+      );
+      if (!splitMap.has(key)) {
+        result.push(originPoints[i], originPoints[i + 1], originPoints[i + 2]);
+      }
+    }
+
+    return new Float32Array(result);
+  }
+
+  public static getDefaultOrthographic(size: ISize) {
+    return {
+      left: -size.width / 2,
+      right: size.width / 2,
+      top: size.height / 2,
+      bottom: -size.height / 2,
+      near: 100,
+      far: -100,
+    };
+  }
+
 }
 
 export default PointCloudUtils;

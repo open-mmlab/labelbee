@@ -1,0 +1,15 @@
+<svg width="24.000000" height="24.000000" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
+	<desc>
+			Created with Pixso.
+	</desc>
+	<mask id="mask1_15945" mask-type="alpha" maskUnits="userSpaceOnUse" x="0.000000" y="0.000000" width="24.000000" height="24.000000">
+		<rect id="Frame 1312316543 (Background/Mask)" width="24.000000" height="24.000000" fill="#C4C4C4"/>
+	</mask>
+	<g mask="url(#mask1_15945)">
+		<path id="Vector 197" d="M6.82031 21.1879C7.30859 20.8242 7.65674 20.4422 7.89697 20.0767C8.56055 19.0654 7.91553 17.8707 7.32861 16.813C6.78955 15.8416 6.34033 14.9126 5.68604 14.0402C3.5 11.1254 3.98877 7.18506 6.86133 4.94373C9.97998 2.51038 13.4199 2.427 15.9365 3.36963C16.5493 3.59912 17.186 3.94055 17.7881 4.3363C20.1196 5.86804 21.0063 8.93555 19.5503 11.3146C17.5649 14.5581 13.4385 15.5564 10.3657 15.641" stroke="#1664FF" stroke-width="1.995000" stroke-linejoin="round" stroke-linecap="round" stroke-dasharray="0 0"/>
+	</g>
+	<g mask="url(#mask1_15945)">
+		<path id="Vector 198" d="M4.979 17.3167C3.92969 16.8472 3.81592 15.4429 4.79492 14.8404C5.9707 14.1169 7.58301 13.7576 9.354 14.7828C10.374 15.3734 10.4321 16.5123 9.39893 17.0798C8.32764 17.6683 6.73828 18.1039 4.979 17.3167Z" stroke="#1664FF" stroke-width="1.895129" stroke-linejoin="round" stroke-dasharray="0 0"/>
+	</g>
+	<defs/>
+</svg>
