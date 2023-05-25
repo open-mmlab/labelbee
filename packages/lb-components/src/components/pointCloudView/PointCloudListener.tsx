@@ -8,9 +8,8 @@ import { cTool, AttributeUtils, CommonToolUtils, EToolName } from '@labelbee/lb-
 import { message } from 'antd';
 import { connect } from 'react-redux';
 import { a2MapStateToProps, IA2MapStateProps } from '@/store/annotation/map';
-import { useCustomToolInstance } from '@/hooks/annotation';
+import { ICustomToolInstance } from '@/hooks/annotation';
 import { useStatus } from './hooks/useStatus';
-import { jsonParser } from '@/utils';
 import { usePointCloudViews } from './hooks/usePointCloudViews';
 import { LabelBeeContext } from '@/store/ctx';
 import { useHistory } from './hooks/useHistory';
@@ -20,12 +19,12 @@ import { useConfig } from './hooks/useConfig';
 import { usePolygon } from './hooks/usePolygon';
 import { useTranslation } from 'react-i18next';
 import { IFileItem } from '@/types/data';
-import { EPointCloudPattern } from '@labelbee/lb-utils';
 
 const { EPolygonPattern } = cTool;
 
 interface IProps extends IA2MapStateProps {
   checkMode?: boolean;
+  toolInstanceRef: React.MutableRefObject<ICustomToolInstance>;
 }
 
 const PointCloudListener: React.FC<IProps> = ({
@@ -34,6 +33,7 @@ const PointCloudListener: React.FC<IProps> = ({
   checkMode,
   configString,
   imgIndex,
+  toolInstanceRef,
 }) => {
   const ptCtx = useContext(PointCloudContext);
   const {
@@ -45,9 +45,7 @@ const PointCloudListener: React.FC<IProps> = ({
   } = useSingleBox();
   const { selectedSphere, updatePointCloudSphere } = useSphere();
   const { clearAllResult, updatePointCloudPattern } = useStatus();
-  const basicInfo = jsonParser(currentData.result);
   const { copySelectedBoxes, pasteSelectedBoxes, copiedBoxes } = useBoxes({ config });
-  const { toolInstanceRef } = useCustomToolInstance({ basicInfo });
   const { updateRotate } = useRotate({ currentData });
   const { updatePointCloudData, topViewSelectedChanged } = usePointCloudViews();
   const { redo, undo, pushHistoryWithList, pushHistoryUnderUpdatePolygon } = useHistory();
@@ -169,7 +167,7 @@ const PointCloudListener: React.FC<IProps> = ({
           );
 
           if (keyCode2Attribute !== undefined) {
-            toolInstanceRef.current.setDefaultAttribute(keyCode2Attribute);
+            toolInstanceRef.current?.setDefaultAttribute(keyCode2Attribute);
           }
         }
         return;
@@ -358,12 +356,6 @@ const PointCloudListener: React.FC<IProps> = ({
         updatePointCloudData?.(newData);
       });
     };
-    toolInstanceRef.current.setPointCloudGlobalPattern = (globalPattern: EPointCloudPattern) => {
-      ptCtx.setGlobalPattern(globalPattern)
-    }
-    toolInstanceRef.current.getPointCloudGlobalPattern = () => {
-      return ptCtx.globalPattern
-    }
   }, [
     ptCtx.pointCloudBoxList,
     ptCtx.pointCloudSphereList,
@@ -373,7 +365,6 @@ const PointCloudListener: React.FC<IProps> = ({
     ptCtx.lineList,
     ptCtx.mainViewInstance,
     ptCtx.ptSegmentInstance,
-    ptCtx.globalPattern
   ]);
 
   /**
