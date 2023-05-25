@@ -81,7 +81,7 @@ const useCustomToolInstance = ({ basicInfo }: ICustomToolInstanceProps = {}) => 
     setPointCloudGlobalPattern: (globalPattern: EPointCloudPattern) => {},
     getPointCloudGlobalPattern: () => EPointCloudPattern.Detection,
   }
-  
+
   const toolInstanceRef = useRef<ICustomToolInstance>(initialCustomToolInstance);
 
   const onMounted = (instance: any) => {

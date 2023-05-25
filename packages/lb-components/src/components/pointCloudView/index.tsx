@@ -55,9 +55,9 @@ const PointCloudView: React.FC<IProps> = ({
   const { toolInstanceRef, clearToolInstance } = useCustomToolInstance({ basicInfo });
 
   useEffect(() => {
-    clearToolInstance()
     toolInstanceRef.current.setPointCloudGlobalPattern = (pattern: EPointCloudPattern) => {
       setGlobalPattern(pattern)
+      clearToolInstance()
     }
 
     toolInstanceRef.current.getPointCloudGlobalPattern = () => {
