@@ -21,14 +21,6 @@ const PointCloudSegment: React.FC<IProps> = ({ currentData, config, checkMode })
   const defaultAttribute = config?.attributeList?.[0]?.value;
 
   useEffect(() => {
-    return () => {
-      if (ptSegmentInstance) {
-        setPtSegmentInstance(undefined);
-      }
-    }
-  }, [])
-  
-  useEffect(() => {
     if (!size?.width || !domRef.current || ptSegmentInstance) {
       return;
     }

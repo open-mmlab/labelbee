@@ -5,7 +5,8 @@ import {
   IPointCloudSphereList,
   IPointCloudSphere,
   ILine,
-  EPointCloudPattern, IPointCloudSegmentation,
+  EPointCloudPattern,
+  IPointCloudSegmentation,
 } from '@labelbee/lb-utils';
 import React, { useEffect, useMemo, useRef, useState } from 'react';
 import {
@@ -14,6 +15,8 @@ import {
   ActionsHistory,
   EToolName,
 } from '@labelbee/lb-annotation';
+import { useDispatch } from '@/store/ctx';
+import { ChangeSave } from '@/store/annotation/actionCreators';
 
 interface IPointCloudContextInstances {
   topViewInstance?: PointCloudAnnotation;
@@ -33,7 +36,7 @@ interface IPointCloudStatus {
 
 interface IPointCloudSegment {
   ptSegmentInstance?: PointCloud;
-  setPtSegmentInstance: (instance: PointCloud) => void;
+  setPtSegmentInstance: (instance?: PointCloud) => void;
 }
 
 type AttrPanelLayout = '' | 'left' | 'right';
@@ -173,8 +176,10 @@ export const PointCloudProvider: React.FC<{}> = ({ children }) => {
   const [hideAttributes, setHideAttributes] = useState<string[]>([]);
   const [attrPanelLayout, setAttrPanelLayout] = useState<AttrPanelLayout>('');
   const [globalPattern, setGlobalPattern] = useState(EPointCloudPattern.Segmentation);
-  const [ptSegmentInstance, setPtSegmentInstance] = useState<PointCloud>();
-  const [segmentation, setSegmentation] = useState<IPointCloudSegmentation[]>([])
+  const [ptSegmentInstance, setPtSegmentInstance] = useState<PointCloud | undefined>(undefined);
+  const [segmentation, setSegmentation] = useState<IPointCloudSegmentation[]>([]);
+
+  const dispatch = useDispatch();
 
   const selectedID = useMemo(() => {
     return selectedIDs.length === 1 ? selectedIDs[0] : '';
@@ -307,6 +312,18 @@ export const PointCloudProvider: React.FC<{}> = ({ children }) => {
       });
     };
 
+    const setGlobalPatternFuc = (pattern: EPointCloudPattern) => {
+      if (globalPattern !== pattern) {
+        dispatch(ChangeSave);
+        setGlobalPattern(pattern);
+
+        // Segment => Detection - Temporarily.
+        if (pattern === EPointCloudPattern.Detection) {
+          setPtSegmentInstance(undefined);
+        }
+      }
+    };
+
     return {
       selectedID,
       pointCloudBoxList,
@@ -353,7 +370,7 @@ export const PointCloudProvider: React.FC<{}> = ({ children }) => {
       setPointCloudPattern,
       selectSpecAttr,
       globalPattern,
-      setGlobalPattern,
+      setGlobalPattern: setGlobalPatternFuc,
       ptSegmentInstance,
       setPtSegmentInstance,
       segmentation,
@@ -399,7 +416,7 @@ export const PointCloudProvider: React.FC<{}> = ({ children }) => {
   useEffect(() => {
     updateSelectedIDsAndRenderAfterHide();
     topViewInstance?.toolInstance?.setHiddenAttributes(hideAttributes);
-    ptSegmentInstance?.store?.setHiddenAttributes(hideAttributes)
+    ptSegmentInstance?.store?.setHiddenAttributes(hideAttributes);
   }, [hideAttributes]);
 
   return <PointCloudContext.Provider value={ptCtx}>{children}</PointCloudContext.Provider>;
