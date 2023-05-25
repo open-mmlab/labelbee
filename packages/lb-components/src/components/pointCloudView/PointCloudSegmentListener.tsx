@@ -38,15 +38,17 @@ const PointCloudSegmentListener: React.FC<IProps> = ({ checkMode, currentData, i
       });
       // Update segmentData.
       ptSegmentInstance.on('syncSegmentData', (segmentation: IPointCloudSegmentation[]) => {
-        setSegmentation(segmentation)
-      })
+        setSegmentation(segmentation);
+      });
     }
   }, [imgIndex, ptSegmentInstance]);
 
   useEffect(() => {
-    let attributeValue = config.attributeList.find((v: IInputList) => v?.key === highlightAttribute)?.value
-    ptSegmentInstance?.store?.highlightPointsByAttribute(attributeValue ?? '')
-  }, [highlightAttribute, ptSegmentInstance])
+    let attributeValue = config.attributeList.find(
+      (v: IInputList) => v?.key === highlightAttribute,
+    )?.value;
+    ptSegmentInstance?.store?.highlightPointsByAttribute(attributeValue ?? '');
+  }, [highlightAttribute, ptSegmentInstance]);
 
   const segmentKeydownEvents = (lowerCaseKey: string, e: KeyboardEvent) => {
     switch (lowerCaseKey) {
@@ -66,8 +68,16 @@ const PointCloudSegmentListener: React.FC<IProps> = ({ checkMode, currentData, i
         ptSegmentInstance?.emit('setSegmentMode', EPointCloudSegmentMode.Remove);
         break;
 
+      case 'enter':
+        ptSegmentInstance?.emit('updateCheck2Edit');
+
+        break;
+
       case 'delete':
-        ptSegmentInstance?.emit("clearSelectedSegmentData", ptSegmentInstance.store?.cacheSegData?.id)
+        ptSegmentInstance?.emit(
+          'clearSelectedSegmentData',
+          ptSegmentInstance.store?.cacheSegData?.id,
+        );
         break;
     }
   };
