@@ -50,7 +50,7 @@ const PointCloudView: React.FC<IProps> = ({
   intelligentFit,
 }) => {
   const ptCtx = useContext(PointCloudContext);
-  const { globalPattern, setGlobalPattern, ptSegmentInstance } = ptCtx;
+  const { globalPattern, setGlobalPattern } = ptCtx;
 
   const basicInfo = jsonParser(currentData.result);
   const { toolInstanceRef, clearToolInstance } = useCustomToolInstance({ basicInfo });
@@ -78,7 +78,7 @@ const PointCloudView: React.FC<IProps> = ({
         resultPolygon: ptCtx.polygonList ?? [],
         resultLine: ptCtx.lineList ?? [],
         resultPoint: ptCtx.pointCloudSphereList ?? [],
-        segmentation: ptSegmentInstance?.store?.formatData,
+        segmentation: ptCtx.segmentation ?? [],
       };
     };
   }, [
@@ -88,6 +88,7 @@ const PointCloudView: React.FC<IProps> = ({
     ptCtx.lineList,
     ptCtx.pointCloudSphereList,
     ptCtx.ptSegmentInstance,
+    ptCtx.segmentation,
   ]);
 
   if (imgList.length === 0) {
