@@ -9,7 +9,7 @@ import { ANNOTATION_ACTIONS } from '@/store/Actions';
 
 export interface ICustomToolInstance {
   valid: boolean;
-  exportData: () => [any[], {}];
+  exportData: () => [any, {}];
   exportCustomData: () => {};
   singleOn: () => void;
   clearResult: () => void;
@@ -30,8 +30,8 @@ export interface ICustomToolInstance {
 
   updateRotate: () => void;
 
-  undo: () => void,
-  redo: () => void,
+  undo: () => void;
+  redo: () => void;
 
   [str: string]: any;
 }
