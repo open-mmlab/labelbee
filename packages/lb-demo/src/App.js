@@ -21,6 +21,7 @@ import {
 } from './mock/index';
 import { getDependStepList, getStepList } from './mock/taskConfig';
 import car1 from './mock/cuboidImages/1.png';
+import {LLMToolQa} from './mock/LLMTool'
 
 const App = () => {
   const tool = qs.parse(window.location.search, { ignoreQueryPrefix: true, comma: true }).tool;
@@ -45,16 +46,18 @@ const App = () => {
       });
     }
 
+
+
     return srcList.map((url, i) => ({
       ...extraData,
       id: i + 1,
       url,
       result: isSingleTool ? getMockResult(tool) : '',
+      questionList: LLMToolQa
     }));
   };
 
   const [fileList] = useState(getMockList());
-
   const [data, setData] = useState(DEFAULT_ANNOTATIONS);
 
   const onChange = (type, ids) => {

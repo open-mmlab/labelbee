@@ -1,6 +1,7 @@
 import { AppProps } from '@/App';
 import AnnotationView from '@/components/AnnotationView';
 import PointCloudAnnotationView from '@/components/AnnotationView/pointCloudAnnotationView';
+import QuestionView from '@/components/LLMToolView/questionView';
 import { i18n } from '@labelbee/lb-utils';
 import React, { useImperativeHandle, useState } from 'react';
 import { I18nextProvider } from 'react-i18next';
@@ -16,6 +17,7 @@ import { PointCloudProvider } from './components/pointCloudView/PointCloudContex
 import { AppState } from './store';
 import { LabelBeeContext } from '@/store/ctx';
 import PredictTracking from '@/components/predictTracking';
+import LLMToolView from '@/components/LLMToolView';
 
 export const store = configureStore();
 
@@ -53,6 +55,14 @@ const OutputApp = (props: AppProps, ref: any) => {
 
 export default React.forwardRef(OutputApp);
 
-export { AnnotationView, PointCloudAnnotationView, i18n, VideoTagTool, PredictTracking };
+export {
+  AnnotationView,
+  PointCloudAnnotationView,
+  QuestionView,
+  LLMToolView,
+  i18n,
+  VideoTagTool,
+  PredictTracking,
+};
 
 export * from './constant';
