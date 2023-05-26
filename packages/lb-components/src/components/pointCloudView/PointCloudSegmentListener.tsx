@@ -5,11 +5,7 @@ import { LabelBeeContext } from '@/store/ctx';
 import { ICustomToolInstance } from '@/hooks/annotation';
 import { PointCloudContext } from './PointCloudContext';
 import { CommonToolUtils } from '@labelbee/lb-annotation';
-import {
-  EPointCloudSegmentMode,
-  PointCloudUtils,
-  IPointCloudSegmentation,
-} from '@labelbee/lb-utils';
+import { EPointCloudSegmentMode, PointCloudUtils } from '@labelbee/lb-utils';
 import { useAttribute } from './hooks/useAttribute';
 import { IInputList } from '@/types/main';
 
@@ -84,7 +80,7 @@ const PointCloudSegmentListener: React.FC<IProps> = ({
 
       case 'delete':
         ptSegmentInstance?.emit(
-          'clearSelectedSegmentData',
+          'deleteSelectedSegmentData',
           ptSegmentInstance.store?.cacheSegData?.id,
         );
         break;

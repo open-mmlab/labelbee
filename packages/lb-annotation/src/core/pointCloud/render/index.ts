@@ -69,7 +69,7 @@ class PointCloudRender {
     this.on('clearStashRender', this.clearStash);
     this.on('clearAllSegmentData', this.clearAllSegmentData);
     this.on('reRender3d', this.render3d);
-    this.on('clearSelectedSegmentData', this.clearSelectedSegmentRender);
+    this.on('deleteSelectedSegmentData', this.clearSelectedSegmentRender);
   }
 
   public unbindMsg() {
@@ -78,7 +78,7 @@ class PointCloudRender {
     this.unbind('clearStashRender', this.clearStash);
     this.unbind('clearAllSegmentData', this.clearAllSegmentData);
     this.unbind('reRender3d', this.render3d);
-    this.unbind('clearSelectedSegmentData', this.clearSelectedSegmentRender);
+    this.unbind('deleteSelectedSegmentData', this.clearSelectedSegmentRender);
   }
 
   public get canvas2d() {
