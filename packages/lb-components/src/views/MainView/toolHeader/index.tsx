@@ -113,12 +113,14 @@ const ToolHeader: React.FC<IToolHeaderProps> = ({
   stepList,
   step,
   annotationEngine,
+  toolName,
 }) => {
   const dispatch = useDispatch();
   const [, forceUpdate] = useReducer((x) => x + 1, 0);
   const ref = useRef(null);
 
   const size = useSize(ref);
+  const isLLMTool = EToolName.LLM === toolName;
 
   // render 数据展示
   const currentOption = <ExportData exportData={exportData} />;
@@ -156,9 +158,9 @@ const ToolHeader: React.FC<IToolHeaderProps> = ({
     </>
   );
 
-  const headerOptionNode = <HeaderOption stepInfo={stepInfo} />;
+  const headerOptionNode = !isLLMTool && <HeaderOption stepInfo={stepInfo} />;
 
-  const PointCloudSwitchPattern = SwitchPattern
+  const PointCloudSwitchPattern = SwitchPattern;
 
   const langNode = (
     <div className={`${prefix}-header__lang`}>
@@ -180,7 +182,7 @@ const ToolHeader: React.FC<IToolHeaderProps> = ({
 
   const rightActions = (
     <>
-      <PredictTrackingIcon />
+      {!isLLMTool && <PredictTrackingIcon />}
       {langNode}
     </>
   );

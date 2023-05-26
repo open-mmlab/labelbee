@@ -4,7 +4,7 @@ import { prefix } from '@/constant';
 import { Spin } from 'antd';
 import { Layout } from 'antd/es';
 import _ from 'lodash';
-import React from 'react';
+import React, { useState, useMemo } from 'react';
 import AnnotationOperation from './annotationOperation';
 import AnnotationTips from './annotationTips';
 import Sidebar from './sidebar';
@@ -20,11 +20,17 @@ import PointCloudView from '@/components/pointCloudView';
 import { getClassName } from '@/utils/dom';
 import { classnames } from '@/utils';
 import { LabelBeeContext } from '@/store/ctx';
-import PreviewResult from '@/components/predictTracking/previewResult';
+import { EToolName } from '@/data/enums/ToolType';
+import LLMToolView from '@/components/LLMToolView';
 
 interface IProps {
   path: string;
   loading: boolean;
+}
+
+interface ILLMContext {
+  hoverKey: number;
+  setHoverKey: (value: number) => void;
 }
 
 const { Sider, Content } = Layout;
@@ -70,9 +76,51 @@ const AnnotatedArea: React.FC<AppProps & IProps> = (props) => {
 
   return <ImageAnnotate {...props} />;
 };
+export const LLMContext = React.createContext<ILLMContext>({
+  hoverKey: -1,
+  setHoverKey: () => {},
+});
+
+const LLMLayout: React.FC<AppProps & IProps> = (props) => {
+  const siderWidth = props.style?.sider?.width;
+  const [hoverKey, setHoverKey] = useState(-1);
+  return (
+    <Layout className={getClassName('layout', 'container')}>
+      <LLMContext.Provider
+        value={useMemo(() => {
+          return { hoverKey, setHoverKey };
+        }, [hoverKey])}
+      >
+        {props?.leftSider}
+        <Content
+          className={classnames({
+            [`${layoutCls}__content`]: true,
+            [`${prefix}-LLMCheckContext`]: !!props.checkMode,
+          })}
+        >
+          <LLMToolView checkMode={props.checkMode} setHoverKey={setHoverKey} />
+          <ToolFooter style={props.style?.footer} mode={props.mode} footer={props?.footer} />
+        </Content>
+
+        {props?.sider && (
+          <Sider
+            className={`${layoutCls}__side`}
+            width={siderWidth ?? 240}
+            style={props.style?.sider}
+          >
+            <Sidebar sider={props?.sider} />
+          </Sider>
+        )}
+      </LLMContext.Provider>
+    </Layout>
+  );
+};
 
 const MainView: React.FC<AppProps & IProps> = (props) => {
   const siderWidth = props.style?.sider?.width;
+  const { stepList, step } = props;
+  const currentToolName = getStepConfig(stepList, step)?.tool;
+  const isLLMTool = EToolName.LLM === currentToolName;
 
   return (
     <ViewportProvider>
@@ -87,20 +135,23 @@ const MainView: React.FC<AppProps & IProps> = (props) => {
             />
           </header>
 
-          <Layout className={getClassName('layout', 'container')}>
-            {props?.leftSider}
-            <Content className={`${layoutCls}__content`}>
-              <AnnotatedArea {...props} />
-            </Content>
-            <Sider
-              className={`${layoutCls}__side`}
-              width={siderWidth ?? 240}
-              style={props.style?.sider}
-            >
-              <Sidebar sider={props?.sider} enableColorPicker={props?.enableColorPicker} />
-            </Sider>
-            <PreviewResult />
-          </Layout>
+          {isLLMTool ? (
+            <LLMLayout {...props} />
+          ) : (
+            <Layout className={getClassName('layout', 'container')}>
+              {props?.leftSider}
+              <Content className={`${layoutCls}__content`}>
+                <AnnotatedArea {...props} />
+              </Content>
+              <Sider
+                className={`${layoutCls}__side`}
+                width={siderWidth ?? 240}
+                style={props.style?.sider}
+              >
+                <Sidebar sider={props?.sider} />
+              </Sider>
+            </Layout>
+          )}
         </Layout>
       </Spin>
     </ViewportProvider>
