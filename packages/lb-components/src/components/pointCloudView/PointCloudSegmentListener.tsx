@@ -43,10 +43,13 @@ const PointCloudSegmentListener: React.FC<IProps> = ({
 
         ptSegmentInstance?.store?.updateCurrentSegment(segmentData);
       });
+
       // Update segmentData.
-      ptSegmentInstance.on('syncSegmentData', (segmentation: IPointCloudSegmentation[]) => {
-        setSegmentation(segmentation);
-      });
+      ptSegmentInstance.on('syncSegmentData', setSegmentation);
+
+      return () => {
+        ptSegmentInstance.unbind('syncSegmentData', setSegmentation);
+      };
     }
   }, [imgIndex, ptSegmentInstance]);
 
