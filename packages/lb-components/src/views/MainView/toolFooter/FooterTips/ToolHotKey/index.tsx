@@ -17,6 +17,7 @@ import pointCloudShortCutTable, {
 } from './pointCloud';
 import scribbleShortCutTable from './scribble';
 import cuboidShortCutTable from './cuboid';
+import LLMShortCutTable from './LLM';
 
 import { footerCls } from '../../index';
 import { useTranslation } from 'react-i18next';
@@ -59,6 +60,7 @@ export const shortCutTable: { [a: string]: IShortCutInfo[] } = {
   [EPointCloudName.PointCloud + '_SEGMENT']: pointCloudShortCutTable_SEGMENT,
   [EToolName.ScribbleTool]: scribbleShortCutTable,
   [EToolName.Cuboid]: cuboidShortCutTable,
+  [EToolName.LLM]: LLMShortCutTable,
 };
 
 const ToolHotKeyIcon = ({ icon }: { icon: React.ReactElement | string }) => {
