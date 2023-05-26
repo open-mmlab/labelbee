@@ -203,7 +203,14 @@
     "Apply": "Apply",
     "BeforePredictStarting": "Before starting, please mark the first and last box, need the same trackID",
     "ThePredictedPointCloud": "The predicted point cloud now needs to be less than 10 frames",
-    "CameraFollowTopView": "Positioned by top view"
+    "CameraFollowTopView": "Positioned by top view",
+    "EfficientListening": "The task is marked in the efficiency monitoring...",
+    "Title":"Title",
+    "Answer":"Answer",
+    "Finished":"Finished",
+    "Unfinished":"Unfinished",
+    "OverallScore":"OverallScore",
+    "NoScoringScale":"NoScoringScale",
   },
   "cn": {
     "TextInput": "文本输入",
@@ -409,6 +416,13 @@
     "Apply": "应用",
     "BeforePredictStarting": "启动前，请先标出首尾的框，需同序号",
     "ThePredictedPointCloud": "现预测点云需要小于 10 帧",
-    "CameraFollowTopView": "按俯视图定位"
+    "CameraFollowTopView": "按俯视图定位",
+    "EfficientListening": "该任务标注效率监控中...",
+    "Title":"题目",
+    "Answer":"回答",
+    "Finished":"已完成",
+    "Unfinished":"未完成",
+    "OverallScore":"整体评分",
+    "NoScoringScale":"暂未添加评分标准",
   }
 }
