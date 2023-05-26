@@ -211,6 +211,10 @@
     "Unfinished":"Unfinished",
     "OverallScore":"OverallScore",
     "NoScoringScale":"NoScoringScale",
+    "Best":"Best",
+    "Worst":"Worst",
+    "RankingQualityOfAnswers":"RankingQualityOfAnswers",
+    "ToBeSorted":"ToBeSorted"
   },
   "cn": {
     "TextInput": "文本输入",
@@ -424,5 +428,9 @@
     "Unfinished":"未完成",
     "OverallScore":"整体评分",
     "NoScoringScale":"暂未添加评分标准",
+    "Best":"最好",
+    "Worst":"最差",
+    "RankingQualityOfAnswers":"请对每个回答的质量进行排序",
+    "ToBeSorted":"待排序"
   }
 }
