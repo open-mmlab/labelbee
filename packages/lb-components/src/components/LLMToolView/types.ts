@@ -14,3 +14,11 @@ export interface IAnswerList {
   indicatorScore: IndicatorScore;
   indicatorDetermine: IndicatorDetermine;
 }
+export interface ILLMToolConfig {
+  // LLM工具
+  enableSort: boolean;
+  indicatorScore: IndicatorScore[]; // 指标评分
+  indicatorDetermine: IndicatorDetermine[]; // 指标判断
+  score: number; // 整体评分
+  text?: boolean;
+}

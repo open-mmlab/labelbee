@@ -17,6 +17,7 @@ import { message } from 'antd/es';
 import _ from 'lodash';
 import { SetAnnotationLoading } from './actionCreators';
 import { AnnotationActionTypes, AnnotationState } from './types';
+import { EToolName } from '@/data/enums/ToolType';
 
 export const getStepConfig = (stepList: any[], step: number) =>
   stepList.find((i) => i.step === step);
@@ -81,6 +82,10 @@ const updateToolInstance = (annotation: AnnotationState, imgNode: HTMLImageEleme
     return;
   }
 
+  if (EToolName.LLM === stepConfig?.tool) {
+    return;
+  }
+
   const container = document.getElementById('toolContainer');
 
   if (!container) {
@@ -111,12 +116,18 @@ export const LoadFileAndFileData =
     const { stepList, step } = getState().annotation;
     const currentIsVideo = StepUtils.currentToolIsVideo(step, stepList);
     const currentIsPointCloud = StepUtils.currentToolIsPointCloud(step, stepList);
+    const currentIsLLM = StepUtils.getCurrentStepInfo(step, stepList)?.tool === EToolName.LLM;
 
     SetAnnotationLoading(dispatch, true);
 
     await dispatch(TryGetFileDataByAPI(nextIndex));
 
     if (currentIsVideo || currentIsPointCloud) {
+      dispatch(AfterVideoLoaded(nextIndex));
+      return;
+    }
+
+    if (currentIsLLM) {
       dispatch(AfterVideoLoaded(nextIndex));
       return;
     }
@@ -130,8 +141,10 @@ export const LoadFileAndFileData =
  */
 const TryGetFileDataByAPI = (nextIndex: number) => async (dispatch: any, getState: any) => {
   const { getFileData, imgList } = getState().annotation;
+
   if (getFileData) {
     const fileData = await getFileData(imgList[nextIndex], nextIndex);
+
     dispatch({
       type: ANNOTATION_ACTIONS.SET_FILE_DATA,
       payload: {
@@ -156,6 +169,7 @@ const AfterVideoLoaded = (nextIndex: number) => (dispatch: any) => {
 const AfterImageLoaded =
   (nextIndex: number, nextBasicIndex?: number) => (dispatch: any, getState: any) => {
     const { toolInstance, imgList } = getState().annotation;
+
     const url = imgList?.[nextIndex]?.url;
     ImgUtils.load(url)
       .then((imgNode: HTMLImageElement) => {
@@ -286,6 +300,7 @@ export const annotationReducer = (
             step,
             stepList,
           );
+
           return {
             ...v,
             result: newResult,
