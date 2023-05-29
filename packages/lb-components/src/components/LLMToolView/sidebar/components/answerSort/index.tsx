@@ -39,7 +39,7 @@ interface ITagPoints {
 
 const contentBoxCls = `${prefix}-LLMSidebar-contentBox`;
 
-const Navigation = (t) => (
+const Navigation = ({ t }: any) => (
   <div className={`${contentBoxCls}__navigation`}>
     <span>{t('Best')}</span>
     <div style={{ display: 'flex', alignItems: 'center' }}>
