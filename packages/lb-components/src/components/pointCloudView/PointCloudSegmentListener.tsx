@@ -5,11 +5,7 @@ import { LabelBeeContext } from '@/store/ctx';
 import { ICustomToolInstance } from '@/hooks/annotation';
 import { PointCloudContext } from './PointCloudContext';
 import { CommonToolUtils } from '@labelbee/lb-annotation';
-import {
-  EPointCloudSegmentMode,
-  PointCloudUtils,
-  IPointCloudSegmentation,
-} from '@labelbee/lb-utils';
+import { EPointCloudSegmentMode, PointCloudUtils } from '@labelbee/lb-utils';
 import { useAttribute } from './hooks/useAttribute';
 import { IInputList } from '@/types/main';
 
@@ -43,10 +39,13 @@ const PointCloudSegmentListener: React.FC<IProps> = ({
 
         ptSegmentInstance?.store?.updateCurrentSegment(segmentData);
       });
+
       // Update segmentData.
-      ptSegmentInstance.on('syncSegmentData', (segmentation: IPointCloudSegmentation[]) => {
-        setSegmentation(segmentation);
-      });
+      ptSegmentInstance.on('syncSegmentData', setSegmentation);
+
+      return () => {
+        ptSegmentInstance.unbind('syncSegmentData', setSegmentation);
+      };
     }
   }, [imgIndex, ptSegmentInstance]);
 
@@ -81,7 +80,7 @@ const PointCloudSegmentListener: React.FC<IProps> = ({
 
       case 'delete':
         ptSegmentInstance?.emit(
-          'clearSelectedSegmentData',
+          'deleteSelectedSegmentData',
           ptSegmentInstance.store?.cacheSegData?.id,
         );
         break;

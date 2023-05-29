@@ -114,7 +114,7 @@ class PointCloudStore {
     this.highlightPointsByAttribute = this.highlightPointsByAttribute.bind(this);
     this.setHiddenAttributes = this.setHiddenAttributes.bind(this);
     this.clearAllSegmentData = this.clearAllSegmentData.bind(this);
-    this.clearSelectedSegmentData = this.clearSelectedSegmentData.bind(this);
+    this.deleteSelectedSegmentData = this.deleteSelectedSegmentData.bind(this);
     this.initMsg();
     this.setupRaycaster();
   }
@@ -129,7 +129,7 @@ class PointCloudStore {
     this.on('setSegmentFocusMode', this.setSegmentFocusMode);
     this.on('switchHideSegment', this.switchSegmentHideMode);
     this.on('clearAllSegmentData', this.clearAllSegmentData);
-    this.on('clearSelectedSegmentData', this.clearSelectedSegmentData);
+    this.on('deleteSelectedSegmentData', this.deleteSelectedSegmentData);
   }
 
   public unbindMsg() {
@@ -141,7 +141,7 @@ class PointCloudStore {
     this.unbind('setSegmentFocusMode', this.setSegmentFocusMode);
     this.unbind('switchHideSegment', this.switchSegmentHideMode);
     this.unbind('clearAllSegmentData', this.clearAllSegmentData);
-    this.unbind('clearSelectedSegmentData', this.clearSelectedSegmentData);
+    this.unbind('deleteSelectedSegmentData', this.deleteSelectedSegmentData);
   }
 
   public get containerWidth() {
@@ -558,7 +558,7 @@ class PointCloudStore {
     }
   }
 
-  public clearSelectedSegmentData(id = '') {
+  public deleteSelectedSegmentData(id = '') {
     if ((this.isCheckStatus || this.isEditStatus) && this.cacheSegData) {
       const segmentPoints = this.scene.getObjectByName(id) as THREE.Points | undefined;
       const { indexes } = this.cacheSegData;
@@ -578,14 +578,18 @@ class PointCloudStore {
           }
         }
 
-        this.cacheSegData = undefined;
-        pointCloudFSM.updateStatus2Ready();
-        this.emit('syncPointCloudStatus', {
-          segmentStatus: this.segmentStatus,
-          cacheSegData: this.cacheSegData,
-        });
+        this.resetSelectedSegmentStatus();
       }
     }
+  }
+
+  public resetSelectedSegmentStatus() {
+    this.cacheSegData = undefined;
+    pointCloudFSM.updateStatus2Ready();
+    this.emit('syncPointCloudStatus', {
+      segmentStatus: this.segmentStatus,
+      cacheSegData: this.cacheSegData,
+    });
   }
 
   public updateCheck2Edit() {
@@ -595,17 +599,22 @@ class PointCloudStore {
   }
 
   public checkPoints() {
-    const hoverPoints = this.segmentData.get(this.hoverPointsID);
-    if (hoverPoints) {
-      this.cacheSegData = {
-        ...hoverPoints,
-        points: new Float32Array(hoverPoints.points),
-      };
-      pointCloudFSM.updateStatus2Check();
-      this.emit('syncPointCloudStatus', {
-        segmentStatus: this.segmentStatus,
-        cacheSegData: this.cacheSegData,
-      });
+    if (this.isReadyStatus || this.isCheckStatus) {
+      const hoverPoints = this.segmentData.get(this.hoverPointsID);
+      if (hoverPoints) {
+        this.cacheSegData = {
+          ...hoverPoints,
+          points: new Float32Array(hoverPoints.points),
+        };
+        pointCloudFSM.updateStatus2Check();
+        this.emit('syncPointCloudStatus', {
+          segmentStatus: this.segmentStatus,
+          cacheSegData: this.cacheSegData,
+        });
+      } else {
+        // Reset selected Status.
+        this.resetSelectedSegmentStatus();
+      }
     }
   }
 

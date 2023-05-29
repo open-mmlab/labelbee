@@ -19,7 +19,7 @@ import {
   PointCloudUtils,
   DEFAULT_SPHERE_PARAMS,
 } from '@labelbee/lb-utils';
-import { BufferAttribute, OrthographicCamera, PerspectiveCamera, PointsMaterial, Shader } from 'three';
+import { BufferAttribute, OrthographicCamera, PerspectiveCamera } from 'three';
 import HighlightWorker from 'web-worker:./highlightWorker.js';
 import FilterBoxWorker from 'web-worker:./filterBoxWorker.js';
 import { isInPolygon } from '@/utils/tool/polygonTool';
@@ -130,6 +130,8 @@ export class PointCloud extends EventListener {
 
   private segmentOperation?: PointCloudSegmentOperation;
 
+  private isSegment = false;
+
   constructor({
     container,
     noAppend,
@@ -182,6 +184,7 @@ export class PointCloud extends EventListener {
 
     if (isSegment === true) {
       this.initSegment();
+      this.isSegment = true;
     }
   }
 
@@ -814,36 +817,56 @@ export class PointCloud extends EventListener {
     return ellipse;
   }
 
-  public overridePointShader = (shader: Shader) => {
-    shader.vertexShader = `
-    attribute float sizes;
-    attribute float visibility;
-    varying float vVisible;
-  ${shader.vertexShader}`.replace(
-      `gl_PointSize = size;`,
-      `gl_PointSize = size;
-      vVisible = visibility;
-    `,
-    );
-    shader.fragmentShader = `
-    varying float vVisible;
-  ${shader.fragmentShader}`.replace(
-      `#include <clipping_planes_fragment>`,
-      `
-      if (vVisible < 0.5) discard;
-    #include <clipping_planes_fragment>`,
-    );
+  public initShaderMaterial = () => {
+    return {
+      vertexShader: `
+      attribute vec3 dimensions;
+      varying vec3 vDimensions;
+      uniform float pointSize;
+      attribute float visibility;
+
+      void main() {
+        // Pass the vertex coordinates to the fragment shader
+        gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0);
+
+          // Pass the dimensions to the fragment shader
+          vDimensions = dimensions;
+          gl_PointSize = pointSize;
+
+          if (visibility < 0.5) {
+            gl_Position = vec4(0.0, 0.0, 0.0, 1.0);  // Invalid Position.
+          }
+      }`,
+      fragmentShader: `
+      varying vec3 vDimensions;
+      void main() {
+        // Calculate color based on dimensions
+        vec3 color = vec3(vDimensions.x, vDimensions.y, vDimensions.z);
+
+        // If vDimensions is default value, the color change to white-rgb(255,255,255)
+        if (vDimensions.x == 0.0 && vDimensions.y == 0.0 && vDimensions.z == 0.0) {
+          color = vec3(255, 255, 255);
+        }
+
+        // Output the final color        
+        gl_FragColor = vec4(color, 1.0);
+      }`,
+      uniforms: {
+        pointSize: { value: 1.2 }, // Init size.
+      },
+    };
   };
 
   public renderPointCloud(points: THREE.Points, radius?: number) {
     points.name = this.pointCloudObjectName;
 
-    const pointsMaterial = new THREE.PointsMaterial({
-      vertexColors: true,
-    });
-
-    pointsMaterial.onBeforeCompile = this.overridePointShader;
-    pointsMaterial.size = this.pointsMaterialSize;
+    /**
+     * Custom ShaderMaterial.
+     *
+     * 1. Filter the invisible points in vertexShader.
+     * 2. If the color is not found, set Color to (255, 255, 255)
+     */
+    const material = new THREE.ShaderMaterial(this.initShaderMaterial());
 
     if (radius) {
       // @ts-ignore
@@ -851,8 +874,7 @@ export class PointCloud extends EventListener {
     }
 
     this.pointsUuid = points.uuid;
-    // Temporarily hide it. It needs to restore.
-    // points.material = pointsMaterial;
+    points.material = material;
     this.filterZAxisPoints(points);
 
     this.scene.add(points);
@@ -898,7 +920,9 @@ export class PointCloud extends EventListener {
     const { points, color } = (await this.cacheInstance.loadPCDFile(src)) as any;
     const geometry = new THREE.BufferGeometry();
     geometry.setAttribute('position', new THREE.BufferAttribute(points, 3));
-    geometry.setAttribute('color', new THREE.BufferAttribute(color, 3));
+    if (!this.isSegment) {
+      geometry.setAttribute('dimensions', new THREE.BufferAttribute(color, 3));
+    }
 
     // TODO: Need to move to store.
     this.initCloudData(points);
@@ -928,7 +952,7 @@ export class PointCloud extends EventListener {
         const params = {
           cuboidList,
           position: oldPointCloud.geometry.attributes.position.array,
-          color: oldPointCloud.geometry.attributes.color.array,
+          color: oldPointCloud.geometry.attributes.dimensions.array,
           colorList,
         };
 
@@ -960,7 +984,9 @@ export class PointCloud extends EventListener {
           this.highlightPCDSrc = undefined;
 
           colorAttribute.needsUpdate = true;
-          oldPointCloud.geometry.setAttribute('color', colorAttribute);
+
+          oldPointCloud.geometry.setAttribute('dimensions', colorAttribute);
+          oldPointCloud.geometry.attributes.dimensions.needsUpdate = true;
           resolve(color);
           this.render();
         };
@@ -972,8 +998,8 @@ export class PointCloud extends EventListener {
     const oldPointCloud = this.scene.getObjectByName(this.pointCloudObjectName) as THREE.Points;
     if (oldPointCloud) {
       const colorAttribute = new THREE.BufferAttribute(color, 3);
-      colorAttribute.needsUpdate = true;
-      oldPointCloud.geometry.setAttribute('color', colorAttribute);
+      oldPointCloud.geometry.setAttribute('dimensions', colorAttribute);
+      oldPointCloud.geometry.attributes.dimensions.needsUpdate = true;
 
       this.render();
     }
@@ -1648,24 +1674,28 @@ export class PointCloud extends EventListener {
    * @returns
    */
   public updatePointSize = ({ zoomIn, customSize }: { zoomIn?: boolean; customSize?: number }) => {
-    const points = this.scene.getObjectByName(this.pointCloudObjectName) as { material: PointsMaterial } | undefined;
+    const points = this.scene.getObjectByName(this.pointCloudObjectName) as
+      | { material: THREE.ShaderMaterial }
+      | undefined;
 
     if (!points) {
       return;
     }
 
-    const preSize = points.material.size;
+    const preSize = points.material.uniforms.pointSize.value;
 
     if (zoomIn) {
-      points.material.size = Math.min(preSize * 1.2, 10);
+      points.material.uniforms.pointSize.value = Math.min(preSize * 1.2, 10);
     } else {
-      points.material.size = Math.max(preSize / 1.2, 1);
+      points.material.uniforms.pointSize.value = Math.max(preSize / 1.2, 1);
     }
 
     if (customSize) {
-      points.material.size = customSize;
+      points.material.uniforms.pointSize.value = customSize;
       this.pointsMaterialSize = customSize;
     }
+
+    points.material.uniformsNeedUpdate = true;
 
     this.render();
   };
