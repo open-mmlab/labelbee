@@ -175,7 +175,7 @@ export const PointCloudProvider: React.FC<{}> = ({ children }) => {
   const history = useRef(new ActionsHistory()).current;
   const [hideAttributes, setHideAttributes] = useState<string[]>([]);
   const [attrPanelLayout, setAttrPanelLayout] = useState<AttrPanelLayout>('');
-  const [globalPattern, setGlobalPattern] = useState(EPointCloudPattern.Segmentation);
+  const [globalPattern, setGlobalPattern] = useState(EPointCloudPattern.Detection);
   const [ptSegmentInstance, setPtSegmentInstance] = useState<PointCloud | undefined>(undefined);
   const [segmentation, setSegmentation] = useState<IPointCloudSegmentation[]>([]);
 
