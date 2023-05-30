@@ -902,6 +902,7 @@ export class PointCloud extends EventListener {
 
       this.store.cloudData.set(`${x}@${y}@${z}`, { visible: false });
     }
+    this.store.setOriginPoints(points);
   }
 
   /**

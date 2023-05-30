@@ -62,10 +62,6 @@ const PointCloudView: React.FC<IProps> = ({
         clearToolInstance();
       }
     };
-
-    toolInstanceRef.current.getPointCloudGlobalPattern = () => {
-      return globalPattern;
-    };
   }, [globalPattern]);
 
   useEffect(() => {
@@ -102,6 +98,9 @@ const PointCloudView: React.FC<IProps> = ({
         <PointCloudSegmentToolbar />
         <PointCloudSegment />
         <PointCloudSegmentStatus />
+        {drawLayerSlot?.({
+          direct: true,
+        })}
       </>
     );
   }
