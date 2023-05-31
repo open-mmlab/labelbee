@@ -27,6 +27,8 @@ const SwitchPattern = ({ toolName }: IProps) => {
     setSideViewInstance,
     setBackViewInstance,
     setMainViewInstance,
+    ptSegmentInstance,
+    setSelectedIDs,
   } = useContext(PointCloudContext);
 
   if (toolName !== EPointCloudName.PointCloud) {
@@ -34,19 +36,24 @@ const SwitchPattern = ({ toolName }: IProps) => {
   }
 
   const clearDetection = () => {
+    setSelectedIDs([]);
     setTopViewInstance(undefined);
     setSideViewInstance(undefined);
     setBackViewInstance(undefined);
     setMainViewInstance(undefined);
   };
 
+  const clearSegmentation = () => {
+    ptSegmentInstance?.emit('clearStash');
+  };
+
   const updateDetection = () => {
+    clearSegmentation();
     setGlobalPattern(EPointCloudPattern.Detection);
-    clearDetection();
   };
   const updateSegmentation = () => {
-    setGlobalPattern(EPointCloudPattern.Segmentation);
     clearDetection();
+    setGlobalPattern(EPointCloudPattern.Segmentation);
   };
 
   return (
