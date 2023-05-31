@@ -15,7 +15,7 @@ interface IProps {
 const PageNumber = (props: IProps) => {
   const { toolInstance } = props;
   const [_, forceRender] = useState(0);
-  const { pointCloudBoxList, pointCloudSphereList, lineList, segmentation, globalPattern } = useContext(PointCloudContext);
+  const { pointCloudBoxList, segmentation, globalPattern } = useContext(PointCloudContext);
   const { t } = useTranslation();
   useEffect(() => {
     if (toolInstance) {
@@ -29,7 +29,7 @@ const PageNumber = (props: IProps) => {
     return null;
   }
 
-  const count = toolInstance?.currentPageResult?.length ?? globalPattern === EPointCloudPattern.Detection ? ([...pointCloudBoxList, ...pointCloudSphereList, ...lineList].length) : segmentation.length;
+  const count = toolInstance?.currentPageResult?.length ?? globalPattern === EPointCloudPattern.Detection ? pointCloudBoxList.length : segmentation.length;
 
   if (count >= 0) {
     return (
