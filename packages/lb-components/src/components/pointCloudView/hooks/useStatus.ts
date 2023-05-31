@@ -18,8 +18,6 @@ export const useStatus = () => {
     sideViewInstance,
     backViewInstance,
     mainViewInstance,
-    pointCloudBoxList,
-    pointCloudSphereList,
     setPointCloudResult,
     setPointCloudSphereList,
     setPolygonList,
@@ -33,12 +31,8 @@ export const useStatus = () => {
 
   // Clear All PointView Data
   const clearAllResult = () => {
-    pointCloudBoxList.forEach((v) => {
-      mainViewInstance?.removeObjectByName(v.id);
-    });
-    pointCloudSphereList.forEach((v) => {
-      mainViewInstance?.removeObjectByName(v.id);
-    });
+    mainViewInstance?.clearAllBox();
+    mainViewInstance?.clearAllSphere();
     mainViewInstance?.render();
 
     setPointCloudResult([]);

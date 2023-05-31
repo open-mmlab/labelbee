@@ -31,7 +31,7 @@ import {
 } from '@/views/MainView/toolFooter/AnnotatedAttributes';
 import { TDrawLayerSlot } from '@/types/main';
 import { PointCloudContext } from './PointCloudContext';
-import { EPointCloudPattern } from '@labelbee/lb-utils';
+import { EPointCloudPattern, PointCloudUtils } from '@labelbee/lb-utils';
 import { useCustomToolInstance } from '@/hooks/annotation';
 import { jsonParser } from '@/utils';
 import { a2MapStateToProps, IA2MapStateProps } from '@/store/annotation/map';
@@ -48,6 +48,7 @@ const PointCloudView: React.FC<IProps> = ({
   drawLayerSlot,
   checkMode,
   intelligentFit,
+  imgIndex,
 }) => {
   const ptCtx = useContext(PointCloudContext);
   const { globalPattern, setGlobalPattern } = ptCtx;
@@ -67,6 +68,19 @@ const PointCloudView: React.FC<IProps> = ({
       return globalPattern;
     };
   }, [globalPattern]);
+
+  useEffect(() => {
+    if (currentData) {
+      const { boxParamsList, polygonList, lineList, sphereParamsList, segmentation } =
+        PointCloudUtils.parsePointCloudCurrentResult(currentData?.result ?? '');
+
+      ptCtx.setPointCloudResult(boxParamsList);
+      ptCtx.setPolygonList(polygonList);
+      ptCtx.setLineList(lineList);
+      ptCtx.setPointCloudSphereList(sphereParamsList);
+      ptCtx.setSegmentation(segmentation);
+    }
+  }, [imgIndex]);
 
   useEffect(() => {
     toolInstanceRef.current.exportData = () => {

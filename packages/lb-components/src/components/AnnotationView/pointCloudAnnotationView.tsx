@@ -96,7 +96,7 @@ const PointCloudAnnotationView = (props: IProps) => {
     return () => {
       const boxParamsList = PointCloudUtils.getBoxParamsFromResultList(result);
       boxParamsList.forEach((v: IPointCloudBox) => {
-        instance.current?.removeObjectByName(v.id);
+        instance.current?.removeObjectByName(v.id, 'box');
       });
       instance.current?.render();
     };

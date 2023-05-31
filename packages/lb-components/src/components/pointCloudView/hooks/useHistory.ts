@@ -175,22 +175,10 @@ export const useHistory = () => {
         setSelectedIDs();
       }
 
-      const deletePointCloudList = pointCloudBoxList.filter((v) =>
-        newPointCloudBoxList.every((d) => d.id !== v.id),
-      );
-      const addPointCloudList = newPointCloudBoxList.filter((v) =>
-        pointCloudBoxList.every((d) => d.id !== v.id),
-      );
-
-      // Clear All Data
-      deletePointCloudList.forEach((v) => {
-        mainViewInstance?.removeObjectByName(v.id);
-      });
+      mainViewInstance?.clearAllBox();
 
       // Add Init Box
-      addPointCloudList.forEach((v) => {
-        mainViewInstance?.generateBox(v);
-      });
+      mainViewInstance?.generateBoxes(newPointCloudBoxList);
 
       setPointCloudResult(newPointCloudBoxList);
       syncAllViewPointCloudColor(newPointCloudBoxList);
@@ -201,19 +189,10 @@ export const useHistory = () => {
         setSelectedIDs();
       }
 
-      let deletedPointCloudList = pointCloudSphereList.filter((v) =>
-        newPointCloudSphereList.every((d) => d.id !== v.id),
-      );
-      let addPointCloudList = newPointCloudSphereList.filter((v) =>
-        pointCloudSphereList.every((d) => d.id !== v.id),
-      );
-      deletedPointCloudList.forEach((v) => {
-        mainViewInstance?.removeObjectByName(v.id);
-      });
+      mainViewInstance?.clearAllSphere();
 
-      addPointCloudList.forEach((v) => {
-        mainViewInstance?.generateSphere(v);
-      });
+      mainViewInstance?.generateSpheres(newPointCloudSphereList);
+
       setPointCloudSphereList(newPointCloudSphereList);
     }
 
@@ -227,7 +206,7 @@ export const useHistory = () => {
 
     topViewInstance?.updatePolygonList(newPointCloudBoxList ?? [], newPolygonList ?? []);
     topViewInstance?.updateLineList(newLineList ?? []);
-    topViewInstance?.updatePointList(newPointCloudSphereList)
+    topViewInstance?.updatePointList(newPointCloudSphereList);
   };
 
   const redo = () => {

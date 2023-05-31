@@ -1107,14 +1107,8 @@ export const usePointCloudViews = () => {
     SetPointCloudLoading(dispatch, true);
     await mainViewInstance.loadPCDFile(newData.url, config?.radius ?? DEFAULT_RADIUS);
 
-    // Clear All Data
-    pointCloudBoxList.forEach((v) => {
-      mainViewInstance?.removeObjectByName(v.id);
-    });
-
-    pointCloudSphereList.forEach((v: IPointCloudSphere) => {
-      mainViewInstance?.removeObjectByName(v.id);
-    });
+    mainViewInstance?.clearAllBox();
+    mainViewInstance?.clearAllSphere();
 
     let boxParamsList: any[] = [];
     let lineList: any[] = [];
@@ -1127,25 +1121,12 @@ export const usePointCloudViews = () => {
       sphereParamsList = PointCloudUtils.getSphereParamsFromResultList(newData.result);
 
       // Add Init Box
-      boxParamsList.forEach((v: IPointCloudBox) => {
-        mainViewInstance?.generateBox(v);
-      });
-
-      sphereParamsList.forEach((v: IPointCloudSphere) => {
-        mainViewInstance?.generateSphere(v);
-      });
+      mainViewInstance?.generateBoxes(boxParamsList);
+      mainViewInstance?.generateSpheres(sphereParamsList);
 
       ptCtx.syncAllViewPointCloudColor(boxParamsList);
-      ptCtx.setPointCloudResult(boxParamsList);
-      ptCtx.setPolygonList(polygonList);
-      ptCtx.setLineList(lineList);
-      ptCtx.setPointCloudSphereList(sphereParamsList);
-    } else {
-      ptCtx.setPointCloudResult([]);
-      ptCtx.setPolygonList([]);
-      ptCtx.setPointCloudSphereList([]);
-      ptCtx.setLineList([]);
     }
+
     initHistory({
       pointCloudBoxList: boxParamsList,
       polygonList,
