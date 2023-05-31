@@ -1130,6 +1130,7 @@ export const usePointCloudViews = () => {
     initHistory({
       pointCloudBoxList: boxParamsList,
       polygonList,
+      lineList,
       pointCloudSphereList: sphereParamsList,
     });
 
