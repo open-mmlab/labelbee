@@ -48,8 +48,9 @@ export type Sider = ({
 }) => React.ReactNode | React.ReactNode;
 
 export type TDrawLayerSlot = (props: {
-  zoom: number;
-  currentPos: { x: number; y: number };
+  zoom?: number;
+  currentPos?: { x?: number; y?: number };
+  direct?: boolean;
 }) => React.ReactNode;
 
 interface IFooter {

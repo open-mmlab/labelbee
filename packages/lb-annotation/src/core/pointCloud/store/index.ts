@@ -52,6 +52,8 @@ class PointCloudStore {
   // PointCloud Data.
   public cloudData = new Map();
 
+  public originPoints = new Float32Array([]);
+
   // Each entity.
   public segmentData = new Map<string, IPointCloudSegmentation>();
 
@@ -305,6 +307,10 @@ class PointCloudStore {
     this.updatePointCloudBySegment([...this.segmentData.values()]);
   }
 
+  public setOriginPoints(originPoints: Float32Array) {
+    this.originPoints = originPoints;
+  }
+
   public updateCanvasBasicStyle(canvas: HTMLCanvasElement, size: ISize, zIndex: number) {
     const pixel = 1;
     canvas.style.position = 'absolute';
@@ -333,9 +339,8 @@ class PointCloudStore {
     }
 
     const polygon = originPolygon;
-    const originPoints = this.scene.getObjectByName(this.pointCloudObjectName) as THREE.Points;
 
-    const cloudDataArrayLike = originPoints?.geometry?.attributes?.position?.array;
+    const cloudDataArrayLike = this.originPoints;
     if (cloudDataArrayLike) {
       const len = cloudDataArrayLike.length;
       const vertices = [];

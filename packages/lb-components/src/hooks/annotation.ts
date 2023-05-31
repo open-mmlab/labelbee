@@ -34,7 +34,6 @@ export interface ICustomToolInstance {
   undo: () => void,
   redo: () => void,
   setPointCloudGlobalPattern: (globalPattern: EPointCloudPattern) => void,
-  getPointCloudGlobalPattern: () => EPointCloudPattern,
   [str: string]: any;
 }
 
@@ -79,7 +78,6 @@ const useCustomToolInstance = ({ basicInfo }: ICustomToolInstanceProps = {}) => 
     redo: () => {},
     undo: () => {},
     setPointCloudGlobalPattern: (globalPattern: EPointCloudPattern) => {},
-    getPointCloudGlobalPattern: () => EPointCloudPattern.Detection,
   }
 
   const toolInstanceRef = useRef<ICustomToolInstance>(initialCustomToolInstance);
