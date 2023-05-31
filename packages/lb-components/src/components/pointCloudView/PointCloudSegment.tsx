@@ -30,8 +30,8 @@ const PointCloudSegment: React.FC<IProps> = ({ currentData, config, checkMode })
       right: size.width / 2,
       top: size.height / 2,
       bottom: -size.height / 2,
-      near: 100,
-      far: -100,
+      near: 1000,
+      far: -1000,
     };
 
     const newPtSegmentInstance = new PointCloud({

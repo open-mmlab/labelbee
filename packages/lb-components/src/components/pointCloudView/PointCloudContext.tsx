@@ -415,8 +415,8 @@ export const PointCloudProvider: React.FC<{}> = ({ children }) => {
 
   useEffect(() => {
     updateSelectedIDsAndRenderAfterHide();
-    topViewInstance?.toolInstance?.setHiddenAttributes(hideAttributes);
-    ptSegmentInstance?.store?.setHiddenAttributes(hideAttributes);
+    topViewInstance?.toolInstance?.setHiddenAttributes?.(hideAttributes);
+    ptSegmentInstance?.store?.setHiddenAttributes?.(hideAttributes);
   }, [hideAttributes]);
 
   return <PointCloudContext.Provider value={ptCtx}>{children}</PointCloudContext.Provider>;
