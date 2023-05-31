@@ -69,6 +69,15 @@ const PointCloudView: React.FC<IProps> = ({
     };
   }, [globalPattern]);
 
+  /**
+   * PointCloud Data initialization !!
+   * 
+   * 1. Initialize all point cloud data types into the PointCloudContext so that data 
+   * from other patterns can be accessed when submitted under current patterns.
+   * 
+   * 2. Data initialization for each pattern is implemented in respective child listeners.
+   * （Detection => PointCloudListener / Segmentation => PointCloudSegmentListener）
+   */
   useEffect(() => {
     if (currentData) {
       const { boxParamsList, polygonList, lineList, sphereParamsList, segmentation } =
