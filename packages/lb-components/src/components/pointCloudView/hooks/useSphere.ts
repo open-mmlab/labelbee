@@ -48,7 +48,7 @@ export const useSphere = () => {
     (id: string) => {
       const newPointCloudSphereList = pointCloudSphereList.filter((v) => v.id !== id);
       setPointCloudSphereList(newPointCloudSphereList);
-      mainViewInstance?.removeObjectByName(id);
+      mainViewInstance?.removeObjectByName(id, 'sphere');
       mainViewInstance?.render();
     }, [pointCloudSphereList]
   )

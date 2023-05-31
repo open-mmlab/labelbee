@@ -160,7 +160,7 @@ export const useSingleBox = () => {
   const deletePointCloudBox = (id: string) => {
     const newPointCloudList = pointCloudBoxList.filter((v) => v.id !== id);
     setPointCloudResult(newPointCloudList);
-    mainViewInstance?.removeObjectByName(id);
+    mainViewInstance?.removeObjectByName(id, 'box');
     mainViewInstance?.render();
     syncAllViewPointCloudColor(newPointCloudList);
   };

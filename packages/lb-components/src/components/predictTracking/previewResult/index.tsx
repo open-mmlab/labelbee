@@ -200,7 +200,7 @@ const GenerateViewsDataUrl = (props: {
           // getViewsDataUrl requires pointCloud to finish loading the 3D view, otherwise it will not capture the correct image
           await sleep(500);
           await getViewsDataUrl(pointCloud, item, ptCtx.zoom);
-          await pointCloud.removeObjectByName(item.id);
+          await pointCloud.removeObjectByName(item.id, 'box');
           await pointCloud.clearPointCloudAndRender();
         }
 

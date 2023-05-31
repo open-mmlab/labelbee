@@ -271,13 +271,8 @@ export const PointCloudProvider: React.FC<{}> = ({ children }) => {
       _lineList: ILine[] = displayLineList,
       _segmentation: IPointCloudSegmentation[] = segmentation,
     ) => {
-      pointCloudBoxList.forEach((v) => {
-        mainViewInstance?.removeObjectByName(v.id);
-      });
-
-      pointCloudSphereList.forEach((v) => {
-        mainViewInstance?.removeObjectByName(v.id);
-      });
+      mainViewInstance?.clearAllBox();
+      mainViewInstance?.clearAllSphere();
 
       topViewInstance?.updatePolygonList(_displayPointCloudList, _polygonList);
       topViewInstance?.updatePointList(_displaySphereList);

@@ -418,8 +418,8 @@ export class PointCloud extends EventListener {
     this.initRenderer();
   }
 
-  public removeObjectByName(name: string) {
-    const oldBox = this.scene.getObjectByName(name);
+  public removeObjectByName(name: string, prefix = '') {
+    const oldBox = this.scene.getObjectByName(prefix + name);
     // Remove Old Box
     if (oldBox) {
       oldBox.removeFromParent();
@@ -465,7 +465,7 @@ export class PointCloud extends EventListener {
   public addSphereToSense = (sphereParams: IPointCloudSphere, color = 'blue') => {
     const id = sphereParams.id ?? uuid();
 
-    this.removeObjectByName(id);
+    this.removeObjectByName(id, 'sphere');
 
     const { radius, widthSegments, heightSegments } = DEFAULT_SPHERE_PARAMS;
     const { center } = sphereParams;
@@ -475,7 +475,7 @@ export class PointCloud extends EventListener {
     const sphere = new THREE.Mesh(spGeo, spMaterial);
     sphere.position.set(center.x, center.y, center.z);
     group.add(sphere);
-    group.name = id;
+    group.name = `sphere-${id}`;
     this.scene.add(group);
   };
 
@@ -510,7 +510,7 @@ export class PointCloud extends EventListener {
   public addBoxToSense = (boxParams: IPointCloudBox, color: THREE.ColorRepresentation = 0xffffff) => {
     const id = boxParams.id ?? uuid();
 
-    this.removeObjectByName(id);
+    this.removeObjectByName(id, 'box');
 
     const { center, width, height, depth, rotation } = boxParams;
     const group = new THREE.Group();
@@ -534,7 +534,7 @@ export class PointCloud extends EventListener {
     if (rotation) {
       group.rotation.set(0, 0, rotation);
     }
-    group.name = id;
+    group.name = `box-${id}`;
     this.scene.add(group);
   };
 
@@ -880,6 +880,28 @@ export class PointCloud extends EventListener {
     this.scene.add(points);
 
     this.render();
+  }
+
+  public clearAllBox() {
+    this.clearAllGroupByPrefix('box');
+  }
+
+  public clearAllSphere() {
+    this.clearAllGroupByPrefix('sphere');
+  }
+
+  public clearAllGroupByPrefix(prefix = '') {
+    const child = this.scene.children;
+    /**
+     * Notice：
+     * When performing bulk deletion, it is important to delete from the end backwards.
+     */
+    for (let i = child.length - 1; i >= 0; i--) {
+      const v = child[i];
+      if (v.type === 'Group' && v.name.startsWith(prefix)) {
+        this.removeObjectByName(v.name);
+      }
+    }
   }
 
   public clearPointCloud() {

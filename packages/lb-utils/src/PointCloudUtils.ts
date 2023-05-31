@@ -43,6 +43,32 @@ class PointCloudUtils {
     }
   };
 
+  public static parsePointCloudCurrentResult(result: string) {
+    const data = this.jsonParser(result);
+    const DEFAULT_STEP = `step_1`;
+
+    const ptResult = data?.[DEFAULT_STEP] ?? {};
+
+    const boxParamsList = ptResult?.result ?? [];
+    /**
+     * Notice.
+     *
+     * It needs to be compatible with the error data structure(`renderPolygon`), `resultPolygon` is the correct one.
+     */
+    const polygonList = ptResult?.resultPolygon ?? ptResult?.renderPolygon ?? [];
+    const lineList = ptResult?.resultLine ?? [];
+    const sphereParamsList = ptResult?.resultPoint ?? [];
+    const segmentation = ptResult?.segmentation ?? [];
+
+    return {
+      boxParamsList,
+      polygonList,
+      lineList,
+      sphereParamsList,
+      segmentation,
+    };
+  }
+
   public static getBoxParamsFromResultList(result: string): IPointCloudBox[] {
     const data = this.jsonParser(result);
 
@@ -369,6 +395,9 @@ class PointCloudUtils {
 
   /**
    * Get the pointCloud result from imgList
+   *
+   * Application Scenarios:
+   * 1. Retrieving basic information such as TrackID.
    * @param param0
    * @returns
    */
@@ -694,7 +723,6 @@ class PointCloudUtils {
       far: -1000,
     };
   }
-
 }
 
 export default PointCloudUtils;

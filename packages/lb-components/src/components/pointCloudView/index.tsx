@@ -31,7 +31,7 @@ import {
 } from '@/views/MainView/toolFooter/AnnotatedAttributes';
 import { TDrawLayerSlot } from '@/types/main';
 import { PointCloudContext } from './PointCloudContext';
-import { EPointCloudPattern } from '@labelbee/lb-utils';
+import { EPointCloudPattern, PointCloudUtils } from '@labelbee/lb-utils';
 import { useCustomToolInstance } from '@/hooks/annotation';
 import { jsonParser } from '@/utils';
 import { a2MapStateToProps, IA2MapStateProps } from '@/store/annotation/map';
@@ -48,6 +48,7 @@ const PointCloudView: React.FC<IProps> = ({
   drawLayerSlot,
   checkMode,
   intelligentFit,
+  imgIndex,
 }) => {
   const ptCtx = useContext(PointCloudContext);
   const { globalPattern, setGlobalPattern } = ptCtx;
@@ -63,6 +64,28 @@ const PointCloudView: React.FC<IProps> = ({
       }
     };
   }, [globalPattern]);
+
+  /**
+   * PointCloud Data initialization !!
+   * 
+   * 1. Initialize all point cloud data types into the PointCloudContext so that data 
+   * from other patterns can be accessed when submitted under current patterns.
+   * 
+   * 2. Data initialization for each pattern is implemented in respective child listeners.
+   * （Detection => PointCloudListener / Segmentation => PointCloudSegmentListener）
+   */
+  useEffect(() => {
+    if (currentData) {
+      const { boxParamsList, polygonList, lineList, sphereParamsList, segmentation } =
+        PointCloudUtils.parsePointCloudCurrentResult(currentData?.result ?? '');
+
+      ptCtx.setPointCloudResult(boxParamsList);
+      ptCtx.setPolygonList(polygonList);
+      ptCtx.setLineList(lineList);
+      ptCtx.setPointCloudSphereList(sphereParamsList);
+      ptCtx.setSegmentation(segmentation);
+    }
+  }, [imgIndex]);
 
   useEffect(() => {
     toolInstanceRef.current.exportData = () => {
