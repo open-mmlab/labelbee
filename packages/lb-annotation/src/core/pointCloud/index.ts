@@ -54,6 +54,7 @@ interface IProps {
   config?: IPointCloudConfig;
 
   isSegment?: boolean;
+  checkMode?: boolean;
 }
 
 export interface IEventBus {
@@ -132,6 +133,8 @@ export class PointCloud extends EventListener {
 
   private isSegment = false;
 
+  private checkMode = false;
+
   constructor({
     container,
     noAppend,
@@ -140,12 +143,14 @@ export class PointCloud extends EventListener {
     backgroundColor = '#4C4C4C', // GRAY_BACKGROUND
     config,
     isSegment,
+    checkMode,
   }: IProps) {
     super();
     this.container = container;
     this.renderer = new THREE.WebGLRenderer({ antialias: true });
     this.backgroundColor = backgroundColor;
     this.config = config;
+    this.checkMode = checkMode ?? false;
 
     // TODO
     if (isOrthographicCamera && orthographicParams) {
@@ -197,6 +202,7 @@ export class PointCloud extends EventListener {
     this.segmentOperation = new PointCloudSegmentOperation({
       dom: this.container,
       store: this.store,
+      checkMode: this.checkMode,
     });
 
     this.pointCloudRender = new PointCloudRender({

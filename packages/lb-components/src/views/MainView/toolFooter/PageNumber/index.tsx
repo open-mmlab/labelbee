@@ -6,6 +6,7 @@ import { Divider } from 'antd/es';
 import { useTranslation } from 'react-i18next';
 import { LabelBeeContext } from '@/store/ctx';
 import { PointCloudContext } from '@/components/pointCloudView/PointCloudContext';
+import { EPointCloudPattern } from '@labelbee/lb-utils';
 
 interface IProps {
   toolInstance: GraphToolInstance;
@@ -14,7 +15,7 @@ interface IProps {
 const PageNumber = (props: IProps) => {
   const { toolInstance } = props;
   const [_, forceRender] = useState(0);
-  const { pointCloudBoxList } = useContext(PointCloudContext);
+  const { pointCloudBoxList, pointCloudSphereList, lineList, segmentation, globalPattern } = useContext(PointCloudContext);
   const { t } = useTranslation();
   useEffect(() => {
     if (toolInstance) {
@@ -28,7 +29,7 @@ const PageNumber = (props: IProps) => {
     return null;
   }
 
-  const count = toolInstance?.currentPageResult?.length ?? pointCloudBoxList.length;
+  const count = toolInstance?.currentPageResult?.length ?? globalPattern === EPointCloudPattern.Detection ? ([...pointCloudBoxList, ...pointCloudSphereList, ...lineList].length) : segmentation.length;
 
   if (count >= 0) {
     return (
