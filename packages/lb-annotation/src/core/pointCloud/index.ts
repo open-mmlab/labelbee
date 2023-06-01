@@ -475,7 +475,7 @@ export class PointCloud extends EventListener {
     const sphere = new THREE.Mesh(spGeo, spMaterial);
     sphere.position.set(center.x, center.y, center.z);
     group.add(sphere);
-    group.name = `sphere-${id}`;
+    group.name = `sphere${id}`;
     this.scene.add(group);
   };
 
@@ -534,7 +534,7 @@ export class PointCloud extends EventListener {
     if (rotation) {
       group.rotation.set(0, 0, rotation);
     }
-    group.name = `box-${id}`;
+    group.name = `box${id}`;
     this.scene.add(group);
   };
 
