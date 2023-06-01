@@ -4,7 +4,7 @@
  * @author Ron <ron.f.luo@gmail.com>
  */
 
-import { useContext } from 'react';
+import { useContext, useMemo } from 'react';
 import { PointCloudContext } from '../PointCloudContext';
 import { cTool } from '@labelbee/lb-annotation';
 import { useHistory } from './useHistory';
@@ -95,10 +95,19 @@ export const useStatus = () => {
     }
   };
 
+  const isPointCloudDetectionPattern = useMemo(() => {
+    return globalPattern === EPointCloudPattern.Detection;
+  }, [globalPattern]);
+
+  const isPointCloudSegmentationPattern = useMemo(() => {
+    return globalPattern === EPointCloudPattern.Segmentation;
+  }, [globalPattern]);
+
   return {
     clearAllResult,
     updatePointCloudPattern,
     pointCloudPattern,
-    isSegmentPattern: globalPattern === EPointCloudPattern.Segmentation,
+    isPointCloudDetectionPattern,
+    isPointCloudSegmentationPattern,
   };
 };

@@ -352,7 +352,7 @@ const renderSegmentTools = [
 
 export const PointCloudSegToolIcon = ({ toolInstance }: { toolInstance: ICustomToolInstance }) => {
   const { ptSegmentInstance } = useContext(PointCloudContext);
-  const [currentTool, setCurrentTool] = useState('CircleSelector');
+  const [currentTool, setCurrentTool] = useState('LassoSelector');
   const { t } = useTranslation();
 
   useEffect(() => {
@@ -412,14 +412,14 @@ const PointCloudToolSidebar: React.FC<IProps> = ({
   stepList,
   enableColorPicker,
 }) => {
-  const { updatePointCloudPattern, pointCloudPattern, isSegmentPattern } = useStatus();
+  const { updatePointCloudPattern, pointCloudPattern, isPointCloudSegmentationPattern } = useStatus();
 
   const config = jsonParser(stepInfo.config);
   const attributeList = config?.attributeList ?? [];
   const subAttributeList =
     config?.secondaryAttributeConfigurable === true ? config?.inputList ?? [] : [];
 
-  if (isSegmentPattern) {
+  if (isPointCloudSegmentationPattern) {
     return (
       <>
         <PointCloudSegToolIcon toolInstance={toolInstance} />
