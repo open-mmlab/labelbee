@@ -176,7 +176,7 @@ export class PointCloud extends EventListener {
     this.axesHelper = new THREE.AxesHelper(1000);
 
     // For Developer
-    this.scene.add(this.axesHelper);
+    // this.scene.add(this.axesHelper);
 
     this.scene.add(this.camera);
     // TODO
