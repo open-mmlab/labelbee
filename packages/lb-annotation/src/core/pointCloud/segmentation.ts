@@ -35,8 +35,8 @@ class PointCloudSegmentOperation {
 
     this.lassoSelector = new LassoSelector(this.store);
     this.circleSelector = new CircleSelector(this.store);
-    this.currentTool = this.circleSelector;
-    this.currentToolName = 'CircleSelector';
+    this.currentTool = this.lassoSelector;
+    this.currentToolName = 'LassoSelector';
     this.dom.addEventListener('pointermove', this.onMouseMove.bind(this));
     this.dom.addEventListener('pointerdown', this.onMouseDown.bind(this));
     this.dom.addEventListener('pointerup', this.onMouseUp.bind(this));

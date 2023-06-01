@@ -352,7 +352,7 @@ const renderSegmentTools = [
 
 export const PointCloudSegToolIcon = ({ toolInstance }: { toolInstance: ICustomToolInstance }) => {
   const { ptSegmentInstance } = useContext(PointCloudContext);
-  const [currentTool, setCurrentTool] = useState('CircleSelector');
+  const [currentTool, setCurrentTool] = useState('LassoSelector');
   const { t } = useTranslation();
 
   useEffect(() => {
