@@ -119,6 +119,9 @@ const PointCloudSegmentStatus = () => {
           className={getClassName('point-cloud-status', 'button')}
           onClick={() => {
             ptSegmentInstance?.emit('clearStash');
+            if (ptSegmentInstance?.store?.segmentFocusMode === EPointCloudSegmentFocusMode.Focus) {
+              ptSegmentInstance?.emit('setSegmentFocusMode', EPointCloudSegmentFocusMode.Unfocus);
+            }
           }}
         >
           <img className={getClassName('point-cloud-status', 'icon')} src={CancelSvg} />

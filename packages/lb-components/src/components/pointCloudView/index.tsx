@@ -60,6 +60,7 @@ const PointCloudView: React.FC<IProps> = ({
     toolInstanceRef.current.setPointCloudGlobalPattern = (pattern: EPointCloudPattern) => {
       if (pattern !== globalPattern) {
         setGlobalPattern(pattern);
+        ptCtx.clearAllDetectionInstance();
         clearToolInstance();
       }
     };
@@ -67,10 +68,10 @@ const PointCloudView: React.FC<IProps> = ({
 
   /**
    * PointCloud Data initialization !!
-   * 
-   * 1. Initialize all point cloud data types into the PointCloudContext so that data 
+   *
+   * 1. Initialize all point cloud data types into the PointCloudContext so that data
    * from other patterns can be accessed when submitted under current patterns.
-   * 
+   *
    * 2. Data initialization for each pattern is implemented in respective child listeners.
    * （Detection => PointCloudListener / Segmentation => PointCloudSegmentListener）
    */
@@ -119,7 +120,7 @@ const PointCloudView: React.FC<IProps> = ({
       <>
         <PointCloudSegmentListener checkMode={checkMode} toolInstanceRef={toolInstanceRef} />
         <PointCloudSegmentToolbar />
-        <PointCloudSegment />
+        <PointCloudSegment checkMode={checkMode}/>
         <PointCloudSegmentStatus />
         {drawLayerSlot?.({
           direct: true,

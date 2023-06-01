@@ -80,7 +80,7 @@ class PointCloudSegmentOperation {
       this.store.updateMouse({ x: iev.offsetX, y: iev.offsetY });
     }
 
-    if (this.isForbid) {
+    if (this.isForbid || this.store.checkMode) {
       return;
     }
 
@@ -94,7 +94,7 @@ class PointCloudSegmentOperation {
   };
 
   public onMouseDown = (iev: MouseEvent) => {
-    if (this.isForbid) {
+    if (this.isForbid || this.store.checkMode) {
       return;
     }
 
@@ -102,7 +102,7 @@ class PointCloudSegmentOperation {
   };
 
   public onMouseUp = (iev: MouseEvent) => {
-    if (this.isForbid || this.store.orbiting === true) {
+    if (this.isForbid || this.store.orbiting === true || this.store.checkMode) {
       return;
     }
 
@@ -115,6 +115,9 @@ class PointCloudSegmentOperation {
 
   public baseMouseDown = (e: MouseEvent) => {
     // TODO: Need to forbid operation when orbit
+    if (this.store.checkMode) {
+      return;
+    }
     switch (e.button) {
       case 0:
         if (this.store.isReadyStatus || this.store.isCheckStatus) {

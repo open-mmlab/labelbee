@@ -98,6 +98,7 @@ export interface IPointCloudContext
   selectSpecAttr: (attr: string) => void;
   segmentation: IPointCloudSegmentation[];
   setSegmentation: (segmentation: IPointCloudSegmentation[]) => void;
+  clearAllDetectionInstance: () => void;
 }
 
 export const PointCloudContext = React.createContext<IPointCloudContext>({
@@ -154,6 +155,7 @@ export const PointCloudContext = React.createContext<IPointCloudContext>({
   setPtSegmentInstance: () => {},
   segmentation: [],
   setSegmentation: () => {},
+  clearAllDetectionInstance: () => {},
 });
 
 export const PointCloudProvider: React.FC<{}> = ({ children }) => {
@@ -283,6 +285,13 @@ export const PointCloudProvider: React.FC<{}> = ({ children }) => {
       syncAllViewPointCloudColor(_displayPointCloudList);
     };
 
+    const clearAllDetectionInstance = () => {
+      setTopViewInstance(undefined);
+      setSideViewInstance(undefined);
+      setBackViewInstance(undefined);
+      setMainViewInstance(undefined);
+    }
+
     /**
      * Synchronize the highlighted pointCloud for all views.
      * @param pointCloudList
@@ -370,6 +379,7 @@ export const PointCloudProvider: React.FC<{}> = ({ children }) => {
       setPtSegmentInstance,
       segmentation,
       setSegmentation,
+      clearAllDetectionInstance,
     };
   }, [
     valid,

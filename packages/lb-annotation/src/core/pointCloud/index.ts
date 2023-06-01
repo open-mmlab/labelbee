@@ -54,6 +54,7 @@ interface IProps {
   config?: IPointCloudConfig;
 
   isSegment?: boolean;
+  checkMode?: boolean;
 }
 
 export interface IEventBus {
@@ -67,6 +68,7 @@ export interface IPointCloudDelegate extends IEventBus {
   scene: THREE.Scene;
   camera: THREE.OrthographicCamera | THREE.PerspectiveCamera;
   container: HTMLElement;
+  checkMode: boolean;
 }
 
 const DEFAULT_DISTANCE = 30;
@@ -132,6 +134,8 @@ export class PointCloud extends EventListener {
 
   private isSegment = false;
 
+  private checkMode = false;
+
   constructor({
     container,
     noAppend,
@@ -140,12 +144,14 @@ export class PointCloud extends EventListener {
     backgroundColor = '#4C4C4C', // GRAY_BACKGROUND
     config,
     isSegment,
+    checkMode,
   }: IProps) {
     super();
     this.container = container;
     this.renderer = new THREE.WebGLRenderer({ antialias: true });
     this.backgroundColor = backgroundColor;
     this.config = config;
+    this.checkMode = checkMode ?? false;
 
     // TODO
     if (isOrthographicCamera && orthographicParams) {
@@ -310,6 +316,7 @@ export class PointCloud extends EventListener {
       scene: this.scene,
       camera: this.camera,
       renderer: this.renderer,
+      checkMode: this.checkMode,
       ...this.eventBus,
     };
   }

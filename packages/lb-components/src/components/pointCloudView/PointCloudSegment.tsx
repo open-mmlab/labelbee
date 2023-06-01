@@ -40,6 +40,7 @@ const PointCloudSegment: React.FC<IProps> = ({ currentData, config, checkMode })
       isSegment: true,
       orthographicParams,
       config,
+      checkMode,
     });
 
     newPtSegmentInstance.store?.setAttribute(defaultAttribute);
