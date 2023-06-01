@@ -16,6 +16,7 @@ import { useTranslation } from 'react-i18next';
 import UnifyParamsModal from '../../../../components/pointCloudView/components/UnifyParamsModal';
 import { useSingleBox } from '@/components/pointCloudView/hooks/useSingleBox';
 import { composeResultByToolInstance } from '@/store/annotation/reducer';
+import { useStatus } from '@/components/pointCloudView/hooks/useStatus';
 
 const mapStateToProps = (state: AppState) => {
   const stepInfo = StepUtils.getCurrentStepInfo(state.annotation?.step, state.annotation?.stepList);
@@ -67,6 +68,7 @@ export const PointCloudOperation: ConnectedComponent<
     const operationList = useOperationList(toolInstance);
     const [isShowModal, setShowModal] = useState(false);
     const [composeImgList, setComposeImgList] = useState<IFileItem[]>([]);
+    const { isPointCloudDetectionPattern, isPointCloudSegmentationPattern } = useStatus();
 
     const config = jsonParser(stepInfo.config);
 
@@ -76,7 +78,7 @@ export const PointCloudOperation: ConnectedComponent<
       operationList.setValidity,
     ];
 
-    if (config.trackConfigurable === true) {
+    if (isPointCloudDetectionPattern && config.trackConfigurable === true) {
       const forbidOperation = !selectedBox;
       const UnifyParams: IOperationConfig = {
         name: t('UnifyParams'),
@@ -102,6 +104,13 @@ export const PointCloudOperation: ConnectedComponent<
     }, []);
 
     const selectedBoxInfo = selectedBox?.info;
+
+    if (isPointCloudSegmentationPattern) {
+      /**
+       * Segmentation Pattern need to remove copyPrevious (setValidity temporarily)
+       */
+      allOperation = allOperation.filter((v) => !['setValidity', 'copyPrevious'].includes(v.key));
+    }
 
     return (
       <>
