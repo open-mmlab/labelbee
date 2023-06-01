@@ -32,7 +32,14 @@ const PointCloudSegmentListener: React.FC<IProps> = ({
    */
   useEffect(() => {
     if (ptSegmentInstance && currentData.url) {
-      // Parse Data.
+      /**
+       * Reset All Status and data.
+       * 
+       * 1. clear stash
+       * 2. clear all segment data.
+       * 
+       */
+      ptSegmentInstance.emit('clearStash');
       ptSegmentInstance.emit('clearAllSegmentData');
       ptSegmentInstance.loadPCDFile(currentData?.url ?? '').then(() => {
         const segmentData = PointCloudUtils.getSegmentFromResultList(currentData?.result ?? '');
