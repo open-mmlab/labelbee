@@ -72,6 +72,8 @@ class PointCloudStore {
 
   public hideSegment = false;
 
+  public checkMode = false;
+
   public updatePointCloud: boolean = false;
 
   public addPointCloud = false;
@@ -94,7 +96,7 @@ class PointCloudStore {
 
   private unbind: EventListener['unbind'];
 
-  constructor({ container, scene, camera, renderer, emit, on, unbind }: IPointCloudDelegate) {
+  constructor({ container, scene, camera, renderer, emit, on, unbind, checkMode }: IPointCloudDelegate) {
     this.container = container;
     this.scene = scene;
     this.camera = camera;
@@ -102,6 +104,7 @@ class PointCloudStore {
     this.emit = emit;
     this.on = on;
     this.unbind = unbind;
+    this.checkMode = checkMode;
 
     this.createCanvas2d();
 
@@ -375,7 +378,7 @@ class PointCloudStore {
               vertices.push(cloudDataArrayLike[i], cloudDataArrayLike[i + 1], cloudDataArrayLike[i + 2]);
               indexes.push(i / 3); // Save the points Index.
               if (this.cloudData.get(key).visible === true) {
-                covers.push(cloudDataArrayLike[i], cloudDataArrayLike[i + 1], cloudDataArrayLike[i + 2]);
+                covers.push(i / 3); // Save the covered points index
               }
             }
             if (this.segmentCoverMode === EPointCloudSegmentCoverMode.Uncover) {
@@ -402,13 +405,12 @@ class PointCloudStore {
       }
 
       const verticesArray = new Float32Array(vertices);
-      const coversArray = new Float32Array(covers);
 
-      this.updateStatusBySelector(verticesArray, coversArray, indexes);
+      this.updateStatusBySelector(verticesArray, covers, indexes);
     }
   }
 
-  public updateStatusBySelector(verticesArray: Float32Array, coversArray: Float32Array, indexes: number[]) {
+  public updateStatusBySelector(verticesArray: Float32Array, covers: number[], indexes: number[]) {
     switch (this.segmentMode) {
       case EPointCloudSegmentMode.Add:
         if (this.cacheSegData) {
@@ -417,10 +419,7 @@ class PointCloudStore {
           const combined = new Float32Array(combinedLength);
           combined.set(points, 0);
           combined.set(verticesArray, points.length);
-          const coverCombinedLength = coverPoints.length + coversArray.length;
-          const coverCombined = new Float32Array(coverCombinedLength);
-          coverCombined.set(coverPoints, 0);
-          coverCombined.set(coversArray, coverPoints.length);
+          const coverCombined = [...new Set([...coverPoints, ...covers])];
           this.cacheSegData = {
             ...this.cacheSegData,
             points: combined,
@@ -433,7 +432,7 @@ class PointCloudStore {
             id: uuid(),
             attribute: this.currentAttribute,
             points: verticesArray,
-            coverPoints: coversArray,
+            coverPoints: covers,
             indexes,
           };
           this.emit('addNewPointsCloud', this.cacheSegData);
@@ -512,16 +511,30 @@ class PointCloudStore {
     this.emit('reRender3d');
   };
 
-  public updateCoverPoints = (coverPoints: Float32Array = new Float32Array([])) => {
+  public updateCoverPoints = (coverPoints: number[] = []) => {
     this.segmentData.forEach((seg, id) => {
       if (id !== this.cacheSegData?.id) {
-        const newPoints = PointCloudUtils.splitPointsFromPoints(seg.points, coverPoints);
-        seg.points = newPoints;
+        const newIndexes = PointCloudUtils.splitPointsFromIndexes(seg.indexes, coverPoints);
+        const newPoints: number[] = [];
+        newIndexes.forEach((index) => {
+          newPoints.push(
+            this.originPoints[index * 3],
+            this.originPoints[index * 3 + 1],
+            this.originPoints[index * 3 + 2],
+          );
+        });
+
+        // update covered points in segmentdata
+        seg.indexes = newIndexes;
+        seg.points = new Float32Array(newPoints);
 
         // update points in threeJs
         const originPoints = this.scene.getObjectByName(id) as THREE.Points;
         if (originPoints) {
-          originPoints.geometry.setAttribute('position', new THREE.Float32BufferAttribute(newPoints, 3));
+          originPoints.geometry.setAttribute(
+            'position',
+            new THREE.Float32BufferAttribute(new Float32Array(newPoints), 3),
+          );
           originPoints.geometry.attributes.position.needsUpdate = true;
         }
       }

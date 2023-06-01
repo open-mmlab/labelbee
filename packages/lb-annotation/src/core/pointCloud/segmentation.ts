@@ -12,13 +12,10 @@ import CircleSelector from './selector/circleSelector';
 interface IProps {
   dom: HTMLElement;
   store: PointCloudStore;
-  checkMode: boolean;
 }
 
 class PointCloudSegmentOperation {
   private dom: HTMLElement;
-
-  private checkMode: boolean;
 
   // Operation Selector
   public currentTool: LassoSelector | CircleSelector;
@@ -35,7 +32,6 @@ class PointCloudSegmentOperation {
   constructor(props: IProps) {
     this.dom = props.dom;
     this.store = props.store;
-    this.checkMode = props.checkMode;
 
     this.lassoSelector = new LassoSelector(this.store);
     this.circleSelector = new CircleSelector(this.store);
@@ -84,7 +80,7 @@ class PointCloudSegmentOperation {
       this.store.updateMouse({ x: iev.offsetX, y: iev.offsetY });
     }
 
-    if (this.isForbid || this.checkMode) {
+    if (this.isForbid || this.store.checkMode) {
       return;
     }
 
@@ -98,7 +94,7 @@ class PointCloudSegmentOperation {
   };
 
   public onMouseDown = (iev: MouseEvent) => {
-    if (this.isForbid || this.checkMode) {
+    if (this.isForbid || this.store.checkMode) {
       return;
     }
 
@@ -106,7 +102,7 @@ class PointCloudSegmentOperation {
   };
 
   public onMouseUp = (iev: MouseEvent) => {
-    if (this.isForbid || this.store.orbiting === true || this.checkMode) {
+    if (this.isForbid || this.store.orbiting === true || this.store.checkMode) {
       return;
     }
 
@@ -119,7 +115,7 @@ class PointCloudSegmentOperation {
 
   public baseMouseDown = (e: MouseEvent) => {
     // TODO: Need to forbid operation when orbit
-    if (this.checkMode) {
+    if (this.store.checkMode) {
       return;
     }
     switch (e.button) {

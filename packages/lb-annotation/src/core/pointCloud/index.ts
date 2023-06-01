@@ -68,6 +68,7 @@ export interface IPointCloudDelegate extends IEventBus {
   scene: THREE.Scene;
   camera: THREE.OrthographicCamera | THREE.PerspectiveCamera;
   container: HTMLElement;
+  checkMode: boolean;
 }
 
 const DEFAULT_DISTANCE = 30;
@@ -202,7 +203,6 @@ export class PointCloud extends EventListener {
     this.segmentOperation = new PointCloudSegmentOperation({
       dom: this.container,
       store: this.store,
-      checkMode: this.checkMode,
     });
 
     this.pointCloudRender = new PointCloudRender({
@@ -316,6 +316,7 @@ export class PointCloud extends EventListener {
       scene: this.scene,
       camera: this.camera,
       renderer: this.renderer,
+      checkMode: this.checkMode,
       ...this.eventBus,
     };
   }
