@@ -90,6 +90,7 @@ export interface AppProps {
   intelligentFit?: boolean;
   enableColorPicker?: boolean;
   highlightAttribute?: string;
+  onLoad?: ({ toolInstance }: { toolInstance: ToolInstance }) => void;
 }
 
 const App: React.FC<AppProps> = (props) => {
