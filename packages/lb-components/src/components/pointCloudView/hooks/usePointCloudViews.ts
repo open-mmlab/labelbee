@@ -1081,14 +1081,7 @@ export const usePointCloudViews = () => {
       return;
     }
 
-    const orthographicParams = {
-      left: -size.width / 2,
-      right: size.width / 2,
-      top: size.height / 2,
-      bottom: -size.height / 2,
-      near: 100,
-      far: -100,
-    };
+    const orthographicParams = PointCloudUtils.getDefaultOrthographicParams(size);
 
     mainViewInstance.initOrthographicCamera(orthographicParams);
     mainViewInstance.initRenderer();

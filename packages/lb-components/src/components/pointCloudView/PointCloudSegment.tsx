@@ -25,20 +25,11 @@ const PointCloudSegment: React.FC<IProps> = ({ currentData, config, checkMode })
       return;
     }
 
-    const orthographicParams = {
-      left: -size.width / 2,
-      right: size.width / 2,
-      top: size.height / 2,
-      bottom: -size.height / 2,
-      near: 1000,
-      far: -1000,
-    };
-
     const newPtSegmentInstance = new PointCloud({
       container: domRef.current,
       isOrthographicCamera: true,
       isSegment: true,
-      orthographicParams,
+      orthographicParams: PointCloudUtils.getDefaultOrthographicParams(size),
       config,
       checkMode,
     });
@@ -52,7 +43,7 @@ const PointCloudSegment: React.FC<IProps> = ({ currentData, config, checkMode })
     if (ptSegmentInstance) {
       // Update size of segmentation.
       ptSegmentInstance.initRenderer();
-      ptSegmentInstance.initOrthographicCamera(PointCloudUtils.getDefaultOrthographic(size));
+      ptSegmentInstance.initOrthographicCamera(PointCloudUtils.getDefaultOrthographicParams(size));
       ptSegmentInstance.render();
     }
   }, [size]);

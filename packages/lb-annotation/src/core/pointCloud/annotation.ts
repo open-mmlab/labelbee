@@ -67,7 +67,7 @@ export class PointCloudAnnotation implements IPointCloudAnnotationOperation {
     toolName,
     proxyMode,
   }: IPointCloudAnnotationProps) {
-    const defaultOrthographic = this.getDefaultOrthographic(size);
+    const defaultOrthographic = PointCloudUtils.getDefaultOrthographicParams(size);
 
     const imgSrc = createEmptyImage(size);
 
@@ -158,22 +158,6 @@ export class PointCloudAnnotation implements IPointCloudAnnotationOperation {
   }
 
   /**
-   * Get default boundary by size.
-   * @param size
-   * @returns
-   */
-  public getDefaultOrthographic(size: ISize) {
-    return {
-      left: -size.width / 2,
-      right: size.width / 2,
-      top: size.height / 2,
-      bottom: -size.height / 2,
-      near: 100,
-      far: -100,
-    };
-  }
-
-  /**
    * Init size when the viewport updated.
    * @param size
    */
@@ -188,7 +172,7 @@ export class PointCloudAnnotation implements IPointCloudAnnotationOperation {
     this.pointCloudInstance.initRenderer();
 
     // Update range of orthographicCamera.
-    this.pointCloudInstance.initOrthographicCamera(this.getDefaultOrthographic(size));
+    this.pointCloudInstance.initOrthographicCamera(PointCloudUtils.getDefaultOrthographicParams(size));
 
     this.pointCloudInstance.render();
 

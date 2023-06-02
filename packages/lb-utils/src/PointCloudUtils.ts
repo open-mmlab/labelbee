@@ -713,14 +713,14 @@ class PointCloudUtils {
     return new Float32Array(result);
   }
 
-  public static getDefaultOrthographic(size: ISize) {
+  public static getDefaultOrthographicParams(size: ISize) {
     return {
       left: -size.width / 2,
       right: size.width / 2,
       top: size.height / 2,
       bottom: -size.height / 2,
-      near: 1000,
-      far: -1000,
+      near: 0.1, // Must more than 0.
+      far: 10000, // Need to set to a larger range, in conjunction with the camera's position on the z-axis.
     };
   }
 }
