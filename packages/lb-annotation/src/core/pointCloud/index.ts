@@ -176,7 +176,7 @@ export class PointCloud extends EventListener {
     this.axesHelper = new THREE.AxesHelper(1000);
 
     // For Developer
-    this.scene.add(this.axesHelper);
+    // this.scene.add(this.axesHelper);
 
     this.scene.add(this.camera);
     // TODO
@@ -322,7 +322,8 @@ export class PointCloud extends EventListener {
   }
 
   get DEFAULT_INIT_CAMERA_POSITION() {
-    return new THREE.Vector3(-0.01, 0, 10);
+    // The z-axis of camera's position is important to control the camera's frustum.
+    return new THREE.Vector3(-0.01, 0, 1000);
   }
 
   get containerWidth() {
