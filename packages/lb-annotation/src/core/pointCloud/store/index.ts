@@ -229,6 +229,9 @@ class PointCloudStore {
       const points: number[] = [];
       data.indexes.forEach((index) => {
         points.push(position[index * 3], position[index * 3 + 1], position[index * 3 + 2]);
+        this.cloudData.set(`${position[index * 3]}@${position[index * 3 + 1]}@${position[index * 3 + 2]}`, {
+          visible: true,
+        });
       });
 
       const newPoints = {
