@@ -149,6 +149,7 @@ const PointCloud3D: React.FC<IA2MapStateProps> = ({ currentData, config }) => {
   useEffect(() => {
     if (ref.current && currentData?.url) {
       let pointCloud = ptCtx.mainViewInstance;
+      // Just for Init.
       if (!pointCloud && size.width) {
         // Need to be showed
         pointCloud = new PointCloud({
@@ -160,7 +161,7 @@ const PointCloud3D: React.FC<IA2MapStateProps> = ({ currentData, config }) => {
         ptCtx.setMainViewInstance(pointCloud);
       }
     }
-  }, [size]);
+  }, [size, currentData]);
 
   /**
    * Listen for data changes.
