@@ -17,10 +17,12 @@ import { IPointCloudBoxWithIndex } from '@/store/annotation/types';
 import { LabelBeeContext, useDispatch } from '@/store/ctx';
 
 import { predict } from '../previewResult/util';
+import { useStatus } from '@/components/pointCloudView/hooks/useStatus';
 
 const PredictTrackingIcon = (props: { loading: boolean }) => {
   const dispatch = useDispatch();
   const { t } = useTranslation();
+  const { isPointCloudSegmentationPattern } = useStatus();
 
   const { loading } = props;
   const { selectedBox } = useSingleBox();
@@ -80,6 +82,10 @@ const PredictTrackingIcon = (props: { loading: boolean }) => {
     SetPredictResult(dispatch, result);
     SetPredictResultVisible(dispatch, true);
   };
+
+  if (isPointCloudSegmentationPattern) {
+    return null;
+  }
 
   return (
     <Button

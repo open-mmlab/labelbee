@@ -17,7 +17,7 @@ import { LabelBeeContext, useDispatch } from '@/store/ctx';
 import { IFileItem } from '@/types/data';
 import { getClassName } from '@/utils/dom';
 import { PointCloud } from '@labelbee/lb-annotation';
-import { toolStyleConverter } from '@labelbee/lb-utils';
+import { PointCloudUtils, toolStyleConverter } from '@labelbee/lb-utils';
 
 import { getViewsDataUrl, IBox, sleep, views } from './util';
 
@@ -155,14 +155,7 @@ const GenerateViewsDataUrl = (props: {
       const config = ptCtx.mainViewInstance?.config;
 
       if (config && ref.current) {
-        const orthographicParams = {
-          left: -size.width / 2,
-          right: size.width / 2,
-          top: size.height / 2,
-          bottom: -size.height / 2,
-          near: 200,
-          far: -200,
-        };
+        const orthographicParams = PointCloudUtils.getDefaultOrthographicParams(size);
 
         const pointCloud = new PointCloud({
           container: ref.current,
@@ -200,7 +193,7 @@ const GenerateViewsDataUrl = (props: {
           // getViewsDataUrl requires pointCloud to finish loading the 3D view, otherwise it will not capture the correct image
           await sleep(500);
           await getViewsDataUrl(pointCloud, item, ptCtx.zoom);
-          await pointCloud.removeObjectByName(item.id);
+          await pointCloud.removeObjectByName(item.id, 'box');
           await pointCloud.clearPointCloudAndRender();
         }
 

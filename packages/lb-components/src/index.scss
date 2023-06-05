@@ -1467,6 +1467,7 @@ $headerHeight: 40px;
   flex-direction: column;
   overflow: hidden;
   flex: 1;
+  position: relative;
 }
 
 .#{$ptPrefix}-wrapper {
@@ -1741,6 +1742,62 @@ $headerHeight: 40px;
           }
         }
       }
+    }
+  }
+}
+
+$ptToolHeight: 40px;
+
+.#{$ptPrefix}-status__operation {
+  z-index: 200;
+  position: absolute;
+  left: 50%;
+  top: calc($ptToolHeight + 20px);
+  transform: translateX(-50%);
+  display: flex;
+  .#{$ptPrefix}-status__button {
+    background-color: white;
+    padding: 7.5px 16px;
+    border: 0.5px solid rgb(196, 196, 196);
+    cursor: pointer;
+    border-radius: 2px;
+    display: flex;
+    align-items: center;
+  }
+}
+
+.#{$ptPrefix}-status__info {
+  z-index: 200;
+  position: absolute;
+  right: 20px;
+  top: calc($ptToolHeight + 20px);
+
+  padding: 16px;
+  color: white;
+  background: rgb(51, 51, 51);
+  border-radius: 2px;
+}
+
+.#{$ptPrefix}-status__icon {
+  margin-right: 5px;
+}
+
+.#{$ptPrefix}-toolbar {
+  height: 40px;
+  padding: 10px 26px;
+  display: flex;
+  justify-content: flex-end;
+  align-items: center;
+  background-color: rgb(102, 102, 102);
+  .#{$ptPrefix}-toolbox{
+    margin-left:16px;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    cursor:pointer;
+    img{
+      height:24px;
+      width:24px;
     }
   }
 }

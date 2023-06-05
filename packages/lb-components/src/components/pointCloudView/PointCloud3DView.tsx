@@ -149,27 +149,19 @@ const PointCloud3D: React.FC<IA2MapStateProps> = ({ currentData, config }) => {
   useEffect(() => {
     if (ref.current && currentData?.url) {
       let pointCloud = ptCtx.mainViewInstance;
+      // Just for Init.
       if (!pointCloud && size.width) {
-        const orthographicParams = {
-          left: -size.width / 2,
-          right: size.width / 2,
-          top: size.height / 2,
-          bottom: -size.height / 2,
-          near: 100,
-          far: -100,
-        };
-
         // Need to be showed
         pointCloud = new PointCloud({
           container: ref.current,
           isOrthographicCamera: true,
-          orthographicParams,
+          orthographicParams: PointCloudUtils.getDefaultOrthographicParams(size),
           config,
         });
         ptCtx.setMainViewInstance(pointCloud);
       }
     }
-  }, [size]);
+  }, [size, currentData]);
 
   /**
    * Listen for data changes.

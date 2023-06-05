@@ -6,6 +6,7 @@
 import { useEffect, useRef } from 'react';
 import { useDispatch } from '@/store/ctx';
 import { ANNOTATION_ACTIONS } from '@/store/Actions';
+import { EPointCloudPattern } from '@labelbee/lb-utils';
 
 export interface ICustomToolInstance {
   valid: boolean;
@@ -32,7 +33,7 @@ export interface ICustomToolInstance {
 
   undo: () => void,
   redo: () => void,
-
+  setPointCloudGlobalPattern: (globalPattern: EPointCloudPattern) => void,
   [str: string]: any;
 }
 
@@ -44,9 +45,10 @@ export interface ICustomToolInstanceProps {
  * @returns
  * Custom an empty toolInstance to adapt old use.
  */
+
 const useCustomToolInstance = ({ basicInfo }: ICustomToolInstanceProps = {}) => {
   const dispatch = useDispatch();
-  const toolInstanceRef = useRef<ICustomToolInstance>({
+  const initialCustomToolInstance: ICustomToolInstance = {
     valid: basicInfo?.valid ?? true,
     exportData: () => {
       return [[], {}];
@@ -75,7 +77,10 @@ const useCustomToolInstance = ({ basicInfo }: ICustomToolInstanceProps = {}) => 
     updateRotate: () => {},
     redo: () => {},
     undo: () => {},
-  });
+    setPointCloudGlobalPattern: (globalPattern: EPointCloudPattern) => {},
+  }
+
+  const toolInstanceRef = useRef<ICustomToolInstance>(initialCustomToolInstance);
 
   const onMounted = (instance: any) => {
     dispatch({
@@ -95,6 +100,10 @@ const useCustomToolInstance = ({ basicInfo }: ICustomToolInstanceProps = {}) => 
     });
   };
 
+  const clearToolInstance = () => {
+    Object.assign(toolInstanceRef.current, initialCustomToolInstance)
+  }
+
   useEffect(() => {
     // Initial toolInstance
     onMounted(toolInstanceRef.current);
@@ -105,6 +114,7 @@ const useCustomToolInstance = ({ basicInfo }: ICustomToolInstanceProps = {}) => 
 
   return {
     toolInstanceRef,
+    clearToolInstance,
   };
 };
 

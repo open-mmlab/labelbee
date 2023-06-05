@@ -5,6 +5,8 @@ import {
   IPointCloudSphereList,
   IPointCloudSphere,
   ILine,
+  EPointCloudPattern,
+  IPointCloudSegmentation,
 } from '@labelbee/lb-utils';
 import React, { useEffect, useMemo, useRef, useState } from 'react';
 import {
@@ -13,21 +15,36 @@ import {
   ActionsHistory,
   EToolName,
 } from '@labelbee/lb-annotation';
+import { useDispatch } from '@/store/ctx';
+import { ChangeSave } from '@/store/annotation/actionCreators';
 
 interface IPointCloudContextInstances {
   topViewInstance?: PointCloudAnnotation;
   sideViewInstance?: PointCloudAnnotation;
   backViewInstance?: PointCloudAnnotation;
   mainViewInstance?: PointCloud;
-  setTopViewInstance: (instance: PointCloudAnnotation) => void;
-  setSideViewInstance: (instance: PointCloudAnnotation) => void;
-  setBackViewInstance: (instance: PointCloudAnnotation) => void;
-  setMainViewInstance: (instance: PointCloud) => void;
+  setTopViewInstance: (instance?: PointCloudAnnotation) => void;
+  setSideViewInstance: (instance?: PointCloudAnnotation) => void;
+  setBackViewInstance: (instance?: PointCloudAnnotation) => void;
+  setMainViewInstance: (instance?: PointCloud) => void;
+}
+
+interface IPointCloudStatus {
+  globalPattern: EPointCloudPattern; // Switch PointCloud Pattern (Segmentation / Detection)
+  setGlobalPattern: (pattern: EPointCloudPattern) => void;
+}
+
+interface IPointCloudSegment {
+  ptSegmentInstance?: PointCloud;
+  setPtSegmentInstance: (instance?: PointCloud) => void;
 }
 
 type AttrPanelLayout = '' | 'left' | 'right';
 
-export interface IPointCloudContext extends IPointCloudContextInstances {
+export interface IPointCloudContext
+  extends IPointCloudContextInstances,
+    IPointCloudStatus,
+    IPointCloudSegment {
   pointCloudBoxList: IPointCloudBoxList;
   pointCloudSphereList: IPointCloudSphereList;
   displayPointCloudList: IPointCloudBoxList;
@@ -64,6 +81,7 @@ export interface IPointCloudContext extends IPointCloudContextInstances {
     _polygonList: IPolygonData[],
     _displaySphereList: IPointCloudSphereList,
     _lineList: ILine[],
+    _segmentation: IPointCloudSegmentation[],
   ) => void;
   attrPanelLayout: AttrPanelLayout;
   setAttrPanelLayout: (layout: AttrPanelLayout) => void;
@@ -78,6 +96,9 @@ export interface IPointCloudContext extends IPointCloudContextInstances {
     toolName: EToolName.Rect | EToolName.Polygon | EToolName.Point | EToolName.Line,
   ) => void;
   selectSpecAttr: (attr: string) => void;
+  segmentation: IPointCloudSegmentation[];
+  setSegmentation: (segmentation: IPointCloudSegmentation[]) => void;
+  clearAllDetectionInstance: () => void;
 }
 
 export const PointCloudContext = React.createContext<IPointCloudContext>({
@@ -127,6 +148,14 @@ export const PointCloudContext = React.createContext<IPointCloudContext>({
   pointCloudPattern: EToolName.Rect,
   setPointCloudPattern: () => {},
   selectSpecAttr: () => {},
+
+  globalPattern: EPointCloudPattern.Detection,
+  setGlobalPattern: () => {},
+
+  setPtSegmentInstance: () => {},
+  segmentation: [],
+  setSegmentation: () => {},
+  clearAllDetectionInstance: () => {},
 });
 
 export const PointCloudProvider: React.FC<{}> = ({ children }) => {
@@ -148,6 +177,11 @@ export const PointCloudProvider: React.FC<{}> = ({ children }) => {
   const history = useRef(new ActionsHistory()).current;
   const [hideAttributes, setHideAttributes] = useState<string[]>([]);
   const [attrPanelLayout, setAttrPanelLayout] = useState<AttrPanelLayout>('');
+  const [globalPattern, setGlobalPattern] = useState(EPointCloudPattern.Detection);
+  const [ptSegmentInstance, setPtSegmentInstance] = useState<PointCloud | undefined>(undefined);
+  const [segmentation, setSegmentation] = useState<IPointCloudSegmentation[]>([]);
+
+  const dispatch = useDispatch();
 
   const selectedID = useMemo(() => {
     return selectedIDs.length === 1 ? selectedIDs[0] : '';
@@ -237,22 +271,26 @@ export const PointCloudProvider: React.FC<{}> = ({ children }) => {
       _polygonList: IPolygonData[] = polygonList,
       _displaySphereList: IPointCloudSphereList = displaySphereList,
       _lineList: ILine[] = displayLineList,
+      _segmentation: IPointCloudSegmentation[] = segmentation,
     ) => {
-      pointCloudBoxList.forEach((v) => {
-        mainViewInstance?.removeObjectByName(v.id);
-      });
-
-      pointCloudSphereList.forEach((v) => {
-        mainViewInstance?.removeObjectByName(v.id);
-      });
+      mainViewInstance?.clearAllBox();
+      mainViewInstance?.clearAllSphere();
 
       topViewInstance?.updatePolygonList(_displayPointCloudList, _polygonList);
       topViewInstance?.updatePointList(_displaySphereList);
       topViewInstance?.updateLineList(_lineList);
       mainViewInstance?.generateBoxes(_displayPointCloudList);
       mainViewInstance?.generateSpheres(_displaySphereList);
+      ptSegmentInstance?.store?.updateCurrentSegment(_segmentation);
       syncAllViewPointCloudColor(_displayPointCloudList);
     };
+
+    const clearAllDetectionInstance = () => {
+      setTopViewInstance(undefined);
+      setSideViewInstance(undefined);
+      setBackViewInstance(undefined);
+      setMainViewInstance(undefined);
+    }
 
     /**
      * Synchronize the highlighted pointCloud for all views.
@@ -262,18 +300,32 @@ export const PointCloudProvider: React.FC<{}> = ({ children }) => {
     const syncAllViewPointCloudColor = (pointCloudList?: IPointCloudBox[]) => {
       const colorPromise = mainViewInstance?.highlightOriginPointCloud(pointCloudList);
       return new Promise((resolve) => {
-        colorPromise?.then((color) => {
-          [topViewInstance].forEach((instance) => {
-            if (color) {
-              instance?.pointCloudInstance?.updateColor(color);
-              resolve({ color });
-            }
+        colorPromise
+          ?.then((color) => {
+            [topViewInstance].forEach((instance) => {
+              if (color) {
+                instance?.pointCloudInstance?.updateColor(color);
+                resolve({ color });
+              }
+            });
+            // TODO： Sync sideView & backView Color.
+          })
+          .catch((err) => {
+            console.error(err);
           });
-          // TODO： Sync sideView & backView Color.
-        }).catch(err => {
-          console.error(err);
-        });
       });
+    };
+
+    const setGlobalPatternFuc = (pattern: EPointCloudPattern) => {
+      if (globalPattern !== pattern) {
+        dispatch(ChangeSave);
+        setGlobalPattern(pattern);
+
+        // Segment => Detection - Temporarily.
+        if (pattern === EPointCloudPattern.Detection) {
+          setPtSegmentInstance(undefined);
+        }
+      }
     };
 
     return {
@@ -321,6 +373,13 @@ export const PointCloudProvider: React.FC<{}> = ({ children }) => {
       pointCloudPattern,
       setPointCloudPattern,
       selectSpecAttr,
+      globalPattern,
+      setGlobalPattern: setGlobalPatternFuc,
+      ptSegmentInstance,
+      setPtSegmentInstance,
+      segmentation,
+      setSegmentation,
+      clearAllDetectionInstance,
     };
   }, [
     valid,
@@ -338,6 +397,9 @@ export const PointCloudProvider: React.FC<{}> = ({ children }) => {
     attrPanelLayout,
     defaultAttribute,
     pointCloudPattern,
+    globalPattern,
+    ptSegmentInstance,
+    segmentation,
   ]);
 
   const updateSelectedIDsAndRenderAfterHide = () => {
@@ -358,7 +420,8 @@ export const PointCloudProvider: React.FC<{}> = ({ children }) => {
 
   useEffect(() => {
     updateSelectedIDsAndRenderAfterHide();
-    topViewInstance?.pointCloud2dOperation?.setHiddenAttributes(hideAttributes);
+    topViewInstance?.toolInstance?.setHiddenAttributes?.(hideAttributes);
+    ptSegmentInstance?.store?.setHiddenAttributes?.(hideAttributes);
   }, [hideAttributes]);
 
   return <PointCloudContext.Provider value={ptCtx}>{children}</PointCloudContext.Provider>;

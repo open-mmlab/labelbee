@@ -5,6 +5,7 @@ import {
   IPointCloudSphereList,
   IPolygonData,
   ILine,
+  IPointCloudSegmentation,
 } from '@labelbee/lb-utils';
 import { useContext } from 'react';
 import { PointCloudContext } from '../PointCloudContext';
@@ -24,6 +25,7 @@ export const useHistory = () => {
     lineList,
     setLineList,
     syncAllViewPointCloudColor,
+    segmentation,
   } = useContext(PointCloudContext);
 
   const addHistory = ({
@@ -68,6 +70,7 @@ export const useHistory = () => {
       polygonList: IPolygonData[];
       lineList: ILine[];
       pointCloudSphereList: IPointCloudSphereList;
+      segmentation: IPointCloudSegmentation[];
     }>,
   ) => {
     const historyRecord = {
@@ -75,6 +78,7 @@ export const useHistory = () => {
       polygonList,
       lineList,
       pointCloudSphereList,
+      segmentation,
     };
 
     if (params.pointCloudBoxList) {
@@ -91,6 +95,10 @@ export const useHistory = () => {
 
     if (params.pointCloudSphereList) {
       historyRecord.pointCloudSphereList = params.pointCloudSphereList;
+    }
+
+    if (params.segmentation) {
+      historyRecord.segmentation = params.segmentation;
     }
 
     history.pushHistory(historyRecord);
@@ -140,9 +148,10 @@ export const useHistory = () => {
   }: {
     pointCloudBoxList: IPointCloudBoxList;
     polygonList: IPolygonData[];
+    lineList: ILine[];
     pointCloudSphereList: IPointCloudSphereList;
   }) => {
-    history.initRecord({ pointCloudBoxList, polygonList, pointCloudSphereList }, true);
+    history.initRecord({ pointCloudBoxList, polygonList, pointCloudSphereList, lineList }, true);
   };
 
   const updatePointCloud = (params?: {
@@ -167,22 +176,10 @@ export const useHistory = () => {
         setSelectedIDs();
       }
 
-      const deletePointCloudList = pointCloudBoxList.filter((v) =>
-        newPointCloudBoxList.every((d) => d.id !== v.id),
-      );
-      const addPointCloudList = newPointCloudBoxList.filter((v) =>
-        pointCloudBoxList.every((d) => d.id !== v.id),
-      );
-
-      // Clear All Data
-      deletePointCloudList.forEach((v) => {
-        mainViewInstance?.removeObjectByName(v.id);
-      });
+      mainViewInstance?.clearAllBox();
 
       // Add Init Box
-      addPointCloudList.forEach((v) => {
-        mainViewInstance?.generateBox(v);
-      });
+      mainViewInstance?.generateBoxes(newPointCloudBoxList);
 
       setPointCloudResult(newPointCloudBoxList);
       syncAllViewPointCloudColor(newPointCloudBoxList);
@@ -193,19 +190,10 @@ export const useHistory = () => {
         setSelectedIDs();
       }
 
-      let deletedPointCloudList = pointCloudSphereList.filter((v) =>
-        newPointCloudSphereList.every((d) => d.id !== v.id),
-      );
-      let addPointCloudList = newPointCloudSphereList.filter((v) =>
-        pointCloudSphereList.every((d) => d.id !== v.id),
-      );
-      deletedPointCloudList.forEach((v) => {
-        mainViewInstance?.removeObjectByName(v.id);
-      });
+      mainViewInstance?.clearAllSphere();
 
-      addPointCloudList.forEach((v) => {
-        mainViewInstance?.generateSphere(v);
-      });
+      mainViewInstance?.generateSpheres(newPointCloudSphereList);
+
       setPointCloudSphereList(newPointCloudSphereList);
     }
 
@@ -219,7 +207,7 @@ export const useHistory = () => {
 
     topViewInstance?.updatePolygonList(newPointCloudBoxList ?? [], newPolygonList ?? []);
     topViewInstance?.updateLineList(newLineList ?? []);
-    topViewInstance?.updatePointList(newPointCloudSphereList)
+    topViewInstance?.updatePointList(newPointCloudSphereList);
   };
 
   const redo = () => {

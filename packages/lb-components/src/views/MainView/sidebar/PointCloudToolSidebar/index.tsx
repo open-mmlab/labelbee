@@ -8,7 +8,7 @@ import { AppState } from '@/store';
 import StepUtils from '@/utils/StepUtils';
 import { connect } from 'react-redux';
 import { IStepInfo } from '@/types/step';
-import { jsonParser } from '@/utils';
+import { classnames, jsonParser } from '@/utils';
 import { ICustomToolInstance } from '@/hooks/annotation';
 import { useStatus } from '@/components/pointCloudView/hooks/useStatus';
 import { useSingleBox } from '@/components/pointCloudView/hooks/useSingleBox';
@@ -20,6 +20,11 @@ import { PointCloudUtils } from '@labelbee/lb-utils';
 import AttributeList from '@/components/attributeList';
 import { IInputList } from '@/types/main';
 import { useAttribute } from '@/components/pointCloudView/hooks/useAttribute';
+import LassoSelectorSvg from '@/assets/annotation/pointCloudTool/lassoSelector.svg';
+import LassoSelectorSvgA from '@/assets/annotation/pointCloudTool/lassoSelector_a.svg';
+import CirCleSelectorSvg from '@/assets/annotation/pointCloudTool/circleSelector.svg';
+import CirCleSelectorSvgA from '@/assets/annotation/pointCloudTool/circleSelector_a.svg';
+import { sidebarCls } from '..';
 import { SetTaskStepList } from '@/store/annotation/actionCreators';
 
 interface IProps {
@@ -332,6 +337,73 @@ const AttributeUpdater = ({
   );
 };
 
+const renderSegmentTools = [
+  {
+    toolName: 'LassoSelector',
+    commonSvg: LassoSelectorSvg,
+    selectedSvg: LassoSelectorSvgA,
+  },
+  {
+    toolName: 'CircleSelector',
+    commonSvg: CirCleSelectorSvg,
+    selectedSvg: CirCleSelectorSvgA,
+  },
+];
+
+export const PointCloudSegToolIcon = ({ toolInstance }: { toolInstance: ICustomToolInstance }) => {
+  const { ptSegmentInstance } = useContext(PointCloudContext);
+  const [currentTool, setCurrentTool] = useState('LassoSelector');
+  const { t } = useTranslation();
+
+  useEffect(() => {
+    if (!ptSegmentInstance) {
+      return;
+    }
+
+    const updateLassoSelector = () => {
+      setCurrentTool('LassoSelector');
+    };
+
+    const updateCircleSelector = () => {
+      setCurrentTool('CircleSelector');
+    };
+
+    ptSegmentInstance.on('LassoSelector', updateLassoSelector);
+    ptSegmentInstance.on('CircleSelector', updateCircleSelector);
+    return () => {
+      ptSegmentInstance.unbind('LassoSelector', updateLassoSelector);
+      ptSegmentInstance.unbind('CircleSelector', updateCircleSelector);
+    };
+  }, [ptSegmentInstance]);
+
+  return (
+    <div className={`${sidebarCls}__level`}>
+      {renderSegmentTools.map((tool) => {
+        const isSelected = currentTool === tool.toolName;
+        return (
+          <span
+            className={`${sidebarCls}__toolOption`}
+            key={tool.toolName}
+            onClick={() => ptSegmentInstance?.emit(tool.toolName)}
+          >
+            <img
+              className={`${sidebarCls}__singleTool`}
+              src={isSelected ? tool?.selectedSvg : tool?.commonSvg}
+            />
+            <span
+              className={classnames({
+                [`${sidebarCls}__toolOption__selected`]: isSelected,
+              })}
+            >
+              {t(tool.toolName)}
+            </span>
+          </span>
+        );
+      })}
+    </div>
+  );
+};
+
 const PointCloudToolSidebar: React.FC<IProps> = ({
   stepInfo,
   toolInstance,
@@ -340,12 +412,29 @@ const PointCloudToolSidebar: React.FC<IProps> = ({
   stepList,
   enableColorPicker,
 }) => {
-  const { updatePointCloudPattern, pointCloudPattern } = useStatus();
+  const { updatePointCloudPattern, pointCloudPattern, isPointCloudSegmentationPattern } = useStatus();
 
   const config = jsonParser(stepInfo.config);
   const attributeList = config?.attributeList ?? [];
   const subAttributeList =
     config?.secondaryAttributeConfigurable === true ? config?.inputList ?? [] : [];
+
+  if (isPointCloudSegmentationPattern) {
+    return (
+      <>
+        <PointCloudSegToolIcon toolInstance={toolInstance} />
+        <AttributeUpdater
+          toolInstance={toolInstance}
+          attributeList={attributeList}
+          subAttributeList={subAttributeList}
+          config={config}
+          stepList={stepList}
+          stepInfo={stepInfo}
+          enableColorPicker={enableColorPicker}
+        />
+      </>
+    );
+  }
 
   return (
     <>
