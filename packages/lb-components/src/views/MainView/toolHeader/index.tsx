@@ -159,7 +159,7 @@ const ToolHeader: React.FC<IToolHeaderProps> = ({
 
   const headerOptionNode = !isLLMTool && <HeaderOption stepInfo={stepInfo} />;
 
-  const langNode = !isLLMTool && (
+  const langNode = (
     <div className={`${prefix}-header__lang`}>
       <span
         className={`${prefix}-langCN ${curLang === 'cn' ? 'active' : ''}`}

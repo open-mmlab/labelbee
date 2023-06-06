@@ -4,23 +4,32 @@
  * @Date: 2023-04-10
  */
 
-import React from 'react';
+import React, { useEffect } from 'react';
 import { Tag } from 'antd';
 import LongText from '@/components/longText';
 import { prefix } from '@/constant';
 import classNames from 'classnames';
-import { useTranslation } from 'react-i18next';
+import { useTranslation, I18nextProvider } from 'react-i18next';
 import { IAnswerList } from '@/components/LLMToolView/types';
+import { i18n } from '@labelbee/lb-utils';
 
 interface IProps {
   hoverKey?: number;
   question: any;
   answerList: IAnswerList[];
+  lang?: string;
 }
 const LLMViewCls = `${prefix}-LLMView`;
 const QuestionView: React.FC<IProps> = (props) => {
-  const { hoverKey, question, answerList } = props;
+  const { hoverKey, question, answerList, lang } = props;
   const { t } = useTranslation();
+
+  useEffect(() => {
+    if (lang) {
+      i18n?.changeLanguage(lang);
+    }
+  }, []);
+
   return (
     <div className={LLMViewCls}>
       <div className={`${LLMViewCls}__textBox`} style={{ borderBottom: '1px solid #EBEBEB' }}>
@@ -58,4 +67,12 @@ const QuestionView: React.FC<IProps> = (props) => {
   );
 };
 
-export default QuestionView;
+const WrapQuestionView = (props: IProps) => {
+  return (
+    <I18nextProvider i18n={i18n}>
+      <QuestionView {...props} />
+    </I18nextProvider>
+  );
+};
+
+export default WrapQuestionView;
