@@ -7,7 +7,7 @@
 import React, { useContext } from 'react';
 import { EPointCloudName } from '@labelbee/lb-annotation';
 import { EPointCloudPattern } from '@labelbee/lb-utils';
-import { Button } from 'antd';
+import { Button, Tooltip } from 'antd';
 import { AppState } from '@/store';
 import { connect } from 'react-redux';
 import { LabelBeeContext } from '@/store/ctx';
@@ -16,9 +16,10 @@ import { useTranslation } from 'react-i18next';
 
 interface IProps {
   toolName: string;
+  forbidSegmentationText?: string;
 }
 
-const SwitchPattern = ({ toolName }: IProps) => {
+const SwitchPattern = ({ toolName, forbidSegmentationText = '' }: IProps) => {
   const { t } = useTranslation();
   const {
     globalPattern,
@@ -56,6 +57,17 @@ const SwitchPattern = ({ toolName }: IProps) => {
     setGlobalPattern(EPointCloudPattern.Segmentation);
   };
 
+  const disabledSegmentation = forbidSegmentationText !== '';
+  const segmentButton = (
+    <Button
+      type={globalPattern === EPointCloudPattern.Segmentation ? 'primary' : undefined}
+      onClick={updateSegmentation}
+      disabled={disabledSegmentation}
+    >
+      {t('SegmentationMode')}
+    </Button>
+  );
+
   return (
     <span style={{ margin: '0 10px' }}>
       <Button
@@ -64,12 +76,11 @@ const SwitchPattern = ({ toolName }: IProps) => {
       >
         {t('DetectionMode')}
       </Button>
-      <Button
-        type={globalPattern === EPointCloudPattern.Segmentation ? 'primary' : undefined}
-        onClick={updateSegmentation}
-      >
-        {t('SegmentationMode')}
-      </Button>
+      {disabledSegmentation ? (
+        <Tooltip title={forbidSegmentationText}>{segmentButton}</Tooltip>
+      ) : (
+        segmentButton
+      )}
     </span>
   );
 };
