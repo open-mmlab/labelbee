@@ -86,14 +86,14 @@ const AnswerList = (props: IProps) => {
         return {
           backgroundColor: '#D9FFDF',
           fontColor: '#36B34A',
-          tagText: tagText + t('Finished'),
+          tagText: `${tagText} ${t('Finished')}`,
           tagStatus,
         };
       case ETagType.UnFinish:
         return {
           backgroundColor: '#FFD9D9',
           fontColor: '#F26549',
-          tagText: tagText + t('Unfinished'),
+          tagText: `${tagText} ${t('Unfinished')}`,
           tagStatus,
         };
 
@@ -136,7 +136,7 @@ const AnswerList = (props: IProps) => {
               setHoverKey(-1);
             }}
           >
-            <Tag color={backgroundColor} style={{ color: fontColor, padding: '2px' }}>
+            <Tag color={backgroundColor} style={{ color: fontColor, padding: '0px 8px' }}>
               {tagText}
             </Tag>
             <span
