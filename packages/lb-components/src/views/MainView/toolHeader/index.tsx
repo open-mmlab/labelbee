@@ -158,7 +158,7 @@ const ToolHeader: React.FC<IToolHeaderProps> = ({
 
   const headerOptionNode = <HeaderOption stepInfo={stepInfo} />;
 
-  const pointCloudSwitchPattern = <SwitchPattern />
+  const PointCloudSwitchPattern = SwitchPattern
 
   const langNode = (
     <div className={`${prefix}-header__lang`}>
@@ -196,7 +196,7 @@ const ToolHeader: React.FC<IToolHeaderProps> = ({
               stepListNode,
               headerOptionNode,
               langNode: rightActions,
-              pointCloudSwitchPattern,
+              PointCloudSwitchPattern,
             })}
           </div>
         </div>
@@ -221,7 +221,7 @@ const ToolHeader: React.FC<IToolHeaderProps> = ({
           {headerOptionNode}
         </div>
         <div className={`${prefix}-header__titlePlacement`} />
-        {pointCloudSwitchPattern}
+        <SwitchPattern />
         {rightActions}
       </div>
     </div>
