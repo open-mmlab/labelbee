@@ -1,7 +1,7 @@
-import React, { useState, useContext, useEffect } from 'react';
+import React, { useState, useEffect } from 'react';
 import { prefix } from '@/constant';
 import { Button, Input } from 'antd';
-import AnswerSort from './components/AnswerSort';
+import AnswerSort from './components/answerSort';
 import { AppState } from '@/store';
 import { connect } from 'react-redux';
 import { isNumber, isObject } from 'lodash';
@@ -12,7 +12,7 @@ import { getStepConfig } from '@/store/annotation/reducer';
 import { useCustomToolInstance } from '@/hooks/annotation';
 import { PageForward } from '@/store/annotation/actionCreators';
 import { EToolName } from '@labelbee/lb-annotation';
-import { IAnswerList } from '@/components/LLMToolView/types';
+import { IWaitAnswerSort, IAnswerSort } from '@/components/LLMToolView/types';
 import { useTranslation } from 'react-i18next';
 
 interface IProps {
@@ -46,11 +46,11 @@ const Sidebar: React.FC<IProps> = (props) => {
   const currentData = imgList[imgIndex] ?? {};
   const basicInfo = jsonParser(currentData?.result);
   const { toolInstanceRef } = useCustomToolInstance({ basicInfo });
-  const [sortList, setSortList] = useState<any[]>([]);
-  const [LLMConfig, setLLMConfig] = useState({});
-  const [answerList, setAnswerList] = useState<IAnswerList[]>([]);
+  const [sortList, setSortList] = useState<IAnswerSort[][]>([]);
+  const [LLMConfig, setLLMConfig] = useState<any>({});
+  const [answerList, setAnswerList] = useState<IWaitAnswerSort[]>([]);
   const [text, setText] = useState('');
-  const [waitSortList, setWaitSortList] = useState<any[]>([]);
+  const [waitSortList, setWaitSortList] = useState<IAnswerSort[]>([]);
 
   useEffect(() => {
     if (stepList && step) {

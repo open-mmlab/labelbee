@@ -14,11 +14,36 @@ export interface IAnswerList {
   indicatorScore: IndicatorScore;
   indicatorDetermine: IndicatorDetermine;
 }
+
+// LLM工具配置
 export interface ILLMToolConfig {
-  // LLM工具
   enableSort: boolean;
   indicatorScore: IndicatorScore[]; // 指标评分
   indicatorDetermine: IndicatorDetermine[]; // 指标判断
   score: number; // 整体评分
   text?: boolean;
+}
+
+// 单个答案
+export interface IWaitAnswerSort {
+  title: number;
+  id: number;
+}
+
+export interface IPoint {
+  x: number;
+  y: number;
+}
+
+export interface ITagVertexPoint {
+  bl: IPoint;
+  br: IPoint;
+  tl: IPoint;
+  tr: IPoint;
+}
+export interface IAnswerSort {
+  title: number;
+  id: number;
+  tagCenterPoint: IPoint;
+  tagVertexPoint: ITagVertexPoint;
 }
