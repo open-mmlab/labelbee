@@ -389,7 +389,6 @@ class PolygonOperation extends BasicToolOperation {
   public clearPolygonDrag() {
     this.drawingPointList = [];
     this.dragInfo = undefined;
-    this.dragInfo = undefined;
     this.dragStatus = EDragStatus.Wait;
     this.hoverEdgeIndex = -1;
     this.hoverPointIndex = -1;
@@ -955,6 +954,17 @@ class PolygonOperation extends BasicToolOperation {
 
     this.dragMouseDown(e);
     return true;
+  }
+
+  public onMouseLeave(): void {
+    /**
+     * Clear all status on mouse leave and while in drag state.
+     */
+    if (this.dragInfo) {
+      this.emitUpdatePolygonByDrag();
+      this.clearPolygonDrag();
+      this.history.pushHistory(this.polygonList);
+    }
   }
 
   /**
