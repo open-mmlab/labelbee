@@ -11,7 +11,8 @@ import ScoreGroupButton from '../scoreGroupButton';
 import DetermineGroup from '../determineGroup';
 import { LLMContext } from '@/views/MainView';
 import { classnames } from '@/utils';
-import { CaretRightOutlined, InfoCircleOutlined } from '@ant-design/icons';
+import { InfoCircleOutlined } from '@ant-design/icons';
+import { expandIconFuc } from '@/views/MainView/sidebar/TagSidebar';
 
 interface IProps {
   list?: any;
@@ -110,7 +111,7 @@ const AnswerList = (props: IProps) => {
   return (
     <Collapse
       bordered={false}
-      expandIcon={({ isActive }) => <CaretRightOutlined rotate={isActive ? 90 : 0} />}
+      expandIcon={expandIconFuc}
       expandIconPosition='end'
       defaultActiveKey={list.length > 0 && list.map((i: any, index: number) => index)}
       style={{ margin: '16px 0px' }}
