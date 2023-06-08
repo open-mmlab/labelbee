@@ -57,20 +57,21 @@ async function main() {
     try {
         await sendMessageToWechat(releaseNotes);
 
-        await new Promise((resolve) => {
-            setTimeout(async () => {
-                createPullRequest({
-                    branchName,
-                    body: releaseNotes,
-                    base: 'dev',
-                    title: 'Update package version',
-                }).catch((err) => {
-                    console.log(err);
-                });
-                resolve();
-                // 避免 You have exceeded a secondary rate limit 问题
-            }, 1000);
-        });
+        // Hide temporarily.
+        // await new Promise((resolve) => {
+        //     setTimeout(async () => {
+        //         createPullRequest({
+        //             branchName,
+        //             body: releaseNotes,
+        //             base: 'dev',
+        //             title: 'Update package version',
+        //         }).catch((err) => {
+        //             console.log(err);
+        //         });
+        //         resolve();
+        //         // 避免 You have exceeded a secondary rate limit 问题
+        //     }, 1000);
+        // });
     } catch (err) {
         console.log(err);
     }
