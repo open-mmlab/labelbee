@@ -68,23 +68,22 @@ const AnswerSort = (props: IProps) => {
     formatSortList();
   }, [JSON.stringify(sortList)]);
 
-  const singleAnswerItem = ({ item, operation }: any) => {
+  const singleAnswerItem = ({ item, operation, id }: any) => {
     const borderStyle = { [`border${activateDirection}`]: '2px solid #8C9AFF' };
 
     return (
       <div
         key={`${item?.id}`}
         color='#EBEBEB'
-        index={item?.id}
+        id={id}
         className={classnames({
           [`${contentBoxCls}__answerTag`]: true,
-          // [`${contentBoxCls}__answerTagGhost`]: !item.id,
         })}
         style={targetTagKey === item?.id && activateDirection ? borderStyle : undefined}
         draggable={isDisableAll ? '' : 'true'}
         {...operation}
       >
-        {item.title}
+        {item?.title}
       </div>
     );
   };
@@ -204,7 +203,7 @@ const AnswerSort = (props: IProps) => {
         return;
       }
       // 不以拖动的tag做参照
-      if (~~e.target.getAttribute('index') === tagNearest[0]?.id) {
+      if (getAttributeIndex(e.target.id) === tagNearest[0]?.id) {
         setTargetTagKey(undefined);
         return;
       }
@@ -223,8 +222,8 @@ const AnswerSort = (props: IProps) => {
 
     tagIndex = formatList.findIndex((i: IAnswerSort[]) => i[0].id === Number(targetTagKey));
     if (target?.parentNode?.parentNode.id === 'sortBox') {
-      key = target.parentNode.getAttribute('index'); // 父级
-      const curKey = target.getAttribute('index'); // 拖动tag
+      key = getAttributeIndex(target.parentNode.id); // 父级
+      const curKey = getAttributeIndex(target.id); // 拖动tag
       newList = formatList[~~key].filter((i: IAnswerSort) => i.id === ~~curKey);
       const removeIndex = formatList[~~key].findIndex((i: IAnswerSort) => i.id === ~~curKey);
       formatList[~~key].splice(removeIndex, 1);
@@ -233,14 +232,14 @@ const AnswerSort = (props: IProps) => {
       if (!targetTagKey) {
         return;
       }
-      key = ~~target.getAttribute('index');
+      key = getAttributeIndex(target.id);
       oldIndex = formatList.findIndex((i: IAnswerSort[]) => i[0].id === key);
       newList = formatList.find((i: IAnswerSort[]) => i[0].id === key);
       formatList.splice(oldIndex, 1);
       tagIndex = formatList.findIndex((i: IAnswerSort[]) => i[0].id === ~~targetTagKey);
     }
     if (target.parentNode.id === 'waitBox') {
-      key = ~~target.getAttribute('index');
+      key = getAttributeIndex(target.id);
       oldIndex = answers.findIndex((i: any) => i.id === key);
       newList = [answers[oldIndex]];
       answers.splice(oldIndex, 1);
@@ -266,6 +265,11 @@ const AnswerSort = (props: IProps) => {
     forceUpdate();
   };
 
+  const getAttributeIndex = (str: string) => {
+    const index = str.indexOf('-');
+    return Number(str.substring(index + 1, str.length));
+  };
+
   return (
     <div style={{ padding: '0px 16px', marginBottom: '16px' }}>
       <div className={`${contentBoxCls}__title`}>
@@ -284,6 +288,7 @@ const AnswerSort = (props: IProps) => {
               answers.map((i: any) =>
                 singleAnswerItem({
                   item: i,
+                  id: `waitBoxItem-${i?.id}`,
                   operation: {
                     onDrag: onDrag,
                     onDragEnd: onDragEnd,
@@ -297,11 +302,11 @@ const AnswerSort = (props: IProps) => {
           {sortList.map((i: any, index: number) => {
             if (i.length > 1) {
               return (
-                // @ts-ignore
-                <div key={`item-${index}`} index={`${index}`}>
+                <div key={`item-${index}`} id={`sortBox-${index}`}>
                   {i.map((item: any) =>
                     singleAnswerItem({
                       item,
+                      id: `sortBoxItem-${item?.id}`,
                       operation: {
                         onDrag: onDrag,
                         onDragEnd: onDragEnd,
@@ -313,6 +318,7 @@ const AnswerSort = (props: IProps) => {
             }
             return singleAnswerItem({
               item: i[0],
+              id: `sortBox-${i[0]?.id}`,
               operation: {
                 onDrag: onDrag,
                 onDragEnd: onDragEnd,
