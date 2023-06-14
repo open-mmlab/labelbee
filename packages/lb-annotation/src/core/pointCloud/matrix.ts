@@ -116,56 +116,59 @@ export function getCuboidFromPointCloudBox(boxParams: IPointCloudBox) {
   };
 }
 
-function orientation(p: IPolygonPoint, q: IPolygonPoint, r: IPolygonPoint): number {
-  const val = (q.y - p.y) * (r.x - q.x) - (q.x - p.x) * (r.y - q.y);
-  if (val === 0) {
-    return 0; // Same line.
-  }
-  if (val > 0) {
-    return 1; // clockwise.
-  }
+function sortPoints(points: IPolygonPoint[]) {
+  const sortedPoints = points.slice();
+  sortedPoints.sort((a, b) => {
+    if (a.x === b.x) {
+      return b.y - a.y; // 修改此处，按照 y 值降序排列
+    }
+    return a.x - b.x;
+  });
+  return sortedPoints;
+}
 
-  return 2; // anticlockwise
+function crossProduct(p1: IPolygonPoint, p2: IPolygonPoint, p3: IPolygonPoint) {
+  const x1 = p2.x - p1.x;
+  const y1 = p2.y - p1.y;
+  const x2 = p3.x - p1.x;
+  const y2 = p3.y - p1.y;
+  return x1 * y2 - x2 * y1;
 }
 
 /**
- * convexHull Algorithm.
+ * convexHull Algorithm using Graham scanning method.
  * @param points
  * @returns
  */
-function convexHull(points: IPolygonPoint[]): IPolygonPoint[] {
-  const n = points.length;
-  if (n < 3) {
-    return [];
+function buildConvexHull(points: IPolygonPoint[]): IPolygonPoint[] {
+  const sortedPoints = sortPoints(points);
+  const lowerHull = [];
+  for (let i = 0; i < sortedPoints.length; i++) {
+    while (
+      lowerHull.length >= 2 &&
+      crossProduct(lowerHull[lowerHull.length - 2], lowerHull[lowerHull.length - 1], sortedPoints[i]) <= 0
+    ) {
+      lowerHull.pop();
+    }
+    lowerHull.push(sortedPoints[i]);
   }
 
-  const hull: IPolygonPoint[] = [];
-  let l = 0;
-
-  for (let i = 1; i < n; i++) {
-    if (points[i].x < points[l].x) {
-      l = i;
+  const upperHull = [];
+  for (let i = sortedPoints.length - 1; i >= 0; i--) {
+    while (
+      upperHull.length >= 2 &&
+      crossProduct(upperHull[upperHull.length - 2], upperHull[upperHull.length - 1], sortedPoints[i]) <= 0
+    ) {
+      upperHull.pop();
     }
+    upperHull.push(sortedPoints[i]);
   }
 
-  let p = l;
-  let q: number;
-  do {
-    hull.push(points[p]);
-    q = (p + 1) % n;
-
-    for (let i = 0; i < n; i++) {
-      if (orientation(points[p], points[i], points[q]) === 2) {
-        q = i;
-      }
-    }
-
-    p = q;
-  } while (p !== l);
-
-  return hull;
+  lowerHull.pop();
+  upperHull.pop();
+  const convexHull = lowerHull.concat(upperHull);
+  return convexHull;
 }
-
 export function pointCloudLidar2image(
   boxParams: IPointCloudBox,
   cameraMatrix: {
@@ -205,7 +208,7 @@ export function pointCloudLidar2image(
   if (transferViewData.length === 6 && createRange === true) {
     const frontPointList = transferViewData[0].pointList;
     const backPointList = transferViewData[1].pointList;
-    viewRangePointList = convexHull([...frontPointList, ...backPointList]);
+    viewRangePointList = buildConvexHull([...frontPointList, ...backPointList]);
   }
 
   return { transferViewData, viewRangePointList };
