@@ -41,8 +41,8 @@ import { ICoordinate } from '@labelbee/lb-utils/src/types/common';
 const DEFAULT_SCOPE = 5;
 const DEFAULT_RADIUS = 90;
 
-const DEFAULT_MIN_WIDTH = 0.01;
-const DEFAULT_MIN_HEIGHT = 0.01;
+// leave a little margin when intelligentFit
+const INTELLIGENT_FIT_MARGIN = 0.01;
 
 const PointCloudView = {
   '3D': '3D',
@@ -136,8 +136,8 @@ export const topViewPolygon2PointCloud = (
       y: centerPoint.y,
       z,
     },
-    width: width || DEFAULT_MIN_WIDTH,
-    height: height || DEFAULT_MIN_HEIGHT,
+    width: intelligentFit ? width + INTELLIGENT_FIT_MARGIN : width,
+    height: intelligentFit ? height + INTELLIGENT_FIT_MARGIN : height,
     depth,
     rotation,
     id: newPolygon.id,
