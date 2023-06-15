@@ -41,6 +41,9 @@ import { ICoordinate } from '@labelbee/lb-utils/src/types/common';
 const DEFAULT_SCOPE = 5;
 const DEFAULT_RADIUS = 90;
 
+const DEFAULT_MIN_WIDTH = 0.01;
+const DEFAULT_MIN_HEIGHT = 0.01;
+
 const PointCloudView = {
   '3D': '3D',
   Top: 'Top',
@@ -133,8 +136,8 @@ export const topViewPolygon2PointCloud = (
       y: centerPoint.y,
       z,
     },
-    width,
-    height,
+    width: width || DEFAULT_MIN_WIDTH,
+    height: height || DEFAULT_MIN_HEIGHT,
     depth,
     rotation,
     id: newPolygon.id,
