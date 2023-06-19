@@ -121,7 +121,7 @@ const PointCloud3D: React.FC<IA2MapStateProps> = ({ currentData, config }) => {
       // Business Logic: If the updated view is top, need to sync with topView Direction in 3dView.
       const topViewVector = { ...box.center };
       topViewVector.x = topViewVector.x - 0.01;
-      topViewVector.z = 10;
+      topViewVector.z = 1000; // The position of camera needs to be set to a higher;
       const isTopView = perspectiveView === EPerspectiveView.Top;
 
       ptCtx.mainViewInstance?.updateCameraByBox(

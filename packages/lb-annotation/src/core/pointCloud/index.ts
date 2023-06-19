@@ -1182,7 +1182,6 @@ export class PointCloud extends EventListener {
       });
     });
 
-    // todo: should leave a little margin
     _polygon = [polygon[polygon.length - 1], ...polygon, polygon[0]];
     const _minDistanceList = [minDistanceList[minDistanceList.length - 1], ...minDistanceList];
     const fittedCoordinates = polygon.map((_, index) => {
@@ -1569,9 +1568,9 @@ export class PointCloud extends EventListener {
 
     newBoxParams = {
       ...newBoxParams,
-      width: newBoxParams.width + offsetWidth,
+      width: Math.abs(newBoxParams.width + offsetWidth),
       height: newBoxParams.height,
-      depth: newBoxParams.depth + offsetDepth,
+      depth: Math.abs(newBoxParams.depth + offsetDepth),
     };
     return { newBoxParams };
   }
@@ -1596,8 +1595,8 @@ export class PointCloud extends EventListener {
     newBoxParams = {
       ...newBoxParams,
       width: newBoxParams.width,
-      height: newBoxParams.height + offsetWidth,
-      depth: newBoxParams.depth + offsetDepth,
+      height: Math.abs(newBoxParams.height + offsetWidth),
+      depth: Math.abs(newBoxParams.depth + offsetDepth),
     };
     return { newBoxParams };
   }

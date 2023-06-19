@@ -34,10 +34,10 @@ const PointCloudSegmentListener: React.FC<IProps> = ({
     if (ptSegmentInstance && currentData.url) {
       /**
        * Reset All Status and data.
-       * 
+       *
        * 1. clear stash
        * 2. clear all segment data.
-       * 
+       *
        */
       ptSegmentInstance.emit('clearStash');
       ptSegmentInstance.emit('clearAllSegmentData');
