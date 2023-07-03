@@ -1,9 +1,9 @@
-import { useLayoutEffect } from 'react';
+import { useLayoutEffect, useMemo } from 'react';
 import ResizeObserver from 'resize-observer-polyfill';
 import type { BasicTarget } from '../utils/dom';
 import { getTargetElement } from '../utils/dom';
 import useRafState from './useRafState';
-
+import { debounce } from 'lodash';
 interface Size {
   width: number;
   height: number;
@@ -18,6 +18,15 @@ function useSize(target: BasicTarget): Size {
     };
   });
 
+  const onChangeSize = useMemo(() => {
+    return debounce((entry) => {
+      setState({
+        width: entry.target.clientWidth ?? 0,
+        height: entry.target.clientHeight ?? 0,
+      });
+    }, 100);
+  }, []);
+
   useLayoutEffect(() => {
     const el = getTargetElement(target);
     if (!el) {
@@ -26,14 +35,12 @@ function useSize(target: BasicTarget): Size {
 
     const resizeObserver = new ResizeObserver((entries: ResizeObserverEntry[]) => {
       entries.forEach((entry: ResizeObserverEntry) => {
-        setState({
-          width: entry.target.clientWidth ?? 0,
-          height: entry.target.clientHeight ?? 0,
-        });
+        onChangeSize(entry);
       });
     });
 
     resizeObserver.observe(el as HTMLElement);
+
     return () => {
       resizeObserver.disconnect();
     };

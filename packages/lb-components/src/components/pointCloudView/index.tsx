@@ -120,7 +120,7 @@ const PointCloudView: React.FC<IProps> = ({
       <>
         <PointCloudSegmentListener checkMode={checkMode} toolInstanceRef={toolInstanceRef} />
         <PointCloudSegmentToolbar />
-        <PointCloudSegment checkMode={checkMode}/>
+        <PointCloudSegment checkMode={checkMode} />
         <PointCloudSegmentStatus />
         {drawLayerSlot?.({
           direct: true,

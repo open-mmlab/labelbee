@@ -555,6 +555,12 @@ $prefix: bee;
       border-radius: 50%;
     }
   }
+  &__pointCloud {
+    transition: width 0.1s;
+    .ant-tabs-content {
+      height: 100%;
+    }
+  }
 }
 
 .#{$prefix}-tips {
