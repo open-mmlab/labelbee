@@ -9,7 +9,7 @@ import { Tag, Collapse, Popover } from 'antd';
 import { useTranslation } from 'react-i18next';
 import ScoreGroupButton from '../scoreGroupButton';
 import DetermineGroup from '../determineGroup';
-import { LLMContext } from '@/views/MainView';
+import { LLMContext } from '@/store/ctx';
 import { classnames } from '@/utils';
 import { InfoCircleOutlined } from '@ant-design/icons';
 import { expandIconFuc } from '@/views/MainView/sidebar/TagSidebar';
@@ -19,7 +19,7 @@ interface IProps {
   checkMode?: boolean;
   LLMConfig?: any;
   setHoverKey: (value: number) => void;
-  unpdateValue: ({
+  updateValue: ({
     order,
     value,
     key,
@@ -39,7 +39,7 @@ enum ETagType {
 const { Panel } = Collapse;
 const LLMSidebarCls = `${prefix}-LLMSidebar`;
 const AnswerList = (props: IProps) => {
-  const { list, LLMConfig, unpdateValue, checkMode } = props;
+  const { list, LLMConfig, updateValue, checkMode } = props;
   const { hoverKey, setHoverKey } = useContext(LLMContext);
   const { t } = useTranslation();
   const isDisableAll = checkMode;
@@ -169,7 +169,7 @@ const AnswerList = (props: IProps) => {
                 selectScore={i.score}
                 score={score}
                 title={t('OverallScore')}
-                unpdateScore={(score) => unpdateValue({ order: i.order, value: score })}
+                updateScore={(score) => updateValue({ order: i.order, value: score })}
                 isDisableAll={isDisableAll}
               />
             )}
@@ -192,12 +192,12 @@ const AnswerList = (props: IProps) => {
                     score={score}
                     title={renderTitle}
                     selectScore={i?.indicatorScore?.[value]}
-                    unpdateScore={(score) => {
+                    updateScore={(score) => {
                       const values = {
                         key: value,
                         value: score,
                       };
-                      unpdateValue({ order: i.order, value: values, key: 'indicatorScore' });
+                      updateValue({ order: i.order, value: values, key: 'indicatorScore' });
                     }}
                     key={index}
                     isDisableAll={isDisableAll}
@@ -213,12 +213,12 @@ const AnswerList = (props: IProps) => {
                   <DetermineGroup
                     selectValue={i?.indicatorDetermine?.[value]}
                     title={label}
-                    unpdateValue={(changeValue) => {
+                    updateValue={(changeValue) => {
                       const values = {
                         key: value,
                         value: changeValue,
                       };
-                      unpdateValue({ order: i.order, value: values, key: 'indicatorDetermine' });
+                      updateValue({ order: i.order, value: values, key: 'indicatorDetermine' });
                     }}
                     key={index}
                     isDisableAll={isDisableAll}

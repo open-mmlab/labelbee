@@ -122,12 +122,7 @@ export const LoadFileAndFileData =
 
     await dispatch(TryGetFileDataByAPI(nextIndex));
 
-    if (currentIsVideo || currentIsPointCloud) {
-      dispatch(AfterVideoLoaded(nextIndex));
-      return;
-    }
-
-    if (currentIsLLM) {
+    if (currentIsVideo || currentIsPointCloud || currentIsLLM) {
       dispatch(AfterVideoLoaded(nextIndex));
       return;
     }

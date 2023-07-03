@@ -12,8 +12,9 @@ import { getStepConfig } from '@/store/annotation/reducer';
 import { useCustomToolInstance } from '@/hooks/annotation';
 import { PageForward } from '@/store/annotation/actionCreators';
 import { EToolName } from '@labelbee/lb-annotation';
-import { IWaitAnswerSort, IAnswerSort } from '@/components/LLMToolView/types';
+import { IWaitAnswerSort, IAnswerSort, ILLMBoxResult } from '@/components/LLMToolView/types';
 import { useTranslation } from 'react-i18next';
+import { formatSort, getCurrentResultFromResultList } from '../utils/data';
 
 interface IProps {
   annotation?: any;
@@ -26,13 +27,6 @@ interface IConfigUpdate {
   order: number;
   value: number | { key: string; value?: number | boolean };
   key?: string;
-}
-
-export interface IIndicatorScore {
-  label: number;
-  value: number;
-  score: number;
-  text?: string;
 }
 
 const { TextArea } = Input;
@@ -49,7 +43,7 @@ const Sidebar: React.FC<IProps> = (props) => {
   const [sortList, setSortList] = useState<IAnswerSort[][]>([]);
   const [LLMConfig, setLLMConfig] = useState<any>({});
   const [answerList, setAnswerList] = useState<IWaitAnswerSort[]>([]);
-  const [text, setText] = useState('');
+  const [text, setText] = useState<string | undefined>(undefined);
   const [waitSortList, setWaitSortList] = useState<IAnswerSort[]>([]);
 
   useEffect(() => {
@@ -63,7 +57,9 @@ const Sidebar: React.FC<IProps> = (props) => {
     if (!currentData) {
       return;
     }
-    const result = getBoxParamsFromResultList(currentData?.result);
+
+    const result: ILLMBoxResult = getCurrentResultFromResultList(currentData?.result);
+
     let qaData = result?.answerList ? result : currentData?.questionList;
     if (qaData?.answerList) {
       getWaitSortList(qaData.answerList);
@@ -96,7 +92,7 @@ const Sidebar: React.FC<IProps> = (props) => {
       let waitSorts: any = [];
       let newSort: any = [];
       // 将[[1],[2,3]]格式转成[[{ title: 1, id: 1 }],[{...},{...}]]
-      const result = getBoxParamsFromResultList(currentData?.result);
+      const result = getCurrentResultFromResultList(currentData?.result);
       const currentResult = result?.length > 0 ? result[0] : result;
       if (currentResult?.sort?.length > 0) {
         newSort = currentResult.sort.reduce((i: any, key: any) => {
@@ -125,27 +121,7 @@ const Sidebar: React.FC<IProps> = (props) => {
     }
   };
 
-  const getBoxParamsFromResultList = (result: string) => {
-    const data = jsonParser(result);
-    const DEFAULT_STEP = `step_1`;
-    const dataList = data?.[DEFAULT_STEP]?.result[0] ?? {};
-    return dataList;
-  };
-
-  const formatSort = (sortList: any) => {
-    const newList = sortList.reduce((list: any, key: any) => {
-      let tagColumn = key;
-      if (key.length > 1) {
-        tagColumn = key.map((i: { id: number; title: number | string }) => i.id);
-      } else {
-        tagColumn = [key[0].id];
-      }
-      return [...list, tagColumn];
-    }, []);
-    return newList;
-  };
-
-  const unpdateValue = ({ order, value, key }: IConfigUpdate) => {
+  const updateValue = ({ order, value, key }: IConfigUpdate) => {
     const newList = answerList?.map((i: any, listIndex) => {
       if (i?.order === order) {
         if (isNumber(value)) {
@@ -171,7 +147,7 @@ const Sidebar: React.FC<IProps> = (props) => {
               list={answerList}
               LLMConfig={LLMConfig}
               setHoverKey={setHoverKey}
-              unpdateValue={unpdateValue}
+              updateValue={updateValue}
               checkMode={checkMode}
             />
           )}

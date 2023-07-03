@@ -9,9 +9,9 @@ import { Tag } from 'antd';
 import { useTranslation } from 'react-i18next';
 import { LeftOutlined } from '@ant-design/icons';
 import { classnames } from '@/utils';
-import ToolUtils from '@/utils/ToolUtils';
 import { cloneDeep } from 'lodash';
 import { IAnswerSort, IWaitAnswerSort } from '@/components/LLMToolView/types';
+import { MathUtils } from '@labelbee/lb-annotation';
 
 interface IProps {
   setSortList: (value: any) => void;
@@ -40,16 +40,19 @@ interface ITagPoints {
 
 const contentBoxCls = `${prefix}-LLMSidebar-contentBox`;
 
-const Navigation = ({ t }: any) => (
-  <div className={`${contentBoxCls}__navigation`}>
-    <span>{t('Best')}</span>
-    <div style={{ display: 'flex', alignItems: 'center' }}>
-      <LeftOutlined />
-      <div style={{ height: 0, border: '1px solid #999999', width: '450px' }} />
+const Navigation = () => {
+  const { t } = useTranslation();
+  return (
+    <div className={`${contentBoxCls}__navigation`}>
+      <span>{t('Best')}</span>
+      <div style={{ display: 'flex', alignItems: 'center' }}>
+        <LeftOutlined />
+        <div style={{ height: 0, border: '1px solid #999999', width: '450px' }} />
+      </div>
+      <span>{t('Worst')}</span>
     </div>
-    <span>{t('Worst')}</span>
-  </div>
-);
+  );
+};
 
 const AnswerSort = (props: IProps) => {
   const [, forceUpdate] = useReducer((x) => x + 1, 0);
@@ -93,22 +96,22 @@ const AnswerSort = (props: IProps) => {
   };
   const compareDistance = (sourceTagCenterPoint: IPoint, tagVertexPoint: ITagPoints) => {
     // top
-    const toTopDistance = ToolUtils.calcTwoPointDistance(
+    const toTopDistance = MathUtils.getLineLength(
       sourceTagCenterPoint,
       middlePoint(tagVertexPoint.tl, tagVertexPoint.tr),
     );
     // right
-    const toRightDistance = ToolUtils.calcTwoPointDistance(
+    const toRightDistance = MathUtils.getLineLength(
       sourceTagCenterPoint,
       middlePoint(tagVertexPoint.tr, tagVertexPoint.tr),
     );
     // bottom
-    const toBottompDistance = ToolUtils.calcTwoPointDistance(
+    const toBottompDistance = MathUtils.getLineLength(
       sourceTagCenterPoint,
       middlePoint(tagVertexPoint.bl, tagVertexPoint.br),
     );
     // left
-    const toLeftDistance = ToolUtils.calcTwoPointDistance(
+    const toLeftDistance = MathUtils.getLineLength(
       sourceTagCenterPoint,
       middlePoint(tagVertexPoint.tl, tagVertexPoint.bl),
     );
@@ -185,12 +188,9 @@ const AnswerSort = (props: IProps) => {
           // 距离最近的中心坐标
           const lastTagCenterPoint = tagNearest[0]?.tagCenterPoint;
           // 当前点和移动点的距离
-          const centerPointDistance = ToolUtils.calcTwoPointDistance(
-            sourceTagCenterPoint,
-            tagCenterPoint,
-          );
+          const centerPointDistance = MathUtils.getLineLength(sourceTagCenterPoint, tagCenterPoint);
           // 上一个最近点的距离
-          const lastCenterPointDistance = ToolUtils.calcTwoPointDistance(
+          const lastCenterPointDistance = MathUtils.getLineLength(
             sourceTagCenterPoint,
             lastTagCenterPoint,
           );
@@ -297,7 +297,7 @@ const AnswerSort = (props: IProps) => {
               )}
           </div>
         </div>
-        <Navigation t={t} />
+        <Navigation />
         <div id='sortBox' className={`${contentBoxCls}__answerBox`}>
           {sortList.map((i: any, index: number) => {
             if (i.length > 1) {

@@ -24,9 +24,6 @@ class ToolUtils {
     return [EToolName.Point, EToolName.Line, EToolName.PointCloudPolygon];
   }
 
-  public static calcTwoPointDistance = (pointA: IPoint, pointB: IPoint) =>
-    Math.sqrt(Math.pow(pointA.x - pointB.x, 2) + Math.pow(pointA.y - pointB.y, 2));
-
   // Calculate the distance from a point to a line
   public static getPointToLineDistance(
     pt: IPoint, // A point outside the straight line

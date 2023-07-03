@@ -7,10 +7,9 @@
 import React, { useContext, useEffect, useState } from 'react';
 import { AppState } from '@/store';
 import { connect } from 'react-redux';
-import { LabelBeeContext } from '@/store/ctx';
+import { LabelBeeContext, LLMContext } from '@/store/ctx';
 import { message } from 'antd';
 import { prefix } from '@/constant';
-import { LLMContext } from '@/views/MainView';
 import { Layout } from 'antd/es';
 import LLMSidebar from '@/components/LLMToolView/sidebar';
 import { getStepConfig } from '@/store/annotation/reducer';

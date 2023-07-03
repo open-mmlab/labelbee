@@ -12,18 +12,18 @@ interface IProps {
   title: string;
   selectValue?: number;
   isDisableAll?: boolean;
-  unpdateValue: (changeValue: boolean) => void;
+  updateValue: (changeValue: boolean) => void;
 }
 
 const DetermineGroup = (props: IProps) => {
-  const { title, selectValue, isDisableAll, unpdateValue } = props;
+  const { title, selectValue, isDisableAll, updateValue } = props;
   const { t } = useTranslation();
   return (
     <div className={`${prefix}-LLMSidebar-contentBox`}>
       <span style={{ width: '160px' }}>{title}</span>
       <Radio.Group
         value={selectValue}
-        onChange={(e) => unpdateValue(e.target.value)}
+        onChange={(e) => updateValue(e.target.value)}
         disabled={isDisableAll}
       >
         <Radio value={true} key={1}>

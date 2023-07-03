@@ -19,18 +19,13 @@ import ToolUtils from '@/utils/ToolUtils';
 import PointCloudView from '@/components/pointCloudView';
 import { getClassName } from '@/utils/dom';
 import { classnames } from '@/utils';
-import { LabelBeeContext } from '@/store/ctx';
+import { LabelBeeContext, LLMContext } from '@/store/ctx';
 import { EToolName } from '@/data/enums/ToolType';
 import LLMToolView from '@/components/LLMToolView';
 
 interface IProps {
   path: string;
   loading: boolean;
-}
-
-interface ILLMContext {
-  hoverKey: number;
-  setHoverKey: (value: number) => void;
 }
 
 const { Sider, Content } = Layout;
@@ -76,10 +71,6 @@ const AnnotatedArea: React.FC<AppProps & IProps> = (props) => {
 
   return <ImageAnnotate {...props} />;
 };
-export const LLMContext = React.createContext<ILLMContext>({
-  hoverKey: -1,
-  setHoverKey: () => {},
-});
 
 const LLMLayout: React.FC<AppProps & IProps> = (props) => {
   const siderWidth = props.style?.sider?.width;
@@ -116,45 +107,53 @@ const LLMLayout: React.FC<AppProps & IProps> = (props) => {
   );
 };
 
+const ViewportProviderLayout = (props: AppProps & IProps & { children: any }) => (
+  <ViewportProvider>
+    <Spin spinning={props.loading}>
+      <Layout className={classnames([layoutCls, props.className])} style={props.style?.layout}>
+        <header className={`${layoutCls}__header`} style={props.style?.header}>
+          <ToolHeader
+            header={props?.header}
+            headerName={props.headerName}
+            goBack={props.goBack}
+            exportData={props.exportData}
+          />
+        </header>
+        {props.children}
+      </Layout>
+    </Spin>
+  </ViewportProvider>
+);
+
 const MainView: React.FC<AppProps & IProps> = (props) => {
   const siderWidth = props.style?.sider?.width;
   const { stepList, step } = props;
   const currentToolName = getStepConfig(stepList, step)?.tool;
   const isLLMTool = EToolName.LLM === currentToolName;
+  if (isLLMTool) {
+    return (
+      <ViewportProviderLayout {...props}>
+        <LLMLayout {...props} />
+      </ViewportProviderLayout>
+    );
+  }
 
   return (
-    <ViewportProvider>
-      <Spin spinning={props.loading}>
-        <Layout className={classnames([layoutCls, props.className])} style={props.style?.layout}>
-          <header className={`${layoutCls}__header`} style={props.style?.header}>
-            <ToolHeader
-              header={props?.header}
-              headerName={props.headerName}
-              goBack={props.goBack}
-              exportData={props.exportData}
-            />
-          </header>
-
-          {isLLMTool ? (
-            <LLMLayout {...props} />
-          ) : (
-            <Layout className={getClassName('layout', 'container')}>
-              {props?.leftSider}
-              <Content className={`${layoutCls}__content`}>
-                <AnnotatedArea {...props} />
-              </Content>
-              <Sider
-                className={`${layoutCls}__side`}
-                width={siderWidth ?? 240}
-                style={props.style?.sider}
-              >
-                <Sidebar sider={props?.sider} />
-              </Sider>
-            </Layout>
-          )}
-        </Layout>
-      </Spin>
-    </ViewportProvider>
+    <ViewportProviderLayout {...props}>
+      <Layout className={getClassName('layout', 'container')}>
+        {props?.leftSider}
+        <Content className={`${layoutCls}__content`}>
+          <AnnotatedArea {...props} />
+        </Content>
+        <Sider
+          className={`${layoutCls}__side`}
+          width={siderWidth ?? 240}
+          style={props.style?.sider}
+        >
+          <Sidebar sider={props?.sider} />
+        </Sider>
+      </Layout>
+    </ViewportProviderLayout>
   );
 };
 
