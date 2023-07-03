@@ -4,6 +4,7 @@ export interface IndicatorScore {
   text?: string;
   score?: number;
 }
+
 export interface IndicatorDetermine {
   label: string;
   value: string;
@@ -11,16 +12,21 @@ export interface IndicatorDetermine {
 export interface IAnswerList {
   order: number;
   answer: string;
-  indicatorScore: IndicatorScore;
-  indicatorDetermine: IndicatorDetermine;
+  score?: number;
+  indicatorScore?: {
+    [key: string]: number;
+  };
+  indicatorDetermine?: {
+    [key: string]: boolean;
+  };
 }
 
 // LLM工具配置
 export interface ILLMToolConfig {
-  enableSort: boolean;
-  indicatorScore: IndicatorScore[]; // 指标评分
-  indicatorDetermine: IndicatorDetermine[]; // 指标判断
-  score: number; // 整体评分
+  enableSort?: boolean;
+  indicatorScore?: IndicatorScore[]; // 指标评分
+  indicatorDetermine?: IndicatorDetermine[]; // 指标判断
+  score?: number; // 整体评分
   text?: boolean;
 }
 
@@ -44,6 +50,13 @@ export interface ITagVertexPoint {
 export interface IAnswerSort {
   title: number;
   id: number;
-  tagCenterPoint: IPoint;
-  tagVertexPoint: ITagVertexPoint;
+  tagCenterPoint?: IPoint;
+  tagVertexPoint?: ITagVertexPoint;
+}
+
+export interface ILLMBoxResult {
+  answerList: IAnswerList[];
+  id: number;
+  sort?: number[][];
+  textAttribute?: string;
 }

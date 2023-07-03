@@ -15,13 +15,14 @@ import { i18n } from '@labelbee/lb-utils';
 
 interface IProps {
   hoverKey?: number;
-  question: any;
+  question: string;
   answerList: IAnswerList[];
   lang?: string;
 }
 const LLMViewCls = `${prefix}-LLMView`;
 const QuestionView: React.FC<IProps> = (props) => {
   const { hoverKey, question, answerList, lang } = props;
+
   const { t } = useTranslation();
 
   useEffect(() => {

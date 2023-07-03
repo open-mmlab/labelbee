@@ -9,12 +9,12 @@ import { Tag } from 'antd';
 import { useTranslation } from 'react-i18next';
 import { LeftOutlined } from '@ant-design/icons';
 import { classnames } from '@/utils';
-import { cloneDeep } from 'lodash';
+import { cloneDeep, isArray } from 'lodash';
 import { IAnswerSort, IWaitAnswerSort } from '@/components/LLMToolView/types';
 import { MathUtils } from '@labelbee/lb-annotation';
 
 interface IProps {
-  setSortList: (value: any) => void;
+  setSortList: (value: IAnswerSort[][]) => void;
   sortList: IAnswerSort[][];
   waitSortList: IWaitAnswerSort[];
   checkMode?: boolean;
@@ -71,7 +71,15 @@ const AnswerSort = (props: IProps) => {
     formatSortList();
   }, [JSON.stringify(sortList)]);
 
-  const singleAnswerItem = ({ item, operation, id }: any) => {
+  const singleAnswerItem = ({
+    item,
+    operation,
+    id,
+  }: {
+    item: IWaitAnswerSort;
+    id: string;
+    operation: any;
+  }) => {
     const borderStyle = { [`border${activateDirection}`]: '2px solid #8C9AFF' };
 
     return (
@@ -141,7 +149,7 @@ const AnswerSort = (props: IProps) => {
     const sortBox = document.getElementById('sortBox');
 
     if (sortBox?.childNodes) {
-      let newSortList: any[] = [];
+      let newSortList: IAnswerSort[][] = [];
       sortBox.childNodes.forEach((item: any, nodeIndex: number) => {
         let itemBox = item;
         if (item?.childNodes?.length > 1) {
@@ -157,9 +165,10 @@ const AnswerSort = (props: IProps) => {
           br: { x: right, y: bottom },
           bl: { x: left, y: bottom },
         };
-        const newList = sortList[nodeIndex].reduce((list: IAnswerSort[], key: any) => {
+
+        const newList = sortList[nodeIndex].reduce((list: IAnswerSort[], key: IAnswerSort) => {
           let tagColumn = key;
-          if (key.length > 1) {
+          if (isArray(key) && key.length > 1) {
             tagColumn = key[0];
           }
           tagColumn = { ...tagColumn, tagCenterPoint, tagVertexPoint };
@@ -167,7 +176,6 @@ const AnswerSort = (props: IProps) => {
         }, []);
         newSortList.push(newList);
       });
-
       setSortList(newSortList);
     }
   };
@@ -208,7 +216,9 @@ const AnswerSort = (props: IProps) => {
         return;
       }
       setTargetTagKey(tagNearest[0]?.id);
-      compareDistance(sourceTagCenterPoint, tagNearest[0]?.tagVertexPoint);
+      if (tagNearest[0]?.tagVertexPoint && sourceTagCenterPoint) {
+        compareDistance(sourceTagCenterPoint, tagNearest[0]?.tagVertexPoint);
+      }
     }
   };
 
@@ -217,7 +227,7 @@ const AnswerSort = (props: IProps) => {
     let key = -1;
     let oldIndex = -1;
     let tagIndex = -1;
-    let newList: any = [];
+    let newList: IAnswerSort[] = [];
     let formatList = cloneDeep(sortList);
 
     tagIndex = formatList.findIndex((i: IAnswerSort[]) => i[0].id === Number(targetTagKey));
@@ -234,13 +244,16 @@ const AnswerSort = (props: IProps) => {
       }
       key = getAttributeIndex(target.id);
       oldIndex = formatList.findIndex((i: IAnswerSort[]) => i[0].id === key);
-      newList = formatList.find((i: IAnswerSort[]) => i[0].id === key);
+      const newAnswerValue = formatList.find((i: IAnswerSort[]) => i[0].id === key);
+      if (newAnswerValue) {
+        newList = newAnswerValue;
+      }
       formatList.splice(oldIndex, 1);
       tagIndex = formatList.findIndex((i: IAnswerSort[]) => i[0].id === ~~targetTagKey);
     }
     if (target.parentNode.id === 'waitBox') {
       key = getAttributeIndex(target.id);
-      oldIndex = answers.findIndex((i: any) => i.id === key);
+      oldIndex = answers.findIndex((i: IWaitAnswerSort) => i.id === key);
       newList = [answers[oldIndex]];
       answers.splice(oldIndex, 1);
     }
@@ -285,7 +298,7 @@ const AnswerSort = (props: IProps) => {
           <span style={{ marginRight: '16px' }}>{t('ToBeSorted')}</span>
           <div id='waitBox' className={`${contentBoxCls}__answerBox`}>
             {answers.length > 0 &&
-              answers.map((i: any) =>
+              answers.map((i: IWaitAnswerSort) =>
                 singleAnswerItem({
                   item: i,
                   id: `waitBoxItem-${i?.id}`,
@@ -299,11 +312,11 @@ const AnswerSort = (props: IProps) => {
         </div>
         <Navigation />
         <div id='sortBox' className={`${contentBoxCls}__answerBox`}>
-          {sortList.map((i: any, index: number) => {
+          {sortList.map((i: IAnswerSort[], index: number) => {
             if (i.length > 1) {
               return (
                 <div key={`item-${index}`} id={`sortBox-${index}`}>
-                  {i.map((item: any) =>
+                  {i.map((item: IAnswerSort) =>
                     singleAnswerItem({
                       item,
                       id: `sortBoxItem-${item?.id}`,

@@ -13,11 +13,18 @@ import { LLMContext } from '@/store/ctx';
 import { classnames } from '@/utils';
 import { InfoCircleOutlined } from '@ant-design/icons';
 import { expandIconFuc } from '@/views/MainView/sidebar/TagSidebar';
+import {
+  IndicatorScore,
+  IndicatorDetermine,
+  ILLMToolConfig,
+  IAnswerList,
+} from '@/components/LLMToolView/types';
+import { isBoolean } from 'lodash';
 
 interface IProps {
-  list?: any;
+  list?: IAnswerList[];
   checkMode?: boolean;
-  LLMConfig?: any;
+  LLMConfig?: ILLMToolConfig;
   setHoverKey: (value: number) => void;
   updateValue: ({
     order,
@@ -39,13 +46,14 @@ enum ETagType {
 const { Panel } = Collapse;
 const LLMSidebarCls = `${prefix}-LLMSidebar`;
 const AnswerList = (props: IProps) => {
-  const { list, LLMConfig, updateValue, checkMode } = props;
+  const { list = [], LLMConfig = {}, updateValue, checkMode } = props;
+
   const { hoverKey, setHoverKey } = useContext(LLMContext);
   const { t } = useTranslation();
   const isDisableAll = checkMode;
 
-  const getFinishStatus = (i: any) => {
-    const { indicatorScore, indicatorDetermine, score } = LLMConfig;
+  const getFinishStatus = (i: IAnswerList) => {
+    const { indicatorScore = [], indicatorDetermine = [], score } = LLMConfig;
 
     let finishStatus = ETagType.Default;
     if (score) {
@@ -56,7 +64,9 @@ const AnswerList = (props: IProps) => {
       finishStatus = ETagType.Finish;
     }
     if (indicatorScore?.length > 0) {
-      const scoreUnFinish = indicatorScore.some((item: any) => !i?.indicatorScore?.[item.value]);
+      const scoreUnFinish = indicatorScore.some(
+        (item: IndicatorScore) => !i?.indicatorScore?.[item.value],
+      );
       if (scoreUnFinish) {
         finishStatus = ETagType.UnFinish;
         return finishStatus;
@@ -64,9 +74,9 @@ const AnswerList = (props: IProps) => {
       finishStatus = ETagType.Finish;
     }
     if (indicatorDetermine?.length > 0) {
-      const determineUnFinish = indicatorDetermine.some((item: any) => {
+      const determineUnFinish = indicatorDetermine.some((item: IndicatorDetermine) => {
         const determineResult = i?.indicatorDetermine?.[item.value];
-        return ![true, false].includes(determineResult);
+        return !isBoolean(determineResult);
       });
       if (determineUnFinish) {
         finishStatus = ETagType.UnFinish;
@@ -78,7 +88,7 @@ const AnswerList = (props: IProps) => {
     return finishStatus;
   };
 
-  const getTagStyle = (item: any) => {
+  const getTagStyle = (item: IAnswerList) => {
     const tagStatus = getFinishStatus(item);
 
     let tagText = item.order;
@@ -113,18 +123,20 @@ const AnswerList = (props: IProps) => {
       bordered={false}
       expandIcon={expandIconFuc}
       expandIconPosition='end'
-      defaultActiveKey={list.length > 0 && list.map((i: any, index: number) => index)}
+      defaultActiveKey={
+        list.length > 0 ? list.map((i: IAnswerList, index: number) => index) : undefined
+      }
       style={{ margin: '16px 0px' }}
     >
-      {list.map((i: any, index: number) => {
-        const { score, indicatorScore, indicatorDetermine } = LLMConfig;
+      {list.map((i: IAnswerList, index: number) => {
+        const { score, indicatorScore = [], indicatorDetermine = [] } = LLMConfig;
         const { backgroundColor, fontColor, tagText, tagStatus } = getTagStyle(i);
 
         const noIndicatorScore =
-          indicatorScore?.filter((i: any) => i.label && i.value && i.score)?.length > 0;
+          indicatorScore?.filter((i: IndicatorScore) => i.label && i.value && i.score)?.length > 0;
 
         const noIndicatorDetermine =
-          indicatorDetermine?.filter((i: any) => i.label && i.value)?.length > 0;
+          indicatorDetermine?.filter((i: IndicatorDetermine) => i.label && i.value)?.length > 0;
 
         const noConfig = !(score || noIndicatorScore || noIndicatorDetermine);
         const header = (
@@ -175,7 +187,7 @@ const AnswerList = (props: IProps) => {
             )}
             {/* 指标评分 */}
             {indicatorScore?.length > 0 &&
-              indicatorScore.map((item: any, index: number) => {
+              indicatorScore.map((item: IndicatorScore, index: number) => {
                 const { label, text, value, score } = item;
                 const renderTitle = (
                   <span>
@@ -206,7 +218,7 @@ const AnswerList = (props: IProps) => {
               })}
             {/* 指标判断 */}
             {indicatorDetermine?.length > 0 &&
-              indicatorDetermine.map((item: any, index: number) => {
+              indicatorDetermine.map((item: IndicatorDetermine, index: number) => {
                 const { label, value } = item;
 
                 return label ? (

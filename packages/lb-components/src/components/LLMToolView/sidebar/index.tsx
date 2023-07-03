@@ -12,7 +12,13 @@ import { getStepConfig } from '@/store/annotation/reducer';
 import { useCustomToolInstance } from '@/hooks/annotation';
 import { PageForward } from '@/store/annotation/actionCreators';
 import { EToolName } from '@labelbee/lb-annotation';
-import { IWaitAnswerSort, IAnswerSort, ILLMBoxResult } from '@/components/LLMToolView/types';
+import {
+  IWaitAnswerSort,
+  IAnswerSort,
+  ILLMBoxResult,
+  ILLMToolConfig,
+  IAnswerList,
+} from '@/components/LLMToolView/types';
 import { useTranslation } from 'react-i18next';
 import { formatSort, getCurrentResultFromResultList } from '../utils/data';
 
@@ -40,11 +46,11 @@ const Sidebar: React.FC<IProps> = (props) => {
   const currentData = imgList[imgIndex] ?? {};
   const basicInfo = jsonParser(currentData?.result);
   const { toolInstanceRef } = useCustomToolInstance({ basicInfo });
-  const [sortList, setSortList] = useState<IAnswerSort[][]>([]);
-  const [LLMConfig, setLLMConfig] = useState<any>({});
-  const [answerList, setAnswerList] = useState<IWaitAnswerSort[]>([]);
+  const [LLMConfig, setLLMConfig] = useState<ILLMToolConfig>();
+  const [answerList, setAnswerList] = useState<IAnswerList[]>([]);
   const [text, setText] = useState<string | undefined>(undefined);
-  const [waitSortList, setWaitSortList] = useState<IAnswerSort[]>([]);
+  const [sortList, setSortList] = useState<IAnswerSort[][]>([]);
+  const [waitSortList, setWaitSortList] = useState<IWaitAnswerSort[]>([]);
 
   useEffect(() => {
     if (stepList && step) {
@@ -86,29 +92,29 @@ const Sidebar: React.FC<IProps> = (props) => {
     toolInstanceRef.current.currentPageResult = result;
   }, [answerList, sortList, text]);
 
-  const getWaitSortList = (answerList: any) => {
+  const getWaitSortList = (answerList: IAnswerList[]) => {
     setSortList([]);
     if (answerList?.length > 0) {
-      let waitSorts: any = [];
-      let newSort: any = [];
+      let waitSorts: IWaitAnswerSort[] = [];
+      let newSort: IAnswerSort[][] = [];
       // 将[[1],[2,3]]格式转成[[{ title: 1, id: 1 }],[{...},{...}]]
       const result = getCurrentResultFromResultList(currentData?.result);
       const currentResult = result?.length > 0 ? result[0] : result;
       if (currentResult?.sort?.length > 0) {
-        newSort = currentResult.sort.reduce((i: any, key: any) => {
+        newSort = currentResult.sort.reduce((i: IWaitAnswerSort[][], key: number[]) => {
           let tagColumn = [{ title: key[0], id: key[0] }];
           if (key.length > 1) {
-            tagColumn = key.map((item: any) => ({ title: item, id: item }));
+            tagColumn = key.map((item: number) => ({ title: item, id: item }));
           }
           return [...i, tagColumn];
         }, []);
         setSortList(newSort);
       }
       // 待排序容器需要过滤已排序容器存在的答案
-      answerList.forEach((i: any) => {
-        const existed = newSort.some((sortItem: any) => {
+      answerList.forEach((i: IAnswerList) => {
+        const existed = newSort.some((sortItem: IAnswerSort[]) => {
           if (sortItem.length > 1) {
-            return sortItem.some((v: any) => v.id === i.order);
+            return sortItem.some((v: IAnswerSort) => v.id === i.order);
           }
           return sortItem[0].id === i.order;
         });
@@ -122,14 +128,16 @@ const Sidebar: React.FC<IProps> = (props) => {
   };
 
   const updateValue = ({ order, value, key }: IConfigUpdate) => {
-    const newList = answerList?.map((i: any, listIndex) => {
+    const newList = answerList?.map((i: IAnswerList) => {
       if (i?.order === order) {
         if (isNumber(value)) {
           return { ...i, score: value };
         }
         if (isObject(value) && key) {
           const obj = { [value?.key]: value.value };
-          return { ...i, [key]: { ...i[key], ...obj } };
+          // @ts-ignore
+          const originData = i[key] ?? {};
+          return { ...i, [key]: { ...originData, ...obj } };
         }
       }
       return i;

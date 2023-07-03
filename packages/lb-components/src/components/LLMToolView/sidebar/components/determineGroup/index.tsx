@@ -10,13 +10,14 @@ import { useTranslation } from 'react-i18next';
 
 interface IProps {
   title: string;
-  selectValue?: number;
+  selectValue?: boolean;
   isDisableAll?: boolean;
   updateValue: (changeValue: boolean) => void;
 }
 
 const DetermineGroup = (props: IProps) => {
   const { title, selectValue, isDisableAll, updateValue } = props;
+
   const { t } = useTranslation();
   return (
     <div className={`${prefix}-LLMSidebar-contentBox`}>
