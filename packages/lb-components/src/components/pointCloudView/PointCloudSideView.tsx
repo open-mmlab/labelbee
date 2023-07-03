@@ -21,6 +21,7 @@ import { useTranslation } from 'react-i18next';
 import { LabelBeeContext } from '@/store/ctx';
 import ToolUtils from '@/utils/ToolUtils';
 import { useZoom } from '@/components/pointCloudView/hooks/useZoom';
+import TitleButton from './components/TitleButton';
 
 /**
  * Get the offset from canvas2d-coordinate to world coordinate
@@ -177,7 +178,8 @@ const PointCloudSideView: React.FC<IA2MapStateProps & IProps> = ({ config, check
   return (
     <PointCloudContainer
       className={getClassName('point-cloud-container', 'side-view')}
-      title={t('SideView')}
+      title={<TitleButton title={t('SideView')} onClick={() => {}} />}
+      titleOnSurface={true}
     >
       <div className={getClassName('point-cloud-container', 'bottom-view-content')}>
         <div className={getClassName('point-cloud-container', 'core-instance')} ref={ref} />
