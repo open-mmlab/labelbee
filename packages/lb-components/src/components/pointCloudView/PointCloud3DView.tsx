@@ -28,6 +28,7 @@ import { usePointCloudViews } from './hooks/usePointCloudViews';
 import { useTranslation } from 'react-i18next';
 import { LabelBeeContext } from '@/store/ctx';
 import PointCloudSizeSlider from './components/PointCloudSizeSlider';
+import TitleButton from './components/TitleButton';
 
 const pointCloudID = 'LABELBEE-POINTCLOUD';
 const PointCloud3DContext = React.createContext<{
@@ -242,7 +243,7 @@ const PointCloud3D: React.FC<IA2MapStateProps> = ({ currentData, config }) => {
   return (
     <PointCloudContainer
       className={getClassName('point-cloud-3d-container')}
-      title={t('3DView')}
+      title={<TitleButton title={t('3DView')} onClick={() => {}} />}
       toolbar={PointCloud3DTitle}
     >
       <div className={getClassName('point-cloud-3d-content')}>

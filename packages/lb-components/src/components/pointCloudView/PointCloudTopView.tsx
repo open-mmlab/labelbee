@@ -37,6 +37,7 @@ import ToolUtils from '@/utils/ToolUtils';
 import _ from 'lodash';
 import PointCloudSizeSlider from './components/PointCloudSizeSlider';
 import { useHistory } from './hooks/useHistory';
+import TitleButton from './components/TitleButton';
 
 const { EPolygonPattern, EToolName } = cTool;
 const { ESortDirection } = cAnnotation;
@@ -411,7 +412,7 @@ const PointCloudTopView: React.FC<IProps> = ({
   return (
     <PointCloudContainer
       className={getClassName('point-cloud-container', 'top-view')}
-      title={t('TopView')}
+      title={<TitleButton title={t('TopView')} onClick={() => {}} />}
       toolbar={<TopViewToolbar currentData={currentData} />}
     >
       <div style={{ position: 'relative', flex: 1 }}>
