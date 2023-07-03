@@ -23,7 +23,7 @@ import {
   OnStepChange,
   OnSubmit,
 } from './types/data';
-import { Header, RenderFooter, Sider } from './types/main';
+import { Header, RenderFooter, Sider, TDrawLayerSlot } from './types/main';
 import { IStepInfo } from './types/step';
 import { ConfigProvider } from 'antd/es';
 import zhCN from 'antd/es/locale/zh_CN';
@@ -74,10 +74,7 @@ export interface AppProps {
   skipBeforePageTurning?: (pageTurning: Function) => void;
   beforeRotate?: () => boolean;
 
-  drawLayerSlot?: (props: {
-    zoom: number;
-    currentPos: { x: number; y: number };
-  }) => React.ReactNode;
+  drawLayerSlot?: TDrawLayerSlot,
 
   // 标注信息扩展的功能
   dataInjectionAtCreation: (annotationData: any) => {};
@@ -91,6 +88,9 @@ export interface AppProps {
 
   checkMode?: boolean;
   intelligentFit?: boolean;
+  enableColorPicker?: boolean;
+  highlightAttribute?: string;
+  onLoad?: ({ toolInstance }: { toolInstance: ToolInstance }) => void;
 }
 
 const App: React.FC<AppProps> = (props) => {
@@ -114,6 +114,7 @@ const App: React.FC<AppProps> = (props) => {
     beforeRotate,
     checkMode = false,
     intelligentFit = true,
+    highlightAttribute = '',
   } = props;
 
   useEffect(() => {
@@ -131,6 +132,7 @@ const App: React.FC<AppProps> = (props) => {
         skipBeforePageTurning,
         beforeRotate,
         checkMode,
+        highlightAttribute,
       }),
     );
 
@@ -163,6 +165,7 @@ const App: React.FC<AppProps> = (props) => {
         onPageChange,
         onStepChange,
         beforeRotate,
+        highlightAttribute,
       }),
     );
 
@@ -178,6 +181,7 @@ const App: React.FC<AppProps> = (props) => {
     onStepChange,
     defaultLang,
     beforeRotate,
+    highlightAttribute,
   ]);
 
   useEffect(() => {

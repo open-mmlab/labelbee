@@ -13,6 +13,10 @@ import selectAll from '@/assets/annotation/pointCloudTool/selectAll.svg';
 import selectMultiple from '@/assets/annotation/pointCloudTool/selectMultiple.svg';
 import TabChangeSelectedSvg from '@/assets/annotation/toolHotKeyIcon/icon_tab_kj.svg';
 import DeleteSvg from '@/assets/annotation/toolHotKeyIcon/icon_del_kj.svg';
+import LassoSelectorSvg from '@/assets/annotation/pointCloudTool/lassoSelector.svg';
+import CirCleSelectorSvg from '@/assets/annotation/pointCloudTool/circleSelector.svg';
+import AddSvg from '@/assets/annotation/pointCloudTool/addSvg.svg';
+import ClearSvg from '@/assets/annotation/pointCloudTool/clearSvg.svg';
 
 import { IShortcut } from '@/types/tool';
 import React from 'react';
@@ -62,7 +66,6 @@ const DragTopView = {
   name: 'TopViewTranslate',
   icon: dragIcon,
   shortCut: [rightClick],
-  noticeInfo: 'Drag',
 };
 
 const ChangeInvalid = {
@@ -146,6 +149,42 @@ const deleteBox = {
   noticeInfo: 'SelectedStatus',
 };
 
+/**
+ * PointCloud Segment.
+ */
+
+const LassoSelector = {
+  name: 'LassoSelector',
+  icon: LassoSelectorSvg,
+  shortCut: ['H'],
+  noticeInfo: 'SelectorMsg'
+};
+
+const CircleSelector = {
+  name: 'CircleSelector',
+  icon: CirCleSelectorSvg,
+  shortCut: ['J'],
+  noticeInfo: 'SelectorMsg'
+};
+
+const Drag3DBySpace = {
+  name: 'PointCloudViewTranslate',
+  icon: dragIcon,
+  shortCut: ['space', rightClick],
+};
+
+const AddMove = {
+  name: 'AddPoint',
+  icon: AddSvg,
+  shortCut: ['U'],
+};
+
+const DeletePoint = {
+  name: 'DeletePoint',
+  icon: ClearSvg,
+  shortCut: ['I'],
+};
+
 const pointCloudShortCutTable: IShortcut[] = [
   { name: 'GeneralOperation' },
   backward,
@@ -192,6 +231,17 @@ const pointCloudShortCutTable_POLYGON: IShortcut[] = [
   deletePolygonPoint,
 ];
 
+const pointCloudShortCutTable_SEGMENT: IShortcut[] = [
+  backward,
+  forward,
+  rotateRoundCenter,
+  Drag3DBySpace,
+  LassoSelector,
+  CircleSelector,
+  AddMove,
+  DeletePoint,
+];
+
 export default pointCloudShortCutTable;
 
-export { pointCloudShortCutTable_POLYGON };
+export { pointCloudShortCutTable_POLYGON, pointCloudShortCutTable_SEGMENT };

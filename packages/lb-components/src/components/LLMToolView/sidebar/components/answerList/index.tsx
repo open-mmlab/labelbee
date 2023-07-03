@@ -8,10 +8,11 @@ import { prefix } from '@/constant';
 import { Tag, Collapse, Popover } from 'antd';
 import { useTranslation } from 'react-i18next';
 import ScoreGroupButton from '../scoreGroupButton';
-import DetermineGroup from '../DetermineGroup';
+import DetermineGroup from '../determineGroup';
 import { LLMContext } from '@/views/MainView';
 import { classnames } from '@/utils';
-import { CaretRightOutlined, InfoCircleOutlined } from '@ant-design/icons';
+import { InfoCircleOutlined } from '@ant-design/icons';
+import { expandIconFuc } from '@/views/MainView/sidebar/TagSidebar';
 
 interface IProps {
   list?: any;
@@ -24,7 +25,7 @@ interface IProps {
     key,
   }: {
     order: number;
-    value: number | { key: string; value: number };
+    value: number | { key: string; value: number | boolean };
     key?: string;
   }) => void;
 }
@@ -43,7 +44,7 @@ const AnswerList = (props: IProps) => {
   const { t } = useTranslation();
   const isDisableAll = checkMode;
 
-  const getFinishStatus = (i) => {
+  const getFinishStatus = (i: any) => {
     const { indicatorScore, indicatorDetermine, score } = LLMConfig;
 
     let finishStatus = ETagType.Default;
@@ -86,14 +87,14 @@ const AnswerList = (props: IProps) => {
         return {
           backgroundColor: '#D9FFDF',
           fontColor: '#36B34A',
-          tagText: tagText + t('Finished'),
+          tagText: `${tagText} ${t('Finished')}`,
           tagStatus,
         };
       case ETagType.UnFinish:
         return {
           backgroundColor: '#FFD9D9',
           fontColor: '#F26549',
-          tagText: tagText + t('Unfinished'),
+          tagText: `${tagText} ${t('Unfinished')}`,
           tagStatus,
         };
 
@@ -110,7 +111,7 @@ const AnswerList = (props: IProps) => {
   return (
     <Collapse
       bordered={false}
-      expandIcon={({ isActive }) => <CaretRightOutlined rotate={isActive ? 90 : 0} />}
+      expandIcon={expandIconFuc}
       expandIconPosition='end'
       defaultActiveKey={list.length > 0 && list.map((i: any, index: number) => index)}
       style={{ margin: '16px 0px' }}
@@ -120,23 +121,23 @@ const AnswerList = (props: IProps) => {
         const { backgroundColor, fontColor, tagText, tagStatus } = getTagStyle(i);
 
         const noIndicatorScore =
-          indicatorScore?.filter((i) => i.label && i.value && i.score)?.length > 0;
+          indicatorScore?.filter((i: any) => i.label && i.value && i.score)?.length > 0;
 
         const noIndicatorDetermine =
-          indicatorDetermine?.filter((i) => i.label && i.value)?.length > 0;
+          indicatorDetermine?.filter((i: any) => i.label && i.value)?.length > 0;
 
         const noConfig = !(score || noIndicatorScore || noIndicatorDetermine);
         const header = (
           <div
             style={{ display: 'flex', width: '500px', alignItems: 'center', whiteSpace: 'nowrap' }}
-            onMouseMove={(e) => {
+            onMouseMove={() => {
               setHoverKey(i.order);
             }}
-            onMouseLeave={(e) => {
+            onMouseLeave={() => {
               setHoverKey(-1);
             }}
           >
-            <Tag color={backgroundColor} style={{ color: fontColor, padding: '2px' }}>
+            <Tag color={backgroundColor} style={{ color: fontColor, padding: '0px 8px' }}>
               {tagText}
             </Tag>
             <span

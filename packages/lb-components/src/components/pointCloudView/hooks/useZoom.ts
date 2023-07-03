@@ -12,15 +12,15 @@ export const useZoom = () => {
   const { zoom, setZoom } = useContext(PointCloudContext);
 
   const initialPosition = () => {
-    topViewInstance?.pointCloud2dOperation.initImgPos();
+    topViewInstance?.toolInstance.initImgPos();
   };
 
   const zoomOut = () => {
-    topViewInstance?.pointCloud2dOperation.zoomChanged(false);
+    topViewInstance?.toolInstance.zoomChanged(false);
   };
 
   const zoomIn = () => {
-    topViewInstance?.pointCloud2dOperation.zoomChanged(true);
+    topViewInstance?.toolInstance.zoomChanged(true);
   };
 
   const syncTopviewToolZoom = (currentPos: ICoordinate, zoom: number, size: ISize) => {

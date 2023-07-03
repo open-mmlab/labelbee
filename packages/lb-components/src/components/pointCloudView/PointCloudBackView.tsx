@@ -186,11 +186,11 @@ const PointCloudBackView = ({ currentData, config, checkMode }: IA2MapStateProps
     <PointCloudContainer
       className={getClassName('point-cloud-container', 'back-view')}
       title={t('BackView')}
-      toolbar={<SizeInfoForView perspectiveView={EPerspectiveView.Back} />}
     >
       <div className={getClassName('point-cloud-container', 'bottom-view-content')}>
         <div className={getClassName('point-cloud-container', 'core-instance')} ref={ref} />
         {!selectedBox && !selectedSphere && <EmptyPage />}
+        <SizeInfoForView perspectiveView={EPerspectiveView.Back} />
       </div>
     </PointCloudContainer>
   );

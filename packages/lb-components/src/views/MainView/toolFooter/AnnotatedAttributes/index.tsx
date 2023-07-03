@@ -35,6 +35,8 @@ const AnnotatedAttributesItem = ({ attribute }: { attribute: IInputList }) => {
     setPointCloudSphereList,
     reRender,
     selectSpecAttr,
+    segmentation,
+    setSegmentation,
   } = pointCloudCtx;
 
   const [expanded, setExpanded] = useState(true);
@@ -46,6 +48,7 @@ const AnnotatedAttributesItem = ({ attribute }: { attribute: IInputList }) => {
     ...polygonList,
     ...pointCloudSphereList,
     ...lineList,
+    ...segmentation,
   ].filter((i) => i.attribute === attribute.value);
 
   const onVisibleChange = () => {
@@ -71,16 +74,20 @@ const AnnotatedAttributesItem = ({ attribute }: { attribute: IInputList }) => {
     const newPointCloudList = pointCloudBoxList.filter((i) => attribute !== i.attribute);
     const newLineList = lineList.filter((i) => attribute !== i.attribute);
     const newSphereList = pointCloudSphereList.filter((i) => attribute !== i.attribute);
-    reRender(newPointCloudList, newPolygonList, newSphereList, newLineList);
+    const newSegmentation = segmentation.filter((i) => attribute !== i.attribute);
+    reRender(newPointCloudList, newPolygonList, newSphereList, newLineList, newSegmentation);
     setPolygonList(newPolygonList);
     setPointCloudResult(newPointCloudList);
     setPointCloudSphereList(newSphereList);
     setLineList(newLineList);
+    setSegmentation(newSegmentation)
 
     pushHistoryWithList({
       pointCloudBoxList: newPointCloudList,
       polygonList: newPolygonList,
       lineList: newLineList,
+      pointCloudSphereList: newSphereList,
+      segmentation: newSegmentation,
     });
   };
 
@@ -135,13 +142,13 @@ const AnnotatedAttributesItem = ({ attribute }: { attribute: IInputList }) => {
 
 export const AnnotatedAttributesPanel = () => {
   const stepConfig: IPointCloudConfig = useSelector(stepConfigSelector);
-  const { attrPanelLayout, setAttrPanelLayout, pointCloudBoxList, polygonList, lineList } =
+  const { attrPanelLayout, setAttrPanelLayout, pointCloudBoxList, pointCloudSphereList, polygonList, lineList, segmentation } =
     useContext(PointCloudContext);
   const { t } = useTranslation();
 
   const existAttributes = useMemo(() => {
-    return [...pointCloudBoxList, ...polygonList, ...lineList].map((i) => i.attribute);
-  }, [pointCloudBoxList, polygonList, lineList]);
+    return [...pointCloudBoxList, ...pointCloudSphereList, ...polygonList, ...lineList, ...segmentation].map((i) => i.attribute);
+  }, [pointCloudBoxList, pointCloudSphereList, polygonList, lineList, segmentation]);
 
   const displayAttrList = useMemo(() => {
     return (stepConfig.attributeList as IInputList[]).filter((i) =>

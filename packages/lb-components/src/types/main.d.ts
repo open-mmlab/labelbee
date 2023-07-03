@@ -48,8 +48,9 @@ export type Sider = ({
 }) => React.ReactNode | React.ReactNode;
 
 export type TDrawLayerSlot = (props: {
-  zoom: number;
-  currentPos: { x: number; y: number };
+  zoom?: number;
+  currentPos?: { x?: number; y?: number };
+  direct?: boolean;
 }) => React.ReactNode;
 
 interface IFooter {
@@ -97,10 +98,12 @@ export type Header = ({
   stepListNode,
   headerOptionNode,
   langNode,
+  PointCloudSwitchPattern,
 }: {
   backNode: React.ReactNode;
   headerNameNode: React.ReactNode;
   stepListNode: React.ReactNode;
   headerOptionNode: React.ReactNode;
   langNode: React.ReactNode;
+  PointCloudSwitchPattern?: React.ReactNode;
 }) => React.ReactNode;

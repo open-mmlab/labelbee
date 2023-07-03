@@ -2,7 +2,7 @@ import { IPointCloudBox, PartialIPointCloudBoxList } from '@labelbee/lb-utils';
 import { useCallback, useContext, useMemo } from 'react';
 import _ from 'lodash';
 import { PointCloudContext } from '../PointCloudContext';
-import { cAnnotation } from '@labelbee/lb-annotation';
+import { EToolName, cAnnotation } from '@labelbee/lb-annotation';
 import { useHistory } from './useHistory';
 import { usePolygon } from './usePolygon';
 
@@ -22,6 +22,7 @@ export const useSingleBox = () => {
     setSelectedIDs,
     syncAllViewPointCloudColor,
     polygonList,
+    pointCloudPattern,
   } = useContext(PointCloudContext);
   const { selectedPolygon, updateSelectedPolygon, updatePolygonValidByID, deletePolygon } =
     usePolygon();
@@ -119,9 +120,22 @@ export const useSingleBox = () => {
   );
 
   /** PointCloud select next/prev one */
-  const switchToNextBox = useCallback(
-    (sort = ESortDirection.ascend) => {
+  const switchToNext = useCallback(
+    (sort = ESortDirection.ascend, manual = false) => {
       if (!topViewInstance || selectedIDs.length > 1) {
+        return;
+      }
+
+      if (pointCloudPattern !== EToolName.Rect && pointCloudPattern !== EToolName.Polygon) {
+        if (manual) {
+          document.dispatchEvent(
+            new KeyboardEvent('keydown', {
+              keyCode: 9,
+              shiftKey: sort !== ESortDirection.ascend,
+            }),
+          );
+        }
+
         return;
       }
 
@@ -132,17 +146,21 @@ export const useSingleBox = () => {
         setSelectedIDs(newSelectedIDs);
       }
     },
-    [topViewInstance],
+    [topViewInstance, pointCloudPattern, topViewInstance?.toolInstance],
   );
 
-  const selectPrevBox = () => {
-    switchToNextBox(ESortDirection.descend);
+  const selectPrevBox = (manual = false) => {
+    switchToNext(ESortDirection.descend, manual);
+  };
+
+  const selectNextBox = (manual = false) => {
+    switchToNext(ESortDirection.ascend, manual);
   };
 
   const deletePointCloudBox = (id: string) => {
     const newPointCloudList = pointCloudBoxList.filter((v) => v.id !== id);
     setPointCloudResult(newPointCloudList);
-    mainViewInstance?.removeObjectByName(id);
+    mainViewInstance?.removeObjectByName(id, 'box');
     mainViewInstance?.render();
     syncAllViewPointCloudColor(newPointCloudList);
   };
@@ -217,7 +235,7 @@ export const useSingleBox = () => {
     updateSelectedBox,
     changeSelectedBoxValid,
     changeValidByID,
-    selectNextBox: switchToNextBox,
+    selectNextBox,
     selectPrevBox,
     deletePointCloudBox,
     selectedBoxes,

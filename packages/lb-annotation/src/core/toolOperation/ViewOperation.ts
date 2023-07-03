@@ -29,10 +29,10 @@ const newScope = 3;
 const DEFAULT_RADIUS = 3;
 const DEFAULT_STROKE_COLOR = '#6371FF';
 
-type IViewOperationProps = {
+interface IViewOperationProps extends IBasicToolOperationProps {
   style: IBasicStyle;
   annotations: TAnnotationViewData[];
-} & IBasicToolOperationProps;
+}
 
 export interface ISpecificStyle {
   stroke: string;
@@ -528,7 +528,7 @@ export default class ViewOperation extends BasicToolOperation {
     }
 
     const data = annotation.annotation;
-    const viewDataPointList = pointCloudLidar2image(data as any, data.calib);
+    const { transferViewData: viewDataPointList } = pointCloudLidar2image(data as any, data.calib);
     const defaultViewStyle = {
       fill: 'transparent',
       // stroke: style.stroke,

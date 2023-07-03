@@ -30,11 +30,12 @@ export interface IA2MapStateProps extends IAnnotationStateProps {
   config: any;
   imgIndex: number;
   configString: string; // Easy for users to listener.
+  highlightAttribute: string;
 }
 
 export const a2MapStateToProps = (state: AppState) => {
   const {
-    annotation: { imgList, imgIndex },
+    annotation: { imgList, imgIndex, highlightAttribute },
   } = state;
   const currentData = imgList[imgIndex] ?? {};
   const stepInfo = StepUtils.getCurrentStepInfo(state.annotation?.step, state.annotation?.stepList);
@@ -46,5 +47,6 @@ export const a2MapStateToProps = (state: AppState) => {
     stepInfo,
     config: jsonParser(stepInfo?.config),
     configString: stepInfo?.config,
+    highlightAttribute,
   };
 };

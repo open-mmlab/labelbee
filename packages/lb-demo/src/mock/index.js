@@ -13,7 +13,7 @@ import car4 from './cuboidImages/4.png';
 import car5 from './cuboidImages/5.png';
 
 // POINTCLOUD_DATA
-import pcd1 from './pointCloud/lidar/1.pcd';
+import pcd1 from './pointCloud/lidar/pro1.pcd';
 import pcd2 from './pointCloud/lidar/2.pcd';
 import pcd3 from './pointCloud/lidar/3.pcd';
 import pcd4 from './pointCloud/lidar/4.pcd';

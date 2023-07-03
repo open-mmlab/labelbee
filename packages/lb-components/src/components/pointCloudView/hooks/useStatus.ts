@@ -4,10 +4,11 @@
  * @author Ron <ron.f.luo@gmail.com>
  */
 
-import { useContext } from 'react';
+import { useContext, useMemo } from 'react';
 import { PointCloudContext } from '../PointCloudContext';
 import { cTool } from '@labelbee/lb-annotation';
 import { useHistory } from './useHistory';
+import { EPointCloudPattern } from '@labelbee/lb-utils';
 
 const { EToolName, EPolygonPattern } = cTool;
 
@@ -17,37 +18,34 @@ export const useStatus = () => {
     sideViewInstance,
     backViewInstance,
     mainViewInstance,
-    pointCloudBoxList,
-    pointCloudSphereList,
     setPointCloudResult,
     setPointCloudSphereList,
     setPolygonList,
     pointCloudPattern,
     setPointCloudPattern,
     syncAllViewPointCloudColor,
+    globalPattern,
+    setLineList,
   } = useContext(PointCloudContext);
   const { pushHistoryWithList } = useHistory();
 
   // Clear All PointView Data
   const clearAllResult = () => {
-    pointCloudBoxList.forEach((v) => {
-      mainViewInstance?.removeObjectByName(v.id);
-    });
-    pointCloudSphereList.forEach((v) => {
-      mainViewInstance?.removeObjectByName(v.id);
-    });
+    mainViewInstance?.clearAllBox();
+    mainViewInstance?.clearAllSphere();
     mainViewInstance?.render();
 
     setPointCloudResult([]);
     setPolygonList([]);
     setPointCloudSphereList([]);
+    setLineList([]);
 
     topViewInstance?.toolScheduler.clearStatusAndResult();
 
     syncAllViewPointCloudColor([]);
 
     // Add History
-    pushHistoryWithList({ pointCloudBoxList: [], polygonList: [] });
+    pushHistoryWithList({ pointCloudBoxList: [], polygonList: [], pointCloudSphereList: [] });
   };
 
   // Clear results of sideview and backview
@@ -97,9 +95,19 @@ export const useStatus = () => {
     }
   };
 
+  const isPointCloudDetectionPattern = useMemo(() => {
+    return globalPattern === EPointCloudPattern.Detection;
+  }, [globalPattern]);
+
+  const isPointCloudSegmentationPattern = useMemo(() => {
+    return globalPattern === EPointCloudPattern.Segmentation;
+  }, [globalPattern]);
+
   return {
     clearAllResult,
     updatePointCloudPattern,
     pointCloudPattern,
+    isPointCloudDetectionPattern,
+    isPointCloudSegmentationPattern,
   };
 };

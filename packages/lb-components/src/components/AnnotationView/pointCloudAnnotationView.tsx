@@ -22,17 +22,6 @@ interface IProps {
   isOrthographicCamera?: boolean;
 }
 
-function getDefaultOrthographicParams(size: { width: number; height: number }) {
-  return {
-    left: -size.width / 2,
-    right: size.width / 2,
-    top: size.height / 2,
-    bottom: -size.height / 2,
-    near: 100,
-    far: -100,
-  };
-}
-
 const PointCloudAnnotationView = (props: IProps) => {
   const { src, result, size, isOrthographicCamera = false, backgroundColor = '#ccc' } = props;
   let viewOperation = useRef<any>();
@@ -54,7 +43,7 @@ const PointCloudAnnotationView = (props: IProps) => {
      *  */
     if (isOrthographicCamera) {
       Object.assign(pointCloudProps, {
-        orthographicParams: getDefaultOrthographicParams(size),
+        orthographicParams: PointCloudUtils.getDefaultOrthographicParams(size),
       });
     }
 
@@ -73,7 +62,7 @@ const PointCloudAnnotationView = (props: IProps) => {
       instance.current?.init();
 
       // Update range of orthographicCamera.
-      instance.current?.initOrthographicCamera(getDefaultOrthographicParams(size));
+      instance.current?.initOrthographicCamera(PointCloudUtils.getDefaultOrthographicParams(size));
       instance.current?.render();
     }
   }, [size]);
@@ -96,7 +85,7 @@ const PointCloudAnnotationView = (props: IProps) => {
     return () => {
       const boxParamsList = PointCloudUtils.getBoxParamsFromResultList(result);
       boxParamsList.forEach((v: IPointCloudBox) => {
-        instance.current?.removeObjectByName(v.id);
+        instance.current?.removeObjectByName(v.id, 'box');
       });
       instance.current?.render();
     };

@@ -7,7 +7,7 @@ import { getClassName } from '@/utils/dom';
 import { FooterDivider } from '@/views/MainView/toolFooter';
 import { ZoomController } from '@/views/MainView/toolFooter/ZoomController';
 import { DownSquareOutlined, UpSquareOutlined } from '@ant-design/icons';
-import { cTool, PointCloudAnnotation, THybridToolName } from '@labelbee/lb-annotation';
+import { cTool, cAnnotation, PointCloudAnnotation, THybridToolName } from '@labelbee/lb-annotation';
 import {
   IPolygonData,
   PointCloudUtils,
@@ -22,7 +22,6 @@ import { useSingleBox } from './hooks/useSingleBox';
 import { PointCloudContainer } from './PointCloudLayout';
 import { BoxInfos, PointCloudValidity } from './PointCloudInfos';
 import { usePolygon } from './hooks/usePolygon';
-import { useLine } from './hooks/useLine';
 import { useSphere } from './hooks/useSphere';
 import { useZoom } from './hooks/useZoom';
 import { Slider } from 'antd';
@@ -35,8 +34,12 @@ import { LabelBeeContext } from '@/store/ctx';
 import { jsonParser } from '@/utils';
 import { TDrawLayerSlot } from '@/types/main';
 import ToolUtils from '@/utils/ToolUtils';
+import _ from 'lodash';
+import PointCloudSizeSlider from './components/PointCloudSizeSlider';
+import { useHistory } from './hooks/useHistory';
 
-const { EPolygonPattern } = cTool;
+const { EPolygonPattern, EToolName } = cTool;
+const { ESortDirection } = cAnnotation;
 
 /**
  * Get the offset from canvas2d-coordinate to world coordinate (Top View)
@@ -71,7 +74,12 @@ const TransferCanvas2WorldOffset = (
 const TopViewToolbar = ({ currentData }: IAnnotationStateProps) => {
   const { zoom, zoomIn, zoomOut, initialPosition } = useZoom();
   const { selectNextBox, selectPrevBox } = useSingleBox();
+  const { switchToNextSphere } = useSphere();
   const { updateRotate } = useRotate({ currentData });
+  const ptCtx = React.useContext(PointCloudContext);
+  const { topViewInstance } = ptCtx;
+
+  const currentToolName = ptCtx?.topViewInstance?.toolScheduler?.getCurrentToolName();
 
   const ratio = 2;
 
@@ -88,6 +96,11 @@ const TopViewToolbar = ({ currentData }: IAnnotationStateProps) => {
 
   return (
     <>
+      <PointCloudSizeSlider
+        onChange={(v: number) => {
+          topViewInstance?.pointCloudInstance?.updatePointSize({ customSize: v });
+        }}
+      />
       <span
         onClick={anticlockwiseRotate}
         className={getClassName('point-cloud', 'rotate-reserve')}
@@ -97,13 +110,21 @@ const TopViewToolbar = ({ currentData }: IAnnotationStateProps) => {
       <FooterDivider />
       <UpSquareOutlined
         onClick={() => {
-          selectPrevBox();
+          if (currentToolName === EToolName.Point) {
+            switchToNextSphere(ESortDirection.descend);
+            return;
+          }
+          selectPrevBox(true);
         }}
         className={getClassName('point-cloud', 'prev')}
       />
       <DownSquareOutlined
         onClick={() => {
-          selectNextBox();
+          if (currentToolName === EToolName.Point) {
+            switchToNextSphere(ESortDirection.ascend);
+            return;
+          }
+          selectNextBox(true);
         }}
         className={getClassName('point-cloud', 'next')}
       />
@@ -173,12 +194,12 @@ const PointCloudTopView: React.FC<IProps> = ({
   const { hideAttributes } = ptCtx;
 
   const { addPolygon, deletePolygon } = usePolygon();
-  const { addLine, deleteLine } = useLine();
   const { deletePointCloudSphere } = useSphere();
   const { deletePointCloudBox, changeValidByID } = useSingleBox();
   const [zAxisLimit, setZAxisLimit] = useState<number>(10);
   const { t } = useTranslation();
   const pointCloudViews = usePointCloudViews();
+  const { pushHistoryWithList } = useHistory();
 
   useLayoutEffect(() => {
     if (ptCtx.topViewInstance) {
@@ -198,6 +219,7 @@ const PointCloudTopView: React.FC<IProps> = ({
         config: { ...config, pointCloudPattern: ptCtx.pointCloudPattern },
         checkMode,
         toolName: ToolUtils.getPointCloudToolList() as THybridToolName,
+        proxyMode: checkMode,
       });
       ptCtx.setTopViewInstance(pointCloudAnnotation);
     }
@@ -211,28 +233,18 @@ const PointCloudTopView: React.FC<IProps> = ({
     const { toolInstance: TopView2dOperation } = ptCtx.topViewInstance;
 
     // line register
-    TopView2dOperation.singleOn('lineCreated', (line: ILine, zoom: number) => {
-      const newLine = {
-        ...line,
-        pointList: line.pointList!.map((v) => PointCloudUtils.transferCanvas2World(v, size)),
-      };
-
-      addLine(newLine);
-      ptCtx.setSelectedIDs(hideAttributes.includes(line.attribute!) ? '' : line.id);
-      return;
+    TopView2dOperation.singleOn('dataUpdated', (updateLine: ILine[], selectedIDs: string[]) => {
+      const transferLine = _.cloneDeep(updateLine).map((i) => {
+        return {
+          ...i,
+          pointList: PointCloudUtils.pointListTransferCanvas2World(i.pointList, size),
+        };
+      });
+      ptCtx.setSelectedIDs(selectedIDs);
+      ptCtx.setLineList(transferLine);
+      pushHistoryWithList({ lineList: transferLine });
     });
 
-    TopView2dOperation.singleOn('lineDeleted', (selectedID: string) => {
-      deletePointCloudBox(selectedID);
-      deleteLine(selectedID);
-    });
-
-    TopView2dOperation.singleOn('lineSelected', (selectedID: string) => {
-      ptCtx.setSelectedIDs([selectedID]);
-    });
-    TopView2dOperation.singleOn('updateLineByDrag', (updateLine: ILine) => {
-      pointCloudViews.topViewUpdateLine?.(updateLine, size);
-    });
     // point tool events
     TopView2dOperation.singleOn('pointCreated', (point: IPointUnit, zoom: number) => {
       // addPoint(point)
@@ -349,6 +361,7 @@ const PointCloudTopView: React.FC<IProps> = ({
     ptCtx.topViewInstance.initSize(size);
     ptCtx.topViewInstance.updatePolygonList(ptCtx.displayPointCloudList, ptCtx.polygonList);
     ptCtx.topViewInstance.updatePointList(ptCtx.displaySphereList);
+    ptCtx.topViewInstance.updateLineList(ptCtx.displayLineList);
 
     const {
       topViewInstance: { pointCloudInstance: pointCloud, toolInstance },
@@ -382,6 +395,7 @@ const PointCloudTopView: React.FC<IProps> = ({
       const { x, y, z } = pointCloud.initCameraPosition;
       pointCloud.camera.position.set(x + offsetY, y - offsetX, z);
       pointCloud.render();
+      syncTopviewToolZoom(currentPos, zoom, size);
       setAnnotationPos({ zoom, currentPos });
     });
   }, [size, ptCtx.topViewInstance, ptCtx.topViewInstance?.toolInstance]);

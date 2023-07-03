@@ -19,7 +19,7 @@ import {
   PointCloudUtils,
   DEFAULT_SPHERE_PARAMS,
 } from '@labelbee/lb-utils';
-import { BufferAttribute, OrthographicCamera, PerspectiveCamera, PointsMaterial, Shader } from 'three';
+import { BufferAttribute, OrthographicCamera, PerspectiveCamera } from 'three';
 import HighlightWorker from 'web-worker:./highlightWorker.js';
 import FilterBoxWorker from 'web-worker:./filterBoxWorker.js';
 import { isInPolygon } from '@/utils/tool/polygonTool';
@@ -30,6 +30,10 @@ import { PCDLoader } from './PCDLoader';
 import { OrbitControls } from './OrbitControls';
 import { PointCloudCache } from './cache';
 import { getCuboidFromPointCloudBox } from './matrix';
+import { PointCloudSegmentOperation } from './segmentation';
+import PointCloudStore from './store';
+import PointCloudRender from './render';
+import EventListener from '../toolOperation/eventListener';
 
 interface IOrthographicCamera {
   left: number;
@@ -48,12 +52,29 @@ interface IProps {
   backgroundColor?: string;
 
   config?: IPointCloudConfig;
+
+  isSegment?: boolean;
+  checkMode?: boolean;
+}
+
+export interface IEventBus {
+  on: EventListener['on'];
+  emit: EventListener['emit'];
+  unbind: EventListener['unbind'];
+}
+
+export interface IPointCloudDelegate extends IEventBus {
+  renderer: THREE.WebGLRenderer;
+  scene: THREE.Scene;
+  camera: THREE.OrthographicCamera | THREE.PerspectiveCamera;
+  container: HTMLElement;
+  checkMode: boolean;
 }
 
 const DEFAULT_DISTANCE = 30;
 const highlightWorker = new HighlightWorker({ type: 'module' });
 
-export class PointCloud {
+export class PointCloud extends EventListener {
   public renderer: THREE.WebGLRenderer;
 
   public scene: THREE.Scene;
@@ -68,6 +89,10 @@ export class PointCloud {
   public pcdLoader: PCDLoader;
 
   public config?: IPointCloudConfig;
+
+  public store?: PointCloudStore; // TODO. Need to transfer all data to here
+
+  public pointCloudRender?: PointCloudRender;
 
   /**
    * zAxis Limit for filter point over a value
@@ -96,12 +121,20 @@ export class PointCloud {
 
   private currentPCDSrc?: string; // Record the src of PointCloud
 
+  private pointsMaterialSize: number = 1;
+
   /**
    * Record the src of Highlight PCD.
    *
    * Avoiding src error problems caused by asynchronous
    */
   private highlightPCDSrc?: string;
+
+  private segmentOperation?: PointCloudSegmentOperation;
+
+  private isSegment = false;
+
+  private checkMode = false;
 
   constructor({
     container,
@@ -110,11 +143,15 @@ export class PointCloud {
     orthographicParams,
     backgroundColor = '#4C4C4C', // GRAY_BACKGROUND
     config,
+    isSegment,
+    checkMode,
   }: IProps) {
+    super();
     this.container = container;
     this.renderer = new THREE.WebGLRenderer({ antialias: true });
     this.backgroundColor = backgroundColor;
     this.config = config;
+    this.checkMode = checkMode ?? false;
 
     // TODO
     if (isOrthographicCamera && orthographicParams) {
@@ -130,11 +167,10 @@ export class PointCloud {
     } else {
       this.camera = new THREE.PerspectiveCamera(30, this.containerWidth / this.containerHeight, 1, 1000);
     }
-    // this.camera = new THREE.OrthographicCamera(-500, 500, 500, -500, 100, -100);
     this.initCamera();
-
     this.scene = new THREE.Scene();
-    this.controls = new OrbitControls(this.camera, this.renderer.domElement);
+    this.controls = new OrbitControls(this.camera, isSegment ? this.container : this.renderer.domElement);
+
     this.pcdLoader = new PCDLoader();
 
     this.axesHelper = new THREE.AxesHelper(1000);
@@ -151,10 +187,143 @@ export class PointCloud {
     this.init();
 
     this.cacheInstance = PointCloudCache.getInstance();
+
+    if (isSegment === true) {
+      this.initSegment();
+      this.isSegment = true;
+    }
+  }
+
+  public initSegment() {
+    this.store = new PointCloudStore(this.pointCloudDelegate);
+    this.controls.enablePan = false;
+    this.controls.addEventListener('start', this.orbiterStart.bind(this));
+    this.controls.addEventListener('change', this.orbiterChange.bind(this));
+    this.controls.addEventListener('end', this.orbiterEnd.bind(this));
+    this.segmentOperation = new PointCloudSegmentOperation({
+      dom: this.container,
+      store: this.store,
+    });
+
+    this.pointCloudRender = new PointCloudRender({
+      store: this.store,
+      ...this.eventBus,
+      nextTick: this.nextTick,
+      config: this.config,
+    });
+    this.initMsg();
+    document.addEventListener('keydown', this.keydown);
+    document.addEventListener('keyup', this.keyup);
+  }
+
+  public orbiterStart() {
+    // Reserved.
+  }
+
+  public orbiterChange() {
+    if (!this.store) {
+      return;
+    }
+    this.store.orbiting = true;
+  }
+
+  public orbiterEnd() {
+    if (!this.store) {
+      return;
+    }
+    this.store.orbiting = false;
+  }
+
+  public get currentSegmentTool() {
+    return this.segmentOperation?.currentToolName;
+  }
+
+  public initMsg() {
+    if (!this.segmentOperation) {
+      return;
+    }
+
+    this.on('CircleSelector', this.segmentOperation.updateSelector2Circle.bind(this.segmentOperation));
+    this.on('LassoSelector', this.segmentOperation.updateSelector2Lasso.bind(this.segmentOperation));
+    this.on('clearPointCloud', this.clearPointCloud.bind(this));
+    this.on('loadPCDFile', this.loadPCDFile.bind(this));
+  }
+
+  public unbindMsg() {
+    if (!this.segmentOperation) {
+      return;
+    }
+
+    this.unbind('CircleSelector', this.segmentOperation.updateSelector2Circle.bind(this.segmentOperation));
+    this.unbind('LassoSelector', this.segmentOperation.updateSelector2Lasso.bind(this.segmentOperation));
+    this.unbind('clearPointCloud', this.clearPointCloud.bind(this));
+    this.unbind('loadPCDFile', this.loadPCDFile.bind(this));
+  }
+
+  public nextTick = () => {
+    if (!this.segmentOperation) {
+      return;
+    }
+
+    this.segmentOperation._raycasting();
+  };
+
+  public keydown = (e: KeyboardEvent) => {
+    if (!this.store) {
+      return;
+    }
+    switch (e.key) {
+      case ' ':
+        this.controls.enablePan = true;
+        this.store.setForbidOperation(true);
+        break;
+
+      default: {
+        break;
+      }
+    }
+  };
+
+  public keyup = (e: KeyboardEvent) => {
+    if (!this.store) {
+      return;
+    }
+
+    switch (e.key) {
+      case ' ':
+        this.controls.enablePan = false;
+        this.store.setForbidOperation(false);
+
+        break;
+
+      default: {
+        break;
+      }
+    }
+  };
+
+  public get eventBus() {
+    return {
+      on: this.on.bind(this),
+      emit: this.emit.bind(this),
+      unbind: this.unbind.bind(this),
+    };
+  }
+
+  public get pointCloudDelegate() {
+    return {
+      container: this.container,
+      scene: this.scene,
+      camera: this.camera,
+      renderer: this.renderer,
+      checkMode: this.checkMode,
+      ...this.eventBus,
+    };
   }
 
   get DEFAULT_INIT_CAMERA_POSITION() {
-    return new THREE.Vector3(-0.01, 0, 10);
+    // The z-axis of camera's position is important to control the camera's frustum.
+    return new THREE.Vector3(-0.01, 0, 1000);
   }
 
   get containerWidth() {
@@ -257,15 +426,11 @@ export class PointCloud {
     this.initRenderer();
   }
 
-  public removeObjectByName(name: string) {
-    const oldBox = this.scene.getObjectByName(name);
+  public removeObjectByName(name: string, prefix = '') {
+    const oldBox = this.scene.getObjectByName(prefix + name);
     // Remove Old Box
     if (oldBox) {
       oldBox.removeFromParent();
-      // if (name === this.pointCloudObjectName) {
-      //   // debugger;
-      //   this.removeObjectByName(name);
-      // }
     }
   }
 
@@ -274,7 +439,7 @@ export class PointCloud {
    * @param boxParams
    * @param color
    */
-  public generateBox(boxParams: IPointCloudBox, color = 0xffffff) {
+  public generateBox(boxParams: IPointCloudBox, color: THREE.ColorRepresentation = 0xffffff) {
     const newColor = color;
     // Temporarily turn the Box white
     // if (this.config?.attributeList && this.config?.attributeList?.length > 0 && boxParams.attribute) {
@@ -286,7 +451,7 @@ export class PointCloud {
     //     )?.hex ?? color;
     // }
 
-    this.AddBoxToSense(boxParams, newColor);
+    this.addBoxToSense(boxParams, newColor);
     this.render();
   }
 
@@ -308,7 +473,7 @@ export class PointCloud {
   public addSphereToSense = (sphereParams: IPointCloudSphere, color = 'blue') => {
     const id = sphereParams.id ?? uuid();
 
-    this.removeObjectByName(id);
+    this.removeObjectByName(id, 'sphere');
 
     const { radius, widthSegments, heightSegments } = DEFAULT_SPHERE_PARAMS;
     const { center } = sphereParams;
@@ -318,7 +483,7 @@ export class PointCloud {
     const sphere = new THREE.Mesh(spGeo, spMaterial);
     sphere.position.set(center.x, center.y, center.z);
     group.add(sphere);
-    group.name = id;
+    group.name = `sphere${id}`;
     this.scene.add(group);
   };
 
@@ -350,10 +515,10 @@ export class PointCloud {
    * @param id
    * @param color
    */
-  public AddBoxToSense = (boxParams: IPointCloudBox, color = 0xffffff) => {
+  public addBoxToSense = (boxParams: IPointCloudBox, color: THREE.ColorRepresentation = 0xffffff) => {
     const id = boxParams.id ?? uuid();
 
-    this.removeObjectByName(id);
+    this.removeObjectByName(id, 'box');
 
     const { center, width, height, depth, rotation } = boxParams;
     const group = new THREE.Group();
@@ -364,10 +529,10 @@ export class PointCloud {
     const arrow = this.generateBoxArrow(boxParams);
 
     // Temporarily hide
-    // const boxID = this.generateBoxTrackID(boxParams);
-    // if (boxID) {
-    //   group.add(boxID);
-    // }
+    const boxID = this.generateBoxTrackID(boxParams);
+    if (boxID) {
+      group.add(boxID);
+    }
 
     group.add(box);
     group.add(arrow);
@@ -377,13 +542,13 @@ export class PointCloud {
     if (rotation) {
       group.rotation.set(0, 0, rotation);
     }
-    group.name = id;
+    group.name = `box${id}`;
     this.scene.add(group);
   };
 
   public generateBoxes(boxes: IPointCloudBox[]) {
     boxes.forEach((box) => {
-      this.generateBox(box);
+      this.addBoxToSense(box);
     });
     this.render();
   }
@@ -660,36 +825,56 @@ export class PointCloud {
     return ellipse;
   }
 
-  public overridePointShader = (shader: Shader) => {
-    shader.vertexShader = `
-    attribute float sizes;
-    attribute float visibility;
-    varying float vVisible;
-  ${shader.vertexShader}`.replace(
-      `gl_PointSize = size;`,
-      `gl_PointSize = size;
-      vVisible = visibility;
-    `,
-    );
-    shader.fragmentShader = `
-    varying float vVisible;
-  ${shader.fragmentShader}`.replace(
-      `#include <clipping_planes_fragment>`,
-      `
-      if (vVisible < 0.5) discard;
-    #include <clipping_planes_fragment>`,
-    );
+  public initShaderMaterial = () => {
+    return {
+      vertexShader: `
+      attribute vec3 dimensions;
+      varying vec3 vDimensions;
+      uniform float pointSize;
+      attribute float visibility;
+
+      void main() {
+        // Pass the vertex coordinates to the fragment shader
+        gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0);
+
+          // Pass the dimensions to the fragment shader
+          vDimensions = dimensions;
+          gl_PointSize = pointSize;
+
+          if (visibility < 0.5) {
+            gl_Position = vec4(0.0, 0.0, 0.0, 1.0);  // Invalid Position.
+          }
+      }`,
+      fragmentShader: `
+      varying vec3 vDimensions;
+      void main() {
+        // Calculate color based on dimensions
+        vec3 color = vec3(vDimensions.x, vDimensions.y, vDimensions.z);
+
+        // If vDimensions is default value, the color change to white-rgb(255,255,255)
+        if (vDimensions.x == 0.0 && vDimensions.y == 0.0 && vDimensions.z == 0.0) {
+          color = vec3(255, 255, 255);
+        }
+
+        // Output the final color        
+        gl_FragColor = vec4(color, 1.0);
+      }`,
+      uniforms: {
+        pointSize: { value: 1.2 }, // Init size.
+      },
+    };
   };
 
   public renderPointCloud(points: THREE.Points, radius?: number) {
     points.name = this.pointCloudObjectName;
 
-    const pointsMaterial = new THREE.PointsMaterial({
-      vertexColors: true,
-    });
-
-    pointsMaterial.onBeforeCompile = this.overridePointShader;
-    pointsMaterial.size = 1.2;
+    /**
+     * Custom ShaderMaterial.
+     *
+     * 1. Filter the invisible points in vertexShader.
+     * 2. If the color is not found, set Color to (255, 255, 255)
+     */
+    const material = new THREE.ShaderMaterial(this.initShaderMaterial());
 
     if (radius) {
       // @ts-ignore
@@ -697,12 +882,34 @@ export class PointCloud {
     }
 
     this.pointsUuid = points.uuid;
-    points.material = pointsMaterial;
+    points.material = material;
     this.filterZAxisPoints(points);
 
     this.scene.add(points);
 
     this.render();
+  }
+
+  public clearAllBox() {
+    this.clearAllGroupByPrefix('box');
+  }
+
+  public clearAllSphere() {
+    this.clearAllGroupByPrefix('sphere');
+  }
+
+  public clearAllGroupByPrefix(prefix = '') {
+    const child = this.scene.children;
+    /**
+     * Notice：
+     * When performing bulk deletion, it is important to delete from the end backwards.
+     */
+    for (let i = child.length - 1; i >= 0; i--) {
+      const v = child[i];
+      if (v.type === 'Group' && v.name.startsWith(prefix)) {
+        this.removeObjectByName(v.name);
+      }
+    }
   }
 
   public clearPointCloud() {
@@ -714,12 +921,27 @@ export class PointCloud {
     this.render();
   }
 
+  public initCloudData(points: Float32Array) {
+    if (!this.store) {
+      return;
+    }
+    for (let i = 0; i < points.length; i += 3) {
+      const x = points[i];
+      const y = points[i + 1];
+      const z = points[i + 2];
+
+      this.store.cloudData.set(`${x}@${y}@${z}`, { visible: false });
+    }
+    this.store.setOriginPoints(points);
+  }
+
   /**
    *
    * @param src
    * @param radius Render the range of circle
    */
-  public loadPCDFile = async (src: string, radius?: number) => {
+  public loadPCDFile = async (src: string | undefined = this.currentPCDSrc, radius?: number) => {
+    if (!src) return;
     this.clearPointCloud();
     this.currentPCDSrc = src;
 
@@ -729,7 +951,12 @@ export class PointCloud {
     const { points, color } = (await this.cacheInstance.loadPCDFile(src)) as any;
     const geometry = new THREE.BufferGeometry();
     geometry.setAttribute('position', new THREE.BufferAttribute(points, 3));
-    geometry.setAttribute('color', new THREE.BufferAttribute(color, 3));
+    if (!this.isSegment) {
+      geometry.setAttribute('dimensions', new THREE.BufferAttribute(color, 3));
+    }
+
+    // TODO: Need to move to store.
+    this.initCloudData(points);
 
     const newPoints = new THREE.Points(geometry);
     this.renderPointCloud(newPoints, radius);
@@ -747,7 +974,7 @@ export class PointCloud {
     }
     this.highlightPCDSrc = this.currentPCDSrc;
 
-    return new Promise<BufferAttribute[] | undefined>((resolve) => {
+    return new Promise<BufferAttribute[] | undefined>((resolve, reject) => {
       if (window.Worker) {
         const newPointCloudBoxList = pointCloudBoxList ? [...pointCloudBoxList] : [];
 
@@ -756,7 +983,7 @@ export class PointCloud {
         const params = {
           cuboidList,
           position: oldPointCloud.geometry.attributes.position.array,
-          color: oldPointCloud.geometry.attributes.color.array,
+          color: oldPointCloud.geometry.attributes.dimensions.array,
           colorList,
         };
 
@@ -765,16 +992,32 @@ export class PointCloud {
           const { color } = e.data;
           const colorAttribute = new THREE.BufferAttribute(color, 3);
 
-          if (this.highlightPCDSrc) {
-            // Save the new highlight color.
-            this.cacheInstance.updateColor(this.highlightPCDSrc, color);
-
-            // Clear
-            this.highlightPCDSrc = undefined;
+          /**
+           * Need to return;
+           *
+           * 1. Not exist highlightPCDSrc
+           * 2. HighlightPCDSrc is not same with currentPCDSrc.
+           * 3. If the calculate color is not same with origin Points length.
+           */
+          if (
+            !this.highlightPCDSrc ||
+            this.highlightPCDSrc !== this.currentPCDSrc ||
+            oldPointCloud.geometry.attributes.position.array.length !== color.length
+          ) {
+            reject(new Error('Error Path'));
+            return;
           }
 
+          // Save the new highlight color.
+          this.cacheInstance.updateColor(this.highlightPCDSrc, color);
+
+          // Clear
+          this.highlightPCDSrc = undefined;
+
           colorAttribute.needsUpdate = true;
-          oldPointCloud.geometry.setAttribute('color', colorAttribute);
+
+          oldPointCloud.geometry.setAttribute('dimensions', colorAttribute);
+          oldPointCloud.geometry.attributes.dimensions.needsUpdate = true;
           resolve(color);
           this.render();
         };
@@ -786,8 +1029,8 @@ export class PointCloud {
     const oldPointCloud = this.scene.getObjectByName(this.pointCloudObjectName) as THREE.Points;
     if (oldPointCloud) {
       const colorAttribute = new THREE.BufferAttribute(color, 3);
-      colorAttribute.needsUpdate = true;
-      oldPointCloud.geometry.setAttribute('color', colorAttribute);
+      oldPointCloud.geometry.setAttribute('dimensions', colorAttribute);
+      oldPointCloud.geometry.attributes.dimensions.needsUpdate = true;
 
       this.render();
     }
@@ -948,9 +1191,9 @@ export class PointCloud {
       const p3 = _polygon[index + 2];
       return PointCloudUtils.getIntersectionBySlope({
         p1: _minDistanceList[index].point,
-        k1: (p1.y - p2.y) / (p1.x - p2.x),
+        line1: [p1, p2],
         p2: _minDistanceList[index + 1].point,
-        k2: (p2.y - p3.y) / (p2.x - p3.x),
+        line2: [p2, p3],
       });
     });
     return fittedCoordinates;
@@ -1458,22 +1701,32 @@ export class PointCloud {
 
   /**
    * Update point size
-   * @param zoomIn
+   * @param param0
+   * @returns
    */
-  public updatePointSize = (zoomIn: boolean) => {
-    const points = this.scene.getObjectByName(this.pointCloudObjectName) as { material: PointsMaterial } | undefined;
+  public updatePointSize = ({ zoomIn, customSize }: { zoomIn?: boolean; customSize?: number }) => {
+    const points = this.scene.getObjectByName(this.pointCloudObjectName) as
+      | { material: THREE.ShaderMaterial }
+      | undefined;
 
     if (!points) {
       return;
     }
 
-    const preSize = points.material.size;
+    const preSize = points.material.uniforms.pointSize.value;
 
     if (zoomIn) {
-      points.material.size = Math.min(preSize * 1.2, 10);
+      points.material.uniforms.pointSize.value = Math.min(preSize * 1.2, 10);
     } else {
-      points.material.size = Math.max(preSize / 1.2, 1);
+      points.material.uniforms.pointSize.value = Math.max(preSize / 1.2, 1);
     }
+
+    if (customSize) {
+      points.material.uniforms.pointSize.value = customSize;
+      this.pointsMaterialSize = customSize;
+    }
+
+    points.material.uniformsNeedUpdate = true;
 
     this.render();
   };

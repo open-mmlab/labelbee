@@ -27,6 +27,7 @@ import useSize from '@/hooks/useSize';
 import { usePointCloudViews } from './hooks/usePointCloudViews';
 import { useTranslation } from 'react-i18next';
 import { LabelBeeContext } from '@/store/ctx';
+import PointCloudSizeSlider from './components/PointCloudSizeSlider';
 
 const pointCloudID = 'LABELBEE-POINTCLOUD';
 const PointCloud3DContext = React.createContext<{
@@ -148,27 +149,19 @@ const PointCloud3D: React.FC<IA2MapStateProps> = ({ currentData, config }) => {
   useEffect(() => {
     if (ref.current && currentData?.url) {
       let pointCloud = ptCtx.mainViewInstance;
+      // Just for Init.
       if (!pointCloud && size.width) {
-        const orthographicParams = {
-          left: -size.width / 2,
-          right: size.width / 2,
-          top: size.height / 2,
-          bottom: -size.height / 2,
-          near: 100,
-          far: -100,
-        };
-
         // Need to be showed
         pointCloud = new PointCloud({
           container: ref.current,
           isOrthographicCamera: true,
-          orthographicParams,
+          orthographicParams: PointCloudUtils.getDefaultOrthographicParams(size),
           config,
         });
         ptCtx.setMainViewInstance(pointCloud);
       }
     }
-  }, [size]);
+  }, [size, currentData]);
 
   /**
    * Listen for data changes.
@@ -228,7 +221,12 @@ const PointCloud3D: React.FC<IA2MapStateProps> = ({ currentData, config }) => {
   }, [selectedBox, ptCtx.mainViewInstance]);
 
   const PointCloud3DTitle = (
-    <div>
+    <>
+      <PointCloudSizeSlider
+        onChange={(v: number) => {
+          ptCtx.mainViewInstance?.updatePointSize({ customSize: v });
+        }}
+      />
       <span style={{ marginRight: 8 }}>{t('ShowArrows')}</span>
       <Switch
         size='small'
@@ -238,7 +236,7 @@ const PointCloud3D: React.FC<IA2MapStateProps> = ({ currentData, config }) => {
           ptCtx.mainViewInstance?.setShowDirection(showDirection);
         }}
       />
-    </div>
+    </>
   );
 
   return (
@@ -246,10 +244,6 @@ const PointCloud3D: React.FC<IA2MapStateProps> = ({ currentData, config }) => {
       className={getClassName('point-cloud-3d-container')}
       title={t('3DView')}
       toolbar={PointCloud3DTitle}
-      style={{
-        height:
-          currentData.mappingImgList && currentData.mappingImgList?.length > 0 ? '55%' : '100%',
-      }}
     >
       <div className={getClassName('point-cloud-3d-content')}>
         <PointCloud3DContext.Provider value={ptCloud3DCtx}>

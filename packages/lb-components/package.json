@@ -1,6 +1,6 @@
 {
   "name": "@labelbee/lb-components",
-  "version": "1.9.0",
+  "version": "1.12.1-alpha.1",
   "description": "Provide a complete library of annotation components",
   "main": "./dist/index.js",
   "es": "./es/index.js",
@@ -18,8 +18,7 @@
     "commit": "git-cz",
     "lint": "eslint 'src/**/*.{ts,tsx,js,jsx}' && npm run build:type",
     "lint:fix": "eslint 'src/**/*.{ts,tsx,js,jsx}' --fix",
-    "commitmsg": "commitlint -e $GIT_PARAMS",
-    "prepublishOnly": "npm run build"
+    "commitmsg": "commitlint -e $GIT_PARAMS"
   },
   "author": "laoluo",
   "contributors": [
@@ -33,6 +32,9 @@
     "canvas",
     "react"
   ],
+  "publishConfig": {
+    "access": "public"
+  },
   "license": "Apache-2.0",
   "homepage": "https://github.com/open-mmlab/labelbee/tree/main/packages/lb-components",
   "bugs": {
@@ -41,8 +43,8 @@
   },
   "dependencies": {
     "@ant-design/icons": "^4.6.2",
-    "@labelbee/lb-annotation": "^1.13.0",
-    "@labelbee/lb-utils": "^1.6.0",
+    "@labelbee/lb-annotation": "1.16.0",
+    "@labelbee/lb-utils": "1.8.0",
     "ahooks": "^3.4.0",
     "classnames": "^2.3.0",
     "lodash": "^4.17.21",
@@ -52,7 +54,8 @@
     "redux": "^4.0.5",
     "redux-actions": "^2.6.5",
     "redux-thunk": "^2.3.0",
-    "resize-observer-polyfill": "^1.5.1"
+    "resize-observer-polyfill": "^1.5.1",
+    "react-colorful": "^5.6.1"
   },
   "peerDependencies": {
     "antd": ">=4.15.0",

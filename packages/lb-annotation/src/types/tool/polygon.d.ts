@@ -15,6 +15,7 @@ declare interface IPolygonData {
   textAttribute: string;
   attribute: string;
   isRect?: boolean; // 用于判断当前多边形矩形模式生成
+  trackID?: number;
 }
 
 declare interface IPolygonPoint {
@@ -30,6 +31,7 @@ declare interface IPolygonConfig extends IToolConfig {
   lineColor: ELineColor; // 线条颜色
   lowerLimitPointNum: number; // 下限点个数
   upperLimitPointNum?: number; // 上限点个数
+  minArea?: number; // 最小面积
   edgeAdsorption: boolean; // 边缘吸附
   drawOutsideTarget: boolean;
   copyBackwardResult: boolean;

@@ -210,7 +210,7 @@ const pointCloudConfig = {
   // 框内点数下限
   lowerLimitPointsNumInBox: 5,
   // attributeConfigurable: true,
-  trackConfigurable: false,
+  trackConfigurable: true,
 };
 
 const cuboidToolConfig = {

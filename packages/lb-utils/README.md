@@ -1,5 +1,7 @@
 # `@labelbee/lb-utils`
 
+The set of all utils.
+
 > TODO: description
 
 ## Usage

@@ -41,6 +41,12 @@ interface IBasicToolOperationProps {
 
   isAppend?: boolean; // 用于 canvas 层次的关闭
   hiddenImg?: boolean; // 隐藏图片渲染
+
+  zoomInfo?: {
+    min: number;
+    max: number;
+    ratio: number;
+  };
 }
 
 /**
@@ -53,7 +59,7 @@ interface IReferenceData {
 }
 
 // zoom 的限制
-const zoomInfo = {
+const DEFAULT_ZOOM_INFO = {
   min: 0.2,
   max: 1000,
   ratio: 0.4,
@@ -164,6 +170,8 @@ class BasicToolOperation extends EventListener {
 
   public coordUtils: CoordinateUtils;
 
+  public zoomInfo = DEFAULT_ZOOM_INFO;
+
   constructor(props: IBasicToolOperationProps) {
     super();
     this.container = props.container;
@@ -233,6 +241,10 @@ class BasicToolOperation extends EventListener {
     this.coordUtils.setBasicImgInfo(this.basicImgInfo);
 
     this.hiddenImg = props.hiddenImg || false;
+
+    if (props.zoomInfo) {
+      this.zoomInfo = props.zoomInfo;
+    }
   }
 
   public onContextmenu(e: MouseEvent) {
@@ -990,11 +1002,11 @@ class BasicToolOperation extends EventListener {
 
     let operator: 0 | -1 | 1 = 0;
 
-    if (delta > 0 && this.zoom > zoomInfo.min) {
+    if (delta > 0 && this.zoom > this.zoomInfo.min) {
       // 减小
       operator = -1;
     }
-    if (delta < 0 && this.zoom < zoomInfo.max) {
+    if (delta < 0 && this.zoom < this.zoomInfo.max) {
       // 放大
       operator = 1;
     }
@@ -1021,7 +1033,7 @@ class BasicToolOperation extends EventListener {
       zoom: newZoom || this.zoom,
       innerZoom: this.innerZoom,
       basicZoom: this.basicZoom,
-      zoomMax: zoomInfo.max,
+      zoomMax: this.zoomInfo.max,
       rotate: this.rotate,
     });
 
@@ -1035,7 +1047,7 @@ class BasicToolOperation extends EventListener {
     this.currentPosStorage = newCurrentPos;
     this.setImgInfo(imgInfo);
 
-    zoomInfo.ratio = ratio;
+    this.zoomInfo.ratio = ratio;
 
     this.emit('renderZoom', zoom, newCurrentPos, imgInfo);
   };

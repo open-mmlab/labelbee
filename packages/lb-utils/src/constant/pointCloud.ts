@@ -15,8 +15,34 @@ export enum EPerspectiveView {
 }
 
 export const DEFAULT_SPHERE_PARAMS = {
-  radius: 3,
+  radius: 0.3,
   widthSegments: 32,
   heightSegments: 16,
-  defaultZ: 5,
+  defaultZ: 1,
+};
+
+export enum EPointCloudPattern {
+  Detection = 'Detection',
+  Segmentation = 'Segmentation',
+}
+
+export enum EPointCloudSegmentMode {
+  Add = 'ADD',
+  Remove = 'REMOVE',
+}
+
+export enum EPointCloudSegmentCoverMode {
+  Cover = 'Cover',
+  Uncover = 'Uncover',
+}
+
+export enum EPointCloudSegmentFocusMode {
+  Focus = 'Focus',
+  Unfocus = 'Unfocus'
+}
+
+export enum EPointCloudSegmentStatus {
+  Ready = 'READY',
+  Check = 'CHECK',
+  Edit = 'EDIT',
 }

@@ -135,20 +135,20 @@ export default class CommonToolUtils {
    * @param T 当前图片的结果框
    * @param sourceID 当前状态依赖的框体，若依赖原图则返回 '0'
    * @param attributeLockList 当前展示的属性
-   * @param selectedID 是否含有选中逻辑
+   * @param selectedIDs 是否含有选中逻辑
    * @returns
    */
   public static getRenderResultList<T = any>(
     resultList: any[],
     sourceID: string,
     attributeLockList: string[] = [],
-    selectedID?: string,
-  ): [T[], T | undefined] {
-    let selectedRect;
+    selectedIDs?: string[],
+  ): [T[], T[]] {
+    const selectedRect: T[] = [];
 
     const showingRect = resultList.filter((result) => {
-      if (selectedID && selectedID === result?.id) {
-        selectedRect = result;
+      if (selectedIDs && selectedIDs.includes(result.id)) {
+        selectedRect.push(result);
         return false;
       }
 

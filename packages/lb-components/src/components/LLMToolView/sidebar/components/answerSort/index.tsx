@@ -11,11 +11,12 @@ import { LeftOutlined } from '@ant-design/icons';
 import { classnames } from '@/utils';
 import ToolUtils from '@/utils/ToolUtils';
 import { cloneDeep } from 'lodash';
+import { IAnswerSort, IWaitAnswerSort } from '@/components/LLMToolView/types';
 
 interface IProps {
   setSortList: (value: any) => void;
-  sortList: any;
-  waitSortList: any;
+  sortList: IAnswerSort[][];
+  waitSortList: IWaitAnswerSort[];
   checkMode?: boolean;
 }
 enum EDirection {
@@ -53,10 +54,11 @@ const Navigation = ({ t }: any) => (
 const AnswerSort = (props: IProps) => {
   const [, forceUpdate] = useReducer((x) => x + 1, 0);
   const { sortList, setSortList, waitSortList, checkMode } = props;
+
   const isDisableAll = checkMode;
   const [activateDirection, setActivateDirection] = useState<EDirection | undefined>(undefined);
   const [targetTagKey, setTargetTagKey] = useState<number | undefined>(undefined);
-  const [answers, setAnswers] = useState([]);
+  const [answers, setAnswers] = useState<IWaitAnswerSort[]>([]);
   const { t } = useTranslation();
   useEffect(() => {
     setAnswers(waitSortList);
@@ -66,23 +68,22 @@ const AnswerSort = (props: IProps) => {
     formatSortList();
   }, [JSON.stringify(sortList)]);
 
-  const singleAnswerItem = ({ item, operation }: any) => {
+  const singleAnswerItem = ({ item, operation, id }: any) => {
     const borderStyle = { [`border${activateDirection}`]: '2px solid #8C9AFF' };
 
     return (
       <div
         key={`${item?.id}`}
         color='#EBEBEB'
-        index={item?.id}
+        id={id}
         className={classnames({
           [`${contentBoxCls}__answerTag`]: true,
-          // [`${contentBoxCls}__answerTagGhost`]: !item.id,
         })}
         style={targetTagKey === item?.id && activateDirection ? borderStyle : undefined}
         draggable={isDisableAll ? '' : 'true'}
         {...operation}
       >
-        {item.title}
+        {item?.title}
       </div>
     );
   };
@@ -137,7 +138,7 @@ const AnswerSort = (props: IProps) => {
     const sortBox = document.getElementById('sortBox');
 
     if (sortBox?.childNodes) {
-      let newSortList: any = [];
+      let newSortList: any[] = [];
       sortBox.childNodes.forEach((item: any, nodeIndex: number) => {
         let itemBox = item;
         if (item?.childNodes?.length > 1) {
@@ -153,7 +154,7 @@ const AnswerSort = (props: IProps) => {
           br: { x: right, y: bottom },
           bl: { x: left, y: bottom },
         };
-        const newList = sortList[nodeIndex].reduce((list: any, key: any) => {
+        const newList = sortList[nodeIndex].reduce((list: IAnswerSort[], key: any) => {
           let tagColumn = key;
           if (key.length > 1) {
             tagColumn = key[0];
@@ -168,7 +169,7 @@ const AnswerSort = (props: IProps) => {
     }
   };
 
-  const onDrag = (e) => {
+  const onDrag = (e: any) => {
     const centerX = e.pageX;
     const centerY = e.pageY;
     const sourceTagCenterPoint = { x: centerX, y: centerY };
@@ -202,7 +203,7 @@ const AnswerSort = (props: IProps) => {
         return;
       }
       // 不以拖动的tag做参照
-      if (~~e.target.getAttribute('index') === tagNearest[0]?.id) {
+      if (getAttributeIndex(e.target.id) === tagNearest[0]?.id) {
         setTargetTagKey(undefined);
         return;
       }
@@ -211,34 +212,35 @@ const AnswerSort = (props: IProps) => {
     }
   };
 
-  const onDragEnd = (e) => {
+  const onDragEnd = (e: any) => {
     const { target } = e;
     let key = -1;
     let oldIndex = -1;
     let tagIndex = -1;
     let newList: any = [];
     let formatList = cloneDeep(sortList);
-    tagIndex = formatList.findIndex((i) => i[0].id === ~~targetTagKey);
+
+    tagIndex = formatList.findIndex((i: IAnswerSort[]) => i[0].id === Number(targetTagKey));
     if (target?.parentNode?.parentNode.id === 'sortBox') {
-      key = target.parentNode.getAttribute('index'); // 父级
-      const curKey = target.getAttribute('index'); // 拖动tag
-      newList = formatList[~~key].filter((i) => i.id === ~~curKey);
-      const removeIndex = formatList[~~key].findIndex((i) => i.id === ~~curKey);
+      key = getAttributeIndex(target.parentNode.id); // 父级
+      const curKey = getAttributeIndex(target.id); // 拖动tag
+      newList = formatList[~~key].filter((i: IAnswerSort) => i.id === ~~curKey);
+      const removeIndex = formatList[~~key].findIndex((i: IAnswerSort) => i.id === ~~curKey);
       formatList[~~key].splice(removeIndex, 1);
     }
     if (target?.parentNode.id === 'sortBox') {
       if (!targetTagKey) {
         return;
       }
-      key = ~~target.getAttribute('index');
-      oldIndex = formatList.findIndex((i) => i[0].id === key);
-      newList = formatList.find((i: any) => i[0].id === key);
+      key = getAttributeIndex(target.id);
+      oldIndex = formatList.findIndex((i: IAnswerSort[]) => i[0].id === key);
+      newList = formatList.find((i: IAnswerSort[]) => i[0].id === key);
       formatList.splice(oldIndex, 1);
-      tagIndex = formatList.findIndex((i) => i[0].id === ~~targetTagKey);
+      tagIndex = formatList.findIndex((i: IAnswerSort[]) => i[0].id === ~~targetTagKey);
     }
     if (target.parentNode.id === 'waitBox') {
-      key = ~~target.getAttribute('index');
-      oldIndex = answers.findIndex((i) => i.id === key);
+      key = getAttributeIndex(target.id);
+      oldIndex = answers.findIndex((i: any) => i.id === key);
       newList = [answers[oldIndex]];
       answers.splice(oldIndex, 1);
     }
@@ -263,6 +265,11 @@ const AnswerSort = (props: IProps) => {
     forceUpdate();
   };
 
+  const getAttributeIndex = (str: string) => {
+    const index = str.indexOf('-');
+    return Number(str.substring(index + 1, str.length));
+  };
+
   return (
     <div style={{ padding: '0px 16px', marginBottom: '16px' }}>
       <div className={`${contentBoxCls}__title`}>
@@ -281,6 +288,7 @@ const AnswerSort = (props: IProps) => {
               answers.map((i: any) =>
                 singleAnswerItem({
                   item: i,
+                  id: `waitBoxItem-${i?.id}`,
                   operation: {
                     onDrag: onDrag,
                     onDragEnd: onDragEnd,
@@ -294,10 +302,11 @@ const AnswerSort = (props: IProps) => {
           {sortList.map((i: any, index: number) => {
             if (i.length > 1) {
               return (
-                <div key={`item-${index}`} index={`${index}`}>
+                <div key={`item-${index}`} id={`sortBox-${index}`}>
                   {i.map((item: any) =>
                     singleAnswerItem({
                       item,
+                      id: `sortBoxItem-${item?.id}`,
                       operation: {
                         onDrag: onDrag,
                         onDragEnd: onDragEnd,
@@ -309,6 +318,7 @@ const AnswerSort = (props: IProps) => {
             }
             return singleAnswerItem({
               item: i[0],
+              id: `sortBox-${i[0]?.id}`,
               operation: {
                 onDrag: onDrag,
                 onDragEnd: onDragEnd,

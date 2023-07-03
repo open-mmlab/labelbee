@@ -1,4 +1,4 @@
-import React, { useState, useCallback } from 'react';
+import React, { useState, useCallback, useContext } from 'react';
 import { useDispatch, useSelector } from '@/store/ctx';
 import { AppState } from '@/store';
 import rotateSvg from '@/assets/annotation/common/icon_r.svg';
@@ -15,6 +15,8 @@ import { ChangeSave } from '@/store/annotation/actionCreators';
 import { IStepInfo } from '@/types/step';
 import { useTranslation } from 'react-i18next';
 import { cTool } from '@labelbee/lb-annotation';
+import { PointCloudContext } from '@/components/pointCloudView/PointCloudContext';
+import { EPointCloudPattern } from '@labelbee/lb-utils';
 const { EVideoToolName, EPointCloudName } = cTool;
 
 interface IProps {
@@ -37,6 +39,8 @@ const HeaderOption: React.FC<IProps> = (props) => {
     annotation: state.annotation,
     imgAttribute: state.imgAttribute,
   }));
+  const { globalPattern } = useContext(PointCloudContext);
+
   const { t } = useTranslation();
 
   const isTagTool = [EToolName.Tag, EVideoToolName.VideoTagTool].includes(stepInfo?.tool as any);
@@ -140,9 +144,15 @@ const HeaderOption: React.FC<IProps> = (props) => {
     },
   ];
 
-  // PointCloudTool temporarily removes "restore" & "redo"
   if (isPointCloud) {
-    commonOptionList = commonOptionList.slice(0, 3);
+    switch (globalPattern) {
+      case EPointCloudPattern.Segmentation:
+        commonOptionList = commonOptionList.slice(0, 1);
+        break;
+      case EPointCloudPattern.Detection:
+        commonOptionList = commonOptionList.slice(0, 3);
+        break;
+    }
   }
 
   return (

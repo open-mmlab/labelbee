@@ -195,6 +195,17 @@ class LineToolUtils {
     return Math.sqrt(Math.pow(Math.abs(point1.x - point2.x), 2) + Math.pow(Math.abs(point1.y - point2.y), 2));
   };
 
+  // 线段长度和
+  public static lineLengthSum(pointList: IPoint[]) {
+    let length = 0;
+    pointList.forEach((point, index) => {
+      if (index > 0) {
+        length += this.calcDistance(pointList[index - 1], point);
+      }
+    });
+    return length;
+  }
+
   public static drawCurveLine = (
     ctx: any,
     points: ILinePoint[],

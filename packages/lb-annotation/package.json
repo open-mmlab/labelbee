@@ -1,6 +1,6 @@
 {
   "name": "@labelbee/lb-annotation",
-  "version": "1.13.0",
+  "version": "1.16.0",
   "description": "Annotation tool collection",
   "keywords": [
     "annotation",
@@ -14,6 +14,9 @@
   "repository": {
     "type": "git",
     "url": "git@github.com:open-mmlab/labelbee.git"
+  },
+  "publishConfig": {
+    "access": "public"
   },
   "license": "Apache-2.0",
   "files": [
@@ -39,8 +42,7 @@
     "format": "prettier --write \"src/**/*.ts\" \"src/**/*.js\"",
     "lint": "eslint --cache --ext .js,.jsx,.ts,.tsx  --fix --format=pretty ./src && npm run lint:prettier && npm run build:type",
     "lint:prettier": "npm run prettier && prettier --version && prettier --check \"src/**/*.{js,jsx,ts,tsx,less,md,json}\" --end-of-line auto",
-    "prettier": "prettier --write \"**/**.{js,jsx,tsx,ts,less,md,json}\"",
-    "prepublishOnly": "npm run build"
+    "prettier": "prettier --write \"**/**.{js,jsx,tsx,ts,less,md,json}\""
   },
   "lint-staged": {
     "src/**/*.{ts,tsx}": [
@@ -92,7 +94,7 @@
     "typescript": "^4.2.3"
   },
   "dependencies": {
-    "@labelbee/lb-utils": "^1.6.0",
+    "@labelbee/lb-utils": "1.8.0",
     "@turf/turf": "5.1.6",
     "color-rgba": "^2.3.0",
     "lodash": "^4.17.20",

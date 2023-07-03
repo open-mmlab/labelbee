@@ -605,13 +605,8 @@ export const usePointCloudViews = () => {
     pointCloudSphereList,
     hideAttributes,
   } = ptCtx;
-  const {
-    addHistory,
-    initHistory,
-    pushHistoryUnderUpdatePolygon,
-    pushHistoryUnderUpdatePoint,
-    pushHistoryUnderUpdateLine,
-  } = useHistory();
+  const { addHistory, initHistory, pushHistoryUnderUpdatePolygon, pushHistoryUnderUpdateLine } =
+    useHistory();
   const { selectedPolygon } = usePolygon();
 
   const { updateSelectedBox, updateSelectedBoxes, getPointCloudByID } = useSingleBox();
@@ -693,6 +688,7 @@ export const usePointCloudViews = () => {
     setSelectedIDs(newPoint.id);
     const newSphereList = addPointCloudSphere(sphereParams);
     syncPointCloudPoint(PointCloudView.Top, newPoint, sphereParams, zoom, newSphereList, config);
+    addHistory({ newSphereParams: sphereParams });
   };
 
   /** Top-view create box from 2D */
@@ -753,13 +749,14 @@ export const usePointCloudViews = () => {
 
     const isBoxHidden = hideAttributes.includes(newPolygon.attribute);
     const newPointCloudList = addPointCloudBox(boxParams);
-
+    const polygonList = ptCtx?.polygonList ?? [];
+    topViewInstance?.updatePolygonList(newPointCloudList ?? [], polygonList);
     /** If new box is hidden will not active target point box */
     if (isBoxHidden) {
       setSelectedIDs([]);
     } else {
       setSelectedIDs(boxParams.id);
-      polygonOperation.setSelectedIDs([newPolygon.id]);
+      polygonOperation.selection.setSelectedIDs(newPolygon.id);
       syncPointCloudViews(PointCloudView.Top, newPolygon, boxParams, zoom, newPointCloudList);
       if (intelligentFit) {
         synchronizeTopView(boxParams, newPolygon, topViewInstance, mainViewInstance);
@@ -787,7 +784,7 @@ export const usePointCloudViews = () => {
     }
     if (newSelectedBox || selectedBox?.info) {
       const boxParams = newSelectedBox ?? selectedBox?.info;
-      operation.setSelectedIDs(selectedIDs);
+      operation?.selection?.setSelectedIDs(selectedIDs[0]);
       const polygon = operation.selectedPolygon;
       if (selectedIDs.length === 1 && boxParams) {
         syncPointCloudViews(PointCloudView.Top, polygon, boxParams, undefined, newPointCloudList);
@@ -918,9 +915,6 @@ export const usePointCloudViews = () => {
     return;
   };
   const topViewUpdatePoint = (updatePoint: IPointUnit, size: ISize) => {
-    const { x: realX, y: realY } = PointCloudUtils.transferCanvas2World(updatePoint, size);
-    pushHistoryUnderUpdatePoint({ ...updatePoint, x: realX, y: realY });
-
     const pointCloudSphere = getPointCloudSphereByID(updatePoint.id);
     const newSphereParams = topViewPoint2PointCloud(
       updatePoint,
@@ -1069,7 +1063,7 @@ export const usePointCloudViews = () => {
         viewToBeUpdated[key]();
       }
     });
-    
+
     if (zoom) {
       mainViewInstance?.updateCameraZoom(zoom);
     }
@@ -1087,14 +1081,7 @@ export const usePointCloudViews = () => {
       return;
     }
 
-    const orthographicParams = {
-      left: -size.width / 2,
-      right: size.width / 2,
-      top: size.height / 2,
-      bottom: -size.height / 2,
-      near: 100,
-      far: -100,
-    };
+    const orthographicParams = PointCloudUtils.getDefaultOrthographicParams(size);
 
     mainViewInstance.initOrthographicCamera(orthographicParams);
     mainViewInstance.initRenderer();
@@ -1113,46 +1100,32 @@ export const usePointCloudViews = () => {
     SetPointCloudLoading(dispatch, true);
     await mainViewInstance.loadPCDFile(newData.url, config?.radius ?? DEFAULT_RADIUS);
 
-    // Clear All Data
-    pointCloudBoxList.forEach((v) => {
-      mainViewInstance?.removeObjectByName(v.id);
-    });
-
-    pointCloudSphereList.forEach((v: IPointCloudSphere) => {
-      mainViewInstance?.removeObjectByName(v.id);
-    });
+    mainViewInstance?.clearAllBox();
+    mainViewInstance?.clearAllSphere();
 
     let boxParamsList: any[] = [];
     let lineList: any[] = [];
     let polygonList = [];
     let sphereParamsList: IPointCloudSphere[] = [];
-    if (currentData.result) {
-      boxParamsList = PointCloudUtils.getBoxParamsFromResultList(currentData.result);
-      polygonList = PointCloudUtils.getPolygonListFromResultList(currentData.result);
-      lineList = PointCloudUtils.getLineListFromResultList(currentData.result);
-      sphereParamsList = PointCloudUtils.getSphereParamsFromResultList(currentData.result);
+    if (newData.result) {
+      boxParamsList = PointCloudUtils.getBoxParamsFromResultList(newData.result);
+      polygonList = PointCloudUtils.getPolygonListFromResultList(newData.result);
+      lineList = PointCloudUtils.getLineListFromResultList(newData.result);
+      sphereParamsList = PointCloudUtils.getSphereParamsFromResultList(newData.result);
 
       // Add Init Box
-      boxParamsList.forEach((v: IPointCloudBox) => {
-        mainViewInstance?.generateBox(v);
-      });
-
-      sphereParamsList.forEach((v: IPointCloudSphere) => {
-        mainViewInstance?.generateSphere(v);
-      });
+      mainViewInstance?.generateBoxes(boxParamsList);
+      mainViewInstance?.generateSpheres(sphereParamsList);
 
       ptCtx.syncAllViewPointCloudColor(boxParamsList);
-      ptCtx.setPointCloudResult(boxParamsList);
-      ptCtx.setPolygonList(polygonList);
-      ptCtx.setLineList(lineList);
-      ptCtx.setPointCloudSphereList(sphereParamsList);
-    } else {
-      ptCtx.setPointCloudResult([]);
-      ptCtx.setPolygonList([]);
-      ptCtx.setPointCloudSphereList([]);
-      ptCtx.setLineList([]);
     }
-    initHistory({ pointCloudBoxList: boxParamsList, polygonList });
+
+    initHistory({
+      pointCloudBoxList: boxParamsList,
+      polygonList,
+      lineList,
+      pointCloudSphereList: sphereParamsList,
+    });
 
     mainViewInstance.updateTopCamera();
 

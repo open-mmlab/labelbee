@@ -8,24 +8,32 @@ import { AppState } from '@/store';
 import StepUtils from '@/utils/StepUtils';
 import { connect } from 'react-redux';
 import { IStepInfo } from '@/types/step';
-import { jsonParser } from '@/utils';
+import { classnames, jsonParser } from '@/utils';
 import { ICustomToolInstance } from '@/hooks/annotation';
 import { useStatus } from '@/components/pointCloudView/hooks/useStatus';
 import { useSingleBox } from '@/components/pointCloudView/hooks/useSingleBox';
 import { useTranslation } from 'react-i18next';
-import { LabelBeeContext } from '@/store/ctx';
+import { LabelBeeContext, useDispatch } from '@/store/ctx';
 import BatchUpdateModal from './components/batchUpdateModal';
 import { IFileItem } from '@/types/data';
 import { PointCloudUtils } from '@labelbee/lb-utils';
 import AttributeList from '@/components/attributeList';
 import { IInputList } from '@/types/main';
 import { useAttribute } from '@/components/pointCloudView/hooks/useAttribute';
+import LassoSelectorSvg from '@/assets/annotation/pointCloudTool/lassoSelector.svg';
+import LassoSelectorSvgA from '@/assets/annotation/pointCloudTool/lassoSelector_a.svg';
+import CirCleSelectorSvg from '@/assets/annotation/pointCloudTool/circleSelector.svg';
+import CirCleSelectorSvgA from '@/assets/annotation/pointCloudTool/circleSelector_a.svg';
+import { sidebarCls } from '..';
+import { SetTaskStepList } from '@/store/annotation/actionCreators';
 
 interface IProps {
   stepInfo: IStepInfo;
   toolInstance: ICustomToolInstance; // Created by useCustomToolInstance.
   imgList: IFileItem[];
   imgIndex: number;
+  stepList: IStepInfo[];
+  enableColorPicker?: boolean;
 }
 
 // Temporarily hidden, this feature does not support the function for the time being.
@@ -82,7 +90,8 @@ const AnnotatedBox = ({ imgList, imgIndex }: { imgList: IFileItem[]; imgIndex: n
 
 const BoxTrackIDInput = () => {
   const [isEdit, setIsEdit] = useState(false);
-  const { pointCloudBoxList } = useContext(PointCloudContext);
+  const ptCtx = useContext(PointCloudContext);
+  const { pointCloudBoxList } = ptCtx;
   const { selectedBox, updateSelectedBox } = useSingleBox();
   const [inputValue, setInputValue] = useState('');
   const { t } = useTranslation();
@@ -98,7 +107,6 @@ const BoxTrackIDInput = () => {
 
   const applyInputValue = (isBlurEvent = false) => {
     const newTrackID = parseInt(inputValue, 10);
-
     if (isBlurEvent) {
       setIsEdit(false);
     }
@@ -123,12 +131,17 @@ const BoxTrackIDInput = () => {
       return;
     }
 
-    updateSelectedBox({ trackID: newTrackID });
+    updateCurrentPolygonList(newTrackID);
   };
 
   useEffect(() => {
     setIsEdit(false);
   }, [selectedBoxTrackID]);
+
+  const updateCurrentPolygonList = (newTrackID: number) => {
+    const newPointCloudList = updateSelectedBox({ trackID: newTrackID });
+    ptCtx?.topViewInstance?.updatePolygonList(newPointCloudList ?? []);
+  };
 
   return (
     <div style={{ padding: 24 }}>
@@ -141,7 +154,12 @@ const BoxTrackIDInput = () => {
         }}
       >
         <span>{t('CurrentBoxTrackIDs')}</span>
-        {selectedBoxTrackID && <BatchUpdateModal id={selectedBoxTrackID} />}
+        {selectedBoxTrackID && (
+          <BatchUpdateModal
+            id={selectedBoxTrackID}
+            updateCurrentPolygonList={(value) => updateCurrentPolygonList(value)}
+          />
+        )}
       </div>
       <div
         style={{
@@ -189,15 +207,24 @@ const AttributeUpdater = ({
   attributeList,
   subAttributeList,
   toolInstance,
+  config,
+  stepList,
+  stepInfo,
+  enableColorPicker,
 }: {
   toolInstance: ICustomToolInstance;
   attributeList: any[]; // TODO
   subAttributeList: any[]; // TODO
+  config: any;
+  stepList: IStepInfo[];
+  stepInfo: IStepInfo;
+  enableColorPicker?: boolean;
 }) => {
   const { selectedBox } = useSingleBox();
   const ptx = useContext(PointCloudContext);
   const { t } = useTranslation();
   const { defaultAttribute } = useAttribute();
+  const dispatch = useDispatch();
 
   const titleStyle = {
     fontWeight: 500,
@@ -210,6 +237,29 @@ const AttributeUpdater = ({
     fontSize: 14,
     fontWeight: 500,
     wordWrap: 'break-word' as any, // WordWrap Type ?
+  };
+
+  const updateColorConfig = (value: string, color: string) => {
+    const attributeList = config?.attributeList?.map((i: any) => {
+      if (i.value === value) {
+        return { ...i, color };
+      }
+      return i;
+    });
+
+    const formatConfig = { ...config, attributeList };
+    const configStr = JSON.stringify(formatConfig);
+    const formatStepList = stepList?.map((i: IStepInfo) => {
+      if (i?.step === stepInfo?.step) {
+        return { ...i, config: configStr };
+      }
+      return i;
+    });
+    ptx?.topViewInstance?.updateAttributeList(attributeList);
+    ptx?.sideViewInstance?.updateAttributeList(attributeList);
+    ptx?.backViewInstance?.updateAttributeList(attributeList);
+    ptx?.mainViewInstance?.setConfig(formatConfig);
+    dispatch(SetTaskStepList({ stepList: formatStepList }));
   };
 
   const setAttribute = (attribute: string) => {
@@ -234,6 +284,8 @@ const AttributeUpdater = ({
         forbidDefault={true}
         selectedAttribute={defaultAttribute ?? ''}
         attributeChanged={(attribute: string) => setAttribute(attribute)}
+        updateColorConfig={updateColorConfig}
+        enableColorPicker={enableColorPicker}
       />
       <Divider style={{ margin: 0 }} />
       {selectedBox && (
@@ -285,13 +337,104 @@ const AttributeUpdater = ({
   );
 };
 
-const PointCloudToolSidebar: React.FC<IProps> = ({ stepInfo, toolInstance, imgList, imgIndex }) => {
-  const { updatePointCloudPattern, pointCloudPattern } = useStatus();
+const renderSegmentTools = [
+  {
+    toolName: 'LassoSelector',
+    commonSvg: LassoSelectorSvg,
+    selectedSvg: LassoSelectorSvgA,
+  },
+  {
+    toolName: 'CircleSelector',
+    commonSvg: CirCleSelectorSvg,
+    selectedSvg: CirCleSelectorSvgA,
+  },
+];
+
+export const PointCloudSegToolIcon = ({ toolInstance }: { toolInstance: ICustomToolInstance }) => {
+  const { ptSegmentInstance } = useContext(PointCloudContext);
+  const [currentTool, setCurrentTool] = useState('LassoSelector');
+  const { t } = useTranslation();
+
+  useEffect(() => {
+    if (!ptSegmentInstance) {
+      return;
+    }
+
+    const updateLassoSelector = () => {
+      setCurrentTool('LassoSelector');
+    };
+
+    const updateCircleSelector = () => {
+      setCurrentTool('CircleSelector');
+    };
+
+    ptSegmentInstance.on('LassoSelector', updateLassoSelector);
+    ptSegmentInstance.on('CircleSelector', updateCircleSelector);
+    return () => {
+      ptSegmentInstance.unbind('LassoSelector', updateLassoSelector);
+      ptSegmentInstance.unbind('CircleSelector', updateCircleSelector);
+    };
+  }, [ptSegmentInstance]);
+
+  return (
+    <div className={`${sidebarCls}__level`}>
+      {renderSegmentTools.map((tool) => {
+        const isSelected = currentTool === tool.toolName;
+        return (
+          <span
+            className={`${sidebarCls}__toolOption`}
+            key={tool.toolName}
+            onClick={() => ptSegmentInstance?.emit(tool.toolName)}
+          >
+            <img
+              className={`${sidebarCls}__singleTool`}
+              src={isSelected ? tool?.selectedSvg : tool?.commonSvg}
+            />
+            <span
+              className={classnames({
+                [`${sidebarCls}__toolOption__selected`]: isSelected,
+              })}
+            >
+              {t(tool.toolName)}
+            </span>
+          </span>
+        );
+      })}
+    </div>
+  );
+};
+
+const PointCloudToolSidebar: React.FC<IProps> = ({
+  stepInfo,
+  toolInstance,
+  imgList,
+  imgIndex,
+  stepList,
+  enableColorPicker,
+}) => {
+  const { updatePointCloudPattern, pointCloudPattern, isPointCloudSegmentationPattern } = useStatus();
 
   const config = jsonParser(stepInfo.config);
   const attributeList = config?.attributeList ?? [];
   const subAttributeList =
     config?.secondaryAttributeConfigurable === true ? config?.inputList ?? [] : [];
+
+  if (isPointCloudSegmentationPattern) {
+    return (
+      <>
+        <PointCloudSegToolIcon toolInstance={toolInstance} />
+        <AttributeUpdater
+          toolInstance={toolInstance}
+          attributeList={attributeList}
+          subAttributeList={subAttributeList}
+          config={config}
+          stepList={stepList}
+          stepInfo={stepInfo}
+          enableColorPicker={enableColorPicker}
+        />
+      </>
+    );
+  }
 
   return (
     <>
@@ -300,18 +443,22 @@ const PointCloudToolSidebar: React.FC<IProps> = ({ stepInfo, toolInstance, imgLi
         selectedToolName={pointCloudPattern}
         onChange={(v) => updatePointCloudPattern?.(v)}
       />
-      {config?.trackConfigurable === true && (
-        <>
-          <AnnotatedBox imgList={imgList} imgIndex={imgIndex} />
-          <BoxTrackIDInput />
-          <Divider style={{ margin: 0 }} />
-        </>
-      )}
       <AttributeUpdater
         toolInstance={toolInstance}
         attributeList={attributeList}
         subAttributeList={subAttributeList}
+        config={config}
+        stepList={stepList}
+        stepInfo={stepInfo}
+        enableColorPicker={enableColorPicker}
       />
+      {config?.trackConfigurable === true && (
+        <>
+          <BoxTrackIDInput />
+          <Divider style={{ margin: 0 }} />
+          <AnnotatedBox imgList={imgList} imgIndex={imgIndex} />
+        </>
+      )}
     </>
   );
 };
@@ -319,12 +466,14 @@ const PointCloudToolSidebar: React.FC<IProps> = ({ stepInfo, toolInstance, imgLi
 const mapStateToProps = (state: AppState) => {
   const stepInfo = StepUtils.getCurrentStepInfo(state.annotation?.step, state.annotation?.stepList);
   const toolInstance = state.annotation?.toolInstance;
+  const stepList = state.annotation?.stepList;
 
   return {
     stepInfo,
     toolInstance,
     imgList: state.annotation.imgList,
     imgIndex: state.annotation.imgIndex,
+    stepList,
   };
 };
 

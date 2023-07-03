@@ -5,7 +5,7 @@
  */
 
 import { IPointCloudBox, IPointCloudConfig, IPointCloudSphere } from './types/pointCloud';
-import { ICoordinate } from './types/common';
+import { ICoordinate, ISize } from './types/common';
 
 class PointCloudUtils {
   public static genColorByCoord(x: number, y: number, z: number) {
@@ -43,6 +43,32 @@ class PointCloudUtils {
     }
   };
 
+  public static parsePointCloudCurrentResult(result: string) {
+    const data = this.jsonParser(result);
+    const DEFAULT_STEP = `step_1`;
+
+    const ptResult = data?.[DEFAULT_STEP] ?? {};
+
+    const boxParamsList = ptResult?.result ?? [];
+    /**
+     * Notice.
+     *
+     * It needs to be compatible with the error data structure(`renderPolygon`), `resultPolygon` is the correct one.
+     */
+    const polygonList = ptResult?.resultPolygon ?? ptResult?.renderPolygon ?? [];
+    const lineList = ptResult?.resultLine ?? [];
+    const sphereParamsList = ptResult?.resultPoint ?? [];
+    const segmentation = ptResult?.segmentation ?? [];
+
+    return {
+      boxParamsList,
+      polygonList,
+      lineList,
+      sphereParamsList,
+      segmentation,
+    };
+  }
+
   public static getBoxParamsFromResultList(result: string): IPointCloudBox[] {
     const data = this.jsonParser(result);
 
@@ -57,6 +83,15 @@ class PointCloudUtils {
 
     const DEFAULT_STEP = `step_1`;
     const pointCloudDataList = data?.[DEFAULT_STEP]?.resultPoint ?? [];
+
+    return pointCloudDataList;
+  }
+
+  public static getSegmentFromResultList(result: string) {
+    const data = this.jsonParser(result);
+
+    const DEFAULT_STEP = `step_1`;
+    const pointCloudDataList = data?.[DEFAULT_STEP]?.segmentation ?? [];
 
     return pointCloudDataList;
   }
@@ -77,6 +112,13 @@ class PointCloudUtils {
       y: -(x - w / 2),
       ...otherProps,
     };
+  };
+
+  public static pointListTransferCanvas2World = (
+    pointList: { x: number; y: number }[] | undefined,
+    size: { width: number; height: number },
+  ) => {
+    return pointList?.map((i) => ({ ...i, ...this.transferCanvas2World(i, size) }));
   };
 
   /**
@@ -353,6 +395,9 @@ class PointCloudUtils {
 
   /**
    * Get the pointCloud result from imgList
+   *
+   * Application Scenarios:
+   * 1. Retrieving basic information such as TrackID.
    * @param param0
    * @returns
    */
@@ -445,6 +490,26 @@ class PointCloudUtils {
     });
 
     return JSON.stringify(originResult);
+  }
+
+  public static batchUpdateTrackIDCheck({
+    newID,
+    result,
+    step = 1,
+  }: {
+    newID: number;
+    result?: string;
+    step?: number;
+  }) {
+    const DEFAULT_STEP_NAME = `step_${step}`;
+    const originResult = this.jsonParser(result);
+    const dataList = originResult?.[DEFAULT_STEP_NAME]?.result;
+
+    if (!dataList) {
+      return false;
+    }
+
+    return dataList.some((v: IPointCloudBox) => v.trackID === newID);
   }
 
   public static batchUpdateResultByTrackID({
@@ -564,25 +629,99 @@ class PointCloudUtils {
 
   /**
    * Get intersection coordinates by slope
-   * @param p1  A point on line1
-   * @param k1  The slope of line1
-   * @param p2  A point on line2
-   * @param k2  The slope of line2
+   * @param p1  A point on line
+   * @param line1  A line parallel to p1
+   * @param p2  A point on line
+   * @param line2  A line parallel to p2
    */
   static getIntersectionBySlope(params: {
     p1: ICoordinate;
-    k1: number;
+    line1: [ICoordinate, ICoordinate];
     p2: ICoordinate;
-    k2: number;
+    line2: [ICoordinate, ICoordinate];
   }) {
-    const { p1, k1, p2, k2 } = params;
+    const { p1, line1, p2, line2 } = params;
     if (p1.x === p2.x && p1.y === p2.y) {
       return p1;
     }
-    const x = (p1.y - p2.y - k1 * p1.x + k2 * p2.x) / (k2 - k1);
-    const y = p1.y - k1 * (p1.x - x);
+
+    let x, y;
+    // When the line is parallel to the coordinate axis
+    if (line1[0].x === line1[1].x) {
+      x = p1.x;
+    }
+    if (line1[0].y === line1[1].y) {
+      y = p1.y;
+    }
+    if (line2[0].x === line2[1].x) {
+      x = p2.x;
+    }
+    if (line2[0].y === line2[1].y) {
+      y = p2.y;
+    }
+
+    const k1 = (line1[0].y - line1[1].y) / (line1[0].x - line1[1].x);
+    const k2 = (line2[0].y - line2[1].y) / (line2[0].x - line2[1].x);
+
+    x = x ?? (p1.y - p2.y - k1 * p1.x + k2 * p2.x) / (k2 - k1);
+    y = y ?? p1.y - k1 * (p1.x - x);
 
     return { x, y };
+  }
+
+  public static getCloudKeys(x: number, y: number, z: number) {
+    return [x, y, z].join('@');
+  }
+
+  public static splitPointsFromIndexes(originIndexes: number[], splitIndexes: number[]) {
+    const splitSet = new Set();
+    for (let i = 0; i < splitIndexes.length; i += 1) {
+      splitSet.add(splitIndexes[i]);
+    }
+
+    const result = [];
+    for (let i = 0; i < originIndexes.length; i += 1) {
+      if (!splitSet.has(originIndexes[i])) {
+        result.push(originIndexes[i]);
+      }
+    }
+
+    return result;
+  }
+
+  public static splitPointsFromPoints(originPoints: Float32Array, splitPoints: Float32Array) {
+    const splitMap = new Map();
+    for (let i = 0; i < splitPoints.length; i += 3) {
+      splitMap.set(
+        PointCloudUtils.getCloudKeys(splitPoints[i], splitPoints[i + 1], splitPoints[i + 2]),
+        1,
+      );
+    }
+
+    const result = [];
+    for (let i = 0; i < originPoints.length; i += 3) {
+      const key = PointCloudUtils.getCloudKeys(
+        originPoints[i],
+        originPoints[i + 1],
+        originPoints[i + 2],
+      );
+      if (!splitMap.has(key)) {
+        result.push(originPoints[i], originPoints[i + 1], originPoints[i + 2]);
+      }
+    }
+
+    return new Float32Array(result);
+  }
+
+  public static getDefaultOrthographicParams(size: ISize) {
+    return {
+      left: -size.width / 2,
+      right: size.width / 2,
+      top: size.height / 2,
+      bottom: -size.height / 2,
+      near: 0.1, // Must more than 0.
+      far: 10000, // Need to set to a larger range, in conjunction with the camera's position on the z-axis.
+    };
   }
 }
 

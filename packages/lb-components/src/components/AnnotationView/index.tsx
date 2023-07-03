@@ -30,6 +30,11 @@ interface IProps {
   globalStyle?: React.CSSProperties; // Custom global style.
 
   afterImgOnLoad?: TAfterImgOnLoad;
+  zoomInfo?: {
+    min: number;
+    max: number;
+    ratio: number;
+  };
 }
 
 const DEFAULT_SIZE = {
@@ -107,6 +112,7 @@ const AnnotationView = (props: IProps, ref: any) => {
         style,
         annotations,
         config: '{}', // TODO，暂时不需要
+        zoomInfo: props.zoomInfo,
       });
 
       viewOperation.current.init();

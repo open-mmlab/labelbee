@@ -28,6 +28,7 @@ interface IPointCloudAnnotationProps {
 
   checkMode?: boolean;
   toolName: THybridToolName;
+  proxyMode?: boolean;
 }
 
 const createEmptyImage = (size: { width: number; height: number }) => {
@@ -56,15 +57,24 @@ export class PointCloudAnnotation implements IPointCloudAnnotationOperation {
 
   public config: IPointCloudConfig;
 
-  constructor({ size, container, pcdPath, extraProps, config, checkMode, toolName }: IPointCloudAnnotationProps) {
-    const defaultOrthographic = this.getDefaultOrthographic(size);
+  constructor({
+    size,
+    container,
+    pcdPath,
+    extraProps,
+    config,
+    checkMode,
+    toolName,
+    proxyMode,
+  }: IPointCloudAnnotationProps) {
+    const defaultOrthographic = PointCloudUtils.getDefaultOrthographicParams(size);
 
     const imgSrc = createEmptyImage(size);
 
     const image = new Image();
     image.src = imgSrc;
 
-    const toolScheduler = new ToolScheduler({ container, size, toolName });
+    const toolScheduler = new ToolScheduler({ container, size, toolName, proxyMode });
     const canvasScheduler = new CanvasScheduler({ container });
 
     // 1. PointCloud initialization
@@ -101,6 +111,7 @@ export class PointCloudAnnotation implements IPointCloudAnnotationOperation {
     } else {
       toolList = toolName as EToolName[];
     }
+
     toolList.forEach((tool, i) => {
       let toolInstance;
       if (tool === EToolName.PointCloudPolygon) {
@@ -112,7 +123,8 @@ export class PointCloudAnnotation implements IPointCloudAnnotationOperation {
         // need to be deleted
         this.pointCloud2dOperation = pointCloudPolygonOperation;
       } else {
-        toolInstance = toolScheduler.createOperation(tool, image, defaultProps);
+        /** Tools can't enable textConfigurable */
+        toolInstance = toolScheduler.createOperation(tool, image, { ...defaultProps, textConfigurable: false });
       }
       if (i === toolList.length - 1) {
         if (!this.toolInstance) {
@@ -136,20 +148,13 @@ export class PointCloudAnnotation implements IPointCloudAnnotationOperation {
     this.pointCloud2dOperation.setConfig(JSON.stringify(config));
   }
 
-  /**
-   * Get default boundary by size.
-   * @param size
-   * @returns
-   */
-  public getDefaultOrthographic(size: ISize) {
-    return {
-      left: -size.width / 2,
-      right: size.width / 2,
-      top: size.height / 2,
-      bottom: -size.height / 2,
-      near: 100,
-      far: -100,
+  // compose attributeList
+  public updateAttributeList(attributeList: IInputList[]) {
+    this.config = {
+      ...this.config,
+      attributeList,
     };
+    this.toolScheduler.syncAllAttributeListInConfig(attributeList);
   }
 
   /**
@@ -167,7 +172,7 @@ export class PointCloudAnnotation implements IPointCloudAnnotationOperation {
     this.pointCloudInstance.initRenderer();
 
     // Update range of orthographicCamera.
-    this.pointCloudInstance.initOrthographicCamera(this.getDefaultOrthographic(size));
+    this.pointCloudInstance.initOrthographicCamera(PointCloudUtils.getDefaultOrthographicParams(size));
 
     this.pointCloudInstance.render();
 
@@ -198,14 +203,21 @@ export class PointCloudAnnotation implements IPointCloudAnnotationOperation {
   }
 
   public updateLineList = (lineList: ILine[]) => {
-    const list = lineList.map((v: ILine) => ({
-      ...v,
-      pointList: v?.pointList?.map((point: IPoint) =>
-        PointCloudUtils.transferWorld2Canvas(point, this.toolInstance.size),
-      ),
-    }));
+    const canvasLineList = (lineList ?? []).map((line) => {
+      const pointList = line.pointList?.map((i) => {
+        return {
+          i,
+          ...PointCloudUtils.transferWorld2Canvas(i, this.toolInstance.size),
+        };
+      });
 
-    this.toolScheduler.updateDataByToolName(EToolName.Line, list);
+      return {
+        ...line,
+        pointList,
+      };
+    });
+
+    this.toolScheduler.updateDataByToolName(EToolName.Line, canvasLineList);
   };
 
   public addLineListOnTopView(result: string) {
@@ -228,6 +240,7 @@ export class PointCloudAnnotation implements IPointCloudAnnotationOperation {
         isRect: true,
         valid: v.valid ?? true,
         attribute: v.attribute,
+        trackID: v?.trackID,
       };
     }) as IPolygonData[];
 
@@ -284,6 +297,7 @@ export class PointCloudAnnotation implements IPointCloudAnnotationOperation {
   public switchToCanvas(toolName: EToolName) {
     const newInstance = this.toolScheduler.switchToCanvas(toolName);
     if (newInstance) {
+      this.toolInstance.eventUnbinding();
       newInstance.eventBinding();
       this.toolInstance = newInstance;
       return newInstance;

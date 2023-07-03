@@ -3,12 +3,13 @@ import { BatchUpdateTrackID } from '@/store/annotation/actionCreators';
 import { composeResultByToolInstance } from '@/store/annotation/reducer';
 import { ToolInstance } from '@/store/annotation/types';
 import { LabelBeeContext, useDispatch } from '@/store/ctx';
-import { AnnotationFileList } from '@/types/data';
+import { AnnotationFileList, IFileItem } from '@/types/data';
 import { IStepInfo } from '@/types/step';
-import { Form, InputNumber, Modal } from 'antd';
+import { Form, InputNumber, Modal, message } from 'antd';
 import React, { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { connect } from 'react-redux';
+import { PointCloudUtils } from '@labelbee/lb-utils';
 
 const layout = {
   labelCol: { span: 8 },
@@ -38,13 +39,21 @@ interface IProps {
   imgList: AnnotationFileList;
   imgIndex: number;
   stepList: IStepInfo[];
+  updateCurrentPolygonList: (value: number) => void;
 }
 
 const inputStyle = {
   width: '80px',
 };
 
-const BatchUpdateModal = ({ id, stepList, imgList, imgIndex, toolInstance }: IProps) => {
+const BatchUpdateModal = ({
+  id,
+  stepList,
+  imgList,
+  imgIndex,
+  toolInstance,
+  updateCurrentPolygonList,
+}: IProps) => {
   const dispatch = useDispatch();
   const [visible, setVisible] = useState(false);
   const [form] = Form.useForm();
@@ -52,16 +61,36 @@ const BatchUpdateModal = ({ id, stepList, imgList, imgIndex, toolInstance }: IPr
 
   const onFinish = (values: any) => {
     // New ImgList without UpdateData
+    const composeImgList = composeResultByToolInstance({
+      toolInstance,
+      imgList,
+      imgIndex,
+      stepList,
+    });
+    if (values.prevPage > values.nextPage) {
+      return;
+    }
+    const rangeComposeImgList = composeImgList.slice(values.prevPage - 1, values.nextPage);
+    const isExisted = rangeComposeImgList.some((v: IFileItem) => {
+      const newTrackID = parseInt(values.newID, 10);
+      return PointCloudUtils.batchUpdateTrackIDCheck({ newID: newTrackID, result: v.result });
+    });
+    if (isExisted) {
+      message.error(t('DuplicateTrackIDsExist'));
+      return;
+    }
     dispatch(
       BatchUpdateTrackID({
         id,
         newID: values.newID,
         rangeIndex: [values.prevPage - 1, values.nextPage - 1],
         // TODO: Not to submit result, just to compose result.
-        imgList: composeResultByToolInstance({ toolInstance, imgList, imgIndex, stepList }),
+        imgList: composeImgList,
       }),
     );
+    const newTrackID = parseInt(values.newID, 10);
     setVisible(false);
+    updateCurrentPolygonList(newTrackID);
   };
 
   const onCancel = () => setVisible(false);
