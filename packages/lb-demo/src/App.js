@@ -21,6 +21,8 @@ import {
 } from './mock/index';
 import { getDependStepList, getStepList } from './mock/taskConfig';
 import car1 from './mock/cuboidImages/1.png';
+import { EToolName } from '@labelbee/lb-annotation';
+import {LLMToolQa,LLMToolResult} from './mock/LLMTool'
 
 const App = () => {
   const tool = qs.parse(window.location.search, { ignoreQueryPrefix: true, comma: true }).tool;
@@ -45,16 +47,30 @@ const App = () => {
       });
     }
 
+    if(EToolName.LLM===tool){
+      return srcList.map((url, i) => ({
+        ...extraData,
+        id: i + 1,
+        url,
+        result: JSON.stringify(LLMToolResult.step_1.result.map((item) => i + 1 + item.answer)),
+        questionList: {
+          ...LLMToolQa,
+          question: `第${i + 1}页-${LLMToolQa.question}`,
+          answerList: LLMToolQa.answerList.map((list) => ({ ...list, answer: i + 1 + list.answer })),
+        },
+      }));
+    }
+
     return srcList.map((url, i) => ({
       ...extraData,
       id: i + 1,
       url,
       result: isSingleTool ? getMockResult(tool) : '',
+      questionList: LLMToolQa
     }));
   };
 
   const [fileList] = useState(getMockList());
-
   const [data, setData] = useState(DEFAULT_ANNOTATIONS);
 
   const onChange = (type, ids) => {

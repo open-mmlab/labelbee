@@ -225,7 +225,22 @@
     "PointCloudHideSegmentInvalid": "Unavailable in focus mode",
     "PointCloudHideFocusInvalid_hide": "Focus mode is not available, please show the marked point first",
     "PointCloudHideFocusInvalid_none": "Focus mode is not available, please select the marker to be focused first",
-    "Palette": "Palette"
+    "Palette": "Palette",
+    "EfficientListening": "The task is marked in the efficiency monitoring...",
+    "Title":"Title",
+    "Answer":"Answer",
+    "Finished":"Finished",
+    "Unfinished":"Unfinished",
+    "OverallScore":"OverallScore",
+    "NoScoringScale":"NoScoringScale",
+    "Best":"Best",
+    "Worst":"Worst",
+    "RankingQualityOfAnswers":"RankingQualityOfAnswers",
+    "ToBeSorted":"ToBeSorted",
+    "Yes":"Yes",
+    "No":"No",
+    "AdditionalContent":"AdditionalContent",
+    "Submit":"Submit"
   },
   "cn": {
     "TextInput": "文本输入",
@@ -453,6 +468,21 @@
     "PointCloudHideSegmentInvalid": "隐藏已标注不可用，请先关闭聚焦",
     "PointCloudHideFocusInvalid_hide": "聚焦不可用，请先关闭“隐藏已标注”",
     "PointCloudHideFocusInvalid_none": "聚焦不可用，请先选择需要聚焦的标记",
-    "Palette": "调色盘"
+    "Palette": "调色盘",
+    "EfficientListening": "该任务标注效率监控中...",
+    "Title":"题目",
+    "Answer":"回答",
+    "Finished":"已完成",
+    "Unfinished":"未完成",
+    "OverallScore":"整体评分",
+    "NoScoringScale":"暂未添加评分标准",
+    "Best":"最好",
+    "Worst":"最差",
+    "RankingQualityOfAnswers":"请对每个回答的质量进行排序",
+    "ToBeSorted":"待排序",
+    "Yes":"是",
+    "No":"否",
+    "AdditionalContent":"（选填）请填写任何你对答案的评价或其他补充内容",
+    "Submit":"提交"
   }
 }

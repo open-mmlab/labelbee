@@ -1598,9 +1598,9 @@ $headerHeight: 40px;
           flex-direction: column;
           justify-content: flex-start;
           overflow-y: scroll;
-          
+
           &::-webkit-scrollbar {
-            display: none;  
+            display: none;
           }
 
           .#{$ptPrefix}-3d-view {
@@ -1789,19 +1789,165 @@ $ptToolHeight: 40px;
   justify-content: flex-end;
   align-items: center;
   background-color: rgb(102, 102, 102);
-  .#{$ptPrefix}-toolbox{
-    margin-left:16px;
-    display:flex;
-    align-items:center;
-    justify-content:center;
-    cursor:pointer;
-    img{
-      height:24px;
-      width:24px;
+  .#{$ptPrefix}-toolbox {
+    margin-left: 16px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    img {
+      height: 24px;
+      width: 24px;
     }
   }
 }
 
+/** LLM style */
+.#{$prefix}-LLMCheckContext {
+  height: calc(100vh - 61px);
+}
+.#{$prefix}-LLMView {
+  height: 100%;
+  background-color: #ffffff;
+  overflow-y: auto;
+  flex: auto;
+
+  .ant-layout {
+    flex: 1;
+  }
+
+  &__textBox {
+    padding: 24px;
+  }
+
+  &__title {
+    font-weight: 500;
+    font-size: 18px;
+    margin-bottom: 24px;
+  }
+
+  &__content {
+    font-weight: 500;
+    font-size: 14px;
+    display: flex;
+    margin-bottom: 24px;
+    min-width: 240px;
+    padding: 16px;
+  }
+
+  &__contentActive {
+    background-color: #eeefff;
+    border: 1px solid #666fff;
+  }
+}
+.#{$prefix}-LLMSidebar {
+  overflow-y: auto;
+}
+
+.#{$prefix}-LLMSidebar-contentBox {
+  display: flex;
+  align-items: center;
+  margin-bottom: 16px;
+
+  &__title {
+    font-weight: 500;
+    font-size: 16px;
+    width: 100%;
+    line-height: 46px;
+  }
+
+  &__navigation {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    font-size: 14px;
+    height: 46px;
+  }
+
+  &__answerBox {
+    display: flex;
+    border: 1px dashed #d9d9d9;
+    border-radius: 4px;
+    flex: 1;
+    min-height: 46px;
+  }
+
+  &__answerTag {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    width: 40px;
+    height: 40px;
+    background-color: #ebebeb;
+    font-size: 14px;
+    color: #333333;
+    margin: 4px;
+    cursor: pointer;
+  }
+
+  &__answerTagGhost {
+    border: 1px dashed #d9d9d9;
+    background: none;
+  }
+}
+
+.#{$prefix}-LLMSidebar-contentBox-sortableHelper {
+  background-color: #8c9aff;
+  cursor: row-resize;
+  z-index: 100;
+  cursor: pointer;
+}
+
+.#{$prefix}-LLMSidebar-panel {
+  padding: 16px;
+
+  .ant-collapse-header {
+    padding: 0px 16px !important;
+    margin-bottom: 12px;
+  }
+  .ant-collapse-content > .ant-collapse-content-box {
+    padding: 0;
+  }
+}
+
+.#{$prefix}-LLMSidebar-errorPanel {
+  .ant-collapse-header {
+    border: 1px solid #f26549;
+    border-radius: 2px;
+  }
+}
+
+.#{$prefix}-LLMSidebar-panelHover {
+  .ant-collapse-header {
+    background-color: #eeefff;
+  }
+}
+
+/** longText style */
+.#{$prefix}-longText {
+  display: flex;
+  align-items: center;
+  .moreIcon {
+    color: #999;
+    cursor: pointer;
+  }
+  .ant-popover-open {
+    color: #1664ff;
+  }
+}
+
+.#{$prefix}-longText-text {
+  text-overflow: ellipsis;
+}
+
+.#{$prefix}-longText-popover {
+  .ant-popover-inner-content {
+    max-width: 300px;
+    max-height: 400px;
+    overflow: auto;
+    word-break: break-all;
+  }
+}
 /** PointCloud样式 end */
 
 $predictTrackingPrefix: #{$prefix}-point-cloud-predict-tracking;
