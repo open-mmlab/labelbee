@@ -102,7 +102,11 @@ const AnswerSort = (props: IProps) => {
   const middlePoint = (P1: IPoint, P2: IPoint) => {
     return { x: (P1.x + P2.x) / 2, y: (P1.y + P2.y) / 2 };
   };
-  const compareDistance = (sourceTagCenterPoint: IPoint, tagVertexPoint: ITagPoints) => {
+
+  const getMinDistanceBySideCenterPoint = (
+    sourceTagCenterPoint: IPoint,
+    tagVertexPoint: ITagPoints,
+  ) => {
     // top
     const toTopDistance = MathUtils.getLineLength(
       sourceTagCenterPoint,
@@ -125,6 +129,15 @@ const AnswerSort = (props: IProps) => {
     );
 
     const minDistance = Math.min(toTopDistance, toRightDistance, toBottompDistance, toLeftDistance);
+    return { minDistance, toTopDistance, toRightDistance, toBottompDistance, toLeftDistance };
+  };
+
+  const setActivateDirectionBycompareDistance = (
+    sourceTagCenterPoint: IPoint,
+    tagVertexPoint: ITagPoints,
+  ) => {
+    const { minDistance, toTopDistance, toRightDistance, toBottompDistance, toLeftDistance } =
+      getMinDistanceBySideCenterPoint(sourceTagCenterPoint, tagVertexPoint);
 
     switch (minDistance) {
       case toTopDistance:
@@ -217,7 +230,7 @@ const AnswerSort = (props: IProps) => {
       }
       setTargetTagKey(tagNearest[0]?.id);
       if (tagNearest[0]?.tagVertexPoint && sourceTagCenterPoint) {
-        compareDistance(sourceTagCenterPoint, tagNearest[0]?.tagVertexPoint);
+        setActivateDirectionBycompareDistance(sourceTagCenterPoint, tagNearest[0]?.tagVertexPoint);
       }
     }
   };

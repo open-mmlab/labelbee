@@ -100,6 +100,9 @@ interface IToolHeaderProps {
   stepInfo: IStepInfo;
   stepList: IStepInfo[];
   step: number;
+  hasLangNode: boolean;
+  hasHeaderOption: boolean;
+  hasPredictTrackingIcon: boolean;
 }
 
 const ToolHeader: React.FC<IToolHeaderProps> = ({
@@ -113,14 +116,15 @@ const ToolHeader: React.FC<IToolHeaderProps> = ({
   stepList,
   step,
   annotationEngine,
-  toolName,
+  hasLangNode,
+  hasHeaderOption,
+  hasPredictTrackingIcon,
 }) => {
   const dispatch = useDispatch();
   const [, forceUpdate] = useReducer((x) => x + 1, 0);
   const ref = useRef(null);
 
   const size = useSize(ref);
-  const isLLMTool = EToolName.LLM === toolName;
 
   // render 数据展示
   const currentOption = <ExportData exportData={exportData} />;
@@ -158,11 +162,11 @@ const ToolHeader: React.FC<IToolHeaderProps> = ({
     </>
   );
 
-  const headerOptionNode = !isLLMTool && <HeaderOption stepInfo={stepInfo} />;
+  const headerOptionNode = hasHeaderOption ? <HeaderOption stepInfo={stepInfo} /> : null;
 
   const PointCloudSwitchPattern = SwitchPattern;
 
-  const langNode = !isLLMTool && (
+  const langNode = (
     <div className={`${prefix}-header__lang`}>
       <span
         className={`${prefix}-langCN ${curLang === 'cn' ? 'active' : ''}`}
@@ -182,8 +186,8 @@ const ToolHeader: React.FC<IToolHeaderProps> = ({
 
   const rightActions = (
     <>
-      {!isLLMTool && <PredictTrackingIcon />}
-      {langNode}
+      {hasPredictTrackingIcon && <PredictTrackingIcon />}
+      {hasLangNode && langNode}
     </>
   );
 
