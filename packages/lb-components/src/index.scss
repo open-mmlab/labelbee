@@ -1898,6 +1898,20 @@ $ptToolHeight: 40px;
   cursor: pointer;
 }
 
+.#{$prefix}-LLMSidebar-indicatorScore {
+  display: flex;
+  align-items: center;
+}
+
+.#{$prefix}-LLMSidebar-indicatorScore-title {
+  .ant-popover-inner-content {
+    max-width: 300px;
+    max-height: 400px;
+    overflow: auto;
+    word-break: break-all;
+  }
+}
+
 .#{$prefix}-LLMSidebar-panel {
   padding: 16px;
 

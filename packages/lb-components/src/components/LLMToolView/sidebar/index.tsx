@@ -154,7 +154,6 @@ const Sidebar: React.FC<IProps> = (props) => {
             <AnswerList
               list={answerList}
               LLMConfig={LLMConfig}
-              setHoverKey={setHoverKey}
               updateValue={updateValue}
               checkMode={checkMode}
             />

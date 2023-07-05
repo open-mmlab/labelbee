@@ -26,7 +26,6 @@ interface IProps {
   list?: IAnswerList[];
   checkMode?: boolean;
   LLMConfig?: ILLMToolConfig;
-  setHoverKey: (value: number) => void;
   updateValue: ({
     order,
     value,
@@ -191,14 +190,18 @@ const AnswerList = (props: IProps) => {
               indicatorScore.map((item: IndicatorScore, index: number) => {
                 const { label, text, value, score } = item;
                 const renderTitle = (
-                  <span style={{ display: 'flex', alignItems: 'center' }}>
+                  <div className={`${LLMSidebarCls}-indicatorScore`}>
                     <LongText text={label} openByText={true} />
                     {text && (
-                      <Popover placement='bottom' content={text}>
+                      <Popover
+                        placement='bottom'
+                        content={text}
+                        overlayClassName={`${LLMSidebarCls}-indicatorScore-title`}
+                      >
                         <InfoCircleOutlined style={{ margin: '0px 4px', cursor: 'pointer' }} />
                       </Popover>
                     )}
-                  </span>
+                  </div>
                 );
                 return label && score ? (
                   <ScoreGroupButton

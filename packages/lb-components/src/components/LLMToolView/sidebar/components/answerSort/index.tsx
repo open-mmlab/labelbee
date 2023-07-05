@@ -3,7 +3,7 @@
  * @Author: lixinghua lixinghua@sensetime.com
  * @Date: 2023-04-10
  */
-import React, { useReducer, useEffect, useState } from 'react';
+import React, { useReducer, useEffect, useState, useContext } from 'react';
 import { prefix } from '@/constant';
 import { Tag } from 'antd';
 import { useTranslation } from 'react-i18next';
@@ -12,6 +12,7 @@ import { classnames } from '@/utils';
 import { cloneDeep, isArray } from 'lodash';
 import { IAnswerSort, IWaitAnswerSort } from '@/components/LLMToolView/types';
 import { MathUtils } from '@labelbee/lb-annotation';
+import { LLMContext } from '@/store/ctx';
 
 interface IProps {
   setSortList: (value: IAnswerSort[][]) => void;
@@ -57,7 +58,7 @@ const Navigation = () => {
 const AnswerSort = (props: IProps) => {
   const [, forceUpdate] = useReducer((x) => x + 1, 0);
   const { sortList, setSortList, waitSortList, checkMode } = props;
-
+  const { hoverKey, setHoverKey } = useContext(LLMContext);
   const isDisableAll = checkMode;
   const [activateDirection, setActivateDirection] = useState<EDirection | undefined>(undefined);
   const [targetTagKey, setTargetTagKey] = useState<number | undefined>(undefined);
@@ -92,6 +93,12 @@ const AnswerSort = (props: IProps) => {
         })}
         style={targetTagKey === item?.id && activateDirection ? borderStyle : undefined}
         draggable={isDisableAll ? '' : 'true'}
+        onMouseMove={() => {
+          setHoverKey(item.id);
+        }}
+        onMouseLeave={() => {
+          setHoverKey(-1);
+        }}
         {...operation}
       >
         {item?.title}
