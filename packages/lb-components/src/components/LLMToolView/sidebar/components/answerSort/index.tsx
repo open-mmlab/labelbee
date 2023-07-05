@@ -58,7 +58,7 @@ const Navigation = () => {
 const AnswerSort = (props: IProps) => {
   const [, forceUpdate] = useReducer((x) => x + 1, 0);
   const { sortList, setSortList, waitSortList, checkMode } = props;
-  const { hoverKey, setHoverKey } = useContext(LLMContext);
+  const { setHoverKey } = useContext(LLMContext);
   const isDisableAll = checkMode;
   const [activateDirection, setActivateDirection] = useState<EDirection | undefined>(undefined);
   const [targetTagKey, setTargetTagKey] = useState<number | undefined>(undefined);
