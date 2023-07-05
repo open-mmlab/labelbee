@@ -177,8 +177,10 @@ const Sidebar: React.FC<IProps> = (props) => {
                   onChange={(e) => {
                     setText(e.target.value);
                   }}
-                  maxLength={300}
+                  maxLength={1000}
                   disabled={checkMode}
+                  showCount={true}
+                  style={{ width: '100%' }}
                 />
               </div>
             </div>
