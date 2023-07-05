@@ -35,7 +35,7 @@ const LLMLayout: React.FC<AppProps & IProps> = (props) => {
             [`${prefix}-LLMCheckContext`]: !!props.checkMode,
           })}
         >
-          <LLMToolView checkMode={props.checkMode} setHoverKey={setHoverKey} />
+          <LLMToolView checkMode={props.checkMode} />
           <ToolFooter style={props.style?.footer} mode={props.mode} footer={props?.footer} />
         </Content>
 

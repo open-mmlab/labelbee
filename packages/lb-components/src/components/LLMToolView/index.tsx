@@ -20,13 +20,12 @@ import { IAnswerList } from './types';
 interface IProps {
   checkMode?: boolean;
   annotation?: any;
-  setHoverKey: (value: number) => void;
 }
 const { Sider } = Layout;
 const LLMViewCls = `${prefix}-LLMView`;
 const layoutCls = `${prefix}-layout`;
 const LLMToolView: React.FC<IProps> = (props) => {
-  const { annotation, setHoverKey, checkMode } = props;
+  const { annotation, checkMode } = props;
   const { imgIndex, imgList, stepList, step } = annotation;
   const { hoverKey } = useContext(LLMContext);
   const [answerList, setAnswerList] = useState<IAnswerList[]>([]);
@@ -65,7 +64,7 @@ const LLMToolView: React.FC<IProps> = (props) => {
       <QuestionView hoverKey={hoverKey} question={question} answerList={answerList} />
       {LLMStepConfig && LLMStepConfig !== '{}' && (
         <Sider className={`${layoutCls}__side`} width={600}>
-          <LLMSidebar setHoverKey={setHoverKey} checkMode={checkMode} />
+          <LLMSidebar checkMode={checkMode} />
         </Sider>
       )}
     </Layout>

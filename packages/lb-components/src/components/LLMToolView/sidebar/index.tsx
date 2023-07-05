@@ -25,7 +25,6 @@ import { formatSort, getCurrentResultFromResultList } from '../utils/data';
 interface IProps {
   annotation?: any;
   dispatch: any;
-  setHoverKey: (value: number) => void;
   checkMode?: boolean;
 }
 
@@ -40,7 +39,7 @@ const sidebarCls = `${prefix}-sidebar`;
 const contentBoxCls = `${prefix}-LLMSidebar-contentBox`;
 
 const Sidebar: React.FC<IProps> = (props) => {
-  const { annotation, setHoverKey, dispatch, checkMode } = props;
+  const { annotation, dispatch, checkMode } = props;
   const { imgIndex, imgList, stepList, step, skipBeforePageTurning } = annotation;
   const { t } = useTranslation();
   const currentData = imgList[imgIndex] ?? {};
@@ -72,7 +71,7 @@ const Sidebar: React.FC<IProps> = (props) => {
       setAnswerList(qaData.answerList || []);
     }
     setText(result?.textAttribute);
-  }, [imgIndex]);
+  }, [imgIndex, currentData]);
 
   useEffect(() => {
     toolInstanceRef.current.exportData = () => {
