@@ -20,6 +20,7 @@ import {
   IAnswerList,
 } from '@/components/LLMToolView/types';
 import { isBoolean } from 'lodash';
+import LongText from '@/components/longText';
 
 interface IProps {
   list?: IAnswerList[];
@@ -190,11 +191,11 @@ const AnswerList = (props: IProps) => {
               indicatorScore.map((item: IndicatorScore, index: number) => {
                 const { label, text, value, score } = item;
                 const renderTitle = (
-                  <span>
-                    {label}
+                  <span style={{ display: 'flex', alignItems: 'center' }}>
+                    <LongText text={label} openByText={true} />
                     {text && (
                       <Popover placement='bottom' content={text}>
-                        <InfoCircleOutlined style={{ marginLeft: '8px', cursor: 'pointer' }} />
+                        <InfoCircleOutlined style={{ margin: '0px 4px', cursor: 'pointer' }} />
                       </Popover>
                     )}
                   </span>
