@@ -22,10 +22,13 @@ import {
 import { getDependStepList, getStepList } from './mock/taskConfig';
 import car1 from './mock/cuboidImages/1.png';
 import { EToolName } from '@labelbee/lb-annotation';
-import {LLMToolQa,LLMToolResult} from './mock/LLMTool'
+import { LLMToolQa, LLMToolResult } from './mock/LLMTool';
 
 const App = () => {
-  const tool = qs.parse(window.location.search, { ignoreQueryPrefix: true, comma: true }).tool;
+  const tool = qs.parse(window.location.search, {
+    ignoreQueryPrefix: true,
+    comma: true,
+  }).tool;
 
   const isSingleTool = !Array.isArray(tool);
   const stepList = isSingleTool ? getStepList(tool) : getDependStepList(tool);
@@ -47,7 +50,7 @@ const App = () => {
       });
     }
 
-    if(EToolName.LLM===tool){
+    if (EToolName.LLM === tool) {
       return srcList.map((url, i) => ({
         ...extraData,
         id: i + 1,
@@ -55,8 +58,11 @@ const App = () => {
         result: JSON.stringify(LLMToolResult.step_1.result.map((item) => i + 1 + item.answer)),
         questionList: {
           ...LLMToolQa,
-          question: `第${i + 1}页-${LLMToolQa.question}`,
-          answerList: LLMToolQa.answerList.map((list) => ({ ...list, answer: i + 1 + list.answer })),
+          question: `${i + 1}-${LLMToolQa.question}`,
+          answerList: LLMToolQa.answerList.map((list) => ({
+            ...list,
+            answer: i + 1 + list.answer,
+          })),
         },
       }));
     }
@@ -66,7 +72,7 @@ const App = () => {
       id: i + 1,
       url,
       result: isSingleTool ? getMockResult(tool) : '',
-      questionList: LLMToolQa
+      questionList: LLMToolQa,
     }));
   };
 
@@ -97,7 +103,11 @@ const App = () => {
   if (tool === 'annotationView') {
     return (
       <div>
-        <div style={{ height: 1000 }}>
+        <div
+          style={{
+            height: 1000,
+          }}
+        >
           <AnnotationView
             src={car1}
             annotations={data}
@@ -110,8 +120,8 @@ const App = () => {
               height: 720,
             }}
             onChange={onChange}
-          />
-        </div>
+          />{' '}
+        </div>{' '}
       </div>
     );
   }
@@ -138,7 +148,7 @@ const App = () => {
     return <Annotation fileList={fileList} goBack={goBack} stepList={stepList} step={1} />;
   }
 
-  return <div className='App'></div>;
+  return <div className='App'> </div>;
 };
 
 export default App;
