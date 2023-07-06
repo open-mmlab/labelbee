@@ -16,8 +16,8 @@
     "build": "rm -fr dist && cross-env NODE_ENV=production rollup -c rollup.config.js && npm run build:type",
     "build:type": "tsc --emitDeclarationOnly",
     "commit": "git-cz",
-    "lint": "eslint 'src/**/*.{ts,tsx,js,jsx}' && npm run build:type",
-    "lint:fix": "eslint 'src/**/*.{ts,tsx,js,jsx}' --fix",
+    "lint": "eslint src --ext .ts,.tsx,.js,.jsx && npm run build:type",
+    "lint:fix": "eslint src --ext .ts,.tsx,.js,.jsx --fix",
     "commitmsg": "commitlint -e $GIT_PARAMS"
   },
   "author": "laoluo",
