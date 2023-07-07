@@ -184,20 +184,22 @@ const Sidebar: React.FC<IProps> = (props) => {
             </div>
           )}
           <div style={{ margin: '24px 16px', display: 'flex' }}>
-            <Button
-              type='primary'
-              style={{ marginLeft: 'auto' }}
-              onClick={() => {
-                if (skipBeforePageTurning) {
-                  skipBeforePageTurning(() => dispatch(PageForward()));
-                  return;
-                }
-                dispatch(PageForward());
-              }}
-              disabled={checkMode}
-            >
-              {t('Submit')}
-            </Button>
+            {imgList?.length - 1 !== imgIndex && (
+              <Button
+                type='primary'
+                style={{ marginLeft: 'auto' }}
+                onClick={() => {
+                  if (skipBeforePageTurning) {
+                    skipBeforePageTurning(() => dispatch(PageForward()));
+                    return;
+                  }
+                  dispatch(PageForward());
+                }}
+                disabled={checkMode}
+              >
+                {t('Submit')}
+              </Button>
+            )}
           </div>
         </div>
       </div>
