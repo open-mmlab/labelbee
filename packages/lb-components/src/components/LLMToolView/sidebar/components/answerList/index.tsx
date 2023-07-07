@@ -57,7 +57,7 @@ const AnswerList = (props: IProps) => {
 
     let finishStatus = ETagType.Default;
     if (score) {
-      if (!i.score) {
+      if (!i.score || i?.score > score) {
         finishStatus = ETagType.UnFinish;
         return finishStatus;
       }
@@ -65,7 +65,8 @@ const AnswerList = (props: IProps) => {
     }
     if (indicatorScore?.length > 0) {
       const scoreUnFinish = indicatorScore.some(
-        (item: IndicatorScore) => !i?.indicatorScore?.[item.value],
+        (item: IndicatorScore) =>
+          !i?.indicatorScore?.[item.value] || i?.indicatorScore?.[item.value] > Number(item?.score),
       );
       if (scoreUnFinish) {
         finishStatus = ETagType.UnFinish;
