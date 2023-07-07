@@ -1803,9 +1803,19 @@ $ptToolHeight: 40px;
 }
 
 /** LLM style */
+
+.#{$prefix}-LLMLayout {
+  overflow: hidden;
+}
+
 .#{$prefix}-LLMCheckContext {
   height: calc(100vh - 61px);
 }
+.#{$prefix}-LLMView-question {
+  flex: 1;
+  overflow: hidden;
+}
+
 .#{$prefix}-LLMView {
   height: 100%;
   background-color: #ffffff;
@@ -1870,6 +1880,7 @@ $ptToolHeight: 40px;
     border-radius: 4px;
     flex: 1;
     min-height: 46px;
+    flex-wrap: wrap;
   }
 
   &__answerTag {
