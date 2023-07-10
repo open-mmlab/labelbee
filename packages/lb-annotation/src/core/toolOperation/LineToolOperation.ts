@@ -945,8 +945,10 @@ class LineToolOperation extends BasicToolOperation {
       return false;
     }
 
-    const allPointsInRange = this.activeLine?.every((i) => {
-      return this.isInBasicPolygon({ x: i.x + offsetX, y: i.y + offsetY });
+    const allPointsInRange = this.selectedLines?.every((i) => {
+      return i.pointList?.every((point) => {
+        return this.isInBasicPolygon({ x: point.x + offsetX, y: point.y + offsetY });
+      });
     });
 
     if (allPointsInRange) {
