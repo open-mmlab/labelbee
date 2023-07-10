@@ -499,7 +499,7 @@ export class CoordinateUtils {
       return this.getAbsCoord(intersection?.point);
     }
 
-    return curCoord;
+    return preCoord;
   }
 
   public coordInsideImage(coord: ICoordinate) {
