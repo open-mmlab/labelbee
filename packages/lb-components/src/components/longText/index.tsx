@@ -36,13 +36,18 @@ const LongText = (props: IProps) => {
   const el = useRef<null | HTMLDivElement>(null);
   useSize(el);
   const isOverflow = el.current && el.current?.clientWidth < el.current?.scrollWidth;
-  if (wordCount && text?.length > wordCount) {
-    const showText = text.slice(0, wordCount);
-    return (
-      <Popover placement={placement} overlayClassName={`${longTextCls}-popover`} content={text}>
-        <div className={`${longTextCls}-text`}>{showText}...</div>
-      </Popover>
-    );
+
+  if (wordCount) {
+    if (text?.length > wordCount) {
+      const showText = text.slice(0, wordCount);
+      return (
+        <Popover placement={placement} overlayClassName={`${longTextCls}-popover`} content={text}>
+          <span style={{ cursor: 'pointer' }}>{showText}...</span>
+        </Popover>
+      );
+    } else {
+      return <div> {text}</div>;
+    }
   }
 
   if (openByText) {

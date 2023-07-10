@@ -1803,9 +1803,19 @@ $ptToolHeight: 40px;
 }
 
 /** LLM style */
+
+.#{$prefix}-LLMLayout {
+  overflow: hidden;
+}
+
 .#{$prefix}-LLMCheckContext {
   height: calc(100vh - 61px);
 }
+.#{$prefix}-LLMView-question {
+  flex: 1;
+  overflow: hidden;
+}
+
 .#{$prefix}-LLMView {
   height: 100%;
   background-color: #ffffff;
@@ -1870,6 +1880,7 @@ $ptToolHeight: 40px;
     border-radius: 4px;
     flex: 1;
     min-height: 46px;
+    flex-wrap: wrap;
   }
 
   &__answerTag {
@@ -1896,6 +1907,20 @@ $ptToolHeight: 40px;
   cursor: row-resize;
   z-index: 100;
   cursor: pointer;
+}
+
+.#{$prefix}-LLMSidebar-indicatorScore {
+  display: flex;
+  align-items: center;
+}
+
+.#{$prefix}-LLMSidebar-indicatorScore-title {
+  .ant-popover-inner-content {
+    max-width: 300px;
+    max-height: 400px;
+    overflow: auto;
+    word-break: break-all;
+  }
 }
 
 .#{$prefix}-LLMSidebar-panel {
@@ -1937,6 +1962,8 @@ $ptToolHeight: 40px;
 }
 
 .#{$prefix}-longText-text {
+  white-space: nowrap;
+  overflow: hidden;
   text-overflow: ellipsis;
 }
 

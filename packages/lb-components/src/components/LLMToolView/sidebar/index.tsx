@@ -25,7 +25,6 @@ import { formatSort, getCurrentResultFromResultList } from '../utils/data';
 interface IProps {
   annotation?: any;
   dispatch: any;
-  setHoverKey: (value: number) => void;
   checkMode?: boolean;
 }
 
@@ -40,7 +39,7 @@ const sidebarCls = `${prefix}-sidebar`;
 const contentBoxCls = `${prefix}-LLMSidebar-contentBox`;
 
 const Sidebar: React.FC<IProps> = (props) => {
-  const { annotation, setHoverKey, dispatch, checkMode } = props;
+  const { annotation, dispatch, checkMode } = props;
   const { imgIndex, imgList, stepList, step, skipBeforePageTurning } = annotation;
   const { t } = useTranslation();
   const currentData = imgList[imgIndex] ?? {};
@@ -72,7 +71,7 @@ const Sidebar: React.FC<IProps> = (props) => {
       setAnswerList(qaData.answerList || []);
     }
     setText(result?.textAttribute);
-  }, [imgIndex]);
+  }, [imgIndex, currentData]);
 
   useEffect(() => {
     toolInstanceRef.current.exportData = () => {
@@ -154,7 +153,6 @@ const Sidebar: React.FC<IProps> = (props) => {
             <AnswerList
               list={answerList}
               LLMConfig={LLMConfig}
-              setHoverKey={setHoverKey}
               updateValue={updateValue}
               checkMode={checkMode}
             />
@@ -177,27 +175,31 @@ const Sidebar: React.FC<IProps> = (props) => {
                   onChange={(e) => {
                     setText(e.target.value);
                   }}
-                  maxLength={300}
+                  maxLength={1000}
                   disabled={checkMode}
+                  showCount={true}
+                  style={{ width: '100%' }}
                 />
               </div>
             </div>
           )}
           <div style={{ margin: '24px 16px', display: 'flex' }}>
-            <Button
-              type='primary'
-              style={{ marginLeft: 'auto' }}
-              onClick={() => {
-                if (skipBeforePageTurning) {
-                  skipBeforePageTurning(() => dispatch(PageForward()));
-                  return;
-                }
-                dispatch(PageForward());
-              }}
-              disabled={checkMode}
-            >
-              {t('Submit')}
-            </Button>
+            {imgList?.length - 1 !== imgIndex && (
+              <Button
+                type='primary'
+                style={{ marginLeft: 'auto' }}
+                onClick={() => {
+                  if (skipBeforePageTurning) {
+                    skipBeforePageTurning(() => dispatch(PageForward()));
+                    return;
+                  }
+                  dispatch(PageForward());
+                }}
+                disabled={checkMode}
+              >
+                {t('Submit')}
+              </Button>
+            )}
           </div>
         </div>
       </div>
