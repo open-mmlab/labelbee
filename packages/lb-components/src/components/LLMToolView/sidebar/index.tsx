@@ -92,10 +92,9 @@ const Sidebar: React.FC<IProps> = (props) => {
   }, [answerList, sortList, text]);
 
   const getWaitSortList = (answerList: IAnswerList[]) => {
-    setSortList([]);
+    let waitSorts: IWaitAnswerSort[] = [];
+    let newSort: IAnswerSort[][] = [];
     if (answerList?.length > 0) {
-      let waitSorts: IWaitAnswerSort[] = [];
-      let newSort: IAnswerSort[][] = [];
       // 将[[1],[2,3]]格式转成[[{ title: 1, id: 1 }],[{...},{...}]]
       const result = getCurrentResultFromResultList(currentData?.result);
       const currentResult = result?.length > 0 ? result[0] : result;
@@ -107,7 +106,6 @@ const Sidebar: React.FC<IProps> = (props) => {
           }
           return [...i, tagColumn];
         }, []);
-        setSortList(newSort);
       }
       // 待排序容器需要过滤已排序容器存在的答案
       answerList.forEach((i: IAnswerList) => {
@@ -122,8 +120,9 @@ const Sidebar: React.FC<IProps> = (props) => {
         }
         waitSorts.push({ title: i.order, id: i.order });
       });
-      setWaitSortList(waitSorts);
     }
+    setSortList(newSort);
+    setWaitSortList(waitSorts);
   };
 
   const updateValue = ({ order, value, key }: IConfigUpdate) => {
