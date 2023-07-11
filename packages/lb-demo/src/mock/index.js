@@ -32,10 +32,10 @@ import calib2 from './pointCloud/calib/P2/2.json';
 export const fileList = [car1, car2, car3, car4, car5];
 // export const fileList = [img1, img2, img3, img4];
 export const videoList = [
-  'http://127.0.0.1:8080/a.mp4',
-  'http://127.0.0.1:8080/d.mp4',
-  'http://127.0.0.1:8080/c.mp4',
-  'http://127.0.0.1:8080/e.mp4',
+  'https://joy1.videvo.net/videvo_files/video/free/2014-12/small_watermarked/Raindrops_Videvo_preview.webm',
+  'https://joy1.videvo.net/videvo_files/video/free/2015-06/small_watermarked/Raindrops_Macro1_Videvo_preview.webm',
+  'https://joy1.videvo.net/videvo_files/video/free/2015-06/small_watermarked/Raindrops_Macro2_Videvo_preview.webm',
+  'https://joy1.videvo.net/videvo_files/video/free/2015-06/small_watermarked/Raindrops_Macro5_Videvo_preview.webm',
 ];
 
 export const pointCloudList = [pcd1, pcd2, pcd3, pcd4, pcd5, pcd6, pcd7, pcd8, pcd9];
