@@ -696,7 +696,7 @@ class LineToolOperation extends BasicToolOperation {
           const displayOrder = order;
           const color = line && this.getLineColorByAttribute(line);
 
-          this.drawLine(line.pointList, undefined, color, false);
+          this.drawLine(line.pointList, undefined, color, this._imgAttribute?.showKeyPoint);
           this.drawLineNumber(line.pointList[0], displayOrder, color, label, line.attribute, line.valid);
 
           if (line.id !== this.textEditingID) {

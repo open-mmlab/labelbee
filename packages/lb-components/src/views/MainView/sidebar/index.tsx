@@ -92,7 +92,7 @@ const Sidebar: React.FC<IProps> = ({ sider, enableColorPicker }) => {
         className='panel'
         key='imgAttribute'
       >
-        <ImgAttributeInfo />
+        <ImgAttributeInfo toolName={toolName as EToolName} />
       </Panel>
     </Collapse>
   );

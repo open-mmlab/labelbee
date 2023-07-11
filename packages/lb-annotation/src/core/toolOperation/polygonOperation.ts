@@ -1593,6 +1593,7 @@ class PolygonOperation extends BasicToolOperation {
           lineCap: 'round',
           isClose: true,
           lineType: this.config?.lineType,
+          showKeyPoint: this._imgAttribute?.showKeyPoint,
         });
 
         let showText = `${AttributeUtils.getAttributeShowText(attribute, this.config.attributeList) ?? ''}`;

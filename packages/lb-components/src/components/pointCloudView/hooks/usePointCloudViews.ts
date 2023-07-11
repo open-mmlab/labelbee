@@ -19,6 +19,7 @@ import {
   UpdatePolygonByDragList,
   ILine,
   DEFAULT_SPHERE_PARAMS,
+  ICoordinate,
 } from '@labelbee/lb-utils';
 import { useContext } from 'react';
 import { PointCloudContext } from '../PointCloudContext';
@@ -36,7 +37,6 @@ import { useTranslation } from 'react-i18next';
 import { useHistory } from './useHistory';
 import { usePolygon } from './usePolygon';
 import { IFileItem } from '@/types/data';
-import { ICoordinate } from '@labelbee/lb-utils/src/types/common';
 
 const DEFAULT_SCOPE = 5;
 const DEFAULT_RADIUS = 90;

@@ -6,6 +6,7 @@ export interface ImgAttributeState {
   brightness: number;
   zoomRatio: number;
   isOriginalSize: boolean;
+  showKeyPoint: boolean;
 }
 
 interface UpdateImgAttribute {

@@ -7,6 +7,7 @@ const initialState: ImgAttributeState = {
   brightness: 1,
   zoomRatio: 1,
   isOriginalSize: false,
+  showKeyPoint: false,
 };
 
 export function imgAttributeReducer(

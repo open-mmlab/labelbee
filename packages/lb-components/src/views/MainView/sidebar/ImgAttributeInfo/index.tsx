@@ -11,19 +11,27 @@ import saturationSvg from '@/assets/annotation/image/saturation.svg';
 import contrastSvg from '@/assets/annotation/image/contrast.svg';
 import brightnessSvg from '@/assets/annotation/image/brightness.svg';
 import ZoomUpSvg from '@/assets/attributeIcon/zoomUp.svg';
-import originalPic from '@/assets/annotation/image/icon_yuantu.svg';
 import { useTranslation } from 'react-i18next';
+import { EToolName } from '@/data/enums/ToolType';
 
 interface IProps {
   imgAttribute: ImgAttributeState;
+  toolName: EToolName;
 }
 
 const ImgAttributeInfo = (props: IProps) => {
   const {
-    imgAttribute: { contrast, saturation, brightness, zoomRatio, isOriginalSize },
+    imgAttribute: { contrast, saturation, brightness, zoomRatio, isOriginalSize, showKeyPoint },
+    toolName,
   } = props;
 
   const { t } = useTranslation();
+
+  useEffect(() => {
+    return () => {
+      store.dispatch(ImgAttribute.InitImgAttribute());
+    };
+  }, []);
 
   const imgAttributeChange = throttle(
     (payload: Partial<ImgAttributeState>) => {
@@ -72,11 +80,19 @@ const ImgAttributeInfo = (props: IProps) => {
     },
   ];
 
-  useEffect(() => {
-    return () => {
-      store.dispatch(ImgAttribute.InitImgAttribute());
-    };
-  }, []);
+  const imgChangeSwitchList = [
+    {
+      name: t('OriginalScale'),
+      key: 'isOriginalSize',
+      value: isOriginalSize,
+    },
+    {
+      name: t('ShowKeyPoint'),
+      key: 'showKeyPoint',
+      value: showKeyPoint,
+      hidden: ![EToolName.Polygon, EToolName.Line, EToolName.LineMarker].includes(toolName),
+    },
+  ];
 
   return (
     <div>
@@ -117,20 +133,28 @@ const ImgAttributeInfo = (props: IProps) => {
         </div>
       ))}
       <div className='imgAttributeController'>
-        <Row className='tools' style={{ padding: '10px 0' }}>
-          <Col span={18}>
-            <span className='singleTool'>
-              <img src={originalPic} width={16} style={{ marginTop: '-2px' }} />
-              <span className='toolName'>{t('OriginalScale')}</span>
-            </span>
-          </Col>
-          <Col>
-            <Switch
-              checked={isOriginalSize}
-              onChange={(v: boolean) => imgAttributeChange({ isOriginalSize: v })}
-            />
-          </Col>
-        </Row>
+        {imgChangeSwitchList.map((data) => {
+          if (data.hidden) {
+            return null;
+          }
+          return (
+            <Row className='tools' style={{ padding: '10px 0' }} key={data.key}>
+              <Col span={18}>
+                <span className='singleTool'>
+                  <span className='toolName' style={{ margin: 0 }}>
+                    {data.name}
+                  </span>
+                </span>
+              </Col>
+              <Col>
+                <Switch
+                  checked={data.value}
+                  onChange={(v: boolean) => imgAttributeChange({ [data.key]: v })}
+                />
+              </Col>
+            </Row>
+          );
+        })}
       </div>
     </div>
   );

@@ -160,7 +160,7 @@ class BasicToolOperation extends EventListener {
 
   private _ctx?: CanvasRenderingContext2D;
 
-  private _imgAttribute?: IImageAttribute;
+  public _imgAttribute?: IImageAttribute;
 
   private _invalidDOM?: HTMLElement;
 
