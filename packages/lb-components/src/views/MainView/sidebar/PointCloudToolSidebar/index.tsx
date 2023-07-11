@@ -412,7 +412,8 @@ const PointCloudToolSidebar: React.FC<IProps> = ({
   stepList,
   enableColorPicker,
 }) => {
-  const { updatePointCloudPattern, pointCloudPattern, isPointCloudSegmentationPattern } = useStatus();
+  const { updatePointCloudPattern, pointCloudPattern, isPointCloudSegmentationPattern } =
+    useStatus();
 
   const config = jsonParser(stepInfo.config);
   const attributeList = config?.attributeList ?? [];
