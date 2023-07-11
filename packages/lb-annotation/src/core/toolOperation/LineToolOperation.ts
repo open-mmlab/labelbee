@@ -1834,7 +1834,7 @@ class LineToolOperation extends BasicToolOperation {
       this.setActiveLine([]);
     }
 
-    this.emit('selectedChange');
+    this.emit('dataUpdated', this.lineList, this.selectedIDs);
   }
 
   public attributeLockListChange(attributeLockList: string[]) {

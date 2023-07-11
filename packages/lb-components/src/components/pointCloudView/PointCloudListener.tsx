@@ -17,6 +17,7 @@ import { useAttribute } from './hooks/useAttribute';
 import { ICoordinate } from '@labelbee/lb-utils/dist/types/types/common';
 import { useConfig } from './hooks/useConfig';
 import { usePolygon } from './hooks/usePolygon';
+import { useLine } from './hooks/useLine';
 import { useTranslation } from 'react-i18next';
 import { IFileItem } from '@/types/data';
 
@@ -48,10 +49,17 @@ const PointCloudListener: React.FC<IProps> = ({
   const { copySelectedBoxes, pasteSelectedBoxes, copiedBoxes } = useBoxes({ config });
   const { updateRotate } = useRotate({ currentData });
   const { updatePointCloudData, topViewSelectedChanged } = usePointCloudViews();
-  const { redo, undo, pushHistoryWithList, pushHistoryUnderUpdatePolygon } = useHistory();
+  const {
+    redo,
+    undo,
+    pushHistoryWithList,
+    pushHistoryUnderUpdatePolygon,
+    pushHistoryUnderUpdateLine,
+  } = useHistory();
   const { syncThreeViewsAttribute } = useAttribute();
   const { syncAllViewsConfig, reRenderTopViewRange } = useConfig();
   const { selectedPolygon } = usePolygon();
+  const { selectedLine } = useLine();
   const { t } = useTranslation();
 
   const updatePolygonOffset = (offset: Partial<ICoordinate>) => {
@@ -255,7 +263,6 @@ const PointCloudListener: React.FC<IProps> = ({
       const selectBox = ptCtx.selectedPointCloudBox;
       if (selectBox) {
         selectBox.attribute = newAttribute;
-
         const newPointCloudList = updateSelectedBox(selectBox);
 
         if (ptCtx.mainViewInstance) {
@@ -268,6 +275,9 @@ const PointCloudListener: React.FC<IProps> = ({
       }
       if (selectedPolygon) {
         pushHistoryUnderUpdatePolygon({ ...selectedPolygon, attribute: newAttribute });
+      }
+      if (selectedLine) {
+        pushHistoryUnderUpdateLine({ ...selectedLine, attribute: newAttribute });
       }
       if (selectedSphere) {
         const newSphereList = updatePointCloudSphere({
