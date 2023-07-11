@@ -17,8 +17,8 @@ import PointCloudToolSidebar from './PointCloudToolSidebar';
 import ToolStyle from './ToolStyle';
 import { cTool } from '@labelbee/lb-annotation';
 import ScribbleSidebar from './ScribbleSidebar';
-import { ToolIcons } from './ToolIcons';
 import { useSelector } from '@/store/ctx';
+import ToolIcons from './ToolIcons';
 
 const { EVideoToolName, EPointCloudName } = cTool;
 
@@ -56,7 +56,7 @@ const Sidebar: React.FC<IProps> = ({ sider, enableColorPicker }) => {
   };
 
   // onChange is empty by default.
-  const toolIcon = <ToolIcons toolName={toolName} onChange={() => {}} />;
+  const toolIcon = <ToolIcons />;
   const attributeList = <SwitchAttributeList />;
 
   const annotationText = <AnnotationText />;
