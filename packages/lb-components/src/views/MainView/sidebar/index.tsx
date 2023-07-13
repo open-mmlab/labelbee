@@ -135,6 +135,7 @@ const Sidebar: React.FC<IProps> = ({ sider, enableColorPicker }) => {
             pointCloudToolSidebar,
             pointCloudOperation,
             scribbleSidebar,
+            TagSidebar,
           })}
         </div>
       );

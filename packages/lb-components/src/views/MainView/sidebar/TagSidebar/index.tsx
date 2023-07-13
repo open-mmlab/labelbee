@@ -16,15 +16,22 @@ import { LabelBeeContext } from '@/store/ctx';
 interface IProps {
   imgIndex: number;
   toolInstance: TagOperation;
+
+  OuterRender?: React.ComponentType<any>
 }
 
 const { Panel } = Collapse;
+
+const EmptyRender: React.FC<undefined> = ({ children }) => {
+  return children;
+};
 
 export const expandIconFuc = ({ isActive }: any) => (
   <CaretRightOutlined rotate={isActive ? 90 : 0} />
 );
 
-const TagSidebar: React.FC<IProps> = ({ toolInstance, imgIndex }) => {
+const TagSidebar: React.FC<IProps> = (props) => {
+  const { toolInstance, imgIndex, OuterRender = EmptyRender, ...externalProps } = props;
   const [expandKeyList, setExpandKeyList] = useState<string[]>([]);
 
   const sidebarRef = useRef<HTMLDivElement>(null);
@@ -35,7 +42,7 @@ const TagSidebar: React.FC<IProps> = ({ toolInstance, imgIndex }) => {
   useEffect(() => {
     if (toolInstance) {
       // 用于配置的初始化
-      setExpandKeyList(toolInstance.config.inputList.map((v: IInputList) => v.value));
+      setExpandKeyList(toolInstance?.config?.inputList?.map((v: IInputList) => v.value) ?? []);
 
       // 进行实时渲染
       toolInstance.singleOn('render', () => {
@@ -186,27 +193,41 @@ const TagSidebar: React.FC<IProps> = ({ toolInstance, imgIndex }) => {
       const selectedAttribute =
         currentTagResult?.result?.[key]?.split(';')?.indexOf(info.value) > -1 ? info.value : '';
 
+      const innerProps = {
+        tagValue: info.value,
+      };
+
+      /**
+       * Temporarily. TODO
+       */
+      const InnerOuterRender = OuterRender as any;
+
       if (inputList?.[basicIndex]?.isMulti === true) {
         return (
           <div className='singleBar' key={`${key}_${basicIndex}_${index}`}>
-            <CheckBoxList
-              attributeChanged={() => setLabel(basicIndex, index)}
-              selectedAttribute={[selectedAttribute]}
-              list={[{ value: info.value, label: info.key }]}
-              num={index + 1}
-            />
+            <InnerOuterRender {...externalProps} {...innerProps}>
+              <CheckBoxList
+                attributeChanged={() => setLabel(basicIndex, index)}
+                selectedAttribute={[selectedAttribute]}
+                list={[{ value: info.value, label: info.key }]}
+                num={index + 1}
+              />
+            </InnerOuterRender>
           </div>
         );
       }
+
       return (
         <div className='singleBar' key={`${key}_${basicIndex}_${index}`}>
-          <RadioList
-            forbidColor
-            attributeChanged={() => setLabel(basicIndex, index)}
-            selectedAttribute={selectedAttribute}
-            list={[{ value: info.value, label: info.key }]}
-            num={index + 1}
-          />
+          <InnerOuterRender {...externalProps} {...innerProps}>
+            <RadioList
+              forbidColor
+              attributeChanged={() => setLabel(basicIndex, index)}
+              selectedAttribute={selectedAttribute}
+              list={[{ value: info.value, label: info.key }]}
+              num={index + 1}
+            />
+          </InnerOuterRender>
         </div>
       );
     });

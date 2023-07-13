@@ -292,6 +292,10 @@ class BasicToolOperation extends EventListener {
     return this.showDefaultCursor;
   }
 
+  public get currentPageCount(): number | undefined {
+    return undefined;
+  }
+
   public get isMultiMoveMode() {
     return this.operationMode === EOperationMode.MultiMove;
   }

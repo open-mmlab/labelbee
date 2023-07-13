@@ -30,7 +30,19 @@ const PageNumber = (props: IProps) => {
     return null;
   }
 
-  const count = toolInstance?.currentPageResult?.length ?? (globalPattern === EPointCloudPattern.Detection ? pointCloudBoxList.length : segmentation.length);
+  /**
+   * Count Showing Priority.
+   * 
+   * 1. currentPageCount
+   * 2. currentPageResult?.length.
+   * 3. PointCloud data.
+   */
+  const count =
+    toolInstance?.currentPageCount ??
+    toolInstance?.currentPageResult?.length ??
+    (globalPattern === EPointCloudPattern.Detection
+      ? pointCloudBoxList.length
+      : segmentation.length);
 
   if (count >= 0) {
     return (

@@ -1,4 +1,5 @@
 import CommonToolUtils from '@/utils/tool/CommonToolUtils';
+import { isEqual } from 'lodash';
 import TagUtils from '../../utils/tool/TagUtils';
 import uuid from '../../utils/uuid';
 import { BasicToolOperation, IBasicToolOperationProps } from './basicToolOperation';
@@ -41,9 +42,32 @@ class TagOperation extends BasicToolOperation {
     return TagUtils.getDefaultTagResult(this.config.inputList, basicResultList);
   };
 
-  public setResult(tagResult: any[]) {
-    this.tagResult = tagResult;
+  public setForbidOperation(forbidOperation: boolean) {
+    this.forbidOperation = forbidOperation;
     this.render();
+  }
+
+  public setResult(tagResult: ITagResult[]) {
+    this.setTagResult(tagResult);
+    this.render();
+  }
+
+  public setTagResult(tagResult: ITagResult[]) {
+    const oldTagResult = this.tagResult;
+    this.tagResult = tagResult;
+    if (isEqual(oldTagResult, tagResult)) {
+      this.emit('updatePageNumber');
+    }
+  }
+
+  public get currentPageCount() {
+    const currentTagResultObj = this.currentTagResult?.result ?? {};
+    return Object.keys(currentTagResultObj).reduce((acc, cur) => {
+      if (currentTagResultObj[cur]?.length > 0) {
+        return acc + 1;
+      }
+      return acc;
+    }, 0);
   }
 
   /**
@@ -186,10 +210,12 @@ class TagOperation extends BasicToolOperation {
             if (value === '') {
               // 如果当前数据仅当前的数据， 则过滤当前结果
               if (Object.keys(result).length === 1) {
-                this.tagResult = this.tagResult.filter((v) => {
-                  const basicSourceID = `${v.sourceID}`;
-                  return CommonToolUtils.isDifferSourceID(basicSourceID, this.sourceID);
-                });
+                this.setTagResult(
+                  this.tagResult.filter((v) => {
+                    const basicSourceID = `${v.sourceID}`;
+                    return CommonToolUtils.isDifferSourceID(basicSourceID, this.sourceID);
+                  }),
+                );
               } else if (Object.keys(result).length > 1) {
                 // 清除当前的标签的 key
                 delete result[oldKey];
@@ -209,8 +235,7 @@ class TagOperation extends BasicToolOperation {
         // if (!basicRect[currentIndex] && currentIndex > 0) {
         //   return false;
         // }
-
-        this.tagResult = [
+        this.setTagResult([
           {
             sourceID: this.sourceID,
             id: uuid(8, 62),
@@ -218,8 +243,9 @@ class TagOperation extends BasicToolOperation {
               [key]: value,
             },
           },
-        ];
+        ]);
       }
+      this.emit('updatePageNumber');
       this.render();
     }
   };
@@ -228,16 +254,17 @@ class TagOperation extends BasicToolOperation {
   // eslint-disable-next-line no-unused-vars
   public clearResult = (sendMessage = true, value?: string) => {
     // 依赖原图
+    let newTagResult: ITagResult[] = [];
     if (value) {
-      this.tagResult = this.tagResult.map((v) => {
+      newTagResult = this.tagResult.map((v) => {
         if (v?.result[value]) {
           delete v.result[value];
         }
         return v;
       });
-    } else {
-      this.tagResult = [];
     }
+
+    this.setTagResult(newTagResult);
     this.render();
   };
 
@@ -299,13 +326,13 @@ class TagOperation extends BasicToolOperation {
   }
 
   exportData() {
-    let { tagResult } = this;
+    let { tagResult: showTagResult } = this;
 
     if (this.isImgError) {
-      tagResult = [];
+      showTagResult = [];
     }
 
-    return [tagResult, this.basicImgInfo];
+    return [showTagResult, this.basicImgInfo];
   }
 }
 

@@ -45,6 +45,8 @@ export type Sider = ({
   // PointCloud
   pointCloudToolSidebar: React.ReactNode;
   pointCloudOperation: React.ReactNode;
+
+  TagSidebar: React.ReactComponentElement;
 }) => React.ReactNode | React.ReactNode;
 
 export type TDrawLayerSlot = (props: {
