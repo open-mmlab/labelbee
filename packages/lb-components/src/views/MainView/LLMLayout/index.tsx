@@ -33,7 +33,6 @@ const LLMLayout: React.FC<AppProps & IProps> = (props) => {
           className={classnames({
             [`${layoutCls}__content`]: true,
             [`${prefix}-LLMLayout`]: true,
-            [`${prefix}-LLMCheckContext`]: !!props.checkMode,
           })}
         >
           <LLMToolView checkMode={props.checkMode} showTips={props.showTips} tips={props.tips} />
