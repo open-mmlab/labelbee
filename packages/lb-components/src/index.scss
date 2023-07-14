@@ -1808,9 +1808,6 @@ $ptToolHeight: 40px;
   overflow: hidden;
 }
 
-.#{$prefix}-LLMCheckContext {
-  height: calc(100vh - 61px);
-}
 .#{$prefix}-LLMView-question {
   flex: 1;
   overflow: hidden;
