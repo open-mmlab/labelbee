@@ -66,6 +66,16 @@ const PointCloudView: React.FC<IProps> = ({
     };
   }, [globalPattern]);
 
+  useEffect(() => {
+    // Used by the footer to show the currentPageCount.
+    toolInstanceRef.current.currentPageCount =
+      ptCtx.globalPattern === EPointCloudPattern.Detection
+        ? ptCtx.pointCloudBoxList.length
+        : ptCtx.segmentation.length;
+
+    toolInstanceRef.current.emit('updatePageNumber');
+  }, [ptCtx.globalPattern, ptCtx.pointCloudBoxList, ptCtx.segmentation]);
+
   /**
    * PointCloud Data initialization !!
    *
@@ -120,7 +130,7 @@ const PointCloudView: React.FC<IProps> = ({
       <>
         <PointCloudSegmentListener checkMode={checkMode} toolInstanceRef={toolInstanceRef} />
         <PointCloudSegmentToolbar />
-        <PointCloudSegment checkMode={checkMode}/>
+        <PointCloudSegment checkMode={checkMode} />
         <PointCloudSegmentStatus />
         {drawLayerSlot?.({
           direct: true,
