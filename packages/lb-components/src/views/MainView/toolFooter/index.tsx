@@ -10,6 +10,8 @@ import { useTranslation } from 'react-i18next';
 import { connect } from 'react-redux';
 import { useDispatch, LabelBeeContext } from '@/store/ctx';
 import FooterTips from './FooterTips';
+import HiddenTextSwitch from './HiddenTextSwitch';
+import FolderPagination from './FolderPagination';
 import HiddenTips from './HiddenTips';
 import PageNumber from './PageNumber';
 import ZoomController from './ZoomController';
@@ -49,6 +51,7 @@ export const FooterDivider = () => (
 const renderFooter: RenderFooter = ({
   footerTips,
   hiddenTips,
+                                      hiddenTextSwitch,
   pageNumber,
   pagination,
   zoomController,
@@ -145,10 +148,12 @@ const ToolFooter: React.FC<IProps> = (props: IProps) => {
       <div className={`${footerCls}`} style={props.style}>
         {footer({
           footerTips: <FooterTips />,
+          hiddenTextSwitch: <HiddenTextSwitch />,
           hiddenTips: <HiddenTips />,
           pageNumber: <PageNumber />,
           annotateAttrList: <AnnotatedAttributesIcon />,
           pagination,
+          FolderPagination,
           zoomController: <ZoomController mode={mode} />,
           curItems,
           footerDivider: <FooterDivider />,

@@ -164,7 +164,6 @@ const AfterVideoLoaded = (nextIndex: number) => (dispatch: any) => {
 const AfterImageLoaded =
   (nextIndex: number, nextBasicIndex?: number) => (dispatch: any, getState: any) => {
     const { toolInstance, imgList } = getState().annotation;
-
     const url = imgList?.[nextIndex]?.url;
     ImgUtils.load(url)
       .then((imgNode: HTMLImageElement) => {
