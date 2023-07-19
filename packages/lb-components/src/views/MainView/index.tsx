@@ -4,7 +4,7 @@ import { prefix } from '@/constant';
 import { Spin } from 'antd';
 import { Layout } from 'antd/es';
 import _ from 'lodash';
-import React from 'react';
+import React, { useState } from 'react';
 import AnnotationOperation from './annotationOperation';
 import AnnotationTips from './annotationTips';
 import Sidebar from './sidebar';
@@ -99,7 +99,8 @@ const ViewportProviderLayout = (props: AppProps & IProps & { children: any }) =>
 };
 
 const MainView: React.FC<AppProps & IProps> = (props) => {
-  const siderWidth = props.style?.sider?.width;
+  const [siderWidth, setSiderWidth] = useState<number | undefined>(undefined);
+  const propsSiderWidth = props.style?.sider?.width;
   const { stepList, step } = props;
   const currentToolName = getStepConfig(stepList, step)?.tool;
   const isLLMTool = EToolName.LLM === currentToolName;
@@ -120,10 +121,15 @@ const MainView: React.FC<AppProps & IProps> = (props) => {
         </Content>
         <Sider
           className={`${layoutCls}__side`}
-          width={siderWidth ?? 240}
+          width={siderWidth ?? propsSiderWidth ?? 240}
           style={props.style?.sider}
         >
-          <Sidebar sider={props?.sider} />
+          <Sidebar
+            sider={props?.sider}
+            enableColorPicker={props?.enableColorPicker}
+            setSiderWidth={setSiderWidth}
+            propsSiderWidth={props.style?.sider?.width}
+          />
         </Sider>
         <PreviewResult />
       </Layout>
