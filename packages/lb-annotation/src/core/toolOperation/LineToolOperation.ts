@@ -945,8 +945,10 @@ class LineToolOperation extends BasicToolOperation {
       return false;
     }
 
-    const allPointsInRange = this.activeLine?.every((i) => {
-      return this.isInBasicPolygon({ x: i.x + offsetX, y: i.y + offsetY });
+    const allPointsInRange = this.selectedLines?.every((i) => {
+      return i.pointList?.every((point) => {
+        return this.isInBasicPolygon({ x: point.x + offsetX, y: point.y + offsetY });
+      });
     });
 
     if (allPointsInRange) {
@@ -1461,6 +1463,12 @@ class LineToolOperation extends BasicToolOperation {
       } else if (this.isCreate && this.activeLine && this.activeLine.length > 1) {
         const newLine = this.createLineData();
         selectedID = newLine.id;
+        newLine.textAttribute = AttributeUtils.getTextAttribute(
+          this.lineList.filter((line) =>
+            CommonToolUtils.isSameSourceID(line.sourceID, CommonToolUtils.getSourceID(this.basicResult)),
+          ),
+          this.config.textCheckType,
+        );
         this.setLineList([...this.lineList, newLine]);
         // this.emit('lineCreated', newLine, this.zoom, this.currentPos);
         this.history?.pushHistory(this.lineList);
