@@ -80,6 +80,10 @@ export default class AnnotationDataUtils {
   ) {
     const resultList = stepResult ?? [];
 
+    // InitData is must
+    if (isInitData !== true) {
+      return resultList;
+    }
     switch (stepConfig.tool) {
       case EToolName.Tag:
       case EToolName.Text: {
@@ -93,10 +97,6 @@ export default class AnnotationDataUtils {
               toolInstance.getInitResultList(stepConfig.dataSourceStep, deltaResultList),
             );
           }
-        }
-
-        if (isInitData !== true) {
-          return resultList;
         }
 
         return toolInstance.getInitResultList(stepConfig.dataSourceStep, basicResultList);

@@ -123,25 +123,27 @@ export default class TagUtil {
    * @returns
    */
   public static getDefaultResultByConfig(inputList: IInputList[]) {
-    return inputList.reduce((acc: { [a: string]: string }, cur: IInputList) => {
-      if (cur.subSelected) {
-        cur.subSelected.forEach((data) => {
-          if (data.isDefault) {
-            const originResult = acc[cur.value] ?? '';
+    return (
+      inputList?.reduce((acc: { [a: string]: string }, cur: IInputList) => {
+        if (cur.subSelected) {
+          cur.subSelected.forEach((data) => {
+            if (data.isDefault) {
+              const originResult = acc[cur.value] ?? '';
 
-            let originResultList: string[] = [];
-            if (originResult.length > 0) {
-              // 说明里面有结果
-              originResultList = originResult.split(';');
+              let originResultList: string[] = [];
+              if (originResult.length > 0) {
+                // 说明里面有结果
+                originResultList = originResult.split(';');
+              }
+              originResultList.push(data.value);
+
+              acc[cur.value] = originResultList.join(';');
             }
-            originResultList.push(data.value);
-
-            acc[cur.value] = originResultList.join(';');
-          }
-        });
-      }
-      return acc;
-    }, {});
+          });
+        }
+        return acc;
+      }, {}) ?? []
+    );
   }
 
   /**

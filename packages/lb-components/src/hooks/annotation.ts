@@ -7,15 +7,17 @@ import { useEffect, useRef } from 'react';
 import { useDispatch } from '@/store/ctx';
 import { ANNOTATION_ACTIONS } from '@/store/Actions';
 import { EPointCloudPattern } from '@labelbee/lb-utils';
+import { EventListener } from '@labelbee/lb-annotation';
 
 export interface ICustomToolInstance {
   valid: boolean;
   exportData: () => [any, {}];
   exportCustomData: () => {};
-  singleOn: () => void;
+  singleOn: (eventName: string, callback: (...args: any[]) => void) => void;
+  on: (eventName: string, callback: (...args: any[]) => void) => void;
+  unbind: (eventName: string, callback: (...params: any[]) => void) => void;
+  emit: (eventName: string, ...args: any[]) => void;
   clearResult: () => void;
-  on: () => void;
-  unbind: () => void;
   setResult: () => void;
   setValid: (valid: boolean) => void;
   history: {
@@ -49,6 +51,9 @@ export interface ICustomToolInstanceProps {
 
 const useCustomToolInstance = ({ basicInfo }: ICustomToolInstanceProps = {}) => {
   const dispatch = useDispatch();
+
+  const eventListenerRef = useRef(new EventListener());
+  const eventListener = eventListenerRef.current;
   const initialCustomToolInstance: ICustomToolInstance = {
     valid: basicInfo?.valid ?? true,
     exportData: () => {
@@ -58,9 +63,10 @@ const useCustomToolInstance = ({ basicInfo }: ICustomToolInstanceProps = {}) => 
       return {};
     },
     clearResult: () => {},
-    singleOn: () => {},
-    on: () => {},
-    unbind: () => {},
+    singleOn: eventListener.singleOn.bind(eventListener),
+    on: eventListener.on.bind(eventListener),
+    unbind: eventListener.unbind.bind(eventListener),
+    emit: eventListener.emit.bind(eventListener),
     setResult: () => {
       // Rerender Data
     },

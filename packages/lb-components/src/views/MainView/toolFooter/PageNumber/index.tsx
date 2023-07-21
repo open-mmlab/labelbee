@@ -1,12 +1,10 @@
-import React, { useContext, useEffect, useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { AppState } from '@/store';
 import { connect } from 'react-redux';
 import { GraphToolInstance } from '@/store/annotation/types';
 import { Divider } from 'antd/es';
 import { useTranslation } from 'react-i18next';
 import { LabelBeeContext } from '@/store/ctx';
-import { PointCloudContext } from '@/components/pointCloudView/PointCloudContext';
-import { EPointCloudPattern } from '@labelbee/lb-utils';
 
 interface IProps {
   toolInstance: GraphToolInstance;
@@ -15,14 +13,18 @@ interface IProps {
 const PageNumber = (props: IProps) => {
   const { toolInstance } = props;
   const [_, forceRender] = useState(0);
-  const { pointCloudBoxList, segmentation, globalPattern } = useContext(PointCloudContext);
   const { t } = useTranslation();
 
   useEffect(() => {
     if (toolInstance) {
-      toolInstance.singleOn('updatePageNumber', () => {
+      const updatePageNumber = () => {
         forceRender((s) => s + 1);
-      });
+      };
+      toolInstance.on('updatePageNumber', updatePageNumber);
+
+      return () => {
+        toolInstance.unbind('updatePageNumber', updatePageNumber);
+      };
     }
   }, [toolInstance]);
 
@@ -30,7 +32,13 @@ const PageNumber = (props: IProps) => {
     return null;
   }
 
-  const count = toolInstance?.currentPageResult?.length ?? (globalPattern === EPointCloudPattern.Detection ? pointCloudBoxList.length : segmentation.length);
+  /**
+   * Count Showing Priority.
+   *
+   * 1. currentPageCount
+   * 2. currentPageResult?.length.
+   */
+  const count = toolInstance?.currentPageCount ?? toolInstance?.currentPageResult?.length;
 
   if (count >= 0) {
     return (

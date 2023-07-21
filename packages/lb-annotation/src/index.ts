@@ -38,6 +38,7 @@ import ActionsHistory from './utils/ActionsHistory';
 
 // ToolListener
 import DblClickEventListener from './utils/tool/DblClickEventListener'; // temporarily supports the use of external tools in this way
+import EventListener from './core/toolOperation/eventListener';
 
 import AnnotationEngine from './core';
 
@@ -68,6 +69,7 @@ export {
   // 工具包
   toolUtils,
   DblClickEventListener,
+  EventListener,
   CommonToolUtils,
   uuid,
   MarkerUtils,
