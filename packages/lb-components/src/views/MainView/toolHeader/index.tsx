@@ -100,6 +100,9 @@ interface IToolHeaderProps {
   stepInfo: IStepInfo;
   stepList: IStepInfo[];
   step: number;
+  hasLangNode: boolean;
+  hasHeaderOption: boolean;
+  hasPredictTrackingIcon: boolean;
 }
 
 const ToolHeader: React.FC<IToolHeaderProps> = ({
@@ -113,6 +116,9 @@ const ToolHeader: React.FC<IToolHeaderProps> = ({
   stepList,
   step,
   annotationEngine,
+  hasLangNode,
+  hasHeaderOption,
+  hasPredictTrackingIcon,
 }) => {
   const dispatch = useDispatch();
   const [, forceUpdate] = useReducer((x) => x + 1, 0);
@@ -156,9 +162,9 @@ const ToolHeader: React.FC<IToolHeaderProps> = ({
     </>
   );
 
-  const headerOptionNode = <HeaderOption stepInfo={stepInfo} />;
+  const headerOptionNode = hasHeaderOption ? <HeaderOption stepInfo={stepInfo} /> : null;
 
-  const PointCloudSwitchPattern = SwitchPattern
+  const PointCloudSwitchPattern = SwitchPattern;
 
   const langNode = (
     <div className={`${prefix}-header__lang`}>
@@ -180,8 +186,8 @@ const ToolHeader: React.FC<IToolHeaderProps> = ({
 
   const rightActions = (
     <>
-      <PredictTrackingIcon />
-      {langNode}
+      {hasPredictTrackingIcon && <PredictTrackingIcon />}
+      {hasLangNode && langNode}
     </>
   );
 

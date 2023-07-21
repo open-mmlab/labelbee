@@ -214,40 +214,55 @@ const pointCloudConfig = {
 };
 
 const cuboidToolConfig = {
-  "isShowCursor": false,
-  "showConfirm": false,
-  "skipWhileNoDependencies": false,
-  "drawOutsideTarget": false,
-  "copyBackwardResult": true,
-  "minWidth": 1,
-  "attributeConfigurable": true,
-  "textConfigurable": true,
-  "textCheckType": 0,
-  "customFormat": "",
-  "attributeList": [
+  isShowCursor: false,
+  showConfirm: false,
+  skipWhileNoDependencies: false,
+  drawOutsideTarget: false,
+  copyBackwardResult: true,
+  minWidth: 1,
+  attributeConfigurable: true,
+  textConfigurable: true,
+  textCheckType: 0,
+  customFormat: '',
+  attributeList: [
     {
-      "key": "跑车",
-      "value": "sports car"
+      key: '跑车',
+      value: 'sports car',
     },
 
     {
-      "key": "吉普车",
-      "value": "jeep"
+      key: '吉普车',
+      value: 'jeep',
     },
     {
-      "key": "紧凑车型",
-      "value": "single"
+      key: '紧凑车型',
+      value: 'single',
     },
     {
-      "key": "SUV等车型",
-      "value": "suv"
+      key: 'SUV等车型',
+      value: 'suv',
     },
     {
-      "key": "货车",
-      "value": "trucks"
+      key: '货车',
+      value: 'trucks',
     },
-  ]
-}
+  ],
+};
+
+const LLMToolConfig = {
+  enableSort: true, // 开启答案排序
+  enableTextAttribute: true, // 文本标注
+  score: 7, // 答案评分
+  indicatorScore: [
+    { label: '可读性', value: 'readability', text: '阅读起来是否顺畅', score: 10 },
+    { label: '不可读性', value: 'unReadability', text: '偶是基督教精神', score: 10 },
+  ], // 指标评分
+  indicatorDetermine: [
+    { label: '包含敏感信息', value: 'sensitiveInfo' },
+    { label: '包含敏感信息2', value: 'sensitiveInfo2' },
+  ], // 指标判断
+  text: true,
+};
 
 export const getConfig = (tool) => {
   if (tool === EToolName.Line) {
@@ -284,6 +299,10 @@ export const getConfig = (tool) => {
 
   if (tool === EToolName.Cuboid) {
     return cuboidToolConfig;
+  }
+
+  if (tool === EToolName.LLM) {
+    return LLMToolConfig;
   }
 
   return rectToolConfig;

@@ -19,8 +19,10 @@ import ToolUtils from '@/utils/ToolUtils';
 import PointCloudView from '@/components/pointCloudView';
 import { getClassName } from '@/utils/dom';
 import { classnames } from '@/utils';
-import { LabelBeeContext } from '@/store/ctx';
 import PreviewResult from '@/components/predictTracking/previewResult';
+import { LabelBeeContext } from '@/store/ctx';
+import { EToolName } from '@/data/enums/ToolType';
+import LLMLayout from './LLMLayout';
 
 interface IProps {
   path: string;
@@ -71,9 +73,9 @@ const AnnotatedArea: React.FC<AppProps & IProps> = (props) => {
   return <ImageAnnotate {...props} />;
 };
 
-const MainView: React.FC<AppProps & IProps> = (props) => {
-  const siderWidth = props.style?.sider?.width;
-
+const ViewportProviderLayout = (props: AppProps & IProps & { children: any }) => {
+  const { stepList, step } = props;
+  const currentToolName = getStepConfig(stepList, step)?.tool;
   return (
     <ViewportProvider>
       <Spin spinning={props.loading}>
@@ -84,26 +86,48 @@ const MainView: React.FC<AppProps & IProps> = (props) => {
               headerName={props.headerName}
               goBack={props.goBack}
               exportData={props.exportData}
+              hasLangNode={EToolName.LLM !== currentToolName}
+              hasHeaderOption={EToolName.LLM !== currentToolName}
+              hasPredictTrackingIcon={EToolName.LLM !== currentToolName}
             />
           </header>
-
-          <Layout className={getClassName('layout', 'container')}>
-            {props?.leftSider}
-            <Content className={`${layoutCls}__content`}>
-              <AnnotatedArea {...props} />
-            </Content>
-            <Sider
-              className={`${layoutCls}__side`}
-              width={siderWidth ?? 240}
-              style={props.style?.sider}
-            >
-              <Sidebar sider={props?.sider} enableColorPicker={props?.enableColorPicker} />
-            </Sider>
-            <PreviewResult />
-          </Layout>
+          {props.children}
         </Layout>
       </Spin>
     </ViewportProvider>
+  );
+};
+
+const MainView: React.FC<AppProps & IProps> = (props) => {
+  const siderWidth = props.style?.sider?.width;
+  const { stepList, step } = props;
+  const currentToolName = getStepConfig(stepList, step)?.tool;
+  const isLLMTool = EToolName.LLM === currentToolName;
+  if (isLLMTool) {
+    return (
+      <ViewportProviderLayout {...props}>
+        <LLMLayout {...props} />
+      </ViewportProviderLayout>
+    );
+  }
+
+  return (
+    <ViewportProviderLayout {...props}>
+      <Layout className={getClassName('layout', 'container')}>
+        {props?.leftSider}
+        <Content className={`${layoutCls}__content`}>
+          <AnnotatedArea {...props} />
+        </Content>
+        <Sider
+          className={`${layoutCls}__side`}
+          width={siderWidth ?? 240}
+          style={props.style?.sider}
+        >
+          <Sidebar sider={props?.sider} />
+        </Sider>
+        <PreviewResult />
+      </Layout>
+    </ViewportProviderLayout>
   );
 };
 

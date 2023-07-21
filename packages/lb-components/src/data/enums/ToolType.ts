@@ -41,12 +41,11 @@ export enum EToolName {
   OCRRelation = 'OCRRelationTool',
   /** 算法分割辅助工具 */
   SegmentByRect = 'segmentByRectTool',
-  
   Cuboid = 'cuboidTool',
   /** 点云多边形工具 */
   PointCloudPolygon = 'pointCloudPolygon',
+  LLM = 'LLMTool',
 }
-
 
 // 文本标注类型
 export enum ETextType {

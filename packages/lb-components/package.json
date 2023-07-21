@@ -1,6 +1,6 @@
 {
   "name": "@labelbee/lb-components",
-  "version": "1.12.2",
+  "version": "1.13.0-alpha.5",
   "description": "Provide a complete library of annotation components",
   "main": "./dist/index.js",
   "es": "./es/index.js",
@@ -16,8 +16,8 @@
     "build": "rm -fr dist && cross-env NODE_ENV=production rollup -c rollup.config.js && npm run build:type",
     "build:type": "tsc --emitDeclarationOnly",
     "commit": "git-cz",
-    "lint": "eslint 'src/**/*.{ts,tsx,js,jsx}' && npm run build:type",
-    "lint:fix": "eslint 'src/**/*.{ts,tsx,js,jsx}' --fix",
+    "lint": "eslint src --ext .ts,.tsx,.js,.jsx && npm run build:type",
+    "lint:fix": "eslint src --ext .ts,.tsx,.js,.jsx --fix",
     "commitmsg": "commitlint -e $GIT_PARAMS"
   },
   "author": "laoluo",
@@ -43,8 +43,8 @@
   },
   "dependencies": {
     "@ant-design/icons": "^4.6.2",
-    "@labelbee/lb-annotation": "1.16.1",
-    "@labelbee/lb-utils": "1.8.0",
+    "@labelbee/lb-annotation": "1.17.0-alpha.2",
+    "@labelbee/lb-utils": "1.9.0-alpha.1",
     "ahooks": "^3.4.0",
     "classnames": "^2.3.0",
     "lodash": "^4.17.21",

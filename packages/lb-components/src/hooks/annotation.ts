@@ -10,7 +10,7 @@ import { EPointCloudPattern } from '@labelbee/lb-utils';
 
 export interface ICustomToolInstance {
   valid: boolean;
-  exportData: () => [any[], {}];
+  exportData: () => [any, {}];
   exportCustomData: () => {};
   singleOn: () => void;
   clearResult: () => void;
@@ -31,9 +31,10 @@ export interface ICustomToolInstance {
 
   updateRotate: () => void;
 
-  undo: () => void,
-  redo: () => void,
-  setPointCloudGlobalPattern: (globalPattern: EPointCloudPattern) => void,
+  undo: () => void;
+  redo: () => void;
+  setPointCloudGlobalPattern: (globalPattern: EPointCloudPattern) => void;
+
   [str: string]: any;
 }
 
@@ -78,7 +79,7 @@ const useCustomToolInstance = ({ basicInfo }: ICustomToolInstanceProps = {}) => 
     redo: () => {},
     undo: () => {},
     setPointCloudGlobalPattern: (globalPattern: EPointCloudPattern) => {},
-  }
+  };
 
   const toolInstanceRef = useRef<ICustomToolInstance>(initialCustomToolInstance);
 
@@ -101,8 +102,8 @@ const useCustomToolInstance = ({ basicInfo }: ICustomToolInstanceProps = {}) => 
   };
 
   const clearToolInstance = () => {
-    Object.assign(toolInstanceRef.current, initialCustomToolInstance)
-  }
+    Object.assign(toolInstanceRef.current, initialCustomToolInstance);
+  };
 
   useEffect(() => {
     // Initial toolInstance

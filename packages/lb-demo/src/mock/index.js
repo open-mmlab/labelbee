@@ -3,6 +3,7 @@ import img2 from './images/19.jpg';
 import img3 from './images/20.jpg';
 import img4 from './images/66.jpg';
 import { pointCloudResult1 } from './pointCloud';
+import { LLMToolResult } from './LLMTool';
 
 // Cuboid_IMG
 import car1 from './cuboidImages/1.png';
@@ -126,6 +127,10 @@ export const getMockResult = (tool) => {
 
   if (tool === 'videoTagTool') {
     return videoTagDefaultResult;
+  }
+
+  if (tool === 'LLMTool') {
+    return LLMToolResult;
   }
 
   if (tool === 'pointCloudTool') {
