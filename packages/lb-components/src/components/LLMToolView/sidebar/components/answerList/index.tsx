@@ -20,12 +20,12 @@ import {
   IAnswerList,
 } from '@/components/LLMToolView/types';
 import { isBoolean } from 'lodash';
+import LongText from '@/components/longText';
 
 interface IProps {
   list?: IAnswerList[];
   checkMode?: boolean;
   LLMConfig?: ILLMToolConfig;
-  setHoverKey: (value: number) => void;
   updateValue: ({
     order,
     value,
@@ -57,7 +57,7 @@ const AnswerList = (props: IProps) => {
 
     let finishStatus = ETagType.Default;
     if (score) {
-      if (!i.score) {
+      if (!i.score || i?.score > score) {
         finishStatus = ETagType.UnFinish;
         return finishStatus;
       }
@@ -65,7 +65,8 @@ const AnswerList = (props: IProps) => {
     }
     if (indicatorScore?.length > 0) {
       const scoreUnFinish = indicatorScore.some(
-        (item: IndicatorScore) => !i?.indicatorScore?.[item.value],
+        (item: IndicatorScore) =>
+          !i?.indicatorScore?.[item.value] || i?.indicatorScore?.[item.value] > Number(item?.score),
       );
       if (scoreUnFinish) {
         finishStatus = ETagType.UnFinish;
@@ -190,14 +191,18 @@ const AnswerList = (props: IProps) => {
               indicatorScore.map((item: IndicatorScore, index: number) => {
                 const { label, text, value, score } = item;
                 const renderTitle = (
-                  <span>
-                    {label}
+                  <div className={`${LLMSidebarCls}-indicatorScore`}>
+                    <LongText text={label} openByText={true} />
                     {text && (
-                      <Popover placement='bottom' content={text}>
-                        <InfoCircleOutlined style={{ marginLeft: '8px', cursor: 'pointer' }} />
+                      <Popover
+                        placement='bottom'
+                        content={text}
+                        overlayClassName={`${LLMSidebarCls}-indicatorScore-title`}
+                      >
+                        <InfoCircleOutlined style={{ margin: '0px 4px', cursor: 'pointer' }} />
                       </Popover>
                     )}
-                  </span>
+                  </div>
                 );
                 return label && score ? (
                   <ScoreGroupButton

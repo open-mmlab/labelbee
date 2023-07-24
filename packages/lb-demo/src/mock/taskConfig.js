@@ -214,40 +214,40 @@ const pointCloudConfig = {
 };
 
 const cuboidToolConfig = {
-  "isShowCursor": false,
-  "showConfirm": false,
-  "skipWhileNoDependencies": false,
-  "drawOutsideTarget": false,
-  "copyBackwardResult": true,
-  "minWidth": 1,
-  "attributeConfigurable": true,
-  "textConfigurable": true,
-  "textCheckType": 0,
-  "customFormat": "",
-  "attributeList": [
+  isShowCursor: false,
+  showConfirm: false,
+  skipWhileNoDependencies: false,
+  drawOutsideTarget: false,
+  copyBackwardResult: true,
+  minWidth: 1,
+  attributeConfigurable: true,
+  textConfigurable: true,
+  textCheckType: 0,
+  customFormat: '',
+  attributeList: [
     {
-      "key": "跑车",
-      "value": "sports car"
+      key: '跑车',
+      value: 'sports car',
     },
 
     {
-      "key": "吉普车",
-      "value": "jeep"
+      key: '吉普车',
+      value: 'jeep',
     },
     {
-      "key": "紧凑车型",
-      "value": "single"
+      key: '紧凑车型',
+      value: 'single',
     },
     {
-      "key": "SUV等车型",
-      "value": "suv"
+      key: 'SUV等车型',
+      value: 'suv',
     },
     {
-      "key": "货车",
-      "value": "trucks"
+      key: '货车',
+      value: 'trucks',
     },
-  ]
-}
+  ],
+};
 
 const LLMToolConfig = {
   enableSort: true, // 开启答案排序
@@ -261,7 +261,8 @@ const LLMToolConfig = {
     { label: '包含敏感信息', value: 'sensitiveInfo' },
     { label: '包含敏感信息2', value: 'sensitiveInfo2' },
   ], // 指标判断
-}
+  text: true,
+};
 
 export const getConfig = (tool) => {
   if (tool === EToolName.Line) {
