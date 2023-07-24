@@ -1,6 +1,6 @@
 import { IBasicText, toolStyleConverter } from '@labelbee/lb-utils';
 import { isNumber } from 'lodash';
-import { EOperationMode, EToolName } from '@/constant/tool';
+import { ELineColor, EOperationMode, EToolName } from '@/constant/tool';
 import { IPolygonConfig, IPolygonData } from '@/types/tool/polygon';
 import MathUtils from '@/utils/MathUtils';
 import AxisUtils, { CoordinateUtils } from '@/utils/tool/AxisUtils';
@@ -1214,12 +1214,26 @@ class BasicToolOperation extends EventListener {
     this.emit('updateResult');
   }
 
-  /** Get the current property color */
-  public getColor(attribute = '', config = this.config) {
-    return toolStyleConverter.getColorByConfig({ attribute, config, style: this.style });
+  get isMultipleColor() {
+    return this.config?.lineColor === ELineColor.MultiColor && !this.config?.attributeConfigurable;
   }
 
-  public getLineColor(attribute = '') {
+  /** Get the current property color */
+  public getColor(attribute = '', config = this.config, order?: number) {
+    return toolStyleConverter.getColorByConfig({
+      attribute,
+      config,
+      style: this.style,
+      isMultipleColor: this.isMultipleColor,
+      order,
+    });
+  }
+
+  public getLineColor(attribute = '', order?: number) {
+    if (this.isMultipleColor) {
+      return toolStyleConverter.getColorByConfig({ isMultipleColor: this.isMultipleColor, order })?.valid?.stroke;
+    }
+
     if (this.config?.attributeConfigurable === true) {
       const attributeIndex = AttributeUtils.getAttributeIndex(attribute, this.config?.attributeList ?? []) + 1;
       const color = this.config?.attributeList?.find((i: any) => i.value === attribute)?.color;

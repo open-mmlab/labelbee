@@ -12,6 +12,7 @@ import { LabelBeeContext } from '@/store/ctx';
 import { AppState } from '@/store';
 import { ToolStyleState } from '@/store/toolStyle/types';
 import { useTranslation } from 'react-i18next';
+import { ELineColor } from '@labelbee/lb-annotation';
 
 interface IProps {
   toolStyle: ToolStyleState;
@@ -147,7 +148,11 @@ const ToolStyle = (props: IProps) => {
       {Object.entries(styleConfig).map((item: any[]) => {
         const key: ToolStyleKey = item[0];
         // 判断是否需要 color 的使用，现在暂时默认不需要
-        if (annotationConfig?.attributeConfigurable === true && key === 'color') {
+        if (
+          (annotationConfig?.attributeConfigurable === true ||
+            annotationConfig?.lineColor === ELineColor.MultiColor) &&
+          key === 'color'
+        ) {
           return null;
         }
         return (

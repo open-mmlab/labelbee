@@ -206,11 +206,24 @@ class ToolStyleConverter {
     attribute,
     config,
     style,
+    isMultipleColor,
+    order,
   }: {
-    attribute: string;
-    config: any;
+    attribute?: string;
+    config?: any;
     style?: any;
+    isMultipleColor?: boolean;
+    order?: number;
   }) {
+    if (isMultipleColor) {
+      const index = order ? order - 1 : 0;
+      return ToolStyleUtils.getToolColorList(
+        ATTRIBUTE_COLORS[index % ATTRIBUTE_COLORS.length],
+        style?.borderOpacity,
+        style?.fillOpacity,
+      );
+    }
+
     if (config?.attributeConfigurable === true) {
       const color = config?.attributeList?.find((i: any) => i.value === attribute)?.color;
       if (color) {

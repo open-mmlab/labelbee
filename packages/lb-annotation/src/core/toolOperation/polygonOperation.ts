@@ -111,6 +111,12 @@ class PolygonOperation extends BasicToolOperation {
     return this.config.minArea || 0;
   }
 
+  get currentOrder() {
+    return this.selectedPolygon
+      ? this.selectedPolygon.order
+      : Math.max(0, ...this.polygonList.map((item) => item.order)) + 1;
+  }
+
   public eventBinding() {
     super.eventBinding();
     // 解绑原本的 onMouseUp，将 onMoueUp 用于 dblClickListener 进行绑定
@@ -1543,7 +1549,7 @@ class PolygonOperation extends BasicToolOperation {
       return;
     }
 
-    const toolColor = this.getColor(selectedPolygon.attribute);
+    const toolColor = this.getColor(selectedPolygon.attribute, this.config, selectedPolygon.order);
     const color = selectedPolygon.valid ? toolColor?.valid.stroke : toolColor?.invalid.stroke;
     return {
       width: TEXT_MAX_WIDTH,
@@ -1581,7 +1587,7 @@ class PolygonOperation extends BasicToolOperation {
 
     const newWidth = TEXT_MAX_WIDTH;
     const coordinate = AxisUtils.getOffsetCoordinate({ x, y }, this.currentPos, this.zoom);
-    const toolColor = this.getColor(attribute);
+    const toolColor = this.getColor(attribute, this.config, selectedPolygon.order);
     const color = valid ? toolColor?.valid.stroke : toolColor?.invalid.stroke;
     if (!this._textAttributeInstance) {
       // 属性文本示例
@@ -1615,7 +1621,7 @@ class PolygonOperation extends BasicToolOperation {
           return;
         }
         const { textAttribute, attribute } = polygon;
-        const toolColor = this.getColor(attribute);
+        const toolColor = this.getColor(attribute, this.config, polygon.order);
         const toolData = StyleUtils.getStrokeAndFill(toolColor, polygon.valid);
         const transformPointList = AxisUtils.changePointListByZoom(polygon.pointList || [], this.zoom, this.currentPos);
 
@@ -1664,7 +1670,7 @@ class PolygonOperation extends BasicToolOperation {
   public renderSelectedPolygon(polygon: IPolygonData) {
     // 3. 选中多边形的渲染
     if (polygon) {
-      const toolColor = this.getColor(polygon.attribute);
+      const toolColor = this.getColor(polygon.attribute, this.config, polygon.order);
       const toolData = StyleUtils.getStrokeAndFill(toolColor, polygon.valid, { isSelected: true });
 
       DrawUtils.drawSelectedPolygonWithFillAndLine(
@@ -1705,7 +1711,7 @@ class PolygonOperation extends BasicToolOperation {
       const { hoverPolygon } = this;
       if (hoverPolygon) {
         let color = '';
-        const toolColor = this.getColor(hoverPolygon.attribute);
+        const toolColor = this.getColor(hoverPolygon.attribute, this.config, hoverPolygon.order);
         if (hoverPolygon.valid) {
           color = toolColor.validHover.fill;
         } else {
@@ -1734,7 +1740,7 @@ class PolygonOperation extends BasicToolOperation {
     // 3. 选中多边形的渲染
     this.renderSelectedPolygons();
 
-    const defaultColor = this.getColor(this.defaultAttribute);
+    const defaultColor = this.getColor(this.defaultAttribute, this.config, this.currentOrder);
     const toolData = StyleUtils.getStrokeAndFill(defaultColor, !this.isCtrl);
 
     // 4. 编辑中的多边形
@@ -1821,10 +1827,11 @@ class PolygonOperation extends BasicToolOperation {
 
     super.render();
     this.renderPolygon();
-    this.renderCursorLine(this.getLineColor(this.defaultAttribute));
+    this.renderCursorLine();
   }
 
-  public renderCursorLine(lineColor: string) {
+  public renderCursorLine() {
+    const lineColor = this.getLineColor(this.defaultAttribute, this.currentOrder);
     super.renderCursorLine(lineColor);
     this.renderCursorText();
   }
