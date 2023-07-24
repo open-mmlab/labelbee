@@ -21,6 +21,7 @@ export interface IInfoList {
 
 export type Sider = ({
   toolIcon,
+  operationRotate,
   attributeList,
   annotationText,
   toolStyle,
@@ -32,6 +33,7 @@ export type Sider = ({
   scribbleSidebar,
 }: {
   toolIcon: React.ReactNode;
+  operationRotate: React.ReactNode;
   attributeList: React.ReactNode;
   annotationText: React.ReactNode;
   toolStyle: React.ReactNode;

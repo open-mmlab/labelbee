@@ -187,6 +187,7 @@ class PolygonOperation extends BasicToolOperation {
     }
 
     this.pattern = pattern;
+    this.emit('patternChange');
   }
 
   /**
@@ -284,7 +285,7 @@ class PolygonOperation extends BasicToolOperation {
 
     const selectedPolygon = PolygonUtils.getPolygonByID(this.polygonList, selectedID);
 
-    if (!selectedPolygon) {
+    if (!selectedPolygon?.isRect) {
       return;
     }
 
@@ -829,6 +830,13 @@ class PolygonOperation extends BasicToolOperation {
           }
           this.isCropping = !this.isCropping;
         }
+        break;
+      case EKeyCode.Left:
+        this.rotatePolygon(1, ERotateDirection.Anticlockwise);
+        break;
+
+      case EKeyCode.Right:
+        this.rotatePolygon(1, ERotateDirection.Clockwise);
         break;
 
       default: {

@@ -19,6 +19,7 @@ import { cTool } from '@labelbee/lb-annotation';
 import ScribbleSidebar from './ScribbleSidebar';
 import { useSelector } from '@/store/ctx';
 import ToolIcons from './ToolIcons';
+import OperationRotate from './OperationRotate';
 
 const { EVideoToolName, EPointCloudName } = cTool;
 
@@ -55,8 +56,8 @@ const Sidebar: React.FC<IProps> = ({ sider, enableColorPicker }) => {
     );
   };
 
-  // onChange is empty by default.
   const toolIcon = <ToolIcons />;
+  const operationRotate = <OperationRotate />;
   const attributeList = <SwitchAttributeList />;
 
   const annotationText = <AnnotationText />;
@@ -123,6 +124,7 @@ const Sidebar: React.FC<IProps> = ({ sider, enableColorPicker }) => {
         <div className={`${sidebarCls}`}>
           {sider({
             toolIcon,
+            operationRotate,
             attributeList,
             annotationText,
             toolStyle,
@@ -159,6 +161,7 @@ const Sidebar: React.FC<IProps> = ({ sider, enableColorPicker }) => {
     return (
       <div className={`${sidebarCls}`}>
         {toolIcon}
+        {toolName === EToolName.Polygon && operationRotate}
         {horizontal}
         {attributeList}
         {annotationText}
