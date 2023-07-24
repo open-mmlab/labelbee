@@ -4,7 +4,7 @@ import { prefix } from '@/constant';
 import { Spin } from 'antd';
 import { Layout } from 'antd/es';
 import _ from 'lodash';
-import React, { useState, useMemo } from 'react';
+import React from 'react';
 import AnnotationOperation from './annotationOperation';
 import AnnotationTips from './annotationTips';
 import Sidebar from './sidebar';
@@ -19,9 +19,10 @@ import ToolUtils from '@/utils/ToolUtils';
 import PointCloudView from '@/components/pointCloudView';
 import { getClassName } from '@/utils/dom';
 import { classnames } from '@/utils';
-import { LabelBeeContext, LLMContext } from '@/store/ctx';
+import PreviewResult from '@/components/predictTracking/previewResult';
+import { LabelBeeContext } from '@/store/ctx';
 import { EToolName } from '@/data/enums/ToolType';
-import LLMToolView from '@/components/LLMToolView';
+import LLMLayout from './LLMLayout';
 
 interface IProps {
   path: string;
@@ -72,58 +73,30 @@ const AnnotatedArea: React.FC<AppProps & IProps> = (props) => {
   return <ImageAnnotate {...props} />;
 };
 
-const LLMLayout: React.FC<AppProps & IProps> = (props) => {
-  const siderWidth = props.style?.sider?.width;
-  const [hoverKey, setHoverKey] = useState(-1);
+const ViewportProviderLayout = (props: AppProps & IProps & { children: any }) => {
+  const { stepList, step } = props;
+  const currentToolName = getStepConfig(stepList, step)?.tool;
   return (
-    <Layout className={getClassName('layout', 'container')}>
-      <LLMContext.Provider
-        value={useMemo(() => {
-          return { hoverKey, setHoverKey };
-        }, [hoverKey])}
-      >
-        {props?.leftSider}
-        <Content
-          className={classnames({
-            [`${layoutCls}__content`]: true,
-            [`${prefix}-LLMCheckContext`]: !!props.checkMode,
-          })}
-        >
-          <LLMToolView checkMode={props.checkMode} setHoverKey={setHoverKey} />
-          <ToolFooter style={props.style?.footer} mode={props.mode} footer={props?.footer} />
-        </Content>
-
-        {props?.sider && (
-          <Sider
-            className={`${layoutCls}__side`}
-            width={siderWidth ?? 240}
-            style={props.style?.sider}
-          >
-            <Sidebar sider={props?.sider} />
-          </Sider>
-        )}
-      </LLMContext.Provider>
-    </Layout>
+    <ViewportProvider>
+      <Spin spinning={props.loading}>
+        <Layout className={classnames([layoutCls, props.className])} style={props.style?.layout}>
+          <header className={`${layoutCls}__header`} style={props.style?.header}>
+            <ToolHeader
+              header={props?.header}
+              headerName={props.headerName}
+              goBack={props.goBack}
+              exportData={props.exportData}
+              hasLangNode={EToolName.LLM !== currentToolName}
+              hasHeaderOption={EToolName.LLM !== currentToolName}
+              hasPredictTrackingIcon={EToolName.LLM !== currentToolName}
+            />
+          </header>
+          {props.children}
+        </Layout>
+      </Spin>
+    </ViewportProvider>
   );
 };
-
-const ViewportProviderLayout = (props: AppProps & IProps & { children: any }) => (
-  <ViewportProvider>
-    <Spin spinning={props.loading}>
-      <Layout className={classnames([layoutCls, props.className])} style={props.style?.layout}>
-        <header className={`${layoutCls}__header`} style={props.style?.header}>
-          <ToolHeader
-            header={props?.header}
-            headerName={props.headerName}
-            goBack={props.goBack}
-            exportData={props.exportData}
-          />
-        </header>
-        {props.children}
-      </Layout>
-    </Spin>
-  </ViewportProvider>
-);
 
 const MainView: React.FC<AppProps & IProps> = (props) => {
   const siderWidth = props.style?.sider?.width;
@@ -152,6 +125,7 @@ const MainView: React.FC<AppProps & IProps> = (props) => {
         >
           <Sidebar sider={props?.sider} />
         </Sider>
+        <PreviewResult />
       </Layout>
     </ViewportProviderLayout>
   );

@@ -16,17 +16,19 @@ import { getStepConfig } from '@/store/annotation/reducer';
 import QuestionView from './questionView';
 import { useTranslation } from 'react-i18next';
 import { IAnswerList } from './types';
+import AnnotationTips from '@/views/MainView/annotationTips';
 
 interface IProps {
   checkMode?: boolean;
   annotation?: any;
-  setHoverKey: (value: number) => void;
+  showTips?: boolean;
+  tips?: string;
 }
 const { Sider } = Layout;
 const LLMViewCls = `${prefix}-LLMView`;
 const layoutCls = `${prefix}-layout`;
 const LLMToolView: React.FC<IProps> = (props) => {
-  const { annotation, setHoverKey, checkMode } = props;
+  const { annotation, checkMode, tips, showTips } = props;
   const { imgIndex, imgList, stepList, step } = annotation;
   const { hoverKey } = useContext(LLMContext);
   const [answerList, setAnswerList] = useState<IAnswerList[]>([]);
@@ -62,10 +64,13 @@ const LLMToolView: React.FC<IProps> = (props) => {
 
   return (
     <Layout className={LLMViewCls}>
-      <QuestionView hoverKey={hoverKey} question={question} answerList={answerList} />
+      <div className={`${LLMViewCls}-question`}>
+        {showTips === true && <AnnotationTips tips={tips} />}
+        <QuestionView hoverKey={hoverKey} question={question} answerList={answerList} />
+      </div>
       {LLMStepConfig && LLMStepConfig !== '{}' && (
         <Sider className={`${layoutCls}__side`} width={600}>
-          <LLMSidebar setHoverKey={setHoverKey} checkMode={checkMode} />
+          <LLMSidebar checkMode={checkMode} />
         </Sider>
       )}
     </Layout>

@@ -7,6 +7,7 @@ import React from 'react';
 import { prefix } from '@/constant';
 import { Radio } from 'antd';
 import { useTranslation } from 'react-i18next';
+import LongText from '@/components/longText';
 
 interface IProps {
   title: string;
@@ -21,7 +22,9 @@ const DetermineGroup = (props: IProps) => {
   const { t } = useTranslation();
   return (
     <div className={`${prefix}-LLMSidebar-contentBox`}>
-      <span style={{ width: '160px' }}>{title}</span>
+      <span style={{ width: '160px' }}>
+        <LongText text={title} openByText={true} />
+      </span>
       <Radio.Group
         value={selectValue}
         onChange={(e) => updateValue(e.target.value)}

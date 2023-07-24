@@ -259,9 +259,9 @@ export const UpdateHighlightAttribute = (attribute: string): AnnotationActionTyp
     type: ANNOTATION_ACTIONS.SET_HIGHLIGHT_ATTRIBUTE,
     payload: {
       attribute,
-    }
-  }
-}
+    },
+  };
+};
 
 /**
  * 初始化任务数据
@@ -322,7 +322,7 @@ export function InitTaskData({
     tasks.push(UpdateCheckMode(checkMode));
   }
 
-  tasks.push(UpdateHighlightAttribute(highlightAttribute))
+  tasks.push(UpdateHighlightAttribute(highlightAttribute));
 
   tasks.push(SetTaskConfig({ stepList, step }));
 
@@ -385,7 +385,7 @@ export function UpdateInjectFunc({
     tasks.push(UpdateBeforeRotate(beforeRotate));
   }
 
-  tasks.push(UpdateHighlightAttribute(highlightAttribute))
+  tasks.push(UpdateHighlightAttribute(highlightAttribute));
 
   tasks.push(SetTaskStepList({ stepList }));
 
