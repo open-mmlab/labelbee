@@ -50,7 +50,9 @@ class PolygonOperation extends BasicToolOperation {
 
   public pattern: EPolygonPattern; // 当前多边形标注形式
 
-  public isCombined: boolean; // 是否开启合并操作
+  public isCombined: boolean; // 是否开启合并操作（单个合并）
+
+  public isCropping: boolean; // 是否开启裁剪操作（单个裁剪）
 
   public dragInfo?: {
     dragStartCoord: ICoordinate;
@@ -88,6 +90,7 @@ class PolygonOperation extends BasicToolOperation {
     this.isCtrl = false;
     this.isAlt = false;
     this.isCombined = false;
+    this.isCropping = false;
     this.pattern = EPolygonPattern.Normal;
 
     this.getCurrentSelectedData = this.getCurrentSelectedData.bind(this);
@@ -106,6 +109,12 @@ class PolygonOperation extends BasicToolOperation {
 
   get minArea() {
     return this.config.minArea || 0;
+  }
+
+  get currentOrder() {
+    return this.selectedPolygon
+      ? this.selectedPolygon.order
+      : Math.max(0, ...this.polygonList.map((item) => item.order)) + 1;
   }
 
   public eventBinding() {
@@ -184,6 +193,7 @@ class PolygonOperation extends BasicToolOperation {
     }
 
     this.pattern = pattern;
+    this.emit('patternChange');
   }
 
   /**
@@ -281,7 +291,7 @@ class PolygonOperation extends BasicToolOperation {
 
     const selectedPolygon = PolygonUtils.getPolygonByID(this.polygonList, selectedID);
 
-    if (!selectedPolygon) {
+    if (!selectedPolygon?.isRect) {
       return;
     }
 
@@ -814,9 +824,25 @@ class PolygonOperation extends BasicToolOperation {
       }
 
       case EKeyCode.X:
-        if (e.altKey) {
-          this.segment();
+        if (e.shiftKey && e.altKey) {
+          this.crop();
+          return;
         }
+
+        if (e.altKey) {
+          if (!this.selectedID) {
+            this.emit('messageInfo', i18n.t('PolygonsToBeCroppedNeedToBeSelected'));
+            return;
+          }
+          this.isCropping = !this.isCropping;
+        }
+        break;
+      case EKeyCode.Left:
+        this.rotatePolygon(1, ERotateDirection.Anticlockwise);
+        break;
+
+      case EKeyCode.Right:
+        this.rotatePolygon(1, ERotateDirection.Clockwise);
         break;
 
       default: {
@@ -1018,9 +1044,13 @@ class PolygonOperation extends BasicToolOperation {
     };
   }
 
-  public segment() {
+  public crop() {
     // 如果没有选中多边形直接进行裁剪操作，直接跳出
     if (!this.selectedID) {
+      this.emit('messageInfo', i18n.t('PolygonsToBeCroppedNeedToBeSelected'));
+      return;
+    }
+    if (this.isCropping && (!this.hoverID || this.hoverID === this.selectedID)) {
       return;
     }
 
@@ -1028,7 +1058,12 @@ class PolygonOperation extends BasicToolOperation {
       return;
     }
     const selectedPointList = PolygonUtils.getPolygonPointList(this.selectedID, this.currentShowList);
-    const backgroundPolygonList = this.currentShowList.filter((v) => v.id !== this.selectedID);
+    const backgroundPolygonList = this.currentShowList.filter((v) => {
+      if (this.isCropping) {
+        return v.id === this.hoverID;
+      }
+      return v.id !== this.selectedID;
+    });
 
     if (backgroundPolygonList.length === 0 || selectedPointList.length === 0) {
       return;
@@ -1093,6 +1128,7 @@ class PolygonOperation extends BasicToolOperation {
       );
       newPolygonList = newPolygonList.filter((v) => v.id !== this.selectedID);
     }
+    this.isCropping = false;
     this.setPolygonList(newPolygonList);
     this.history.pushHistory(newPolygonList);
     this.render();
@@ -1131,6 +1167,7 @@ class PolygonOperation extends BasicToolOperation {
     }
 
     const { newPolygon, unionList } = composeData;
+    this.isCombined = false;
     if (unionList.length === 1 && newPolygon) {
       const newPolygonList = this.polygonList
         .filter((v) => !unionList.includes(v.id))
@@ -1149,7 +1186,6 @@ class PolygonOperation extends BasicToolOperation {
     } else {
       this.emit('messageInfo', i18n.t('CombiningFailedNotify'));
     }
-    this.isCombined = false;
   }
 
   /**
@@ -1424,21 +1460,25 @@ class PolygonOperation extends BasicToolOperation {
   }
 
   public onMouseUp(e: MouseEvent) {
-    if (this.isCombined) {
-      switch (e.button) {
-        case 0:
+    switch (e.button) {
+      case 0:
+        if (this.isCombined) {
           this.combine(e);
-          break;
-
-        case 2:
-          this.isCombined = false;
-          break;
-        default:
           return;
-      }
+        }
+        if (this.isCropping) {
+          this.crop();
+          return;
+        }
+        break;
 
-      return;
+      case 2:
+        this.isCombined = false;
+        this.isCropping = false;
+        break;
+      default:
     }
+
     if (super.onMouseUp(e) || this.forbidMouseOperation || !this.imgInfo) {
       return undefined;
     }
@@ -1509,7 +1549,7 @@ class PolygonOperation extends BasicToolOperation {
       return;
     }
 
-    const toolColor = this.getColor(selectedPolygon.attribute);
+    const toolColor = this.getColor(selectedPolygon.attribute, this.config, selectedPolygon.order);
     const color = selectedPolygon.valid ? toolColor?.valid.stroke : toolColor?.invalid.stroke;
     return {
       width: TEXT_MAX_WIDTH,
@@ -1547,7 +1587,7 @@ class PolygonOperation extends BasicToolOperation {
 
     const newWidth = TEXT_MAX_WIDTH;
     const coordinate = AxisUtils.getOffsetCoordinate({ x, y }, this.currentPos, this.zoom);
-    const toolColor = this.getColor(attribute);
+    const toolColor = this.getColor(attribute, this.config, selectedPolygon.order);
     const color = valid ? toolColor?.valid.stroke : toolColor?.invalid.stroke;
     if (!this._textAttributeInstance) {
       // 属性文本示例
@@ -1581,7 +1621,7 @@ class PolygonOperation extends BasicToolOperation {
           return;
         }
         const { textAttribute, attribute } = polygon;
-        const toolColor = this.getColor(attribute);
+        const toolColor = this.getColor(attribute, this.config, polygon.order);
         const toolData = StyleUtils.getStrokeAndFill(toolColor, polygon.valid);
         const transformPointList = AxisUtils.changePointListByZoom(polygon.pointList || [], this.zoom, this.currentPos);
 
@@ -1593,6 +1633,7 @@ class PolygonOperation extends BasicToolOperation {
           lineCap: 'round',
           isClose: true,
           lineType: this.config?.lineType,
+          showKeyPoint: this._imgAttribute?.showKeyPoint,
         });
 
         let showText = `${AttributeUtils.getAttributeShowText(attribute, this.config.attributeList) ?? ''}`;
@@ -1629,7 +1670,7 @@ class PolygonOperation extends BasicToolOperation {
   public renderSelectedPolygon(polygon: IPolygonData) {
     // 3. 选中多边形的渲染
     if (polygon) {
-      const toolColor = this.getColor(polygon.attribute);
+      const toolColor = this.getColor(polygon.attribute, this.config, polygon.order);
       const toolData = StyleUtils.getStrokeAndFill(toolColor, polygon.valid, { isSelected: true });
 
       DrawUtils.drawSelectedPolygonWithFillAndLine(
@@ -1670,7 +1711,7 @@ class PolygonOperation extends BasicToolOperation {
       const { hoverPolygon } = this;
       if (hoverPolygon) {
         let color = '';
-        const toolColor = this.getColor(hoverPolygon.attribute);
+        const toolColor = this.getColor(hoverPolygon.attribute, this.config, hoverPolygon.order);
         if (hoverPolygon.valid) {
           color = toolColor.validHover.fill;
         } else {
@@ -1699,7 +1740,7 @@ class PolygonOperation extends BasicToolOperation {
     // 3. 选中多边形的渲染
     this.renderSelectedPolygons();
 
-    const defaultColor = this.getColor(this.defaultAttribute);
+    const defaultColor = this.getColor(this.defaultAttribute, this.config, this.currentOrder);
     const toolData = StyleUtils.getStrokeAndFill(defaultColor, !this.isCtrl);
 
     // 4. 编辑中的多边形
@@ -1786,45 +1827,58 @@ class PolygonOperation extends BasicToolOperation {
 
     super.render();
     this.renderPolygon();
-    this.renderCursorLine(this.getLineColor(this.defaultAttribute));
+    this.renderCursorLine();
   }
 
-  public renderCursorLine(lineColor: string) {
+  public renderCursorLine() {
+    const lineColor = this.getLineColor(this.defaultAttribute, this.currentOrder);
     super.renderCursorLine(lineColor);
+    this.renderCursorText();
+  }
+
+  public renderCursorText() {
+    let text = '';
     if (this.isCombined) {
-      const { x, y } = this.coord;
-      const padding = 10; // 框的边界
-      const rectWidth = 186; // 框的宽度
-      const rectHeight = 32; // 框的高度
-      DrawUtils.drawRectWithFill(
-        this.canvas,
-        {
-          x: x + padding,
-          y: y - padding * 4 - 1,
-          width: rectWidth,
-          height: rectHeight,
-        } as IRect,
-        { color: 'black' },
-      );
-
-      DrawUtils.drawText(this.canvas, { x, y }, i18n.t('ClickAnotherPolygon'), {
-        textAlign: 'center',
-        color: 'white',
-        offsetX: rectWidth / 2 + padding,
-        offsetY: -(rectHeight / 2 + padding / 2),
-      });
-
-      DrawUtils.drawRect(
-        this.canvas,
-        {
-          x: x - padding,
-          y: y - padding,
-          width: padding * 2,
-          height: padding * 2,
-        } as IRect,
-        { lineDash: [6], color: 'white' },
-      );
+      text = i18n.t('ClickAnotherPolygon');
     }
+    if (this.isCropping) {
+      text = i18n.t('ClickCroppingPolygon');
+    }
+    if (!text) {
+      return;
+    }
+    const { x, y } = this.coord;
+    const padding = 10; // 框的边界
+    const rectWidth = 186; // 框的宽度
+    const rectHeight = 32; // 框的高度
+    DrawUtils.drawRectWithFill(
+      this.canvas,
+      {
+        x: x + padding,
+        y: y - padding * 4 - 1,
+        width: rectWidth,
+        height: rectHeight,
+      } as IRect,
+      { color: 'black' },
+    );
+
+    DrawUtils.drawText(this.canvas, { x, y }, text, {
+      textAlign: 'center',
+      color: 'white',
+      offsetX: rectWidth / 2 + padding,
+      offsetY: -(rectHeight / 2 + padding / 2),
+    });
+
+    DrawUtils.drawRect(
+      this.canvas,
+      {
+        x: x - padding,
+        y: y - padding,
+        width: padding * 2,
+        height: padding * 2,
+      } as IRect,
+      { lineDash: [6], color: 'white' },
+    );
   }
 
   /** 撤销 */

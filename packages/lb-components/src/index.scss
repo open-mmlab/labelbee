@@ -256,6 +256,7 @@ $prefix: bee;
             cursor: pointer;
             display: flex;
             align-items: center;
+            height: 100%;
 
             .toolName {
               width: 100%;
@@ -319,6 +320,42 @@ $prefix: bee;
     width: 100%;
     height: 1px;
     background: #eee;
+  }
+
+  &__operationRotate {
+    display: flex;
+    justify-content: space-between;
+    margin: 8px;
+    padding: 8px;
+    font-size: 10px;
+    background-color: rgb(240, 240, 240);
+    border-radius: 6px;
+    .operation {
+      display: flex;
+      align-items: center;
+      padding: 8px 4px;
+      background-color: white;
+      border-radius: 6px;
+      cursor: pointer;
+      .icon {
+        margin-right: 5px;
+      }
+
+      .hoverIcon {
+        display: none;
+        margin-right: 5px;
+      }
+      
+      &:hover {
+        color: #666fff;
+        .icon {
+          display: none;
+        }
+        .hoverIcon {
+          display: inline-block;
+        }
+      }
+    }
   }
 
   .dashHorizontal {

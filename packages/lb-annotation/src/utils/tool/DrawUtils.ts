@@ -499,20 +499,25 @@ export default class DrawUtils {
       lineCap: CanvasLineCap;
       isClose: boolean; // 是否闭合
       lineType: ELineTypes;
+      showKeyPoint: boolean;
     }> = {},
   ) {
-    const { strokeColor, fillColor, thickness, lineCap, isClose, lineType } = options;
+    const { strokeColor, fillColor, thickness, lineCap, isClose, lineType, showKeyPoint } = options;
 
-    const newPointList = this.drawPolygon(canvas, pointList, {
+    this.drawPolygonWithFill(canvas, pointList, { color: fillColor, lineType });
+
+    const drawPolygonOptions = {
       color: strokeColor,
       thickness,
       lineCap,
       isClose,
       lineType,
-    });
-    this.drawPolygonWithFill(canvas, pointList, { color: fillColor, lineType });
+    };
 
-    return newPointList;
+    if (showKeyPoint) {
+      return this.drawPolygonWithKeyPoint(canvas, pointList, drawPolygonOptions);
+    }
+    return this.drawPolygon(canvas, pointList, drawPolygonOptions);
   }
 
   /**
@@ -560,18 +565,12 @@ export default class DrawUtils {
       lineType: ELineTypes;
     }> = {},
   ) {
-    const { pointColor = 'white', strokeColor } = options;
-
-    const newPointList = this.drawPolygonWithFillAndLine(canvas, pointList, options);
+    const newPointList = this.drawPolygonWithFillAndLine(canvas, pointList, { ...options, showKeyPoint: true });
 
     // if (isClose === false) {
     //   newPointList.pop();
     // }
 
-    newPointList.forEach((point) => {
-      this.drawCircleWithFill(canvas, point, 4, { color: strokeColor });
-      this.drawCircleWithFill(canvas, point, 3, { color: pointColor });
-    });
     return newPointList;
   }
 

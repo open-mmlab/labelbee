@@ -5,7 +5,7 @@
  */
 
 import _ from 'lodash';
-import { ELineColor, ELineTypes, ETextType, EToolName } from '@/constant/tool';
+import { ELineTypes, ETextType, EToolName } from '@/constant/tool';
 import ActionsHistory from '@/utils/ActionsHistory';
 import uuid from '@/utils/uuid';
 import EKeyCode from '@/constant/keyCode';
@@ -93,6 +93,7 @@ class LineToolOperation extends BasicToolOperation {
       const color = this.getLineColorByAttribute({
         attribute: line.attribute!,
         valid: line.valid!,
+        order: line.order,
       });
 
       if (this.selectedLines.length > 0) {
@@ -130,6 +131,10 @@ class LineToolOperation extends BasicToolOperation {
   /** 选中单个线条 */
   get selectedLine() {
     return this.lineList.find((i) => i.id === this.selectedID);
+  }
+
+  get currentOrder() {
+    return this.selectedLine ? this.selectedLine.order : Math.max(0, ...this.lineList.map((item) => item.order)) + 1;
   }
 
   /**
@@ -247,11 +252,6 @@ class LineToolOperation extends BasicToolOperation {
   /** 线条类型是否为曲线 */
   get isCurve() {
     return this.config.lineType === ELineTypes.Curve;
-  }
-
-  /** 线条是否为多色 */
-  get isMultipleColor() {
-    return this.config.lineColor === ELineColor.MultiColor;
   }
 
   get imageSize() {
@@ -381,7 +381,7 @@ class LineToolOperation extends BasicToolOperation {
   get lineStyle() {
     return {
       lineWidth: this.style.width,
-      color: this.getLineColor(this.defaultAttribute),
+      color: this.getLineColor(this.defaultAttribute, this.currentOrder),
       opacity: this.style.opacity,
     };
   }
@@ -673,8 +673,12 @@ class LineToolOperation extends BasicToolOperation {
     }
   };
 
-  public getLineColorByAttribute(line: { attribute: string; valid: boolean } | ILine, isSelected: boolean = false) {
-    return StyleUtils.getStrokeAndFill(this.getColor(line.attribute), line.valid, { isSelected }).stroke;
+  public getLineColorByAttribute(
+    line: { attribute: string; valid: boolean; order: number } | ILine,
+    isSelected: boolean = false,
+  ) {
+    const color = this.getColor(line.attribute, this.config, line.order);
+    return StyleUtils.getStrokeAndFill(color, line.valid, { isSelected }).stroke;
   }
 
   public drawLines = () => {
@@ -696,7 +700,7 @@ class LineToolOperation extends BasicToolOperation {
           const displayOrder = order;
           const color = line && this.getLineColorByAttribute(line);
 
-          this.drawLine(line.pointList, undefined, color, false);
+          this.drawLine(line.pointList, undefined, color, this._imgAttribute?.showKeyPoint);
           this.drawLineNumber(line.pointList[0], displayOrder, color, label, line.attribute, line.valid);
 
           if (line.id !== this.textEditingID) {
@@ -720,7 +724,7 @@ class LineToolOperation extends BasicToolOperation {
     this.drawLines();
     this.drawActivatedLine(nextPoint, undefined, false);
     this.renderTextAttribute();
-    this.renderCursorLine(this.getLineColor(this.defaultAttribute));
+    this.renderCursorLine(this.getLineColor(this.defaultAttribute, this.currentOrder));
   };
 
   /**
@@ -1929,7 +1933,7 @@ class LineToolOperation extends BasicToolOperation {
   public getCurrentSelectedData() {
     const valid = this.isActiveLineValid();
     const attribute = this.defaultAttribute;
-    const toolColor = this.getColor(attribute);
+    const toolColor = this.getColor(attribute, this.config, this.currentOrder);
     const color = valid ? toolColor?.valid.stroke : toolColor?.invalid.stroke;
     const textAttribute = this.lineList.find((i) => i.id === this.selectedID)?.textAttribute ?? '';
 
@@ -1950,7 +1954,7 @@ class LineToolOperation extends BasicToolOperation {
     const { x, y } = this.selectedLine!.pointList![1];
 
     const coordinate = this.coordUtils.getRenderCoord({ x, y });
-    const toolColor = this.getColor(attribute);
+    const toolColor = this.getColor(attribute, this.config, this.currentOrder);
     const color = valid ? toolColor?.valid.stroke : toolColor?.invalid.stroke;
     const textAttribute = this.lineList.find((i) => i.id === this.selectedID)?.textAttribute ?? '';
 

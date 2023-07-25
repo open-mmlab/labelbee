@@ -11,6 +11,7 @@ import IconPolygonInsertKj from '@/assets/annotation/toolHotKeyIcon/icon_polygon
 import IconUnGripKj from '@/assets/annotation/toolHotKeyIcon/icon_unGrip_kj.svg';
 import IconPointSpecialKj from '@/assets/annotation/toolHotKeyIcon/icon_pointSpecial_kj.svg';
 import IconSegment from '@/assets/annotation/toolHotKeyIcon/icon_segment.svg';
+import IconContinuousSegment from '@/assets/annotation/toolHotKeyIcon/icon_continuous_segment.svg';
 import IconPolygonMerge from '@/assets/annotation/toolHotKeyIcon/icon_polygonMerge_kj.svg';
 import IconAI from '@/assets/annotation/toolHotKeyIcon/icon_AI.svg';
 import IconSwapOutlined from '@/assets/annotation/toolHotKeyIcon/icon_swap_outlined.svg';
@@ -105,7 +106,14 @@ export const splitPolygon = {
   name: 'CropOverlapArea',
   icon: IconSegment,
   noticeInfo: '',
-  shortCut: ['ALT', 'X'],
+  shortCut: ['Alt', 'X'],
+};
+
+export const continuousSplitPolygon = {
+  name: 'ContinuousCropping',
+  icon: IconContinuousSegment,
+  noticeInfo: '',
+  shortCut: ['Alt', 'Shift', 'X'],
 };
 
 export const combinePolygon = {
@@ -162,5 +170,6 @@ const pointToolShortCutTable = [
   // changeRenderPattern,
   combinePolygon,
   splitPolygon,
+  continuousSplitPolygon,
 ];
 export default pointToolShortCutTable;

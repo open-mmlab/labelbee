@@ -4,4 +4,5 @@ declare interface IImageAttribute {
   brightness: number;
   zoomRatio: number;
   isOriginalSize: boolean;
+  showKeyPoint: boolean;
 }

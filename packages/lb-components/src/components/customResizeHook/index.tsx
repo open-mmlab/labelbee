@@ -45,7 +45,7 @@ export const ViewportProviderComponent = (props: any) => {
       return;
     }
 
-    if (!e.shiftKey && !e.ctrlKey) {
+    if (!e.shiftKey && !e.ctrlKey && !e.metaKey) {
       if (e.keyCode === EKeyCode.A) {
         if (skipBeforePageTurning) {
           skipBeforePageTurning(() => dispatch(PageBackward()));

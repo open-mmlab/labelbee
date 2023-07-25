@@ -6,7 +6,7 @@
 
 import { EToolName } from '@/data/enums/ToolType';
 import React from 'react';
-import { sidebarCls } from './index';
+import { sidebarCls } from '../index';
 import lineSvg from '@/assets/annotation/lineTool/icon_line.svg';
 import lineASvg from '@/assets/annotation/lineTool/icon_line_a.svg';
 import pointSvg from '@/assets/annotation/pointTool/icon_point.svg';
@@ -51,7 +51,7 @@ const getToolNameVersion = (lang: string) => {
   return TOOL_NAME;
 };
 
-export const ToolIcons = ({
+const BasicToolIcons = ({
   toolName,
   selectedToolName,
   onChange,
@@ -66,6 +66,10 @@ export const ToolIcons = ({
       return [EToolName.Polygon, EToolName.Rect, EToolName.Point, EToolName.Line].includes(
         item?.toolName,
       );
+    }
+
+    if (toolName === EToolName.Polygon) {
+      return [EToolName.Polygon, EToolName.Rect].includes(item?.toolName);
     }
 
     return item?.toolName === toolName;
@@ -100,3 +104,5 @@ export const ToolIcons = ({
     </div>
   );
 };
+
+export default BasicToolIcons;
