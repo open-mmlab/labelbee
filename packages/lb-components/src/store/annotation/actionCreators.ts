@@ -588,7 +588,7 @@ export const DispatcherTurning = async (
   getState: any,
   pageTurningOperation: EPageTurningOperation,
   triggerEventAfterIndexChanged = false,
-  noSubmit: boolean = false,
+  noSubmit = false,
   toIndex?: number,
 ) => {
   const annotationStore = getState().annotation;
