@@ -425,7 +425,7 @@ export const UpdateProcessingStep =
       dispatch({ type: ANNOTATION_ACTIONS.SET_STEP, payload: { toStep } }),
       dispatch({ type: ANNOTATION_ACTIONS.CALC_STEP_PROGRESS }),
       // 切换步骤保持图片位置
-      dispatch(LoadFileAndFileData(index ?? imgIndex, 0)),
+      dispatch(LoadFileAndFileData(index ?? imgIndex, 0, false)),
     ];
   };
 
@@ -453,8 +453,23 @@ const SubmitAndChangeFileIndex = (
   nextBasicIndex?: number,
 ) => [
   dispatch(ToSubmitFileData(submitType)),
-  dispatch(LoadFileAndFileData(nextIndex, nextBasicIndex)),
+  dispatch(LoadFileAndFileData(nextIndex, nextBasicIndex, false)),
 ];
+
+/**
+ * 不提交数据，仅切换标注文件（拉框预测使用）
+ * @param dispatch
+ * @param nextIndex
+ * @param nextBasicIndex
+ * @constructor
+ */
+const OnlyChangeFileIndex = (
+  dispatch: any,
+  nextIndex: number,
+  nextBasicIndex?: number,
+) => [
+  dispatch(LoadFileAndFileData(nextIndex, nextBasicIndex, true)),
+]
 
 const ChangeBasicIndex = (dispatch: any, nextBasicIndex: number) => [
   dispatch({ type: ANNOTATION_ACTIONS.SUBMIT_RESULT }),
@@ -482,6 +497,7 @@ export const PageBackward =
       getState,
       EPageTurningOperation.Backward,
       triggerEventAfterIndexChanged,
+      false,
     );
   };
 
@@ -494,15 +510,18 @@ export const PageForward =
       getState,
       EPageTurningOperation.Forward,
       triggerEventAfterIndexChanged,
+      false,
     );
   };
 
 /**
  * 跳到指定文件索引
  * @param toIndex
+ * @param triggerEventAfterIndexChanged
+ * @param noSubmit
  */
 export const PageJump =
-  (toIndex: number, triggerEventAfterIndexChanged = false) =>
+  (toIndex: number, triggerEventAfterIndexChanged = false, noSubmit = false) =>
   (dispatch: any, getState: any) => {
     if (toIndex === getState().imgIndex) {
       return;
@@ -513,6 +532,7 @@ export const PageJump =
       getState,
       EPageTurningOperation.Jump,
       triggerEventAfterIndexChanged,
+      noSubmit,
       toIndex,
     );
   };
@@ -559,6 +579,8 @@ export const loadImgList = async (
  * @param dispatch
  * @param getState
  * @param pageTurningOperation
+ * @param triggerEventAfterIndexChanged
+ * @param noSubmit
  * @param toIndex
  */
 export const DispatcherTurning = async (
@@ -566,6 +588,7 @@ export const DispatcherTurning = async (
   getState: any,
   pageTurningOperation: EPageTurningOperation,
   triggerEventAfterIndexChanged = false,
+  noSubmit: boolean = false,
   toIndex?: number,
 ) => {
   const annotationStore = getState().annotation;
@@ -595,7 +618,11 @@ export const DispatcherTurning = async (
       submitType === ESubmitType.Backward
         ? getBasicIndex(getState().annotation, basicIndex)
         : basicIndex;
-    return SubmitAndChangeFileIndex(dispatch, fileIndex, submitType, index);
+    if (noSubmit === true) {
+      return OnlyChangeFileIndex(dispatch, fileIndex, index)
+    } else {
+      return SubmitAndChangeFileIndex(dispatch, fileIndex, submitType, index);
+    }
   }
 
   if (basicIndexChanged) {
