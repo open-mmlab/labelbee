@@ -1817,10 +1817,10 @@ $headerHeight: 40px;
       overflow: auto;
 
       .#{$ptPrefix}-2d-container {
-        flex: 1;
         flex-direction: column;
         display: flex;
         overflow: hidden;
+        flex-shrink: 0;
       }
 
       .#{$ptPrefix}-2d-image {

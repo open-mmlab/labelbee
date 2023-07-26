@@ -4,12 +4,17 @@ import { PointCloudContainer } from './PointCloudLayout';
 import { PointCloudContext } from './PointCloudContext';
 import { connect } from 'react-redux';
 
-import { pointCloudLidar2image } from '@labelbee/lb-annotation';
+import { pointCloudLidar2image, cKeyCode } from '@labelbee/lb-annotation';
 import { LabelBeeContext } from '@/store/ctx';
 import { a2MapStateToProps, IA2MapStateProps } from '@/store/annotation/map';
 import { toolStyleConverter } from '@labelbee/lb-utils';
 import PointCloud2DSingleView from './PointCloud2DSingleView';
 import TitleButton from './components/TitleButton';
+import { LeftOutlined } from '@ant-design/icons';
+import classNames from 'classnames';
+import EscSvg from '@/assets/annotation/common/icon_esc.svg';
+import LeftSquareOutlined from '@/assets/annotation/common/icon_left_squareOutlined.svg';
+import RightSquareOutlined from '@/assets/annotation/common/icon_right_squareOutlined.svg';
 
 // TODO, It will be deleted when the exported type of lb-annotation is work.
 interface IAnnotationDataTemporarily {
@@ -17,10 +22,14 @@ interface IAnnotationDataTemporarily {
   annotation: any;
 }
 
+const EKeyCode = cKeyCode.default;
+
 const PointCloud2DView = ({ currentData, config }: IA2MapStateProps) => {
   const [annotations2d, setAnnotations2d] = useState<IAnnotationDataTemporarily[]>([]);
   const { topViewInstance, displayPointCloudList } = useContext(PointCloudContext);
   const [selectedID, setSelectedID] = useState('');
+  const [isEnlarge, setIsEnlarge] = useState(false);
+  const [curIndex, setCurIndex] = useState<number | undefined>(undefined);
 
   useEffect(() => {
     if (topViewInstance && currentData?.mappingImgList && currentData?.mappingImgList?.length > 0) {
@@ -80,6 +89,49 @@ const PointCloud2DView = ({ currentData, config }: IA2MapStateProps) => {
     }
   }, [displayPointCloudList, currentData?.mappingImgList, selectedID]);
 
+  useEffect(() => {
+    window.addEventListener('keydown', onKeyDown);
+    return () => {
+      window.removeEventListener('keydown', onKeyDown);
+    };
+  }, [curIndex]);
+
+  const onKeyDown = (event: KeyboardEvent) => {
+    const { keyCode } = event;
+    switch (keyCode) {
+      case EKeyCode.Esc:
+        if (isEnlarge) {
+          setIsEnlarge(false);
+        }
+        break;
+      case EKeyCode.Left:
+        lastPage();
+        break;
+
+      case EKeyCode.Right:
+        nextPage();
+        break;
+    }
+  };
+
+  const lastPage = () => {
+    if (curIndex === undefined || !isEnlarge) {
+      return;
+    }
+    if (Number(curIndex) > 0) {
+      setCurIndex(curIndex - 1);
+    }
+  };
+
+  const nextPage = () => {
+    if (curIndex === undefined || !isEnlarge) {
+      return;
+    }
+    if (Number(curIndex) < annotations2d?.length - 1) {
+      setCurIndex(curIndex + 1);
+    }
+  };
+
   const formatViewDataPointList = ({
     viewDataPointList,
     pointCloudBox,
@@ -101,28 +153,89 @@ const PointCloud2DView = ({ currentData, config }: IA2MapStateProps) => {
   const hiddenData =
     !currentData || !currentData?.mappingImgList || !(currentData?.mappingImgList?.length > 0);
 
+  const PointCloud2DTitle = (
+    <div
+      style={{
+        display: 'flex',
+        alignItems: 'center',
+        fontSize: '14px',
+      }}
+    >
+      <img
+        src={LeftSquareOutlined}
+        style={{ height: '24px', marginRight: '8px', cursor: 'pointer' }}
+        onClick={() => lastPage()}
+      />
+      <span style={{ marginRight: '12px' }}>键盘左键上一张</span>
+      <span style={{ margin: '0px 8px 0px 12px' }}>键盘右键上一张</span>
+      <img
+        src={RightSquareOutlined}
+        style={{ height: '24px', marginRight: '12px', cursor: 'pointer' }}
+        onClick={() => nextPage()}
+      />
+      <img
+        src={EscSvg}
+        style={{ height: '24px', margin: '0px 8px 0px 12px', cursor: 'pointer' }}
+        onClick={() => {
+          setIsEnlarge(false);
+          setCurIndex(undefined);
+        }}
+      />
+      <span>键退出</span>
+    </div>
+  );
+
   if (annotations2d?.length > 0) {
     return (
       <>
-        {annotations2d.map((item: any, index: number) => (
-          <PointCloudContainer
-            className={getClassName('point-cloud-2d-container')}
-            title={
-              <TitleButton
-                title={item?.calName}
-                onClick={() => {}}
-                style={{ background: 'rgba(0, 0, 0, 0.74)', color: '#FFFFFF' }}
-              />
-            }
-            titleOnSurface={true}
-            style={hiddenData ? { display: 'none' } : { display: 'flex' }}
-            key={index}
-          >
-            {item?.newAnnotations2d && item?.url && (
-              <PointCloud2DSingleView mappingData={item} setSelectedID={setSelectedID} />
-            )}
-          </PointCloudContainer>
-        ))}
+        {annotations2d.map((item: any, index: number) => {
+          const showEnlarge = isEnlarge && index === curIndex;
+          return (
+            <PointCloudContainer
+              className={classNames({
+                [getClassName('point-cloud-2d-container')]: true,
+                [getClassName('point-cloud-3d-containerZoom')]: showEnlarge,
+              })}
+              title={
+                showEnlarge ? (
+                  <div style={{ display: 'flex', alignItems: 'center' }}>
+                    <LeftOutlined
+                      style={{ cursor: 'pointer', marginRight: '12px' }}
+                      onClick={() => {
+                        setIsEnlarge(false);
+                        setCurIndex(undefined);
+                      }}
+                    />
+                    <span>{item?.calName}</span>
+                    <span style={{ marginLeft: '8px' }}>
+                      {curIndex + 1}/{annotations2d?.length}
+                    </span>
+                  </div>
+                ) : (
+                  <TitleButton
+                    title={item?.calName}
+                    onClick={() => {
+                      setIsEnlarge(true);
+                      setCurIndex(index);
+                    }}
+                    style={{ background: 'rgba(0, 0, 0, 0.74)', color: '#FFFFFF' }}
+                  />
+                )
+              }
+              titleOnSurface={!showEnlarge}
+              style={{
+                display: hiddenData ? 'none' : 'flex',
+                width: showEnlarge ? '100%' : '455px',
+              }}
+              key={index}
+              toolbar={PointCloud2DTitle}
+            >
+              {item?.newAnnotations2d && item?.url && (
+                <PointCloud2DSingleView mappingData={item} setSelectedID={setSelectedID} />
+              )}
+            </PointCloudContainer>
+          );
+        })}
       </>
     );
   }
