@@ -111,7 +111,7 @@ const updateToolInstance = (annotation: AnnotationState, imgNode: HTMLImageEleme
  * @param nextBasicIndex
  */
 export const LoadFileAndFileData =
-  (nextIndex: number, nextBasicIndex?: number): any =>
+  (nextIndex: number, nextBasicIndex?: number, noSubmit?: boolean): any =>
   async (dispatch: any, getState: any) => {
     const { stepList, step } = getState().annotation;
     const currentIsVideo = StepUtils.currentToolIsVideo(step, stepList);
@@ -127,7 +127,7 @@ export const LoadFileAndFileData =
       return;
     }
 
-    dispatch(AfterImageLoaded(nextIndex, nextBasicIndex));
+    dispatch(AfterImageLoaded(nextIndex, nextBasicIndex, noSubmit));
   };
 
 /**
@@ -162,9 +162,8 @@ const AfterVideoLoaded = (nextIndex: number) => (dispatch: any) => {
 };
 
 const AfterImageLoaded =
-  (nextIndex: number, nextBasicIndex?: number) => (dispatch: any, getState: any) => {
+  (nextIndex: number, nextBasicIndex?: number, noSubmit?: boolean) => (dispatch: any, getState: any) => {
     const { toolInstance, imgList } = getState().annotation;
-
     const url = imgList?.[nextIndex]?.url;
     ImgUtils.load(url)
       .then((imgNode: HTMLImageElement) => {
@@ -176,6 +175,7 @@ const AfterImageLoaded =
             imgNode,
             nextIndex,
             nextBasicIndex,
+            noSubmit,
           },
         });
       })
@@ -187,6 +187,7 @@ const AfterImageLoaded =
           payload: {
             nextIndex,
             nextBasicIndex,
+            noSubmit,
           },
         });
       });
@@ -496,8 +497,10 @@ export const annotationReducer = (
               CommonToolUtils.isSameSourceID(i.sourceID, sourceID),
             )
           : result;
-        toolInstance?.history.initRecord(result, true);
-        toolInstance?.setResult(resultForBasicIndex);
+        if (action.payload.noSubmit !== true) {
+          toolInstance?.history.initRecord(result, true);
+          toolInstance?.setResult(resultForBasicIndex);
+        }
       }
 
       return {

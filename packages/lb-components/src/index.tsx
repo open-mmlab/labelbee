@@ -32,9 +32,9 @@ const OutputApp = (props: AppProps, ref: any) => {
         annotationEngine: (store.getState() as AppState).annotation.annotationEngine,
         pageBackwardActions: () => store.dispatch(PageBackward() as unknown as AnyAction),
         pageForwardActions: () => store.dispatch(PageForward() as unknown as AnyAction),
-        pageJump: (page: string) => {
+        pageJump: (page: string, noSubmit?: boolean) => {
           const imgIndex = ~~page - 1;
-          store.dispatch(PageJump(imgIndex) as unknown as AnyAction);
+          store.dispatch(PageJump(imgIndex, false, noSubmit) as unknown as AnyAction);
         },
         hello: () => alert(`hello labelBee!!!`),
       };

@@ -98,6 +98,21 @@ $prefix: bee;
     padding: 4px;
     border: 1px solid #cccccc;
   }
+
+  &__hiddenTextSwitch{
+    display: flex;
+    align-items: center;
+    margin-right: 10px;
+    color: #fff;
+    font-size: 12px;
+    .ant-switch {
+      margin-left: 5px;
+      background-color: #a3a3a3;
+    }
+    .ant-switch-checked {
+      background-color: #666fff;
+    }
+  }
 }
 
 .#{$prefix}-page-input {

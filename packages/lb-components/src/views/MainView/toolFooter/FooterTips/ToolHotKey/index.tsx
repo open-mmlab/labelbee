@@ -61,6 +61,7 @@ export const shortCutTable: { [a: string]: IShortCutInfo[] } = {
   [EToolName.ScribbleTool]: scribbleShortCutTable,
   [EToolName.Cuboid]: cuboidShortCutTable,
   [EToolName.LLM]: LLMShortCutTable,
+  [EToolName.RectTrack]: rectToolShortcutTable,
 };
 
 const ToolHotKeyIcon = ({ icon }: { icon: React.ReactElement | string }) => {

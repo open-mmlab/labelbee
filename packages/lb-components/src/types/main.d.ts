@@ -62,10 +62,14 @@ interface IFooter {
   footerTips: React.ReactNode;
   /** 标注隐藏中  (HiddenTips) */
   hiddenTips: React.ReactNode;
+  /** 隐藏文字信息  (HiddenTextSwitch) */
+  hiddenTextSwitch: React.ReactNode;
   /** 本页件数  */
   pageNumber: React.ReactNode;
   /** 页码切换 */
   pagination: React.ReactNode;
+  /** 文件夹切换 */
+  FolderPagination: Function;
   /** 缩放切换 ZoomController */
   zoomController: React.ReactNode;
   /** 当前分页 */
@@ -87,6 +91,7 @@ interface IFooter {
 export type RenderFooter = ({
   footerTips,
   hiddenTips,
+  hiddenTextSwitch,
   pageNumber,
   pagination,
   zoomController,
