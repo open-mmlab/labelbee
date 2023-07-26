@@ -7,7 +7,7 @@ export const PointCloudContainer: React.FC<{
   toolbar?: React.ReactElement | null;
   className?: string;
   style?: React.CSSProperties;
-  titleOnSurface?: boolean;
+  titleOnSurface?: boolean; // adherent surface
 }> = ({ title, toolbar, children, className, style, titleOnSurface }) => {
   return (
     <div className={classNames([className, getClassName('point-cloud-container')])} style={style}>
