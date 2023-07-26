@@ -4,6 +4,7 @@ import { connect } from 'react-redux';
 import { a2MapStateToProps } from '@/store/annotation/map';
 import { LabelBeeContext } from '@/store/ctx';
 import { ImgUtils, Rect2DOperation, uuid } from '@labelbee/lb-annotation';
+import { IBasicRect } from '@labelbee/lb-utils';
 
 import { usePointCloudViews } from '../pointCloudView/hooks/usePointCloudViews';
 import { PointCloudContext } from '../pointCloudView/PointCloudContext';
@@ -18,6 +19,13 @@ interface IRect2DOperationViewProps {
   checkMode?: boolean;
 }
 
+interface IRect2DOperationViewRect extends IBasicRect {
+  boxID: string;
+  id: string;
+  attribute: any;
+  order?: number;
+}
+
 const Rect2DOperationView = (props: IRect2DOperationViewProps) => {
   const { mappingData = {}, size, config, checkMode } = props;
   const { url } = mappingData;
@@ -29,7 +37,7 @@ const Rect2DOperationView = (props: IRect2DOperationViewProps) => {
   const operation = useRef<any>(null);
   const currentFn = useRef<any>(null);
 
-  const handleUpdateDragResult = (rect) => {
+  const handleUpdateDragResult = (rect: IRect2DOperationViewRect) => {
     const results = currentFn.current?.(rect);
     setPointCloudResult(results);
   };
@@ -39,11 +47,13 @@ const Rect2DOperationView = (props: IRect2DOperationViewProps) => {
   }, [update2DViewRect]);
 
   const setRects = () => {
-    let allRects = [];
+    let allRects: IRect2DOperationViewRect[] = [];
     pointCloudBoxList.forEach((pointCloudBox) => {
       const { rects = [], id, attribute, trackID } = pointCloudBox;
       const rect = rects.find((rect) => rect.imageName === mappingData.url);
-      allRects = [...allRects, { ...rect, boxID: id, id: uuid(), attribute, order: trackID }];
+      if (rect) {
+        allRects = [...allRects, { ...rect, boxID: id, id: uuid(), attribute, order: trackID }];
+      }
     });
     operation.current?.setResult(allRects);
   };
@@ -84,7 +94,9 @@ const Rect2DOperationView = (props: IRect2DOperationViewProps) => {
   useEffect(() => {
     setRects();
     if (selectedID) {
-      const rect = operation.current?.rectList.find((rect) => rect.boxID === selectedID);
+      const rect = operation.current?.rectList.find(
+        (rect: IRect2DOperationViewRect) => rect.boxID === selectedID,
+      );
       if (rect) {
         operation.current?.setSelectedID(rect.id);
       }

@@ -1,4 +1,4 @@
-import RectOperation from './rectOperation';
+import { RectOperation } from './rectOperation';
 
 class Rect2DOperation extends RectOperation {
   public checkMode?: Boolean;
@@ -9,6 +9,7 @@ class Rect2DOperation extends RectOperation {
   }
 
   public createNewDrawingRect() {}
+
   public onRightDblClick() {}
 
   public onMouseMove(e: MouseEvent): undefined {

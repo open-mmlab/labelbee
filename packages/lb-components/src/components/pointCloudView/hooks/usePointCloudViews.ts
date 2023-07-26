@@ -22,6 +22,7 @@ import {
   DEFAULT_SPHERE_PARAMS,
   IDefaultSize,
   IPolygonData,
+  IBasicRect,
 } from '@labelbee/lb-utils';
 import { useContext } from 'react';
 import { PointCloudContext } from '../PointCloudContext';
@@ -42,7 +43,7 @@ import { message } from 'antd';
 import { useTranslation } from 'react-i18next';
 import { useHistory } from './useHistory';
 import { usePolygon } from './usePolygon';
-import { IFileItem } from '@/types/data';
+import { IFileItem, IMappingImg } from '@/types/data';
 import { ICoordinate } from '@labelbee/lb-utils/src/types/common';
 
 const DEFAULT_SCOPE = 5;
@@ -636,7 +637,7 @@ export const usePointCloudViews = () => {
   const generateRects = async (boxParams: IPointCloudBox) => {
     if (!cuboidBoxIn2DView) {
       const { mappingImgList = [] } = currentData;
-      const promises = mappingImgList.map((v) => getRectPointCloudBox(boxParams, v));
+      const promises = mappingImgList.map((v: IMappingImg) => getRectPointCloudBox(boxParams, v));
       const rects = await Promise.all(promises);
       Object.assign(boxParams, { rects: rects.filter((rect) => rect !== undefined) });
     }
@@ -807,24 +808,32 @@ export const usePointCloudViews = () => {
     addHistory({ newBoxParams: boxParams });
   };
 
-  const update2DViewRect = (params) => {
+  const update2DViewRect = (
+    params: IBasicRect & {
+      boxID: string;
+      imageName: string;
+    },
+  ) => {
     const { boxID, imageName, width, height, x, y } = params;
     const currentBox = pointCloudBoxList.find((v) => v.id === boxID);
+    if (currentBox?.rects) {
+      const { rects = [] } = currentBox;
+      const currentRect = rects.find((v) => v.imageName === imageName);
+      if (currentRect) {
+        let newRects = rects as IPointCloudBox['rects'];
 
-    const { rects = [] } = currentBox;
-    const currentRect = rects.find((v) => v.imageName === imageName);
-    let newRects = rects;
+        const newRect = { ...currentRect, width, height, x, y };
+        newRects = rects.map((v) => (v === currentRect ? newRect : v));
 
-    const newRect = { ...currentRect, width, height, x, y };
-    newRects = rects.map((v) => (v === currentRect ? newRect : v));
+        const newBox = { ...currentBox, rects: newRects };
 
-    const newBox = { ...currentBox, rects: newRects };
+        const newPointCloudBoxList = pointCloudBoxList.map((v) => (v === currentBox ? newBox : v));
 
-    const newPointCloudBoxList = pointCloudBoxList.map((v) => (v === currentBox ? newBox : v));
+        topViewInstance?.updatePolygonList(newPointCloudBoxList ?? []);
 
-    topViewInstance?.updatePolygonList(newPointCloudBoxList ?? []);
-
-    return newPointCloudBoxList;
+        return newPointCloudBoxList;
+      }
+    }
   };
 
   /** Top-view selected changed and render to other view */

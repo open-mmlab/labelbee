@@ -1,6 +1,8 @@
 import _ from 'lodash';
 
 import { pointCloudLidar2image } from '@labelbee/lb-annotation';
+import { IBasicRect, ICoordinate, IPointCloudBox } from '@labelbee/lb-utils';
+import { IMappingImg } from '@/types/data';
 
 export const jsonParser = (content: any, defaultValue: any = {}) => {
   try {
@@ -36,7 +38,7 @@ export const classnames = (className: { [key: string]: boolean } | (string | und
   return '';
 };
 
-export const getBoundingRect = (points) => {
+export const getBoundingRect = (points: ICoordinate[]) => {
   let minX = Infinity;
   let minY = Infinity;
   let maxX = -Infinity;
@@ -58,9 +60,16 @@ export const getBoundingRect = (points) => {
 };
 
 const isBoundingRectInImage = (() => {
-  const imageSizes = {};
+  const imageSizes: {
+    [key: string]: {
+      width: number;
+      height: number;
+    };
+  } = {};
 
-  const getIntersection = (rect1, rect2) => {
+  type IRect = Omit<IBasicRect, 'id'>;
+
+  const getIntersection = (rect1: IRect, rect2: IRect) => {
     const left = Math.max(rect1.x, rect2.x);
     const top = Math.max(rect1.y, rect2.y);
     const right = Math.min(rect1.x + rect1.width, rect2.x + rect2.width);
@@ -70,7 +79,7 @@ const isBoundingRectInImage = (() => {
     return width >= 0 && height >= 0 ? { x: left, y: top, width, height } : null;
   };
 
-  return (boundingRect, imageurl) => {
+  return (boundingRect: IRect, imageurl: string) => {
     if (imageSizes[imageurl]) {
       const imgWidth = imageSizes[imageurl].width;
       const imgHeight = imageSizes[imageurl].height;
@@ -98,7 +107,10 @@ const isBoundingRectInImage = (() => {
   };
 })();
 
-export const getRectPointCloudBox = async (pointCloudBox, mappingData) => {
+export const getRectPointCloudBox = async (
+  pointCloudBox: IPointCloudBox,
+  mappingData: IMappingImg,
+) => {
   const { trackID, valid } = pointCloudBox;
 
   // 需要新建一个Rect
@@ -107,7 +119,7 @@ export const getRectPointCloudBox = async (pointCloudBox, mappingData) => {
     mappingData.calib,
   );
 
-  const tmpPoints = viewDataPointList.reduce((acc, v) => {
+  const tmpPoints = viewDataPointList.reduce((acc: ICoordinate[], v) => {
     if (v.type === 'line') {
       return [...acc, ...v.pointList];
     }

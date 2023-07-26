@@ -45,7 +45,7 @@ export const useSingleBox = (props?: IUseSingleBoxParams) => {
   const updateSelectedBox = useCallback(
     async (params: Partial<IPointCloudBox>) => {
       if (selectedBox?.info) {
-        await props?.generateRects?.(params);
+        await props?.generateRects?.(params as IPointCloudBox);
         pointCloudBoxList.splice(selectedBox.index, 1, _.merge(selectedBox.info, params));
         const newPointCloudBoxList = _.cloneDeep(pointCloudBoxList);
         setPointCloudResult(newPointCloudBoxList);
