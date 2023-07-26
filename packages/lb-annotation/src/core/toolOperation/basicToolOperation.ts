@@ -206,12 +206,6 @@ class BasicToolOperation extends EventListener {
       y: 0,
     };
     this.isShowCursor = false;
-    this.style = {
-      strokeColor: COLORS_ARRAY[4],
-      fillColor: COLORS_ARRAY[4],
-      strokeWidth: 2,
-      opacity: 1,
-    };
     this.attributeLockList = [];
     this.history = new ActionsHistory();
     this.style = props.style ?? CommonToolUtils.jsonParser(styleString);

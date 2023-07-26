@@ -17,7 +17,7 @@ export const useRotate = ({ currentData }: IAnnotationStateProps) => {
   const ptCtx = useContext(PointCloudContext);
   const { selectedBox, updateSelectedBox } = useSingleBox();
   const { run: updateRotate } = useThrottleFn(
-    (angle: number) => {
+    async (angle: number) => {
       const { topViewInstance, mainViewInstance, syncAllViewPointCloudColor } = ptCtx;
       if (!topViewInstance || !mainViewInstance) {
         return;
@@ -31,7 +31,7 @@ export const useRotate = ({ currentData }: IAnnotationStateProps) => {
         return;
       }
 
-      const newPointCloudList = updateSelectedBox({
+      const newPointCloudList = await updateSelectedBox({
         rotation: PointCloudUtils.restrictAngleRange(
           selectedPointCloudBox.rotation + Number(Math.PI * angle) / 180,
         ),
@@ -58,10 +58,10 @@ export const useRotate = ({ currentData }: IAnnotationStateProps) => {
     },
     {
       wait: 800,
-    }
+    },
   );
 
-  return { 
+  return {
     updateRotate,
   };
 };

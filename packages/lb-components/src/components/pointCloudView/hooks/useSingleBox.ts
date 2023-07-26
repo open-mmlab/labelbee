@@ -8,8 +8,12 @@ import { usePolygon } from './usePolygon';
 
 const { ESortDirection } = cAnnotation;
 
+interface IUseSingleBoxParams {
+  generateRects?: (box: IPointCloudBox) => void;
+}
+
 /** Actions for single selected box */
-export const useSingleBox = () => {
+export const useSingleBox = (props?: IUseSingleBoxParams) => {
   const {
     pointCloudBoxList,
     setPointCloudResult,
@@ -39,8 +43,9 @@ export const useSingleBox = () => {
 
   /** Use Partial<IPointCloudBox> to update selected box */
   const updateSelectedBox = useCallback(
-    (params: Partial<IPointCloudBox>) => {
+    async (params: Partial<IPointCloudBox>) => {
       if (selectedBox?.info) {
+        await props?.generateRects?.(params);
         pointCloudBoxList.splice(selectedBox.index, 1, _.merge(selectedBox.info, params));
         const newPointCloudBoxList = _.cloneDeep(pointCloudBoxList);
         setPointCloudResult(newPointCloudBoxList);
@@ -82,12 +87,12 @@ export const useSingleBox = () => {
   );
 
   /** Toggle selected box‘s validity  */
-  const changeSelectedBoxValid = useCallback(() => {
+  const changeSelectedBoxValid = useCallback(async () => {
     if (selectedBox?.info) {
       const { id, valid = true } = selectedBox.info;
 
       // PointCloud
-      const newPointCloudList = updateSelectedBox({ valid: !valid });
+      const newPointCloudList = await updateSelectedBox({ valid: !valid });
 
       // Async
       syncAllViewPointCloudColor(newPointCloudList);
@@ -193,23 +198,24 @@ export const useSingleBox = () => {
    * @param updateList {PartialIPointCloudBoxList}
    */
   const updateSelectedBoxes = useCallback(
-    (updateList: PartialIPointCloudBoxList) => {
+    async (updateList: PartialIPointCloudBoxList) => {
       const newPointCloudBoxList = _.cloneDeep(pointCloudBoxList);
       let hasModify = false;
 
-      updateList.forEach((i) => {
+      for (const i of updateList) {
         const index = newPointCloudBoxList.findIndex((p) => p.id === i.id);
 
         if (index > -1) {
           const updatedBoxParam = _.merge(newPointCloudBoxList[index], i);
+          await props?.generateRects?.(updatedBoxParam);
           newPointCloudBoxList.splice(index, 1, updatedBoxParam);
           mainViewInstance?.generateBox(updatedBoxParam);
           hasModify = true;
         }
-      });
+      }
 
       if (hasModify) {
-        setPointCloudResult(newPointCloudBoxList);
+        await setPointCloudResult(newPointCloudBoxList);
         pushHistoryWithList({ pointCloudBoxList: newPointCloudBoxList });
         mainViewInstance?.render();
         return newPointCloudBoxList;

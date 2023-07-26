@@ -138,8 +138,8 @@ const BoxTrackIDInput = () => {
     setIsEdit(false);
   }, [selectedBoxTrackID]);
 
-  const updateCurrentPolygonList = (newTrackID: number) => {
-    const newPointCloudList = updateSelectedBox({ trackID: newTrackID });
+  const updateCurrentPolygonList = async (newTrackID: number) => {
+    const newPointCloudList = await updateSelectedBox({ trackID: newTrackID });
     ptCtx?.topViewInstance?.updatePolygonList(newPointCloudList ?? []);
   };
 

@@ -77,7 +77,8 @@ export interface IPointCloudContext
 
   zoom: number;
   setZoom: (zoom: number) => void;
-
+  cuboidBoxIn2DView: boolean;
+  setCuboidBoxIn2DView: (bool?: boolean) => void;
   history: ActionsHistory; // Operation History
   hideAttributes: string[];
   setHideAttributes: (hideAttrs: string[]) => void;
@@ -173,6 +174,8 @@ export const PointCloudContext = React.createContext<IPointCloudContext>({
 
   highlight2DDataList: [],
   setHighlight2DDataList: () => {},
+  cuboidBoxIn2DView: true,
+  setCuboidBoxIn2DView: () => {},
 });
 
 export const PointCloudProvider: React.FC<{}> = ({ children }) => {
@@ -182,6 +185,7 @@ export const PointCloudProvider: React.FC<{}> = ({ children }) => {
   const [lineList, setLineList] = useState<ILine[]>([]);
   const [selectedIDs, setSelectedIDsState] = useState<string[]>([]);
   const [valid, setValid] = useState<boolean>(true);
+  const [cuboidBoxIn2DView, setCuboidBoxIn2DView] = useState<boolean>(true);
   const [zoom, setZoom] = useState<number>(1);
   const [topViewInstance, setTopViewInstance] = useState<PointCloudAnnotation>();
   const [sideViewInstance, setSideViewInstance] = useState<PointCloudAnnotation>();
@@ -414,6 +418,8 @@ export const PointCloudProvider: React.FC<{}> = ({ children }) => {
 
       highlight2DDataList,
       setHighlight2DDataList,
+      cuboidBoxIn2DView,
+      setCuboidBoxIn2DView,
     };
   }, [
     valid,

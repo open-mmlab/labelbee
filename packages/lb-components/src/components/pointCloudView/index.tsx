@@ -43,6 +43,7 @@ interface IProps extends IA2MapStateProps {
   drawLayerSlot?: TDrawLayerSlot;
   checkMode?: boolean;
   intelligentFit?: boolean;
+  cuboidBoxIn2DView?: boolean;
 }
 
 const PointCloudView: React.FC<IProps> = ({
@@ -53,6 +54,7 @@ const PointCloudView: React.FC<IProps> = ({
   intelligentFit,
   imgIndex,
   loadPCDFileLoading,
+  cuboidBoxIn2DView,
 }) => {
   const ptCtx = useContext(PointCloudContext);
   const { globalPattern, setGlobalPattern, selectedIDs } = ptCtx;
@@ -157,6 +159,7 @@ const PointCloudView: React.FC<IProps> = ({
 
           <div className={getClassName('point-cloud-content')}>
             <div className={getClassName('point-cloud-container', 'left')}>
+              <PointCloud2DView checkMode={checkMode} cuboidBoxIn2DView={cuboidBoxIn2DView} />
               <PointCloud3DView />
               {backAndSideView}
             </div>

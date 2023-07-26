@@ -11,6 +11,7 @@ import LineToolOperation from './core/toolOperation/LineToolOperation';
 import TextToolOperation from './core/toolOperation/TextToolOperation';
 import PolygonOperation from './core/toolOperation/polygonOperation';
 import MeasureOperation from './core/toolOperation/measureOperation';
+import Rect2DOperation from './core/toolOperation/rect2DOperation';
 import { BasicToolOperation } from './core/toolOperation/basicToolOperation';
 import ViewOperation from './core/toolOperation/ViewOperation';
 import ScribbleTool from './core/toolOperation/ScribbleTool';
@@ -56,6 +57,7 @@ export {
   PolygonOperation,
   TextToolOperation,
   BasicToolOperation,
+  Rect2DOperation,
   MeasureOperation,
   ViewOperation,
   PointCloud2dOperation,

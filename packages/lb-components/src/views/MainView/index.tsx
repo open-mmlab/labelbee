@@ -52,6 +52,7 @@ const PointCloudAnnotate: React.FC<AppProps & IProps> = (props) => {
         drawLayerSlot={props.drawLayerSlot}
         checkMode={props.checkMode}
         intelligentFit={props.intelligentFit}
+        cuboidBoxIn2DView={props.cuboidBoxIn2DView}
       />
       <ToolFooter style={props.style?.footer} mode={props.mode} footer={props?.footer} />
     </>

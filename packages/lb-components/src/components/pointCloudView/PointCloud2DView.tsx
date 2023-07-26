@@ -51,7 +51,7 @@ interface IProps extends IA2MapStateProps {
   thumbnailWidth?: number;
   isEnlargeTopView?: boolean;
 }
-
+import Rect2DOperationView from '@/components/rect2DOperationView';
 const ContainerTitle = ({
   showEnlarge,
   isEnlargeTopView,
