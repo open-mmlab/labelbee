@@ -1196,6 +1196,10 @@ class RectOperation extends BasicToolOperation {
     this.emit('shiftRightMouseUp', hoverRectID);
   }
 
+  public updateDragResult() {
+    this.emit('updateDragResult', { ...this.selectedRect });
+  }
+
   public onMouseUp(e: MouseEvent) {
     if (super.onMouseUp(e) || this.forbidMouseOperation || !this.imgInfo) {
       return true;
@@ -1209,7 +1213,7 @@ class RectOperation extends BasicToolOperation {
 
       // 同步 rectList
       this.emit('updateResult');
-      this.emit('updateDragResult', { ...this.selectedRect });
+      this.updateDragResult();
       return;
     }
 

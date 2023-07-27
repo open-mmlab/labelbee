@@ -1,16 +1,18 @@
+import { useLatest } from 'ahooks';
 import React, { useContext, useEffect, useRef } from 'react';
 import { connect } from 'react-redux';
 
 import { a2MapStateToProps } from '@/store/annotation/map';
 import { LabelBeeContext } from '@/store/ctx';
-import { ImgUtils, Rect2DOperation, uuid } from '@labelbee/lb-annotation';
+import { IMappingImg } from '@/types/data';
+import { ImgUtils, PointCloud2DRectOperation } from '@labelbee/lb-annotation';
 import { IBasicRect } from '@labelbee/lb-utils';
 
 import { usePointCloudViews } from '../pointCloudView/hooks/usePointCloudViews';
 import { PointCloudContext } from '../pointCloudView/PointCloudContext';
 
-interface IRect2DOperationViewProps {
-  mappingData?: any;
+interface IPointCloud2DRectOperationViewProps {
+  mappingData?: IMappingImg;
   size: {
     width: number;
     height: number;
@@ -19,40 +21,37 @@ interface IRect2DOperationViewProps {
   checkMode?: boolean;
 }
 
-interface IRect2DOperationViewRect extends IBasicRect {
+interface IPointCloud2DRectOperationViewRect extends IBasicRect {
   boxID: string;
   id: string;
   attribute: any;
   order?: number;
 }
 
-const Rect2DOperationView = (props: IRect2DOperationViewProps) => {
-  const { mappingData = {}, size, config, checkMode } = props;
-  const { url } = mappingData;
+const PointCloud2DRectOperationView = (props: IPointCloud2DRectOperationViewProps) => {
+  const { mappingData, size, config, checkMode } = props;
+  const url = mappingData?.url ?? '';
   const { pointCloudBoxList, setPointCloudResult, selectedID, setCuboidBoxIn2DView } =
     useContext(PointCloudContext);
 
   const { update2DViewRect } = usePointCloudViews();
   const ref = React.useRef(null);
   const operation = useRef<any>(null);
-  const currentFn = useRef<any>(null);
+  const update2DViewRectFn = useLatest<any>(update2DViewRect);
 
-  const handleUpdateDragResult = (rect: IRect2DOperationViewRect) => {
-    const results = currentFn.current?.(rect);
+  const handleUpdateDragResult = (rect: IPointCloud2DRectOperationViewRect) => {
+    const results = update2DViewRectFn.current?.(rect);
     setPointCloudResult(results);
   };
 
-  useEffect(() => {
-    currentFn.current = update2DViewRect;
-  }, [update2DViewRect]);
-
   const setRects = () => {
-    let allRects: IRect2DOperationViewRect[] = [];
+    let allRects: IPointCloud2DRectOperationViewRect[] = [];
     pointCloudBoxList.forEach((pointCloudBox) => {
       const { rects = [], id, attribute, trackID } = pointCloudBox;
-      const rect = rects.find((rect) => rect.imageName === mappingData.url);
+      const rect = rects.find((rect) => rect.imageName === mappingData?.url);
+      const rectID = id + '_' + mappingData?.url;
       if (rect) {
-        allRects = [...allRects, { ...rect, boxID: id, id: uuid(), attribute, order: trackID }];
+        allRects = [...allRects, { ...rect, boxID: id, id: rectID, attribute, order: trackID }];
       }
     });
     operation.current?.setResult(allRects);
@@ -61,7 +60,7 @@ const Rect2DOperationView = (props: IRect2DOperationViewProps) => {
   useEffect(() => {
     setCuboidBoxIn2DView?.(false);
     if (ref.current) {
-      const toolInstance = new Rect2DOperation({
+      const toolInstance = new PointCloud2DRectOperation({
         container: ref.current,
         size,
         config: { ...config, isShowOrder: true, attributeConfigurable: true },
@@ -73,7 +72,7 @@ const Rect2DOperationView = (props: IRect2DOperationViewProps) => {
       operation.current.on('updateDragResult', handleUpdateDragResult);
 
       return () => {
-        operation.current?.unbindAll('updateDragResult');
+        operation.current?.unbind('updateDragResult', handleUpdateDragResult);
         operation.current?.destroy();
       };
     }
@@ -95,7 +94,7 @@ const Rect2DOperationView = (props: IRect2DOperationViewProps) => {
     setRects();
     if (selectedID) {
       const rect = operation.current?.rectList.find(
-        (rect: IRect2DOperationViewRect) => rect.boxID === selectedID,
+        (rect: IPointCloud2DRectOperationViewRect) => rect.boxID === selectedID,
       );
       if (rect) {
         operation.current?.setSelectedID(rect.id);
@@ -107,5 +106,5 @@ const Rect2DOperationView = (props: IRect2DOperationViewProps) => {
 };
 
 export default connect(a2MapStateToProps, null, null, { context: LabelBeeContext })(
-  Rect2DOperationView,
+  PointCloud2DRectOperationView,
 );
