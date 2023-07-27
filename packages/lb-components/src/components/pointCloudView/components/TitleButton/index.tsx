@@ -3,9 +3,9 @@ import { ExpandAltOutlined } from '@ant-design/icons';
 import { getClassName } from '@/utils/dom';
 
 interface IProps {
-  title: string | React.ReactElement | null;
+  title: string | React.ReactElement | null | undefined;
   onClick: () => void;
-  style?: any;
+  style?: React.CSSProperties;
 }
 
 const TitleButton = ({ title, onClick, style }: IProps) => {

@@ -4,8 +4,15 @@ import AnnotationView from '@/components/AnnotationView';
 import useSize from '@/hooks/useSize';
 import { useSingleBox } from './hooks/useSingleBox';
 import { ViewOperation } from '@labelbee/lb-annotation';
+import { IAnnotationData2dList, IAnnotationDataTemporarily } from './PointCloud2DView';
 
-const PointCloud2DSingleView = ({ mappingData, setSelectedID }: any) => {
+const PointCloud2DSingleView = ({
+  mappingData,
+  setSelectedID,
+}: {
+  mappingData: IAnnotationData2dList;
+  setSelectedID: (value: string | number) => void;
+}) => {
   const ref = useRef(null);
   const viewRef = useRef<{ toolInstance: ViewOperation }>();
   const { selectedBox } = useSingleBox();
@@ -23,11 +30,11 @@ const PointCloud2DSingleView = ({ mappingData, setSelectedID }: any) => {
       return;
     }
     const selected2data = mappingData.newAnnotations2d.find(
-      (v: any) => v.annotation.id === selectedBox.info.id,
+      (v: IAnnotationDataTemporarily) => v.annotation.id === selectedBox.info.id,
     );
 
     let id = '';
-    if (selected2data?.annotation.pointList?.length > 0) {
+    if (selected2data && selected2data?.annotation.pointList?.length > 0) {
       toolInstance.focusPositionByPointList(selected2data?.annotation.pointList);
       id = selectedBox.info.id;
       setSelectedID(id);

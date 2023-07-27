@@ -7,7 +7,7 @@ import { connect } from 'react-redux';
 import { pointCloudLidar2image, cKeyCode } from '@labelbee/lb-annotation';
 import { LabelBeeContext } from '@/store/ctx';
 import { a2MapStateToProps, IA2MapStateProps } from '@/store/annotation/map';
-import { toolStyleConverter } from '@labelbee/lb-utils';
+import { IPointCloudBox, IPolygonPoint, toolStyleConverter } from '@labelbee/lb-utils';
 import PointCloud2DSingleView from './PointCloud2DSingleView';
 import TitleButton from './components/TitleButton';
 import { LeftOutlined } from '@ant-design/icons';
@@ -15,19 +15,41 @@ import classNames from 'classnames';
 import EscSvg from '@/assets/annotation/common/icon_esc.svg';
 import LeftSquareOutlined from '@/assets/annotation/common/icon_left_squareOutlined.svg';
 import RightSquareOutlined from '@/assets/annotation/common/icon_right_squareOutlined.svg';
+import { IMappingImg } from '@/types/data';
 
 // TODO, It will be deleted when the exported type of lb-annotation is work.
-interface IAnnotationDataTemporarily {
+export interface IAnnotationDataTemporarily {
   type: string;
-  annotation: any;
+  annotation: {
+    id: number | string;
+    pointList: IPolygonPoint[];
+    color: string;
+    stroke: string;
+    fill: string;
+  };
+}
+
+interface ITransferViewData {
+  type: string;
+  pointList: {
+    id: string;
+    x: number;
+    y: number;
+  }[];
+}
+
+export interface IAnnotationData2dList {
+  newAnnotations2d: IAnnotationDataTemporarily[];
+  url?: string;
+  calName?: string;
 }
 
 const EKeyCode = cKeyCode.default;
 
 const PointCloud2DView = ({ currentData, config }: IA2MapStateProps) => {
-  const [annotations2d, setAnnotations2d] = useState<IAnnotationDataTemporarily[]>([]);
+  const [annotations2d, setAnnotations2d] = useState<IAnnotationData2dList[]>([]);
   const { topViewInstance, displayPointCloudList } = useContext(PointCloudContext);
-  const [selectedID, setSelectedID] = useState('');
+  const [selectedID, setSelectedID] = useState<number | string>('');
   const [isEnlarge, setIsEnlarge] = useState(false);
   const [curIndex, setCurIndex] = useState<number | undefined>(undefined);
 
@@ -37,10 +59,10 @@ const PointCloud2DView = ({ currentData, config }: IA2MapStateProps) => {
         fill: 'transparent',
         color: 'green',
       };
-      let newAnnotations2dList: any = [];
-      currentData?.mappingImgList.forEach((mappingData: any) => {
+      let newAnnotations2dList: IAnnotationData2dList[] = [];
+      currentData?.mappingImgList.forEach((mappingData: IMappingImg) => {
         const newAnnotations2d: IAnnotationDataTemporarily[] = displayPointCloudList.reduce(
-          (acc: IAnnotationDataTemporarily[], pointCloudBox) => {
+          (acc: IAnnotationDataTemporarily[], pointCloudBox: IPointCloudBox) => {
             const { transferViewData: viewDataPointList, viewRangePointList } =
               pointCloudLidar2image(pointCloudBox, mappingData.calib, {
                 createRange: pointCloudBox.id === selectedID,
@@ -137,8 +159,16 @@ const PointCloud2DView = ({ currentData, config }: IA2MapStateProps) => {
     pointCloudBox,
     defaultViewStyle,
     stroke,
-  }: any) => {
-    return viewDataPointList!.map((v: any) => {
+  }: {
+    viewDataPointList: ITransferViewData[];
+    pointCloudBox: IPointCloudBox;
+    defaultViewStyle: {
+      fill: string;
+      color: string;
+    };
+    stroke: string;
+  }) => {
+    return viewDataPointList!.map((v: ITransferViewData) => {
       return {
         type: v.type,
         annotation: {
@@ -188,7 +218,7 @@ const PointCloud2DView = ({ currentData, config }: IA2MapStateProps) => {
   if (annotations2d?.length > 0) {
     return (
       <>
-        {annotations2d.map((item: any, index: number) => {
+        {annotations2d.map((item: IAnnotationData2dList, index: number) => {
           const showEnlarge = isEnlarge && index === curIndex;
           return (
             <PointCloudContainer

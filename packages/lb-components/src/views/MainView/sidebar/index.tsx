@@ -217,7 +217,7 @@ const Sidebar: React.FC<IProps> = ({
         setSiderWidth(w);
       }
     };
-
+    // sidebar collapse
     const hideSideBox = (
       <div
         style={{
@@ -243,46 +243,48 @@ const Sidebar: React.FC<IProps> = ({
       </div>
     );
 
-    return showSide ? (
-      <Tabs
-        type='card'
-        activeKey='1'
-        className={classnames({
-          [`${sidebarCls}`]: true,
-          [`${sidebarCls}__pointCloud`]: true,
-        })}
-      >
-        <Tabs.TabPane
-          tab={
-            <span onClick={() => showFoldSide()}>
-              <img
-                style={{
-                  width: '16px',
-                  height: '16px',
-                  marginLeft: '4px',
-                  cursor: 'pointer',
-                }}
-                src={menuFoldSvg}
-              />
-            </span>
-          }
-          key=''
-        />
-
-        <Tabs.TabPane
-          tab='工具面板'
-          key='1'
-          style={{ height: '100%', display: 'flex', flexDirection: 'column' }}
+    if (showSide) {
+      return (
+        <Tabs
+          type='card'
+          activeKey='1'
+          className={classnames({
+            [`${sidebarCls}`]: true,
+            [`${sidebarCls}__pointCloud`]: true,
+          })}
         >
-          <div className={`${sidebarCls}__content`}>
-            <PointCloudToolSidebar />
-          </div>
-          <PointCloudOperation />
-        </Tabs.TabPane>
-      </Tabs>
-    ) : (
-      hideSideBox
-    );
+          <Tabs.TabPane
+            tab={
+              <span onClick={() => showFoldSide()}>
+                <img
+                  style={{
+                    width: '16px',
+                    height: '16px',
+                    marginLeft: '4px',
+                    cursor: 'pointer',
+                  }}
+                  src={menuFoldSvg}
+                />
+              </span>
+            }
+            key=''
+          />
+
+          <Tabs.TabPane
+            tab='工具面板'
+            key='1'
+            style={{ height: '100%', display: 'flex', flexDirection: 'column' }}
+          >
+            <div className={`${sidebarCls}__content`}>
+              <PointCloudToolSidebar />
+            </div>
+            <PointCloudOperation />
+          </Tabs.TabPane>
+        </Tabs>
+      );
+    }
+
+    return hideSideBox;
   }
 
   if (toolName === EToolName.ScribbleTool) {
