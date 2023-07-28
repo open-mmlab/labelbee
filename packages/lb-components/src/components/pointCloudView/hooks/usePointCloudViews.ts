@@ -811,14 +811,14 @@ export const usePointCloudViews = () => {
   const update2DViewRect = (
     params: IBasicRect & {
       boxID: string;
-      imageName: string;
+      path: string;
     },
   ) => {
-    const { boxID, imageName, width, height, x, y } = params;
+    const { boxID, path, width, height, x, y } = params;
     const currentBox = pointCloudBoxList.find((v) => v.id === boxID);
     if (currentBox?.rects) {
       const { rects = [] } = currentBox;
-      const currentRect = rects.find((v) => v.imageName === imageName);
+      const currentRect = rects.find((v) => v.path === path);
       if (currentRect) {
         let newRects = rects as IPointCloudBox['rects'];
 

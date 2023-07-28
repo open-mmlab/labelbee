@@ -48,8 +48,8 @@ const PointCloud2DRectOperationView = (props: IPointCloud2DRectOperationViewProp
     let allRects: IPointCloud2DRectOperationViewRect[] = [];
     pointCloudBoxList.forEach((pointCloudBox) => {
       const { rects = [], id, attribute, trackID } = pointCloudBox;
-      const rect = rects.find((rect) => rect.imageName === mappingData?.url);
-      const rectID = id + '_' + mappingData?.url;
+      const rect = rects.find((rect) => rect.path === mappingData?.path);
+      const rectID = id + '_' + mappingData?.path;
       if (rect) {
         allRects = [...allRects, { ...rect, boxID: id, id: rectID, attribute, order: trackID }];
       }
