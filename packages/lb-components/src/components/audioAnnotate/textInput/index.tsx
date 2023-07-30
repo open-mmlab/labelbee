@@ -127,14 +127,14 @@ export const SingleTextInput = (props: any) => {
     onFocus: (e: FocusEvent<HTMLTextAreaElement>) => {
       EventBus.emit('heartbeat');
       setTextAreaFocus(true);
-      onFocus && onFocus(e);
+      onFocus?.(e);
       if (e.target.value) {
         setInvalid(false);
       }
     },
     onBlur: (e: FocusEvent<HTMLTextAreaElement>) => {
       setTextAreaFocus(false);
-      onBlur && onBlur(e);
+      onBlur?.(e);
       if (config.required) {
         setInvalid(!e.target.value);
       }
@@ -216,13 +216,13 @@ export const SingleTextInput = (props: any) => {
           disabled={disabled}
         />
 
-        {/*{!algorithmDisabled && (*/}
-        {/*  <AlgorithmButtonForText*/}
-        {/*    afterAlgorithm={(textVal: string) => {*/}
-        {/*      updateTextWithKey(textVal);*/}
-        {/*    }}*/}
-        {/*  />*/}
-        {/*)}*/}
+        {/* {!algorithmDisabled && ( */}
+        {/*  <AlgorithmButtonForText */}
+        {/*    afterAlgorithm={(textVal: string) => { */}
+        {/*      updateTextWithKey(textVal); */}
+        {/*    }} */}
+        {/*  /> */}
+        {/* )} */}
 
         <div className={styles.extra}>{extra}</div>
       </div>

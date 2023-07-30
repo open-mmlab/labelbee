@@ -1,7 +1,7 @@
 import { isObject } from 'lodash';
 import { IPolygonPoint } from '../../types/tool/polygon';
 import { ESortDirection, EStepType } from '../../constant/annotation';
-import EKeyCode from '../../constant/keyCode'
+import EKeyCode from '../../constant/keyCode';
 
 type point = {
   id: string;
@@ -124,9 +124,7 @@ export default class CommonToolUtils {
    * @param keyCode
    */
   public static isMoveKey(keyCode: number) {
-    return [EKeyCode.Left, EKeyCode.Right, EKeyCode.Down, EKeyCode.Up, EKeyCode.Space].includes(
-      keyCode,
-    );
+    return [EKeyCode.Left, EKeyCode.Right, EKeyCode.Down, EKeyCode.Up, EKeyCode.Space].includes(keyCode);
   }
 
   public static getNextSelectedRectID(
