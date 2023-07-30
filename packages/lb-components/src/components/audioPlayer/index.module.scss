@@ -1,0 +1,120 @@
+.audioPlayer {
+  background: #222;
+  position: relative;
+
+  .wave {
+    border: 1px solid #333;
+  }
+
+  .controlBar {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 64px;
+    font-size: 12px;
+    .playButton {
+      color: white;
+      display: flex;
+      align-items: center;
+      &.playButtonDisabled {
+        cursor: not-allowed;
+      }
+
+      :global {
+        .anticon {
+          font-size: 32px;
+          width: 32px;
+          height: 32px;
+        }
+      }
+    }
+  }
+
+  .progress {
+    position: absolute;
+    bottom: 0;
+    width: 100%;
+    background-color: #3f3f3f;
+    height: 10px;
+
+    cursor: pointer;
+
+    &:hover .radioTooltip {
+      display: block;
+    }
+
+    .radioTooltip {
+      position: absolute;
+      top: -2em;
+      z-index: 999;
+      display: none;
+      float: right;
+      padding: 6px 8px 8px 8px;
+      color: #000;
+      font-size: 1em;
+      font-family: Arial, Helvetica, sans-serif;
+      background-color: rgba(255, 255, 255, 0.8);
+      border-radius: 0.3em;
+      transform: translate(-50%, -50%);
+      pointer-events: none;
+
+      &::selection {
+        background: transparent;
+      }
+    }
+
+    .mouseTooltip {
+      z-index: 1000;
+      color: #fff;
+      background-color: black;
+    }
+  }
+
+  .time {
+    color: white;
+    margin-right: 20px;
+  }
+}
+
+.audioFooter {
+  background-color: #333;
+  height: 40px;
+  opacity: 0.8;
+  display: flex;
+}
+
+.waveformContainer {
+  transform: scaleY(-1);
+  overflow: scroll hidden;
+  .waveform {
+    position: relative;
+    padding-bottom: 10px;
+    transform: scaleY(-1);
+    &.clip {
+      //cursor: url('../../assets/annotation/audio/blackClip.svg'), default;
+    }
+    &.combined {
+      //cursor: url('../../assets/annotation/audio/combine.svg') 10 12, default;
+    }
+  }
+  &::-webkit-scrollbar {
+    width: 8px;
+  }
+  &::-webkit-scrollbar-track {
+    background: #555;
+    border-radius: 5.5px;
+  }
+
+  &::-webkit-scrollbar-thumb {
+    background: #999;
+  }
+}
+
+.tips {
+  position: fixed;
+  color: #fff;
+  background-color: black;
+  padding: 4px 8px;
+  border-radius: 4px;
+  z-index: 999;
+}

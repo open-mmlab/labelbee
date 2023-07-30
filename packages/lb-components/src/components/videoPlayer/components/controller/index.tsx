@@ -21,13 +21,18 @@ const { EVideoToolName } = cTool;
  * @param {Number} time
  * @returns {String} displayTime (min:sec:mircoSec)
  */
-const videoTimeFormat = (time: number) => {
+export const videoTimeFormat = (time: number) => {
   const min = Math.floor(time / 60);
   const sec = ~~(time % 60).toFixed();
   const minSec = (time * 10).toString().split('').pop();
   const fillZero = (num: number) => (num < 10 ? `0${num}` : num);
   return `${fillZero(min)}:${fillZero(sec)}:${minSec}`;
 };
+
+export enum EPlayerType {
+  Video,
+  Audio,
+}
 
 const VideoProgress = () => {
   const { currentTime, duration, buffered, setCurrentTime } = React.useContext(VideoPlayerCtx);

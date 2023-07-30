@@ -1,0 +1,35 @@
+.container {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 100%;
+  border: 1px solid transparent;
+  font-size: 12px;
+  .loop {
+    position: absolute;
+    width: 18px;
+    height: 18px;
+    right: 8px;
+    bottom: 8px;
+    background-color: #fff;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+  div {
+    line-height: 22px;
+  }
+  .attribute {
+    display: inline-block;
+    padding: 0 8px;
+  }
+
+  .text {
+    display: -webkit-inline-box;
+    padding: 0 8px;
+    max-width: 100%;
+    max-height: 44px;
+  }
+}

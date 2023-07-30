@@ -91,6 +91,7 @@ export interface AppProps {
   enableColorPicker?: boolean;
   highlightAttribute?: string;
   onLoad?: ({ toolInstance }: { toolInstance: ToolInstance }) => void;
+  auditContext?: any;
 }
 
 const App: React.FC<AppProps> = (props) => {
