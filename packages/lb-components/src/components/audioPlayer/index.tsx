@@ -1,5 +1,4 @@
-import { useState, useRef, useEffect } from 'react';
-import React from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import { getWebPcm2WavBase64 } from '@/components/audioAnnotate/utils/getWebPcm2Wac';
 import WaveSurfer from '@aas/wavesurfer.js';
 import _, { debounce, sortBy } from 'lodash';
@@ -29,8 +28,7 @@ import useAudioSegment from './useAudioSegment';
 import CombineTip from './combineTip';
 import SegmentTip from './segmentTip';
 import ToolFooter from '@/views/MainView/toolFooter';
-import { RenderFooter } from '@/types/main';
-import { IInputList } from '@/types/main';
+import { RenderFooter, IInputList } from '@/types/main';
 
 const { EToolName } = cTool
 const EKeyCode = cKeyCode.default
@@ -484,7 +482,7 @@ export const AudioPlayer = ({
       const tmp = waveRef?.current?.getDuration() || 0;
       setDuration(tmp);
       setWaveCurrentTime();
-      onLoaded && onLoaded({ duration: Math.round(tmp) });
+      onLoaded?.({ duration: Math.round(tmp) });
       setLoading(false);
       playPause();
       EventBus.on('setCurrentTimeByPosition', calcPercentage);
@@ -517,11 +515,10 @@ export const AudioPlayer = ({
 
     wavesurfer.on('error', () => {
       setFileError(true);
-      onLoaded &&
-        onLoaded({
-          hasError: true,
-        });
-      onError && onError();
+      onLoaded?.({
+        hasError: true,
+      });
+      onError?.();
     });
 
     wavesurfer.on('region-created', (instance: any) => {
@@ -575,7 +572,7 @@ export const AudioPlayer = ({
         const { element } = listMap[item.id] ?? {};
         const { start, end } = item;
         if (element) {
-          const { x: startX, width } = element.getBoundingClientRect?.();
+          const { x: startX, width } = element.getBoundingClientRect?.() || {};
           const endX = startX + width;
           [startX, endX].forEach((xPos, index) => {
             if (!edges.includes(xPos)) {
@@ -585,7 +582,7 @@ export const AudioPlayer = ({
           });
         }
       });
-      const { x: currentStartX, width } = instance.element.getBoundingClientRect?.();
+      const { x: currentStartX, width } = instance.element.getBoundingClientRect?.() || {};
       const currentEndX = currentStartX + width;
 
       edges.forEach((edge) => {
@@ -681,7 +678,7 @@ export const AudioPlayer = ({
         break;
       case EKeyCode.Delete:
         if (!isCheck) {
-          const { id } = audioClipStateRef.current?.selectedRegion;
+          const { id } = audioClipStateRef.current?.selectedRegion || {};
           if (id) {
             removeRegionById(id);
           }

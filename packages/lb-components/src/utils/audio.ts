@@ -45,7 +45,7 @@ export const DEFAULT_TEXT_CONFIG_ITEM: ITextConfigItem = {
 export const getAttributeIcon = (
   attribute: string,
   attributeList: IInputList[],
-  valid: boolean = true,
+  valid = true,
 ) => {
   const attributeIndex = attributeList.findIndex((i: any) => i.value === attribute);
   let src = ICON_ARRAY[attributeIndex % ICON_ARRAY.length] ?? NULL_ICON;
@@ -295,7 +295,7 @@ export const updateColorOpacity = (color: string, opacity: number) => {
  * @returns
  */
 export const precisionMinus = (a: number, b: number) => {
-  return new Decimal(+a || 0).minus(+b || 0).toNumber();
+  return new Decimal(Number(a) || 0).minus(Number(b) || 0).toNumber();
 };
 
 /**

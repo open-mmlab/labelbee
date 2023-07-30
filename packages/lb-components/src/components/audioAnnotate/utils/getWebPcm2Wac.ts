@@ -15,28 +15,31 @@ const writeString = (view: DataView, offset: number, str: string) => {
 
 const floatTo32BitPCM = (output: DataView, offset: number, input: ArrayBuffer) => {
   let inputArray = new Int32Array(input);
-  for (let i = 0; i < inputArray.length; i++, offset += 4) {
-    output.setInt32(offset, inputArray[i], true);
+  let offsetLocal = offset
+  for (let i = 0; i < inputArray.length; i++, offsetLocal += 4) {
+    output.setInt32(offsetLocal, inputArray[i], true);
   }
 };
 
 const floatTo16BitPCM = (output: DataView, offset: number, input: ArrayBuffer) => {
   let inputArray = new Int16Array(input);
-  for (let i = 0; i < inputArray.length; i++, offset += 2) {
-    output.setInt16(offset, inputArray[i], true);
+  let offsetLocal = offset
+  for (let i = 0; i < inputArray.length; i++, offsetLocal += 2) {
+    output.setInt16(offsetLocal, inputArray[i], true);
   }
 };
 
 const floatTo8BitPCM = (output: DataView, offset: number, input: ArrayBuffer) => {
   let inputArray = new Int8Array(input);
-  for (let i = 0; i < inputArray.length; i++, offset++) {
-    output.setInt8(offset, inputArray[i]);
+  let offsetLocal = offset
+  for (let i = 0; i < inputArray.length; i++, offsetLocal++) {
+    output.setInt8(offsetLocal, inputArray[i]);
   }
 };
 
 const addWavHeader = (samples: ArrayBuffer, sampleRateTmp: number, sampleBits: number, channelCount: number) => {
   let dataLength = samples.byteLength;
-  /* 新的buffer类，预留 44 bytes 的　heaer 空间 */
+  /* 新的buffer类，预留44bytes的heaer 空间 */
   let buffer = new ArrayBuffer(44 + dataLength);
   /* 转为 Dataview, 利用 API 来填充字节 */
   let view = new DataView(buffer);
