@@ -22,3 +22,4 @@ export enum ESubmitType {
 // css 命名前缀
 export const prefix = 'bee';
 export const componentCls = `${prefix}-component`;
+

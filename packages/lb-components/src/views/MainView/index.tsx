@@ -23,6 +23,7 @@ import PreviewResult from '@/components/predictTracking/previewResult';
 import { LabelBeeContext } from '@/store/ctx';
 import { EToolName } from '@/data/enums/ToolType';
 import LLMLayout from './LLMLayout';
+import AudioAnnotate from '@/components/audioAnnotate'
 
 interface IProps {
   path: string;
@@ -104,6 +105,7 @@ const MainView: React.FC<AppProps & IProps> = (props) => {
   const { stepList, step } = props;
   const currentToolName = getStepConfig(stepList, step)?.tool;
   const isLLMTool = EToolName.LLM === currentToolName;
+  const isAudioTool = ToolUtils.isAudioTool(currentToolName);
   if (isLLMTool) {
     return (
       <ViewportProviderLayout {...props}>
@@ -112,6 +114,11 @@ const MainView: React.FC<AppProps & IProps> = (props) => {
     );
   }
 
+  if (isAudioTool) {
+    return <ViewportProviderLayout {...props}>
+      <AudioAnnotate {...props} />
+    </ViewportProviderLayout>
+  }
   return (
     <ViewportProviderLayout {...props}>
       <Layout className={getClassName('layout', 'container')}>

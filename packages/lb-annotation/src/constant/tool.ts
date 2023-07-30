@@ -15,6 +15,11 @@ export enum EVideoToolName {
   VideoClipTool = 'videoClipTool',
 }
 
+export enum EAudioToolName {
+  /** 音频综合工具 */
+  AudioTextTool = 'audioTextTool',
+}
+
 /** 新：工具type */
 export enum EToolType {
   Rect = 0,
@@ -76,7 +81,7 @@ export enum ERectPattern {
   'showOrder',
 }
 
-export type ToolName = EToolName | EVideoToolName | EPointCloudName;
+export type ToolName = typeof EToolName | typeof EVideoToolName | typeof EPointCloudName;
 export type THybridToolName = EToolName | Array<EToolName>;
 
 export const TOOL_NAME: { [a: string]: string } = {

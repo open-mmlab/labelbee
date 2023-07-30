@@ -1,0 +1,31 @@
+.containerWrapper {
+  position: relative;
+  flex: 1;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  .audioWrapper {
+    position: relative;
+  }
+}
+
+.textareaContainer {
+  flex: 1;
+  overflow: scroll;
+  text-align: center;
+
+  .textareaContent {
+    display: inline-block;
+    width: 65%;
+  }
+}
+
+:global {
+  .audio-tool-spinner {
+    height: 100%;
+
+    .ant-spin-container {
+      height: 100%;
+    }
+  }
+}

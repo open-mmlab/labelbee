@@ -104,6 +104,7 @@ export interface AppProps {
   highlightAttribute?: string;
   onLoad?: ({ toolInstance }: { toolInstance: ToolInstance }) => void;
   preDataProcess?: (params: IPreDataProcessParams) => IPointCloudBox[];
+  auditContext?: any;
 }
 
 const App: React.FC<AppProps> = (props) => {

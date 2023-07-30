@@ -36,18 +36,15 @@ class EventBus {
    * @param eventName 事件名字
    * @param callback 事件回调
    */
-  public emit(eventName: string) {
+  public emit(eventName: string, ...args: any[]) {
     const listener = this._events.get(eventName);
-    if (!listener) {
-      return;
+    if (listener) {
+      listener.forEach((fn) => {
+        if (fn) {
+          fn(...args);
+        }
+      });
     }
-    listener.forEach((fn) => {
-      if (!fn) {
-        return;
-      }
-
-      fn();
-    });
   }
 
   /**

@@ -175,6 +175,6 @@ const ToolStyle = (props: IProps) => {
 };
 const mapStateToProps = ({ toolStyle, annotation }: AppState) => ({
   toolStyle,
-  config: annotation.toolInstance.config,
+  config: annotation.toolInstance?.config,
 });
 export default connect(mapStateToProps, null, null, { context: LabelBeeContext })(ToolStyle);

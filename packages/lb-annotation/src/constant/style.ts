@@ -53,6 +53,12 @@ export const COLORS_ARRAY = [
   'rgba(0, 255, 234, 1)', // 4
 ];
 
+export const WHITE_FONT_COLOR_ARRAY = [
+  'rgba(128, 12, 249, 1)',
+  'rgba(153, 66, 23, 1)',
+  'rgba(2, 130, 250, 1)',
+];
+
 /** svg icon */
 export const ICON_ARRAY = [
   canvasEdit0,
