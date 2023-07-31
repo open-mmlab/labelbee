@@ -79,7 +79,7 @@ export interface I3DSpaceCoord {
 export interface IPointCloudBoxRect extends IBasicRect {
   valid: boolean;
   trackID: number;
-  path: string;
+  imageName: string;
 }
 
 export interface IPointCloudBox extends IVolume {

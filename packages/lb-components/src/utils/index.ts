@@ -130,7 +130,7 @@ export const getRectPointCloudBox = async (
     ...getBoundingRect(tmpPoints),
     valid,
     trackID,
-    path: mappingData.path,
+    imageName: mappingData.path,
   };
 
   const isRectInImage = await isBoundingRectInImage(boundingRect, mappingData.path);
