@@ -46,7 +46,12 @@ export interface IAnnotationData2dList {
 
 const EKeyCode = cKeyCode.default;
 
-const PointCloud2DView = ({ currentData, config }: IA2MapStateProps) => {
+interface IProps extends IA2MapStateProps {
+  thumbnailWidth?: number;
+  hiedZoom?: boolean; // Hide zoom function
+}
+
+const PointCloud2DView = ({ currentData, config, thumbnailWidth, hiedZoom }: IProps) => {
   const [annotations2d, setAnnotations2d] = useState<IAnnotationData2dList[]>([]);
   const { topViewInstance, displayPointCloudList } = useContext(PointCloudContext);
   const [selectedID, setSelectedID] = useState<number | string>('');
@@ -244,6 +249,7 @@ const PointCloud2DView = ({ currentData, config }: IA2MapStateProps) => {
                 ) : (
                   <TitleButton
                     title={item?.calName}
+                    hiedZoom={hiedZoom}
                     onClick={() => {
                       setIsEnlarge(true);
                       setCurIndex(index);
@@ -255,7 +261,7 @@ const PointCloud2DView = ({ currentData, config }: IA2MapStateProps) => {
               titleOnSurface={!showEnlarge}
               style={{
                 display: hiddenData ? 'none' : 'flex',
-                width: showEnlarge ? '100%' : '455px',
+                width: showEnlarge ? '100%' : thumbnailWidth,
               }}
               key={index}
               toolbar={PointCloud2DTitle}

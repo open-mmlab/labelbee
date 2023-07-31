@@ -4,15 +4,16 @@ import { getClassName } from '@/utils/dom';
 
 interface IProps {
   title: string | React.ReactElement | null | undefined;
-  onClick: () => void;
+  onClick?: () => void;
   style?: React.CSSProperties;
+  hiedZoom?: boolean; // Hide zoom function
 }
 
-const TitleButton = ({ title, onClick, style }: IProps) => {
+const TitleButton = ({ title, onClick, style, hiedZoom }: IProps) => {
   return (
     <span className={getClassName('point-cloud-container', 'title-button')} style={style}>
       {title}
-      <ExpandAltOutlined onClick={onClick} style={{ marginLeft: 4 }} />
+      {!hiedZoom && <ExpandAltOutlined onClick={onClick} style={{ marginLeft: 4 }} />}
     </span>
   );
 };

@@ -12,7 +12,7 @@
  */
 
 import { getClassName } from '@/utils/dom';
-import React, { useContext, useEffect } from 'react';
+import React, { useContext, useEffect, useState } from 'react';
 import PointCloud3DView from './PointCloud3DView';
 import PointCloudBackView from './PointCloudBackView';
 import PointCloudTopView from './PointCloudTopView';
@@ -35,6 +35,8 @@ import { EPointCloudPattern, PointCloudUtils } from '@labelbee/lb-utils';
 import { useCustomToolInstance } from '@/hooks/annotation';
 import { jsonParser } from '@/utils';
 import { a2MapStateToProps, IA2MapStateProps } from '@/store/annotation/map';
+import classNames from 'classnames';
+import { useTranslation } from 'react-i18next';
 
 interface IProps extends IA2MapStateProps {
   drawLayerSlot?: TDrawLayerSlot;
@@ -51,7 +53,22 @@ const PointCloudView: React.FC<IProps> = ({
   imgIndex,
 }) => {
   const ptCtx = useContext(PointCloudContext);
-  const { globalPattern, setGlobalPattern } = ptCtx;
+  const { globalPattern, setGlobalPattern, selectedIDs } = ptCtx;
+  const { t } = useTranslation();
+
+  const [isEnlargeTopView, setIsEnlargeTopView] = useState(false);
+  const selectAndEnlarge = selectedIDs?.length > 0 && isEnlargeTopView;
+
+  const BACK_SIDE_CONTAIN_WIDTH = 455;
+  const BACK_SIDE_CONTAIN_HEIGHT = 400;
+  const initPositionX = window.innerWidth - BACK_SIDE_CONTAIN_WIDTH;
+  const initPositionY = window.innerHeight - BACK_SIDE_CONTAIN_HEIGHT;
+
+  const [position, setPosition] = useState({
+    x: initPositionX,
+    y: initPositionY,
+  });
+  const [offset, setOffset] = useState({ x: 0, y: 0 });
 
   const basicInfo = jsonParser(currentData.result);
   const { toolInstanceRef, clearToolInstance } = useCustomToolInstance({ basicInfo });
@@ -111,6 +128,23 @@ const PointCloudView: React.FC<IProps> = ({
     ptCtx.segmentation,
   ]);
 
+  useEffect(() => {
+    window.addEventListener('resize', onResize);
+    return () => {
+      window.removeEventListener('resize', onResize);
+    };
+  }, []);
+
+  const onResize = () => {
+    const initPositionX = window.innerWidth - BACK_SIDE_CONTAIN_WIDTH;
+    const initPositionY = window.innerHeight - BACK_SIDE_CONTAIN_HEIGHT;
+
+    setPosition({
+      x: initPositionX,
+      y: initPositionY,
+    });
+  };
+
   if (imgList.length === 0) {
     return null;
   }
@@ -129,6 +163,57 @@ const PointCloudView: React.FC<IProps> = ({
     );
   }
 
+  let backAndSideView = (
+    <div className={getClassName('point-cloud-container', 'left-bottom')}>
+      <PointCloudBackView checkMode={checkMode} />
+      <PointCloudSideView checkMode={checkMode} />
+    </div>
+  );
+  if (isEnlargeTopView) {
+    backAndSideView = (
+      <div
+        className={classNames({
+          [getClassName('point-cloud-container', 'left-bottom')]: true,
+          [getClassName('point-cloud-container', 'left-bottom-float')]: selectAndEnlarge,
+        })}
+        style={{
+          top: position.y,
+          left: position.x,
+          width: 360,
+        }}
+      >
+        {selectAndEnlarge && (
+          <div
+            className={getClassName('point-cloud-container', 'left-bottom-floatHeader')}
+            draggable={'true'}
+            onDragStart={(event) => {
+              if (selectAndEnlarge) {
+                setOffset({
+                  x: event.clientX - position.x,
+                  y: event.clientY - position.y,
+                });
+              }
+            }}
+            onDrag={(e: any) => {
+              const moveX = e.clientX - offset.x;
+              const moveY = e.clientY - offset.y;
+              setPosition({ x: moveX, y: moveY });
+            }}
+            onDragEnd={(e: any) => {
+              const moveX = e.clientX - offset.x;
+              const moveY = e.clientY - offset.y;
+              setPosition({ x: moveX, y: moveY });
+            }}
+          >
+            {t('HoldDrag')}
+          </div>
+        )}
+        <PointCloudBackView checkMode={checkMode} />
+        <PointCloudSideView checkMode={checkMode} />
+      </div>
+    );
+  }
+
   return (
     <>
       <PointCloudListener checkMode={checkMode} toolInstanceRef={toolInstanceRef} />
@@ -139,20 +224,40 @@ const PointCloudView: React.FC<IProps> = ({
           <div className={getClassName('point-cloud-content')}>
             <div className={getClassName('point-cloud-container', 'left')}>
               <PointCloud3DView />
-              <div className={getClassName('point-cloud-container', 'left-bottom')}>
-                <PointCloudBackView checkMode={checkMode} />
-                <PointCloudSideView checkMode={checkMode} />
-              </div>
+              {backAndSideView}
             </div>
-
-            <div className={getClassName('point-cloud-container', 'right')}>
+            <div
+              className={classNames({
+                [getClassName('point-cloud-container', 'right')]: true,
+                [getClassName('point-cloud-container', 'rightZoom')]: isEnlargeTopView,
+              })}
+            >
               <PointCloudTopView
                 drawLayerSlot={drawLayerSlot}
                 checkMode={checkMode}
                 intelligentFit={intelligentFit}
+                setIsEnlargeTopView={setIsEnlargeTopView}
+                onExitZoom={() => {
+                  setIsEnlargeTopView(false);
+                  setPosition({
+                    x: initPositionX,
+                    y: initPositionY,
+                  });
+                  setOffset({ x: 0, y: 0 });
+                }}
+                isEnlargeTopView={isEnlargeTopView}
               />
-              <div className={getClassName('point-cloud-container', 'right-bottom')}>
-                <PointCloud2DView />
+              <div
+                className={classNames({
+                  [getClassName('point-cloud-container', 'right-bottom')]: !isEnlargeTopView,
+                  [getClassName('point-cloud-container', 'right-bottom-floatLeft')]:
+                    isEnlargeTopView,
+                })}
+              >
+                <PointCloud2DView
+                  thumbnailWidth={isEnlargeTopView ? 300 : 455}
+                  hiedZoom={isEnlargeTopView}
+                />
               </div>
             </div>
           </div>
