@@ -180,9 +180,9 @@ const PointCloud3D: React.FC<IA2MapStateProps> = ({ currentData, config }) => {
             {},
           )?.hex;
 
-          pointCloud?.generateBox(v, hex);
+          pointCloud?.addBoxToSense(v, hex);
         });
-
+        pointCloud.render();
         ptCtx.setPointCloudResult(boxParamsList);
         ptCtx.setPointCloudValid(jsonParser(currentData.result)?.valid);
       }
