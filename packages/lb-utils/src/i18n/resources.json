@@ -232,14 +232,14 @@
     "Finished":"Finished",
     "Unfinished":"Unfinished",
     "OverallScore":"OverallScore",
-    "NoScoringScale":"NoScoringScale",
+    "NoScoringScale":"Configurable step details on the left",
     "Best":"Best",
     "Worst":"Worst",
     "RankingQualityOfAnswers":"RankingQualityOfAnswers",
     "ToBeSorted":"ToBeSorted",
     "Yes":"Yes",
     "No":"No",
-    "AdditionalContent":"AdditionalContent",
+    "LeastCharacterError":"Please enter at least {{num}} characters",
     "Submit":"Submit"
   },
   "cn": {
@@ -475,14 +475,14 @@
     "Finished":"已完成",
     "Unfinished":"未完成",
     "OverallScore":"整体评分",
-    "NoScoringScale":"暂未添加评分标准",
+    "NoScoringScale":"可在左侧配置步骤详情",
     "Best":"最好",
     "Worst":"最差",
     "RankingQualityOfAnswers":"请对每个回答的质量进行排序",
     "ToBeSorted":"待排序",
     "Yes":"是",
     "No":"否",
-    "AdditionalContent":"（选填）请填写任何你对答案的评价或其他补充内容",
+    "LeastCharacterError": "请至少输入{{num}}个字符",
     "Submit":"提交"
   }
 }

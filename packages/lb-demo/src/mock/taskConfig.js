@@ -261,7 +261,10 @@ const LLMToolConfig = {
     { label: '包含敏感信息', value: 'sensitiveInfo' },
     { label: '包含敏感信息2', value: 'sensitiveInfo2' },
   ], // 指标判断
-  text: true,
+  text: [
+    { title: '这是标题1', clue: '这是提示语1', min: 0, max: 100 },
+    { title: '这是标题2', clue: '这是提示语2', min: 10, max: 100 },
+  ],
 };
 
 export const getConfig = (tool) => {

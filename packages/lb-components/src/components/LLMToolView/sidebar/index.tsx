@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { prefix } from '@/constant';
-import { Button, Input } from 'antd';
+import { Button, Empty } from 'antd';
 import AnswerSort from './components/answerSort';
 import { AppState } from '@/store';
 import { connect } from 'react-redux';
@@ -11,16 +11,21 @@ import { jsonParser } from '@/utils';
 import { getStepConfig } from '@/store/annotation/reducer';
 import { useCustomToolInstance } from '@/hooks/annotation';
 import { PageForward } from '@/store/annotation/actionCreators';
-import { EToolName } from '@labelbee/lb-annotation';
+import { EToolName, cKeyCode } from '@labelbee/lb-annotation';
 import {
   IWaitAnswerSort,
   IAnswerSort,
   ILLMBoxResult,
   ILLMToolConfig,
   IAnswerList,
+  IndicatorScore,
+  IndicatorDetermine,
+  ITextList,
 } from '@/components/LLMToolView/types';
 import { useTranslation } from 'react-i18next';
 import { formatSort, getCurrentResultFromResultList } from '../utils/data';
+import emptySvg from '@/assets/annotation/LLMTool/empty.svg';
+import TextInputBox from './components/textInputBox';
 
 interface IProps {
   annotation?: any;
@@ -33,10 +38,8 @@ interface IConfigUpdate {
   value: number | { key: string; value?: number | boolean };
   key?: string;
 }
-
-const { TextArea } = Input;
+const EKeyCode = cKeyCode.default;
 const sidebarCls = `${prefix}-sidebar`;
-const contentBoxCls = `${prefix}-LLMSidebar-contentBox`;
 
 const Sidebar: React.FC<IProps> = (props) => {
   const { annotation, dispatch, checkMode } = props;
@@ -45,9 +48,9 @@ const Sidebar: React.FC<IProps> = (props) => {
   const currentData = imgList[imgIndex] ?? {};
   const basicInfo = jsonParser(currentData?.result);
   const { toolInstanceRef } = useCustomToolInstance({ basicInfo });
-  const [LLMConfig, setLLMConfig] = useState<ILLMToolConfig>();
+  const [LLMConfig, setLLMConfig] = useState<ILLMToolConfig>({});
   const [answerList, setAnswerList] = useState<IAnswerList[]>([]);
-  const [text, setText] = useState<string | undefined>(undefined);
+  const [text, setText] = useState<ITextList[] | undefined>(undefined);
   const [sortList, setSortList] = useState<IAnswerSort[][]>([]);
   const [waitSortList, setWaitSortList] = useState<IWaitAnswerSort[]>([]);
 
@@ -64,12 +67,12 @@ const Sidebar: React.FC<IProps> = (props) => {
     }
 
     const result: ILLMBoxResult = getCurrentResultFromResultList(currentData?.result);
-
     let qaData = result?.answerList ? result : currentData?.questionList;
     if (qaData?.answerList) {
       getWaitSortList(qaData.answerList);
       setAnswerList(qaData.answerList || []);
     }
+
     setText(result?.textAttribute);
   }, [imgIndex, currentData]);
 
@@ -90,6 +93,24 @@ const Sidebar: React.FC<IProps> = (props) => {
 
     toolInstanceRef.current.currentPageResult = result;
   }, [answerList, sortList, text]);
+
+  useEffect(() => {
+    window.addEventListener('keydown', onKeyDown);
+
+    return () => {
+      window.removeEventListener('keydown', onKeyDown);
+    };
+  }, []);
+
+  const onKeyDown = (e: KeyboardEvent) => {
+    if (e.ctrlKey && e.keyCode === EKeyCode.Enter) {
+      if (skipBeforePageTurning) {
+        skipBeforePageTurning(() => dispatch(PageForward()));
+        return;
+      }
+      dispatch(PageForward());
+    }
+  };
 
   const getWaitSortList = (answerList: IAnswerList[]) => {
     let waitSorts: IWaitAnswerSort[] = [];
@@ -144,6 +165,39 @@ const Sidebar: React.FC<IProps> = (props) => {
     setAnswerList(newList);
   };
 
+  const isNoConfig = () => {
+    const { indicatorScore = [], indicatorDetermine = [], text = [] } = LLMConfig;
+    const hasIndicatorScore =
+      indicatorScore?.filter((i: IndicatorScore) => i.label && i.value && i.score)?.length > 0;
+
+    const hasIndicatorDetermine =
+      indicatorDetermine?.filter((i: IndicatorDetermine) => i.label && i.value)?.length > 0;
+    const hasText = text?.length > 0;
+
+    const noConfig = !(hasIndicatorScore || hasIndicatorDetermine || hasText);
+    return noConfig;
+  };
+
+  if (isNoConfig()) {
+    return (
+      <div className={`${sidebarCls}`}>
+        <div
+          className={`${sidebarCls}__content`}
+          style={{ display: 'flex', justifyContent: 'center', alignItems: 'center' }}
+        >
+          <Empty
+            description={<span style={{ color: '#ccc' }}>{t('NoScoringScale')}</span>}
+            imageStyle={{
+              width: 200,
+              height: 200,
+            }}
+            image={<img src={emptySvg} />}
+          />
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className={`${sidebarCls}`}>
       <div className={`${sidebarCls}__content`}>
@@ -167,19 +221,12 @@ const Sidebar: React.FC<IProps> = (props) => {
 
           {LLMConfig?.text && (
             <div style={{ padding: '0px 16px', marginBottom: '16px' }}>
-              <div className={`${contentBoxCls}__title`}>{t('AdditionalContent')}</div>
-              <div style={{ display: 'flex', alignItems: 'center' }}>
-                <TextArea
-                  value={text}
-                  onChange={(e) => {
-                    setText(e.target.value);
-                  }}
-                  maxLength={1000}
-                  disabled={checkMode}
-                  showCount={true}
-                  style={{ width: '100%' }}
-                />
-              </div>
+              <TextInputBox
+                textAttribute={text || []}
+                LLMConfig={LLMConfig}
+                setText={setText}
+                checkMode={checkMode}
+              />
             </div>
           )}
           <div style={{ margin: '24px 16px', display: 'flex' }}>
@@ -196,7 +243,7 @@ const Sidebar: React.FC<IProps> = (props) => {
                 }}
                 disabled={checkMode}
               >
-                {t('Submit')}
+                {t('Save')}
               </Button>
             )}
           </div>
