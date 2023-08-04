@@ -41,7 +41,7 @@ interface IConfigUpdate {
 const EKeyCode = cKeyCode.default;
 const sidebarCls = `${prefix}-sidebar`;
 
-const Sidebar: React.FC<IProps> = (props) => {
+const LLMToolSidebar: React.FC<IProps> = (props) => {
   const { annotation, dispatch, checkMode } = props;
   const { imgIndex, imgList, stepList, step, skipBeforePageTurning } = annotation;
   const { t } = useTranslation();
@@ -197,57 +197,57 @@ const Sidebar: React.FC<IProps> = (props) => {
       </div>
     );
   }
-
+  const { indicatorScore = [], indicatorDetermine = [], enableSort } = LLMConfig;
+  const showAnwerList =
+    answerList.length > 0 && (indicatorDetermine?.length > 0 || indicatorScore?.length > 0);
   return (
     <div className={`${sidebarCls}`}>
       <div className={`${sidebarCls}__content`}>
-        <div style={{ padding: '0px 16px' }}>
-          {answerList.length > 0 && LLMConfig && (
-            <AnswerList
-              list={answerList}
-              LLMConfig={LLMConfig}
-              updateValue={updateValue}
-              checkMode={checkMode}
-            />
-          )}
-          {LLMConfig?.enableSort && (
-            <AnswerSort
-              waitSortList={waitSortList}
-              sortList={sortList}
-              setSortList={setSortList}
-              checkMode={checkMode}
-            />
-          )}
+        {showAnwerList && (
+          <AnswerList
+            list={answerList}
+            LLMConfig={LLMConfig}
+            updateValue={updateValue}
+            checkMode={checkMode}
+          />
+        )}
+        {enableSort && (
+          <AnswerSort
+            waitSortList={waitSortList}
+            sortList={sortList}
+            setSortList={setSortList}
+            checkMode={checkMode}
+          />
+        )}
 
-          {LLMConfig?.text && (
-            <div style={{ padding: '0px 16px', marginBottom: '16px' }}>
-              <TextInputBox
-                textAttribute={text || []}
-                LLMConfig={LLMConfig}
-                setText={setText}
-                checkMode={checkMode}
-              />
-            </div>
-          )}
-          <div style={{ margin: '24px 16px', display: 'flex' }}>
-            {imgList?.length - 1 !== imgIndex && (
-              <Button
-                type='primary'
-                style={{ marginLeft: 'auto' }}
-                onClick={() => {
-                  if (skipBeforePageTurning) {
-                    skipBeforePageTurning(() => dispatch(PageForward()));
-                    return;
-                  }
-                  dispatch(PageForward());
-                }}
-                disabled={checkMode}
-              >
-                {t('Save')}
-              </Button>
-            )}
+        {LLMConfig?.text && (
+          <div style={{ padding: '0px 16px', marginTop: '16px' }}>
+            <TextInputBox
+              textAttribute={text || []}
+              LLMConfig={LLMConfig}
+              setText={setText}
+              checkMode={checkMode}
+            />
           </div>
-        </div>
+        )}
+      </div>
+      <div style={{ margin: '24px 16px', display: 'flex' }}>
+        {imgList?.length - 1 !== imgIndex && (
+          <Button
+            type='primary'
+            style={{ marginLeft: 'auto' }}
+            onClick={() => {
+              if (skipBeforePageTurning) {
+                skipBeforePageTurning(() => dispatch(PageForward()));
+                return;
+              }
+              dispatch(PageForward());
+            }}
+            disabled={checkMode}
+          >
+            {t('Save')}
+          </Button>
+        )}
       </div>
     </div>
   );
@@ -258,4 +258,4 @@ const mapStateToProps = (state: AppState) => {
   };
 };
 
-export default connect(mapStateToProps, null, null, { context: LabelBeeContext })(Sidebar);
+export default connect(mapStateToProps, null, null, { context: LabelBeeContext })(LLMToolSidebar);

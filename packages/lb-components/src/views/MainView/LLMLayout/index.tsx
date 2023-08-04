@@ -19,7 +19,6 @@ const { Sider, Content } = Layout;
 const layoutCls = `${prefix}-layout`;
 
 const LLMLayout: React.FC<AppProps & IProps> = (props) => {
-  const siderWidth = props.style?.sider?.width;
   const [hoverKey, setHoverKey] = useState(-1);
   return (
     <Layout className={getClassName('layout', 'container')}>
@@ -39,15 +38,10 @@ const LLMLayout: React.FC<AppProps & IProps> = (props) => {
           <ToolFooter style={props.style?.footer} mode={props.mode} footer={props?.footer} />
         </Content>
 
-        {props?.sider && (
-          <Sider
-            className={`${layoutCls}__side`}
-            width={siderWidth ?? 240}
-            style={props.style?.sider}
-          >
-            <Sidebar sider={props?.sider} />
-          </Sider>
-        )}
+        <Sider className={`${layoutCls}__side`} width={600} style={{ position: 'relative' }}>
+          <Sidebar sider={props?.sider} checkMode={props?.checkMode} />
+          {props.drawLayerSlot?.({})}
+        </Sider>
       </LLMContext.Provider>
     </Layout>
   );

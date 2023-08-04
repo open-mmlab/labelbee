@@ -19,6 +19,7 @@ import { cTool } from '@labelbee/lb-annotation';
 import ScribbleSidebar from './ScribbleSidebar';
 import { ToolIcons } from './ToolIcons';
 import { useSelector } from '@/store/ctx';
+import LLMToolSidebar from '@/components/LLMToolView/sidebar';
 
 const { EVideoToolName, EPointCloudName } = cTool;
 
@@ -28,10 +29,11 @@ interface IProps {
   toolName?: EToolName;
   sider?: Sider;
   enableColorPicker?: boolean;
+  checkMode?: boolean;
 }
 
 export const sidebarCls = `${prefix}-sidebar`;
-const Sidebar: React.FC<IProps> = ({ sider, enableColorPicker }) => {
+const Sidebar: React.FC<IProps> = ({ sider, enableColorPicker, checkMode }) => {
   const stepInfo = useSelector((state: AppState) =>
     StepUtils.getCurrentStepInfo(state.annotation.step, state.annotation.stepList),
   );
@@ -111,6 +113,8 @@ const Sidebar: React.FC<IProps> = ({ sider, enableColorPicker }) => {
     />
   );
 
+  const LLMSidebar = <LLMToolSidebar checkMode={checkMode} />;
+
   const horizontal = <div className={`${sidebarCls}__horizontal`} />;
 
   const pointCloudToolSidebar = <PointCloudToolSidebar enableColorPicker={enableColorPicker} />;
@@ -135,6 +139,7 @@ const Sidebar: React.FC<IProps> = ({ sider, enableColorPicker }) => {
             pointCloudToolSidebar,
             pointCloudOperation,
             scribbleSidebar,
+            LLMSidebar,
           })}
         </div>
       );
@@ -219,6 +224,10 @@ const Sidebar: React.FC<IProps> = ({ sider, enableColorPicker }) => {
         {operation}
       </div>
     );
+  }
+
+  if (toolName === EToolName.LLM) {
+    return LLMSidebar;
   }
 
   return null;
