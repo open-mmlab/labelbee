@@ -38,7 +38,7 @@ interface ITransferViewData {
   }[];
 }
 
-export interface IAnnotationData2dList {
+export interface IAnnotationData2dView {
   newAnnotations2d: IAnnotationDataTemporarily[];
   url?: string;
   calName?: string;
@@ -48,11 +48,10 @@ const EKeyCode = cKeyCode.default;
 
 interface IProps extends IA2MapStateProps {
   thumbnailWidth?: number;
-  hiedZoom?: boolean; // Hide zoom function
 }
 
-const PointCloud2DView = ({ currentData, config, thumbnailWidth, hiedZoom }: IProps) => {
-  const [annotations2d, setAnnotations2d] = useState<IAnnotationData2dList[]>([]);
+const PointCloud2DView = ({ currentData, config, thumbnailWidth }: IProps) => {
+  const [annotations2d, setAnnotations2d] = useState<IAnnotationData2dView[]>([]);
   const { topViewInstance, displayPointCloudList } = useContext(PointCloudContext);
   const [selectedID, setSelectedID] = useState<number | string>('');
   const [isEnlarge, setIsEnlarge] = useState(false);
@@ -64,7 +63,7 @@ const PointCloud2DView = ({ currentData, config, thumbnailWidth, hiedZoom }: IPr
         fill: 'transparent',
         color: 'green',
       };
-      let newAnnotations2dList: IAnnotationData2dList[] = [];
+      let newAnnotations2dList: IAnnotationData2dView[] = [];
       currentData?.mappingImgList.forEach((mappingData: IMappingImg) => {
         const newAnnotations2d: IAnnotationDataTemporarily[] = displayPointCloudList.reduce(
           (acc: IAnnotationDataTemporarily[], pointCloudBox: IPointCloudBox) => {
@@ -223,7 +222,7 @@ const PointCloud2DView = ({ currentData, config, thumbnailWidth, hiedZoom }: IPr
   if (annotations2d?.length > 0) {
     return (
       <>
-        {annotations2d.map((item: IAnnotationData2dList, index: number) => {
+        {annotations2d.map((item: IAnnotationData2dView, index: number) => {
           const showEnlarge = isEnlarge && index === curIndex;
           return (
             <PointCloudContainer
@@ -249,7 +248,6 @@ const PointCloud2DView = ({ currentData, config, thumbnailWidth, hiedZoom }: IPr
                 ) : (
                   <TitleButton
                     title={item?.calName}
-                    hiedZoom={hiedZoom}
                     onClick={() => {
                       setIsEnlarge(true);
                       setCurIndex(index);

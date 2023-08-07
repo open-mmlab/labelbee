@@ -4,13 +4,13 @@ import AnnotationView from '@/components/AnnotationView';
 import useSize from '@/hooks/useSize';
 import { useSingleBox } from './hooks/useSingleBox';
 import { ViewOperation } from '@labelbee/lb-annotation';
-import { IAnnotationData2dList, IAnnotationDataTemporarily } from './PointCloud2DView';
+import { IAnnotationData2dView, IAnnotationDataTemporarily } from './PointCloud2DView';
 
 const PointCloud2DSingleView = ({
   mappingData,
   setSelectedID,
 }: {
-  mappingData: IAnnotationData2dList;
+  mappingData: IAnnotationData2dView;
   setSelectedID: (value: string | number) => void;
 }) => {
   const ref = useRef(null);

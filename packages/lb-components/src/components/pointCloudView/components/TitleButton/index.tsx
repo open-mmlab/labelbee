@@ -6,14 +6,13 @@ interface IProps {
   title: string | React.ReactElement | null | undefined;
   onClick?: () => void;
   style?: React.CSSProperties;
-  hiedZoom?: boolean; // Hide zoom function
 }
 
-const TitleButton = ({ title, onClick, style, hiedZoom }: IProps) => {
+const TitleButton = ({ title, onClick, style }: IProps) => {
   return (
     <span className={getClassName('point-cloud-container', 'title-button')} style={style}>
       {title}
-      {!hiedZoom && <ExpandAltOutlined onClick={onClick} style={{ marginLeft: 4 }} />}
+      {onClick && <ExpandAltOutlined onClick={onClick} style={{ marginLeft: 4 }} />}
     </span>
   );
 };

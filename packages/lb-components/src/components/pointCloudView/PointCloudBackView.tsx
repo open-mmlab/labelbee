@@ -186,7 +186,7 @@ const PointCloudBackView = ({ currentData, config, checkMode }: IA2MapStateProps
   return (
     <PointCloudContainer
       className={getClassName('point-cloud-container', 'back-view')}
-      title={<TitleButton title={t('BackView')} hiedZoom={true} />}
+      title={<TitleButton title={t('BackView')} />}
       titleOnSurface={true}
     >
       <div className={getClassName('point-cloud-container', 'bottom-view-content')}>

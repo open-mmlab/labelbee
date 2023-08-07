@@ -36,7 +36,7 @@ import { useCustomToolInstance } from '@/hooks/annotation';
 import { jsonParser } from '@/utils';
 import { a2MapStateToProps, IA2MapStateProps } from '@/store/annotation/map';
 import classNames from 'classnames';
-import { useTranslation } from 'react-i18next';
+import SideAndBackOverView from './components/sideAndBackOverView';
 
 interface IProps extends IA2MapStateProps {
   drawLayerSlot?: TDrawLayerSlot;
@@ -54,21 +54,9 @@ const PointCloudView: React.FC<IProps> = ({
 }) => {
   const ptCtx = useContext(PointCloudContext);
   const { globalPattern, setGlobalPattern, selectedIDs } = ptCtx;
-  const { t } = useTranslation();
 
   const [isEnlargeTopView, setIsEnlargeTopView] = useState(false);
   const selectAndEnlarge = selectedIDs?.length > 0 && isEnlargeTopView;
-
-  const BACK_SIDE_CONTAIN_WIDTH = 455;
-  const BACK_SIDE_CONTAIN_HEIGHT = 400;
-  const initPositionX = window.innerWidth - BACK_SIDE_CONTAIN_WIDTH;
-  const initPositionY = window.innerHeight - BACK_SIDE_CONTAIN_HEIGHT;
-
-  const [position, setPosition] = useState({
-    x: initPositionX,
-    y: initPositionY,
-  });
-  const [offset, setOffset] = useState({ x: 0, y: 0 });
 
   const basicInfo = jsonParser(currentData.result);
   const { toolInstanceRef, clearToolInstance } = useCustomToolInstance({ basicInfo });
@@ -128,23 +116,6 @@ const PointCloudView: React.FC<IProps> = ({
     ptCtx.segmentation,
   ]);
 
-  useEffect(() => {
-    window.addEventListener('resize', onResize);
-    return () => {
-      window.removeEventListener('resize', onResize);
-    };
-  }, []);
-
-  const onResize = () => {
-    const initPositionX = window.innerWidth - BACK_SIDE_CONTAIN_WIDTH;
-    const initPositionY = window.innerHeight - BACK_SIDE_CONTAIN_HEIGHT;
-
-    setPosition({
-      x: initPositionX,
-      y: initPositionY,
-    });
-  };
-
   if (imgList.length === 0) {
     return null;
   }
@@ -171,46 +142,7 @@ const PointCloudView: React.FC<IProps> = ({
   );
   if (isEnlargeTopView) {
     backAndSideView = (
-      <div
-        className={classNames({
-          [getClassName('point-cloud-container', 'left-bottom')]: true,
-          [getClassName('point-cloud-container', 'left-bottom-float')]: selectAndEnlarge,
-        })}
-        style={{
-          top: position.y,
-          left: position.x,
-          width: 360,
-        }}
-      >
-        {selectAndEnlarge && (
-          <div
-            className={getClassName('point-cloud-container', 'left-bottom-floatHeader')}
-            draggable={'true'}
-            onDragStart={(event) => {
-              if (selectAndEnlarge) {
-                setOffset({
-                  x: event.clientX - position.x,
-                  y: event.clientY - position.y,
-                });
-              }
-            }}
-            onDrag={(e: any) => {
-              const moveX = e.clientX - offset.x;
-              const moveY = e.clientY - offset.y;
-              setPosition({ x: moveX, y: moveY });
-            }}
-            onDragEnd={(e: any) => {
-              const moveX = e.clientX - offset.x;
-              const moveY = e.clientY - offset.y;
-              setPosition({ x: moveX, y: moveY });
-            }}
-          >
-            {t('HoldDrag')}
-          </div>
-        )}
-        <PointCloudBackView checkMode={checkMode} />
-        <PointCloudSideView checkMode={checkMode} />
-      </div>
+      <SideAndBackOverView selectAndEnlarge={selectAndEnlarge} checkMode={checkMode} />
     );
   }
 
@@ -239,11 +171,6 @@ const PointCloudView: React.FC<IProps> = ({
                 setIsEnlargeTopView={setIsEnlargeTopView}
                 onExitZoom={() => {
                   setIsEnlargeTopView(false);
-                  setPosition({
-                    x: initPositionX,
-                    y: initPositionY,
-                  });
-                  setOffset({ x: 0, y: 0 });
                 }}
                 isEnlargeTopView={isEnlargeTopView}
               />
@@ -254,10 +181,7 @@ const PointCloudView: React.FC<IProps> = ({
                     isEnlargeTopView,
                 })}
               >
-                <PointCloud2DView
-                  thumbnailWidth={isEnlargeTopView ? 300 : 455}
-                  hiedZoom={isEnlargeTopView}
-                />
+                <PointCloud2DView thumbnailWidth={isEnlargeTopView ? 300 : 455} />
               </div>
             </div>
           </div>

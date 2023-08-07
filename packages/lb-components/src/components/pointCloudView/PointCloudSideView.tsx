@@ -178,7 +178,7 @@ const PointCloudSideView: React.FC<IA2MapStateProps & IProps> = ({ config, check
   return (
     <PointCloudContainer
       className={getClassName('point-cloud-container', 'side-view')}
-      title={<TitleButton title={t('SideView')} hiedZoom={true} />}
+      title={<TitleButton title={t('SideView')} />}
       titleOnSurface={true}
     >
       <div className={getClassName('point-cloud-container', 'bottom-view-content')}>
