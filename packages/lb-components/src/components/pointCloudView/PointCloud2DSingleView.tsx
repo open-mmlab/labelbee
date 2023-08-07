@@ -7,10 +7,10 @@ import { ViewOperation } from '@labelbee/lb-annotation';
 import { IAnnotationData2dView, IAnnotationDataTemporarily } from './PointCloud2DView';
 
 const PointCloud2DSingleView = ({
-  mappingData,
+  view2dData,
   setSelectedID,
 }: {
-  mappingData: IAnnotationData2dView;
+  view2dData: IAnnotationData2dView;
   setSelectedID: (value: string | number) => void;
 }) => {
   const ref = useRef(null);
@@ -18,7 +18,7 @@ const PointCloud2DSingleView = ({
   const { selectedBox } = useSingleBox();
   const size = useSize(ref);
 
-  const hiddenData = !mappingData;
+  const hiddenData = !view2dData;
 
   const afterImgOnLoad = useCallback(() => {
     const toolInstance = viewRef.current?.toolInstance;
@@ -29,7 +29,7 @@ const PointCloud2DSingleView = ({
     if (!selectedBox || !toolInstance) {
       return;
     }
-    const selected2data = mappingData.newAnnotations2d.find(
+    const selected2data = view2dData.annotations.find(
       (v: IAnnotationDataTemporarily) => v.annotation.id === selectedBox.info.id,
     );
 
@@ -39,7 +39,7 @@ const PointCloud2DSingleView = ({
       id = selectedBox.info.id;
       setSelectedID(id);
     }
-  }, [selectedBox, viewRef.current, mappingData.newAnnotations2d]);
+  }, [selectedBox, viewRef.current, view2dData.annotations]);
 
   /**
    * If the status is updated, it needs to
@@ -51,8 +51,8 @@ const PointCloud2DSingleView = ({
   return (
     <div className={getClassName('point-cloud-2d-image')} ref={ref}>
       <AnnotationView
-        src={mappingData?.url ?? ''}
-        annotations={mappingData.newAnnotations2d}
+        src={view2dData?.url ?? ''}
+        annotations={view2dData.annotations}
         size={size}
         ref={viewRef}
         globalStyle={{

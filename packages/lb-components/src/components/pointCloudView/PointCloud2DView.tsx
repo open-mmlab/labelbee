@@ -39,7 +39,7 @@ interface ITransferViewData {
 }
 
 export interface IAnnotationData2dView {
-  newAnnotations2d: IAnnotationDataTemporarily[];
+  annotations: IAnnotationDataTemporarily[];
   url?: string;
   calName?: string;
 }
@@ -106,7 +106,7 @@ const PointCloud2DView = ({ currentData, config, thumbnailWidth }: IProps) => {
           [],
         );
         newAnnotations2dList.push({
-          newAnnotations2d,
+          annotations: newAnnotations2d,
           url: mappingData?.url,
           calName: mappingData.calib?.calName,
         });
@@ -264,8 +264,8 @@ const PointCloud2DView = ({ currentData, config, thumbnailWidth }: IProps) => {
               key={index}
               toolbar={PointCloud2DTitle}
             >
-              {item?.newAnnotations2d && item?.url && (
-                <PointCloud2DSingleView mappingData={item} setSelectedID={setSelectedID} />
+              {item?.annotations && item?.url && (
+                <PointCloud2DSingleView view2dData={item} setSelectedID={setSelectedID} />
               )}
             </PointCloudContainer>
           );
