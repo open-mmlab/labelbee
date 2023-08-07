@@ -12,7 +12,7 @@
  */
 
 import { getClassName } from '@/utils/dom';
-import React, { useContext, useEffect } from 'react';
+import React, { useContext, useEffect, useState } from 'react';
 import PointCloud3DView from './PointCloud3DView';
 import PointCloudBackView from './PointCloudBackView';
 import PointCloudTopView from './PointCloudTopView';
@@ -35,6 +35,8 @@ import { EPointCloudPattern, PointCloudUtils } from '@labelbee/lb-utils';
 import { useCustomToolInstance } from '@/hooks/annotation';
 import { jsonParser } from '@/utils';
 import { a2MapStateToProps, IA2MapStateProps } from '@/store/annotation/map';
+import classNames from 'classnames';
+import SideAndBackOverView from './components/sideAndBackOverView';
 
 interface IProps extends IA2MapStateProps {
   drawLayerSlot?: TDrawLayerSlot;
@@ -51,7 +53,10 @@ const PointCloudView: React.FC<IProps> = ({
   imgIndex,
 }) => {
   const ptCtx = useContext(PointCloudContext);
-  const { globalPattern, setGlobalPattern } = ptCtx;
+  const { globalPattern, setGlobalPattern, selectedIDs } = ptCtx;
+
+  const [isEnlargeTopView, setIsEnlargeTopView] = useState(false);
+  const selectAndEnlarge = selectedIDs?.length > 0 && isEnlargeTopView;
 
   const basicInfo = jsonParser(currentData.result);
   const { toolInstanceRef, clearToolInstance } = useCustomToolInstance({ basicInfo });
@@ -120,12 +125,24 @@ const PointCloudView: React.FC<IProps> = ({
       <>
         <PointCloudSegmentListener checkMode={checkMode} toolInstanceRef={toolInstanceRef} />
         <PointCloudSegmentToolbar />
-        <PointCloudSegment checkMode={checkMode}/>
+        <PointCloudSegment checkMode={checkMode} />
         <PointCloudSegmentStatus />
         {drawLayerSlot?.({
           direct: true,
         })}
       </>
+    );
+  }
+
+  let backAndSideView = (
+    <div className={getClassName('point-cloud-container', 'left-bottom')}>
+      <PointCloudBackView checkMode={checkMode} />
+      <PointCloudSideView checkMode={checkMode} />
+    </div>
+  );
+  if (isEnlargeTopView) {
+    backAndSideView = (
+      <SideAndBackOverView selectAndEnlarge={selectAndEnlarge} checkMode={checkMode} />
     );
   }
 
@@ -138,19 +155,33 @@ const PointCloudView: React.FC<IProps> = ({
 
           <div className={getClassName('point-cloud-content')}>
             <div className={getClassName('point-cloud-container', 'left')}>
-              <PointCloud2DView />
               <PointCloud3DView />
+              {backAndSideView}
             </div>
-
-            <div className={getClassName('point-cloud-container', 'right')}>
+            <div
+              className={classNames({
+                [getClassName('point-cloud-container', 'right')]: true,
+                [getClassName('point-cloud-container', 'rightZoom')]: isEnlargeTopView,
+              })}
+            >
               <PointCloudTopView
                 drawLayerSlot={drawLayerSlot}
                 checkMode={checkMode}
                 intelligentFit={intelligentFit}
+                setIsEnlargeTopView={setIsEnlargeTopView}
+                onExitZoom={() => {
+                  setIsEnlargeTopView(false);
+                }}
+                isEnlargeTopView={isEnlargeTopView}
               />
-              <div className={getClassName('point-cloud-container', 'right-bottom')}>
-                <PointCloudSideView checkMode={checkMode} />
-                <PointCloudBackView checkMode={checkMode} />
+              <div
+                className={classNames({
+                  [getClassName('point-cloud-container', 'right-bottom')]: !isEnlargeTopView,
+                  [getClassName('point-cloud-container', 'right-bottom-floatLeft')]:
+                    isEnlargeTopView,
+                })}
+              >
+                <PointCloud2DView thumbnailWidth={isEnlargeTopView ? 300 : 455} />
               </div>
             </div>
           </div>

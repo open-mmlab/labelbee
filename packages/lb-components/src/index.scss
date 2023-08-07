@@ -555,6 +555,12 @@ $prefix: bee;
       border-radius: 50%;
     }
   }
+  &__pointCloud {
+    transition: width 0.1s;
+    .ant-tabs-content {
+      height: 100%;
+    }
+  }
 }
 
 .#{$prefix}-tips {
@@ -1480,13 +1486,14 @@ $headerHeight: 40px;
   .#{$ptPrefix}-content {
     flex: 1;
     display: flex;
+    overflow: hidden;
   }
 
   .#{$ptPrefix}-container {
     position: relative;
 
     &__header {
-      background-color: #444;
+      background-color: #4c4c4c;
       color: white;
       height: $headerHeight;
       padding: 0 16px;
@@ -1498,12 +1505,12 @@ $headerHeight: 40px;
       flex: 1;
       overflow: hidden;
       text-overflow: ellipsis;
-      font-weight: 700;
+      font-weight: 500;
     }
     &__header-toolbar {
       display: flex;
       align-items: center;
-      font-size: 12px;
+      font-size: 14px;
 
       .#{$ptPrefix} {
         @mixin iconMg {
@@ -1557,25 +1564,52 @@ $headerHeight: 40px;
         padding: 0 4px;
       }
     }
+
+    &__header-title-box {
+      position: absolute;
+      top: 16px;
+      left: 16px;
+      z-index: 1000;
+    }
+
+    &__title-button {
+      border-radius: 2px;
+      padding: 4px 8px;
+      background-color: #fff;
+      color: #000000;
+    }
   }
+
+  .#{$ptPrefix}-3d-containerZoom {
+    position: absolute;
+    top: 0px;
+    left: 0px;
+    width: 100%;
+    height: 100%;
+    z-index: 1001;
+
+    .#{$ptPrefix}-container__header {
+      background-color: #4c4c4c;
+      height: auto;
+      line-height: normal;
+      color: white;
+      padding: 10px 16px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      border-bottom: 1px solid;
+      font-size: 14px;
+    }
+  }
+
   .#{$ptPrefix}-container__left {
-    width: 40%;
+    width: 455px;
     display: flex;
     flex-direction: column;
     border-right: 1px solid #fff;
     height: 100%;
     overflow: hidden;
-    .#{$ptPrefix}-2d-container {
-      flex: 1;
-      flex-direction: column;
-      display: flex;
-      overflow: hidden;
-
-      .#{$ptPrefix}-2d-image {
-        flex: 1;
-        background-color: $pointCloudBg;
-      }
-    }
+    flex-shrink: 0;
 
     .#{$ptPrefix}-3d-container {
       display: flex;
@@ -1588,124 +1622,164 @@ $headerHeight: 40px;
         flex: 1;
         overflow: hidden;
 
-        .#{$ptPrefix}-3d-sidebar {
-          padding-left: 16px;
-          height: 100%;
-          background-color: $pointCloudBg;
-          width: 36px;
-          box-sizing: content-box;
-          display: flex;
-          flex-direction: column;
-          justify-content: flex-start;
-          overflow-y: scroll;
-
-          &::-webkit-scrollbar {
-            display: none;
-          }
-
-          .#{$ptPrefix}-3d-view {
-            &__reset,
-            &__followTop {
-              @include icon();
-
-              font-size: 36px;
-              background-position: center;
-              background-color: #444;
-              border-radius: 4px;
-            }
-
-            &__reset {
-              background-image: url('./assets/annotation/pointCloudTool/3DViewReset.svg');
-              margin: 16px 0;
-            }
-
-            &__followTop {
-              margin: 16px 0 0 0;
-              background-size: 36px;
-              background-image: url('./assets/annotation/pointCloudTool/followTopView.png');
-            }
-
-            &__top,
-            &__front,
-            &__left,
-            &__right,
-            &__back,
-            &__bottom,
-            &__lft,
-            &__rbt {
-              @include icon();
-              background-image: url('./assets/annotation/pointCloudTool/3DViews.png');
-              margin-bottom: 8px;
-
-              &.active {
-                background-image: url('./assets/annotation/pointCloudTool/3DViewsActive.png');
-              }
-            }
-
-            &__top {
-              background-position: 0 0;
-            }
-
-            &__front {
-              background-position-y: -44px;
-            }
-
-            &__left {
-              background-position-y: -88px;
-            }
-
-            &__back {
-              background-position-y: -132px;
-            }
-
-            &__right {
-              background-position-y: -176px;
-            }
-
-            &__bottom {
-              background-position-y: -220px;
-            }
-
-            &__lft {
-              background-position-y: -264px;
-            }
-
-            &__rbt {
-              background-position-y: -308px;
-              margin-bottom: 0px;
-            }
-          }
-        }
-
         .#{$ptPrefix}-3d-view {
           flex: 1;
           overflow: hidden;
         }
       }
+
+      .#{$ptPrefix}-3d-sidebar {
+        transition: width 0.5s;
+        padding-left: 16px;
+        height: 100%;
+        background-color: $pointCloudBg;
+        width: 36px;
+        box-sizing: content-box;
+        display: flex;
+        flex-direction: column;
+        justify-content: flex-start;
+        overflow-y: scroll;
+
+        &::-webkit-scrollbar {
+          display: none;
+        }
+      }
+
+      .#{$ptPrefix}-3d-view {
+        &__reset,
+        &__followTop {
+          @include icon();
+
+          font-size: 36px;
+          background-position: center;
+          background-color: #444;
+          border-radius: 4px;
+        }
+
+        &__reset {
+          background-image: url('./assets/annotation/pointCloudTool/3DViewReset.svg');
+          margin: 16px 0;
+        }
+
+        &__followTop {
+          margin: 16px 0 0 0;
+          background-size: 36px;
+          background-image: url('./assets/annotation/pointCloudTool/followTopView.png');
+        }
+
+        &__top,
+        &__front,
+        &__left,
+        &__right,
+        &__back,
+        &__bottom,
+        &__lft,
+        &__rbt {
+          @include icon();
+          background-image: url('./assets/annotation/pointCloudTool/3DViews.png');
+          margin-bottom: 8px;
+
+          &.active {
+            background-image: url('./assets/annotation/pointCloudTool/3DViewsActive.png');
+          }
+        }
+
+        &__top {
+          background-position: 0 0;
+        }
+
+        &__front {
+          background-position-y: -44px;
+        }
+
+        &__left {
+          background-position-y: -88px;
+        }
+
+        &__back {
+          background-position-y: -132px;
+        }
+
+        &__right {
+          background-position-y: -176px;
+        }
+
+        &__bottom {
+          background-position-y: -220px;
+        }
+
+        &__lft {
+          background-position-y: -264px;
+        }
+
+        &__rbt {
+          background-position-y: -308px;
+          margin-bottom: 0px;
+        }
+      }
+
+      .#{$ptPrefix}-3d-sidebarZoom {
+        padding-left: 16px;
+        height: 100%;
+        background-color: $pointCloudBg;
+        box-sizing: content-box;
+        display: flex;
+
+        .#{$ptPrefix}-3d-view {
+          &__reset {
+            margin: 0px 4px;
+          }
+
+          &__followTop {
+            margin: 0px 4px;
+          }
+
+          &__top,
+          &__front,
+          &__left,
+          &__right,
+          &__back,
+          &__bottom,
+          &__lft,
+          &__rbt {
+            background-color: #444;
+            border-radius: 4px;
+            margin: 0px 4px;
+          }
+        }
+      }
     }
-  }
 
-  .#{$ptPrefix}-container__right {
-    flex: 1;
-    display: flex;
-    flex-direction: column;
+    .#{$ptPrefix}-container__left-bottom-float {
+      position: fixed;
+      bottom: 0px;
+      right: 0px;
+      z-index: 1003;
+      width: 360px;
+      height: 400px;
+      border: 1px solid #fff;
 
-    .#{$ptPrefix}-container__top-view {
-      height: 62.5%;
-      border-bottom: 1px solid #fff;
-      overflow: hidden;
-      display: flex;
-      flex-direction: column;
+      .#{$ptPrefix}-container__left-bottom-floatHeader {
+        line-height: 24px;
+        font-size: 12px;
+        width: 100%;
+        color: #fff;
+        background-color: #969696;
+        text-align: center;
+        cursor: grabbing;
+      }
     }
 
-    .#{$ptPrefix}-container__right-bottom {
+    .#{$ptPrefix}-container__left-bottom {
       flex: 1;
+      flex-direction: column;
       display: flex;
       overflow: hidden;
+
       .#{$ptPrefix}-container__empty-page {
         position: absolute;
         left: 0;
-        top: $headerHeight;
+        top: 0;
         flex: 1;
         background: black;
         color: #666666;
@@ -1713,19 +1787,14 @@ $headerHeight: 40px;
         justify-content: center;
         align-items: center;
         flex-direction: column;
-        font-size: 16px;
+        font-size: 12px;
         z-index: 20;
-        height: calc(100% - $headerHeight);
+        height: 100%;
         width: 100%;
         .#{$ptPrefix}-container__empty-page__text {
-          margin-top: 13px;
+          margin-top: 8px;
         }
       }
-
-      .#{$ptPrefix}-container__side-view {
-        border-right: 1px solid white;
-      }
-
       .#{$ptPrefix}-container__side-view,
       .#{$ptPrefix}-container__back-view {
         position: relative;
@@ -1733,6 +1802,8 @@ $headerHeight: 40px;
         display: flex;
         background: black;
         flex-direction: column;
+        border-top: 1px solid white;
+
         .#{$ptPrefix}-container__bottom-view-content {
           flex: 1;
           .#{$ptPrefix}-container__core-instance {
@@ -1741,6 +1812,88 @@ $headerHeight: 40px;
             height: 100%;
           }
         }
+      }
+    }
+  }
+
+  .#{$ptPrefix}-container__rightZoom {
+    position: fixed;
+    top: 0px;
+    left: 0px;
+    width: 100%;
+    height: 100%;
+    z-index: 1002;
+
+    .#{$ptPrefix}-container__header {
+      background-color: #4c4c4c;
+      height: auto;
+      line-height: normal;
+      color: white;
+      padding: 10px 16px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      border-bottom: 1px solid;
+      font-size: 14px;
+    }
+  }
+
+  .#{$ptPrefix}-container__right {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+    background-color: #444;
+
+    .#{$ptPrefix}-container__top-view {
+      border-bottom: 1px solid #fff;
+      overflow: hidden;
+      display: flex;
+      flex-direction: column;
+      flex: 3;
+    }
+
+    .#{$ptPrefix}-container__right-bottom-floatLeft {
+      position: absolute;
+      top: 54px;
+      left: 0px;
+      width: 300px;
+      height: 100%;
+      overflow-y: auto;
+      z-index: 100;
+
+      .#{$ptPrefix}-2d-container {
+        flex-direction: column;
+        display: flex;
+        overflow: hidden;
+        flex-shrink: 0;
+      }
+
+      .#{$ptPrefix}-2d-image {
+        flex: 1;
+        background-color: $pointCloudBg;
+        border-right: 1px solid #fff;
+        border-bottom: 1px solid #fff;
+      }
+    }
+
+    .#{$ptPrefix}-container__right-bottom {
+      flex: 1;
+      display: flex;
+      overflow: auto;
+
+      .#{$ptPrefix}-2d-container {
+        flex-direction: column;
+        display: flex;
+        overflow: hidden;
+        flex-shrink: 0;
+      }
+
+      .#{$ptPrefix}-2d-image {
+        flex: 1;
+        height: 100%;
+        background-color: $pointCloudBg;
+        border-right: 1px solid #fff;
       }
     }
   }
@@ -1789,6 +1942,7 @@ $ptToolHeight: 40px;
   justify-content: flex-end;
   align-items: center;
   background-color: rgb(102, 102, 102);
+
   .#{$ptPrefix}-toolbox {
     margin-left: 16px;
     display: flex;

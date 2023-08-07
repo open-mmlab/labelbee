@@ -6,7 +6,7 @@
  */
 
 import { getClassName } from '@/utils/dom';
-import { PointCloud } from '@labelbee/lb-annotation';
+import { PointCloud, cKeyCode } from '@labelbee/lb-annotation';
 import {
   EPerspectiveView,
   IPointCloudBox,
@@ -28,7 +28,10 @@ import { usePointCloudViews } from './hooks/usePointCloudViews';
 import { useTranslation } from 'react-i18next';
 import { LabelBeeContext } from '@/store/ctx';
 import PointCloudSizeSlider from './components/PointCloudSizeSlider';
+import TitleButton from './components/TitleButton';
+import { LeftOutlined } from '@ant-design/icons';
 
+const EKeyCode = cKeyCode.default;
 const pointCloudID = 'LABELBEE-POINTCLOUD';
 const PointCloud3DContext = React.createContext<{
   isActive: boolean;
@@ -66,11 +69,12 @@ const PointCloudViewIcon = ({
   );
 };
 
-const PointCloud3DSideBar = () => {
+const PointCloud3DSideBar = ({ isEnlarge }: { isEnlarge?: boolean }) => {
   const { reset3DView, followTopView } = useContext(PointCloud3DContext);
   const { t } = useTranslation();
-  return (
-    <div className={getClassName('point-cloud-3d-sidebar')}>
+
+  const viewIconList = (
+    <>
       <PointCloudViewIcon perspectiveView='Top' />
       <PointCloudViewIcon perspectiveView='Front' />
       <PointCloudViewIcon perspectiveView='Left' />
@@ -78,7 +82,10 @@ const PointCloud3DSideBar = () => {
       <PointCloudViewIcon perspectiveView='Right' />
       <PointCloudViewIcon perspectiveView='LFT' />
       <PointCloudViewIcon perspectiveView='RBT' />
-
+    </>
+  );
+  const localizeIcon = (
+    <>
       <Tooltip title={t('CameraFollowTopView')}>
         <span
           onClick={() => {
@@ -94,6 +101,21 @@ const PointCloud3DSideBar = () => {
         }}
         className={getClassName('point-cloud-3d-view', 'reset')}
       />
+    </>
+  );
+
+  if (isEnlarge) {
+    return (
+      <div className={getClassName('point-cloud-3d-sidebarZoom')}>
+        {localizeIcon}
+        {viewIconList}
+      </div>
+    );
+  }
+  return (
+    <div className={getClassName('point-cloud-3d-sidebar')}>
+      {viewIconList}
+      {localizeIcon}
     </div>
   );
 };
@@ -101,6 +123,7 @@ const PointCloud3DSideBar = () => {
 const PointCloud3D: React.FC<IA2MapStateProps> = ({ currentData, config }) => {
   const ptCtx = useContext(PointCloudContext);
   const [showDirection, setShowDirection] = useState(true);
+  const [isEnlarge, setIsEnlarge] = useState(false);
   const ref = useRef<HTMLDivElement>(null);
   const { initPointCloud3d } = usePointCloudViews();
   const size = useSize(ref);
@@ -216,6 +239,20 @@ const PointCloud3D: React.FC<IA2MapStateProps> = ({ currentData, config }) => {
     }
   }, [selectedSphere]);
 
+  useEffect(() => {
+    window.addEventListener('keydown', onKeyDown);
+    return () => {
+      window.removeEventListener('keydown', onKeyDown);
+    };
+  }, []);
+
+  const onKeyDown = (event: KeyboardEvent) => {
+    if (event.keyCode === EKeyCode.Esc) {
+      setIsEnlarge(false);
+      return;
+    }
+  };
+
   const ptCloud3DCtx = useMemo(() => {
     return { reset3DView, setTarget3DView, isActive: !!selectedBox, followTopView };
   }, [selectedBox, ptCtx.mainViewInstance]);
@@ -236,19 +273,48 @@ const PointCloud3D: React.FC<IA2MapStateProps> = ({ currentData, config }) => {
           ptCtx.mainViewInstance?.setShowDirection(showDirection);
         }}
       />
+      {isEnlarge && (
+        <PointCloud3DContext.Provider value={ptCloud3DCtx}>
+          <PointCloud3DSideBar isEnlarge={isEnlarge} />
+        </PointCloud3DContext.Provider>
+      )}
     </>
   );
 
   return (
     <PointCloudContainer
-      className={getClassName('point-cloud-3d-container')}
-      title={t('3DView')}
+      className={classNames({
+        [getClassName('point-cloud-3d-container')]: true,
+        [getClassName('point-cloud-3d-containerZoom')]: isEnlarge,
+      })}
+      title={
+        isEnlarge ? (
+          <div style={{ display: 'flex', alignItems: 'center' }}>
+            <LeftOutlined
+              style={{ cursor: 'pointer', marginRight: '12px' }}
+              onClick={() => {
+                setIsEnlarge(false);
+              }}
+            />
+            {t('3DView')}
+          </div>
+        ) : (
+          <TitleButton
+            title={t('3DView')}
+            onClick={() => {
+              setIsEnlarge(true);
+            }}
+          />
+        )
+      }
       toolbar={PointCloud3DTitle}
     >
       <div className={getClassName('point-cloud-3d-content')}>
-        <PointCloud3DContext.Provider value={ptCloud3DCtx}>
-          <PointCloud3DSideBar />
-        </PointCloud3DContext.Provider>
+        {!isEnlarge && (
+          <PointCloud3DContext.Provider value={ptCloud3DCtx}>
+            <PointCloud3DSideBar />
+          </PointCloud3DContext.Provider>
+        )}
         <div className={getClassName('point-cloud-3d-view')} id={pointCloudID} ref={ref} />
       </div>
     </PointCloudContainer>

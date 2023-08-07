@@ -18,7 +18,7 @@ const DEFAULT_BOX_INFO_STYLE = {
   backgroundColor: 'rgba(153, 153, 153, 0.3)',
   padding: '8px 10px',
   zIndex: 20,
-  fontSize: 14,
+  fontSize: 12,
 };
 
 /**
@@ -84,9 +84,11 @@ export const SizeInfoForView = ({ perspectiveView }: { perspectiveView: EPerspec
 export const BoxInfos = ({
   checkMode,
   config,
+  style,
 }: {
   checkMode?: boolean;
   config: IPointCloudConfig;
+  style?: React.CSSProperties;
 }) => {
   const ptCtx = React.useContext(PointCloudContext);
   const { selectedBox } = useSingleBox();
@@ -148,15 +150,19 @@ export const BoxInfos = ({
   if (selectedBox) {
     return (
       <div
-        style={{
-          position: 'absolute',
-          ...DEFAULT_BOX_INFO_STYLE,
-          right: 8,
-          bottom: 8,
-        }}
+        style={
+          style
+            ? style
+            : {
+                position: 'absolute',
+                ...DEFAULT_BOX_INFO_STYLE,
+                right: 8,
+                bottom: 8,
+              }
+        }
       >
         {infos.map((i) => (
-          <div key={i.label}>{`${i.label}: ${i.value}`}</div>
+          <div key={i.label} style={{ margin: '0px 4px' }}>{`${i.label}: ${i.value}`}</div>
         ))}
       </div>
     );
