@@ -115,6 +115,8 @@ export class PointCloud extends EventListener {
 
   private rangeObjectName = 'range';
 
+  private highlightGroupName = 'highlightBoxes';
+
   private cacheInstance: PointCloudCache; // PointCloud Cache Map
 
   private showDirection: boolean = true; // Whether to display the direction of box
@@ -1023,6 +1025,74 @@ export class PointCloud extends EventListener {
         };
       }
     });
+  }
+
+  /**
+   * Clean all highlightBox
+   */
+  public clearHighlightBoxes() {
+    this.removeObjectByName(this.highlightGroupName);
+  }
+
+  public clearHighlightBoxesAndRender() {
+    this.clearHighlightBoxes();
+    this.render();
+  }
+
+  public highlightBoxes(boxes: IPointCloudBox[]) {
+    const group = new THREE.Group();
+
+    // 1. Highlight all box.
+    boxes.forEach((box) => {
+      const {
+        center: { x, y, z },
+        width,
+        height,
+        depth,
+        rotation,
+      } = box;
+      const { fill } = toolStyleConverter.getColorFromConfig(
+        { attribute: box.attribute },
+        { ...this.config, attributeConfigurable: true },
+        {},
+      );
+
+      // 1-1. Add Transparent Box.
+      const geometry = new THREE.BoxGeometry(width, height, depth);
+      const material = new THREE.MeshBasicMaterial({
+        color: fill,
+        transparent: true,
+        opacity: 0.2,
+        depthTest: false,
+      });
+      geometry.rotateZ(rotation);
+      geometry.translate(x, y, z);
+      const mesh = new THREE.Mesh(geometry, material);
+      group.add(mesh);
+
+      // 1-2. Add plane for direction.
+      const planeGeo = new THREE.PlaneGeometry(depth, height);
+      planeGeo.rotateY(Math.PI / 2);
+      planeGeo.rotateZ(rotation);
+      // The plane center Offset
+      const vector = new THREE.Vector3(width / 2, 0, 0);
+      const rM = new THREE.Matrix4().makeRotationY(Math.PI / 2).makeRotationZ(rotation);
+      vector.applyMatrix4(rM);
+      planeGeo.translate(x + vector.x, y + vector.y, z + vector.z);
+      const plainMaterial = new THREE.MeshBasicMaterial({
+        color: fill,
+        side: THREE.DoubleSide,
+        transparent: true,
+        opacity: 0.8,
+        depthTest: false,
+      });
+      const plainMesh = new THREE.Mesh(planeGeo, plainMaterial);
+      group.add(plainMesh);
+    });
+
+    group.name = this.highlightGroupName;
+    this.scene.add(group);
+    this.render();
   }
 
   public updateColor(color: any[]) {

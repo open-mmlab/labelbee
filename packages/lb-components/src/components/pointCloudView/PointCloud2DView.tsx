@@ -50,7 +50,7 @@ interface IProps extends IA2MapStateProps {
   thumbnailWidth?: number;
 }
 
-const PointCloud2DView = ({ currentData, config, thumbnailWidth }: IProps) => {
+const PointCloud2DView = ({ currentData, config, thumbnailWidth, highlightAttribute }: IProps) => {
   const [annotations2d, setAnnotations2d] = useState<IAnnotationData2dView[]>([]);
   const { topViewInstance, displayPointCloudList } = useContext(PointCloudContext);
   const [selectedID, setSelectedID] = useState<number | string>('');
@@ -67,9 +67,16 @@ const PointCloud2DView = ({ currentData, config, thumbnailWidth }: IProps) => {
       currentData?.mappingImgList.forEach((mappingData: IMappingImg) => {
         const newAnnotations2d: IAnnotationDataTemporarily[] = displayPointCloudList.reduce(
           (acc: IAnnotationDataTemporarily[], pointCloudBox: IPointCloudBox) => {
+            /**
+             * Is need to create range.
+             * 1. pointCloudBox is selected;
+             * 2. HighlightAttribute is same with pointCloudBox's attribute.
+             */
+            const createRange =
+              pointCloudBox.id === selectedID || highlightAttribute === pointCloudBox.attribute;
             const { transferViewData: viewDataPointList, viewRangePointList } =
               pointCloudLidar2image(pointCloudBox, mappingData.calib, {
-                createRange: pointCloudBox.id === selectedID,
+                createRange,
               });
 
             const stroke = toolStyleConverter.getColorFromConfig(
@@ -88,7 +95,7 @@ const PointCloud2DView = ({ currentData, config, thumbnailWidth }: IProps) => {
             });
             const newArr = [...acc, ...viewDataPointLists];
 
-            if (pointCloudBox.id === selectedID && viewRangePointList.length > 0) {
+            if (viewRangePointList?.length > 0) {
               newArr.push({
                 type: 'polygon',
                 annotation: {
@@ -113,7 +120,7 @@ const PointCloud2DView = ({ currentData, config, thumbnailWidth }: IProps) => {
       });
       setAnnotations2d(newAnnotations2dList);
     }
-  }, [displayPointCloudList, currentData?.mappingImgList, selectedID]);
+  }, [displayPointCloudList, currentData?.mappingImgList, selectedID, highlightAttribute]);
 
   useEffect(() => {
     window.addEventListener('keydown', onKeyDown);
