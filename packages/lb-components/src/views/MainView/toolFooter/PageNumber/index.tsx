@@ -17,6 +17,7 @@ const PageNumber = (props: IProps) => {
   const [_, forceRender] = useState(0);
   const { pointCloudBoxList, segmentation, globalPattern } = useContext(PointCloudContext);
   const { t } = useTranslation();
+
   useEffect(() => {
     if (toolInstance) {
       toolInstance.singleOn('updatePageNumber', () => {
@@ -29,7 +30,7 @@ const PageNumber = (props: IProps) => {
     return null;
   }
 
-  const count = toolInstance?.currentPageResult?.length ?? globalPattern === EPointCloudPattern.Detection ? pointCloudBoxList.length : segmentation.length;
+  const count = toolInstance?.currentPageResult?.length ?? (globalPattern === EPointCloudPattern.Detection ? pointCloudBoxList.length : segmentation.length);
 
   if (count >= 0) {
     return (

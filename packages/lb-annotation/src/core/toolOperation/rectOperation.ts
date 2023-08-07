@@ -1174,7 +1174,8 @@ class RectOperation extends BasicToolOperation {
       }
 
       this.setSelectedRectID(hoverRectID, e.ctrlKey);
-      if (hoverRect) {
+      // Only executed when one is selected
+      if (hoverRect && this.selectedIDs?.length === 1) {
         this.setDefaultAttribute(hoverRect.attribute);
       }
       this.hoverRectID = '';
