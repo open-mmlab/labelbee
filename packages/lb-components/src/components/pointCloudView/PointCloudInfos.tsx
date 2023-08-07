@@ -95,6 +95,7 @@ export const BoxInfos = ({
   const [infos, setInfos] = useState<Array<{ label: string; value: string }>>([]);
   const trans = useTranslation();
   const { t, i18n } = trans;
+  const isShowOnHeader = style;
 
   useEffect(() => {
     if (!selectedBox) {
@@ -103,6 +104,7 @@ export const BoxInfos = ({
     const { length, width, height, rotation_y } = PointCloudUtils.transferBox2Kitti(
       selectedBox.info,
     );
+    const { x, y, z } = selectedBox.info.center;
 
     let infos = [
       {
@@ -116,6 +118,18 @@ export const BoxInfos = ({
       {
         label: t('Height'),
         value: height.toFixed(DECIMAL_PLACES),
+      },
+      {
+        label: 'x',
+        value: x.toFixed(DECIMAL_PLACES),
+      },
+      {
+        label: 'y',
+        value: y.toFixed(DECIMAL_PLACES),
+      },
+      {
+        label: 'z',
+        value: z.toFixed(DECIMAL_PLACES),
       },
       {
         label: t('Rotation_y'),
@@ -161,9 +175,23 @@ export const BoxInfos = ({
               }
         }
       >
-        {infos.map((i) => (
-          <div key={i.label} style={{ margin: '0px 4px' }}>{`${i.label}: ${i.value}`}</div>
-        ))}
+        {infos.map((i) => {
+          if (isShowOnHeader) {
+            return (
+              <div key={i.label} style={{ margin: '0px 4px' }}>
+                {`${i.label}: ${i.value}`}
+              </div>
+            );
+          }
+          return (
+            <div key={i.label}>
+              <span style={{ width: '38px', display: 'inline-block', textAlign: 'end' }}>
+                {i.label}
+              </span>
+              : <span>{i.value}</span>
+            </div>
+          );
+        })}
       </div>
     );
   }
