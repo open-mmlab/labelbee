@@ -582,6 +582,7 @@ export const synchronizeTopView = (
   const oldPolygon = newPolygonList.find((v) => v.id === newPolygon.id);
   if (oldPolygon) {
     oldPolygon.pointList = polygon2d;
+    oldPolygon.valid = newBoxParams.valid ?? true;
   } else {
     newPolygonList.push({
       id: newPolygon.id,
@@ -1090,9 +1091,7 @@ export const usePointCloudViews = () => {
     };
 
     Object.keys(viewToBeUpdated).forEach((key) => {
-      if (key !== omitView) {
-        viewToBeUpdated[key]();
-      }
+      viewToBeUpdated[key]();
     });
 
     if (zoom) {
