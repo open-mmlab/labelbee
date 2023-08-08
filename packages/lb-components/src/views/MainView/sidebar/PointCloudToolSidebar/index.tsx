@@ -16,9 +16,8 @@ import { useTranslation } from 'react-i18next';
 import { LabelBeeContext, useDispatch } from '@/store/ctx';
 import BatchUpdateModal from './components/batchUpdateModal';
 import { IFileItem } from '@/types/data';
-import { PointCloudUtils } from '@labelbee/lb-utils';
+import { PointCloudUtils, IInputList } from '@labelbee/lb-utils';
 import AttributeList from '@/components/attributeList';
-import { IInputList } from '@/types/main';
 import { useAttribute } from '@/components/pointCloudView/hooks/useAttribute';
 import LassoSelectorSvg from '@/assets/annotation/pointCloudTool/lassoSelector.svg';
 import LassoSelectorSvgA from '@/assets/annotation/pointCloudTool/lassoSelector_a.svg';
@@ -213,7 +212,7 @@ const AttributeUpdater = ({
   enableColorPicker,
 }: {
   toolInstance: ICustomToolInstance;
-  attributeList: any[]; // TODO
+  attributeList: IInputList[];
   subAttributeList: any[]; // TODO
   config: any;
   stepList: IStepInfo[];
@@ -270,10 +269,12 @@ const AttributeUpdater = ({
     toolInstance.setSubAttribute(key, value);
   };
 
-  const list = attributeList.map((i: any) => ({
+  const list = attributeList.map((i: IInputList) => ({
     label: i.key,
     value: i.value,
     color: i?.color,
+    limit: i?.limit,
+    isDefault: i?.isDefault,
   }));
 
   return (
