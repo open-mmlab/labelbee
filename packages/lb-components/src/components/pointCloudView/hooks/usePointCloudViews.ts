@@ -8,6 +8,7 @@ import {
   PointCloud,
   MathUtils,
   getCuboidFromPointCloudBox,
+  EPointCloudName,
 } from '@labelbee/lb-annotation';
 import {
   IPointCloudBox,
@@ -37,6 +38,7 @@ import { useHistory } from './useHistory';
 import { usePolygon } from './usePolygon';
 import { IFileItem } from '@/types/data';
 import { ICoordinate } from '@labelbee/lb-utils/src/types/common';
+import { preDataProcess } from '@/utils/data';
 
 const DEFAULT_SCOPE = 5;
 const DEFAULT_RADIUS = 90;
@@ -726,7 +728,7 @@ export const usePointCloudViews = () => {
     const polygonOperation = topViewInstance?.toolInstance;
 
     const newPolygon = { ...polygon };
-    const { boxParams, newPointList } = topViewPolygon2PointCloud(
+    let { boxParams, newPointList } = topViewPolygon2PointCloud(
       newPolygon,
       size,
       topViewPointCloud,
@@ -734,6 +736,15 @@ export const usePointCloudViews = () => {
       extraData,
       intelligentFit,
     );
+
+    const nextResult = preDataProcess({
+      tool: EPointCloudName.PointCloud,
+      dataList: [boxParams],
+      stepConfig: config,
+      action: 'topViewAddBox',
+    });
+
+    boxParams = nextResult[0];
 
     // If the count is less than lowerLimitPointsNumInBox, needs to delete it
     if (
@@ -845,6 +856,16 @@ export const usePointCloudViews = () => {
         selectedPointCloudBox,
         sideViewInstance.pointCloudInstance,
       );
+
+      const nextResult = preDataProcess({
+        tool: EPointCloudName.PointCloud,
+        dataList: [newBoxParams],
+        stepConfig: config,
+        action: 'viewUpdateBox',
+      });
+
+      newBoxParams = nextResult[0];
+
       // Update count
       if (mainViewInstance) {
         const { count } = mainViewInstance.getSensesPointZAxisInPolygon(
@@ -956,7 +977,7 @@ export const usePointCloudViews = () => {
       return;
     }
 
-    const updatePointCloudList: IPointCloudBox[] = updateList.map(({ newPolygon: polygon }) => {
+    let updatePointCloudList: IPointCloudBox[] = updateList.map(({ newPolygon: polygon }) => {
       const pointCloudBox = getPointCloudByID(polygon.id);
 
       const { boxParams } = topViewPolygon2PointCloud(
@@ -967,6 +988,13 @@ export const usePointCloudViews = () => {
       );
 
       return boxParams;
+    });
+
+    updatePointCloudList = preDataProcess({
+      tool: EPointCloudName.PointCloud,
+      dataList: updatePointCloudList,
+      stepConfig: config,
+      action: 'topViewUpdateBox',
     });
 
     /**
