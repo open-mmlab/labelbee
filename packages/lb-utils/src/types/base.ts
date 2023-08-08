@@ -10,17 +10,17 @@ interface ISizeRange {
 
 // Default size
 interface IDefaultSize {
-  heightDefault?: string;
-  lengthDefault?: string;
-  widthDefault?: string;
+  heightDefault: string;
+  lengthDefault: string;
+  widthDefault: string;
 }
 
 // logical condition
 interface ILogicalCondition {
-  condition?: string;
-  dimensionLeft?: string;
-  dimensionRight?: string;
-  logical?: string;
+  condition: string;
+  dimensionLeft: string;
+  dimensionRight: string;
+  logical: string;
 }
 
 // position limit
