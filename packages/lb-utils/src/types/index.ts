@@ -4,3 +4,4 @@ export * from './annotationView';
 export * from './line';
 export * from './point';
 export * from './common';
+export * from './base';

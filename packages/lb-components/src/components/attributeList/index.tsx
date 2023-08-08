@@ -6,6 +6,8 @@ import { Popover } from 'antd';
 import ColorPalette from '../colorPalette';
 import { CloseOutlined } from '@ant-design/icons';
 import { useTranslation } from 'react-i18next';
+import { ILimit } from '@labelbee/lb-utils';
+import LimitPopover from './components/limitPopover';
 
 export const ATTRIBUTE_COLORS = [NULL_COLOR].concat(COLORS_ARRAY);
 
@@ -14,6 +16,7 @@ interface IProps {
     label: string;
     value: string;
     color?: string;
+    limit?: ILimit;
   }>;
   selectedAttribute?: string;
   attributeChanged: (v: string) => void;
@@ -128,6 +131,10 @@ const AttributeList = React.forwardRef((props: IProps, ref) => {
                 )}
                 {i.label}
               </span>
+
+              {i?.limit && (
+                <LimitPopover limit={i.limit} isDefaultSize={true} onChange={() => {}} />
+              )}
               <span className='sensebee-radio-num'>{hotKey}</span>
             </Radio>
           );

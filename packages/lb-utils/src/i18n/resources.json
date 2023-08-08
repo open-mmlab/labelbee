@@ -241,7 +241,12 @@
     "No":"No",
     "AdditionalContent":"AdditionalContent",
     "Submit":"Submit",
-    "DragAndDrop":"Drag and drap"
+    "DragAndDrop":"Drag and drap",
+    "DefaultSize":"Default size",
+    "NormalSizeRange":"Normal size range",
+    "NormalCenterPointRange":"Normal center point range",
+    "Unlocked":"Unlocked",
+    "Locked":"Locked"
   },
   "cn": {
     "TextInput": "文本输入",
@@ -485,6 +490,11 @@
     "No":"否",
     "AdditionalContent":"（选填）请填写任何你对答案的评价或其他补充内容",
     "Submit":"提交",
-    "DragAndDrop":"按住拖动"
+    "DragAndDrop":"按住拖动",
+    "DefaultSize":"默认尺寸",
+    "NormalSizeRange":"正常尺寸范围",
+    "NormalCenterPointRange":"正常中心点范围",
+    "Unlocked":"未开启",
+    "Locked":"已开启"
   }
 }
