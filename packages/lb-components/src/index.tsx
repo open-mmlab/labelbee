@@ -18,7 +18,6 @@ import { AppState } from './store';
 import { LabelBeeContext } from '@/store/ctx';
 import PredictTracking from '@/components/predictTracking';
 import LLMToolView from '@/components/LLMToolView';
-import { preDataProcess } from './utils/data';
 
 export const store = configureStore();
 
@@ -70,7 +69,6 @@ export {
   i18n,
   VideoTagTool,
   PredictTracking,
-  preDataProcess
 };
 
 export * from './constant';

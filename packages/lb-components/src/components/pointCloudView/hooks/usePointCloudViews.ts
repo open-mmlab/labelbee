@@ -31,14 +31,13 @@ import { useDispatch, useSelector } from '@/store/ctx';
 import { AppState } from '@/store';
 import StepUtils from '@/utils/StepUtils';
 import { jsonParser } from '@/utils';
-import { SetPointCloudLoading } from '@/store/annotation/actionCreators';
+import { PreDataProcess, SetPointCloudLoading } from '@/store/annotation/actionCreators';
 import { message } from 'antd';
 import { useTranslation } from 'react-i18next';
 import { useHistory } from './useHistory';
 import { usePolygon } from './usePolygon';
 import { IFileItem } from '@/types/data';
 import { ICoordinate } from '@labelbee/lb-utils/src/types/common';
-import { preDataProcess } from '@/utils/data';
 
 const DEFAULT_SCOPE = 5;
 const DEFAULT_RADIUS = 90;
@@ -738,12 +737,14 @@ export const usePointCloudViews = () => {
       intelligentFit,
     );
 
-    const nextResult = preDataProcess({
-      tool: EPointCloudName.PointCloud,
-      dataList: [boxParams],
-      stepConfig: config,
-      action: 'topViewAddBox',
-    });
+    const nextResult = dispatch(
+      PreDataProcess({
+        tool: EPointCloudName.PointCloud,
+        dataList: [boxParams],
+        stepConfig: config,
+        action: 'viewUpdateBox',
+      }),
+    ) as unknown as IPointCloudBox[];
 
     boxParams = nextResult[0];
 
@@ -858,12 +859,14 @@ export const usePointCloudViews = () => {
         sideViewInstance.pointCloudInstance,
       );
 
-      const nextResult = preDataProcess({
-        tool: EPointCloudName.PointCloud,
-        dataList: [newBoxParams],
-        stepConfig: config,
-        action: 'viewUpdateBox',
-      });
+      const nextResult = dispatch(
+        PreDataProcess({
+          tool: EPointCloudName.PointCloud,
+          dataList: [newBoxParams],
+          stepConfig: config,
+          action: 'viewUpdateBox',
+        }),
+      ) as unknown as IPointCloudBox[];
 
       newBoxParams = nextResult[0];
 
@@ -991,12 +994,14 @@ export const usePointCloudViews = () => {
       return boxParams;
     });
 
-    updatePointCloudList = preDataProcess({
-      tool: EPointCloudName.PointCloud,
-      dataList: updatePointCloudList,
-      stepConfig: config,
-      action: 'topViewUpdateBox',
-    });
+    updatePointCloudList = dispatch(
+      PreDataProcess({
+        tool: EPointCloudName.PointCloud,
+        dataList: updatePointCloudList,
+        stepConfig: config,
+        action: 'viewUpdateBox',
+      }),
+    ) as unknown as IPointCloudBox[];
 
     /**
      * If single target updated, use syncPointCloudViews to sync all views and render
