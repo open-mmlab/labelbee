@@ -1,5 +1,5 @@
 // Size range
-interface ISizeRange {
+export interface ISizeRange {
   heightMax?: string;
   heightMin?: string;
   lengthMax?: string;
@@ -9,14 +9,14 @@ interface ISizeRange {
 }
 
 // Default size
-interface IDefaultSize {
+export interface IDefaultSize {
   heightDefault: string;
   lengthDefault: string;
   widthDefault: string;
 }
 
 // logical condition
-interface ILogicalCondition {
+export interface ILogicalCondition {
   condition: string;
   dimensionLeft: string;
   dimensionRight: string;

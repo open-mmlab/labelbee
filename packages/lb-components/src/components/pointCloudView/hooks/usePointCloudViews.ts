@@ -18,7 +18,7 @@ import {
   IPointUnit,
   UpdatePolygonByDragList,
   ILine,
-  DEFAULT_SPHERE_PARAMS,
+  DEFAULT_SPHERE_PARAMS, IDefaultSize, IPolygonData,
 } from '@labelbee/lb-utils';
 import { useContext } from 'react';
 import { PointCloudContext } from '../PointCloudContext';
@@ -992,6 +992,27 @@ export const usePointCloudViews = () => {
     }
   };
 
+  const updateViewsByDefaultSize = (defaultSize: IDefaultSize) => {
+    if (selectedBox) {
+      const selectedBoxTrackID = selectedBox?.info.trackID;
+      const polygonList = topViewInstance?.toolInstance?.polygonList
+      const originPolygon = polygonList.find((v: IPolygonData) => v?.trackID === selectedBoxTrackID)
+      const newBoxParams: IPointCloudBox = {
+        ...selectedBox.info,
+        width: Number(defaultSize.widthDefault),
+        depth: Number(defaultSize.lengthDefault),
+        height: Number(defaultSize.heightDefault),
+      }
+      const newPointCloudBoxList = updateSelectedBoxes([newBoxParams]);
+      syncPointCloudViews(
+        PointCloudView['3D'],
+        originPolygon,
+        newBoxParams,
+        undefined,
+        newPointCloudBoxList,
+      );
+    }
+  }
   /**
    * Sync views after adding a point
    */
@@ -1166,5 +1187,6 @@ export const usePointCloudViews = () => {
     pointCloudBoxListUpdated,
     initPointCloud3d,
     updatePointCloudData,
+    updateViewsByDefaultSize,
   };
 };

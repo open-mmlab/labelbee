@@ -16,7 +16,7 @@ import { useTranslation } from 'react-i18next';
 import { LabelBeeContext, useDispatch } from '@/store/ctx';
 import BatchUpdateModal from './components/batchUpdateModal';
 import { IFileItem } from '@/types/data';
-import { PointCloudUtils, IInputList } from '@labelbee/lb-utils';
+import { PointCloudUtils, IInputList, IDefaultSize } from '@labelbee/lb-utils';
 import AttributeList from '@/components/attributeList';
 import { useAttribute } from '@/components/pointCloudView/hooks/useAttribute';
 import LassoSelectorSvg from '@/assets/annotation/pointCloudTool/lassoSelector.svg';
@@ -25,6 +25,7 @@ import CirCleSelectorSvg from '@/assets/annotation/pointCloudTool/circleSelector
 import CirCleSelectorSvgA from '@/assets/annotation/pointCloudTool/circleSelector_a.svg';
 import { sidebarCls } from '..';
 import { SetTaskStepList } from '@/store/annotation/actionCreators';
+import { usePointCloudViews } from '@/components/pointCloudView/hooks/usePointCloudViews';
 
 interface IProps {
   stepInfo: IStepInfo;
@@ -223,6 +224,8 @@ const AttributeUpdater = ({
   const ptx = useContext(PointCloudContext);
   const { t } = useTranslation();
   const { defaultAttribute } = useAttribute();
+  const pointCloudViews = usePointCloudViews();
+
   const dispatch = useDispatch();
 
   const titleStyle = {
@@ -261,6 +264,12 @@ const AttributeUpdater = ({
     dispatch(SetTaskStepList({ stepList: formatStepList }));
   };
 
+  const updateSize = (size: IDefaultSize) => {
+    if (pointCloudViews.updateViewsByDefaultSize) {
+      pointCloudViews.updateViewsByDefaultSize(size)
+    }
+  }
+
   const setAttribute = (attribute: string) => {
     toolInstance.setDefaultAttribute(attribute);
   };
@@ -287,6 +296,7 @@ const AttributeUpdater = ({
         attributeChanged={(attribute: string) => setAttribute(attribute)}
         updateColorConfig={updateColorConfig}
         enableColorPicker={enableColorPicker}
+        updateSize={updateSize}
       />
       <Divider style={{ margin: 0 }} />
       {selectedBox && (
