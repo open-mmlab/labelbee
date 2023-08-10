@@ -16,8 +16,8 @@ const LimitPopover = ({
   const sizeRange = limit?.sizeLimit?.sizeRange;
   const positionLimit = limit?.positionLimit;
 
-  const { heightDefault, lengthDefault, widthDefault } = defaultSize;
-  const { heightMax, heightMin, lengthMax, lengthMin, widthMax, widthMin } = sizeRange;
+  const { heightDefault, depthDefault, widthDefault } = defaultSize;
+  const { heightMax, heightMin, depthMax, depthMin, widthMax, widthMin } = sizeRange;
   const { XMin, XMax, YMin, YMax, ZMin, ZMax } = positionLimit;
 
   return (
@@ -30,7 +30,7 @@ const LimitPopover = ({
               <div>
                 【{t('DefaultSize')}】
               </div>
-              <span>{`${t('Length')}: ${lengthDefault}m、`}</span>
+              <span>{`${t('Length')}: ${depthDefault}m、`}</span>
               <span>{`${t('Width')}: ${widthDefault}m、`}</span>
               <span>{`${t('Height')}: ${heightDefault}m`}</span>
             </div>
@@ -39,7 +39,7 @@ const LimitPopover = ({
           {sizeRange && (
             <div style={{ marginBottom: '24px' }}>
               <div>*{t('NormalSizeRange')}</div>
-              <span>{`${t('Length')}:: ${lengthMin}~${lengthMax}m、`}</span>
+              <span>{`${t('Length')}:: ${depthMin}~${depthMax}m、`}</span>
               <span>{`${t('Width')}: ${widthMin}~${widthMax}m、`}</span>
               <span>{`${t('Height')}: ${heightMin}~${heightMax}m`}</span>
             </div>

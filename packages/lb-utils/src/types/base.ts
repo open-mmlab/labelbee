@@ -2,8 +2,8 @@
 export interface ISizeRange {
   heightMax?: string;
   heightMin?: string;
-  lengthMax?: string;
-  lengthMin?: string;
+  depthMax?: string;
+  depthMin?: string;
   widthMax?: string;
   widthMin?: string;
 }
@@ -11,7 +11,7 @@ export interface ISizeRange {
 // Default size
 export interface IDefaultSize {
   heightDefault: string;
-  lengthDefault: string;
+  depthDefault: string;
   widthDefault: string;
 }
 

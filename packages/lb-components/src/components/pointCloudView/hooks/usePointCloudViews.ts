@@ -1000,7 +1000,7 @@ export const usePointCloudViews = () => {
       const newBoxParams: IPointCloudBox = {
         ...selectedBox.info,
         width: Number(defaultSize.widthDefault),
-        depth: Number(defaultSize.lengthDefault),
+        depth: Number(defaultSize.depthDefault),
         height: Number(defaultSize.heightDefault),
       }
       const newPointCloudBoxList = updateSelectedBoxes([newBoxParams]);
