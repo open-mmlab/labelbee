@@ -773,7 +773,13 @@ export const usePointCloudViews = () => {
     } else {
       setSelectedIDs(boxParams.id);
       polygonOperation.selection.setSelectedIDs(newPolygon.id);
-      syncPointCloudViews(PointCloudView.Top, newPolygon, boxParams, zoom, newPointCloudList);
+      syncPointCloudViews({
+        omitView: PointCloudView.Top,
+        polygon: newPolygon,
+        boxParams,
+        zoom,
+        newPointCloudBoxList: newPointCloudList,
+      });
       if (intelligentFit) {
         synchronizeTopView(boxParams, newPolygon, topViewInstance, mainViewInstance);
       }
@@ -803,7 +809,12 @@ export const usePointCloudViews = () => {
       operation?.selection?.setSelectedIDs(selectedIDs[0]);
       const polygon = operation.selectedPolygon;
       if (selectedIDs.length === 1 && boxParams) {
-        syncPointCloudViews(PointCloudView.Top, polygon, boxParams, undefined, newPointCloudList);
+        syncPointCloudViews({
+          omitView: PointCloudView.Top,
+          polygon,
+          boxParams,
+          newPointCloudBoxList: newPointCloudList,
+        });
         return;
       }
     }
@@ -867,8 +878,11 @@ export const usePointCloudViews = () => {
           action: 'viewUpdateBox',
         }),
       ) as unknown as IPointCloudBox[];
+      const newBox = nextResult[0];
+      // 如果更新后的box valid没有变化，则不更新当前视图
+      const updateCurrentView = newBoxParams.valid !== newBox.valid;
 
-      newBoxParams = nextResult[0];
+      newBoxParams = newBox;
 
       // Update count
       if (mainViewInstance) {
@@ -887,7 +901,14 @@ export const usePointCloudViews = () => {
       }
 
       const newPointCloudList = updateSelectedBox(newBoxParams);
-      syncPointCloudViews(fromView, newPolygon, newBoxParams, undefined, newPointCloudList);
+
+      syncPointCloudViews({
+        omitView: updateCurrentView ? undefined : fromView,
+        polygon: newPolygon,
+        boxParams: newBoxParams,
+        newPointCloudBoxList: [newBoxParams],
+      });
+
       return newPointCloudList;
     }
   };
@@ -1011,13 +1032,12 @@ export const usePointCloudViews = () => {
       const { newPolygon: polygon } = updateList[0];
       const newPointCloudBoxList = updateSelectedBoxes(updatePointCloudList);
 
-      syncPointCloudViews(
-        PointCloudView.Top,
+      syncPointCloudViews({
+        omitView: PointCloudView.Top,
         polygon,
-        updatePointCloudList[0],
-        undefined,
+        boxParams: updatePointCloudList[0],
         newPointCloudBoxList,
-      );
+      });
     } else {
       const newPointCloudBoxList = updateSelectedBoxes(updatePointCloudList);
       if (newPointCloudBoxList) {
@@ -1069,13 +1089,18 @@ export const usePointCloudViews = () => {
    * @param polygon
    * @param boxParams
    */
-  const syncPointCloudViews = async (
-    omitView: string,
-    polygon: any,
-    boxParams: IPointCloudBox,
-    zoom?: number,
-    newPointCloudBoxList?: IPointCloudBox[],
-  ) => {
+  interface ISyncPointCloudViews {
+    // 如果不传omitView，则同步所有视图
+    omitView?: string;
+    polygon: any;
+    boxParams: IPointCloudBox;
+    zoom?: number;
+    newPointCloudBoxList?: IPointCloudBox[];
+  }
+
+  const syncPointCloudViews = async (params: ISyncPointCloudViews) => {
+    const { omitView, polygon, boxParams, zoom, newPointCloudBoxList } = params;
+
     const dataUrl = currentData?.url;
     if (newPointCloudBoxList) {
       // Wait for the mainPointCloudData.
@@ -1096,7 +1121,9 @@ export const usePointCloudViews = () => {
     };
 
     Object.keys(viewToBeUpdated).forEach((key) => {
-      viewToBeUpdated[key]();
+      if (key !== omitView) {
+        viewToBeUpdated[key]();
+      }
     });
 
     if (zoom) {
