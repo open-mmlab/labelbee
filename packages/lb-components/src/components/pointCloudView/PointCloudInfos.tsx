@@ -108,18 +108,6 @@ export const BoxInfos = ({
 
     let infos = [
       {
-        label: t('Length'),
-        value: length.toFixed(DECIMAL_PLACES),
-      },
-      {
-        label: t('Width'),
-        value: width.toFixed(DECIMAL_PLACES),
-      },
-      {
-        label: t('Height'),
-        value: height.toFixed(DECIMAL_PLACES),
-      },
-      {
         label: 'x',
         value: x.toFixed(DECIMAL_PLACES),
       },
@@ -130,6 +118,18 @@ export const BoxInfos = ({
       {
         label: 'z',
         value: z.toFixed(DECIMAL_PLACES),
+      },
+      {
+        label: t('Length'),
+        value: length.toFixed(DECIMAL_PLACES),
+      },
+      {
+        label: t('Width'),
+        value: width.toFixed(DECIMAL_PLACES),
+      },
+      {
+        label: t('Height'),
+        value: height.toFixed(DECIMAL_PLACES),
       },
       {
         label: t('Rotation_y'),
