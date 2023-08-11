@@ -7,6 +7,7 @@ import {
   ILine,
   EPointCloudPattern,
   IPointCloudSegmentation,
+  ICalib,
 } from '@labelbee/lb-utils';
 import React, { useEffect, useMemo, useRef, useState } from 'react';
 import {
@@ -40,6 +41,11 @@ interface IPointCloudSegment {
 }
 
 type AttrPanelLayout = '' | 'left' | 'right';
+
+interface IHighlight2DData {
+  url: string;
+  calib: ICalib;
+}
 
 export interface IPointCloudContext
   extends IPointCloudContextInstances,
@@ -86,7 +92,10 @@ export interface IPointCloudContext
   attrPanelLayout: AttrPanelLayout;
   setAttrPanelLayout: (layout: AttrPanelLayout) => void;
 
-  syncAllViewPointCloudColor: (newPointCloudList?: IPointCloudBox[]) => void;
+  syncAllViewPointCloudColor: (
+    newPointCloudList?: IPointCloudBox[],
+    newHighlight2DDataList?: IHighlight2DData[],
+  ) => Promise<any>;
 
   defaultAttribute: string;
   setDefaultAttribute: (defaultAttribute: string) => void;
@@ -99,6 +108,9 @@ export interface IPointCloudContext
   segmentation: IPointCloudSegmentation[];
   setSegmentation: (segmentation: IPointCloudSegmentation[]) => void;
   clearAllDetectionInstance: () => void;
+
+  highlight2DDataList: IHighlight2DData[];
+  setHighlight2DDataList: (urlList: IHighlight2DData[]) => void;
 }
 
 export const PointCloudContext = React.createContext<IPointCloudContext>({
@@ -140,7 +152,9 @@ export const PointCloudContext = React.createContext<IPointCloudContext>({
   reRender: () => {},
   setAttrPanelLayout: () => {},
   attrPanelLayout: '',
-  syncAllViewPointCloudColor: () => {},
+  syncAllViewPointCloudColor: () => {
+    return Promise.resolve();
+  },
 
   defaultAttribute: '',
   setDefaultAttribute: () => {},
@@ -156,6 +170,9 @@ export const PointCloudContext = React.createContext<IPointCloudContext>({
   segmentation: [],
   setSegmentation: () => {},
   clearAllDetectionInstance: () => {},
+
+  highlight2DDataList: [],
+  setHighlight2DDataList: () => {},
 });
 
 export const PointCloudProvider: React.FC<{}> = ({ children }) => {
@@ -180,6 +197,7 @@ export const PointCloudProvider: React.FC<{}> = ({ children }) => {
   const [globalPattern, setGlobalPattern] = useState(EPointCloudPattern.Detection);
   const [ptSegmentInstance, setPtSegmentInstance] = useState<PointCloud | undefined>(undefined);
   const [segmentation, setSegmentation] = useState<IPointCloudSegmentation[]>([]);
+  const [highlight2DDataList, setHighlight2DDataList] = useState<IHighlight2DData[]>([]);
 
   const dispatch = useDispatch();
 
@@ -290,30 +308,43 @@ export const PointCloudProvider: React.FC<{}> = ({ children }) => {
       setSideViewInstance(undefined);
       setBackViewInstance(undefined);
       setMainViewInstance(undefined);
-    }
+    };
 
     /**
      * Synchronize the highlighted pointCloud for all views.
      * @param pointCloudList
      */
 
-    const syncAllViewPointCloudColor = (pointCloudList?: IPointCloudBox[]) => {
-      const colorPromise = mainViewInstance?.highlightOriginPointCloud(pointCloudList);
-      return new Promise((resolve) => {
-        colorPromise
-          ?.then((color) => {
-            [topViewInstance].forEach((instance) => {
-              if (color) {
-                instance?.pointCloudInstance?.updateColor(color);
-                resolve({ color });
-              }
-            });
-            // TODO： Sync sideView & backView Color.
-          })
-          .catch((err) => {
-            console.error(err);
-          });
-      });
+    const syncAllViewPointCloudColor = async (
+      pointCloudList?: IPointCloudBox[],
+      newHighlight2DDataList?: IHighlight2DData[],
+    ) => {
+      if (!mainViewInstance) {
+        return;
+      }
+
+      const points = mainViewInstance.pointCloudObject;
+
+      if (!points) {
+        return;
+      }
+
+      try {
+        const highlightIndex = await mainViewInstance.getHighlightIndexByMappingImgList({
+          mappingImgList: newHighlight2DDataList ?? highlight2DDataList, // MappingImgList can be defined by through external param.
+          points: points.geometry.attributes.position.array,
+        });
+
+        const color = await mainViewInstance?.highlightOriginPointCloud(
+          pointCloudList,
+          highlightIndex,
+        );
+
+        color && topViewInstance?.pointCloudInstance?.updateColor(color);
+        return color;
+      } catch (error) {
+        console.error(error);
+      }
     };
 
     const setGlobalPatternFuc = (pattern: EPointCloudPattern) => {
@@ -380,6 +411,9 @@ export const PointCloudProvider: React.FC<{}> = ({ children }) => {
       segmentation,
       setSegmentation,
       clearAllDetectionInstance,
+
+      highlight2DDataList,
+      setHighlight2DDataList,
     };
   }, [
     valid,
@@ -400,6 +434,7 @@ export const PointCloudProvider: React.FC<{}> = ({ children }) => {
     globalPattern,
     ptSegmentInstance,
     segmentation,
+    highlight2DDataList,
   ]);
 
   const updateSelectedIDsAndRenderAfterHide = () => {

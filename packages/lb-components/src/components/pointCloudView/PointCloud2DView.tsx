@@ -7,7 +7,7 @@ import { connect } from 'react-redux';
 import { pointCloudLidar2image, cKeyCode } from '@labelbee/lb-annotation';
 import { LabelBeeContext } from '@/store/ctx';
 import { a2MapStateToProps, IA2MapStateProps } from '@/store/annotation/map';
-import { IPointCloudBox, IPolygonPoint, toolStyleConverter } from '@labelbee/lb-utils';
+import { ICalib, IPointCloudBox, IPolygonPoint, toolStyleConverter } from '@labelbee/lb-utils';
 import PointCloud2DSingleView from './PointCloud2DSingleView';
 import TitleButton from './components/TitleButton';
 import { LeftOutlined } from '@ant-design/icons';
@@ -40,8 +40,9 @@ interface ITransferViewData {
 
 export interface IAnnotationData2dView {
   annotations: IAnnotationDataTemporarily[];
-  url?: string;
+  url: string;
   calName?: string;
+  calib: ICalib;
 }
 
 const EKeyCode = cKeyCode.default;
@@ -116,6 +117,7 @@ const PointCloud2DView = ({ currentData, config, thumbnailWidth, highlightAttrib
           annotations: newAnnotations2d,
           url: mappingData?.url,
           calName: mappingData.calib?.calName,
+          calib: mappingData?.calib,
         });
       });
       setAnnotations2d(newAnnotations2dList);
@@ -272,7 +274,11 @@ const PointCloud2DView = ({ currentData, config, thumbnailWidth, highlightAttrib
               toolbar={PointCloud2DTitle}
             >
               {item?.annotations && item?.url && (
-                <PointCloud2DSingleView view2dData={item} setSelectedID={setSelectedID} />
+                <PointCloud2DSingleView
+                  currentData={currentData}
+                  view2dData={item}
+                  setSelectedID={setSelectedID}
+                />
               )}
             </PointCloudContainer>
           );

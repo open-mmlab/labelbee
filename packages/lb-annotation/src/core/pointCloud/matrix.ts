@@ -12,6 +12,7 @@ import {
   TMatrix14Tuple,
   TMatrix13Tuple,
   IPolygonPoint,
+  ICalib,
 } from '@labelbee/lb-utils';
 import uuid from '@/utils/uuid';
 
@@ -169,6 +170,104 @@ function buildConvexHull(points: IPolygonPoint[]): IPolygonPoint[] {
   const convexHull = lowerHull.concat(upperHull);
   return convexHull;
 }
+
+export const point3DLidar2Image = (point: { x: number; y: number; z: number }, cameraMatrix: ICalib) => {
+  const { P, R, T } = cameraMatrix;
+  const { composeMatrix4 } = transferKitti2Matrix(P, R, T);
+  return lidar2image(point, composeMatrix4);
+};
+
+export const point2dTo3D = (point: { x: number; y: number; z: number }, cameraMatrix: ICalib) => {
+  const { P, R, T } = cameraMatrix;
+  const { composeMatrix4 } = transferKitti2Matrix(P, R, T);
+  const vector = new THREE.Vector4(point.x, point.y, point.z);
+  const newV = vector.applyMatrix4(composeMatrix4.invert());
+
+  return newV;
+};
+
+export const isInImage = ({
+  point,
+  calib,
+  width,
+  height,
+}: {
+  point: I3DSpaceCoord;
+  calib: ICalib;
+  width: number;
+  height: number;
+}) => {
+  /**
+   * 1. Calculate the size of image
+   */
+
+  if (!calib) {
+    return false;
+  }
+  // return true;
+  const image2D = point3DLidar2Image(point, calib);
+  if (!image2D) {
+    return false;
+  }
+  // 2. Restrict the size of image
+  if (image2D.x >= 0 && image2D.x <= width && image2D.y >= 0 && image2D.y <= height) {
+    return true;
+  }
+  return false;
+};
+
+export const getHighlightIndexByPoints = ({
+  points,
+  calib,
+  width,
+  height,
+}: {
+  points: ArrayLike<number>;
+  calib: ICalib;
+  width: number;
+  height: number;
+}) => {
+  const highlightIndex: number[] = [];
+  for (let i = 0; i < points.length; i += 3) {
+    const x = points[i];
+    const y = points[i + 1];
+    const z = points[i + 2];
+
+    const isIn = isInImage({ point: { x, y, z }, calib, width, height });
+    if (isIn) {
+      highlightIndex.push(1);
+    } else {
+      highlightIndex.push(0);
+    }
+  }
+  return highlightIndex;
+};
+
+/**
+ * Merge numberList between 1 and 0.
+ * @param indexList
+ * @returns
+ */
+export const mergeHighlightList = (indexList: number[][]) => {
+  if (indexList.length === 0) {
+    return [];
+  }
+
+  const list = [];
+  for (let i = 0; i < indexList[0].length; i++) {
+    for (let j = 0; j < indexList.length; j++) {
+      if (indexList[j][i] === 1) {
+        list.push(1);
+        break;
+      }
+    }
+    if (list.length === i) {
+      list.push(0);
+    }
+  }
+  return list;
+};
+
 export function pointCloudLidar2image(
   boxParams: IPointCloudBox,
   cameraMatrix: {

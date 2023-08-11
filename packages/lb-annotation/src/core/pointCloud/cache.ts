@@ -23,10 +23,14 @@ export class PointCloudCache {
 
   private static instance: PointCloudCache;
 
+  public cache2DHighlightIndex: Map<string, number[]>;
+
   private constructor() {
     this.pcdLoader = new PCDLoader();
     this.pointsMap = new Map();
     this.colorMap = new Map();
+
+    this.cache2DHighlightIndex = new Map();
   }
 
   public static getInstance() {
@@ -84,4 +88,11 @@ export class PointCloudCache {
       );
     });
   };
+
+  /**
+   * Clear all cache2dHighlightIndex.
+   */
+  public clearCache2DHighlightIndex() {
+    this.cache2DHighlightIndex.clear();
+  }
 }

@@ -18,6 +18,7 @@ import {
   toolStyleConverter,
   PointCloudUtils,
   DEFAULT_SPHERE_PARAMS,
+  ICalib,
 } from '@labelbee/lb-utils';
 import { BufferAttribute, OrthographicCamera, PerspectiveCamera } from 'three';
 import HighlightWorker from 'web-worker:./highlightWorker.js';
@@ -26,10 +27,11 @@ import { isInPolygon } from '@/utils/tool/polygonTool';
 import { IPolygonPoint } from '@/types/tool/polygon';
 import uuid from '@/utils/uuid';
 import MathUtils from '@/utils/MathUtils';
+import ImgUtils from '@/utils/ImgUtils';
 import { PCDLoader } from './PCDLoader';
 import { OrbitControls } from './OrbitControls';
 import { PointCloudCache } from './cache';
-import { getCuboidFromPointCloudBox } from './matrix';
+import { getCuboidFromPointCloudBox, getHighlightIndexByPoints, mergeHighlightList } from './matrix';
 import { PointCloudSegmentOperation } from './segmentation';
 import PointCloudStore from './store';
 import PointCloudRender from './render';
@@ -238,6 +240,10 @@ export class PointCloud extends EventListener {
 
   public get currentSegmentTool() {
     return this.segmentOperation?.currentToolName;
+  }
+
+  public get pointCloudObject() {
+    return this.scene.getObjectByName(this.pointCloudObjectName) as THREE.Points;
   }
 
   public initMsg() {
@@ -945,6 +951,11 @@ export class PointCloud extends EventListener {
   public loadPCDFile = async (src: string | undefined = this.currentPCDSrc, radius?: number) => {
     if (!src) return;
     this.clearPointCloud();
+    /**
+     * Clear Img Cache.
+     */
+    this.cacheInstance.clearCache2DHighlightIndex();
+
     this.currentPCDSrc = src;
 
     /**
@@ -965,11 +976,46 @@ export class PointCloud extends EventListener {
   };
 
   /**
+   * Highlight PointCloud by MappingImgList.
+   * @param param0
+   * @returns
+   */
+  public getHighlightIndexByMappingImgList = async ({
+    mappingImgList,
+    points,
+  }: {
+    mappingImgList: Array<{ url: string; calib: ICalib }>;
+    points: ArrayLike<number>;
+  }) => {
+    /**
+     * The img is loaded, so it can use cache in browser.
+     */
+    const imgNodeList = await Promise.all(mappingImgList.map((v) => ImgUtils.load(v.url)));
+    const highlightIndexList = mappingImgList.map((v, i) => {
+      if (this.cacheInstance.cache2DHighlightIndex.has(v.url)) {
+        return this.cacheInstance.cache2DHighlightIndex.get(v.url) ?? [];
+      }
+      const h = getHighlightIndexByPoints({
+        points,
+        calib: v.calib,
+        width: imgNodeList[i].width,
+        height: imgNodeList[i].height,
+      });
+
+      // Cache highlightIndex.
+      this.cacheInstance.cache2DHighlightIndex.set(v.url, h);
+      return h;
+    });
+    const mergeList = mergeHighlightList(highlightIndexList);
+    return mergeList;
+  };
+
+  /**
    * It needs to be updated after load PointCloud's data.
    * @param boxParams
    * @returns
    */
-  public highlightOriginPointCloud(pointCloudBoxList?: IPointCloudBox[]) {
+  public highlightOriginPointCloud(pointCloudBoxList?: IPointCloudBox[], highlightIndex: number[] = []) {
     const oldPointCloud = this.scene.getObjectByName(this.pointCloudObjectName) as THREE.Points;
     if (!oldPointCloud) {
       return;
@@ -987,6 +1033,7 @@ export class PointCloud extends EventListener {
           position: oldPointCloud.geometry.attributes.position.array,
           color: oldPointCloud.geometry.attributes.dimensions.array,
           colorList,
+          highlightIndex,
         };
 
         highlightWorker.postMessage(params);

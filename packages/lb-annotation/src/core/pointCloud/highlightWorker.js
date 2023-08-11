@@ -124,7 +124,7 @@ function getNewColorByBox({ zMin, zMax, polygonPointList, attribute, x, y, z, co
 }
 
 onmessage = function onmessage(e) {
-  const { position: points, color, cuboidList, colorList } = e.data;
+  const { position: points, color, cuboidList, colorList, highlightIndex } = e.data;
   let num = 0;
 
   /**
@@ -175,14 +175,22 @@ onmessage = function onmessage(e) {
       color[i + 1] = g;
       color[i + 2] = b;
     } else {
-      // // DEFAULT COLOR RENDER
-      // Recover the originPoint
-      const index = getIndex(z);
-      const newColor = COLOR_MAP_JET[index];
-      const [r, g, b] = newColor;
-      color[i] = r / 255;
-      color[i + 1] = g / 255;
-      color[i + 2] = b / 255;
+      const pointIndex = Math.floor(i / 3);
+
+      if (highlightIndex && highlightIndex[pointIndex] === 1) {
+        color[i] = 0;
+        color[i + 1] = 0;
+        color[i + 2] = 0;
+      } else {
+        // // DEFAULT COLOR RENDER
+        // Recover the originPoint
+        const index = getIndex(z);
+        const newColor = COLOR_MAP_JET[index];
+        const [r, g, b] = newColor;
+        color[i] = r / 255;
+        color[i + 1] = g / 255;
+        color[i + 2] = b / 255;
+      }
     }
   }
 
