@@ -607,6 +607,7 @@ export const usePointCloudViews = () => {
     pointCloudBoxList,
     pointCloudSphereList,
     hideAttributes,
+    setHighlight2DDataList
   } = ptCtx;
   const { addHistory, initHistory, pushHistoryUnderUpdatePolygon, pushHistoryUnderUpdateLine } =
     useHistory();
@@ -1100,6 +1101,11 @@ export const usePointCloudViews = () => {
       return;
     }
 
+    /**
+     * Init Cache Data.
+     */
+    setHighlight2DDataList([]);
+
     SetPointCloudLoading(dispatch, true);
     await mainViewInstance.loadPCDFile(newData.url, config?.radius ?? DEFAULT_RADIUS);
 
@@ -1120,7 +1126,10 @@ export const usePointCloudViews = () => {
       mainViewInstance?.generateBoxes(boxParamsList);
       mainViewInstance?.generateSpheres(sphereParamsList);
 
-      ptCtx.syncAllViewPointCloudColor(boxParamsList);
+      /**
+       * Use [] to replace the default highlight2DDataList.
+       */
+      ptCtx.syncAllViewPointCloudColor(boxParamsList, []);
     }
 
     initHistory({

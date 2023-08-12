@@ -120,7 +120,7 @@ const PointCloud3DSideBar = ({ isEnlarge }: { isEnlarge?: boolean }) => {
   );
 };
 
-const PointCloud3D: React.FC<IA2MapStateProps> = ({ currentData, config }) => {
+const PointCloud3D: React.FC<IA2MapStateProps> = ({ currentData, config, highlightAttribute }) => {
   const ptCtx = useContext(PointCloudContext);
   const [showDirection, setShowDirection] = useState(true);
   const [isEnlarge, setIsEnlarge] = useState(false);
@@ -256,6 +256,22 @@ const PointCloud3D: React.FC<IA2MapStateProps> = ({ currentData, config }) => {
   const ptCloud3DCtx = useMemo(() => {
     return { reset3DView, setTarget3DView, isActive: !!selectedBox, followTopView };
   }, [selectedBox, ptCtx.mainViewInstance]);
+
+  // Highlight 3D Box when `highAttribute` updated.
+  useEffect(() => {
+    const highlightBoxes = ptCtx.pointCloudBoxList.filter(
+      (v) => v.attribute === highlightAttribute,
+    );
+
+    if (highlightBoxes?.length > 0) {
+      ptCtx.mainViewInstance?.clearHighlightBoxes();
+      ptCtx.mainViewInstance?.highlightBoxes(highlightBoxes);
+    }
+
+    if (highlightBoxes.length === 0) {
+      ptCtx.mainViewInstance?.clearHighlightBoxesAndRender();
+    }
+  }, [highlightAttribute, ptCtx.mainViewInstance]);
 
   const PointCloud3DTitle = (
     <>

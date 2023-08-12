@@ -198,6 +198,7 @@ const PointCloudTopView: React.FC<IProps> = ({
   setIsEnlargeTopView,
   isEnlargeTopView,
   onExitZoom,
+  highlightAttribute,
 }) => {
   const [annotationPos, setAnnotationPos] = useState({ zoom: 1, currentPos: { x: 0, y: 0 } });
   const ref = useRef<HTMLDivElement>(null);
@@ -435,6 +436,10 @@ const PointCloudTopView: React.FC<IProps> = ({
       onExitZoom();
     }
   };
+  // Highlight TopView Box when `hightAttribute` updated.
+  useEffect(() => {
+    ptCtx.topViewInstance?.pointCloud2dOperation?.setHighlightAttribute?.(highlightAttribute);
+  }, [ptCtx.topViewInstance, highlightAttribute]);
 
   return (
     <PointCloudContainer

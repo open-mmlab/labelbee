@@ -35,6 +35,8 @@ class PointCloud2dOperation extends PolygonOperation {
 
   private checkMode: boolean;
 
+  private highlightAttributeList: string[] = []; //
+
   constructor(props: IPolygonOperationProps & IPointCloud2dOperationProps) {
     super(props);
 
@@ -216,8 +218,10 @@ class PointCloud2dOperation extends PolygonOperation {
         }
         const lineColor = this.getPointCloudLineColor(polygon);
         const transformPointList = AxisUtils.changePointListByZoom(polygon.pointList || [], this.zoom, this.currentPos);
+        const isHighlight = this.highlightAttributeList.includes(polygon.attribute);
+
         DrawUtils.drawPolygonWithFillAndLine(this.canvas, transformPointList, {
-          fillColor: 'transparent',
+          fillColor: isHighlight ? lineColor : 'transparent',
           strokeColor: lineColor,
           pointColor: 'white',
           thickness: this.style?.width ?? 2,
@@ -493,6 +497,11 @@ class PointCloud2dOperation extends PolygonOperation {
       }
     }
   };
+
+  public setHighlightAttribute(attribute: string) {
+    this.highlightAttributeList = [attribute];
+    this.render();
+  }
 }
 
 export default PointCloud2dOperation;

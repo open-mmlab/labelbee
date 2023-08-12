@@ -7,7 +7,6 @@ import { PointCloudContext } from './PointCloudContext';
 import { CommonToolUtils } from '@labelbee/lb-annotation';
 import { EPointCloudSegmentMode, PointCloudUtils } from '@labelbee/lb-utils';
 import { useAttribute } from './hooks/useAttribute';
-import { IInputList } from '@/types/main';
 
 interface IProps extends IA2MapStateProps {
   checkMode?: boolean;
@@ -56,10 +55,7 @@ const PointCloudSegmentListener: React.FC<IProps> = ({
   }, [imgIndex, ptSegmentInstance]);
 
   useEffect(() => {
-    let attributeValue = config.attributeList.find(
-      (v: IInputList) => v?.key === highlightAttribute,
-    )?.value;
-    ptSegmentInstance?.store?.highlightPointsByAttribute(attributeValue ?? '');
+    ptSegmentInstance?.store?.highlightPointsByAttribute(highlightAttribute ?? '');
   }, [highlightAttribute, ptSegmentInstance]);
 
   const segmentKeydownEvents = (lowerCaseKey: string, e: KeyboardEvent) => {

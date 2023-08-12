@@ -1,26 +1,40 @@
 import { getClassName } from '@/utils/dom';
-import React, { useCallback, useEffect, useRef } from 'react';
+import React, { useCallback, useEffect, useRef, useState } from 'react';
 import AnnotationView from '@/components/AnnotationView';
 import useSize from '@/hooks/useSize';
 import { useSingleBox } from './hooks/useSingleBox';
 import { ViewOperation } from '@labelbee/lb-annotation';
 import { IAnnotationData2dView, IAnnotationDataTemporarily } from './PointCloud2DView';
+import { useHighlight } from './hooks/useHighlight';
+import HighlightVisible from './components/HighlightVisible';
+import { IFileItem } from '@/types/data';
 
 const PointCloud2DSingleView = ({
   view2dData,
   setSelectedID,
+  currentData,
 }: {
   view2dData: IAnnotationData2dView;
   setSelectedID: (value: string | number) => void;
+  currentData: IFileItem;
 }) => {
   const ref = useRef(null);
   const viewRef = useRef<{ toolInstance: ViewOperation }>();
   const { selectedBox } = useSingleBox();
   const size = useSize(ref);
+  const { url, calib } = view2dData;
+  const { toggle2dVisible, isHighlightVisible } = useHighlight({ currentData });
+  const [loading, setLoading] = useState(false);
 
   const hiddenData = !view2dData;
 
-  const afterImgOnLoad = useCallback(() => {
+  const afterImgOnLoad = (imgNode: HTMLImageElement) => {
+    focusSelectBox();
+
+    // TODO: Save the ImgNode Data and cache the highlightIndex
+  };
+
+  const focusSelectBox = useCallback(() => {
     const toolInstance = viewRef.current?.toolInstance;
 
     // Clear Selected.
@@ -45,8 +59,14 @@ const PointCloud2DSingleView = ({
    * If the status is updated, it needs to
    */
   useEffect(() => {
-    afterImgOnLoad();
-  }, [afterImgOnLoad]);
+    focusSelectBox();
+  }, [focusSelectBox]);
+
+  const highlightOnClick = async () => {
+    setLoading(true);
+    await toggle2dVisible(url, calib);
+    setLoading(false);
+  };
 
   return (
     <div className={getClassName('point-cloud-2d-image')} ref={ref}>
@@ -63,6 +83,16 @@ const PointCloud2DSingleView = ({
           min: 0.01,
           max: 1000,
           ratio: 0.4,
+        }}
+      />
+      <HighlightVisible
+        visible={isHighlightVisible(url)}
+        onClick={highlightOnClick}
+        loading={loading}
+        style={{
+          position: 'absolute',
+          right: 16,
+          top: 16,
         }}
       />
     </div>

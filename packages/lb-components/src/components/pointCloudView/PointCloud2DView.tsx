@@ -7,7 +7,7 @@ import { connect } from 'react-redux';
 import { pointCloudLidar2image, cKeyCode } from '@labelbee/lb-annotation';
 import { LabelBeeContext } from '@/store/ctx';
 import { a2MapStateToProps, IA2MapStateProps } from '@/store/annotation/map';
-import { IPointCloudBox, IPolygonPoint, toolStyleConverter } from '@labelbee/lb-utils';
+import { ICalib, IPointCloudBox, IPolygonPoint, toolStyleConverter } from '@labelbee/lb-utils';
 import PointCloud2DSingleView from './PointCloud2DSingleView';
 import TitleButton from './components/TitleButton';
 import { LeftOutlined } from '@ant-design/icons';
@@ -40,8 +40,9 @@ interface ITransferViewData {
 
 export interface IAnnotationData2dView {
   annotations: IAnnotationDataTemporarily[];
-  url?: string;
+  url: string;
   calName?: string;
+  calib: ICalib;
 }
 
 const EKeyCode = cKeyCode.default;
@@ -50,7 +51,7 @@ interface IProps extends IA2MapStateProps {
   thumbnailWidth?: number;
 }
 
-const PointCloud2DView = ({ currentData, config, thumbnailWidth }: IProps) => {
+const PointCloud2DView = ({ currentData, config, thumbnailWidth, highlightAttribute }: IProps) => {
   const [annotations2d, setAnnotations2d] = useState<IAnnotationData2dView[]>([]);
   const { topViewInstance, displayPointCloudList } = useContext(PointCloudContext);
   const [selectedID, setSelectedID] = useState<number | string>('');
@@ -67,9 +68,16 @@ const PointCloud2DView = ({ currentData, config, thumbnailWidth }: IProps) => {
       currentData?.mappingImgList.forEach((mappingData: IMappingImg) => {
         const newAnnotations2d: IAnnotationDataTemporarily[] = displayPointCloudList.reduce(
           (acc: IAnnotationDataTemporarily[], pointCloudBox: IPointCloudBox) => {
+            /**
+             * Is need to create range.
+             * 1. pointCloudBox is selected;
+             * 2. HighlightAttribute is same with pointCloudBox's attribute.
+             */
+            const createRange =
+              pointCloudBox.id === selectedID || highlightAttribute === pointCloudBox.attribute;
             const { transferViewData: viewDataPointList, viewRangePointList } =
               pointCloudLidar2image(pointCloudBox, mappingData.calib, {
-                createRange: pointCloudBox.id === selectedID,
+                createRange,
               });
 
             const stroke = toolStyleConverter.getColorFromConfig(
@@ -88,7 +96,7 @@ const PointCloud2DView = ({ currentData, config, thumbnailWidth }: IProps) => {
             });
             const newArr = [...acc, ...viewDataPointLists];
 
-            if (pointCloudBox.id === selectedID && viewRangePointList.length > 0) {
+            if (viewRangePointList?.length > 0) {
               newArr.push({
                 type: 'polygon',
                 annotation: {
@@ -109,11 +117,12 @@ const PointCloud2DView = ({ currentData, config, thumbnailWidth }: IProps) => {
           annotations: newAnnotations2d,
           url: mappingData?.url,
           calName: mappingData.calib?.calName,
+          calib: mappingData?.calib,
         });
       });
       setAnnotations2d(newAnnotations2dList);
     }
-  }, [displayPointCloudList, currentData?.mappingImgList, selectedID]);
+  }, [displayPointCloudList, currentData?.mappingImgList, selectedID, highlightAttribute]);
 
   useEffect(() => {
     window.addEventListener('keydown', onKeyDown);
@@ -265,7 +274,11 @@ const PointCloud2DView = ({ currentData, config, thumbnailWidth }: IProps) => {
               toolbar={PointCloud2DTitle}
             >
               {item?.annotations && item?.url && (
-                <PointCloud2DSingleView view2dData={item} setSelectedID={setSelectedID} />
+                <PointCloud2DSingleView
+                  currentData={currentData}
+                  view2dData={item}
+                  setSelectedID={setSelectedID}
+                />
               )}
             </PointCloudContainer>
           );
