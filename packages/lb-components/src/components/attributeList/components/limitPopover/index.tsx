@@ -1,26 +1,23 @@
 import React from 'react';
 import { Tooltip } from 'antd';
-import styleLockSvg from '@/assets/toolStyle/icon_styleLock.svg';
-import styleLockActivateSvg from '@/assets/toolStyle/icon_styleLock_a.svg';
-import { ILimit } from '@labelbee/lb-utils';
+import defaultSizeSvg from '@/assets/toolStyle/icon_defaultSize.svg';
+import { ILimit, IDefaultSize } from '@labelbee/lb-utils';
 import { useTranslation } from 'react-i18next';
 
 const LimitPopover = ({
   limit,
-  isDefaultSize,
-  onChange,
+  updateSize,
 }: {
   limit: ILimit;
-  isDefaultSize: boolean;
-  onChange: () => void;
+  updateSize?: (size: IDefaultSize) => void;
 }) => {
   const { t } = useTranslation();
   const defaultSize = limit?.sizeLimit?.defaultSize;
   const sizeRange = limit?.sizeLimit?.sizeRange;
   const positionLimit = limit?.positionLimit;
 
-  const { heightDefault, lengthDefault, widthDefault } = defaultSize;
-  const { heightMax, heightMin, lengthMax, lengthMin, widthMax, widthMin } = sizeRange;
+  const { heightDefault, depthDefault, widthDefault } = defaultSize;
+  const { heightMax, heightMin, depthMax, depthMin, widthMax, widthMin } = sizeRange;
   const { XMin, XMax, YMin, YMax, ZMin, ZMax } = positionLimit;
 
   return (
@@ -31,25 +28,25 @@ const LimitPopover = ({
           {defaultSize && (
             <div style={{ marginBottom: '24px' }}>
               <div>
-                {t('DefaultSize')}({isDefaultSize ? t('Locked') : t('Unlocked')})
+                【{t('DefaultSize')}】
               </div>
-              <span>{`${t('Length')}: ${lengthDefault}、`}</span>
-              <span>{`${t('Width')}: ${widthDefault}、`}</span>
-              <span>{`${t('Height')}: ${heightDefault}`}</span>
+              <span>{`${t('Length')}: ${depthDefault}m、`}</span>
+              <span>{`${t('Width')}: ${widthDefault}m、`}</span>
+              <span>{`${t('Height')}: ${heightDefault}m`}</span>
             </div>
           )}
 
           {sizeRange && (
             <div style={{ marginBottom: '24px' }}>
-              <div>{t('NormalSizeRange')}</div>
-              <span>{`${t('Length')}:: ${lengthMin}~${lengthMax}、`}</span>
-              <span>{`${t('Width')}: ${widthMin}~${widthMax}、`}</span>
-              <span>{`${t('Height')}: ${heightMin}~${heightMax}`}</span>
+              <div>*{t('NormalSizeRange')}</div>
+              <span>{`${t('Length')}:: ${depthMin}~${depthMax}m、`}</span>
+              <span>{`${t('Width')}: ${widthMin}~${widthMax}m、`}</span>
+              <span>{`${t('Height')}: ${heightMin}~${heightMax}m`}</span>
             </div>
           )}
           {positionLimit && (
             <div>
-              <div>{t('NormalCenterPointRange')}</div>
+              <div>*{t('NormalCenterPointRange')}</div>
               <span>{`X: ${XMin}~${XMax}、`}</span>
               <span>{`Y: ${YMin}~${YMax}、`}</span>
               <span>{`Z: ${ZMin}~${ZMax}`}</span>
@@ -60,8 +57,14 @@ const LimitPopover = ({
       placement='bottomRight'
     >
       <img
-        src={isDefaultSize ? styleLockActivateSvg : styleLockSvg}
+        src={defaultSizeSvg}
         style={{ margin: '0px 8px' }}
+        onClick={(e) => {
+          e.preventDefault()
+          if (defaultSize) {
+            updateSize?.(defaultSize)
+          }
+        }}
       />
     </Tooltip>
   );
