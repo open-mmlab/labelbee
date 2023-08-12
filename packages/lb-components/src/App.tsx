@@ -1,5 +1,5 @@
 import MainView from '@/views/MainView';
-import { i18n } from '@labelbee/lb-utils';
+import { IPointCloudBox, i18n } from '@labelbee/lb-utils';
 import React, { useEffect, useState } from 'react';
 import { connect } from 'react-redux';
 import { store } from '.';
@@ -28,12 +28,24 @@ import { IStepInfo } from './types/step';
 import { ConfigProvider } from 'antd/es';
 import zhCN from 'antd/es/locale/zh_CN';
 import enUS from 'antd/es/locale/en_US';
+import { EPointCloudName } from '@labelbee/lb-annotation';
 
 interface IAnnotationStyle {
   strokeColor: string;
   fillColor: string;
   textColor: string;
   toolColor: any;
+}
+
+export interface IPreDataProcessParams {
+  // 标注类型:暂时只支持点云
+  tool: EPointCloudName.PointCloud | string;
+  // 更新数据
+  dataList: IPointCloudBox[];
+  // 更新数据的具体动作
+  action: 'preDataProcess' | 'viewUpdateBox';
+  // 当前步骤的config
+  stepConfig: IStepInfo['config'];
 }
 
 export interface AppProps {
@@ -74,7 +86,7 @@ export interface AppProps {
   skipBeforePageTurning?: (pageTurning: Function) => void;
   beforeRotate?: () => boolean;
 
-  drawLayerSlot?: TDrawLayerSlot,
+  drawLayerSlot?: TDrawLayerSlot;
 
   // 标注信息扩展的功能
   dataInjectionAtCreation: (annotationData: any) => {};
@@ -91,6 +103,7 @@ export interface AppProps {
   enableColorPicker?: boolean;
   highlightAttribute?: string;
   onLoad?: ({ toolInstance }: { toolInstance: ToolInstance }) => void;
+  preDataProcess?: (params: IPreDataProcessParams) => IPointCloudBox[];
 }
 
 const App: React.FC<AppProps> = (props) => {
@@ -115,6 +128,7 @@ const App: React.FC<AppProps> = (props) => {
     checkMode = false,
     intelligentFit = true,
     highlightAttribute = '',
+    preDataProcess,
   } = props;
 
   useEffect(() => {
@@ -133,6 +147,7 @@ const App: React.FC<AppProps> = (props) => {
         beforeRotate,
         checkMode,
         highlightAttribute,
+        preDataProcess,
       }),
     );
 
@@ -166,6 +181,7 @@ const App: React.FC<AppProps> = (props) => {
         onStepChange,
         beforeRotate,
         highlightAttribute,
+        preDataProcess,
       }),
     );
 
@@ -182,6 +198,7 @@ const App: React.FC<AppProps> = (props) => {
     defaultLang,
     beforeRotate,
     highlightAttribute,
+    preDataProcess,
   ]);
 
   useEffect(() => {

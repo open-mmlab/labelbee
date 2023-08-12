@@ -17,6 +17,7 @@ import PageOperator from '@/utils/PageOperator';
 import { jsonParser } from '@/utils';
 import { IPointCloudBox } from '@labelbee/lb-utils';
 import { getBoxesByTrackID } from '@/components/predictTracking/previewResult/util';
+import { IPreDataProcessParams } from '@/App';
 
 const dispatchTasks = (dispatch: any, tasks: any[]) => tasks.map((task) => dispatch(task));
 
@@ -195,6 +196,15 @@ export function UpdateBeforeRotate(beforeRotate: () => {}): AnnotationActionType
   };
 }
 
+export function UpdatePreDataProcess(preDataProcess: () => {}): AnnotationActionTypes {
+  return {
+    type: ANNOTATION_ACTIONS.UPDATE_PRE_DATA_PROCESS,
+    payload: {
+      preDataProcess,
+    },
+  };
+}
+
 export function CopyBackWordResult(): AnnotationActionTypes {
   return {
     type: ANNOTATION_ACTIONS.COPY_BACKWARD_RESULT,
@@ -281,6 +291,7 @@ export function InitTaskData({
   beforeRotate,
   checkMode,
   highlightAttribute,
+  preDataProcess,
 }: any): any {
   const tasks: any[] = [];
 
@@ -318,6 +329,10 @@ export function InitTaskData({
     tasks.push(UpdateBeforeRotate(beforeRotate));
   }
 
+  if (preDataProcess) {
+    tasks.push(UpdatePreDataProcess(preDataProcess));
+  }
+
   if (typeof checkMode === 'boolean') {
     tasks.push(UpdateCheckMode(checkMode));
   }
@@ -352,6 +367,7 @@ export function UpdateInjectFunc({
   stepList,
   beforeRotate,
   highlightAttribute,
+  preDataProcess,
 }: any): any {
   const tasks: any[] = [];
 
@@ -383,6 +399,10 @@ export function UpdateInjectFunc({
 
   if (beforeRotate) {
     tasks.push(UpdateBeforeRotate(beforeRotate));
+  }
+
+  if (preDataProcess) {
+    tasks.push(UpdatePreDataProcess(preDataProcess));
   }
 
   tasks.push(UpdateHighlightAttribute(highlightAttribute));
@@ -661,4 +681,11 @@ export const GetBoxesByID =
   (dispatch: any, getState: any): IPointCloudBox[] => {
     const { imgList, step } = getState().annotation;
     return getBoxesByTrackID(imgList, step, selectedBoxTrackID, selectedBoxID);
+  };
+
+export const PreDataProcess =
+  (params: IPreDataProcessParams) =>
+  (dispatch: any, getState: any): IPointCloudBox[] => {
+    const { annotation } = getState();
+    return annotation?.preDataProcess?.(params) ?? params.dataList;
   };

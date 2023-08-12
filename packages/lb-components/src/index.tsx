@@ -46,10 +46,13 @@ const OutputApp = (props: AppProps, ref: any) => {
     <Provider store={store} context={LabelBeeContext}>
       <I18nextProvider i18n={i18n}>
         <PointCloudProvider>
-          <App {...props} setToolInstance={(toolInstance) => {
-            setToolInstance(toolInstance)
-            props.onLoad?.({ toolInstance})
-          }} />
+          <App
+            {...props}
+            setToolInstance={(toolInstance) => {
+              setToolInstance(toolInstance);
+              props.onLoad?.({ toolInstance });
+            }}
+          />
         </PointCloudProvider>
       </I18nextProvider>
     </Provider>

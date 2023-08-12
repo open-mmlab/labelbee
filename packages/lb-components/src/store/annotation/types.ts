@@ -20,6 +20,7 @@ import {
 } from '@/types/data';
 import { ESubmitType } from '@/constant';
 import { IPointCloudBox } from '@labelbee/lb-utils';
+import { IPreDataProcessParams } from '@/App';
 
 export type GraphToolInstance =
   | RectOperation
@@ -69,6 +70,7 @@ export interface AnnotationState {
   predictionResult: IPointCloudBoxWithIndex[];
   predictionResultVisible: boolean;
   highlightAttribute: string;
+  preDataProcess?: (params: IPreDataProcessParams) => IPointCloudBox[];
 }
 
 interface UpdateToolInstance {

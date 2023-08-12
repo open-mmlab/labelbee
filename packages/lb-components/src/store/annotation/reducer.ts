@@ -640,6 +640,13 @@ export const annotationReducer = (
       };
     }
 
+    case ANNOTATION_ACTIONS.UPDATE_PRE_DATA_PROCESS: {
+      return {
+        ...state,
+        preDataProcess: action.payload.preDataProcess,
+      };
+    }
+
     case ANNOTATION_ACTIONS.SKIP_BEFORE_PAGE_TURNING: {
       return {
         ...state,
@@ -779,11 +786,11 @@ export const annotationReducer = (
     }
 
     case ANNOTATION_ACTIONS.SET_HIGHLIGHT_ATTRIBUTE: {
-      const { attribute } = action.payload
+      const { attribute } = action.payload;
       return {
         ...state,
         highlightAttribute: attribute,
-      }
+      };
     }
 
     case ANNOTATION_ACTIONS.BATCH_UPDATE_TRACK_ID: {
