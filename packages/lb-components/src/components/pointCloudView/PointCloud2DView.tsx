@@ -49,13 +49,76 @@ const EKeyCode = cKeyCode.default;
 
 interface IProps extends IA2MapStateProps {
   thumbnailWidth?: number;
+  isEnlargeTopView?: boolean;
 }
 
-const PointCloud2DView = ({ currentData, config, thumbnailWidth, highlightAttribute }: IProps) => {
+const ContainerTitle = ({
+  showEnlarge,
+  isEnlargeTopView,
+  data,
+  setIsEnlarge,
+  setCurIndex,
+  curIndex = 0,
+  index,
+  annotations2d,
+}: {
+  showEnlarge: boolean;
+  isEnlargeTopView?: boolean;
+  data: IAnnotationData2dView;
+  setIsEnlarge: (v: boolean) => void;
+  setCurIndex: (v: number | undefined) => void;
+  curIndex: number | undefined;
+  index: number;
+  annotations2d: IAnnotationData2dView[];
+}) => {
+  if (isEnlargeTopView) {
+    return (
+      <TitleButton
+        title={data?.calName}
+        style={{ background: 'rgba(0, 0, 0, 0.74)', color: '#FFFFFF' }}
+      />
+    );
+  }
+  if (showEnlarge) {
+    return (
+      <div style={{ display: 'flex', alignItems: 'center' }}>
+        <LeftOutlined
+          style={{ cursor: 'pointer', marginRight: '12px' }}
+          onClick={() => {
+            setIsEnlarge(false);
+            setCurIndex(undefined);
+          }}
+        />
+        <span>{data?.calName}</span>
+        <span style={{ marginLeft: '8px' }}>
+          {curIndex + 1}/{annotations2d?.length}
+        </span>
+      </div>
+    );
+  }
+  return (
+    <TitleButton
+      title={data?.calName}
+      onClick={() => {
+        setIsEnlarge(true);
+        setCurIndex(index);
+      }}
+      style={{ background: 'rgba(0, 0, 0, 0.74)', color: '#FFFFFF' }}
+    />
+  );
+};
+
+const PointCloud2DView = ({
+  currentData,
+  config,
+  thumbnailWidth,
+  isEnlargeTopView,
+  highlightAttribute,
+}: IProps) => {
   const [annotations2d, setAnnotations2d] = useState<IAnnotationData2dView[]>([]);
   const { topViewInstance, displayPointCloudList } = useContext(PointCloudContext);
   const [selectedID, setSelectedID] = useState<number | string>('');
-  const [isEnlarge, setIsEnlarge] = useState(false);
+  const [isEnlarge, setIsEnlarge] = useState<boolean>(false);
   const [curIndex, setCurIndex] = useState<number | undefined>(undefined);
 
   useEffect(() => {
@@ -240,30 +303,16 @@ const PointCloud2DView = ({ currentData, config, thumbnailWidth, highlightAttrib
                 [getClassName('point-cloud-3d-containerZoom')]: showEnlarge,
               })}
               title={
-                showEnlarge ? (
-                  <div style={{ display: 'flex', alignItems: 'center' }}>
-                    <LeftOutlined
-                      style={{ cursor: 'pointer', marginRight: '12px' }}
-                      onClick={() => {
-                        setIsEnlarge(false);
-                        setCurIndex(undefined);
-                      }}
-                    />
-                    <span>{item?.calName}</span>
-                    <span style={{ marginLeft: '8px' }}>
-                      {curIndex + 1}/{annotations2d?.length}
-                    </span>
-                  </div>
-                ) : (
-                  <TitleButton
-                    title={item?.calName}
-                    onClick={() => {
-                      setIsEnlarge(true);
-                      setCurIndex(index);
-                    }}
-                    style={{ background: 'rgba(0, 0, 0, 0.74)', color: '#FFFFFF' }}
-                  />
-                )
+                <ContainerTitle
+                  showEnlarge={showEnlarge}
+                  isEnlargeTopView={isEnlargeTopView}
+                  data={item}
+                  setIsEnlarge={setIsEnlarge}
+                  setCurIndex={setCurIndex}
+                  curIndex={curIndex}
+                  index={index}
+                  annotations2d={annotations2d}
+                />
               }
               titleOnSurface={!showEnlarge}
               style={{

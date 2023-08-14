@@ -181,7 +181,10 @@ const PointCloudView: React.FC<IProps> = ({
                     isEnlargeTopView,
                 })}
               >
-                <PointCloud2DView thumbnailWidth={isEnlargeTopView ? 300 : 455} />
+                <PointCloud2DView
+                  isEnlargeTopView={isEnlargeTopView}
+                  thumbnailWidth={isEnlargeTopView ? 300 : 455}
+                />
               </div>
             </div>
           </div>

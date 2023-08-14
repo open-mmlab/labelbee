@@ -50,40 +50,41 @@ const SideAndBackOverView = (props: IProps) => {
     <div
       className={classNames({
         [getClassName('point-cloud-container', 'left-bottom')]: true,
-        [getClassName('point-cloud-container', 'left-bottom-float')]: selectAndEnlarge,
+        [getClassName('point-cloud-container', 'left-bottom-float')]: true,
       })}
       style={{
         top: position.y,
         left: position.x,
         width: 360,
+        height: 400,
+        zIndex: selectAndEnlarge ? 1003 : -1,
       }}
     >
-      {selectAndEnlarge && (
-        <div
-          className={getClassName('point-cloud-container', 'left-bottom-floatHeader')}
-          draggable={'true'}
-          onDragStart={(event) => {
-            if (selectAndEnlarge) {
-              setOffset({
-                x: event.clientX - position.x,
-                y: event.clientY - position.y,
-              });
-            }
-          }}
-          onDrag={(e: any) => {
-            const moveX = e.clientX - offset.x;
-            const moveY = e.clientY - offset.y;
-            setPosition({ x: moveX, y: moveY });
-          }}
-          onDragEnd={(e: any) => {
-            const moveX = e.clientX - offset.x;
-            const moveY = e.clientY - offset.y;
-            setPosition({ x: moveX, y: moveY });
-          }}
-        >
-          {t('DragAndDrop')}
-        </div>
-      )}
+      <div
+        className={getClassName('point-cloud-container', 'left-bottom-floatHeader')}
+        draggable={'true'}
+        onDragStart={(event) => {
+          if (selectAndEnlarge) {
+            setOffset({
+              x: event.clientX - position.x,
+              y: event.clientY - position.y,
+            });
+          }
+        }}
+        onDrag={(e: any) => {
+          const moveX = e.clientX - offset.x;
+          const moveY = e.clientY - offset.y;
+          setPosition({ x: moveX, y: moveY });
+        }}
+        onDragEnd={(e: any) => {
+          const moveX = e.clientX - offset.x;
+          const moveY = e.clientY - offset.y;
+          setPosition({ x: moveX, y: moveY });
+        }}
+      >
+        {t('DragAndDrop')}
+      </div>
+
       <PointCloudBackView checkMode={checkMode} />
       <PointCloudSideView checkMode={checkMode} />
     </div>
