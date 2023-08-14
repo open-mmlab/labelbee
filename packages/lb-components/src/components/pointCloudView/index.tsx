@@ -51,6 +51,7 @@ const PointCloudView: React.FC<IProps> = ({
   checkMode,
   intelligentFit,
   imgIndex,
+  loadPCDFileProgress,
 }) => {
   const ptCtx = useContext(PointCloudContext);
   const { globalPattern, setGlobalPattern, selectedIDs } = ptCtx;
@@ -181,10 +182,12 @@ const PointCloudView: React.FC<IProps> = ({
                     isEnlargeTopView,
                 })}
               >
-                <PointCloud2DView
-                  isEnlargeTopView={isEnlargeTopView}
-                  thumbnailWidth={isEnlargeTopView ? 300 : 455}
-                />
+                {!loadPCDFileProgress && (
+                  <PointCloud2DView
+                    isEnlargeTopView={isEnlargeTopView}
+                    thumbnailWidth={isEnlargeTopView ? 300 : 455}
+                  />
+                )}
               </div>
             </div>
           </div>

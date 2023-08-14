@@ -37,6 +37,7 @@ const initialState: AnnotationState = {
   resultList: [],
   stepProgress: 0,
   loading: false,
+  loadPCDFileProgress: true,
   triggerEventAfterIndexChanged: false,
 
   pointCloudLoading: false,
@@ -760,6 +761,15 @@ export const annotationReducer = (
     }
 
     case ANNOTATION_ACTIONS.SET_LOADING: {
+      const { loadPCDFileProgress } = action.payload;
+
+      return {
+        ...state,
+        loadPCDFileProgress: !!loadPCDFileProgress,
+      };
+    }
+
+    case ANNOTATION_ACTIONS.SET_LOADPCDFILE_PROGRESS: {
       const { loading } = action.payload;
 
       return {
