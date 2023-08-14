@@ -19,7 +19,9 @@ import {
   IPointUnit,
   UpdatePolygonByDragList,
   ILine,
-  DEFAULT_SPHERE_PARAMS, IDefaultSize, IPolygonData,
+  DEFAULT_SPHERE_PARAMS,
+  IDefaultSize,
+  IPolygonData,
 } from '@labelbee/lb-utils';
 import { useContext } from 'react';
 import { PointCloudContext } from '../PointCloudContext';
@@ -609,7 +611,7 @@ export const usePointCloudViews = () => {
     pointCloudBoxList,
     pointCloudSphereList,
     hideAttributes,
-    setHighlight2DDataList
+    setHighlight2DDataList,
   } = ptCtx;
   const { addHistory, initHistory, pushHistoryUnderUpdatePolygon, pushHistoryUnderUpdateLine } =
     useHistory();
@@ -1054,24 +1056,25 @@ export const usePointCloudViews = () => {
   const updateViewsByDefaultSize = (defaultSize: IDefaultSize) => {
     if (selectedBox) {
       const selectedBoxTrackID = selectedBox?.info.trackID;
-      const polygonList = topViewInstance?.toolInstance?.polygonList
-      const originPolygon = polygonList.find((v: IPolygonData) => v?.trackID === selectedBoxTrackID)
+      const polygonList = topViewInstance?.toolInstance?.polygonList;
+      const originPolygon = polygonList.find(
+        (v: IPolygonData) => v?.trackID === selectedBoxTrackID,
+      );
       const newBoxParams: IPointCloudBox = {
         ...selectedBox.info,
         width: Number(defaultSize.widthDefault),
         depth: Number(defaultSize.depthDefault),
         height: Number(defaultSize.heightDefault),
-      }
+      };
       const newPointCloudBoxList = updateSelectedBoxes([newBoxParams]);
-      syncPointCloudViews(
-        PointCloudView['3D'],
-        originPolygon,
-        newBoxParams,
-        undefined,
+      syncPointCloudViews({
+        omitView: PointCloudView['3D'],
+        polygon: originPolygon,
+        boxParams: newBoxParams,
         newPointCloudBoxList,
-      );
+      });
     }
-  }
+  };
   /**
    * Sync views after adding a point
    */
