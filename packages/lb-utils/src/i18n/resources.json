@@ -245,6 +245,7 @@
     "DefaultSize":"Click to use the default size.",
     "NormalSizeRange":"Normal size range",
     "NormalCenterPointRange":"Normal center point range",
+    "LoadingTips": "Wait a minute, Data Loading ~",
     "Unlocked":"Unlocked",
     "Locked":"Locked"
   },
@@ -494,6 +495,7 @@
     "DefaultSize":"点击图标以使用默认尺寸",
     "NormalSizeRange":"正常尺寸范围",
     "NormalCenterPointRange":"正常中心点范围",
+    "LoadingTips": "数据加载中~请稍后",
     "Unlocked":"未开启",
     "Locked":"已开启"
   }

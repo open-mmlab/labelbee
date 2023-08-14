@@ -23,6 +23,8 @@ import PreviewResult from '@/components/predictTracking/previewResult';
 import { LabelBeeContext } from '@/store/ctx';
 import { EToolName } from '@/data/enums/ToolType';
 import LLMLayout from './LLMLayout';
+import { LoadingOutlined } from '@ant-design/icons';
+import { useTranslation } from 'react-i18next';
 
 interface IProps {
   path: string;
@@ -74,11 +76,17 @@ const AnnotatedArea: React.FC<AppProps & IProps> = (props) => {
 };
 
 const ViewportProviderLayout = (props: AppProps & IProps & { children: any }) => {
+  const { t } = useTranslation();
   const { stepList, step } = props;
   const currentToolName = getStepConfig(stepList, step)?.tool;
   return (
     <ViewportProvider>
-      <Spin spinning={props.loading}>
+      <Spin
+        spinning={props.loading}
+        indicator={<LoadingOutlined />}
+        tip={<span style={{ marginTop: 200 }}>{t('LoadingTips')}</span>}
+        delay={500}
+      >
         <Layout className={classnames([layoutCls, props.className])} style={props.style?.layout}>
           <header className={`${layoutCls}__header`} style={props.style?.header}>
             <ToolHeader
