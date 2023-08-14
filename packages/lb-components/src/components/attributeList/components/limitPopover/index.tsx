@@ -16,9 +16,9 @@ const LimitPopover = ({
   const sizeRange = limit?.sizeLimit?.sizeRange;
   const positionLimit = limit?.positionLimit;
 
-  const { heightDefault, depthDefault, widthDefault } = defaultSize;
-  const { heightMax, heightMin, depthMax, depthMin, widthMax, widthMin } = sizeRange;
-  const { XMin, XMax, YMin, YMax, ZMin, ZMax } = positionLimit;
+  const { heightDefault, depthDefault, widthDefault } = defaultSize || {};
+  const { heightMax, heightMin, depthMax, depthMin, widthMax, widthMin } = sizeRange || {};
+  const { XMin, XMax, YMin, YMax, ZMin, ZMax } = positionLimit || {};
 
   return (
     <Tooltip
@@ -27,9 +27,7 @@ const LimitPopover = ({
         <div style={{ padding: '8px' }}>
           {defaultSize && (
             <div style={{ marginBottom: '24px' }}>
-              <div>
-                【{t('DefaultSize')}】
-              </div>
+              <div>【{t('DefaultSize')}】</div>
               <span>{`${t('Length')}: ${depthDefault}m、`}</span>
               <span>{`${t('Width')}: ${widthDefault}m、`}</span>
               <span>{`${t('Height')}: ${heightDefault}m`}</span>
@@ -39,7 +37,7 @@ const LimitPopover = ({
           {sizeRange && (
             <div style={{ marginBottom: '24px' }}>
               <div>*{t('NormalSizeRange')}</div>
-              <span>{`${t('Length')}:: ${depthMin}~${depthMax}m、`}</span>
+              <span>{`${t('Length')}: ${depthMin}~${depthMax}m、`}</span>
               <span>{`${t('Width')}: ${widthMin}~${widthMax}m、`}</span>
               <span>{`${t('Height')}: ${heightMin}~${heightMax}m`}</span>
             </div>
@@ -60,9 +58,9 @@ const LimitPopover = ({
         src={defaultSizeSvg}
         style={{ margin: '0px 8px' }}
         onClick={(e) => {
-          e.preventDefault()
+          e.preventDefault();
           if (defaultSize) {
-            updateSize?.(defaultSize)
+            updateSize?.(defaultSize);
           }
         }}
       />

@@ -35,7 +35,7 @@ interface IPositionLimit {
 export interface ILimit {
   sizeLimit: {
     sizeRange: ISizeRange;
-    defaultSize: IDefaultSize;
+    defaultSize?: IDefaultSize;
     logicalCondition: ILogicalCondition[];
   };
   positionLimit: IPositionLimit;
