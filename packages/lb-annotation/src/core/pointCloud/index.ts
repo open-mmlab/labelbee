@@ -868,7 +868,7 @@ export class PointCloud extends EventListener {
         gl_FragColor = vec4(color, 1.0);
       }`,
       uniforms: {
-        pointSize: { value: 1.2 }, // Init size.
+        pointSize: { value: this.pointsMaterialSize }, // Init size.
       },
     };
   };
