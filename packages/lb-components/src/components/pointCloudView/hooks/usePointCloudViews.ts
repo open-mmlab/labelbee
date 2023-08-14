@@ -848,7 +848,7 @@ export const usePointCloudViews = () => {
   const viewUpdateBox = (newPolygon: any, originPolygon: any, fromView: string) => {
     if (selectedPointCloudBox) {
       let transfer2PointCloud;
-      let newBoxParams;
+      let newBoxParams: IPointCloudBox;
 
       // Switch the right function.
       switch (fromView) {
@@ -902,6 +902,10 @@ export const usePointCloudViews = () => {
       }
 
       const newPointCloudList = updateSelectedBox(newBoxParams);
+
+      newBoxParams = newPointCloudList.find(
+        (item) => item.id === newBoxParams.id,
+      ) as IPointCloudBox;
 
       syncPointCloudViews({
         omitView: updateCurrentView ? undefined : fromView,
