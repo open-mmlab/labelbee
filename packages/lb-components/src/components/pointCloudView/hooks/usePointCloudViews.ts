@@ -1201,30 +1201,8 @@ export const usePointCloudViews = () => {
 
     let boxParamsList: any[] = [];
     let lineList: any[] = [];
-    let polygonList = [];
+    let polygonList: any[] = [];
     let sphereParamsList: IPointCloudSphere[] = [];
-    if (newData.result) {
-      boxParamsList = PointCloudUtils.getBoxParamsFromResultList(newData.result);
-      polygonList = PointCloudUtils.getPolygonListFromResultList(newData.result);
-      lineList = PointCloudUtils.getLineListFromResultList(newData.result);
-      sphereParamsList = PointCloudUtils.getSphereParamsFromResultList(newData.result);
-
-      // Add Init Box
-      mainViewInstance?.generateBoxes(boxParamsList);
-      mainViewInstance?.generateSpheres(sphereParamsList);
-
-      /**
-       * Use [] to replace the default highlight2DDataList.
-       */
-      ptCtx.syncAllViewPointCloudColor(boxParamsList, []);
-    }
-
-    initHistory({
-      pointCloudBoxList: boxParamsList,
-      polygonList,
-      lineList,
-      pointCloudSphereList: sphereParamsList,
-    });
 
     mainViewInstance.updateTopCamera();
 
@@ -1245,6 +1223,31 @@ export const usePointCloudViews = () => {
     topViewInstance.updateData(newData.url, newData.result, {
       radius: config?.radius ?? DEFAULT_RADIUS,
     });
+
+    if (newData.result) {
+      boxParamsList = PointCloudUtils.getBoxParamsFromResultList(newData.result);
+      polygonList = PointCloudUtils.getPolygonListFromResultList(newData.result);
+      lineList = PointCloudUtils.getLineListFromResultList(newData.result);
+      sphereParamsList = PointCloudUtils.getSphereParamsFromResultList(newData.result);
+
+      // Add Init Box
+      mainViewInstance?.generateBoxes(boxParamsList);
+      mainViewInstance?.generateSpheres(sphereParamsList);
+
+      /**
+       * Use [] to replace the default highlight2DDataList.
+       * Need to await syncAllViewPointCloudColor before setLoading(false).
+       */
+      await ptCtx.syncAllViewPointCloudColor(boxParamsList, []);
+    }
+
+    initHistory({
+      pointCloudBoxList: boxParamsList,
+      polygonList,
+      lineList,
+      pointCloudSphereList: sphereParamsList,
+    });
+
     SetPointCloudLoading(dispatch, false);
   };
 
