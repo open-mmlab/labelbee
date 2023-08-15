@@ -327,6 +327,7 @@ const PointCloud2DView = ({
                   currentData={currentData}
                   view2dData={item}
                   setSelectedID={setSelectedID}
+                  isHighlight={!showEnlarge}
                 />
               )}
             </PointCloudContainer>

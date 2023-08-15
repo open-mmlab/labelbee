@@ -13,10 +13,12 @@ const PointCloud2DSingleView = ({
   view2dData,
   setSelectedID,
   currentData,
+  isHighlight,
 }: {
   view2dData: IAnnotationData2dView;
   setSelectedID: (value: string | number) => void;
   currentData: IFileItem;
+  isHighlight: boolean;
 }) => {
   const ref = useRef(null);
   const viewRef = useRef<{ toolInstance: ViewOperation }>();
@@ -85,16 +87,18 @@ const PointCloud2DSingleView = ({
           ratio: 0.4,
         }}
       />
-      <HighlightVisible
-        visible={isHighlightVisible(url)}
-        onClick={highlightOnClick}
-        loading={loading}
-        style={{
-          position: 'absolute',
-          right: 16,
-          top: 16,
-        }}
-      />
+      {isHighlight && (
+        <HighlightVisible
+          visible={isHighlightVisible(url)}
+          onClick={highlightOnClick}
+          loading={loading}
+          style={{
+            position: 'absolute',
+            right: 16,
+            top: 16,
+          }}
+        />
+      )}
     </div>
   );
 };
