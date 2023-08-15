@@ -16,6 +16,7 @@ import _ from 'lodash';
 import type { ObjectString } from './types';
 import { getKeyCodeNumber } from './utils';
 import { IFileItem } from '@/types/data';
+import { TDrawLayerSlot } from '@/types/main';
 
 export interface IVideoTagInstanceAdaptorProps {
   imgIndex: number;
@@ -27,6 +28,8 @@ export interface IVideoTagInstanceAdaptorProps {
   onUnmounted: () => void;
   step: number;
   stepList: IStepInfo[];
+
+  drawLayerSlot?: TDrawLayerSlot;
 }
 
 interface IVideoTagInstanceAdaptorState {
@@ -304,6 +307,7 @@ export class TagToolInstanceAdaptor extends React.Component<
           }}
         />
         <VideoTagLayer result={tagResult} inputList={this.config?.inputList} />
+        {this.props.drawLayerSlot?.({ zoom: 1, currentPos: { x: 0, y: 0 } })}
       </div>
     );
   }
