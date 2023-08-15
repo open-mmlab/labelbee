@@ -21,7 +21,7 @@ const HighlightVisible = ({
     borderRadius: 2,
     padding: 6,
     fontSize: 16,
-    zIndex: 1001,
+    zIndex: 101,
   };
   let ShowIcon = visible ? EyeFilled : EyeInvisibleFilled;
 
