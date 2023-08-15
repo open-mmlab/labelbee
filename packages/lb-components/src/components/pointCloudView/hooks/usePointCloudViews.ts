@@ -907,9 +907,9 @@ export const usePointCloudViews = () => {
         };
       }
 
-      const newPointCloudList = updateSelectedBox(newBoxParams);
+      const newPointCloudBoxList = updateSelectedBox(newBoxParams);
 
-      newBoxParams = newPointCloudList.find(
+      newBoxParams = newPointCloudBoxList.find(
         (item) => item.id === newBoxParams.id,
       ) as IPointCloudBox;
 
@@ -917,10 +917,10 @@ export const usePointCloudViews = () => {
         omitView: updateCurrentView ? undefined : fromView,
         polygon: newPolygon,
         boxParams: newBoxParams,
-        newPointCloudBoxList: [newBoxParams],
+        newPointCloudBoxList,
       });
 
-      return newPointCloudList;
+      return newPointCloudBoxList;
     }
   };
 
@@ -1135,6 +1135,10 @@ export const usePointCloudViews = () => {
     const { omitView, polygon, boxParams, zoom, newPointCloudBoxList } = params;
 
     const dataUrl = currentData?.url;
+    
+    /**
+     * Highlight New Data.
+     */
     if (newPointCloudBoxList) {
       // Wait for the mainPointCloudData.
       await ptCtx.syncAllViewPointCloudColor(newPointCloudBoxList);
