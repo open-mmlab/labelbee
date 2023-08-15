@@ -3,6 +3,7 @@
  */
 import React from 'react';
 import { EyeFilled, EyeInvisibleFilled, LoadingOutlined } from '@ant-design/icons';
+import { getClassName } from '@/utils/dom';
 
 const HighlightVisible = ({
   visible,
@@ -30,7 +31,13 @@ const HighlightVisible = ({
     Object.assign(defaultStyle, { borderRadius: 100 });
   }
 
-  return <ShowIcon style={{ ...defaultStyle, ...style }} onClick={loading ? () => {} : onClick} />;
+  return (
+    <ShowIcon
+      className={getClassName('point-cloud-highlight-view')}
+      style={{ ...defaultStyle, ...style }}
+      onClick={loading ? () => {} : onClick}
+    />
+  );
 };
 
 export default HighlightVisible;

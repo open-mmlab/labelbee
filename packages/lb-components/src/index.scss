@@ -1600,6 +1600,10 @@ $headerHeight: 40px;
       border-bottom: 1px solid;
       font-size: 14px;
     }
+
+    .#{$ptPrefix}-highlight-view {
+      display: none;
+    }
   }
 
   .#{$ptPrefix}-container__left {
