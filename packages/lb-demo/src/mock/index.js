@@ -54,21 +54,7 @@ export const pointCloudMappingImgList = [
 const data = [];
 
 const polygonData = [];
-// Array(1)
-//   .fill('')
-//   .map((v, i) => ({
-//     id: i + 1,
-//     sourceID: '',
-//     pointList: Array(1000)
-//       .fill('')
-//       .map((_) => ({
-//         x: Math.random() * 300,
-//         y: Math.random() * 400,
-//       })),
-//     order: i + 1,
-//     attribute: '',
-//     valid: true,
-//   }));
+
 
 export const rectDefaultResult = JSON.stringify({
   height: 200,

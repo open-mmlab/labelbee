@@ -5,7 +5,7 @@ import { IVideoTagInstanceAdaptorProps, TagToolInstanceAdaptor } from './TagTool
 
 /**
  * I18n provider for InstanceAdaptorI18nProvider
- * @param props
+ * @param props 
  */
 export const VideoTagTool = (props: IVideoTagInstanceAdaptorProps & { lang?: string }) => {
   useEffect(() => {

@@ -11,7 +11,6 @@ import App from './App';
 import configureStore from './configureStore';
 import { PageBackward, PageForward, PageJump } from './store/annotation/actionCreators';
 import { ToolInstance } from './store/annotation/types';
-import { VideoTagTool } from '@/components/videoPlayer/TagToolInstanceAdaptorI18nProvider';
 import './index.scss';
 import { PointCloudProvider } from './components/pointCloudView/PointCloudContext';
 import { AppState } from './store';
@@ -64,7 +63,6 @@ export {
   QuestionView,
   LLMToolView,
   i18n,
-  VideoTagTool,
   PredictTracking,
 };
 

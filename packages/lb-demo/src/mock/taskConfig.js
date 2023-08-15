@@ -139,7 +139,7 @@ const polygonConfig = {
   isShowOrder: false,
   attributeConfigurable: true,
   attributeList: [
-    { key: '玩偶', value: 'doll' },
+    { key: '车胎', value: 'doll' },
     { key: '喷壶', value: 'wateringCan' },
     { key: '脸盆', value: 'washbasin' },
     { key: '保温杯', value: 'vacuumCup' },

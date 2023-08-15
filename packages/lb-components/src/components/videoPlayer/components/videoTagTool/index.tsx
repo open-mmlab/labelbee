@@ -9,15 +9,12 @@ import React from 'react';
 import { CommonToolUtils, uuid } from '@labelbee/lb-annotation';
 import StepUtils from '@/utils/StepUtils';
 import { jsonParser } from '@/utils';
-import { VideoPlayer } from './index';
-import { VideoTagLayer } from './VideoTagLayer';
+import { VideoPlayer } from '../../index';
+import { VideoTagLayer } from '../../VideoTagLayer';
 import { IStepInfo } from '@/types/step';
 import _ from 'lodash';
-import { getKeyCodeNumber } from './utils';
+import { getKeyCodeNumber } from '../../utils';
 import { IFileItem } from '@/types/data';
-
-import { ToolInstanceForComponent } from '../videoAnnotate/ToolInstanceForComponent';
-import { ObjectString } from './types';
 
 export interface IVideoTagInstanceAdaptorProps {
   imgIndex: number;
@@ -38,10 +35,10 @@ interface IVideoTagInstanceAdaptorState {
   valid: boolean;
 }
 
-export class TagToolInstanceAdaptor
-  extends React.Component<IVideoTagInstanceAdaptorProps, IVideoTagInstanceAdaptorState>
-  implements ToolInstanceForComponent
-{
+export class TagToolInstanceAdaptor extends React.Component<
+  IVideoTagInstanceAdaptorProps,
+  IVideoTagInstanceAdaptorState
+> {
   public fns: { [key: string]: () => void } = {};
   public videoRef?: HTMLVideoElement;
   public labelSelectedList: number[] = [];
@@ -172,7 +169,7 @@ export class TagToolInstanceAdaptor
    */
   public combineResult = (
     inputValue: { value: { key: string; value: string }; isMulti: boolean },
-    existValue: ObjectString = {},
+    existValue: Record<string, string | undefined> = {},
   ) => {
     const { isMulti } = inputValue;
     const { key, value } = inputValue.value;
