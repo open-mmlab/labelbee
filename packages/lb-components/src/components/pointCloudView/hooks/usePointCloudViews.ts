@@ -1069,6 +1069,8 @@ export const usePointCloudViews = () => {
         width: Number(defaultSize.widthDefault),
         depth: Number(defaultSize.depthDefault),
         height: Number(defaultSize.heightDefault),
+        // 默认属性一定是有效的
+        valid: true,
       };
       const newPointCloudBoxList = updateSelectedBoxes([newBoxParams]);
       syncPointCloudViews({
