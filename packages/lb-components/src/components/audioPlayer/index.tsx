@@ -1,6 +1,5 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { getWebPcm2WavBase64 } from '@/components/audioAnnotate/utils/getWebPcm2Wac';
-import WaveSurfer from '@aas/wavesurfer.js';
 import _, { debounce, sortBy } from 'lodash';
 import { PauseOutlined, CaretRightOutlined } from '@ant-design/icons';
 import { cKeyCode, cTool } from '@labelbee/lb-annotation';
@@ -10,8 +9,9 @@ import InvalidPage from '@/components/invalidPage';
 import ImageError from '@/components/imageError';
 import { classnames } from '@/utils';
 import SpeedController, { EPlayerType } from '@/components/videoPlayer/components/SpeedController';
-import Region from '@aas/wavesurfer.js/dist/plugin/wavesurfer.regions.js';
-import Cursor from '@aas/wavesurfer.js/dist/plugin/wavesurfer.cursor.js';
+import WaveSurfer from '@/components/wavesurfer/wavesurfer.js';
+import Region from '@/components/wavesurfer/plugin/regions/index.js';
+import Cursor from '@/components/wavesurfer/plugin/cursor/index.js';
 import ZoomSlider, { audioZoomInfo } from './zoomSlider';
 import LabelDisplayToggle from './labelDisplayToggle';
 import ClipRegion from './clipRegion';
