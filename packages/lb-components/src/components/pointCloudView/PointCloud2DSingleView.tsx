@@ -13,10 +13,12 @@ const PointCloud2DSingleView = ({
   view2dData,
   setSelectedID,
   currentData,
+  showEnlarge,
 }: {
   view2dData: IAnnotationData2dView;
   setSelectedID: (value: string | number) => void;
   currentData: IFileItem;
+  showEnlarge: boolean;
 }) => {
   const ref = useRef(null);
   const viewRef = useRef<{ toolInstance: ViewOperation }>();
@@ -93,6 +95,7 @@ const PointCloud2DSingleView = ({
           position: 'absolute',
           right: 16,
           top: 16,
+          zIndex: showEnlarge ? -1 : 101,
         }}
       />
     </div>

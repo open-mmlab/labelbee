@@ -24,7 +24,7 @@ import PointCloudSegment from './PointCloudSegment';
 import PointCloudSegmentStatus from './PointCloudSegmentStatus';
 import PointCloudSegmentToolbar from './PointCloudSegmentToolbar';
 import { connect } from 'react-redux';
-import { LabelBeeContext } from '@/store/ctx';
+import { LabelBeeContext, useDispatch } from '@/store/ctx';
 import {
   AnnotatedAttributesPanelFixedLeft,
   AnnotatedAttributesPanelFixedRight,
@@ -37,6 +37,7 @@ import { jsonParser } from '@/utils';
 import { a2MapStateToProps, IA2MapStateProps } from '@/store/annotation/map';
 import classNames from 'classnames';
 import SideAndBackOverView from './components/sideAndBackOverView';
+import { SetLoadPCDFileLoading } from '@/store/annotation/actionCreators';
 
 interface IProps extends IA2MapStateProps {
   drawLayerSlot?: TDrawLayerSlot;
@@ -55,7 +56,7 @@ const PointCloudView: React.FC<IProps> = ({
 }) => {
   const ptCtx = useContext(PointCloudContext);
   const { globalPattern, setGlobalPattern, selectedIDs } = ptCtx;
-
+  const dispatch = useDispatch();
   const [isEnlargeTopView, setIsEnlargeTopView] = useState(false);
   const selectAndEnlarge = selectedIDs?.length > 0 && isEnlargeTopView;
 
@@ -82,10 +83,10 @@ const PointCloudView: React.FC<IProps> = ({
    * （Detection => PointCloudListener / Segmentation => PointCloudSegmentListener）
    */
   useEffect(() => {
+    SetLoadPCDFileLoading(dispatch, true);
     if (currentData) {
       const { boxParamsList, polygonList, lineList, sphereParamsList, segmentation } =
         PointCloudUtils.parsePointCloudCurrentResult(currentData?.result ?? '');
-
       ptCtx.setPointCloudResult(boxParamsList);
       ptCtx.setPolygonList(polygonList);
       ptCtx.setLineList(lineList);
@@ -182,12 +183,10 @@ const PointCloudView: React.FC<IProps> = ({
                     isEnlargeTopView,
                 })}
               >
-                {!loadPCDFileLoading && (
-                  <PointCloud2DView
-                    isEnlargeTopView={isEnlargeTopView}
-                    thumbnailWidth={isEnlargeTopView ? 300 : 455}
-                  />
-                )}
+                <PointCloud2DView
+                  isEnlargeTopView={isEnlargeTopView}
+                  thumbnailWidth={isEnlargeTopView ? 300 : 455}
+                />
               </div>
             </div>
           </div>

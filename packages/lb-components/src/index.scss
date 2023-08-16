@@ -288,7 +288,7 @@ $prefix: bee;
   }
 
   &__level {
-    padding: 28px;
+    padding: 20px 8px;
     border-bottom: 1px solid #eee;
     display: flex;
     justify-content: center;
@@ -1819,7 +1819,7 @@ $headerHeight: 40px;
   }
 
   .#{$ptPrefix}-container__rightZoom {
-    position: fixed;
+    position: absolute;
     top: 0px;
     left: 0px;
     width: 100%;
