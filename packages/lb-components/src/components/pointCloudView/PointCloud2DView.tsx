@@ -300,7 +300,7 @@ const PointCloud2DView = ({
             <PointCloudContainer
               className={classNames({
                 [getClassName('point-cloud-2d-container')]: true,
-                [getClassName('point-cloud-3d-containerZoom')]: showEnlarge,
+                [getClassName('point-cloud-container', 'zoom')]: showEnlarge,
               })}
               title={
                 <ContainerTitle
@@ -327,7 +327,6 @@ const PointCloud2DView = ({
                   currentData={currentData}
                   view2dData={item}
                   setSelectedID={setSelectedID}
-                  isHighlight={!showEnlarge}
                 />
               )}
             </PointCloudContainer>
