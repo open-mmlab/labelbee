@@ -651,11 +651,11 @@ export const SetPointCloudLoading = (dispatch: Function, loading: boolean) => {
   });
 };
 
-export const SetLoadPcdFileProgress = (dispatch: Function, loadPCDFileProgress: boolean) => {
+export const SetLoadPCDFileLoading = (dispatch: Function, loadPCDFileLoading: boolean) => {
   dispatch({
-    type: ANNOTATION_ACTIONS.SET_LOADPCDFILE_PROGRESS,
+    type: ANNOTATION_ACTIONS.SET_LOADPCDFILE_LOADING,
     payload: {
-      loadPCDFileProgress,
+      loadPCDFileLoading,
     },
   });
 };
