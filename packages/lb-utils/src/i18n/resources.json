@@ -247,7 +247,9 @@
     "NormalCenterPointRange":"Normal center point range",
     "LoadingTips": "Wait a minute, Data Loading ~",
     "Unlocked":"Unlocked",
-    "Locked":"Locked"
+    "Locked":"Locked",
+    "And":"And",
+    "Or":"Or"
   },
   "cn": {
     "TextInput": "文本输入",
@@ -497,6 +499,8 @@
     "NormalCenterPointRange":"正常中心点范围",
     "LoadingTips": "数据加载中~请稍后",
     "Unlocked":"未开启",
-    "Locked":"已开启"
+    "Locked":"已开启",
+    "And":"且",
+    "Or":"或"
   }
 }
