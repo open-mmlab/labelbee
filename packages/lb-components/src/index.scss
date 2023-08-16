@@ -2128,14 +2128,19 @@ $ptToolHeight: 40px;
 
 $predictTrackingPrefix: #{$prefix}-point-cloud-predict-tracking;
 .#{$predictTrackingPrefix}-container {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  z-index: 1005;
   .#{$predictTrackingPrefix}-container__bar {
-    position: fixed;
+    position: absolute;
     z-index: 100;
     left: 0;
-    right: $menuWidth;
+    right: 0;
     bottom: 40px;
     background: #444;
-    // background: rgba(0, 0, 0, 0.6);
     color: white;
     padding: 20px 24px;
     display: flex;
@@ -2149,7 +2154,6 @@ $predictTrackingPrefix: #{$prefix}-point-cloud-predict-tracking;
       .#{$predictTrackingPrefix}-container__option {
         display: flex;
         .#{$predictTrackingPrefix}-container__button {
-          background: red;
           display: flex;
           justify-content: center;
           align-items: center;

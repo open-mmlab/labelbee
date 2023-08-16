@@ -126,6 +126,7 @@ const MainView: React.FC<AppProps & IProps> = (props) => {
         {props?.leftSider}
         <Content className={`${layoutCls}__content`}>
           <AnnotatedArea {...props} />
+          <PreviewResult />
         </Content>
         <Sider
           className={`${layoutCls}__side`}
@@ -139,7 +140,6 @@ const MainView: React.FC<AppProps & IProps> = (props) => {
             propsSiderWidth={props.style?.sider?.width}
           />
         </Sider>
-        <PreviewResult />
       </Layout>
     </ViewportProviderLayout>
   );
