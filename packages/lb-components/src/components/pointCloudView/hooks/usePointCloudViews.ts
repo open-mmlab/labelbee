@@ -1044,7 +1044,6 @@ export const usePointCloudViews = () => {
       const newPointCloudBoxList = updateSelectedBoxes(updatePointCloudList);
 
       syncPointCloudViews({
-        omitView: PointCloudView.Top,
         polygon,
         boxParams: updatePointCloudList[0],
         newPointCloudBoxList,
