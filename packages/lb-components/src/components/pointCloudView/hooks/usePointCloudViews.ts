@@ -36,7 +36,7 @@ import { jsonParser } from '@/utils';
 import {
   PreDataProcess,
   SetPointCloudLoading,
-  SetLoadPcdFileProgress,
+  SetLoadPCDFileLoading,
 } from '@/store/annotation/actionCreators';
 import { message } from 'antd';
 import { useTranslation } from 'react-i18next';
@@ -1198,7 +1198,7 @@ export const usePointCloudViews = () => {
     setHighlight2DDataList([]);
 
     SetPointCloudLoading(dispatch, true);
-    SetLoadPcdFileProgress(dispatch, true);
+    SetLoadPCDFileLoading(dispatch, true);
     await mainViewInstance.loadPCDFile(newData.url, config?.radius ?? DEFAULT_RADIUS);
 
     mainViewInstance?.clearAllBox();
@@ -1254,7 +1254,7 @@ export const usePointCloudViews = () => {
     });
 
     SetPointCloudLoading(dispatch, false);
-    SetLoadPcdFileProgress(dispatch, false);
+    SetLoadPCDFileLoading(dispatch, false);
   };
 
   return {
