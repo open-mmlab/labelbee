@@ -465,6 +465,7 @@ class PolygonOperation extends BasicToolOperation {
       this._textAttributeInstance?.updateIcon(this.getTextIconSvg());
     }
   }
+
   /**
    * Sets the validity of a polygon with the given ID and renders the updated polygon list.
    * @param {string} id - The ID of the polygon to update.

@@ -1058,17 +1058,36 @@ export const usePointCloudViews = () => {
 
   const updateViewsByDefaultSize = (defaultSize: IDefaultSize) => {
     if (selectedBox) {
+      const widthDefault = Number(defaultSize.widthDefault)
+      const depthDefault = Number(defaultSize.depthDefault)
+      const heightDefault = Number(defaultSize.heightDefault)
       const selectedBoxTrackID = selectedBox?.info.trackID;
       const polygonList = topViewInstance?.toolInstance?.polygonList;
       const originPolygon = polygonList.find(
         (v: IPolygonData) => v?.trackID === selectedBoxTrackID,
       );
+      const size = {
+        width: topViewInstance?.toolInstance?.basicImgInfo?.width,
+        height: topViewInstance?.toolInstance?.basicImgInfo?.height,
+      }
+      const pointsInWorld = originPolygon.pointList.map((p: ICoordinate) => PointCloudUtils.transferCanvas2World(p, size))
+      const newPolygonPoints = MathUtils.getModifiedRectangleCoordinates(pointsInWorld, widthDefault, heightDefault)
+      const point1 = newPolygonPoints[0]
+      const point3 = newPolygonPoints[2]
+      const centerPoint = MathUtils.getLineCenterPoint([point1, point3]);
+      const bottomZ = selectedBox.info.center.z - selectedBox.info.depth / 2
+      // attention: widthDefault means the length of line between point1 and point2,
+      // so the height of box should be widthDefault, as same as in topViewPolygon2PointCloud("height = MathUtils.getLineLength(point1, point2)")
       const newBoxParams: IPointCloudBox = {
         ...selectedBox.info,
-        width: Number(defaultSize.widthDefault),
-        depth: Number(defaultSize.depthDefault),
-        height: Number(defaultSize.heightDefault),
-        // 默认属性一定是有效的
+        center: {
+          x: centerPoint.x,
+          y: centerPoint.y,
+          z: bottomZ + (depthDefault / 2)
+        },
+        width: heightDefault,
+        height: widthDefault,
+        depth: depthDefault,
         valid: true,
       };
       const newPointCloudBoxList = updateSelectedBoxes([newBoxParams]);
@@ -1136,7 +1155,7 @@ export const usePointCloudViews = () => {
     const { omitView, polygon, boxParams, zoom, newPointCloudBoxList } = params;
 
     const dataUrl = currentData?.url;
-    
+
     /**
      * Highlight New Data.
      */
