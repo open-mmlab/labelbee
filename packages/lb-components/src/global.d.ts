@@ -1,5 +1,5 @@
 declare module '*.svg';
 declare module '*.module.scss';
-declare module '@/components/wavesurfer/wavesurfer.js';
-declare module '@/components/wavesurfer/plugin/regions/index.js';
-declare module '@/components/wavesurfer/plugin/cursor/index.js';
+declare module '@labelbee/wavesurfer';
+declare module '@labelbee/wavesurfer/dist/plugin/wavesurfer.regions.js';
+declare module '@labelbee/wavesurfer/dist/plugin/wavesurfer.cursor.js';

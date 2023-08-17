@@ -42,10 +42,10 @@
     "email": "brady_luo.sz@foxmail.com"
   },
   "dependencies": {
-    "@aas/wavesurfer.js": "^0.0.4-alpha",
     "@ant-design/icons": "^4.6.2",
     "@labelbee/lb-annotation": "1.17.1",
     "@labelbee/lb-utils": "1.9.0",
+    "@labelbee/wavesurfer": "0.0.4-alpha.3",
     "@types/react-dom": "^18.2.7",
     "ahooks": "^3.4.0",
     "classnames": "^2.3.0",
