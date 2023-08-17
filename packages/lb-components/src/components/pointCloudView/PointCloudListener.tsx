@@ -4,14 +4,20 @@ import { useBoxes } from './hooks/useBoxes';
 import { useSingleBox } from './hooks/useSingleBox';
 import { useSphere } from './hooks/useSphere';
 import React, { useContext, useEffect } from 'react';
-import { cTool, AttributeUtils, CommonToolUtils, EToolName } from '@labelbee/lb-annotation';
+import {
+  cTool,
+  AttributeUtils,
+  CommonToolUtils,
+  EToolName,
+  EPointCloudName,
+} from '@labelbee/lb-annotation';
 import { message } from 'antd';
 import { connect } from 'react-redux';
 import { a2MapStateToProps, IA2MapStateProps } from '@/store/annotation/map';
 import { ICustomToolInstance } from '@/hooks/annotation';
 import { useStatus } from './hooks/useStatus';
 import { usePointCloudViews } from './hooks/usePointCloudViews';
-import { LabelBeeContext } from '@/store/ctx';
+import { LabelBeeContext, useDispatch } from '@/store/ctx';
 import { useHistory } from './hooks/useHistory';
 import { useAttribute } from './hooks/useAttribute';
 import { ICoordinate } from '@labelbee/lb-utils/dist/types/types/common';
@@ -20,6 +26,8 @@ import { usePolygon } from './hooks/usePolygon';
 import { useLine } from './hooks/useLine';
 import { useTranslation } from 'react-i18next';
 import { IFileItem } from '@/types/data';
+import { PreDataProcess } from '@/store/annotation/actionCreators';
+import { IPointCloudBox } from '@labelbee/lb-utils';
 
 const { EPolygonPattern } = cTool;
 
@@ -56,6 +64,7 @@ const PointCloudListener: React.FC<IProps> = ({
     pushHistoryUnderUpdatePolygon,
     pushHistoryUnderUpdateLine,
   } = useHistory();
+  const dispatch = useDispatch();
   const { syncThreeViewsAttribute } = useAttribute();
   const { syncAllViewsConfig, reRenderTopViewRange } = useConfig();
   const { selectedPolygon } = usePolygon();
@@ -263,7 +272,25 @@ const PointCloudListener: React.FC<IProps> = ({
       const selectBox = ptCtx.selectedPointCloudBox;
       if (selectBox) {
         selectBox.attribute = newAttribute;
+
+        const nextResult = dispatch(
+          PreDataProcess({
+            tool: EPointCloudName.PointCloud,
+            dataList: [selectBox],
+            stepConfig: config,
+            action: 'viewUpdateBox',
+          }),
+        ) as unknown as IPointCloudBox[];
+
+        selectBox.valid = nextResult[0].valid;
+
         const newPointCloudList = updateSelectedBox(selectBox);
+
+        ptCtx?.topViewInstance?.pointCloud2dOperation?.setPolygonValidAndRender?.(
+          selectBox.id,
+          true,
+          selectBox.valid,
+        );
 
         if (ptCtx.mainViewInstance) {
           // TODO: Poor performance.
