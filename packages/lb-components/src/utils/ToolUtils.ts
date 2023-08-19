@@ -20,6 +20,10 @@ class ToolUtils {
     return tool ? (Object.values(EPointCloudName) as string[]).includes(tool) : false;
   }
 
+  public static isMappingTool(tool?: string) {
+    return tool ? ([EToolName.Point, EToolName.Tag, EToolName.Polygon, EToolName.Line] as string[]).includes(tool) : false;
+  }
+
   public static getPointCloudToolList() {
     return [EToolName.Point, EToolName.Line, EToolName.PointCloudPolygon];
   }
