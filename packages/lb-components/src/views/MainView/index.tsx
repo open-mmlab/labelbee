@@ -23,6 +23,7 @@ import PreviewResult from '@/components/predictTracking/previewResult';
 import { LabelBeeContext } from '@/store/ctx';
 import { EToolName } from '@/data/enums/ToolType';
 import LLMLayout from './LLMLayout';
+import { AnnotationMappingWrapper } from './mappingWrapper/AnnotationMappingWrapper'
 
 interface IProps {
   path: string;
@@ -61,6 +62,7 @@ const AnnotatedArea: React.FC<AppProps & IProps> = (props) => {
   const currentToolName = getStepConfig(stepList, step)?.tool;
   const isVideoTool = ToolUtils.isVideoTool(currentToolName);
   const isPointCloudTool = ToolUtils.isPointCloudTool(currentToolName);
+  const isMappingTool = ToolUtils.isMappingTool(currentToolName)
 
   if (isVideoTool) {
     return <VideoAnnotate {...props} />;
@@ -68,6 +70,12 @@ const AnnotatedArea: React.FC<AppProps & IProps> = (props) => {
 
   if (isPointCloudTool) {
     return <PointCloudAnnotate {...props} />;
+  }
+
+  if (isMappingTool) {
+    return <AnnotationMappingWrapper>
+      <ImageAnnotate {...props} />
+    </AnnotationMappingWrapper>
   }
 
   return <ImageAnnotate {...props} />;
