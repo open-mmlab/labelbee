@@ -125,6 +125,14 @@ export class ToolScheduler implements IToolSchedulerOperation {
   }
 
   public setSize(size: ISize) {
+    // Update the outside Dom Size.
+    if (size.width && size.height) {
+      this.toolOperationDom.forEach((dom) => {
+        dom.style.width = `${size.width}px`;
+        dom.style.height = `${size.height}px`;
+      });
+    }
+    // Update the ToolInstance Canvas Size.
     this.toolOperationList.forEach((toolInstance) => {
       toolInstance.setSize(size);
     });
