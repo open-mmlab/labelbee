@@ -1071,7 +1071,7 @@ export const usePointCloudViews = () => {
         height: topViewInstance?.toolInstance?.basicImgInfo?.height,
       }
       const pointsInWorld = originPolygon.pointList.map((p: ICoordinate) => PointCloudUtils.transferCanvas2World(p, size))
-      const newPolygonPoints = MathUtils.getModifiedRectangleCoordinates(pointsInWorld, widthDefault, heightDefault)
+      const newPolygonPoints = MathUtils.getModifiedRectangleCoordinates(pointsInWorld, heightDefault, widthDefault)
       const point1 = newPolygonPoints[0]
       const point3 = newPolygonPoints[2]
       const centerPoint = MathUtils.getLineCenterPoint([point1, point3]);
@@ -1085,8 +1085,8 @@ export const usePointCloudViews = () => {
           y: centerPoint.y,
           z: bottomZ + (depthDefault / 2)
         },
-        width: heightDefault,
-        height: widthDefault,
+        width: widthDefault,
+        height: heightDefault,
         depth: depthDefault,
         valid: true,
       };
