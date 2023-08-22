@@ -190,11 +190,7 @@ const PointCloudBackView = ({ currentData, config, checkMode }: IA2MapStateProps
       titleOnSurface={true}
     >
       <div className={getClassName('point-cloud-container', 'bottom-view-content')}>
-        <div
-          className={getClassName('point-cloud-container', 'core-instance')}
-          ref={ref}
-          style={{ width: 360 }}
-        />
+        <div className={getClassName('point-cloud-container', 'core-instance')} ref={ref} />
         {!selectedBox && !selectedSphere && <EmptyPage />}
         <SizeInfoForView perspectiveView={EPerspectiveView.Back} />
       </div>

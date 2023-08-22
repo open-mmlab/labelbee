@@ -168,6 +168,9 @@ export class PointCloudAnnotation implements IPointCloudAnnotationOperation {
     this.pointCloudInstance.updateTopCamera();
     this.pointCloudInstance.setDefaultControls();
 
+    // Update all 2D Canvas & DOM Size.
+    this.toolScheduler.setSize(size);
+
     // Update Canvas Size
     this.pointCloudInstance.initRenderer();
 
@@ -191,9 +194,6 @@ export class PointCloudAnnotation implements IPointCloudAnnotationOperation {
       // this.pointCloud2dOperation.setImgNode(image);
       // this.pointCloud2dOperation.initImgPos();
     };
-
-    // It need to update directly
-    this.pointCloud2dOperation.setCanvasSize(size);
   }
 
   public addPolygonListOnTopView(result: string) {

@@ -651,6 +651,15 @@ export const SetPointCloudLoading = (dispatch: Function, loading: boolean) => {
   });
 };
 
+export const SetLoadPCDFileLoading = (dispatch: Function, loadPCDFileLoading: boolean) => {
+  dispatch({
+    type: ANNOTATION_ACTIONS.SET_LOADPCDFILE_LOADING,
+    payload: {
+      loadPCDFileLoading,
+    },
+  });
+};
+
 export const InitAnnotationState = (dispatch: Function) => {
   dispatch({
     type: ANNOTATION_ACTIONS.INIT_ALL_STATE,

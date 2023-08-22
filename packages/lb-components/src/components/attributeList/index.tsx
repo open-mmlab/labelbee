@@ -67,7 +67,7 @@ const AttributeList = React.forwardRef((props: IProps, ref) => {
       >
         {list.map((i: any, index: number) => {
           let hotKey: number | string = props?.num ?? index;
-          const isChosen = i?.value === props?.selectedAttribute
+          const isChosen = i?.value === props?.selectedAttribute;
 
           if (props.forbidDefault === true && typeof hotKey === 'number') {
             // 禁止 default 将从 1 开始
@@ -87,6 +87,12 @@ const AttributeList = React.forwardRef((props: IProps, ref) => {
           if (i?.color) {
             color = i.color;
           }
+
+          const { defaultSize, logicalCondition, sizeRange } = i?.limit?.sizeLimit || {};
+          // Determine if a scope configuration exists
+          const hasLimit =
+            i?.limit?.positionLimit || defaultSize || sizeRange || logicalCondition?.length > 0;
+          const showLimitPopover = isChosen && hasLimit;
 
           return (
             <Radio value={i.value} ref={radioRef} key={i.label + index}>
@@ -134,9 +140,7 @@ const AttributeList = React.forwardRef((props: IProps, ref) => {
                 {i.label}
               </span>
 
-              {i?.limit && isChosen && (
-                <LimitPopover limit={i.limit} updateSize={props?.updateSize} />
-              )}
+              {showLimitPopover && <LimitPopover limit={i.limit} updateSize={props?.updateSize} />}
               <span className='sensebee-radio-num'>{hotKey}</span>
             </Radio>
           );

@@ -114,6 +114,7 @@ const PointCloud2DView = ({
   thumbnailWidth,
   isEnlargeTopView,
   highlightAttribute,
+  loadPCDFileLoading,
 }: IProps) => {
   const [annotations2d, setAnnotations2d] = useState<IAnnotationData2dView[]>([]);
   const { topViewInstance, displayPointCloudList } = useContext(PointCloudContext);
@@ -122,7 +123,12 @@ const PointCloud2DView = ({
   const [curIndex, setCurIndex] = useState<number | undefined>(undefined);
 
   useEffect(() => {
-    if (topViewInstance && currentData?.mappingImgList && currentData?.mappingImgList?.length > 0) {
+    if (
+      !loadPCDFileLoading &&
+      topViewInstance &&
+      currentData?.mappingImgList &&
+      currentData?.mappingImgList?.length > 0
+    ) {
       const defaultViewStyle = {
         fill: 'transparent',
         color: 'green',
@@ -185,7 +191,13 @@ const PointCloud2DView = ({
       });
       setAnnotations2d(newAnnotations2dList);
     }
-  }, [displayPointCloudList, currentData?.mappingImgList, selectedID, highlightAttribute]);
+  }, [
+    displayPointCloudList,
+    currentData?.mappingImgList,
+    selectedID,
+    highlightAttribute,
+    loadPCDFileLoading,
+  ]);
 
   useEffect(() => {
     window.addEventListener('keydown', onKeyDown);
@@ -300,7 +312,7 @@ const PointCloud2DView = ({
             <PointCloudContainer
               className={classNames({
                 [getClassName('point-cloud-2d-container')]: true,
-                [getClassName('point-cloud-3d-containerZoom')]: showEnlarge,
+                [getClassName('point-cloud-container', 'zoom')]: showEnlarge,
               })}
               title={
                 <ContainerTitle
@@ -327,6 +339,7 @@ const PointCloud2DView = ({
                   currentData={currentData}
                   view2dData={item}
                   setSelectedID={setSelectedID}
+                  showEnlarge={showEnlarge}
                 />
               )}
             </PointCloudContainer>

@@ -258,10 +258,9 @@ const Sidebar: React.FC<IProps> = ({
             [`${sidebarCls}`]: true,
             [`${sidebarCls}__pointCloud`]: true,
           })}
-        >
-          <Tabs.TabPane
-            tab={
-              <span onClick={() => showFoldSide()}>
+          tabBarExtraContent={{
+            left: (
+              <span onClick={() => showFoldSide()} style={{ padding: '0px 4px' }}>
                 <img
                   style={{
                     width: '16px',
@@ -272,10 +271,9 @@ const Sidebar: React.FC<IProps> = ({
                   src={menuFoldSvg}
                 />
               </span>
-            }
-            key=''
-          />
-
+            ),
+          }}
+        >
           <Tabs.TabPane
             tab='工具面板'
             key='1'

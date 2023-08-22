@@ -288,7 +288,7 @@ $prefix: bee;
   }
 
   &__level {
-    padding: 28px;
+    padding: 20px 8px;
     border-bottom: 1px solid #eee;
     display: flex;
     justify-content: center;
@@ -1561,7 +1561,7 @@ $headerHeight: 40px;
       }
       &__slider {
         width: 70px;
-        padding: 0 4px;
+        padding: 0 4px 0 8px;
       }
     }
 
@@ -1580,7 +1580,7 @@ $headerHeight: 40px;
     }
   }
 
-  .#{$ptPrefix}-3d-containerZoom {
+  .#{$ptPrefix}-container__zoom {
     position: absolute;
     top: 0px;
     left: 0px;
@@ -1599,6 +1599,10 @@ $headerHeight: 40px;
       align-items: center;
       border-bottom: 1px solid;
       font-size: 14px;
+    }
+
+    .#{$ptPrefix}-highlight-view {
+      display: none;
     }
   }
 
@@ -1815,7 +1819,7 @@ $headerHeight: 40px;
   }
 
   .#{$ptPrefix}-container__rightZoom {
-    position: fixed;
+    position: absolute;
     top: 0px;
     left: 0px;
     width: 100%;
@@ -2128,14 +2132,19 @@ $ptToolHeight: 40px;
 
 $predictTrackingPrefix: #{$prefix}-point-cloud-predict-tracking;
 .#{$predictTrackingPrefix}-container {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  z-index: 1005;
   .#{$predictTrackingPrefix}-container__bar {
-    position: fixed;
+    position: absolute;
     z-index: 100;
     left: 0;
-    right: $menuWidth;
+    right: 0;
     bottom: 40px;
     background: #444;
-    // background: rgba(0, 0, 0, 0.6);
     color: white;
     padding: 20px 24px;
     display: flex;
@@ -2149,7 +2158,6 @@ $predictTrackingPrefix: #{$prefix}-point-cloud-predict-tracking;
       .#{$predictTrackingPrefix}-container__option {
         display: flex;
         .#{$predictTrackingPrefix}-container__button {
-          background: red;
           display: flex;
           justify-content: center;
           align-items: center;

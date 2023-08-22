@@ -59,6 +59,7 @@ export interface AnnotationState {
   resultList: any[];
   stepProgress: number;
   loading: boolean; // 用于图片加载
+  loadPCDFileLoading: boolean; // loadPCDFile
   /** 阻止文件切换后的事件 */
   triggerEventAfterIndexChanged: boolean;
 
