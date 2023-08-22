@@ -4,7 +4,7 @@ import { prefix } from '@/constant';
 import { Spin } from 'antd';
 import { Layout } from 'antd/es';
 import _ from 'lodash';
-import React from 'react';
+import React, { useState } from 'react';
 import AnnotationOperation from './annotationOperation';
 import AnnotationTips from './annotationTips';
 import Sidebar from './sidebar';
@@ -23,6 +23,8 @@ import PreviewResult from '@/components/predictTracking/previewResult';
 import { LabelBeeContext } from '@/store/ctx';
 import { EToolName } from '@/data/enums/ToolType';
 import LLMLayout from './LLMLayout';
+import { LoadingOutlined } from '@ant-design/icons';
+import { useTranslation } from 'react-i18next';
 
 interface IProps {
   path: string;
@@ -74,11 +76,17 @@ const AnnotatedArea: React.FC<AppProps & IProps> = (props) => {
 };
 
 const ViewportProviderLayout = (props: AppProps & IProps & { children: any }) => {
+  const { t } = useTranslation();
   const { stepList, step } = props;
   const currentToolName = getStepConfig(stepList, step)?.tool;
   return (
     <ViewportProvider>
-      <Spin spinning={props.loading}>
+      <Spin
+        spinning={props.loading}
+        indicator={<LoadingOutlined />}
+        tip={<span style={{ marginTop: 200 }}>{t('LoadingTips')}</span>}
+        delay={500}
+      >
         <Layout className={classnames([layoutCls, props.className])} style={props.style?.layout}>
           <header className={`${layoutCls}__header`} style={props.style?.header}>
             <ToolHeader
@@ -99,7 +107,8 @@ const ViewportProviderLayout = (props: AppProps & IProps & { children: any }) =>
 };
 
 const MainView: React.FC<AppProps & IProps> = (props) => {
-  const siderWidth = props.style?.sider?.width;
+  const [siderWidth, setSiderWidth] = useState<number | undefined>(undefined);
+  const propsSiderWidth = props.style?.sider?.width;
   const { stepList, step } = props;
   const currentToolName = getStepConfig(stepList, step)?.tool;
   const isLLMTool = EToolName.LLM === currentToolName;
@@ -117,15 +126,20 @@ const MainView: React.FC<AppProps & IProps> = (props) => {
         {props?.leftSider}
         <Content className={`${layoutCls}__content`}>
           <AnnotatedArea {...props} />
+          <PreviewResult />
         </Content>
         <Sider
           className={`${layoutCls}__side`}
-          width={siderWidth ?? 240}
+          width={siderWidth ?? propsSiderWidth ?? 240}
           style={props.style?.sider}
         >
-          <Sidebar sider={props?.sider} />
+          <Sidebar
+            sider={props?.sider}
+            enableColorPicker={props?.enableColorPicker}
+            setSiderWidth={setSiderWidth}
+            propsSiderWidth={props.style?.sider?.width}
+          />
         </Sider>
-        <PreviewResult />
       </Layout>
     </ViewportProviderLayout>
   );

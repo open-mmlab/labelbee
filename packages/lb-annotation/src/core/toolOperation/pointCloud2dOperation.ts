@@ -35,6 +35,8 @@ class PointCloud2dOperation extends PolygonOperation {
 
   private checkMode: boolean;
 
+  private highlightAttributeList: string[] = []; //
+
   constructor(props: IPolygonOperationProps & IPointCloud2dOperationProps) {
     super(props);
 
@@ -216,8 +218,10 @@ class PointCloud2dOperation extends PolygonOperation {
         }
         const lineColor = this.getPointCloudLineColor(polygon);
         const transformPointList = AxisUtils.changePointListByZoom(polygon.pointList || [], this.zoom, this.currentPos);
+        const isHighlight = this.highlightAttributeList.includes(polygon.attribute);
+
         DrawUtils.drawPolygonWithFillAndLine(this.canvas, transformPointList, {
-          fillColor: 'transparent',
+          fillColor: isHighlight ? lineColor : 'transparent',
           strokeColor: lineColor,
           pointColor: 'white',
           thickness: this.style?.width ?? 2,
@@ -420,16 +424,14 @@ class PointCloud2dOperation extends PolygonOperation {
 
   /**
    * If the operation is triggered internally, it will emit validUpdate.
-   *
-   * The Invalid update needs to be added a params.
-   * @override
-   * @param id
-   * @param forbidEmit
-   * @returns
+   * @param {string} id - The ID of the polygon to update.
+   * @param {boolean} [isUpdate=false] - The Invalid update needs to be added a params.
+   * @param {boolean} [valid] - The new validity status of the polygon.
+   * @returns {void}
    */
-  public setPolygonValidAndRender(id: string, isUpdate = false) {
+  public setPolygonValidAndRender(id: string, isUpdate = false, valid?: boolean) {
     if (isUpdate) {
-      super.setPolygonValidAndRender(id);
+      super.setPolygonValidAndRender(id, valid);
       return;
     }
 
@@ -493,6 +495,11 @@ class PointCloud2dOperation extends PolygonOperation {
       }
     }
   };
+
+  public setHighlightAttribute(attribute: string) {
+    this.highlightAttributeList = [attribute];
+    this.render();
+  }
 }
 
 export default PointCloud2dOperation;

@@ -18,7 +18,7 @@ const DEFAULT_BOX_INFO_STYLE = {
   backgroundColor: 'rgba(153, 153, 153, 0.3)',
   padding: '8px 10px',
   zIndex: 20,
-  fontSize: 14,
+  fontSize: 12,
 };
 
 /**
@@ -84,15 +84,18 @@ export const SizeInfoForView = ({ perspectiveView }: { perspectiveView: EPerspec
 export const BoxInfos = ({
   checkMode,
   config,
+  style,
 }: {
   checkMode?: boolean;
   config: IPointCloudConfig;
+  style?: React.CSSProperties;
 }) => {
   const ptCtx = React.useContext(PointCloudContext);
   const { selectedBox } = useSingleBox();
   const [infos, setInfos] = useState<Array<{ label: string; value: string }>>([]);
   const trans = useTranslation();
   const { t, i18n } = trans;
+  const isShowOnHeader = style;
 
   useEffect(() => {
     if (!selectedBox) {
@@ -101,8 +104,21 @@ export const BoxInfos = ({
     const { length, width, height, rotation_y } = PointCloudUtils.transferBox2Kitti(
       selectedBox.info,
     );
+    const { x, y, z } = selectedBox.info.center;
 
     let infos = [
+      {
+        label: 'x',
+        value: x.toFixed(DECIMAL_PLACES),
+      },
+      {
+        label: 'y',
+        value: y.toFixed(DECIMAL_PLACES),
+      },
+      {
+        label: 'z',
+        value: z.toFixed(DECIMAL_PLACES),
+      },
       {
         label: t('Length'),
         value: length.toFixed(DECIMAL_PLACES),
@@ -148,16 +164,34 @@ export const BoxInfos = ({
   if (selectedBox) {
     return (
       <div
-        style={{
-          position: 'absolute',
-          ...DEFAULT_BOX_INFO_STYLE,
-          right: 8,
-          bottom: 8,
-        }}
+        style={
+          style
+            ? style
+            : {
+                position: 'absolute',
+                ...DEFAULT_BOX_INFO_STYLE,
+                right: 8,
+                bottom: 8,
+              }
+        }
       >
-        {infos.map((i) => (
-          <div key={i.label}>{`${i.label}: ${i.value}`}</div>
-        ))}
+        {infos.map((i) => {
+          if (isShowOnHeader) {
+            return (
+              <div key={i.label} style={{ margin: '0px 4px' }}>
+                {`${i.label}: ${i.value}`}
+              </div>
+            );
+          }
+          return (
+            <div key={i.label}>
+              <span style={{ width: '38px', display: 'inline-block', textAlign: 'end' }}>
+                {i.label}
+              </span>
+              : <span>{i.value}</span>
+            </div>
+          );
+        })}
       </div>
     );
   }

@@ -1863,7 +1863,6 @@ class LineToolOperation extends BasicToolOperation {
   };
 
   public setResult(lineList: ILine[]) {
-    this.setNoneStatus();
     this.setLineList(lineList);
     this.render();
   }

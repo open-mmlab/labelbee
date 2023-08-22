@@ -240,7 +240,16 @@
     "Yes":"Yes",
     "No":"No",
     "AdditionalContent":"AdditionalContent",
-    "Submit":"Submit"
+    "Submit":"Submit",
+    "DragAndDrop":"Drag and drap",
+    "DefaultSize":"Click to use the default size.",
+    "NormalSizeRange":"Normal size range",
+    "NormalCenterPointRange":"Normal center point range",
+    "LoadingTips": "Wait a minute, Data Loading ~",
+    "Unlocked":"Unlocked",
+    "Locked":"Locked",
+    "And":"And",
+    "Or":"Or"
   },
   "cn": {
     "TextInput": "文本输入",
@@ -483,6 +492,15 @@
     "Yes":"是",
     "No":"否",
     "AdditionalContent":"（选填）请填写任何你对答案的评价或其他补充内容",
-    "Submit":"提交"
+    "Submit":"提交",
+    "DragAndDrop":"按住拖动",
+    "DefaultSize":"点击图标以使用默认尺寸",
+    "NormalSizeRange":"正常尺寸范围",
+    "NormalCenterPointRange":"正常中心点范围",
+    "LoadingTips": "数据加载中~请稍后",
+    "Unlocked":"未开启",
+    "Locked":"已开启",
+    "And":"且",
+    "Or":"或"
   }
 }

@@ -613,4 +613,45 @@ export default class MathUtils {
     });
     return { connectionPoints };
   }
+
+  /**
+   * Calculate new coordinates by given new length and width
+   * @param coordinates
+   * @param newWidth
+   * @param newHeight
+   */
+  public static getModifiedRectangleCoordinates(coordinates: ICoordinate[], newWidth: number, newHeight: number) {
+    if (coordinates.length !== 4) {
+      throw new Error('Invalid number of coordinates. Four coordinates are required.');
+    }
+
+    const fixedPoint = coordinates[0];
+    const secondPoint = coordinates[1];
+    const thirdPoint = coordinates[2];
+
+    // Calculate the original length and width
+    const originalWidth = Math.sqrt((secondPoint.x - fixedPoint.x) ** 2 + (secondPoint.y - fixedPoint.y) ** 2);
+    const originalHeight = Math.sqrt((thirdPoint.x - secondPoint.x) ** 2 + (thirdPoint.y - secondPoint.y) ** 2);
+
+    // Calculate scaling factors for new length and width
+    const lengthScaleFactor = newWidth / originalWidth;
+    const widthScaleFactor = newHeight / originalHeight;
+
+    const newSecondPoint = {
+      x: fixedPoint.x + (secondPoint.x - fixedPoint.x) * lengthScaleFactor,
+      y: fixedPoint.y + (secondPoint.y - fixedPoint.y) * lengthScaleFactor,
+    };
+
+    const newThirdPoint = {
+      x: newSecondPoint.x + (thirdPoint.x - secondPoint.x) * widthScaleFactor,
+      y: newSecondPoint.y + (thirdPoint.y - secondPoint.y) * widthScaleFactor,
+    };
+
+    const newFourthPoint = {
+      x: fixedPoint.x + (newThirdPoint.x - secondPoint.x),
+      y: fixedPoint.y + (newThirdPoint.y - secondPoint.y),
+    };
+
+    return [fixedPoint, newSecondPoint, newThirdPoint, newFourthPoint];
+  }
 }

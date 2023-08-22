@@ -1,206 +1,354 @@
 import { getClassName } from '@/utils/dom';
-import React, { useCallback, useContext, useEffect, useRef, useState } from 'react';
+import React, { useContext, useEffect, useState } from 'react';
 import { PointCloudContainer } from './PointCloudLayout';
-import AnnotationView from '@/components/AnnotationView';
 import { PointCloudContext } from './PointCloudContext';
 import { connect } from 'react-redux';
-import { LeftOutlined, RightOutlined } from '@ant-design/icons';
-import useSize from '@/hooks/useSize';
-import { useSingleBox } from './hooks/useSingleBox';
-import { ViewOperation, pointCloudLidar2image } from '@labelbee/lb-annotation';
-import { useTranslation } from 'react-i18next';
+
+import { pointCloudLidar2image, cKeyCode } from '@labelbee/lb-annotation';
 import { LabelBeeContext } from '@/store/ctx';
 import { a2MapStateToProps, IA2MapStateProps } from '@/store/annotation/map';
-import { toolStyleConverter } from '@labelbee/lb-utils';
+import { ICalib, IPointCloudBox, IPolygonPoint, toolStyleConverter } from '@labelbee/lb-utils';
+import PointCloud2DSingleView from './PointCloud2DSingleView';
+import TitleButton from './components/TitleButton';
+import { LeftOutlined } from '@ant-design/icons';
+import classNames from 'classnames';
+import EscSvg from '@/assets/annotation/common/icon_esc.svg';
+import LeftSquareOutlined from '@/assets/annotation/common/icon_left_squareOutlined.svg';
+import RightSquareOutlined from '@/assets/annotation/common/icon_right_squareOutlined.svg';
+import { IMappingImg } from '@/types/data';
 
-const Toolbar = ({
-  onNext,
-  onPrev,
-  imgLength,
-  imgIndex,
+// TODO, It will be deleted when the exported type of lb-annotation is work.
+export interface IAnnotationDataTemporarily {
+  type: string;
+  annotation: {
+    id: number | string;
+    pointList: IPolygonPoint[];
+    color: string;
+    stroke: string;
+    fill: string;
+  };
+}
+
+interface ITransferViewData {
+  type: string;
+  pointList: {
+    id: string;
+    x: number;
+    y: number;
+  }[];
+}
+
+export interface IAnnotationData2dView {
+  annotations: IAnnotationDataTemporarily[];
+  url: string;
+  calName?: string;
+  calib: ICalib;
+}
+
+const EKeyCode = cKeyCode.default;
+
+interface IProps extends IA2MapStateProps {
+  thumbnailWidth?: number;
+  isEnlargeTopView?: boolean;
+}
+
+const ContainerTitle = ({
+  showEnlarge,
+  isEnlargeTopView,
+  data,
+  setIsEnlarge,
+  setCurIndex,
+  curIndex = 0,
+  index,
+  annotations2d,
 }: {
-  onNext: () => void;
-  onPrev: () => void;
-  imgLength: number;
-  imgIndex: number;
+  showEnlarge: boolean;
+  isEnlargeTopView?: boolean;
+  data: IAnnotationData2dView;
+  setIsEnlarge: (v: boolean) => void;
+  setCurIndex: (v: number | undefined) => void;
+  curIndex: number | undefined;
+  index: number;
+  annotations2d: IAnnotationData2dView[];
 }) => {
+  if (isEnlargeTopView) {
+    return (
+      <TitleButton
+        title={data?.calName}
+        style={{ background: 'rgba(0, 0, 0, 0.74)', color: '#FFFFFF' }}
+      />
+    );
+  }
+  if (showEnlarge) {
+    return (
+      <div style={{ display: 'flex', alignItems: 'center' }}>
+        <LeftOutlined
+          style={{ cursor: 'pointer', marginRight: '12px' }}
+          onClick={() => {
+            setIsEnlarge(false);
+            setCurIndex(undefined);
+          }}
+        />
+        <span>{data?.calName}</span>
+        <span style={{ marginLeft: '8px' }}>
+          {curIndex + 1}/{annotations2d?.length}
+        </span>
+      </div>
+    );
+  }
   return (
-    <div>
-      <LeftOutlined onClick={onPrev} />
-      <span>
-        {' '}
-        {imgIndex + 1} / {imgLength}{' '}
-      </span>
-
-      <RightOutlined onClick={onNext} />
-    </div>
+    <TitleButton
+      title={data?.calName}
+      onClick={() => {
+        setIsEnlarge(true);
+        setCurIndex(index);
+      }}
+      style={{ background: 'rgba(0, 0, 0, 0.74)', color: '#FFFFFF' }}
+    />
   );
 };
 
-// TODO, It will be deleted when the exported type of lb-annotation is work.
-interface IAnnotationDataTemporarily {
-  type: string;
-  annotation: any;
-}
-
-const PointCloud2DView = ({ currentData, config }: IA2MapStateProps) => {
-  const [annotations2d, setAnnotations2d] = useState<IAnnotationDataTemporarily[]>([]);
+const PointCloud2DView = ({
+  currentData,
+  config,
+  thumbnailWidth,
+  isEnlargeTopView,
+  highlightAttribute,
+  loadPCDFileLoading,
+}: IProps) => {
+  const [annotations2d, setAnnotations2d] = useState<IAnnotationData2dView[]>([]);
   const { topViewInstance, displayPointCloudList } = useContext(PointCloudContext);
-  const [selectedID, setSelectedID] = useState('');
-  const [mappingIndex, setMappingIndex] = useState(0);
-  const ref = useRef(null);
-  const viewRef = useRef<{ toolInstance: ViewOperation }>();
-  const { selectedBox } = useSingleBox();
-  const size = useSize(ref);
-  const { t } = useTranslation();
-
-  const mappingData = currentData?.mappingImgList?.[mappingIndex];
+  const [selectedID, setSelectedID] = useState<number | string>('');
+  const [isEnlarge, setIsEnlarge] = useState<boolean>(false);
+  const [curIndex, setCurIndex] = useState<number | undefined>(undefined);
 
   useEffect(() => {
-    setMappingIndex(0);
-  }, [currentData]);
-
-  useEffect(() => {
-    if (topViewInstance && mappingData) {
+    if (
+      !loadPCDFileLoading &&
+      topViewInstance &&
+      currentData?.mappingImgList &&
+      currentData?.mappingImgList?.length > 0
+    ) {
       const defaultViewStyle = {
         fill: 'transparent',
         color: 'green',
       };
+      let newAnnotations2dList: IAnnotationData2dView[] = [];
+      currentData?.mappingImgList.forEach((mappingData: IMappingImg) => {
+        const newAnnotations2d: IAnnotationDataTemporarily[] = displayPointCloudList.reduce(
+          (acc: IAnnotationDataTemporarily[], pointCloudBox: IPointCloudBox) => {
+            /**
+             * Is need to create range.
+             * 1. pointCloudBox is selected;
+             * 2. HighlightAttribute is same with pointCloudBox's attribute.
+             */
+            const createRange =
+              pointCloudBox.id === selectedID || highlightAttribute === pointCloudBox.attribute;
+            const { transferViewData: viewDataPointList, viewRangePointList } =
+              pointCloudLidar2image(pointCloudBox, mappingData.calib, {
+                createRange,
+              });
 
-      const newAnnotations2d: IAnnotationDataTemporarily[] = displayPointCloudList.reduce(
-        (acc: IAnnotationDataTemporarily[], pointCloudBox) => {
-          const { transferViewData: viewDataPointList, viewRangePointList } = pointCloudLidar2image(
-            pointCloudBox,
-            mappingData.calib,
-            {
-              createRange: pointCloudBox.id === selectedID,
-            },
-          );
+            const stroke = toolStyleConverter.getColorFromConfig(
+              { attribute: pointCloudBox.attribute },
+              {
+                ...config,
+                attributeConfigurable: true,
+              },
+              {},
+            )?.stroke;
+            const viewDataPointLists = formatViewDataPointList({
+              viewDataPointList,
+              pointCloudBox,
+              defaultViewStyle,
+              stroke,
+            });
+            const newArr = [...acc, ...viewDataPointLists];
 
-          const stroke = toolStyleConverter.getColorFromConfig(
-            { attribute: pointCloudBox.attribute },
-            {
-              ...config,
-              attributeConfigurable: true,
-            },
-            {},
-          )?.stroke;
-
-          const newArr = [
-            ...acc,
-            ...viewDataPointList!.map((v: any) => {
-              return {
-                type: v.type,
+            if (viewRangePointList?.length > 0) {
+              newArr.push({
+                type: 'polygon',
                 annotation: {
-                  id: pointCloudBox.id,
-                  pointList: v.pointList,
+                  id: selectedID,
+                  pointList: viewRangePointList,
                   ...defaultViewStyle,
                   stroke,
+                  fill: 'rgba(255, 255, 255, 0.6)',
                 },
-              };
-            }),
-          ];
+              });
+            }
 
-          if (pointCloudBox.id === selectedID && viewRangePointList.length > 0) {
-            newArr.push({
-              type: 'polygon',
-              annotation: {
-                id: selectedID,
-                pointList: viewRangePointList,
-                ...defaultViewStyle,
-                stroke,
-                fill: 'rgba(255, 255, 255, 0.6)',
-              },
-            });
-          }
-
-          return newArr;
-        },
-        [],
-      );
-
-      setAnnotations2d(newAnnotations2d);
+            return newArr;
+          },
+          [],
+        );
+        newAnnotations2dList.push({
+          annotations: newAnnotations2d,
+          url: mappingData?.url,
+          calName: mappingData.calib?.calName,
+          calib: mappingData?.calib,
+        });
+      });
+      setAnnotations2d(newAnnotations2dList);
     }
-  }, [displayPointCloudList, mappingData, selectedID]);
+  }, [
+    displayPointCloudList,
+    currentData?.mappingImgList,
+    selectedID,
+    highlightAttribute,
+    loadPCDFileLoading,
+  ]);
 
+  useEffect(() => {
+    window.addEventListener('keydown', onKeyDown);
+    return () => {
+      window.removeEventListener('keydown', onKeyDown);
+    };
+  }, [curIndex]);
+
+  const onKeyDown = (event: KeyboardEvent) => {
+    const { keyCode } = event;
+    switch (keyCode) {
+      case EKeyCode.Esc:
+        if (isEnlarge) {
+          setIsEnlarge(false);
+        }
+        break;
+      case EKeyCode.Left:
+        lastPage();
+        break;
+
+      case EKeyCode.Right:
+        nextPage();
+        break;
+    }
+  };
+
+  const lastPage = () => {
+    if (curIndex === undefined || !isEnlarge) {
+      return;
+    }
+    if (Number(curIndex) > 0) {
+      setCurIndex(curIndex - 1);
+    }
+  };
+
+  const nextPage = () => {
+    if (curIndex === undefined || !isEnlarge) {
+      return;
+    }
+    if (Number(curIndex) < annotations2d?.length - 1) {
+      setCurIndex(curIndex + 1);
+    }
+  };
+
+  const formatViewDataPointList = ({
+    viewDataPointList,
+    pointCloudBox,
+    defaultViewStyle,
+    stroke,
+  }: {
+    viewDataPointList: ITransferViewData[];
+    pointCloudBox: IPointCloudBox;
+    defaultViewStyle: {
+      fill: string;
+      color: string;
+    };
+    stroke: string;
+  }) => {
+    return viewDataPointList!.map((v: ITransferViewData) => {
+      return {
+        type: v.type,
+        annotation: {
+          id: pointCloudBox.id,
+          pointList: v.pointList,
+          ...defaultViewStyle,
+          stroke,
+        },
+      };
+    });
+  };
   const hiddenData =
     !currentData || !currentData?.mappingImgList || !(currentData?.mappingImgList?.length > 0);
 
-  const afterImgOnLoad = useCallback(() => {
-    const toolInstance = viewRef.current?.toolInstance;
-
-    // Clear Selected.
-    setSelectedID('');
-
-    if (!selectedBox || !toolInstance) {
-      return;
-    }
-    const selected2data = annotations2d.find((v) => v.annotation.id === selectedBox.info.id);
-
-    let id = '';
-    if (selected2data?.annotation.pointList?.length > 0) {
-      toolInstance.focusPositionByPointList(selected2data?.annotation.pointList);
-      id = selectedBox.info.id;
-      setSelectedID(id);
-    }
-  }, [selectedBox, viewRef.current, annotations2d, mappingIndex]);
-
-  /**
-   * If the status is updated, it needs to
-   */
-  useEffect(() => {
-    afterImgOnLoad();
-  }, [afterImgOnLoad]);
-
-  return (
-    <PointCloudContainer
-      className={getClassName('point-cloud-2d-container')}
-      title={t('2DView')}
-      toolbar={
-        hiddenData ? undefined : (
-          <Toolbar
-            imgIndex={mappingIndex}
-            imgLength={currentData.mappingImgList?.length ?? 0}
-            onNext={() => {
-              if (!currentData || !currentData?.mappingImgList) {
-                return;
-              }
-
-              if (mappingIndex >= currentData?.mappingImgList?.length - 1) {
-                return;
-              }
-              setMappingIndex((v) => v + 1);
-            }}
-            onPrev={() => {
-              if (mappingIndex <= 0) {
-                return;
-              }
-              setMappingIndex((v) => v - 1);
-            }}
-          />
-        )
-      }
-      style={hiddenData ? { display: 'none' } : { display: 'flex', minHeight: 200, maxHeight: 500 }}
+  const PointCloud2DTitle = (
+    <div
+      style={{
+        display: 'flex',
+        alignItems: 'center',
+        fontSize: '14px',
+      }}
     >
-      <div className={getClassName('point-cloud-2d-image')} ref={ref}>
-        <AnnotationView
-          src={mappingData?.url ?? ''}
-          annotations={annotations2d}
-          size={size}
-          ref={viewRef}
-          globalStyle={{
-            display: hiddenData ? 'none' : 'block',
-          }}
-          afterImgOnLoad={afterImgOnLoad}
-          zoomInfo={{
-            min: 0.01,
-            max: 1000,
-            ratio: 0.4,
-          }}
-        />
-      </div>
-    </PointCloudContainer>
+      <img
+        src={LeftSquareOutlined}
+        style={{ height: '24px', marginRight: '8px', cursor: 'pointer' }}
+        onClick={() => lastPage()}
+      />
+      <span style={{ marginRight: '12px' }}>键盘左键上一张</span>
+      <span style={{ margin: '0px 8px 0px 12px' }}>键盘右键上一张</span>
+      <img
+        src={RightSquareOutlined}
+        style={{ height: '24px', marginRight: '12px', cursor: 'pointer' }}
+        onClick={() => nextPage()}
+      />
+      <img
+        src={EscSvg}
+        style={{ height: '24px', margin: '0px 8px 0px 12px', cursor: 'pointer' }}
+        onClick={() => {
+          setIsEnlarge(false);
+          setCurIndex(undefined);
+        }}
+      />
+      <span>键退出</span>
+    </div>
   );
+
+  if (annotations2d?.length > 0) {
+    return (
+      <>
+        {annotations2d.map((item: IAnnotationData2dView, index: number) => {
+          const showEnlarge = isEnlarge && index === curIndex;
+          return (
+            <PointCloudContainer
+              className={classNames({
+                [getClassName('point-cloud-2d-container')]: true,
+                [getClassName('point-cloud-container', 'zoom')]: showEnlarge,
+              })}
+              title={
+                <ContainerTitle
+                  showEnlarge={showEnlarge}
+                  isEnlargeTopView={isEnlargeTopView}
+                  data={item}
+                  setIsEnlarge={setIsEnlarge}
+                  setCurIndex={setCurIndex}
+                  curIndex={curIndex}
+                  index={index}
+                  annotations2d={annotations2d}
+                />
+              }
+              titleOnSurface={!showEnlarge}
+              style={{
+                display: hiddenData ? 'none' : 'flex',
+                width: showEnlarge ? '100%' : thumbnailWidth,
+              }}
+              key={index}
+              toolbar={PointCloud2DTitle}
+            >
+              {item?.annotations && item?.url && (
+                <PointCloud2DSingleView
+                  currentData={currentData}
+                  view2dData={item}
+                  setSelectedID={setSelectedID}
+                  showEnlarge={showEnlarge}
+                />
+              )}
+            </PointCloudContainer>
+          );
+        })}
+      </>
+    );
+  }
+  return null;
 };
 
 export default connect(a2MapStateToProps, null, null, { context: LabelBeeContext })(

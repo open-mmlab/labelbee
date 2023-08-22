@@ -466,17 +466,23 @@ class PolygonOperation extends BasicToolOperation {
     }
   }
 
-  public setPolygonValidAndRender(id: string) {
+  /**
+   * Sets the validity of a polygon with the given ID and renders the updated polygon list.
+   * @param {string} id - The ID of the polygon to update.
+   * @param {boolean} [valid] - The new validity status of the polygon. If not provided, the validity will be toggled.
+   * @returns {void}
+   */
+  public setPolygonValidAndRender(id: string, valid?: boolean) {
     if (!id) {
       return;
     }
 
     const newPolygonList = this.polygonList.map((polygon) => {
       if (polygon.id === id) {
-        const valid = polygon?.valid ?? true; // Valid Default is True.
+        const currentValid = polygon?.valid ?? true; // Valid Default is True.
         return {
           ...polygon,
-          valid: !valid,
+          valid: valid ?? !currentValid,
         };
       }
 

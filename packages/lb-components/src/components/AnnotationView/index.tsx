@@ -38,7 +38,7 @@ interface IProps {
 }
 
 const DEFAULT_SIZE = {
-  width: 500,
+  width: 455,
   height: 100, // Most Important, If the outer size is smaller than this will not take effect by default
 };
 

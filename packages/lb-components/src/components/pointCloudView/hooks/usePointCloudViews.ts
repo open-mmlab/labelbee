@@ -8,6 +8,7 @@ import {
   PointCloud,
   MathUtils,
   getCuboidFromPointCloudBox,
+  EPointCloudName,
 } from '@labelbee/lb-annotation';
 import {
   IPointCloudBox,
@@ -19,6 +20,8 @@ import {
   UpdatePolygonByDragList,
   ILine,
   DEFAULT_SPHERE_PARAMS,
+  IDefaultSize,
+  IPolygonData,
 } from '@labelbee/lb-utils';
 import { useContext } from 'react';
 import { PointCloudContext } from '../PointCloudContext';
@@ -30,7 +33,11 @@ import { useDispatch, useSelector } from '@/store/ctx';
 import { AppState } from '@/store';
 import StepUtils from '@/utils/StepUtils';
 import { jsonParser } from '@/utils';
-import { SetPointCloudLoading } from '@/store/annotation/actionCreators';
+import {
+  PreDataProcess,
+  SetPointCloudLoading,
+  SetLoadPCDFileLoading,
+} from '@/store/annotation/actionCreators';
 import { message } from 'antd';
 import { useTranslation } from 'react-i18next';
 import { useHistory } from './useHistory';
@@ -580,6 +587,7 @@ export const synchronizeTopView = (
   const oldPolygon = newPolygonList.find((v) => v.id === newPolygon.id);
   if (oldPolygon) {
     oldPolygon.pointList = polygon2d;
+    oldPolygon.valid = newBoxParams.valid ?? true;
   } else {
     newPolygonList.push({
       id: newPolygon.id,
@@ -607,6 +615,7 @@ export const usePointCloudViews = () => {
     pointCloudBoxList,
     pointCloudSphereList,
     hideAttributes,
+    setHighlight2DDataList,
   } = ptCtx;
   const { addHistory, initHistory, pushHistoryUnderUpdatePolygon, pushHistoryUnderUpdateLine } =
     useHistory();
@@ -726,7 +735,7 @@ export const usePointCloudViews = () => {
     const polygonOperation = topViewInstance?.toolInstance;
 
     const newPolygon = { ...polygon };
-    const { boxParams, newPointList } = topViewPolygon2PointCloud(
+    let { boxParams, newPointList } = topViewPolygon2PointCloud(
       newPolygon,
       size,
       topViewPointCloud,
@@ -734,6 +743,17 @@ export const usePointCloudViews = () => {
       extraData,
       intelligentFit,
     );
+
+    const nextResult = dispatch(
+      PreDataProcess({
+        tool: EPointCloudName.PointCloud,
+        dataList: [boxParams],
+        stepConfig: config,
+        action: 'viewUpdateBox',
+      }),
+    ) as unknown as IPointCloudBox[];
+
+    boxParams = nextResult[0];
 
     // If the count is less than lowerLimitPointsNumInBox, needs to delete it
     if (
@@ -760,7 +780,13 @@ export const usePointCloudViews = () => {
     } else {
       setSelectedIDs(boxParams.id);
       polygonOperation.selection.setSelectedIDs(newPolygon.id);
-      syncPointCloudViews(PointCloudView.Top, newPolygon, boxParams, zoom, newPointCloudList);
+      syncPointCloudViews({
+        omitView: PointCloudView.Top,
+        polygon: newPolygon,
+        boxParams,
+        zoom,
+        newPointCloudBoxList: newPointCloudList,
+      });
       if (intelligentFit) {
         synchronizeTopView(boxParams, newPolygon, topViewInstance, mainViewInstance);
       }
@@ -790,7 +816,12 @@ export const usePointCloudViews = () => {
       operation?.selection?.setSelectedIDs(selectedIDs[0]);
       const polygon = operation.selectedPolygon;
       if (selectedIDs.length === 1 && boxParams) {
-        syncPointCloudViews(PointCloudView.Top, polygon, boxParams, undefined, newPointCloudList);
+        syncPointCloudViews({
+          omitView: PointCloudView.Top,
+          polygon,
+          boxParams,
+          newPointCloudBoxList: newPointCloudList,
+        });
         return;
       }
     }
@@ -823,7 +854,7 @@ export const usePointCloudViews = () => {
   const viewUpdateBox = (newPolygon: any, originPolygon: any, fromView: string) => {
     if (selectedPointCloudBox) {
       let transfer2PointCloud;
-      let newBoxParams;
+      let newBoxParams: IPointCloudBox;
 
       // Switch the right function.
       switch (fromView) {
@@ -845,6 +876,21 @@ export const usePointCloudViews = () => {
         selectedPointCloudBox,
         sideViewInstance.pointCloudInstance,
       );
+
+      const nextResult = dispatch(
+        PreDataProcess({
+          tool: EPointCloudName.PointCloud,
+          dataList: [newBoxParams],
+          stepConfig: config,
+          action: 'viewUpdateBox',
+        }),
+      ) as unknown as IPointCloudBox[];
+      const newBox = nextResult[0];
+      // 如果更新后的box valid没有变化，则不更新当前视图
+      const updateCurrentView = newBoxParams.valid !== newBox.valid;
+
+      newBoxParams = newBox;
+
       // Update count
       if (mainViewInstance) {
         const { count } = mainViewInstance.getSensesPointZAxisInPolygon(
@@ -861,9 +907,20 @@ export const usePointCloudViews = () => {
         };
       }
 
-      const newPointCloudList = updateSelectedBox(newBoxParams);
-      syncPointCloudViews(fromView, newPolygon, newBoxParams, undefined, newPointCloudList);
-      return newPointCloudList;
+      const newPointCloudBoxList = updateSelectedBox(newBoxParams);
+
+      newBoxParams = newPointCloudBoxList.find(
+        (item) => item.id === newBoxParams.id,
+      ) as IPointCloudBox;
+
+      syncPointCloudViews({
+        omitView: updateCurrentView ? undefined : fromView,
+        polygon: newPolygon,
+        boxParams: newBoxParams,
+        newPointCloudBoxList,
+      });
+
+      return newPointCloudBoxList;
     }
   };
 
@@ -956,7 +1013,7 @@ export const usePointCloudViews = () => {
       return;
     }
 
-    const updatePointCloudList: IPointCloudBox[] = updateList.map(({ newPolygon: polygon }) => {
+    let updatePointCloudList: IPointCloudBox[] = updateList.map(({ newPolygon: polygon }) => {
       const pointCloudBox = getPointCloudByID(polygon.id);
 
       const { boxParams } = topViewPolygon2PointCloud(
@@ -969,6 +1026,15 @@ export const usePointCloudViews = () => {
       return boxParams;
     });
 
+    updatePointCloudList = dispatch(
+      PreDataProcess({
+        tool: EPointCloudName.PointCloud,
+        dataList: updatePointCloudList,
+        stepConfig: config,
+        action: 'viewUpdateBox',
+      }),
+    ) as unknown as IPointCloudBox[];
+
     /**
      * If single target updated, use syncPointCloudViews to sync all views and render
      * If multi targets updated, use updateSelectedBoxes and update highlight by syncAllViewPointCloudColor
@@ -977,13 +1043,11 @@ export const usePointCloudViews = () => {
       const { newPolygon: polygon } = updateList[0];
       const newPointCloudBoxList = updateSelectedBoxes(updatePointCloudList);
 
-      syncPointCloudViews(
-        PointCloudView.Top,
+      syncPointCloudViews({
         polygon,
-        updatePointCloudList[0],
-        undefined,
+        boxParams: updatePointCloudList[0],
         newPointCloudBoxList,
-      );
+      });
     } else {
       const newPointCloudBoxList = updateSelectedBoxes(updatePointCloudList);
       if (newPointCloudBoxList) {
@@ -992,6 +1056,49 @@ export const usePointCloudViews = () => {
     }
   };
 
+  const updateViewsByDefaultSize = (defaultSize: IDefaultSize) => {
+    if (selectedBox) {
+      const widthDefault = Number(defaultSize.widthDefault)
+      const depthDefault = Number(defaultSize.depthDefault)
+      const heightDefault = Number(defaultSize.heightDefault)
+      const selectedBoxTrackID = selectedBox?.info.trackID;
+      const polygonList = topViewInstance?.toolInstance?.polygonList;
+      const originPolygon = polygonList.find(
+        (v: IPolygonData) => v?.trackID === selectedBoxTrackID,
+      );
+      const size = {
+        width: topViewInstance?.toolInstance?.basicImgInfo?.width,
+        height: topViewInstance?.toolInstance?.basicImgInfo?.height,
+      }
+      const pointsInWorld = originPolygon.pointList.map((p: ICoordinate) => PointCloudUtils.transferCanvas2World(p, size))
+      const newPolygonPoints = MathUtils.getModifiedRectangleCoordinates(pointsInWorld, heightDefault, widthDefault)
+      const point1 = newPolygonPoints[0]
+      const point3 = newPolygonPoints[2]
+      const centerPoint = MathUtils.getLineCenterPoint([point1, point3]);
+      const bottomZ = selectedBox.info.center.z - selectedBox.info.depth / 2
+      // attention: widthDefault means the length of line between point1 and point2,
+      // so the height of box should be widthDefault, as same as in topViewPolygon2PointCloud("height = MathUtils.getLineLength(point1, point2)")
+      const newBoxParams: IPointCloudBox = {
+        ...selectedBox.info,
+        center: {
+          x: centerPoint.x,
+          y: centerPoint.y,
+          z: bottomZ + (depthDefault / 2)
+        },
+        width: widthDefault,
+        height: heightDefault,
+        depth: depthDefault,
+        valid: true,
+      };
+      const newPointCloudBoxList = updateSelectedBoxes([newBoxParams]);
+      syncPointCloudViews({
+        omitView: PointCloudView['3D'],
+        polygon: originPolygon,
+        boxParams: newBoxParams,
+        newPointCloudBoxList,
+      });
+    }
+  };
   /**
    * Sync views after adding a point
    */
@@ -1035,14 +1142,23 @@ export const usePointCloudViews = () => {
    * @param polygon
    * @param boxParams
    */
-  const syncPointCloudViews = async (
-    omitView: string,
-    polygon: any,
-    boxParams: IPointCloudBox,
-    zoom?: number,
-    newPointCloudBoxList?: IPointCloudBox[],
-  ) => {
+  interface ISyncPointCloudViews {
+    // 如果不传omitView，则同步所有视图
+    omitView?: string;
+    polygon: any;
+    boxParams: IPointCloudBox;
+    zoom?: number;
+    newPointCloudBoxList?: IPointCloudBox[];
+  }
+
+  const syncPointCloudViews = async (params: ISyncPointCloudViews) => {
+    const { omitView, polygon, boxParams, zoom, newPointCloudBoxList } = params;
+
     const dataUrl = currentData?.url;
+
+    /**
+     * Highlight New Data.
+     */
     if (newPointCloudBoxList) {
       // Wait for the mainPointCloudData.
       await ptCtx.syncAllViewPointCloudColor(newPointCloudBoxList);
@@ -1100,7 +1216,13 @@ export const usePointCloudViews = () => {
       return;
     }
 
+    /**
+     * Init Cache Data.
+     */
+    setHighlight2DDataList([]);
+
     SetPointCloudLoading(dispatch, true);
+    SetLoadPCDFileLoading(dispatch, true);
     await mainViewInstance.loadPCDFile(newData.url, config?.radius ?? DEFAULT_RADIUS);
 
     mainViewInstance?.clearAllBox();
@@ -1108,27 +1230,8 @@ export const usePointCloudViews = () => {
 
     let boxParamsList: any[] = [];
     let lineList: any[] = [];
-    let polygonList = [];
+    let polygonList: any[] = [];
     let sphereParamsList: IPointCloudSphere[] = [];
-    if (newData.result) {
-      boxParamsList = PointCloudUtils.getBoxParamsFromResultList(newData.result);
-      polygonList = PointCloudUtils.getPolygonListFromResultList(newData.result);
-      lineList = PointCloudUtils.getLineListFromResultList(newData.result);
-      sphereParamsList = PointCloudUtils.getSphereParamsFromResultList(newData.result);
-
-      // Add Init Box
-      mainViewInstance?.generateBoxes(boxParamsList);
-      mainViewInstance?.generateSpheres(sphereParamsList);
-
-      ptCtx.syncAllViewPointCloudColor(boxParamsList);
-    }
-
-    initHistory({
-      pointCloudBoxList: boxParamsList,
-      polygonList,
-      lineList,
-      pointCloudSphereList: sphereParamsList,
-    });
 
     mainViewInstance.updateTopCamera();
 
@@ -1149,7 +1252,33 @@ export const usePointCloudViews = () => {
     topViewInstance.updateData(newData.url, newData.result, {
       radius: config?.radius ?? DEFAULT_RADIUS,
     });
+
+    if (newData.result) {
+      boxParamsList = PointCloudUtils.getBoxParamsFromResultList(newData.result);
+      polygonList = PointCloudUtils.getPolygonListFromResultList(newData.result);
+      lineList = PointCloudUtils.getLineListFromResultList(newData.result);
+      sphereParamsList = PointCloudUtils.getSphereParamsFromResultList(newData.result);
+
+      // Add Init Box
+      mainViewInstance?.generateBoxes(boxParamsList);
+      mainViewInstance?.generateSpheres(sphereParamsList);
+
+      /**
+       * Use [] to replace the default highlight2DDataList.
+       * Need to await syncAllViewPointCloudColor before setLoading(false).
+       */
+      await ptCtx.syncAllViewPointCloudColor(boxParamsList, []);
+    }
+
+    initHistory({
+      pointCloudBoxList: boxParamsList,
+      polygonList,
+      lineList,
+      pointCloudSphereList: sphereParamsList,
+    });
+
     SetPointCloudLoading(dispatch, false);
+    SetLoadPCDFileLoading(dispatch, false);
   };
 
   return {
@@ -1166,5 +1295,6 @@ export const usePointCloudViews = () => {
     pointCloudBoxListUpdated,
     initPointCloud3d,
     updatePointCloudData,
+    updateViewsByDefaultSize,
   };
 };

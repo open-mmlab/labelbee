@@ -6,8 +6,14 @@
 import { getClassName } from '@/utils/dom';
 import { FooterDivider } from '@/views/MainView/toolFooter';
 import { ZoomController } from '@/views/MainView/toolFooter/ZoomController';
-import { DownSquareOutlined, UpSquareOutlined } from '@ant-design/icons';
-import { cTool, cAnnotation, PointCloudAnnotation, THybridToolName } from '@labelbee/lb-annotation';
+import { DownSquareOutlined, UpSquareOutlined, LeftOutlined } from '@ant-design/icons';
+import {
+  cTool,
+  cAnnotation,
+  PointCloudAnnotation,
+  THybridToolName,
+  cKeyCode,
+} from '@labelbee/lb-annotation';
 import {
   IPolygonData,
   PointCloudUtils,
@@ -37,9 +43,11 @@ import ToolUtils from '@/utils/ToolUtils';
 import _ from 'lodash';
 import PointCloudSizeSlider from './components/PointCloudSizeSlider';
 import { useHistory } from './hooks/useHistory';
+import TitleButton from './components/TitleButton';
 
 const { EPolygonPattern, EToolName } = cTool;
 const { ESortDirection } = cAnnotation;
+const EKeyCode = cKeyCode.default;
 
 /**
  * Get the offset from canvas2d-coordinate to world coordinate (Top View)
@@ -175,6 +183,9 @@ interface IProps extends IA2MapStateProps {
   drawLayerSlot?: TDrawLayerSlot;
   checkMode?: boolean;
   intelligentFit?: boolean;
+  setIsEnlargeTopView: (value: boolean) => void;
+  isEnlargeTopView: boolean;
+  onExitZoom: () => void;
 }
 
 const PointCloudTopView: React.FC<IProps> = ({
@@ -184,6 +195,10 @@ const PointCloudTopView: React.FC<IProps> = ({
   drawLayerSlot,
   checkMode,
   intelligentFit,
+  setIsEnlargeTopView,
+  isEnlargeTopView,
+  onExitZoom,
+  highlightAttribute,
 }) => {
   const [annotationPos, setAnnotationPos] = useState({ zoom: 1, currentPos: { x: 0, y: 0 } });
   const ref = useRef<HTMLDivElement>(null);
@@ -408,10 +423,53 @@ const PointCloudTopView: React.FC<IProps> = ({
     pointCloudViews.topViewSelectedChanged({});
   }, [ptCtx.selectedIDs]);
 
+  useEffect(() => {
+    window.addEventListener('keydown', onKeyDown);
+    return () => {
+      window.removeEventListener('keydown', onKeyDown);
+    };
+  }, []);
+
+  const onKeyDown = (event: KeyboardEvent) => {
+    const { keyCode } = event;
+    if (keyCode === EKeyCode.Esc) {
+      onExitZoom();
+    }
+  };
+  // Highlight TopView Box when `hightAttribute` updated.
+  useEffect(() => {
+    ptCtx.topViewInstance?.pointCloud2dOperation?.setHighlightAttribute?.(highlightAttribute);
+  }, [ptCtx.topViewInstance, highlightAttribute]);
+
   return (
     <PointCloudContainer
       className={getClassName('point-cloud-container', 'top-view')}
-      title={t('TopView')}
+      title={
+        isEnlargeTopView ? (
+          <div style={{ display: 'flex', alignItems: 'center', position: 'relative' }}>
+            <LeftOutlined
+              style={{ cursor: 'pointer', marginRight: '12px' }}
+              onClick={() => {
+                onExitZoom();
+              }}
+            />
+            <span>{t('TopView')}</span>
+
+            <BoxInfos
+              checkMode={checkMode}
+              config={config}
+              style={{ display: 'flex', position: 'initial', margin: '0px 20px' }}
+            />
+          </div>
+        ) : (
+          <TitleButton
+            title={t('TopView')}
+            onClick={() => {
+              setIsEnlargeTopView(true);
+            }}
+          />
+        )
+      }
       toolbar={<TopViewToolbar currentData={currentData} />}
     >
       <div style={{ position: 'relative', flex: 1 }}>
@@ -419,7 +477,7 @@ const PointCloudTopView: React.FC<IProps> = ({
           {drawLayerSlot?.(annotationPos)}
         </div>
 
-        <BoxInfos checkMode={checkMode} config={config} />
+        {!isEnlargeTopView && <BoxInfos checkMode={checkMode} config={config} />}
         <ZAxisSlider checkMode={checkMode} zAxisLimit={zAxisLimit} setZAxisLimit={setZAxisLimit} />
         <PointCloudValidity />
       </div>

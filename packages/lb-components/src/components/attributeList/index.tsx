@@ -6,6 +6,8 @@ import { Popover } from 'antd';
 import ColorPalette from '../colorPalette';
 import { CloseOutlined } from '@ant-design/icons';
 import { useTranslation } from 'react-i18next';
+import { ILimit, IDefaultSize } from '@labelbee/lb-utils';
+import LimitPopover from './components/limitPopover';
 
 export const ATTRIBUTE_COLORS = [NULL_COLOR].concat(COLORS_ARRAY);
 
@@ -14,6 +16,7 @@ interface IProps {
     label: string;
     value: string;
     color?: string;
+    limit?: ILimit;
   }>;
   selectedAttribute?: string;
   attributeChanged: (v: string) => void;
@@ -24,6 +27,7 @@ interface IProps {
   style?: React.CSSProperties;
   enableColorPicker?: boolean;
   updateColorConfig?: (value: string, color: string) => void;
+  updateSize?: (size: IDefaultSize) => void;
 }
 
 const AttributeList = React.forwardRef((props: IProps, ref) => {
@@ -63,6 +67,7 @@ const AttributeList = React.forwardRef((props: IProps, ref) => {
       >
         {list.map((i: any, index: number) => {
           let hotKey: number | string = props?.num ?? index;
+          const isChosen = i?.value === props?.selectedAttribute;
 
           if (props.forbidDefault === true && typeof hotKey === 'number') {
             // 禁止 default 将从 1 开始
@@ -82,6 +87,12 @@ const AttributeList = React.forwardRef((props: IProps, ref) => {
           if (i?.color) {
             color = i.color;
           }
+
+          const { defaultSize, logicalCondition, sizeRange } = i?.limit?.sizeLimit || {};
+          // Determine if a scope configuration exists
+          const hasLimit =
+            i?.limit?.positionLimit || defaultSize || sizeRange || logicalCondition?.length > 0;
+          const showLimitPopover = isChosen && hasLimit;
 
           return (
             <Radio value={i.value} ref={radioRef} key={i.label + index}>
@@ -128,6 +139,8 @@ const AttributeList = React.forwardRef((props: IProps, ref) => {
                 )}
                 {i.label}
               </span>
+
+              {showLimitPopover && <LimitPopover limit={i.limit} updateSize={props?.updateSize} />}
               <span className='sensebee-radio-num'>{hotKey}</span>
             </Radio>
           );

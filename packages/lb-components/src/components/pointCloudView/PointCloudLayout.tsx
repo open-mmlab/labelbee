@@ -3,21 +3,27 @@ import classNames from 'classnames';
 import React from 'react';
 
 export const PointCloudContainer: React.FC<{
-  title: string;
+  title: string | React.ReactElement | null;
   toolbar?: React.ReactElement | null;
   className?: string;
   style?: React.CSSProperties;
-}> = ({ title, toolbar, children, className, style }) => {
+  titleOnSurface?: boolean; // adherent surface
+}> = ({ title, toolbar, children, className, style, titleOnSurface }) => {
   return (
     <div className={classNames([className, getClassName('point-cloud-container')])} style={style}>
-      <div className={getClassName('point-cloud-container', 'header')}>
-        <span className={getClassName('point-cloud-container', 'header-title')}>{title}</span>
+      {titleOnSurface ? (
+        <span className={getClassName('point-cloud-container', 'header-title-box')}>{title}</span>
+      ) : (
+        <div className={getClassName('point-cloud-container', 'header')}>
+          {title && (
+            <span className={getClassName('point-cloud-container', 'header-title')}>{title}</span>
+          )}
 
-        {toolbar && (
-          <div className={getClassName('point-cloud-container', 'header-toolbar')}>{toolbar}</div>
-        )}
-      </div>
-
+          {toolbar && (
+            <div className={getClassName('point-cloud-container', 'header-toolbar')}>{toolbar}</div>
+          )}
+        </div>
+      )}
       {children}
     </div>
   );

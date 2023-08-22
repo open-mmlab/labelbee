@@ -4,7 +4,7 @@ import { AppState } from '@/store';
 import { Sider } from '@/types/main';
 import StepUtils from '@/utils/StepUtils';
 import { Collapse } from 'antd/es';
-import React from 'react';
+import React, { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import AnnotationText from './AnnotationText';
 import ClearIcon from './ClearIcon';
@@ -19,6 +19,9 @@ import { cTool } from '@labelbee/lb-annotation';
 import ScribbleSidebar from './ScribbleSidebar';
 import { ToolIcons } from './ToolIcons';
 import { useSelector } from '@/store/ctx';
+import { Tabs } from 'antd';
+import { classnames } from '@/utils';
+import menuFoldSvg from '@/assets/annotation/common/icon_menu_fold.svg';
 
 const { EVideoToolName, EPointCloudName } = cTool;
 
@@ -28,13 +31,21 @@ interface IProps {
   toolName?: EToolName;
   sider?: Sider;
   enableColorPicker?: boolean;
+  setSiderWidth?: (width: number | undefined) => void;
+  propsSiderWidth?: number | undefined;
 }
 
 export const sidebarCls = `${prefix}-sidebar`;
-const Sidebar: React.FC<IProps> = ({ sider, enableColorPicker }) => {
+const Sidebar: React.FC<IProps> = ({
+  sider,
+  enableColorPicker,
+  setSiderWidth,
+  propsSiderWidth,
+}) => {
   const stepInfo = useSelector((state: AppState) =>
     StepUtils.getCurrentStepInfo(state.annotation.step, state.annotation.stepList),
   );
+  const [showSide, setShowSide] = useState<boolean>(true);
   const toolName = stepInfo?.tool;
   const { t } = useTranslation();
 
@@ -199,14 +210,79 @@ const Sidebar: React.FC<IProps> = ({ sider, enableColorPicker }) => {
   }
 
   if (toolName === EPointCloudName.PointCloud) {
-    return (
-      <div className={`${sidebarCls}`}>
-        <div className={`${sidebarCls}__content`}>
-          <PointCloudToolSidebar />
-        </div>
-        <PointCloudOperation />
+    const showFoldSide = () => {
+      setShowSide(!showSide);
+      if (setSiderWidth) {
+        const w = showSide ? 48 : undefined;
+        setSiderWidth(w);
+      }
+    };
+    // sidebar collapse
+    const hideSideBox = (
+      <div
+        style={{
+          width: '48px',
+          height: '100%',
+          display: 'flex',
+          justifyContent: 'center',
+          background: '#ffffff',
+        }}
+      >
+        <span onClick={() => showFoldSide()}>
+          <img
+            style={{
+              width: '16px',
+              height: '16px',
+              marginTop: '18px',
+              cursor: 'pointer',
+              transform: 'rotate(180deg)',
+            }}
+            src={menuFoldSvg}
+          />
+        </span>
       </div>
     );
+
+    if (showSide) {
+      return (
+        <Tabs
+          type='card'
+          activeKey='1'
+          className={classnames({
+            [`${sidebarCls}`]: true,
+            [`${sidebarCls}__pointCloud`]: true,
+          })}
+          tabBarExtraContent={{
+            left: (
+              <span onClick={() => showFoldSide()} style={{ padding: '0px 4px' }}>
+                <img
+                  style={{
+                    width: '16px',
+                    height: '16px',
+                    marginLeft: '4px',
+                    cursor: 'pointer',
+                  }}
+                  src={menuFoldSvg}
+                />
+              </span>
+            ),
+          }}
+        >
+          <Tabs.TabPane
+            tab='工具面板'
+            key='1'
+            style={{ height: '100%', display: 'flex', flexDirection: 'column' }}
+          >
+            <div className={`${sidebarCls}__content`}>
+              <PointCloudToolSidebar />
+            </div>
+            <PointCloudOperation />
+          </Tabs.TabPane>
+        </Tabs>
+      );
+    }
+
+    return hideSideBox;
   }
 
   if (toolName === EToolName.ScribbleTool) {

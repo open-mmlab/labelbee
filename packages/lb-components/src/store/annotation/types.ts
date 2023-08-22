@@ -20,6 +20,7 @@ import {
 } from '@/types/data';
 import { ESubmitType } from '@/constant';
 import { IPointCloudBox } from '@labelbee/lb-utils';
+import { IPreDataProcessParams } from '@/App';
 
 export type GraphToolInstance =
   | RectOperation
@@ -58,6 +59,7 @@ export interface AnnotationState {
   resultList: any[];
   stepProgress: number;
   loading: boolean; // 用于图片加载
+  loadPCDFileLoading: boolean; // loadPCDFile
   /** 阻止文件切换后的事件 */
   triggerEventAfterIndexChanged: boolean;
 
@@ -69,6 +71,7 @@ export interface AnnotationState {
   predictionResult: IPointCloudBoxWithIndex[];
   predictionResultVisible: boolean;
   highlightAttribute: string;
+  preDataProcess?: (params: IPreDataProcessParams) => IPointCloudBox[];
 }
 
 interface UpdateToolInstance {

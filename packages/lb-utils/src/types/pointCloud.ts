@@ -122,6 +122,7 @@ export interface ICalib {
   P: [TMatrix14Tuple, TMatrix14Tuple, TMatrix14Tuple]; // 3x4 Camera Intrinsic matrix
   R: [TMatrix13Tuple, TMatrix13Tuple, TMatrix13Tuple]; // 3x3 rotation matrix
   T: [TMatrix14Tuple, TMatrix14Tuple, TMatrix14Tuple]; // 3x4 Lidar to camera matrix
+  calName?: string; // Camera Name
 }
 
 export type UpdatePolygonByDragList = Array<{
@@ -140,5 +141,5 @@ export interface IPointCloudSegmentation {
     [key in string]: string;
   };
   coverPoints?: number[];
-  indexes: number[]
+  indexes: number[];
 }
