@@ -166,15 +166,14 @@ const LLMToolSidebar: React.FC<IProps> = (props) => {
   };
 
   const isNoConfig = () => {
-    const { indicatorScore = [], indicatorDetermine = [], text = [] } = LLMConfig;
+    const { indicatorScore = [], indicatorDetermine = [], text = [], enableSort } = LLMConfig;
     const hasIndicatorScore =
       indicatorScore?.filter((i: IndicatorScore) => i.label && i.value && i.score)?.length > 0;
 
     const hasIndicatorDetermine =
       indicatorDetermine?.filter((i: IndicatorDetermine) => i.label && i.value)?.length > 0;
     const hasText = text?.length > 0;
-
-    const noConfig = !(hasIndicatorScore || hasIndicatorDetermine || hasText);
+    const noConfig = !(hasIndicatorScore || hasIndicatorDetermine || hasText || enableSort);
     return noConfig;
   };
 
@@ -204,19 +203,19 @@ const LLMToolSidebar: React.FC<IProps> = (props) => {
   return (
     <div className={`${sidebarCls}`}>
       <div className={`${sidebarCls}__content`}>
-        {showAnwerList && (
-          <AnswerList
-            list={answerList}
-            LLMConfig={LLMConfig}
-            updateValue={updateValue}
-            checkMode={checkMode}
-          />
-        )}
         {enableSort && (
           <AnswerSort
             waitSortList={waitSortList}
             sortList={sortList}
             setSortList={setSortList}
+            checkMode={checkMode}
+          />
+        )}
+        {showAnwerList && (
+          <AnswerList
+            list={answerList}
+            LLMConfig={LLMConfig}
+            updateValue={updateValue}
             checkMode={checkMode}
           />
         )}

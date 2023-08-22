@@ -32,6 +32,7 @@ export interface ILLMToolConfig {
 
 // LLM文本
 export interface ITextList {
+  textId: string;
   title?: string;
   tip?: string;
   min?: number;
