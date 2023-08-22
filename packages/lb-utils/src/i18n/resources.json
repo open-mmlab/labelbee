@@ -232,7 +232,7 @@
     "Finished":"Finished",
     "Unfinished":"Unfinished",
     "OverallScore":"OverallScore",
-    "NoScoringScale":"NoScoringScale",
+    "NoScoringScale":"Configurable step details on the left",
     "Best":"Best",
     "Worst":"Worst",
     "RankingQualityOfAnswers":"RankingQualityOfAnswers",
@@ -246,7 +246,8 @@
     "NormalSizeRange":"Normal size range",
     "NormalCenterPointRange":"Normal center point range",
     "Unlocked":"Unlocked",
-    "Locked":"Locked"
+    "Locked":"Locked",
+    "LeastCharacterError":"Please enter at least {{num}} characters"
   },
   "cn": {
     "TextInput": "文本输入",
@@ -481,7 +482,7 @@
     "Finished":"已完成",
     "Unfinished":"未完成",
     "OverallScore":"整体评分",
-    "NoScoringScale":"暂未添加评分标准",
+    "NoScoringScale":"可在左侧配置步骤详情",
     "Best":"最好",
     "Worst":"最差",
     "RankingQualityOfAnswers":"请对每个回答的质量进行排序",
@@ -495,6 +496,7 @@
     "NormalSizeRange":"正常尺寸范围",
     "NormalCenterPointRange":"正常中心点范围",
     "Unlocked":"未开启",
-    "Locked":"已开启"
+    "Locked":"已开启",
+    "LeastCharacterError": "请至少输入{{num}}个字符"
   }
 }

@@ -11,8 +11,6 @@ import { LabelBeeContext, LLMContext } from '@/store/ctx';
 import { message } from 'antd';
 import { prefix } from '@/constant';
 import { Layout } from 'antd/es';
-import LLMSidebar from '@/components/LLMToolView/sidebar';
-import { getStepConfig } from '@/store/annotation/reducer';
 import QuestionView from './questionView';
 import { useTranslation } from 'react-i18next';
 import { IAnswerList } from './types';
@@ -24,16 +22,13 @@ interface IProps {
   showTips?: boolean;
   tips?: string;
 }
-const { Sider } = Layout;
 const LLMViewCls = `${prefix}-LLMView`;
-const layoutCls = `${prefix}-layout`;
 const LLMToolView: React.FC<IProps> = (props) => {
   const { annotation, checkMode, tips, showTips } = props;
-  const { imgIndex, imgList, stepList, step } = annotation;
+  const { imgIndex, imgList } = annotation;
   const { hoverKey } = useContext(LLMContext);
   const [answerList, setAnswerList] = useState<IAnswerList[]>([]);
   const [question, setQuestion] = useState<string>('');
-  const LLMStepConfig = getStepConfig(stepList, step)?.config;
   const { t } = useTranslation();
   useEffect(() => {
     let interval: undefined | ReturnType<typeof setInterval>;
@@ -68,11 +63,6 @@ const LLMToolView: React.FC<IProps> = (props) => {
         {showTips === true && <AnnotationTips tips={tips} />}
         <QuestionView hoverKey={hoverKey} question={question} answerList={answerList} />
       </div>
-      {LLMStepConfig && LLMStepConfig !== '{}' && (
-        <Sider className={`${layoutCls}__side`} width={600}>
-          <LLMSidebar checkMode={checkMode} />
-        </Sider>
-      )}
     </Layout>
   );
 };
