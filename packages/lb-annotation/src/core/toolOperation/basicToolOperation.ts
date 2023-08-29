@@ -496,24 +496,16 @@ class BasicToolOperation extends EventListener {
       return;
     }
 
-    // Get the min-zoomRatio.
-    let zoomRatio = 1;
-
-    if (this._imgAttribute && this._imgAttribute?.zoomRatio < 1 && this._imgAttribute?.zoomRatio > 0) {
-      zoomRatio = this._imgAttribute?.zoomRatio;
-    }
-
-    const { zoom } = ImgPosUtils.getInitImgPos(
-      size,
-      { width: imgNode.width, height: imgNode.height },
-      this.rotate,
-      zoomRatio,
-      false,
-    );
+    const { min } = ImgPosUtils.getMinZoomByImgAndSize({
+      canvasSize: size,
+      imgSize: { width: imgNode.width, height: imgNode.height },
+      rotate: this.rotate,
+      zoomRatio: this._imgAttribute?.zoomRatio,
+    });
 
     this.zoomInfo = {
       ...this.zoomInfo,
-      min: zoom / 2, // Limit the half of initZoom.
+      min,
     };
   }
 

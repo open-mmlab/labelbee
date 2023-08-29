@@ -43,6 +43,29 @@ export default class ImgPosUtils {
     };
   }
 
+  /**
+   * Get the minZoom.
+   */
+  public static getMinZoomByImgAndSize({
+    canvasSize,
+    imgSize,
+    rotate = 0,
+    zoomRatio = 1,
+  }: {
+    canvasSize: ISize;
+    imgSize: ISize;
+    rotate: number;
+    zoomRatio?: number;
+  }) {
+    // Default Zoom is 1 unless is between 0 and 1.
+    if (zoomRatio && !(zoomRatio < 1 && zoomRatio > 0)) {
+      zoomRatio = 1;
+    }
+
+    const { zoom } = ImgPosUtils.getInitImgPos(canvasSize, imgSize, rotate, zoomRatio, false);
+    return { min: zoom / 2 };
+  }
+
   // 获取底层依赖矩形的 currentPos
   public static getBasicRecPos(
     imgNode: any,
