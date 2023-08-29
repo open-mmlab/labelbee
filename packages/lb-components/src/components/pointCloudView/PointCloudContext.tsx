@@ -8,6 +8,7 @@ import {
   EPointCloudPattern,
   IPointCloudSegmentation,
   ICalib,
+  ISize,
 } from '@labelbee/lb-utils';
 import React, { useEffect, useMemo, useRef, useState } from 'react';
 import {
@@ -203,7 +204,26 @@ export const PointCloudProvider: React.FC<{}> = ({ children }) => {
   const [segmentation, setSegmentation] = useState<IPointCloudSegmentation[]>([]);
   const [highlight2DDataList, setHighlight2DDataList] = useState<IHighlight2DData[]>([]);
 
+  const [imageSizes, setImageSizes] = useState<{
+    [key: string]: ISize;
+  }>({});
+
   const dispatch = useDispatch();
+
+  const cacheImageNodeSize = (params: { imgNode: HTMLImageElement; url: string }) => {
+    const { imgNode, url } = params;
+    if (url && imgNode) {
+      setImageSizes((prev) => {
+        return {
+          ...prev,
+          [url]: {
+            width: imgNode.width,
+            height: imgNode.height,
+          },
+        };
+      });
+    }
+  };
 
   const selectedID = useMemo(() => {
     return selectedIDs.length === 1 ? selectedIDs[0] : '';
@@ -420,6 +440,8 @@ export const PointCloudProvider: React.FC<{}> = ({ children }) => {
       setHighlight2DDataList,
       cuboidBoxIn2DView,
       setCuboidBoxIn2DView,
+      imageSizes,
+      cacheImageNodeSize,
     };
   }, [
     valid,
@@ -441,6 +463,8 @@ export const PointCloudProvider: React.FC<{}> = ({ children }) => {
     ptSegmentInstance,
     segmentation,
     highlight2DDataList,
+    cuboidBoxIn2DView,
+    imageSizes,
   ]);
 
   const updateSelectedIDsAndRenderAfterHide = () => {

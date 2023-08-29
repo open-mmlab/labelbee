@@ -31,8 +31,7 @@ interface IPointCloud2DRectOperationViewRect extends IBasicRect {
 const PointCloud2DRectOperationView = (props: IPointCloud2DRectOperationViewProps) => {
   const { mappingData, size, config, checkMode } = props;
   const url = mappingData?.url ?? '';
-  const { pointCloudBoxList, setPointCloudResult, selectedID, setCuboidBoxIn2DView } =
-    useContext(PointCloudContext);
+  const { pointCloudBoxList, setPointCloudResult, selectedID } = useContext(PointCloudContext);
 
   const { update2DViewRect } = usePointCloudViews();
   const ref = React.useRef(null);
@@ -58,7 +57,6 @@ const PointCloud2DRectOperationView = (props: IPointCloud2DRectOperationViewProp
   };
 
   useEffect(() => {
-    setCuboidBoxIn2DView?.(false);
     if (ref.current) {
       const toolInstance = new PointCloud2DRectOperation({
         container: ref.current,

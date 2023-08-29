@@ -1,5 +1,5 @@
 import { getClassName } from '@/utils/dom';
-import React, { useCallback, useEffect, useRef, useState } from 'react';
+import React, { useCallback, useContext, useEffect, useRef, useState } from 'react';
 import AnnotationView from '@/components/AnnotationView';
 import useSize from '@/hooks/useSize';
 import { useSingleBox } from './hooks/useSingleBox';
@@ -8,17 +8,24 @@ import { IAnnotationData2dView, IAnnotationDataTemporarily } from './PointCloud2
 import { useHighlight } from './hooks/useHighlight';
 import HighlightVisible from './components/HighlightVisible';
 import { IFileItem } from '@/types/data';
+import { PointCloudContext } from './PointCloudContext';
+
+import PointCloud2DRectOperationView from '@/components/pointCloud2DRectOperationView';
 
 const PointCloud2DSingleView = ({
   view2dData,
   setSelectedID,
   currentData,
   showEnlarge,
+  config,
+  checkMode = false,
 }: {
   view2dData: IAnnotationData2dView;
   setSelectedID: (value: string | number) => void;
   currentData: IFileItem;
   showEnlarge: boolean;
+  config: any;
+  checkMode?: boolean;
 }) => {
   const ref = useRef(null);
   const viewRef = useRef<{ toolInstance: ViewOperation }>();
@@ -27,12 +34,15 @@ const PointCloud2DSingleView = ({
   const { url, calib } = view2dData;
   const { toggle2dVisible, isHighlightVisible } = useHighlight({ currentData });
   const [loading, setLoading] = useState(false);
-
+  const { cuboidBoxIn2DView, cacheImageNodeSize } = useContext(PointCloudContext);
   const hiddenData = !view2dData;
 
   const afterImgOnLoad = (imgNode: HTMLImageElement) => {
     focusSelectBox();
-
+    cacheImageNodeSize({
+      url,
+      imgNode,
+    });
     // TODO: Save the ImgNode Data and cache the highlightIndex
   };
 
@@ -72,21 +82,31 @@ const PointCloud2DSingleView = ({
 
   return (
     <div className={getClassName('point-cloud-2d-image')} ref={ref}>
-      <AnnotationView
-        src={view2dData?.url ?? ''}
-        annotations={view2dData.annotations}
-        size={size}
-        ref={viewRef}
-        globalStyle={{
-          display: hiddenData ? 'none' : 'block',
-        }}
-        afterImgOnLoad={afterImgOnLoad}
-        zoomInfo={{
-          min: 0.01,
-          max: 1000,
-          ratio: 0.4,
-        }}
-      />
+      {cuboidBoxIn2DView ? (
+        <AnnotationView
+          src={view2dData?.url ?? ''}
+          annotations={view2dData.annotations}
+          size={size}
+          ref={viewRef}
+          globalStyle={{
+            display: hiddenData ? 'none' : 'block',
+          }}
+          afterImgOnLoad={afterImgOnLoad}
+          zoomInfo={{
+            min: 0.01,
+            max: 1000,
+            ratio: 0.4,
+          }}
+        />
+      ) : (
+        <PointCloud2DRectOperationView
+          mappingData={view2dData}
+          size={size}
+          config={config}
+          checkMode={checkMode}
+        />
+      )}
+
       <HighlightVisible
         visible={isHighlightVisible(url)}
         onClick={highlightOnClick}

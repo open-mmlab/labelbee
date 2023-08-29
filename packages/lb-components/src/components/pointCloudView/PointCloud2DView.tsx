@@ -43,6 +43,7 @@ export interface IAnnotationData2dView {
   url: string;
   calName?: string;
   calib: ICalib;
+  path?: string;
 }
 
 const EKeyCode = cKeyCode.default;
@@ -50,8 +51,9 @@ const EKeyCode = cKeyCode.default;
 interface IProps extends IA2MapStateProps {
   thumbnailWidth?: number;
   isEnlargeTopView?: boolean;
+  checkMode?: boolean;
 }
-import Rect2DOperationView from '@/components/rect2DOperationView';
+
 const ContainerTitle = ({
   showEnlarge,
   isEnlargeTopView,
@@ -115,6 +117,7 @@ const PointCloud2DView = ({
   isEnlargeTopView,
   highlightAttribute,
   loadPCDFileLoading,
+  checkMode,
 }: IProps) => {
   const [annotations2d, setAnnotations2d] = useState<IAnnotationData2dView[]>([]);
   const { topViewInstance, displayPointCloudList } = useContext(PointCloudContext);
@@ -187,6 +190,7 @@ const PointCloud2DView = ({
           url: mappingData?.url,
           calName: mappingData.calib?.calName,
           calib: mappingData?.calib,
+          path: mappingData?.url,
         });
       });
       setAnnotations2d(newAnnotations2dList);
@@ -340,6 +344,8 @@ const PointCloud2DView = ({
                   view2dData={item}
                   setSelectedID={setSelectedID}
                   showEnlarge={showEnlarge}
+                  config={config}
+                  checkMode={checkMode}
                 />
               )}
             </PointCloudContainer>
