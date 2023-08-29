@@ -15,14 +15,14 @@ interface IProps {
 const TextInputBox = (props: IProps) => {
   const { checkMode, LLMConfig, textAttribute, setText } = props;
   const textConfig = LLMConfig?.text && isArray(LLMConfig.text) ? LLMConfig?.text : [];
-
   const { TextArea } = Input;
   const [form] = Form.useForm();
   const { t } = useTranslation();
 
   useEffect(() => {
     const combinResult = textConfig.map((i, index) => {
-      return { ...i, value: textAttribute[index]?.value };
+      const value = textAttribute.filter((item) => item?.textId === i?.textId) || [];
+      return { ...i, value: value[0]?.value };
     });
     form.setFieldsValue({ text: combinResult });
   }, [textConfig, textAttribute]);
@@ -40,7 +40,7 @@ const TextInputBox = (props: IProps) => {
             <>
               {fields.map((field, index) => {
                 const { max, min, title, tip } = textConfig[field.name] || {};
-                const showTextIput = title;
+                const showTextInput = title;
                 const messageError = t('LeastCharacterError', {
                   num: min,
                 });
@@ -49,41 +49,48 @@ const TextInputBox = (props: IProps) => {
                     style={{ display: 'flex', flexDirection: 'column', marginBottom: '16px' }}
                     key={index}
                   >
-                    <Form.Item
-                      name={[field.name, 'title']}
-                      extra={tip}
-                      style={{
-                        fontSize: '16px',
-                        lineHeight: '22px',
-                        fontWeight: 500,
-                        color: '#333333',
-                        marginBottom: 8,
-                      }}
-                      required={!!min}
-                      label={' '}
-                      colon={false}
-                    >
-                      {title}
-                      <span
-                        className={classnames({
-                          [`clearText`]: true,
-                          [`clearText__disabled`]: checkMode,
-                        })}
-                        style={{ verticalAlign: 'initial' }}
-                        onClick={() => {
-                          form.setFields([
-                            {
-                              name: ['text', field.name, 'value'],
-                              value: undefined,
-                              errors: min ? [messageError] : [],
-                            },
-                          ]);
-                          const newText = form.getFieldValue('text');
-                          setText(newText);
+                    {showTextInput && (
+                      <Form.Item
+                        name={[field.name, 'title']}
+                        extra={tip}
+                        style={{
+                          fontSize: '16px',
+                          lineHeight: '22px',
+                          fontWeight: 500,
+                          color: '#333333',
+                          marginBottom: 8,
                         }}
-                      />
-                    </Form.Item>
-                    {showTextIput && (
+                        required={!!min}
+                        label={' '}
+                        colon={false}
+                      >
+                        {title}
+                        {showTextInput && (
+                          <span
+                            className={classnames({
+                              [`clearText`]: true,
+                              [`clearText__disabled`]: checkMode,
+                            })}
+                            style={{ verticalAlign: 'initial' }}
+                            onClick={() => {
+                              if (checkMode) {
+                                return;
+                              }
+                              form.setFields([
+                                {
+                                  name: ['text', field.name, 'value'],
+                                  value: undefined,
+                                  errors: min ? [messageError] : [],
+                                },
+                              ]);
+                              const newText = form.getFieldValue('text');
+                              setText(newText);
+                            }}
+                          />
+                        )}
+                      </Form.Item>
+                    )}
+                    {showTextInput && (
                       <Form.Item
                         name={[field.name, 'value']}
                         style={{
@@ -102,9 +109,9 @@ const TextInputBox = (props: IProps) => {
                         initialValue={undefined}
                       >
                         <TextArea
-                          maxLength={max || 1000}
+                          maxLength={max}
                           disabled={checkMode}
-                          showCount={true}
+                          showCount={max ? true : false}
                           style={{ width: '100%' }}
                         />
                       </Form.Item>
