@@ -19,16 +19,16 @@ import { LabelBeeContext, useDispatch } from '@/store/ctx';
 import { predict } from '../previewResult/util';
 import { useStatus } from '@/components/pointCloudView/hooks/useStatus';
 
-const PredictTrackingIcon = (props: { loading: boolean }) => {
+const PredictTrackingIcon = (props: { loading: boolean; predictionResultVisible: boolean }) => {
   const dispatch = useDispatch();
   const { t } = useTranslation();
   const { isPointCloudSegmentationPattern } = useStatus();
 
-  const { loading } = props;
+  const { loading, predictionResultVisible } = props;
   const { selectedBox } = useSingleBox();
 
   const handler = async () => {
-    if (loading) {
+    if (loading || predictionResultVisible) {
       return;
     }
 
@@ -107,6 +107,7 @@ const PredictTrackingIcon = (props: { loading: boolean }) => {
 const mapStateToProps = (state: AppState) => {
   return {
     loading: state.annotation.loading,
+    predictionResultVisible: state.annotation.predictionResultVisible,
   };
 };
 

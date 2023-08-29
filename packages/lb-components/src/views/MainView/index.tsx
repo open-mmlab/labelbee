@@ -24,6 +24,8 @@ import { LabelBeeContext } from '@/store/ctx';
 import { EToolName } from '@/data/enums/ToolType';
 import LLMLayout from './LLMLayout';
 import AudioAnnotate from '@/components/audioAnnotate'
+import { LoadingOutlined } from '@ant-design/icons';
+import { useTranslation } from 'react-i18next';
 
 interface IProps {
   path: string;
@@ -75,11 +77,17 @@ const AnnotatedArea: React.FC<AppProps & IProps> = (props) => {
 };
 
 const ViewportProviderLayout = (props: AppProps & IProps & { children: any }) => {
+  const { t } = useTranslation();
   const { stepList, step } = props;
   const currentToolName = getStepConfig(stepList, step)?.tool;
   return (
     <ViewportProvider>
-      <Spin spinning={props.loading}>
+      <Spin
+        spinning={props.loading}
+        indicator={<LoadingOutlined />}
+        tip={<span style={{ marginTop: 200 }}>{t('LoadingTips')}</span>}
+        delay={500}
+      >
         <Layout className={classnames([layoutCls, props.className])} style={props.style?.layout}>
           <header className={`${layoutCls}__header`} style={props.style?.header}>
             <ToolHeader
@@ -125,6 +133,7 @@ const MainView: React.FC<AppProps & IProps> = (props) => {
         {props?.leftSider}
         <Content className={`${layoutCls}__content`}>
           <AnnotatedArea {...props} />
+          <PreviewResult />
         </Content>
         <Sider
           className={`${layoutCls}__side`}
@@ -138,7 +147,6 @@ const MainView: React.FC<AppProps & IProps> = (props) => {
             propsSiderWidth={props.style?.sider?.width}
           />
         </Sider>
-        <PreviewResult />
       </Layout>
     </ViewportProviderLayout>
   );

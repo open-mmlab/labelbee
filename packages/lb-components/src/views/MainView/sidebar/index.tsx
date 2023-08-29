@@ -22,6 +22,7 @@ import { useSelector } from '@/store/ctx';
 import { Tabs } from 'antd';
 import { classnames } from '@/utils';
 import menuFoldSvg from '@/assets/annotation/common/icon_menu_fold.svg';
+import LLMToolSidebar from '@/components/LLMToolView/sidebar';
 
 const { EVideoToolName, EPointCloudName } = cTool;
 
@@ -33,6 +34,7 @@ interface IProps {
   enableColorPicker?: boolean;
   setSiderWidth?: (width: number | undefined) => void;
   propsSiderWidth?: number | undefined;
+  checkMode?: boolean;
 }
 
 export const sidebarCls = `${prefix}-sidebar`;
@@ -41,6 +43,7 @@ const Sidebar: React.FC<IProps> = ({
   enableColorPicker,
   setSiderWidth,
   propsSiderWidth,
+  checkMode,
 }) => {
   const stepInfo = useSelector((state: AppState) =>
     StepUtils.getCurrentStepInfo(state.annotation.step, state.annotation.stepList),
@@ -122,6 +125,8 @@ const Sidebar: React.FC<IProps> = ({
     />
   );
 
+  const LLMSidebar = <LLMToolSidebar checkMode={checkMode} />;
+
   const horizontal = <div className={`${sidebarCls}__horizontal`} />;
 
   const pointCloudToolSidebar = <PointCloudToolSidebar enableColorPicker={enableColorPicker} />;
@@ -146,6 +151,7 @@ const Sidebar: React.FC<IProps> = ({
             pointCloudToolSidebar,
             pointCloudOperation,
             scribbleSidebar,
+            LLMSidebar,
           })}
         </div>
       );
@@ -252,10 +258,9 @@ const Sidebar: React.FC<IProps> = ({
             [`${sidebarCls}`]: true,
             [`${sidebarCls}__pointCloud`]: true,
           })}
-        >
-          <Tabs.TabPane
-            tab={
-              <span onClick={() => showFoldSide()}>
+          tabBarExtraContent={{
+            left: (
+              <span onClick={() => showFoldSide()} style={{ padding: '0px 4px' }}>
                 <img
                   style={{
                     width: '16px',
@@ -266,10 +271,9 @@ const Sidebar: React.FC<IProps> = ({
                   src={menuFoldSvg}
                 />
               </span>
-            }
-            key=''
-          />
-
+            ),
+          }}
+        >
           <Tabs.TabPane
             tab='工具面板'
             key='1'
@@ -297,6 +301,10 @@ const Sidebar: React.FC<IProps> = ({
         {operation}
       </div>
     );
+  }
+
+  if (toolName === EToolName.LLM) {
+    return LLMSidebar;
   }
 
   return null;

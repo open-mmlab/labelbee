@@ -19,6 +19,7 @@ import StepUtils from '@/utils/StepUtils';
 import { EPointCloudName } from '@labelbee/lb-annotation';
 import { useTranslation } from 'react-i18next';
 import FooterPopover from '../FooterPopover';
+import LongText from '@/components/longText';
 
 const AnnotatedAttributesItem = ({ attribute }: { attribute: IInputList }) => {
   const pointCloudCtx = useContext(PointCloudContext);
@@ -80,7 +81,7 @@ const AnnotatedAttributesItem = ({ attribute }: { attribute: IInputList }) => {
     setPointCloudResult(newPointCloudList);
     setPointCloudSphereList(newSphereList);
     setLineList(newLineList);
-    setSegmentation(newSegmentation)
+    setSegmentation(newSegmentation);
 
     pushHistoryWithList({
       pointCloudBoxList: newPointCloudList,
@@ -118,11 +119,12 @@ const AnnotatedAttributesItem = ({ attribute }: { attribute: IInputList }) => {
         />
         <span
           className={getClassName('annotated-attribute', 'item', 'text')}
+          style={{ width: '100%', overflow: 'hidden' }}
           onClick={() => {
             selectSpecAttr(attribute.value);
           }}
         >
-          {attribute.key}
+          <LongText text={attribute.key} openByText={true} />
         </span>
 
         <DeleteOutlined onClick={() => onDeleteGraphByAttr(attribute)} />
@@ -142,12 +144,25 @@ const AnnotatedAttributesItem = ({ attribute }: { attribute: IInputList }) => {
 
 export const AnnotatedAttributesPanel = () => {
   const stepConfig: IPointCloudConfig = useSelector(stepConfigSelector);
-  const { attrPanelLayout, setAttrPanelLayout, pointCloudBoxList, pointCloudSphereList, polygonList, lineList, segmentation } =
-    useContext(PointCloudContext);
+  const {
+    attrPanelLayout,
+    setAttrPanelLayout,
+    pointCloudBoxList,
+    pointCloudSphereList,
+    polygonList,
+    lineList,
+    segmentation,
+  } = useContext(PointCloudContext);
   const { t } = useTranslation();
 
   const existAttributes = useMemo(() => {
-    return [...pointCloudBoxList, ...pointCloudSphereList, ...polygonList, ...lineList, ...segmentation].map((i) => i.attribute);
+    return [
+      ...pointCloudBoxList,
+      ...pointCloudSphereList,
+      ...polygonList,
+      ...lineList,
+      ...segmentation,
+    ].map((i) => i.attribute);
   }, [pointCloudBoxList, pointCloudSphereList, polygonList, lineList, segmentation]);
 
   const displayAttrList = useMemo(() => {

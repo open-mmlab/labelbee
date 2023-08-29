@@ -868,7 +868,7 @@ export class PointCloud extends EventListener {
         gl_FragColor = vec4(color, 1.0);
       }`,
       uniforms: {
-        pointSize: { value: 1.2 }, // Init size.
+        pointSize: { value: this.pointsMaterialSize }, // Init size.
       },
     };
   };
@@ -990,7 +990,8 @@ export class PointCloud extends EventListener {
     /**
      * The img is loaded, so it can use cache in browser.
      */
-    const imgNodeList = await Promise.all(mappingImgList.map((v) => ImgUtils.load(v.url)));
+    const imgNodeList =
+      mappingImgList.length === 0 ? [] : await Promise.all(mappingImgList.map((v) => ImgUtils.load(v.url)));
     const highlightIndexList = mappingImgList.map((v, i) => {
       if (this.cacheInstance.cache2DHighlightIndex.has(v.url)) {
         return this.cacheInstance.cache2DHighlightIndex.get(v.url) ?? [];

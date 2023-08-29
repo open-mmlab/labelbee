@@ -301,7 +301,7 @@ const PointCloud3D: React.FC<IA2MapStateProps> = ({ currentData, config, highlig
     <PointCloudContainer
       className={classNames({
         [getClassName('point-cloud-3d-container')]: true,
-        [getClassName('point-cloud-3d-containerZoom')]: isEnlarge,
+        [getClassName('point-cloud-container', 'zoom')]: isEnlarge,
       })}
       title={
         isEnlarge ? (
