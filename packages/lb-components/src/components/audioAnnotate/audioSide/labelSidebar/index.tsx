@@ -1,5 +1,5 @@
-import RadioList from '@/components/AttributeList';
-import CheckBoxList from '@/components/CheckboxList';
+import RadioList from '@/components/attributeList';
+import CheckBoxList from '@/components/checkboxList';
 import { CaretRightOutlined } from '@ant-design/icons';
 import { Badge, Collapse, Tooltip } from 'antd';
 import { cloneDeep } from 'lodash';
