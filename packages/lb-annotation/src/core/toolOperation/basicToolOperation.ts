@@ -466,6 +466,8 @@ class BasicToolOperation extends EventListener {
       ...basicImgInfo,
     });
 
+    this.updateZoomInfo();
+
     if (this.isImgError === true) {
       this.isImgError = false;
       this.emit('changeAnnotationShow');
@@ -478,6 +480,35 @@ class BasicToolOperation extends EventListener {
     this.initImgPos();
     this.render();
     this.renderBasicCanvas();
+  }
+
+  /**
+   * Update the zoomInfo when Image or Size updated.
+   */
+  public updateZoomInfo(imgNode = this.imgNode, size = this.size) {
+    if (!imgNode || !size) {
+      return;
+    }
+
+    // Get the min-zoomRatio.
+    let zoomRatio = 1;
+
+    if (this._imgAttribute && this._imgAttribute?.zoomRatio < 1 && this._imgAttribute?.zoomRatio > 0) {
+      zoomRatio = this._imgAttribute?.zoomRatio;
+    }
+
+    const { zoom } = ImgPosUtils.getInitImgPos(
+      size,
+      { width: imgNode.width, height: imgNode.height },
+      this.rotate,
+      zoomRatio,
+      false,
+    );
+
+    this.zoomInfo = {
+      ...this.zoomInfo,
+      min: zoom / 2, // Limit the half of initZoom.
+    };
   }
 
   public setErrorImg() {
@@ -1096,6 +1127,7 @@ class BasicToolOperation extends EventListener {
    */
   public setSize(size: ISize) {
     this.size = size;
+    this.updateZoomInfo();
     if (this.container.contains(this.canvas)) {
       this.destroyCanvas();
       this.createCanvas(size);
