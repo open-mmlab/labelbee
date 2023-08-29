@@ -53,16 +53,9 @@ const AnswerList = (props: IProps) => {
   const isDisableAll = checkMode;
 
   const getFinishStatus = (i: IAnswerList) => {
-    const { indicatorScore = [], indicatorDetermine = [], score } = LLMConfig;
+    const { indicatorScore = [], indicatorDetermine = [] } = LLMConfig;
 
     let finishStatus = ETagType.Default;
-    if (score) {
-      if (!i.score || i?.score > score) {
-        finishStatus = ETagType.UnFinish;
-        return finishStatus;
-      }
-      finishStatus = ETagType.Finish;
-    }
     if (indicatorScore?.length > 0) {
       const scoreUnFinish = indicatorScore.some(
         (item: IndicatorScore) =>
@@ -130,16 +123,9 @@ const AnswerList = (props: IProps) => {
       style={{ margin: '16px 0px' }}
     >
       {list.map((i: IAnswerList, index: number) => {
-        const { score, indicatorScore = [], indicatorDetermine = [] } = LLMConfig;
+        const { indicatorScore = [], indicatorDetermine = [] } = LLMConfig;
         const { backgroundColor, fontColor, tagText, tagStatus } = getTagStyle(i);
 
-        const noIndicatorScore =
-          indicatorScore?.filter((i: IndicatorScore) => i.label && i.value && i.score)?.length > 0;
-
-        const noIndicatorDetermine =
-          indicatorDetermine?.filter((i: IndicatorDetermine) => i.label && i.value)?.length > 0;
-
-        const noConfig = !(score || noIndicatorScore || noIndicatorDetermine);
         const header = (
           <div
             style={{ display: 'flex', width: '500px', alignItems: 'center', whiteSpace: 'nowrap' }}
@@ -176,16 +162,6 @@ const AnswerList = (props: IProps) => {
               [`${LLMSidebarCls}-errorPanel`]: tagStatus === ETagType.UnFinish,
             })}
           >
-            {/* 整体评分 */}
-            {score && (
-              <ScoreGroupButton
-                selectScore={i.score}
-                score={score}
-                title={t('OverallScore')}
-                updateScore={(score) => updateValue({ order: i.order, value: score })}
-                isDisableAll={isDisableAll}
-              />
-            )}
             {/* 指标评分 */}
             {indicatorScore?.length > 0 &&
               indicatorScore.map((item: IndicatorScore, index: number) => {
@@ -242,10 +218,6 @@ const AnswerList = (props: IProps) => {
                   />
                 ) : null;
               })}
-
-            {noConfig && (
-              <div style={{ padding: '8px 0px', color: '#CCCCCC' }}>{t('NoScoringScale')}</div>
-            )}
           </Panel>
         );
       })}

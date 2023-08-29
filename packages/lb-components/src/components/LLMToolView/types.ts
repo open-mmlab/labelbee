@@ -27,7 +27,17 @@ export interface ILLMToolConfig {
   indicatorScore?: IndicatorScore[]; // 指标评分
   indicatorDetermine?: IndicatorDetermine[]; // 指标判断
   score?: number; // 整体评分
-  text?: boolean;
+  text?: ITextList[];
+}
+
+// LLM文本
+export interface ITextList {
+  textId: string;
+  title?: string;
+  tip?: string;
+  min?: number;
+  max?: number;
+  value?: string;
 }
 
 // 单个答案
@@ -58,5 +68,5 @@ export interface ILLMBoxResult {
   answerList: IAnswerList[];
   id: number;
   sort?: number[][];
-  textAttribute?: string;
+  textAttribute?: ITextList[];
 }

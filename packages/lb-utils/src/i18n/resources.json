@@ -232,7 +232,7 @@
     "Finished":"Finished",
     "Unfinished":"Unfinished",
     "OverallScore":"OverallScore",
-    "NoScoringScale":"NoScoringScale",
+    "NoScoringScale":"Configurable step details on the left",
     "Best":"Best",
     "Worst":"Worst",
     "RankingQualityOfAnswers":"RankingQualityOfAnswers",
@@ -248,6 +248,7 @@
     "LoadingTips": "Wait a minute, Data Loading ~",
     "Unlocked":"Unlocked",
     "Locked":"Locked",
+    "LeastCharacterError":"Please enter at least {{num}} characters",
     "And":"And",
     "Or":"Or"
   },
@@ -484,7 +485,7 @@
     "Finished":"已完成",
     "Unfinished":"未完成",
     "OverallScore":"整体评分",
-    "NoScoringScale":"暂未添加评分标准",
+    "NoScoringScale":"可在左侧配置步骤详情",
     "Best":"最好",
     "Worst":"最差",
     "RankingQualityOfAnswers":"请对每个回答的质量进行排序",
@@ -500,6 +501,7 @@
     "LoadingTips": "数据加载中~请稍后",
     "Unlocked":"未开启",
     "Locked":"已开启",
+    "LeastCharacterError": "请至少输入{{num}}个字符",
     "And":"且",
     "Or":"或"
   }
