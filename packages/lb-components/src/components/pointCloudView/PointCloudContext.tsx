@@ -113,6 +113,10 @@ export interface IPointCloudContext
 
   highlight2DDataList: IHighlight2DData[];
   setHighlight2DDataList: (urlList: IHighlight2DData[]) => void;
+  imageSizes: {
+    [key: string]: ISize;
+  };
+  cacheImageNodeSize: (params: { imgNode: HTMLImageElement; url: string }) => void;
 }
 
 export const PointCloudContext = React.createContext<IPointCloudContext>({
@@ -177,6 +181,8 @@ export const PointCloudContext = React.createContext<IPointCloudContext>({
   setHighlight2DDataList: () => {},
   cuboidBoxIn2DView: true,
   setCuboidBoxIn2DView: (bool?: boolean) => {},
+  imageSizes: {},
+  cacheImageNodeSize: () => {},
 });
 
 export const PointCloudProvider: React.FC<{}> = ({ children }) => {
@@ -186,7 +192,7 @@ export const PointCloudProvider: React.FC<{}> = ({ children }) => {
   const [lineList, setLineList] = useState<ILine[]>([]);
   const [selectedIDs, setSelectedIDsState] = useState<string[]>([]);
   const [valid, setValid] = useState<boolean>(true);
-  const [cuboidBoxIn2DView, setCuboidBoxIn2DView] = useState<boolean>(false);
+  const [cuboidBoxIn2DView, setCuboidBoxIn2DView] = useState<boolean>(true);
   const [zoom, setZoom] = useState<number>(1);
   const [topViewInstance, setTopViewInstance] = useState<PointCloudAnnotation>();
   const [sideViewInstance, setSideViewInstance] = useState<PointCloudAnnotation>();

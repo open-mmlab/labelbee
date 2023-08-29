@@ -638,12 +638,13 @@ export const usePointCloudViews = () => {
   const generateRects = (boxParams: IPointCloudBox) => {
     if (!cuboidBoxIn2DView) {
       const { mappingImgList = [] } = currentData;
-      const rects = mappingImgList.map((v: IMappingImg) =>
-        getRectPointCloudBox({
-          pointCloudBox: boxParams,
-          mappingData: v,
-          imageSizes,
-        }),
+      const rects: Array<ReturnType<typeof getRectPointCloudBox>> = mappingImgList.map(
+        (v: IMappingImg) =>
+          getRectPointCloudBox({
+            pointCloudBox: boxParams,
+            mappingData: v,
+            imageSizes,
+          }),
       );
 
       Object.assign(boxParams, { rects: rects.filter((rect) => rect !== undefined) });

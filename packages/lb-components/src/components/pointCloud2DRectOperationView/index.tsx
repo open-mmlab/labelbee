@@ -10,6 +10,7 @@ import { IBasicRect } from '@labelbee/lb-utils';
 
 import { usePointCloudViews } from '../pointCloudView/hooks/usePointCloudViews';
 import { PointCloudContext } from '../pointCloudView/PointCloudContext';
+import { TAfterImgOnLoad } from '../AnnotationView';
 
 interface IPointCloud2DRectOperationViewProps {
   mappingData?: IMappingImg;
@@ -19,6 +20,7 @@ interface IPointCloud2DRectOperationViewProps {
   };
   config: any;
   checkMode?: boolean;
+  afterImgOnLoad: TAfterImgOnLoad;
 }
 
 interface IPointCloud2DRectOperationViewRect extends IBasicRect {
@@ -29,7 +31,7 @@ interface IPointCloud2DRectOperationViewRect extends IBasicRect {
 }
 
 const PointCloud2DRectOperationView = (props: IPointCloud2DRectOperationViewProps) => {
-  const { mappingData, size, config, checkMode } = props;
+  const { mappingData, size, config, checkMode, afterImgOnLoad } = props;
   const url = mappingData?.url ?? '';
   const { pointCloudBoxList, setPointCloudResult, selectedID } = useContext(PointCloudContext);
 
@@ -80,6 +82,7 @@ const PointCloud2DRectOperationView = (props: IPointCloud2DRectOperationViewProp
     if (operation.current && url) {
       ImgUtils.load(url).then((imgNode: HTMLImageElement) => {
         operation.current.setImgNode(imgNode);
+        afterImgOnLoad(imgNode);
       });
     }
   }, [url]);

@@ -43,7 +43,7 @@ export interface IAnnotationData2dView {
   url: string;
   calName?: string;
   calib: ICalib;
-  path?: string;
+  path: string;
 }
 
 const EKeyCode = cKeyCode.default;
@@ -344,7 +344,6 @@ const PointCloud2DView = ({
                   view2dData={item}
                   setSelectedID={setSelectedID}
                   showEnlarge={showEnlarge}
-                  config={config}
                   checkMode={checkMode}
                 />
               )}

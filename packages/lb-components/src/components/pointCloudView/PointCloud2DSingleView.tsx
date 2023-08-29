@@ -17,14 +17,12 @@ const PointCloud2DSingleView = ({
   setSelectedID,
   currentData,
   showEnlarge,
-  config,
   checkMode = false,
 }: {
   view2dData: IAnnotationData2dView;
   setSelectedID: (value: string | number) => void;
   currentData: IFileItem;
   showEnlarge: boolean;
-  config: any;
   checkMode?: boolean;
 }) => {
   const ref = useRef(null);
@@ -102,8 +100,8 @@ const PointCloud2DSingleView = ({
         <PointCloud2DRectOperationView
           mappingData={view2dData}
           size={size}
-          config={config}
           checkMode={checkMode}
+          afterImgOnLoad={afterImgOnLoad}
         />
       )}
 

@@ -77,8 +77,6 @@ export interface I3DSpaceCoord {
 }
 
 export interface IPointCloudBoxRect extends IBasicRect {
-  valid: boolean;
-  trackID: number;
   imageName: string;
 }
 

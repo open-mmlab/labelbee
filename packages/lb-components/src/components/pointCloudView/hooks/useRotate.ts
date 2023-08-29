@@ -17,7 +17,7 @@ export const useRotate = ({ currentData }: IAnnotationStateProps) => {
   const ptCtx = useContext(PointCloudContext);
   const { selectedBox, updateSelectedBox } = useSingleBox();
   const { run: updateRotate } = useThrottleFn(
-    async (angle: number) => {
+    (angle: number) => {
       const { topViewInstance, mainViewInstance, syncAllViewPointCloudColor } = ptCtx;
       if (!topViewInstance || !mainViewInstance) {
         return;
