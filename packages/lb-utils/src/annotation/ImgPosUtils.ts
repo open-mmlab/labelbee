@@ -2,6 +2,8 @@
  * 图像初始化相关函数的
  */
 
+import { IBasicRect, ISize } from "..";
+
 export default class ImgPosUtils {
   /**
    * 初始化图片在页面中的大小
@@ -69,7 +71,7 @@ export default class ImgPosUtils {
   // 获取底层依赖矩形的 currentPos
   public static getBasicRecPos(
     imgNode: any,
-    basicRect: IRect,
+    basicRect: IBasicRect,
     size: { width: number; height: number },
     shrinkRatio: number = 0.9,
     zoomRatio: number = 1,

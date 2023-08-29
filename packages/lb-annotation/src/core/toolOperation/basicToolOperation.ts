@@ -1,4 +1,4 @@
-import { IBasicText, toolStyleConverter } from '@labelbee/lb-utils';
+import { IBasicText, ImgPosUtils, toolStyleConverter } from '@labelbee/lb-utils';
 import { isNumber } from 'lodash';
 import { EOperationMode, EToolName } from '@/constant/tool';
 import { IPolygonConfig, IPolygonData } from '@/types/tool/polygon';
@@ -16,7 +16,6 @@ import ActionsHistory from '../../utils/ActionsHistory';
 import AttributeUtils from '../../utils/tool/AttributeUtils';
 import DblClickEventListener from '../../utils/tool/DblClickEventListener';
 import DrawUtils from '../../utils/tool/DrawUtils';
-import ImgPosUtils from '../../utils/tool/ImgPosUtils';
 import RenderDomUtils from '../../utils/tool/RenderDomUtils';
 import ZoomUtils from '../../utils/tool/ZoomUtils';
 import EventListener from './eventListener';
