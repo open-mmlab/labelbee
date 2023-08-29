@@ -43,9 +43,9 @@ export const useSingleBox = (props?: IUseSingleBoxParams) => {
 
   /** Use Partial<IPointCloudBox> to update selected box */
   const updateSelectedBox = useCallback(
-    async (params: Partial<IPointCloudBox>) => {
+    (params: Partial<IPointCloudBox>) => {
       if (selectedBox?.info) {
-        await props?.generateRects?.(params as IPointCloudBox);
+        props?.generateRects?.(params as IPointCloudBox);
         pointCloudBoxList.splice(selectedBox.index, 1, _.merge(selectedBox.info, params));
         const newPointCloudBoxList = _.cloneDeep(pointCloudBoxList);
         setPointCloudResult(newPointCloudBoxList);
@@ -87,12 +87,12 @@ export const useSingleBox = (props?: IUseSingleBoxParams) => {
   );
 
   /** Toggle selected box‘s validity  */
-  const changeSelectedBoxValid = useCallback(async () => {
+  const changeSelectedBoxValid = useCallback(() => {
     if (selectedBox?.info) {
       const { id, valid = true } = selectedBox.info;
 
       // PointCloud
-      const newPointCloudList = await updateSelectedBox({ valid: !valid });
+      const newPointCloudList = updateSelectedBox({ valid: !valid });
 
       // Async
       syncAllViewPointCloudColor(newPointCloudList);
@@ -198,7 +198,7 @@ export const useSingleBox = (props?: IUseSingleBoxParams) => {
    * @param updateList {PartialIPointCloudBoxList}
    */
   const updateSelectedBoxes = useCallback(
-    async (updateList: PartialIPointCloudBoxList) => {
+    (updateList: PartialIPointCloudBoxList) => {
       const newPointCloudBoxList = _.cloneDeep(pointCloudBoxList);
       let hasModify = false;
 
@@ -207,7 +207,7 @@ export const useSingleBox = (props?: IUseSingleBoxParams) => {
 
         if (index > -1) {
           const updatedBoxParam = _.merge(newPointCloudBoxList[index], i);
-          await props?.generateRects?.(updatedBoxParam);
+          props?.generateRects?.(updatedBoxParam);
           newPointCloudBoxList.splice(index, 1, updatedBoxParam);
           mainViewInstance?.generateBox(updatedBoxParam);
           hasModify = true;
@@ -215,7 +215,7 @@ export const useSingleBox = (props?: IUseSingleBoxParams) => {
       }
 
       if (hasModify) {
-        await setPointCloudResult(newPointCloudBoxList);
+        setPointCloudResult(newPointCloudBoxList);
         pushHistoryWithList({ pointCloudBoxList: newPointCloudBoxList });
         mainViewInstance?.render();
         return newPointCloudBoxList;

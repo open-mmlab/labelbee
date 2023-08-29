@@ -267,7 +267,7 @@ const PointCloudListener: React.FC<IProps> = ({
 
   // Update the listener of toolInstance.
   useEffect(() => {
-    toolInstanceRef.current.setDefaultAttribute = async (newAttribute: string) => {
+    toolInstanceRef.current.setDefaultAttribute = (newAttribute: string) => {
       syncThreeViewsAttribute(newAttribute);
       const selectBox = ptCtx.selectedPointCloudBox;
       if (selectBox) {

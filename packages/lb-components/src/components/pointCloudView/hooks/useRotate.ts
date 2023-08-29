@@ -31,7 +31,7 @@ export const useRotate = ({ currentData }: IAnnotationStateProps) => {
         return;
       }
 
-      const newPointCloudList = await updateSelectedBox({
+      const newPointCloudList = updateSelectedBox({
         rotation: PointCloudUtils.restrictAngleRange(
           selectedPointCloudBox.rotation + Number(Math.PI * angle) / 180,
         ),

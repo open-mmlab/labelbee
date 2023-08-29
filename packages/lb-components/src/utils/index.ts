@@ -1,7 +1,7 @@
 import _ from 'lodash';
 
 import { pointCloudLidar2image } from '@labelbee/lb-annotation';
-import { IBasicRect, ICoordinate, IPointCloudBox } from '@labelbee/lb-utils';
+import { IBasicRect, ICoordinate, IPointCloudBox, ISize } from '@labelbee/lb-utils';
 import { IMappingImg } from '@/types/data';
 
 export const jsonParser = (content: any, defaultValue: any = {}) => {
@@ -60,13 +60,6 @@ export const getBoundingRect = (points: ICoordinate[]) => {
 };
 
 const isBoundingRectInImage = (() => {
-  const imageSizes: {
-    [key: string]: {
-      width: number;
-      height: number;
-    };
-  } = {};
-
   type IRect = Omit<IBasicRect, 'id'>;
 
   const getIntersection = (rect1: IRect, rect2: IRect) => {
@@ -79,7 +72,13 @@ const isBoundingRectInImage = (() => {
     return width >= 0 && height >= 0 ? { x: left, y: top, width, height } : null;
   };
 
-  return (boundingRect: IRect, imageurl: string) => {
+  return (
+    boundingRect: IRect,
+    imageurl: string,
+    imageSizes: {
+      [key: string]: ISize;
+    },
+  ) => {
     if (imageSizes[imageurl]) {
       const imgWidth = imageSizes[imageurl].width;
       const imgHeight = imageSizes[imageurl].height;
@@ -87,32 +86,20 @@ const isBoundingRectInImage = (() => {
       const intersection = getIntersection(boundingRect, imgRect);
       return intersection !== null;
     }
-
-    const img = new Image();
-
-    return new Promise((resolve, reject) => {
-      img.onload = () => {
-        const imgWidth = img.width;
-        const imgHeight = img.height;
-        imageSizes[imageurl] = { width: imgWidth, height: imgHeight };
-        const imgRect = { x: 0, y: 0, width: imgWidth, height: imgHeight };
-        const intersection = getIntersection(boundingRect, imgRect);
-        resolve(intersection !== null);
-      };
-      img.onerror = () => {
-        reject(new Error(`Failed to load image: ${imageurl}`));
-      };
-      img.src = imageurl;
-    });
+    return false;
   };
 })();
 
-export const getRectPointCloudBox = async (
-  pointCloudBox: IPointCloudBox,
-  mappingData: IMappingImg,
-) => {
-  const { trackID, valid } = pointCloudBox;
+interface IGetRectPointCloudBoxParams {
+  pointCloudBox: IPointCloudBox;
+  mappingData: IMappingImg;
+  imageSizes: {
+    [key: string]: ISize;
+  };
+}
 
+export const getRectPointCloudBox = (params: IGetRectPointCloudBoxParams) => {
+  const { pointCloudBox, mappingData, imageSizes } = params;
   // 需要新建一个Rect
   const { transferViewData: viewDataPointList } = pointCloudLidar2image(
     pointCloudBox,
@@ -128,12 +115,10 @@ export const getRectPointCloudBox = async (
 
   const boundingRect = {
     ...getBoundingRect(tmpPoints),
-    valid,
-    trackID,
     imageName: mappingData.path,
   };
 
-  const isRectInImage = await isBoundingRectInImage(boundingRect, mappingData.path);
+  const isRectInImage = isBoundingRectInImage(boundingRect, mappingData.path, imageSizes);
 
   if (isRectInImage) return boundingRect;
 };

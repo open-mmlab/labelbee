@@ -139,7 +139,7 @@ const BoxTrackIDInput = () => {
   }, [selectedBoxTrackID]);
 
   const updateCurrentPolygonList = async (newTrackID: number) => {
-    const newPointCloudList = await updateSelectedBox({ trackID: newTrackID });
+    const newPointCloudList = updateSelectedBox({ trackID: newTrackID });
     ptCtx?.topViewInstance?.updatePolygonList(newPointCloudList ?? []);
   };
 
@@ -266,9 +266,9 @@ const AttributeUpdater = ({
 
   const updateSize = (size: IDefaultSize) => {
     if (pointCloudViews.updateViewsByDefaultSize) {
-      pointCloudViews.updateViewsByDefaultSize(size)
+      pointCloudViews.updateViewsByDefaultSize(size);
     }
-  }
+  };
 
   const setAttribute = (attribute: string) => {
     toolInstance.setDefaultAttribute(attribute);

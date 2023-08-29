@@ -33,7 +33,7 @@ import _ from 'lodash';
 import { useDispatch, useSelector } from '@/store/ctx';
 import { AppState } from '@/store';
 import StepUtils from '@/utils/StepUtils';
-import { jsonParser,getRectPointCloudBox } from '@/utils';
+import { jsonParser, getRectPointCloudBox } from '@/utils';
 import {
   PreDataProcess,
   SetPointCloudLoading,
@@ -618,6 +618,7 @@ export const usePointCloudViews = () => {
     hideAttributes,
     setHighlight2DDataList,
     cuboidBoxIn2DView,
+    imageSizes,
   } = ptCtx;
   const { addHistory, initHistory, pushHistoryUnderUpdatePolygon, pushHistoryUnderUpdateLine } =
     useHistory();
@@ -634,11 +635,17 @@ export const usePointCloudViews = () => {
   });
   const dispatch = useDispatch();
 
-  const generateRects = async (boxParams: IPointCloudBox) => {
+  const generateRects = (boxParams: IPointCloudBox) => {
     if (!cuboidBoxIn2DView) {
       const { mappingImgList = [] } = currentData;
-      const promises = mappingImgList.map((v: IMappingImg) => getRectPointCloudBox(boxParams, v));
-      const rects = await Promise.all(promises);
+      const rects = mappingImgList.map((v: IMappingImg) =>
+        getRectPointCloudBox({
+          pointCloudBox: boxParams,
+          mappingData: v,
+          imageSizes,
+        }),
+      );
+
       Object.assign(boxParams, { rects: rects.filter((rect) => rect !== undefined) });
     }
   };
@@ -716,7 +723,7 @@ export const usePointCloudViews = () => {
   };
 
   /** Top-view create box from 2D */
-  const topViewAddBox = async ({
+  const topViewAddBox = ({
     polygon,
     size,
     imgList,
@@ -783,7 +790,7 @@ export const usePointCloudViews = () => {
     }
 
     const isBoxHidden = hideAttributes.includes(newPolygon.attribute);
-    await generateRects(boxParams);
+    generateRects(boxParams);
     const newPointCloudList = addPointCloudBox(boxParams);
     const polygonList = ptCtx?.polygonList ?? [];
     topViewInstance?.updatePolygonList(newPointCloudList ?? [], polygonList);
@@ -892,7 +899,7 @@ export const usePointCloudViews = () => {
    * @param originPolygon
    * @param fromView Back or Side
    */
-  const viewUpdateBox = async (newPolygon: any, originPolygon: any, fromView: string) => {
+  const viewUpdateBox = (newPolygon: any, originPolygon: any, fromView: string) => {
     if (selectedPointCloudBox) {
       let transfer2PointCloud;
       let newBoxParams: IPointCloudBox;
@@ -1039,7 +1046,7 @@ export const usePointCloudViews = () => {
    * @param polygon
    * @param size
    */
-  const topViewUpdateBox = async (updateList: UpdatePolygonByDragList, size: ISize) => {
+  const topViewUpdateBox = (updateList: UpdatePolygonByDragList, size: ISize) => {
     // If the selected Object is Polygon.
     if (selectedPolygon) {
       /**
@@ -1082,15 +1089,14 @@ export const usePointCloudViews = () => {
      */
     if (updatePointCloudList.length === 1) {
       const { newPolygon: polygon } = updateList[0];
-      const newPointCloudBoxList = await updateSelectedBoxes(updatePointCloudList);
-
+      const newPointCloudBoxList = updateSelectedBoxes(updatePointCloudList);
       syncPointCloudViews({
         polygon,
         boxParams: updatePointCloudList[0],
         newPointCloudBoxList,
       });
     } else {
-      const newPointCloudBoxList = await updateSelectedBoxes(updatePointCloudList);
+      const newPointCloudBoxList = updateSelectedBoxes(updatePointCloudList);
       if (newPointCloudBoxList) {
         ptCtx.syncAllViewPointCloudColor(newPointCloudBoxList);
       }
@@ -1099,9 +1105,9 @@ export const usePointCloudViews = () => {
 
   const updateViewsByDefaultSize = (defaultSize: IDefaultSize) => {
     if (selectedBox) {
-      const widthDefault = Number(defaultSize.widthDefault)
-      const depthDefault = Number(defaultSize.depthDefault)
-      const heightDefault = Number(defaultSize.heightDefault)
+      const widthDefault = Number(defaultSize.widthDefault);
+      const depthDefault = Number(defaultSize.depthDefault);
+      const heightDefault = Number(defaultSize.heightDefault);
       const selectedBoxTrackID = selectedBox?.info.trackID;
       const polygonList = topViewInstance?.toolInstance?.polygonList;
       const originPolygon = polygonList.find(
@@ -1110,13 +1116,19 @@ export const usePointCloudViews = () => {
       const size = {
         width: topViewInstance?.toolInstance?.basicImgInfo?.width,
         height: topViewInstance?.toolInstance?.basicImgInfo?.height,
-      }
-      const pointsInWorld = originPolygon.pointList.map((p: ICoordinate) => PointCloudUtils.transferCanvas2World(p, size))
-      const newPolygonPoints = MathUtils.getModifiedRectangleCoordinates(pointsInWorld, heightDefault, widthDefault)
-      const point1 = newPolygonPoints[0]
-      const point3 = newPolygonPoints[2]
+      };
+      const pointsInWorld = originPolygon.pointList.map((p: ICoordinate) =>
+        PointCloudUtils.transferCanvas2World(p, size),
+      );
+      const newPolygonPoints = MathUtils.getModifiedRectangleCoordinates(
+        pointsInWorld,
+        heightDefault,
+        widthDefault,
+      );
+      const point1 = newPolygonPoints[0];
+      const point3 = newPolygonPoints[2];
       const centerPoint = MathUtils.getLineCenterPoint([point1, point3]);
-      const bottomZ = selectedBox.info.center.z - selectedBox.info.depth / 2
+      const bottomZ = selectedBox.info.center.z - selectedBox.info.depth / 2;
       // attention: widthDefault means the length of line between point1 and point2,
       // so the height of box should be widthDefault, as same as in topViewPolygon2PointCloud("height = MathUtils.getLineLength(point1, point2)")
       const newBoxParams: IPointCloudBox = {
@@ -1124,7 +1136,7 @@ export const usePointCloudViews = () => {
         center: {
           x: centerPoint.x,
           y: centerPoint.y,
-          z: bottomZ + (depthDefault / 2)
+          z: bottomZ + depthDefault / 2,
         },
         width: widthDefault,
         height: heightDefault,
