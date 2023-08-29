@@ -1,4 +1,4 @@
-import React, { useMemo } from 'react';
+import React, { useMemo, useState, useEffect } from 'react';
 import { AudioPlayer } from '@/components/audioPlayer';
 import { getClassName } from '@/utils/dom';
 import PreviewResult from '@/components/predictTracking/previewResult';
@@ -6,23 +6,81 @@ import { Layout } from 'antd/es';
 import { Spin } from 'antd';
 import { prefix } from '@/constant';
 import { AppProps } from '@/App';
-import { CommonToolUtils, cTool } from '@labelbee/lb-annotation';
-// const styles = require('./index.module.scss')
+import { cKeyCode, CommonToolUtils, cTool, uuid, TagUtils } from '@labelbee/lb-annotation';
 import styles from './index.module.scss';
 import { isImageValue } from '@/utils/audio';
 import TagResultShow from '@/components/audioAnnotate/tagResultShow';
 import { AudioClipProvider, useAudioClipStore } from './audioContext';
 import TextInput from './textInput';
+import { connect } from 'react-redux';
+import { a2MapStateToProps, IA2MapStateProps } from '@/store/annotation/map';
+import { LabelBeeContext } from '@/store/ctx';
+import { jsonParser } from '@/utils';
+import { useCustomToolInstance } from '@/hooks/annotation';
+import { IAudioTimeSlice, ITextConfigItem } from '@labelbee/lb-utils'
+import { sidebarCls } from '@/views/MainView/sidebar';
+import LabelSidebar from './audioSide/labelSidebar'
+import ClipSidebar from './audioSide/clipSidebar'
+import ToggleTagModeSvg from '@/assets/annotation/audio/tag.svg';
+import ToggleTagModeASvg from '@/assets/annotation/audio/tagA.svg';
+import ClipSvg from '@/assets/annotation/audio/clip.svg'
+import ClipASvg from '@/assets/annotation/audio/clipA.svg'
 
 const { EAudioToolName } = cTool;
+const EKeyCode = cKeyCode.default;
+
 const { Sider, Content } = Layout;
 const layoutCls = `${prefix}-layout`;
 
-interface IProps {
+interface IProps extends IA2MapStateProps {
   path: string;
   loading: boolean;
   audioContext?: any;
 }
+
+const ToggleAudioOption = ({
+  setSideTab,
+  sideTab,
+}: {
+  setSideTab: (v: string) => void;
+  sideTab: string;
+}) => {
+  const options = [
+    {
+      tab: 'tag',
+      commonSvg: ToggleTagModeSvg,
+      selectedSvg: ToggleTagModeASvg,
+    },
+    {
+      tab: 'clip',
+      commonSvg: ClipSvg,
+      selectedSvg: ClipASvg,
+    },
+  ];
+
+  return (
+    <div className={styles.toggleAudioOption}>
+      {options.map((info, index) => {
+        const { tab, selectedSvg, commonSvg } = info;
+
+        return (
+          <div key={index} className={styles.option}>
+            <img
+              className={styles.icon}
+              src={sideTab === tab ? selectedSvg : commonSvg}
+              onClick={() => {
+                if (sideTab === tab) {
+                  return;
+                }
+                setSideTab(tab);
+              }}
+            />
+          </div>
+        );
+      })}
+    </div>
+  );
+};
 
 const AudioTextToolTextarea = ({
   result,
@@ -65,10 +123,179 @@ const AudioTextToolTextarea = ({
 };
 
 const AudioSideBar = (props: any) => {
-  if (typeof props.sider === 'function') {
-    return props.sider({ useAudioClipStore });
+  const {
+    sider,
+    config,
+    result,
+    updateTagResult,
+    updateRegion,
+    isEdit,
+    tagConfigurable,
+    clipConfigurable,
+    EventBus,
+  } = props
+  let labelInfoSet = config?.inputList || []
+  let tagResult = result?.tag ?? {}
+  let regions = result?.regions ?? []
+
+  const [labelSelectedList, setLabelSelectedList] = useState<number[]>([]);
+
+  const [sideTab, setSideTab] = useState('tag');
+
+  useEffect(() => {
+    if (!tagConfigurable && clipConfigurable) {
+      setSideTab('clip');
+      return;
+    }
+
+    setSideTab('tag');
+  }, [tagConfigurable, clipConfigurable]);
+
+  useEffect(() => {
+    window.addEventListener('keydown', keydown);
+    return () => {
+      window.removeEventListener('keydown', keydown);
+    };
+  });
+
+  const keydown = (e: KeyboardEvent) => {
+    if (tagConfigurable && clipConfigurable) {
+      switch (e.keyCode) {
+        case EKeyCode.L:
+          setSideTab('tag');
+          break;
+        case EKeyCode.X:
+          setSideTab('clip');
+          break;
+      }
+    }
+
+    if (sideTab === 'tag') {
+      if (!CommonToolUtils.hotkeyFilter(e)) {
+        return;
+      }
+
+      if (CommonToolUtils.isMoveKey(e?.keyCode)) {
+        e.preventDefault();
+      }
+
+      let keyCode = e.keyCode;
+
+      if (keyCode) {
+        if ((keyCode <= 57 && keyCode >= 49) || (keyCode <= 105 && keyCode >= 97)) {
+          if (keyCode > 57) {
+            keyCode = keyCode - 97;
+          } else {
+            keyCode = keyCode - 49;
+          }
+
+          // 数字键 0 - 9 48 - 57 / 97 - 105
+          // 数字键检测
+          const labeleSelectedList = labelSelectedList.slice();
+
+          if (labelInfoSet.length === 1) {
+            // 说明标签只有一层
+            setLabel(0, keyCode);
+            setLabelSelectedList([0, keyCode]);
+            setTimeout(() => {
+              setLabelSelectedList([]);
+            }, 500);
+          } else if (labeleSelectedList.length === 1) {
+            setLabel(labeleSelectedList[0], keyCode);
+            setLabelSelectedList([labeleSelectedList[0], keyCode]);
+            setTimeout(() => {
+              setLabelSelectedList([]);
+            }, 500);
+          } else {
+            setLabelSelectedList([keyCode]);
+          }
+        }
+      }
+    }
+  };
+  const setLabel = (i: number, j: number) => {
+    // 改数据要触发外层数据更新 updateTagResult
+    // 需要判断 i j 是否能找到 labelInfoSet 的值
+    if (
+      i < labelInfoSet.length &&
+      labelInfoSet[i].subSelected &&
+      j < labelInfoSet[i].subSelected.length
+    ) {
+      const key = labelInfoSet[i].value;
+      const isMulti = labelInfoSet[i].isMulti;
+
+      let value = labelInfoSet[i].subSelected[j].value;
+      // 判断是否有数据， 有则需要检测覆盖
+
+      let times = 0;
+      const result = tagResult;
+
+      for (const oldKey in tagResult) {
+        if (oldKey === labelInfoSet[i].value) {
+          times++;
+
+          // 需要区分是否为多选
+          if (isMulti === true) {
+            const keyList = result[oldKey].split(';').filter((v: string) => v !== ''); // 注意： 需要过滤 '' 空字符串分割出现 ['']
+            const index = keyList.indexOf(value);
+
+            if (index === -1) {
+              keyList.push(value);
+            } else {
+              // 处在数据需要清除
+              keyList.splice(index, 1);
+            }
+            value = keyList.join(';');
+          }
+
+          if (value === '') {
+            delete result[oldKey];
+          } else {
+            result[oldKey] = value;
+          }
+        }
+      }
+
+      // 如果都不在的说明为新的,需要往里面嵌入新的信息
+      times === 0 && Object.assign(tagResult, { [key]: value });
+      updateTagResult(tagResult);
+    }
+  };
+
+  const clearTagResult = (value: any) => {
+    delete tagResult[value];
+    updateTagResult(tagResult);
+  };
+
+  const toggleAudioOption = tagConfigurable && clipConfigurable && <ToggleAudioOption setSideTab={setSideTab} sideTab={sideTab} />
+
+  const labelSidebar = sideTab === 'tag' && <LabelSidebar
+    labelInfoSet={tagConfigurable ? labelInfoSet : []} // 工具配置
+    labelSelectedList={labelSelectedList}
+    setLabel={setLabel}
+    tagResult={tagResult}
+    clearResult={clearTagResult}
+    isEdit={isEdit}
+    withPanelTab={false}
+  />
+
+  const clipSidebar = sideTab === 'clip' && <ClipSidebar
+    regions={regions}
+    updateRegion={updateRegion}
+    useAudioClipStore={useAudioClipStore}
+    EventBus={EventBus}
+  />
+
+  if (typeof sider === 'function') {
+    return <div className={`${sidebarCls}`}>
+      {sider({
+        toggleAudioOption,
+        labelSidebar,
+        clipSidebar,
+      })}
+    </div>
   } else {
-    return props.sider;
+    return sider;
   }
 };
 
@@ -76,10 +303,40 @@ const AudioAnnotate: React.FC<AppProps & IProps> = (props) => {
   const siderWidth = props.style?.sider?.width;
 
   // 迁移部分sensebee的参数
-  const { step, stepList, audioContext, footer, sider, imgList } = props;
-  const { currentFile: currentData, imgIndex, drawLayerSlot } = audioContext || {}
-  const stepInfo = CommonToolUtils.getCurrentStepInfo(step, stepList);
+  const { step, stepList, audioContext, sider, imgList, imgIndex, currentData, config, stepInfo } = props;
+  const { drawLayerSlot } = audioContext || {}
   const annotationStepInfo = CommonToolUtils.getCurrentStepToolAndConfig(step, stepList);
+
+  const basicInfo = jsonParser(currentData.result);
+  const { toolInstanceRef } = useCustomToolInstance({ basicInfo });
+
+  const [loading, setLoading] = useState<boolean>(true);
+  const [result, setResult] = useState<any>(null)
+
+  useEffect(() => {
+    setLoading(true)
+  }, [imgIndex])
+
+  useEffect(() => {
+    if (loading === false) {
+      initResult()
+    }
+  }, [loading])
+
+  useEffect(() => {
+    toolInstanceRef.current.exportData = () => {
+      return [[result], {}];
+    };
+
+    toolInstanceRef.current.clearResult = clearResult
+
+  }, [result]);
+
+  const currentResult = useMemo(() => {
+    const stepResult = basicInfo[`step_${step}`]
+    return stepResult?.result || []
+  }, [config, basicInfo])
+
   const {
     tagConfigurable,
     textConfigurable = true,
@@ -102,10 +359,10 @@ const AudioAnnotate: React.FC<AppProps & IProps> = (props) => {
     clipTextConfigurable,
   };
 
-  const valid = isImageValue(currentData.result);
+  const valid = isImageValue(currentData.result ?? '');
   const count = CommonToolUtils.jsonParser(currentData.result)?.duration ?? 0;
   const totalText = valid ? count : 0;
-  const inputDisabled = !valid || audioContext?.loading || ![textConfigurable, clipTextConfigurable].includes(true);
+  const inputDisabled = !valid || loading || ![textConfigurable, clipTextConfigurable].includes(true);
   let preContext: { [key: string]: any } = {};
   if (imgIndex !== -1 && imgList?.length) {
     const preResult = imgList[imgIndex]?.preResult;
@@ -126,15 +383,111 @@ const AudioAnnotate: React.FC<AppProps & IProps> = (props) => {
     }
   }
 
+  const initResult = () => {
+    if (currentResult?.length > 0) {
+      setResult(currentResult[0])
+    } else {
+      setResult({
+        id: uuid(),
+        sourceID: '',
+        value: getInitValue(),
+        tag: getInitTagValue(),
+        regions: [],
+      })
+    }
+  }
+
+  /** 获取文本的默认数据 */
+  const getInitValue = (useDefault = true) => {
+    const initValue: any = {};
+    let configList = config.configList || [];
+    if (configList.length > 0) {
+      configList.forEach((i: ITextConfigItem) => {
+        initValue[i.key as keyof typeof initValue] = useDefault ? i.default || '' : '';
+      });
+    }
+
+    return initValue;
+  };
+
+  /** 获取标签的默认数据 */
+  const getInitTagValue = () => {
+    return TagUtils.getDefaultResultByConfig(config.inputList || []);
+  };
+
+  const onLoaded = ({ duration, hasError }: any) => {
+    setLoading(false);
+  }
+
+  const removeRegion = (id: string) => {
+    setResult((result: any) => ({
+      ...result,
+      regions: (result?.regions || []).filter((item: any) => item.id !== id),
+    }))
+  };
+
+  const updateRegion = (region: IAudioTimeSlice) => {
+    setResult((result: any) => {
+      const currentRegions: IAudioTimeSlice[] = result?.regions ?? [];
+      const { id } = region;
+      const currentRegion = currentRegions.find((item: IAudioTimeSlice) => item.id === id);
+      if (currentRegion) {
+        return {
+          ...result,
+          regions: currentRegions.map((item: IAudioTimeSlice) => {
+            if (id === item.id) {
+              return {
+                ...item,
+                ...region,
+              };
+            }
+            return item;
+          }),
+        }
+      } else {
+        return {
+          ...result,
+          regions: [...currentRegions, region],
+        }
+      }
+    })
+  };
+
+  const updateText = (val: string, key: string) => {
+    setResult((result: any) => ({
+      ...result,
+      value: {
+        ...result.value,
+        [key]: val,
+      }
+    }))
+  }
+
+  const updateTagResult = (tagResult: any) => {
+    setResult((result: any) => ({
+      ...result,
+      tag: tagResult,
+    }))
+  }
+
+  const clearResult = () => {
+    setResult((result: any) => ({
+      ...result,
+      value: getInitValue(),
+      tag: {},
+      regions: [],
+    }))
+  }
+
   return <AudioClipProvider>
-    <Spin spinning={audioContext?.loading} wrapperClassName='audio-tool-spinner'>
+    <Spin spinning={loading} wrapperClassName='audio-tool-spinner'>
       <Layout className={getClassName('layout', 'container')} style={{ height: '100%' }}>
         {props?.leftSider}
         <Content className={`${layoutCls}__content`}>
           <div className={styles.containerWrapper}>
             <div className={styles.audioWrapper}>
               {tagConfigurable && (
-                <TagResultShow result={audioContext?.result?.tag} labelInfoSet={inputList} EventBus={audioContext?.EventBus}/>
+                <TagResultShow result={result?.tag} labelInfoSet={inputList} EventBus={audioContext?.EventBus}/>
               )}
               {audioContext?.promptLayer}
               <AudioPlayer
@@ -146,13 +499,13 @@ const AudioAnnotate: React.FC<AppProps & IProps> = (props) => {
                 }}
                 drawLayerSlot={drawLayerSlot}
                 fileData={currentData}
-                onLoaded={audioContext?.onLoaded}
+                onLoaded={onLoaded}
                 invalid={!valid}
-                updateRegion={audioContext?.updateRegion}
-                removeRegion={audioContext.removeRegion}
-                regions={audioContext?.result?.regions}
+                updateRegion={updateRegion}
+                removeRegion={removeRegion}
+                regions={result?.regions}
                 activeToolPanel={audioContext?.activeToolPanel}
-                footer={footer}
+                footer={props.footer}
                 EventBus={audioContext.EventBus}
                 {...clipConfig}
               />
@@ -160,10 +513,10 @@ const AudioAnnotate: React.FC<AppProps & IProps> = (props) => {
             {(textConfigurable || clipTextConfigurable) && (
               <AudioTextToolTextarea
                 preContext={preContext}
-                result={audioContext?.result}
+                result={result}
                 inputDisabled={inputDisabled}
-                updateText={audioContext?.updateText}
-                updateRegion={audioContext?.updateRegion}
+                updateText={updateText}
+                updateRegion={updateRegion}
                 configList={configList}
                 autofocus={audioContext?.autoFocus}
                 textConfigurable={textConfigurable}
@@ -180,7 +533,17 @@ const AudioAnnotate: React.FC<AppProps & IProps> = (props) => {
           width={siderWidth ?? 240}
           style={props.style?.sider}
         >
-          <AudioSideBar sider={sider} />
+          <AudioSideBar
+            sider={sider}
+            config={config}
+            result={result}
+            updateTagResult={updateTagResult}
+            updateRegion={updateRegion}
+            isEdit={audioContext?.isEdit}
+            tagConfigurable={tagConfigurable}
+            clipConfigurable={clipConfigurable}
+            EventBus={audioContext?.EventBus}
+          />
         </Sider>
         <PreviewResult />
       </Layout>
@@ -188,4 +551,4 @@ const AudioAnnotate: React.FC<AppProps & IProps> = (props) => {
   </AudioClipProvider>;
 };
 
-export default AudioAnnotate
+export default connect(a2MapStateToProps, null, null, { context: LabelBeeContext })(AudioAnnotate)

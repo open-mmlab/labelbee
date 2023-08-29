@@ -28,7 +28,7 @@ import useAudioSegment from './useAudioSegment';
 import CombineTip from './combineTip';
 import SegmentTip from './segmentTip';
 import ToolFooter from '@/views/MainView/toolFooter';
-import { RenderFooter, IInputList } from '@/types/main';
+import { IInputList, RenderFooter } from '@/types/main';
 
 const { EToolName } = cTool
 const EKeyCode = cKeyCode.default
@@ -87,7 +87,7 @@ export const AudioPlayer = ({
   /** 截取片段数据:regions变化不会触发更新 */
   regions?: IAudioTimeSlice[];
   /** 更新截取片段，如果传入的id不存在，会新建一个数据 */
-  updateRegion?: (region: Partial<IAudioTimeSlice>) => void;
+  updateRegion?: (region: IAudioTimeSlice) => void;
   /** 根据id删除截取数据 */
   removeRegion?: (id: string) => void;
   /** 当前使用的工具panel，用于判断是否展示批注层 */
@@ -438,11 +438,14 @@ export const AudioPlayer = ({
       playImmediately: true,
     });
 
-    updateRegion?.({
+    const regionParam: IAudioTimeSlice = {
       id,
       start: start.decimalReserved(3),
       end: end.decimalReserved(3),
-    });
+      attribute: '',
+      text: '',
+    }
+    updateRegion?.(regionParam);
     update();
   };
 

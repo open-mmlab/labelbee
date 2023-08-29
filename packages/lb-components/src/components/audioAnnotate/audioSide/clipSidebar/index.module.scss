@@ -1,0 +1,79 @@
+.clipSidebar {
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+  overflow: hidden;
+  background-color: white;
+  .clipResults {
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+    flex: 1;
+    .title {
+      padding-left: 20px;
+      height: 32px;
+      line-height: 32px;
+      color: #333;
+      border-bottom: 1px solid #eee;
+    }
+    .regions {
+      flex: 1;
+      color: #666;
+      overflow: auto;
+      background: #fafafa;
+      .region {
+        position: relative;
+        padding: 12px 20px;
+        line-height: 18px;
+        &.selected {
+          background: rgba(102, 111, 255, 0.1);
+          color: #666fff;
+        }
+        img {
+          margin-right: 6px;
+        }
+        .label {
+          display: flex;
+          align-items: center;
+          margin-bottom: 2px;
+          .text {
+            max-width: 185px;
+          }
+        }
+        .time {
+          display: flex;
+          align-items: center;
+        }
+        &:hover .delete {
+          display: block;
+        }
+        .delete {
+          display: none;
+          cursor: pointer;
+          position: absolute;
+          right: 24px;
+          bottom: 14px;
+        }
+      }
+    }
+  }
+  .attributeList {
+    flex: 1;
+    overflow: auto;
+    :global {
+      .sensebee-radio-group,
+      .sensebee-radio-group-no-limit-height .ant-radio-group {
+        max-height: none;
+      }
+    }
+  }
+}
+
+.empty {
+  color: #999;
+  height: 262px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  background: #fafafa;
+}

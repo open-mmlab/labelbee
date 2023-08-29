@@ -144,6 +144,8 @@ const App = () => {
     console.log('goBack', data);
   };
 
+  console.log(fileList)
+  console.log(stepList)
   if (fileList.length > 0) {
     return <Annotation fileList={fileList} goBack={goBack} stepList={stepList} step={1} />;
   }

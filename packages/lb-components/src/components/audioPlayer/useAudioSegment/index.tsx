@@ -19,7 +19,7 @@ interface IProps {
   waveRef: any;
   regionMap: { [key: string]: IAudioTimeSlice };
   /** 更新截取片段，如果传入的id不存在，会新建一个数据 */
-  updateRegion?: (region: Partial<IAudioTimeSlice>) => void;
+  updateRegion?: (region: IAudioTimeSlice) => void;
   /** 根据id删除截取数据 */
   removeRegion?: (id: string) => void;
   generateRegions: () => void;

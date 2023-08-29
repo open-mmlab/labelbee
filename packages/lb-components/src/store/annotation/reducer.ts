@@ -437,6 +437,7 @@ export const annotationReducer = (
         return { ...state, imgIndex: action.payload.nextIndex };
       }
 
+
       const currentStepInfo = StepUtils.getCurrentStepInfo(step, stepList);
 
       const { nextIndex, imgNode, nextBasicIndex, imgError } = action.payload;

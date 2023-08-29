@@ -18,10 +18,11 @@ import pointCloudShortCutTable, {
 import scribbleShortCutTable from './scribble';
 import cuboidShortCutTable from './cuboid';
 import LLMShortCutTable from './LLM';
+import audioTextShortCutTable from './audioText'
 
 import { footerCls } from '../../index';
 import { useTranslation } from 'react-i18next';
-import { cTool } from '@labelbee/lb-annotation';
+import { cTool, EAudioToolName } from '@labelbee/lb-annotation';
 import { PointCloudContext } from '@/components/pointCloudView/PointCloudContext';
 import FooterPopover from '@/views/MainView/toolFooter/FooterPopover';
 import { EPointCloudPattern } from '@labelbee/lb-utils';
@@ -61,6 +62,7 @@ export const shortCutTable: { [a: string]: IShortCutInfo[] } = {
   [EToolName.ScribbleTool]: scribbleShortCutTable,
   [EToolName.Cuboid]: cuboidShortCutTable,
   [EToolName.LLM]: LLMShortCutTable,
+  [EAudioToolName.AudioTextTool]: audioTextShortCutTable,
 };
 
 const ToolHotKeyIcon = ({ icon }: { icon: React.ReactElement | string }) => {

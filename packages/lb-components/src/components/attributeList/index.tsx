@@ -28,6 +28,7 @@ interface IProps {
   enableColorPicker?: boolean;
   updateColorConfig?: (value: string, color: string) => void;
   updateSize?: (size: IDefaultSize) => void;
+  attributeLockChange?: (list: any) => void;
 }
 
 const AttributeList = React.forwardRef((props: IProps, ref) => {
