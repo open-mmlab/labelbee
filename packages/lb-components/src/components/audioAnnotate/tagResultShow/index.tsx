@@ -1,13 +1,15 @@
 import React, { useEffect, useState } from 'react';
 import styles from './index.module.scss';
-import { TagUtils } from '@labelbee/lb-annotation'
+import { TagUtils, EventBus } from '@labelbee/lb-annotation'
 
 const TagResultShow = (props: any) => {
-  const { result, labelInfoSet, isCheck, EventBus } = props;
+  const { result, labelInfoSet, isCheck, hasPromptLayer } = props;
   const [visible, setVisible] = useState(true);
 
+  const top = hasPromptLayer ? 40 : 0
+
   useEffect(() => {
-    EventBus.on('toggleShowLabel', (val: boolean) => {
+    EventBus.on('toggleShowLabel', (val) => {
       setVisible(val);
     });
     return () => {
@@ -25,7 +27,7 @@ const TagResultShow = (props: any) => {
   }
 
   return (
-    <div className={styles.labelContainer} style={isCheck ? { height: 245 } : { bottom: 108 }}>
+    <div className={styles.labelContainer} style={isCheck ? { height: 245, top } : { bottom: 108, top }}>
       <div id='label' className={styles.label} key={`tagSet_${0}`}>
         {tagInfoList.map((v: any, index: number) => {
           const values = v.value.filter((i: any) => i);

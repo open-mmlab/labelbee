@@ -95,7 +95,6 @@ const AudioTextToolTextarea = ({
   textConfigurable,
   updateRegion,
   clipAttributeList,
-  EventBus
 }: any) => {
   return (
     <div className={styles.textareaContainer}>
@@ -115,7 +114,6 @@ const AudioTextToolTextarea = ({
           textConfigurable={textConfigurable}
           updateRegion={updateRegion}
           clipAttributeList={clipAttributeList}
-          EventBus={EventBus}
         />
       </div>
     </div>
@@ -132,7 +130,6 @@ const AudioSideBar = (props: any) => {
     isEdit,
     tagConfigurable,
     clipConfigurable,
-    EventBus,
   } = props
   let labelInfoSet = config?.inputList || []
   let tagResult = result?.tag ?? {}
@@ -283,28 +280,38 @@ const AudioSideBar = (props: any) => {
     regions={regions}
     updateRegion={updateRegion}
     useAudioClipStore={useAudioClipStore}
-    EventBus={EventBus}
   />
 
-  if (typeof sider === 'function') {
-    return <div className={`${sidebarCls}`}>
-      {sider({
-        toggleAudioOption,
-        labelSidebar,
-        clipSidebar,
-      })}
-    </div>
-  } else {
-    return sider;
+  if (sider) {
+    if (typeof sider === 'function') {
+      return <div className={`${sidebarCls}`}>
+        {sider({
+          toggleAudioOption,
+          labelSidebar,
+          clipSidebar,
+        })}
+      </div>
+    } else {
+      return sider;
+    }
   }
+  return (
+    <div className={`${sidebarCls}`}>
+      <div className={`${sidebarCls}__content`}>
+        {toggleAudioOption}
+        {labelSidebar}
+        {clipSidebar}
+      </div>
+    </div>
+  );
+
 };
 
 const AudioAnnotate: React.FC<AppProps & IProps> = (props) => {
   const siderWidth = props.style?.sider?.width;
 
   // 迁移部分sensebee的参数
-  const { step, stepList, audioContext, sider, imgList, imgIndex, currentData, config, stepInfo } = props;
-  const { drawLayerSlot } = audioContext || {}
+  const { step, stepList, audioContext, sider, drawLayerSlot, imgList, imgIndex, currentData, config, stepInfo } = props;
   const annotationStepInfo = CommonToolUtils.getCurrentStepToolAndConfig(step, stepList);
 
   const basicInfo = jsonParser(currentData.result);
@@ -312,9 +319,11 @@ const AudioAnnotate: React.FC<AppProps & IProps> = (props) => {
 
   const [loading, setLoading] = useState<boolean>(true);
   const [result, setResult] = useState<any>(null)
+  const [autoFocus, setAutoFocus] = useState<boolean>(false)
 
   useEffect(() => {
     setLoading(true)
+    setAutoFocus(true)
   }, [imgIndex])
 
   useEffect(() => {
@@ -487,7 +496,7 @@ const AudioAnnotate: React.FC<AppProps & IProps> = (props) => {
           <div className={styles.containerWrapper}>
             <div className={styles.audioWrapper}>
               {tagConfigurable && (
-                <TagResultShow result={result?.tag} labelInfoSet={inputList} EventBus={audioContext?.EventBus}/>
+                <TagResultShow result={result?.tag} labelInfoSet={inputList} hasPromptLayer={!!audioContext?.promptLayer}/>
               )}
               {audioContext?.promptLayer}
               <AudioPlayer
@@ -506,7 +515,6 @@ const AudioAnnotate: React.FC<AppProps & IProps> = (props) => {
                 regions={result?.regions}
                 activeToolPanel={audioContext?.activeToolPanel}
                 footer={props.footer}
-                EventBus={audioContext.EventBus}
                 {...clipConfig}
               />
             </div>
@@ -518,12 +526,11 @@ const AudioAnnotate: React.FC<AppProps & IProps> = (props) => {
                 updateText={updateText}
                 updateRegion={updateRegion}
                 configList={configList}
-                autofocus={audioContext?.autoFocus}
+                autofocus={autoFocus}
                 textConfigurable={textConfigurable}
                 clipTextConfigurable={clipTextConfigurable}
                 clipAttributeList={clipAttributeList}
                 clipAttributeConfigurable={clipAttributeConfigurable}
-                EventBus={audioContext.EventBus}
               />
             )}
           </div>
@@ -542,7 +549,6 @@ const AudioAnnotate: React.FC<AppProps & IProps> = (props) => {
             isEdit={audioContext?.isEdit}
             tagConfigurable={tagConfigurable}
             clipConfigurable={clipConfigurable}
-            EventBus={audioContext?.EventBus}
           />
         </Sider>
         <PreviewResult />

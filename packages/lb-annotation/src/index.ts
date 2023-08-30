@@ -35,6 +35,7 @@ import ImgUtils from './utils/ImgUtils';
 import MathUtils from './utils/MathUtils';
 import AttributeUtils from './utils/tool/AttributeUtils';
 import ActionsHistory from './utils/ActionsHistory';
+import EventBus from './utils/EventBus';
 
 // ToolListener
 import DblClickEventListener from './utils/tool/DblClickEventListener'; // temporarily supports the use of external tools in this way
@@ -84,6 +85,7 @@ export {
   StyleUtils,
   // 其他特殊基础功能
   ActionsHistory,
+  EventBus,
 };
 
 export * from './newCore';

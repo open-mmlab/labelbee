@@ -70,7 +70,6 @@ interface IProps {
   clipAttributeList?: IInputList[];
   /** 更新截取片段数据 */
   updateRegion?: (region: IAudioTimeSlice) => void;
-  EventBus?: object;
   isEdit?: boolean;
 }
 
@@ -94,7 +93,6 @@ export const SingleTextInput = (props: any) => {
     onFocusStyle = {},
     // 右侧输入框上方展示元素
     extra,
-    EventBus,
   } = props;
   const { maxLength } = config;
 
@@ -121,11 +119,9 @@ export const SingleTextInput = (props: any) => {
     autoSize: { minRows: 2, maxRows: 6 },
     onChange: (e: FocusEvent<HTMLTextAreaElement>) => {
       const value = e.target.value;
-      EventBus.emit('heartbeat');
       updateTextWithKey(value);
     },
     onFocus: (e: FocusEvent<HTMLTextAreaElement>) => {
-      EventBus.emit('heartbeat');
       setTextAreaFocus(true);
       onFocus?.(e);
       if (e.target.value) {
@@ -147,7 +143,6 @@ export const SingleTextInput = (props: any) => {
       const { keyCode } = e;
       if (e.ctrlKey) {
         if (keyCode === EKeyCode.Enter) {
-          EventBus.emit('next', 123);
           e.preventDefault();
         }
         if (addPlaceholder && [EKeyCode.One, EKeyCode.Two, EKeyCode.Three].includes(keyCode)) {
@@ -264,7 +259,6 @@ const TextInput = (props: IProps) => {
     clipAttributeConfigurable,
     updateRegion,
     clipAttributeList = [],
-    EventBus,
   } = props;
 
   const [focusIndex, setFocusIndex] = useState(0);
@@ -428,7 +422,6 @@ const TextInput = (props: IProps) => {
               textID={textID}
               addPlaceholder={addPlaceholder}
               onFocus={() => setFocusIndex(index)}
-              EventBus={EventBus}
             />
           ))}
         {clipTextConfigurable &&
@@ -486,7 +479,6 @@ const TextInput = (props: IProps) => {
                     </div>
                   ) : null
                 }
-                EventBus={EventBus}
               />
             );
           })}

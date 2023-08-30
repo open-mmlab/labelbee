@@ -2,7 +2,7 @@ import React, { useState, useRef, useEffect } from 'react';
 import { getWebPcm2WavBase64 } from '@/components/audioAnnotate/utils/getWebPcm2Wac';
 import _, { debounce, sortBy } from 'lodash';
 import { PauseOutlined, CaretRightOutlined } from '@ant-design/icons';
-import { cKeyCode, cTool } from '@labelbee/lb-annotation';
+import { cKeyCode, cTool, EventBus } from '@labelbee/lb-annotation';
 import { IAudioTimeSlice } from '@labelbee/lb-utils'
 import { Button } from 'antd';
 import InvalidPage from '@/components/invalidPage';
@@ -29,6 +29,7 @@ import CombineTip from './combineTip';
 import SegmentTip from './segmentTip';
 import ToolFooter from '@/views/MainView/toolFooter';
 import { IInputList, RenderFooter } from '@/types/main';
+import { decimalReserved } from '@/components/videoPlayer/utils'
 
 const { EToolName } = cTool
 const EKeyCode = cKeyCode.default
@@ -75,7 +76,6 @@ export const AudioPlayer = ({
   hoverRegionId,
   footer,
   drawLayerSlot,
-  EventBus,
 }: {
   fileData: any;
   height?: number;
@@ -101,8 +101,7 @@ export const AudioPlayer = ({
   /** 查看模式用到的hoverId */
   hoverRegionId?: string;
   footer?: RenderFooter;
-  drawLayerSlot?: (params: { currentTime: number, remainingTime: number, audioPlayer: any }) => any;
-  EventBus: any;
+  drawLayerSlot?: any,
 }) => {
   const { url, path } = fileData;
   const [isPlaying, setIsPlaying] = useState<boolean>(false);
@@ -440,8 +439,8 @@ export const AudioPlayer = ({
 
     const regionParam: IAudioTimeSlice = {
       id,
-      start: start.decimalReserved(3),
-      end: end.decimalReserved(3),
+      start: decimalReserved(start, 3),
+      end: decimalReserved(end, 3),
       attribute: '',
       text: '',
     }
@@ -532,8 +531,8 @@ export const AudioPlayer = ({
       }
       const regionItem = {
         id,
-        start: start.decimalReserved(3),
-        end: end.decimalReserved(3),
+        start: decimalReserved(start, 3),
+        end: decimalReserved(end, 3),
         attribute: audioClipStateRef.current.selectedAttribute,
         text: '',
       };

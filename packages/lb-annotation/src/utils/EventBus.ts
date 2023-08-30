@@ -13,7 +13,7 @@ class EventBus {
    * @param eventName 事件名字
    * @param callback 事件回调
    */
-  public on(eventName: string, callback: () => void) {
+  public on(eventName: string, callback: (...args: any[]) => void) {
     const existEvents = this._events.get(eventName) || [];
     if (!existEvents.some((fn) => fn === callback)) {
       this._events.set(eventName, existEvents.concat(callback));
@@ -27,7 +27,7 @@ class EventBus {
    * @param {() => void} callback
    * @memberof EventBus
    */
-  public singleOn(eventName: string, callback: () => void) {
+  public singleOn(eventName: string, callback: (...args: any[]) => void) {
     this._events.set(eventName, [callback]);
   }
 
@@ -52,7 +52,7 @@ class EventBus {
    * @param eventName 需要解绑的事件名字
    * @param callback 需要解绑的方法
    */
-  public unbind(eventName: string, callback: () => void) {
+  public unbind(eventName: string, callback: (...args: any[]) => void) {
     const existEvents: any[] | undefined = this._events.get(eventName);
     if (existEvents) {
       this._events.set(

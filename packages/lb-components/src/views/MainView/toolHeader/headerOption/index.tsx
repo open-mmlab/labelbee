@@ -14,7 +14,7 @@ import { EToolName } from '@/data/enums/ToolType';
 import { ChangeSave } from '@/store/annotation/actionCreators';
 import { IStepInfo } from '@/types/step';
 import { useTranslation } from 'react-i18next';
-import { cTool } from '@labelbee/lb-annotation';
+import { cTool, EAudioToolName } from '@labelbee/lb-annotation';
 import { PointCloudContext } from '@/components/pointCloudView/PointCloudContext';
 import { EPointCloudPattern } from '@labelbee/lb-utils';
 const { EVideoToolName, EPointCloudName } = cTool;
@@ -46,6 +46,7 @@ const HeaderOption: React.FC<IProps> = (props) => {
   const isTagTool = [EToolName.Tag, EVideoToolName.VideoTagTool].includes(stepInfo?.tool as any);
   const isVideo = [EVideoToolName.VideoTagTool].includes(stepInfo?.tool as any);
   const isPointCloud = [EPointCloudName.PointCloud].includes(stepInfo?.tool as any);
+  const isAudio = [EAudioToolName.AudioTextTool].includes(stepInfo?.tool as any);
 
   const isBegin = props.isBegin || isTagTool;
 
@@ -153,6 +154,10 @@ const HeaderOption: React.FC<IProps> = (props) => {
         commonOptionList = commonOptionList.slice(0, 3);
         break;
     }
+  }
+
+  if (isAudio) {
+    commonOptionList = commonOptionList.slice(0, 1)
   }
 
   return (

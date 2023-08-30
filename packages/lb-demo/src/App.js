@@ -18,6 +18,7 @@ import {
   pointCloudList,
   pointCloudMappingImgList,
   videoList,
+  mockAudioList,
 } from './mock/index';
 import { getDependStepList, getStepList } from './mock/taskConfig';
 import car1 from './mock/cuboidImages/1.png';
@@ -34,6 +35,7 @@ const App = () => {
   const stepList = isSingleTool ? getStepList(tool) : getDependStepList(tool);
   const currentIsVideo = StepUtils.currentToolIsVideo(1, stepList);
   const currentIsPointCloud = StepUtils.currentToolIsPointCloud(1, stepList);
+  const currentIsAudio = StepUtils.currentToolIsAudio(1, stepList)
   const getMockList = () => {
     let srcList = mockFileList;
 
@@ -41,6 +43,10 @@ const App = () => {
 
     if (currentIsVideo) {
       srcList = videoList;
+    }
+
+    if (currentIsAudio) {
+      return mockAudioList
     }
 
     if (currentIsPointCloud) {
@@ -144,8 +150,6 @@ const App = () => {
     console.log('goBack', data);
   };
 
-  console.log(fileList)
-  console.log(stepList)
   if (fileList.length > 0) {
     return <Annotation fileList={fileList} goBack={goBack} stepList={stepList} step={1} />;
   }

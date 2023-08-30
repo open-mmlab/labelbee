@@ -1,12 +1,11 @@
 import React from 'react';
 import AttributeList from '@/components/attributeList';
 import { IAudioTimeSlice } from '@labelbee/lb-utils'
-
+import { EventBus } from '@labelbee/lb-annotation';
 import ClipIcon from '@/assets/annotation/audio/clipSmall.svg';
 import ClipActiveIcon from '@/assets/annotation/audio/clipASmall.svg';
 import DeleteIcon from '@/assets/annotation/audio/delete.svg';
 import LoopActiveIcon from '@/assets/annotation/audio/loopA.svg';
-
 import { getAttributeShowText, timeFormat } from '@/utils/audio';
 import LongText from '@/components/longText';
 import { classnames } from '@/utils';
@@ -18,11 +17,10 @@ interface IClipSidebarProps {
   regions: IAudioTimeSlice[];
   updateRegion: (region: IAudioTimeSlice) => void;
   useAudioClipStore: any;
-  EventBus: any;
 }
 /** 开启音频截取后，标注中展示在右侧，包含已截取片段和调整属性操作 */
 const ClipSidebar = (props: IClipSidebarProps) => {
-  const { regions = [], updateRegion, useAudioClipStore, EventBus } = props;
+  const { regions = [], updateRegion, useAudioClipStore } = props;
   const { audioClipState, setAudioClipState } = useAudioClipStore();
 
   const {
