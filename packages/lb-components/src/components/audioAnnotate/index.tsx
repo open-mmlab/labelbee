@@ -8,7 +8,6 @@ import { prefix } from '@/constant';
 import { AppProps } from '@/App';
 import { cKeyCode, CommonToolUtils, cTool, uuid, TagUtils } from '@labelbee/lb-annotation';
 import styles from './index.module.scss';
-import { isImageValue } from '@/utils/audio';
 import TagResultShow from '@/components/audioAnnotate/tagResultShow';
 import { AudioClipProvider, useAudioClipStore } from './audioContext';
 import TextInput from './textInput';
@@ -368,7 +367,7 @@ const AudioAnnotate: React.FC<AppProps & IProps> = (props) => {
     clipTextConfigurable,
   };
 
-  const valid = isImageValue(currentData.result ?? '');
+  const valid = audioContext?.valid;
   const count = CommonToolUtils.jsonParser(currentData.result)?.duration ?? 0;
   const totalText = valid ? count : 0;
   const inputDisabled = !valid || loading || ![textConfigurable, clipTextConfigurable].includes(true);
