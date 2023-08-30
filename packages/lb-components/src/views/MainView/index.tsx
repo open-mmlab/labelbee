@@ -57,7 +57,6 @@ const PointCloudAnnotate: React.FC<AppProps & IProps> = (props) => {
         style={props.style?.footer}
         mode={props.mode}
         footer={props?.footer}
-        showSwitchCuboidBoxIn2DView={props.showSwitchCuboidBoxIn2DView as boolean}
       />
     </>
   );

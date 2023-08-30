@@ -100,7 +100,6 @@ export interface AppProps {
 
   checkMode?: boolean;
   intelligentFit?: boolean;
-  showSwitchCuboidBoxIn2DView?: boolean; // 2d视图是否展示立体框的切换按钮，默认不展示
   enableColorPicker?: boolean;
   highlightAttribute?: string;
   onLoad?: ({ toolInstance }: { toolInstance: ToolInstance }) => void;
@@ -127,7 +126,6 @@ const App: React.FC<AppProps> = (props) => {
     skipBeforePageTurning,
     beforeRotate,
     checkMode = false,
-    showSwitchCuboidBoxIn2DView = true,
     intelligentFit = true,
     highlightAttribute = '',
     preDataProcess,
@@ -233,7 +231,6 @@ const App: React.FC<AppProps> = (props) => {
           {...props}
           intelligentFit={intelligentFit}
           checkMode={checkMode}
-          showSwitchCuboidBoxIn2DView={showSwitchCuboidBoxIn2DView}
         />
       </ConfigProvider>
     </div>

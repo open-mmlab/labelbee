@@ -34,7 +34,6 @@ interface IProps {
   footer?: RenderFooter;
 
   skipBeforePageTurning?: (pageTurning: Function) => void;
-  showSwitchCuboidBoxIn2DView?: boolean;
 }
 
 export const footerCls = `${prefix}-footer`;
@@ -82,7 +81,6 @@ const ToolFooter: React.FC<IProps> = (props: IProps) => {
     mode = 'light',
     footer = renderFooter,
     skipBeforePageTurning,
-    showSwitchCuboidBoxIn2DView = false,
   } = props;
 
   const dispatch = useDispatch();
@@ -139,7 +137,7 @@ const ToolFooter: React.FC<IProps> = (props: IProps) => {
           <FooterTips />
           <AnnotatedAttributesIcon />
           <div style={{ flex: 1 }} />
-          <SwitchCuboidBoxIn2DView showSwitchCuboidBoxIn2DView={showSwitchCuboidBoxIn2DView} />
+          <SwitchCuboidBoxIn2DView />
           {pagination}
         </div>
       );
