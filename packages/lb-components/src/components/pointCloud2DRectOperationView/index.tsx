@@ -1,15 +1,16 @@
 import { useLatest } from 'ahooks';
-import React, { useContext, useEffect, useRef } from 'react';
+import { Spin } from 'antd/es';
+import React, { useContext, useEffect, useRef, useState } from 'react';
 import { connect } from 'react-redux';
 
+import { usePointCloudViews } from '@/components/pointCloudView/hooks/usePointCloudViews';
+import { PointCloudContext } from '@/components/pointCloudView/PointCloudContext';
 import { a2MapStateToProps } from '@/store/annotation/map';
 import { LabelBeeContext } from '@/store/ctx';
 import { IMappingImg } from '@/types/data';
 import { ImgUtils, PointCloud2DRectOperation } from '@labelbee/lb-annotation';
 import { IBasicRect } from '@labelbee/lb-utils';
 
-import { usePointCloudViews } from '../pointCloudView/hooks/usePointCloudViews';
-import { PointCloudContext } from '../pointCloudView/PointCloudContext';
 import { TAfterImgOnLoad } from '../AnnotationView';
 
 interface IPointCloud2DRectOperationViewProps {
@@ -39,6 +40,8 @@ const PointCloud2DRectOperationView = (props: IPointCloud2DRectOperationViewProp
   const ref = React.useRef(null);
   const operation = useRef<any>(null);
   const update2DViewRectFn = useLatest<any>(update2DViewRect);
+
+  const [loading, setLoading] = useState(true);
 
   const handleUpdateDragResult = (rect: IPointCloud2DRectOperationViewRect) => {
     const results = update2DViewRectFn.current?.(rect);
@@ -83,6 +86,7 @@ const PointCloud2DRectOperationView = (props: IPointCloud2DRectOperationViewProp
       ImgUtils.load(url).then((imgNode: HTMLImageElement) => {
         operation.current.setImgNode(imgNode);
         afterImgOnLoad(imgNode);
+        setLoading(false);
       });
     }
   }, [url]);
@@ -101,9 +105,13 @@ const PointCloud2DRectOperationView = (props: IPointCloud2DRectOperationViewProp
         operation.current?.setSelectedID(rect.id);
       }
     }
-  }, [pointCloudBoxList, selectedID]);
+  }, [pointCloudBoxList, selectedID, url]);
 
-  return <div ref={ref} style={{ position: 'relative' }} />;
+  return (
+    <Spin spinning={loading}>
+      <div ref={ref} style={{ position: 'relative', ...size }} />
+    </Spin>
+  );
 };
 
 export default connect(a2MapStateToProps, null, null, { context: LabelBeeContext })(

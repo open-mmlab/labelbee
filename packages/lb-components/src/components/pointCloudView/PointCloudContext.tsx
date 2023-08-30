@@ -116,7 +116,7 @@ export interface IPointCloudContext
   imageSizes: {
     [key: string]: ISize;
   };
-  cacheImageNodeSize: (params: { imgNode: HTMLImageElement; url: string }) => void;
+  cacheImageNodeSize: (params: { imgNode: HTMLImageElement; path: string }) => void;
 }
 
 export const PointCloudContext = React.createContext<IPointCloudContext>({
@@ -216,13 +216,13 @@ export const PointCloudProvider: React.FC<{}> = ({ children }) => {
 
   const dispatch = useDispatch();
 
-  const cacheImageNodeSize = (params: { imgNode: HTMLImageElement; url: string }) => {
-    const { imgNode, url } = params;
-    if (url && imgNode) {
+  const cacheImageNodeSize = (params: { imgNode: HTMLImageElement; path: string }) => {
+    const { imgNode, path } = params;
+    if (path && imgNode) {
       setImageSizes((prev) => {
         return {
           ...prev,
-          [url]: {
+          [path]: {
             width: imgNode.width,
             height: imgNode.height,
           },

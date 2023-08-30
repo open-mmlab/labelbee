@@ -190,7 +190,7 @@ const PointCloud2DView = ({
           url: mappingData?.url,
           calName: mappingData.calib?.calName,
           calib: mappingData?.calib,
-          path: mappingData?.url,
+          path: mappingData?.path,
         });
       });
       setAnnotations2d(newAnnotations2dList);

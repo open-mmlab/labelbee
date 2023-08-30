@@ -53,7 +53,7 @@ export const getBoundingRect = (points: ICoordinate[]) => {
 
   return {
     x: minX,
-    y: maxY,
+    y: minY,
     width: maxX - minX,
     height: maxY - minY,
   };
@@ -74,14 +74,14 @@ const isBoundingRectInImage = (() => {
 
   return (
     boundingRect: IRect,
-    imageurl: string,
+    path: string,
     imageSizes: {
       [key: string]: ISize;
     },
   ) => {
-    if (imageSizes[imageurl]) {
-      const imgWidth = imageSizes[imageurl].width;
-      const imgHeight = imageSizes[imageurl].height;
+    if (imageSizes[path]) {
+      const imgWidth = imageSizes[path].width;
+      const imgHeight = imageSizes[path].height;
       const imgRect = { x: 0, y: 0, width: imgWidth, height: imgHeight };
       const intersection = getIntersection(boundingRect, imgRect);
       return intersection !== null;
