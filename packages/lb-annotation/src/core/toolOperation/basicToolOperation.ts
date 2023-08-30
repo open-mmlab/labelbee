@@ -1,4 +1,4 @@
-import { IBasicText, toolStyleConverter } from '@labelbee/lb-utils';
+import { IBasicText, ImgPosUtils, toolStyleConverter } from '@labelbee/lb-utils';
 import { isNumber } from 'lodash';
 import { EOperationMode, EToolName } from '@/constant/tool';
 import { IPolygonConfig, IPolygonData } from '@/types/tool/polygon';
@@ -16,7 +16,6 @@ import ActionsHistory from '../../utils/ActionsHistory';
 import AttributeUtils from '../../utils/tool/AttributeUtils';
 import DblClickEventListener from '../../utils/tool/DblClickEventListener';
 import DrawUtils from '../../utils/tool/DrawUtils';
-import ImgPosUtils from '../../utils/tool/ImgPosUtils';
 import RenderDomUtils from '../../utils/tool/RenderDomUtils';
 import ZoomUtils from '../../utils/tool/ZoomUtils';
 import EventListener from './eventListener';
@@ -472,6 +471,8 @@ class BasicToolOperation extends EventListener {
       ...basicImgInfo,
     });
 
+    this.updateZoomInfo();
+
     if (this.isImgError === true) {
       this.isImgError = false;
       this.emit('changeAnnotationShow');
@@ -484,6 +485,27 @@ class BasicToolOperation extends EventListener {
     this.initImgPos();
     this.render();
     this.renderBasicCanvas();
+  }
+
+  /**
+   * Update the zoomInfo when Image or Size updated.
+   */
+  public updateZoomInfo(imgNode = this.imgNode, size = this.size) {
+    if (!imgNode || !size) {
+      return;
+    }
+
+    const { min } = ImgPosUtils.getMinZoomByImgAndSize({
+      canvasSize: size,
+      imgSize: { width: imgNode.width, height: imgNode.height },
+      rotate: this.rotate,
+      zoomRatio: this._imgAttribute?.zoomRatio,
+    });
+
+    this.zoomInfo = {
+      ...this.zoomInfo,
+      min,
+    };
   }
 
   public setErrorImg() {
@@ -1102,6 +1124,7 @@ class BasicToolOperation extends EventListener {
    */
   public setSize(size: ISize) {
     this.size = size;
+    this.updateZoomInfo();
     if (this.container.contains(this.canvas)) {
       this.destroyCanvas();
       this.createCanvas(size);
