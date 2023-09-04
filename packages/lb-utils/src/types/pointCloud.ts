@@ -9,6 +9,7 @@
 import { IInputList } from './base';
 import { IPolygonData } from './polygon';
 import { ICoordinate } from './common';
+import { IBasicRect } from './annotationView';
 
 export type TMatrix4Tuple = [
   number,
@@ -75,6 +76,10 @@ export interface I3DSpaceCoord {
   z: number;
 }
 
+export interface IPointCloudBoxRect extends IBasicRect {
+  imageName: string;
+}
+
 export interface IPointCloudBox extends IVolume {
   attribute: string;
   center: I3DSpaceCoord;
@@ -87,6 +92,7 @@ export interface IPointCloudBox extends IVolume {
   };
   count?: number;
   newPointList?: ICoordinate[];
+  rects?: IPointCloudBoxRect[];
 }
 
 export interface IPointCloudSphere {

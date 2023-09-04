@@ -250,7 +250,10 @@
     "Locked":"Locked",
     "LeastCharacterError":"Please enter at least {{num}} characters",
     "And":"And",
-    "Or":"Or"
+    "Or":"Or",
+    "ImageLabels":"Image labels",
+    "3DRect":"3D Rect",
+    "2DRect":"2D Rect"
   },
   "cn": {
     "TextInput": "文本输入",
@@ -503,6 +506,9 @@
     "Locked":"已开启",
     "LeastCharacterError": "请至少输入{{num}}个字符",
     "And":"且",
-    "Or":"或"
+    "Or":"或",
+    "ImageLabels":"图片标注物",
+    "3DRect":"3D 框",
+    "2DRect":"2D 框"
   }
 }
