@@ -35,9 +35,9 @@
   "publishConfig": {
   },
   "author": "",
-  "license": "BSD-3-Clause",
+  "license": "Apache-2.0",
   "bugs": {
-    "url": "https://github.com/katspaugh/wavesurfer.js/issues"
+    "url": "https://github.com/open-mmlab/labelbee/issues"
   },
   "keywords": [
     "waveform",
@@ -87,7 +87,7 @@
     "webpack-dev-server": "^4.9.3",
     "webpack-merge": "^5.8.0"
   },
-  "homepage": "https://wavesurfer-js.org",
+  "homepage": "https://github.com/open-mmlab/labelbee",
   "lint-staged": {
     "*.js": [
       "eslint"
