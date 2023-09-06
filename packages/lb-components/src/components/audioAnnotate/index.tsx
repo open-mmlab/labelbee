@@ -367,7 +367,7 @@ const AudioAnnotate: React.FC<AppProps & IProps> = (props) => {
     clipTextConfigurable,
   };
 
-  const valid = audioContext?.valid;
+  const valid = audioContext ? audioContext?.valid : true;
   const count = CommonToolUtils.jsonParser(currentData.result)?.duration ?? 0;
   const totalText = valid ? count : 0;
   const inputDisabled = !valid || loading || ![textConfigurable, clipTextConfigurable].includes(true);
@@ -424,6 +424,7 @@ const AudioAnnotate: React.FC<AppProps & IProps> = (props) => {
   };
 
   const onLoaded = ({ duration, hasError }: any) => {
+    console.log('onloaded')
     setLoading(false);
   }
 

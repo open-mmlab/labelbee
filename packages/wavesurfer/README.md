@@ -1,4 +1,11 @@
-# [wavesurfer.js](https://wavesurfer-js.org)
+## Used External Projects
+
+During the development of this project, we utilized the following external projects and open-source libraries, and we would like to extend our gratitude to the original authors for their contributions:
+
+- [wavesurfer.js](https://wavesurfer-js.org)
+
+Please refer to the documentation and licenses of each project/library for more information.
+
 
 [![npm version](https://img.shields.io/npm/v/wavesurfer.js.svg?style=flat)](https://www.npmjs.com/package/wavesurfer.js)
 ![npm](https://img.shields.io/npm/dm/wavesurfer.js.svg) [![Join the chat at https://gitter.im/katspaugh/wavesurfer.js](https://badges.gitter.im/katspaugh/wavesurfer.js.svg)](https://gitter.im/katspaugh/wavesurfer.js?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge)
