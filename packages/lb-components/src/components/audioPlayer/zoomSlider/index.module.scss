@@ -1,0 +1,16 @@
+.sliderContainer {
+  display: inline-flex;
+  align-items: center;
+  color: #fff;
+  margin: 0 40px;
+  :global {
+    .ant-slider-rail {
+      background-color: #595959;
+      border-radius: 100px;
+    }
+    .ant-slider-handle.ant-tooltip-open,
+    .ant-slider-handle:focus {
+      border-color: #ffff;
+    }
+  }
+}

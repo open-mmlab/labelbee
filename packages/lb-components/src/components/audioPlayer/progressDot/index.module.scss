@@ -1,0 +1,12 @@
+.progressDot {
+  position: absolute;
+  top: -12px;
+  left: 0;
+  display: inline-block;
+  z-index: 200;
+  margin-left: -9px;
+  img {
+    width: 16px;
+    height: 18px;
+  }
+}

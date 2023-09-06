@@ -9,7 +9,3 @@ interface CanvasRenderingContext2D {
    */
   wrapText: (text: string, x: number, y: number, maxWidth?: number, lineHeight?: number) => void;
 }
-
-declare interface Canvas {
-  CanvasRenderingContext2D: CanvasRenderingContext2D;
-}

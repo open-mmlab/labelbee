@@ -5,7 +5,7 @@
  */
 
 import { cTool } from '@labelbee/lb-annotation';
-const { EVideoToolName, EPointCloudName, EToolName } = cTool;
+const { EVideoToolName, EPointCloudName, EToolName, EAudioToolName } = cTool;
 
 interface IPoint {
   x: number;
@@ -14,6 +14,10 @@ interface IPoint {
 class ToolUtils {
   public static isVideoTool(tool?: string) {
     return tool ? (Object.values(EVideoToolName) as string[]).includes(tool) : false;
+  }
+
+  public static isAudioTool(tool?: string) {
+    return tool ? (Object.values(EAudioToolName) as string[]).includes(tool) : false;
   }
 
   public static isPointCloudTool(tool?: string) {

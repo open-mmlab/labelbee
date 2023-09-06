@@ -23,8 +23,10 @@ import PreviewResult from '@/components/predictTracking/previewResult';
 import { LabelBeeContext } from '@/store/ctx';
 import { EToolName } from '@/data/enums/ToolType';
 import LLMLayout from './LLMLayout';
+import AudioAnnotate from '@/components/audioAnnotate'
 import { LoadingOutlined } from '@ant-design/icons';
 import { useTranslation } from 'react-i18next';
+import { EAudioToolName } from '@labelbee/lb-annotation';
 
 interface IProps {
   path: string;
@@ -83,6 +85,9 @@ const ViewportProviderLayout = (props: AppProps & IProps & { children: any }) =>
   const { t } = useTranslation();
   const { stepList, step } = props;
   const currentToolName = getStepConfig(stepList, step)?.tool;
+  const hasLangNode = ![EToolName.LLM, EAudioToolName.AudioTextTool].includes(currentToolName)
+  const hasHeaderOption = ![EToolName.LLM].includes(currentToolName)
+  const hasPredictTrackingIcon = ![EToolName.LLM, EAudioToolName.AudioTextTool].includes(currentToolName)
   return (
     <ViewportProvider>
       <Spin
@@ -98,9 +103,9 @@ const ViewportProviderLayout = (props: AppProps & IProps & { children: any }) =>
               headerName={props.headerName}
               goBack={props.goBack}
               exportData={props.exportData}
-              hasLangNode={EToolName.LLM !== currentToolName}
-              hasHeaderOption={EToolName.LLM !== currentToolName}
-              hasPredictTrackingIcon={EToolName.LLM !== currentToolName}
+              hasLangNode={hasLangNode}
+              hasHeaderOption={hasHeaderOption}
+              hasPredictTrackingIcon={hasPredictTrackingIcon}
             />
           </header>
           {props.children}
@@ -116,6 +121,7 @@ const MainView: React.FC<AppProps & IProps> = (props) => {
   const { stepList, step } = props;
   const currentToolName = getStepConfig(stepList, step)?.tool;
   const isLLMTool = EToolName.LLM === currentToolName;
+  const isAudioTool = ToolUtils.isAudioTool(currentToolName);
   if (isLLMTool) {
     return (
       <ViewportProviderLayout {...props}>
@@ -124,6 +130,11 @@ const MainView: React.FC<AppProps & IProps> = (props) => {
     );
   }
 
+  if (isAudioTool) {
+    return <ViewportProviderLayout {...props}>
+      <AudioAnnotate {...props} />
+    </ViewportProviderLayout>
+  }
   return (
     <ViewportProviderLayout {...props}>
       <Layout className={getClassName('layout', 'container')}>
