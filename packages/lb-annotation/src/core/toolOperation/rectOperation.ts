@@ -72,8 +72,6 @@ class RectOperation extends BasicToolOperation {
     this.hoverRectEdgeIndex = -1;
     this.hoverRectPointIndex = -1;
     this.markerIndex = 0;
-    this.setStyle(props.style);
-
     this.createNewDrawingRect = this.createNewDrawingRect.bind(this);
     this.getDrawingRectWithRectList = this.getDrawingRectWithRectList.bind(this);
     this.setSelectedIdAfterAddingDrawingRect = this.setSelectedIdAfterAddingDrawingRect.bind(this);
@@ -1198,6 +1196,10 @@ class RectOperation extends BasicToolOperation {
     this.emit('shiftRightMouseUp', hoverRectID);
   }
 
+  public updateDragResult() {
+    this.emit('updateDragResult', { ...this.selectedRect });
+  }
+
   public onMouseUp(e: MouseEvent) {
     if (super.onMouseUp(e) || this.forbidMouseOperation || !this.imgInfo) {
       return true;
@@ -1211,6 +1213,7 @@ class RectOperation extends BasicToolOperation {
 
       // 同步 rectList
       this.emit('updateResult');
+      this.updateDragResult();
       return;
     }
 

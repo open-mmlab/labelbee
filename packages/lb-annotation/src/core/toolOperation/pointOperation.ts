@@ -59,8 +59,6 @@ class PointOperation extends BasicToolOperation {
     this.pointList = [];
     this.markerIndex = 0;
     this.selection = new Selection(this);
-    this.setStyle(props.style);
-
     this.createPoint = this.createPoint.bind(this);
     this.getCurrentSelectedData = this.getCurrentSelectedData.bind(this);
     this.updateSelectedTextAttribute = this.updateSelectedTextAttribute.bind(this);

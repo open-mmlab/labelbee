@@ -8,6 +8,7 @@ import {
   EPointCloudPattern,
   IPointCloudSegmentation,
   ICalib,
+  ISize,
 } from '@labelbee/lb-utils';
 import React, { useEffect, useMemo, useRef, useState } from 'react';
 import {
@@ -77,7 +78,8 @@ export interface IPointCloudContext
 
   zoom: number;
   setZoom: (zoom: number) => void;
-
+  cuboidBoxIn2DView: boolean;
+  setCuboidBoxIn2DView: (bool: boolean) => void;
   history: ActionsHistory; // Operation History
   hideAttributes: string[];
   setHideAttributes: (hideAttrs: string[]) => void;
@@ -111,6 +113,10 @@ export interface IPointCloudContext
 
   highlight2DDataList: IHighlight2DData[];
   setHighlight2DDataList: (urlList: IHighlight2DData[]) => void;
+  imageSizes: {
+    [key: string]: ISize;
+  };
+  cacheImageNodeSize: (params: { imgNode: HTMLImageElement; path: string }) => void;
 }
 
 export const PointCloudContext = React.createContext<IPointCloudContext>({
@@ -173,6 +179,10 @@ export const PointCloudContext = React.createContext<IPointCloudContext>({
 
   highlight2DDataList: [],
   setHighlight2DDataList: () => {},
+  cuboidBoxIn2DView: true,
+  setCuboidBoxIn2DView: (bool?: boolean) => {},
+  imageSizes: {},
+  cacheImageNodeSize: () => {},
 });
 
 export const PointCloudProvider: React.FC<{}> = ({ children }) => {
@@ -182,6 +192,7 @@ export const PointCloudProvider: React.FC<{}> = ({ children }) => {
   const [lineList, setLineList] = useState<ILine[]>([]);
   const [selectedIDs, setSelectedIDsState] = useState<string[]>([]);
   const [valid, setValid] = useState<boolean>(true);
+  const [cuboidBoxIn2DView, setCuboidBoxIn2DView] = useState<boolean>(true);
   const [zoom, setZoom] = useState<number>(1);
   const [topViewInstance, setTopViewInstance] = useState<PointCloudAnnotation>();
   const [sideViewInstance, setSideViewInstance] = useState<PointCloudAnnotation>();
@@ -199,7 +210,26 @@ export const PointCloudProvider: React.FC<{}> = ({ children }) => {
   const [segmentation, setSegmentation] = useState<IPointCloudSegmentation[]>([]);
   const [highlight2DDataList, setHighlight2DDataList] = useState<IHighlight2DData[]>([]);
 
+  const [imageSizes, setImageSizes] = useState<{
+    [key: string]: ISize;
+  }>({});
+
   const dispatch = useDispatch();
+
+  const cacheImageNodeSize = (params: { imgNode: HTMLImageElement; path: string }) => {
+    const { imgNode, path } = params;
+    if (path && imgNode) {
+      setImageSizes((prev) => {
+        return {
+          ...prev,
+          [path]: {
+            width: imgNode.width,
+            height: imgNode.height,
+          },
+        };
+      });
+    }
+  };
 
   const selectedID = useMemo(() => {
     return selectedIDs.length === 1 ? selectedIDs[0] : '';
@@ -414,6 +444,10 @@ export const PointCloudProvider: React.FC<{}> = ({ children }) => {
 
       highlight2DDataList,
       setHighlight2DDataList,
+      cuboidBoxIn2DView,
+      setCuboidBoxIn2DView,
+      imageSizes,
+      cacheImageNodeSize,
     };
   }, [
     valid,
@@ -435,6 +469,8 @@ export const PointCloudProvider: React.FC<{}> = ({ children }) => {
     ptSegmentInstance,
     segmentation,
     highlight2DDataList,
+    cuboidBoxIn2DView,
+    imageSizes,
   ]);
 
   const updateSelectedIDsAndRenderAfterHide = () => {

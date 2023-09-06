@@ -58,10 +58,10 @@ export const useRotate = ({ currentData }: IAnnotationStateProps) => {
     },
     {
       wait: 800,
-    }
+    },
   );
 
-  return { 
+  return {
     updateRotate,
   };
 };
