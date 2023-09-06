@@ -1,6 +1,6 @@
 {
   "name": "@labelbee/wavesurfer",
-  "version": "0.0.4-alpha.3",
+  "version": "1.0.0-alpha.1",
   "description": "Interactive navigable audio visualization using Web Audio and Canvas",
   "main": "dist/wavesurfer.js",
   "directories": {
