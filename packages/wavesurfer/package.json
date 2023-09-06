@@ -32,7 +32,9 @@
     "prepublishOnly": "not-in-install && npm run build || in-install",
     "prepare": "npm run build"
   },
-  "publishConfig": {},
+  "publishConfig": {
+    "access": "public"
+  },
   "author": "",
   "license": "Apache-2.0",
   "bugs": {
