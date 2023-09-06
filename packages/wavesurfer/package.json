@@ -33,6 +33,7 @@
     "prepare": "npm run build"
   },
   "publishConfig": {
+    "access": "public"
   },
   "author": "",
   "license": "Apache-2.0",
