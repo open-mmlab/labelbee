@@ -24,7 +24,7 @@
     "build:normal": "npm run build:main && npm run build:plugins && npm run build:htmlinit",
     "build:minified": "npm run build:main:min && npm run build:plugins:min && npm run build:htmlinit:min",
     "lint": "npm run lint:js",
-    "lint:js": "eslint src spec",
+    "lint:js": "eslint src",
     "lint-js-html": "lint-staged",
     "doc": "esdoc",
     "test": "karma start karma.conf.js",

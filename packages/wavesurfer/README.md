@@ -150,10 +150,3 @@ When preparing a new release, update the version in the `package.json` and have 
 The main maintainer: <img src="https://avatars.githubusercontent.com/u/305679" width="16" height="16" /> [Thijs Triemstra](https://github.com/thijstriemstra)
 
 Many thanks to [all the awesome contributors](https://github.com/katspaugh/wavesurfer.js/contributors)!
-
-## License
-
-[![License](https://img.shields.io/badge/License-BSD%203--Clause-blue.svg)](https://opensource.org/licenses/BSD-3-Clause)
-
-This work is licensed under a
-[BSD 3-Clause License](https://opensource.org/licenses/BSD-3-Clause).
