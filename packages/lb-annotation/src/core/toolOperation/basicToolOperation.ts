@@ -1,4 +1,4 @@
-import { IBasicText, toolStyleConverter } from '@labelbee/lb-utils';
+import { IBasicText, ImgPosUtils, toolStyleConverter } from '@labelbee/lb-utils';
 import { isNumber } from 'lodash';
 import { EOperationMode, EToolName } from '@/constant/tool';
 import { IPolygonConfig, IPolygonData } from '@/types/tool/polygon';
@@ -9,14 +9,13 @@ import CommonToolUtils from '@/utils/tool/CommonToolUtils';
 import LineToolUtils from '@/utils/tool/LineToolUtils';
 import { EDragStatus, EGrowthMode, ELang } from '../../constant/annotation';
 import EKeyCode from '../../constant/keyCode';
-import { BASE_ICON, COLORS_ARRAY, styleString } from '../../constant/style';
+import { BASE_ICON, styleString } from '../../constant/style';
 import locale from '../../locales';
 import { EMessage } from '../../locales/constants';
 import ActionsHistory from '../../utils/ActionsHistory';
 import AttributeUtils from '../../utils/tool/AttributeUtils';
 import DblClickEventListener from '../../utils/tool/DblClickEventListener';
 import DrawUtils from '../../utils/tool/DrawUtils';
-import ImgPosUtils from '../../utils/tool/ImgPosUtils';
 import RenderDomUtils from '../../utils/tool/RenderDomUtils';
 import ZoomUtils from '../../utils/tool/ZoomUtils';
 import EventListener from './eventListener';
@@ -206,12 +205,6 @@ class BasicToolOperation extends EventListener {
       y: 0,
     };
     this.isShowCursor = false;
-    this.style = {
-      strokeColor: COLORS_ARRAY[4],
-      fillColor: COLORS_ARRAY[4],
-      strokeWidth: 2,
-      opacity: 1,
-    };
     this.attributeLockList = [];
     this.history = new ActionsHistory();
     this.style = props.style ?? CommonToolUtils.jsonParser(styleString);
@@ -472,6 +465,8 @@ class BasicToolOperation extends EventListener {
       ...basicImgInfo,
     });
 
+    this.updateZoomInfo();
+
     if (this.isImgError === true) {
       this.isImgError = false;
       this.emit('changeAnnotationShow');
@@ -484,6 +479,27 @@ class BasicToolOperation extends EventListener {
     this.initImgPos();
     this.render();
     this.renderBasicCanvas();
+  }
+
+  /**
+   * Update the zoomInfo when Image or Size updated.
+   */
+  public updateZoomInfo(imgNode = this.imgNode, size = this.size) {
+    if (!imgNode || !size) {
+      return;
+    }
+
+    const { min } = ImgPosUtils.getMinZoomByImgAndSize({
+      canvasSize: size,
+      imgSize: { width: imgNode.width, height: imgNode.height },
+      rotate: this.rotate,
+      zoomRatio: this._imgAttribute?.zoomRatio,
+    });
+
+    this.zoomInfo = {
+      ...this.zoomInfo,
+      min,
+    };
   }
 
   public setErrorImg() {
@@ -1102,6 +1118,7 @@ class BasicToolOperation extends EventListener {
    */
   public setSize(size: ISize) {
     this.size = size;
+    this.updateZoomInfo();
     if (this.container.contains(this.canvas)) {
       this.destroyCanvas();
       this.createCanvas(size);

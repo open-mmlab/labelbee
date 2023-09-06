@@ -8,8 +8,12 @@ import { usePolygon } from './usePolygon';
 
 const { ESortDirection } = cAnnotation;
 
+interface IUseSingleBoxParams {
+  generateRects?: (box: IPointCloudBox) => void;
+}
+
 /** Actions for single selected box */
-export const useSingleBox = () => {
+export const useSingleBox = (props?: IUseSingleBoxParams) => {
   const {
     pointCloudBoxList,
     setPointCloudResult,
@@ -41,6 +45,7 @@ export const useSingleBox = () => {
   const updateSelectedBox = useCallback(
     (params: Partial<IPointCloudBox>) => {
       if (selectedBox?.info) {
+        props?.generateRects?.(params as IPointCloudBox);
         pointCloudBoxList.splice(selectedBox.index, 1, _.merge(selectedBox.info, params));
         const newPointCloudBoxList = _.cloneDeep(pointCloudBoxList);
         setPointCloudResult(newPointCloudBoxList);
@@ -197,16 +202,17 @@ export const useSingleBox = () => {
       const newPointCloudBoxList = _.cloneDeep(pointCloudBoxList);
       let hasModify = false;
 
-      updateList.forEach((i) => {
+      for (const i of updateList) {
         const index = newPointCloudBoxList.findIndex((p) => p.id === i.id);
 
         if (index > -1) {
           const updatedBoxParam = _.merge(newPointCloudBoxList[index], i);
+          props?.generateRects?.(updatedBoxParam);
           newPointCloudBoxList.splice(index, 1, updatedBoxParam);
           mainViewInstance?.generateBox(updatedBoxParam);
           hasModify = true;
         }
-      });
+      }
 
       if (hasModify) {
         setPointCloudResult(newPointCloudBoxList);

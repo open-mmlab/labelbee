@@ -44,10 +44,12 @@ export const pointCloudMappingImgList = [
   {
     url: pointCloudImg1,
     calib: calib1,
+    path: pointCloudImg1,
   },
   {
     url: pointCloudImg2,
     calib: calib2,
+    path: pointCloudImg2,
   },
 ];
 
