@@ -48,7 +48,7 @@ module.exports = {
     },
     'overrides': [
     {
-        'files': ['example/**/*.js', 'spec/**/*.js'],
+        'files': ['spec/**/*.js'],
         'rules': {
             'no-var': 'off',
             'no-console': 'off',
