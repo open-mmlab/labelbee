@@ -103,6 +103,7 @@ export const useHistory = () => {
 
     history.pushHistory(historyRecord);
   };
+
   const pushHistoryUnderUpdateLine = (line: ILine) => {
     const selectedLine = lineList.find((v) => v.id === line.id);
     if (selectedLine) {
