@@ -18,7 +18,6 @@ import {
   IPolygonPoint,
   IPointUnit,
   UpdatePolygonByDragList,
-  ILine,
   DEFAULT_SPHERE_PARAMS,
   IDefaultSize,
   IPolygonData,
@@ -620,8 +619,7 @@ export const usePointCloudViews = () => {
     cuboidBoxIn2DView,
     imageSizes,
   } = ptCtx;
-  const { addHistory, initHistory, pushHistoryUnderUpdatePolygon, pushHistoryUnderUpdateLine } =
-    useHistory();
+  const { addHistory, initHistory, pushHistoryUnderUpdatePolygon } = useHistory();
   const { selectedPolygon } = usePolygon();
 
   const { getPointCloudSphereByID, updatePointCloudSphere, selectedSphere } = useSphere();
@@ -1015,14 +1013,6 @@ export const usePointCloudViews = () => {
     viewUpdateBox(newPolygon, originPolygon, PointCloudView.Back);
   };
 
-  const topViewUpdateLine = (updateList: ILine, size: ISize) => {
-    // updateList.pointList = updateList.pointList.map((v) =>
-    //   PointCloudUtils.transferCanvas2World(v, size),
-    // );
-
-    pushHistoryUnderUpdateLine(updateList);
-    return;
-  };
   const topViewUpdatePoint = (updatePoint: IPointUnit, size: ISize) => {
     const pointCloudSphere = getPointCloudSphereByID(updatePoint.id);
     const newSphereParams = topViewPoint2PointCloud(
@@ -1343,7 +1333,6 @@ export const usePointCloudViews = () => {
     sideViewUpdatePoint,
     backViewUpdatePoint,
     topViewUpdateBox,
-    topViewUpdateLine,
     sideViewUpdateBox,
     backViewUpdateBox,
     pointCloudBoxListUpdated,
