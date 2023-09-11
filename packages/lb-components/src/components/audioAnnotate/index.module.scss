@@ -22,7 +22,7 @@
 
 :global {
   .audio-tool-spinner {
-    height: 100%;
+    height: calc(100vh - 60px);
 
     .ant-spin-container {
       height: 100%;

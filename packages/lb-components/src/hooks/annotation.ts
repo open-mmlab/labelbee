@@ -16,7 +16,7 @@ export interface ICustomToolInstance {
   clearResult: () => void;
   on: () => void;
   unbind: () => void;
-  setResult: () => void;
+  setResult: (result: any) => void;
   setValid: (valid: boolean) => void;
   history: {
     initRecord: (action: any) => void;

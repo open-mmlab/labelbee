@@ -336,6 +336,7 @@ const AudioAnnotate: React.FC<AppProps & IProps> = (props) => {
       return [[result], {}];
     };
 
+    toolInstanceRef.current.setResult = updateResult
     toolInstanceRef.current.clearResult = clearResult
 
   }, [result]);
@@ -424,7 +425,6 @@ const AudioAnnotate: React.FC<AppProps & IProps> = (props) => {
   };
 
   const onLoaded = ({ duration, hasError }: any) => {
-    console.log('onloaded')
     setLoading(false);
   }
 
@@ -479,6 +479,9 @@ const AudioAnnotate: React.FC<AppProps & IProps> = (props) => {
     }))
   }
 
+  const updateResult = (result: any) => {
+    setResult(result)
+  }
   const clearResult = () => {
     setResult((result: any) => ({
       ...result,
