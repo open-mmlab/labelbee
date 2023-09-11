@@ -342,9 +342,9 @@ const AudioAnnotate: React.FC<AppProps & IProps> = (props) => {
   }, [result]);
 
   const currentResult = useMemo(() => {
-    const stepResult = basicInfo[`step_${step}`]
+    const stepResult = basicInfo[`step_${stepInfo?.step}`]
     return stepResult?.result || []
-  }, [config, basicInfo])
+  }, [config, basicInfo, stepInfo])
 
   const {
     tagConfigurable,
