@@ -18,8 +18,8 @@ class PointCloud2DRectOperation extends RectOperation {
   // Disable creating new rectangles
   public createNewDrawingRect() {}
 
-  // Disable right double-click to delete
-  public onRightDblClick() {}
+  // Disable delete rect
+  public deleteSelectedRect() {}
 
   // Disable mouse actions in check mode
   public onMouseMove(e: MouseEvent): undefined {
