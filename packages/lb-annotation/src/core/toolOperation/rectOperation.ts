@@ -1562,6 +1562,9 @@ class RectOperation extends BasicToolOperation {
       // 不看图形信息
       const { hiddenText = false } = style;
 
+      // 是否展示属性名
+      const isShowAttributeName = this.config?.isShowAttributeName ?? true;
+
       ctx.save();
 
       const { strokeColor, fillColor, textColor } = this.getRenderStyle(rect);
@@ -1578,7 +1581,7 @@ class RectOperation extends BasicToolOperation {
         showText = `${order}_${MarkerUtils.getMarkerShowText(rect.label, this.config.markerList)}`;
       }
 
-      if (rect.attribute) {
+      if (rect.attribute && isShowAttributeName) {
         showText = `${showText}  ${AttributeUtils.getAttributeShowText(rect.attribute, this.config?.attributeList)}`;
       }
 

@@ -66,7 +66,12 @@ const PointCloud2DRectOperationView = (props: IPointCloud2DRectOperationViewProp
       const toolInstance = new PointCloud2DRectOperation({
         container: ref.current,
         size,
-        config: { ...config, isShowOrder: true, attributeConfigurable: true },
+        config: {
+          ...config,
+          isShowOrder: true,
+          attributeConfigurable: true,
+          isShowAttributeName: false,
+        },
         checkMode,
       });
 

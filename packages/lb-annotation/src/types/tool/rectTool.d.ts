@@ -33,4 +33,5 @@ declare interface IRectConfig extends IToolConfig {
 
   markerConfigurable?: boolean;
   markerList?: IInputList[];
+  isShowAttributeName?: boolean;
 }
