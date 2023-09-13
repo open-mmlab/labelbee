@@ -375,7 +375,7 @@ const AudioAnnotate: React.FC<AppProps & IProps> = (props) => {
   let preContext: { [key: string]: any } = {};
   if (imgIndex !== -1 && imgList?.length) {
     const preResult = imgList[imgIndex]?.preResult;
-    const loadPreStep = audioContext?.isEdit ? audioContext?.stepConfig.loadPreStep : stepInfo.loadPreStep;
+    const loadPreStep = audioContext?.isEdit ? audioContext?.stepConfig?.loadPreStep : stepInfo?.loadPreStep;
 
     if (preResult && loadPreStep) {
       const preResultObj = CommonToolUtils.jsonParser(preResult);
