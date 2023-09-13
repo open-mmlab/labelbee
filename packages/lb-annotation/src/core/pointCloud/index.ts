@@ -442,6 +442,10 @@ export class PointCloud extends EventListener {
     }
   }
 
+  public getColorFromConfig(attribute: string) {
+    return toolStyleConverter.getColorFromConfig({ attribute }, { ...this.config, attributeConfigurable: true }, {});
+  }
+
   /**
    * Render box by params
    * @param boxParams
@@ -465,11 +469,7 @@ export class PointCloud extends EventListener {
 
   public getAllAttributeColor(boxes: IPointCloudBox[]) {
     return boxes.reduce((acc: { [k: string]: any }, box) => {
-      acc[box.attribute] = toolStyleConverter.getColorFromConfig(
-        { attribute: box.attribute },
-        { ...this.config, attributeConfigurable: true },
-        {},
-      );
+      acc[box.attribute] = this.getColorFromConfig(box.attribute);
       return acc;
     }, {});
   }
@@ -496,22 +496,14 @@ export class PointCloud extends EventListener {
   };
 
   public generateSphere = (sphereParams: IPointCloudSphere) => {
-    const { fill } = toolStyleConverter.getColorFromConfig(
-      { attribute: sphereParams.attribute },
-      { ...this.config, attributeConfigurable: true },
-      {},
-    );
+    const { fill } = this.getColorFromConfig(sphereParams.attribute);
     this.addSphereToSense(sphereParams, fill);
     this.render();
   };
 
   public generateSpheres = (spheres: IPointCloudSphere[]) => {
     spheres.forEach((sphere) => {
-      const { fill } = toolStyleConverter.getColorFromConfig(
-        { attribute: sphere.attribute },
-        { ...this.config, attributeConfigurable: true },
-        {},
-      );
+      const { fill } = this.getColorFromConfig(sphere.attribute);
       this.addSphereToSense(sphere, fill);
     });
     this.render();
