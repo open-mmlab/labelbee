@@ -44,6 +44,7 @@ import { useHistory } from './useHistory';
 import { usePolygon } from './usePolygon';
 import { IFileItem, IMappingImg } from '@/types/data';
 import { ICoordinate } from '@labelbee/lb-utils/src/types/common';
+import { useLatest } from 'ahooks';
 
 const DEFAULT_SCOPE = 5;
 const DEFAULT_RADIUS = 90;
@@ -633,8 +634,10 @@ export const usePointCloudViews = () => {
   });
   const dispatch = useDispatch();
 
+  const cuboidBoxIn2DViewLatest = useLatest(cuboidBoxIn2DView);
+
   const generateRects = (boxParams: IPointCloudBox) => {
-    if (!cuboidBoxIn2DView) {
+    if (!cuboidBoxIn2DViewLatest.current) {
       const { mappingImgList = [] } = currentData;
       const rects: Array<ReturnType<typeof getRectPointCloudBox>> = mappingImgList.map(
         (v: IMappingImg) =>
