@@ -965,6 +965,8 @@ export class PointCloud extends EventListener {
 
     const newPoints = new THREE.Points(geometry);
     this.renderPointCloud(newPoints, radius);
+
+    this.emit('loadPCDFileEnd');
   };
 
   /**

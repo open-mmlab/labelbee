@@ -716,6 +716,21 @@ class PointCloudStore {
     this.emit('reRender3d');
   }
 
+  /**
+   * Get All segment indexes by attribute.
+   * @param attribute
+   * @returns
+   */
+  public getHighlightAttribute(attribute: string) {
+    const list: number[][] = [];
+    this.segmentData.forEach((seg) => {
+      if (seg.attribute === attribute) {
+        list.push(seg.indexes);
+      }
+    });
+    return list;
+  }
+
   public setAttribute(attribute: string) {
     this.currentAttribute = attribute;
   }

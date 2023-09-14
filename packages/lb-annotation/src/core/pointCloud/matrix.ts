@@ -312,3 +312,53 @@ export function pointCloudLidar2image(
 
   return { transferViewData, viewRangePointList };
 }
+
+/**
+ * Calculate the pcdMapping from point3d to point2d.
+ * @param points
+ * @param cameraMatrix
+ * @param filterSize
+ * @returns
+ */
+export function pointMappingLidar2image(
+  points: number[],
+  cameraMatrix: {
+    P: [TMatrix14Tuple, TMatrix14Tuple, TMatrix14Tuple];
+    R: [TMatrix13Tuple, TMatrix13Tuple, TMatrix13Tuple];
+    T: [TMatrix14Tuple, TMatrix14Tuple, TMatrix14Tuple];
+  },
+  filterSize: {
+    width: number;
+    height: number;
+  },
+) {
+  const { P, R, T } = cameraMatrix;
+  const { composeMatrix4 } = transferKitti2Matrix(P, R, T);
+
+  const len = points.length / 3;
+
+  const pcdMapping: { [key: number]: { x: number; y: number } } = {};
+  for (let i = 0; i < len; i++) {
+    const point2d = lidar2image(
+      {
+        x: points[i * 3],
+        y: points[i * 3 + 1],
+        z: points[i * 3 + 2],
+      },
+      composeMatrix4,
+    );
+
+    if (point2d) {
+      const x = Math.floor(point2d.x);
+      const y = Math.floor(point2d.y);
+
+      // 1. Filter the points outside imgSize.
+      if (x > filterSize.width || y > filterSize.height || x < 0 || y < 0) {
+        continue;
+      }
+
+      pcdMapping[i] = { x: point2d.x, y: point2d.y };
+    }
+  }
+  return { pcdMapping };
+}

@@ -1,0 +1,201 @@
+import { IA2MapStateProps, a2MapStateToProps } from '@/store/annotation/map';
+import { LabelBeeContext } from '@/store/ctx';
+import React, { useCallback, useContext, useEffect, useRef, useState } from 'react';
+import AnnotationView from '@/components/AnnotationView';
+import { connect } from 'react-redux';
+import { PointCloudContext } from './PointCloudContext';
+import TitleButton from './components/TitleButton';
+import { EPointCloudSegmentStatus, ICalib, IPointCloudSegmentation } from '@labelbee/lb-utils';
+import { Spin } from 'antd';
+import HighlightSegmentWorker from 'web-worker:./highlightSegmentWorker.js';
+import { pointMappingLidar2image } from '@labelbee/lb-annotation';
+
+interface IProps extends IA2MapStateProps {
+  checkMode?: boolean;
+}
+
+const PointCloudSegment2DSingleView = ({
+  path,
+  url,
+  calib,
+  pcdUrl,
+}: {
+  path: string;
+  url: string;
+  calib: ICalib;
+  pcdUrl?: string;
+}) => {
+  const { ptSegmentInstance, cacheImageNodeSize, imageSizes } = useContext(PointCloudContext);
+  const ref = useRef(null);
+  const dataLoadedRef = useRef(0);
+  const pcdMapping = useRef({});
+  const [annotations, setAnnotations] = useState<any[]>([]);
+  const [loading, setLoading] = useState(false);
+
+  // 1. Init CacheMap after pcdLoaded & imgLoaded.
+  const cacheMappingPCD2Img = useCallback(() => {
+    dataLoadedRef.current = dataLoadedRef.current + 1;
+    // Need to load two resource: pcd & img
+    if (dataLoadedRef.current === 2) {
+      const points = ptSegmentInstance?.store?.originPoints; // Get the origin
+      if (!points) {
+        return;
+      }
+
+      const filterSize = imageSizes[path];
+      pcdMapping.current = pointMappingLidar2image(points, calib, filterSize).pcdMapping;
+    }
+  }, [ptSegmentInstance, imageSizes]);
+
+  // Highlight the points by indexes & pcdMapping.
+  const highlight2DPoints = useCallback(
+    (indexes: number[], color: string) => {
+      if (indexes) {
+        if (imageSizes[path]) {
+          const cacheMap = pcdMapping.current;
+          const highlightWorker = new HighlightSegmentWorker();
+          setLoading(true);
+          highlightWorker.postMessage({ cacheMap, indexes, color });
+          highlightWorker.onmessage = (e: any) => {
+            setAnnotations(e.data.annotations);
+            highlightWorker.terminate();
+            setLoading(false);
+          };
+        }
+      }
+    },
+    [imageSizes],
+  );
+
+  /**
+   * Listen the defaultAttribute Updated.
+   */
+  useEffect(() => {
+    if (ptSegmentInstance) {
+      const updateDefaultAttributeColor = ({ newAttribute }: { newAttribute: string }) => {
+        const toolStyle = ptSegmentInstance?.getColorFromConfig(newAttribute);
+        console.log('newAttribute', newAttribute, toolStyle);
+        if (toolStyle) {
+          setAnnotations(
+            annotations.map((v) => ({
+              ...v,
+              annotation: {
+                ...v.annotation,
+                fill: toolStyle.fill,
+                stroke: toolStyle.fill,
+              },
+            })),
+          );
+        }
+      };
+      ptSegmentInstance.on('updateDefaultAttribute', updateDefaultAttributeColor);
+
+      return () => {
+        ptSegmentInstance.unbind('updateDefaultAttribute', updateDefaultAttributeColor);
+      };
+    }
+  }, [ptSegmentInstance, annotations]);
+
+  useEffect(() => {
+    if (ptSegmentInstance) {
+      const highlightPointsByCachePoints = (data: {
+        segmentStatus: EPointCloudSegmentStatus;
+        cacheSegData: IPointCloudSegmentation;
+      }) => {
+        if (data.cacheSegData) {
+          // 1. get filterPoints: number[] [x,y,z,x,y,z,...]; Test first one.
+          const { cacheSegData } = data;
+          if (cacheSegData?.indexes) {
+            const toolStyle = ptSegmentInstance.getColorFromConfig(cacheSegData.attribute);
+            highlight2DPoints(cacheSegData?.indexes, toolStyle.fill);
+          }
+        } else {
+          // clear annotations.
+          setAnnotations([]);
+        }
+      };
+      ptSegmentInstance.on('syncPointCloudStatus', highlightPointsByCachePoints);
+      ptSegmentInstance.on('loadPCDFileEnd', cacheMappingPCD2Img);
+
+      return () => {
+        ptSegmentInstance.unbind('syncPointCloudStatus', highlightPointsByCachePoints);
+        ptSegmentInstance.unbind('loadPCDFileEnd', cacheMappingPCD2Img);
+      };
+    }
+  }, [ptSegmentInstance, pcdUrl, imageSizes]);
+
+  const afterImgOnLoad = (imgNode: HTMLImageElement) => {
+    cacheImageNodeSize({
+      path,
+      imgNode,
+    });
+
+    cacheMappingPCD2Img();
+  };
+
+  return (
+    <div key={path} style={{ position: 'relative' }} ref={ref}>
+      <TitleButton
+        title={calib.calName}
+        style={{
+          background: 'rgba(0, 0, 0, 0.74)',
+          color: '#FFFFFF',
+          position: 'absolute',
+          top: 10,
+          left: 10,
+          zIndex: 1,
+        }}
+      />
+      <Spin spinning={loading} delay={1000}>
+        <AnnotationView
+          size={{
+            width: 300,
+            height: 200,
+          }}
+          key={path}
+          src={url}
+          annotations={annotations}
+          afterImgOnLoad={afterImgOnLoad}
+        />
+      </Spin>
+    </div>
+  );
+};
+
+/**
+ * The whole segment 2DView.
+ * @param param0
+ * @returns
+ */
+const PointCloudSegment2DView = ({ currentData, highlightAttribute }: IProps) => {
+  const mappingImgList = currentData.mappingImgList ?? [];
+
+  if (mappingImgList?.length > 0) {
+    return (
+      <div
+        style={{
+          position: 'absolute',
+          height: '100%',
+          overflowY: 'scroll',
+          zIndex: 100,
+          width: 300,
+        }}
+      >
+        {mappingImgList?.map((data, i) => (
+          <PointCloudSegment2DSingleView
+            key={data.path}
+            path={data.path}
+            url={data.url}
+            calib={data.calib}
+            pcdUrl={currentData.url}
+          />
+        ))}
+      </div>
+    );
+  }
+  return null;
+};
+
+export default connect(a2MapStateToProps, null, null, { context: LabelBeeContext })(
+  PointCloudSegment2DView,
+);

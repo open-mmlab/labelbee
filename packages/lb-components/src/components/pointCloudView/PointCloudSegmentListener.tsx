@@ -103,6 +103,7 @@ const PointCloudSegmentListener: React.FC<IProps> = ({
 
     toolInstanceRef.current.setDefaultAttribute = (newAttribute: string) => {
       updateSegmentAttribute(newAttribute);
+      ptSegmentInstance?.emit('updateDefaultAttribute', { newAttribute });
     };
 
     return () => {
