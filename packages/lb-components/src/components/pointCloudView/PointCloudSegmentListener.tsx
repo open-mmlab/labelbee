@@ -116,6 +116,7 @@ const PointCloudSegmentListener: React.FC<IProps> = ({
       if (!ptCtx.ptSegmentInstance) {
         return;
       }
+      ptCtx.ptSegmentInstance.emit('clearStash');
       ptCtx.ptSegmentInstance.emit('clearAllSegmentData');
     };
   }, [

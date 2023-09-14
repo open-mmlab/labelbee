@@ -560,6 +560,11 @@ class PointCloudStore {
   }
 
   public clearStash() {
+    if (this.isCheckStatus) {
+      this.resetSelectedSegmentStatus();
+      return;
+    }
+
     if (this.isEditStatus && this.cacheSegData) {
       this.updateCloudDataStatus(this.cacheSegData.points, { visible: false });
       if (this.segmentData.has(this.cacheSegData.id)) {
