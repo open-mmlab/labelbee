@@ -34,18 +34,20 @@ interface IPointCloud2DRectOperationViewRect extends IBasicRect {
 const PointCloud2DRectOperationView = (props: IPointCloud2DRectOperationViewProps) => {
   const { mappingData, size, config, checkMode, afterImgOnLoad } = props;
   const url = mappingData?.url ?? '';
-  const { pointCloudBoxList, setPointCloudResult, selectedID } = useContext(PointCloudContext);
+  const { pointCloudBoxList, setPointCloudResult } = useContext(PointCloudContext);
 
   const { update2DViewRect } = usePointCloudViews();
   const ref = React.useRef(null);
   const operation = useRef<any>(null);
   const update2DViewRectFn = useLatest<any>(update2DViewRect);
+  const newPointCloudResult = useRef(null);
 
   const [loading, setLoading] = useState(true);
 
   const handleUpdateDragResult = (rect: IPointCloud2DRectOperationViewRect) => {
-    const results = update2DViewRectFn.current?.(rect);
-    setPointCloudResult(results);
+    const result = update2DViewRectFn.current?.(rect);
+    newPointCloudResult.current = result;
+    setPointCloudResult(result);
   };
 
   const setRects = () => {
@@ -96,16 +98,11 @@ const PointCloud2DRectOperationView = (props: IPointCloud2DRectOperationViewProp
   }, [size]);
 
   useEffect(() => {
-    setRects();
-    if (selectedID) {
-      const rect = operation.current?.rectList.find(
-        (rect: IPointCloud2DRectOperationViewRect) => rect.boxID === selectedID,
-      );
-      if (rect) {
-        operation.current?.setSelectedID(rect.id);
-      }
+    // Avoid repeated rendering
+    if (pointCloudBoxList !== newPointCloudResult.current) {
+      setRects();
     }
-  }, [pointCloudBoxList, selectedID, url]);
+  }, [pointCloudBoxList, url]);
 
   return (
     <Spin spinning={loading}>
