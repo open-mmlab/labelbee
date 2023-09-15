@@ -87,12 +87,12 @@ const PointCloudSegment2DSingleView = ({
 
   // Highlight Data by 'highlightAttribute';
   useEffect(() => {
-    if (!ptSegmentInstance) {
+    if (!ptSegmentInstance?.store) {
       return;
     }
 
-    const indexesList = ptSegmentInstance?.store?.getHighlightAttribute(highlightAttribute ?? '');
-    const toolStyle = ptSegmentInstance?.getColorFromConfig(highlightAttribute);
+    const indexesList = ptSegmentInstance.store.getHighlightAttribute(highlightAttribute ?? '');
+    const toolStyle = ptSegmentInstance?.getColorFromConfig(highlightAttribute ?? '');
     highlight2DPoints(indexesList.flat(), toolStyle.fill);
   }, [highlightAttribute, ptSegmentInstance]);
 

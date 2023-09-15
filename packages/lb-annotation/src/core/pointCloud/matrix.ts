@@ -321,7 +321,7 @@ export function pointCloudLidar2image(
  * @returns
  */
 export function pointMappingLidar2image(
-  points: number[],
+  points: Float32Array,
   cameraMatrix: {
     P: [TMatrix14Tuple, TMatrix14Tuple, TMatrix14Tuple];
     R: [TMatrix13Tuple, TMatrix13Tuple, TMatrix13Tuple];
