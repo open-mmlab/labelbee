@@ -5,7 +5,12 @@ import AnnotationView from '@/components/AnnotationView';
 import { connect } from 'react-redux';
 import { PointCloudContext } from './PointCloudContext';
 import TitleButton from './components/TitleButton';
-import { EPointCloudSegmentStatus, ICalib, IPointCloudSegmentation } from '@labelbee/lb-utils';
+import {
+  EPointCloudSegmentStatus,
+  ICalib,
+  IPointCloudSegmentation,
+  ISize,
+} from '@labelbee/lb-utils';
 import { Spin } from 'antd';
 import HighlightSegmentWorker from 'web-worker:./highlightSegmentWorker.js';
 import { pointMappingLidar2image } from '@labelbee/lb-annotation';
@@ -19,18 +24,30 @@ const PointCloudSegment2DSingleView = ({
   url,
   calib,
   pcdUrl,
+  highlightAttribute,
 }: {
   path: string;
   url: string;
   calib: ICalib;
   pcdUrl?: string;
+  highlightAttribute?: string;
 }) => {
   const { ptSegmentInstance, cacheImageNodeSize, imageSizes } = useContext(PointCloudContext);
   const ref = useRef(null);
   const dataLoadedRef = useRef(0);
   const pcdMapping = useRef({});
+  const imgSizeRef = useRef<ISize | undefined>();
+
   const [annotations, setAnnotations] = useState<any[]>([]);
   const [loading, setLoading] = useState(false);
+
+  useEffect(() => {
+    return () => {
+      dataLoadedRef.current = 0;
+      pcdMapping.current = {};
+      imgSizeRef.current = undefined;
+    };
+  }, [pcdUrl]);
 
   // 1. Init CacheMap after pcdLoaded & imgLoaded.
   const cacheMappingPCD2Img = useCallback(() => {
@@ -38,34 +55,46 @@ const PointCloudSegment2DSingleView = ({
     // Need to load two resource: pcd & img
     if (dataLoadedRef.current === 2) {
       const points = ptSegmentInstance?.store?.originPoints; // Get the origin
-      if (!points) {
+      if (!points || !imgSizeRef.current) {
+        console.error('cacheMappingPCD2Img Error', {
+          path,
+          points,
+          filterSize: imgSizeRef.current,
+        });
         return;
       }
 
-      const filterSize = imageSizes[path];
-      pcdMapping.current = pointMappingLidar2image(points, calib, filterSize).pcdMapping;
+      pcdMapping.current = pointMappingLidar2image(points, calib, imgSizeRef.current).pcdMapping;
     }
-  }, [ptSegmentInstance, imageSizes]);
+  }, [ptSegmentInstance]);
 
   // Highlight the points by indexes & pcdMapping.
-  const highlight2DPoints = useCallback(
-    (indexes: number[], color: string) => {
-      if (indexes) {
-        if (imageSizes[path]) {
-          const cacheMap = pcdMapping.current;
-          const highlightWorker = new HighlightSegmentWorker();
-          setLoading(true);
-          highlightWorker.postMessage({ cacheMap, indexes, color });
-          highlightWorker.onmessage = (e: any) => {
-            setAnnotations(e.data.annotations);
-            highlightWorker.terminate();
-            setLoading(false);
-          };
-        }
+  const highlight2DPoints = useCallback((indexes: number[], color: string) => {
+    if (indexes) {
+      if (imgSizeRef.current) {
+        const cacheMap = pcdMapping.current;
+        const highlightWorker = new HighlightSegmentWorker();
+        setLoading(true);
+        highlightWorker.postMessage({ cacheMap, indexes, color });
+        highlightWorker.onmessage = (e: any) => {
+          setAnnotations(e.data.annotations);
+          highlightWorker.terminate();
+          setLoading(false);
+        };
       }
-    },
-    [imageSizes],
-  );
+    }
+  }, []);
+
+  // Highlight Data by 'highlightAttribute';
+  useEffect(() => {
+    if (!ptSegmentInstance) {
+      return;
+    }
+
+    const indexesList = ptSegmentInstance?.store?.getHighlightAttribute(highlightAttribute ?? '');
+    const toolStyle = ptSegmentInstance?.getColorFromConfig(highlightAttribute);
+    highlight2DPoints(indexesList.flat(), toolStyle.fill);
+  }, [highlightAttribute, ptSegmentInstance]);
 
   /**
    * Listen the defaultAttribute Updated.
@@ -74,7 +103,6 @@ const PointCloudSegment2DSingleView = ({
     if (ptSegmentInstance) {
       const updateDefaultAttributeColor = ({ newAttribute }: { newAttribute: string }) => {
         const toolStyle = ptSegmentInstance?.getColorFromConfig(newAttribute);
-        console.log('newAttribute', newAttribute, toolStyle);
         if (toolStyle) {
           setAnnotations(
             annotations.map((v) => ({
@@ -96,6 +124,9 @@ const PointCloudSegment2DSingleView = ({
     }
   }, [ptSegmentInstance, annotations]);
 
+  /**
+   * Listen the ptSegmentInstance event.
+   */
   useEffect(() => {
     if (ptSegmentInstance) {
       const highlightPointsByCachePoints = (data: {
@@ -130,6 +161,8 @@ const PointCloudSegment2DSingleView = ({
       imgNode,
     });
 
+    // Save the imgSize in current hook.
+    imgSizeRef.current = { width: imgNode.width, height: imgNode.height };
     cacheMappingPCD2Img();
   };
 
@@ -188,6 +221,7 @@ const PointCloudSegment2DView = ({ currentData, highlightAttribute }: IProps) =>
             url={data.url}
             calib={data.calib}
             pcdUrl={currentData.url}
+            highlightAttribute={highlightAttribute}
           />
         ))}
       </div>
