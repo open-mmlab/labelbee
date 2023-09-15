@@ -11,7 +11,7 @@ import qs from 'qs';
 import React, { useState } from 'react';
 import './App.css';
 import Annotation from './components/Annotation';
-import { DEFAULT_ANNOTATIONS } from './mock';
+import { DEFAULT_ANNOTATIONS, generateRandomColor } from './mock';
 import {
   fileList as mockFileList,
   getMockResult,
@@ -35,7 +35,7 @@ const App = () => {
   const stepList = isSingleTool ? getStepList(tool) : getDependStepList(tool);
   const currentIsVideo = StepUtils.currentToolIsVideo(1, stepList);
   const currentIsPointCloud = StepUtils.currentToolIsPointCloud(1, stepList);
-  const currentIsAudio = StepUtils.currentToolIsAudio(1, stepList)
+  const currentIsAudio = StepUtils.currentToolIsAudio(1, stepList);
   const getMockList = () => {
     let srcList = mockFileList;
 
@@ -46,7 +46,7 @@ const App = () => {
     }
 
     if (currentIsAudio) {
-      return mockAudioList
+      return mockAudioList;
     }
 
     if (currentIsPointCloud) {
@@ -89,7 +89,7 @@ const App = () => {
     if (type === 'hover') {
       setData((pre) => {
         return pre.map((item) => {
-          if (item.annotation.id === 'g5r2l7mcrv8') {
+          if (item.annotation && item.annotation.id === 'g5r2l7mcrv8') {
             const { annotation } = item;
             return {
               ...item,
@@ -105,6 +105,27 @@ const App = () => {
     }
   };
 
+  const handler = () => {
+    const color = generateRandomColor();
+    setData((pre) => {
+      return pre.map((item) => {
+        if (item.type === 'staticPoint') {
+          const { annotation } = item;
+          return {
+            ...item,
+            annotation: annotation.map((point) => {
+              return {
+                ...point,
+                color,
+              };
+            }),
+          };
+        }
+        return item;
+      });
+    });
+  };
+
   // 参看工具的展示
   if (tool === 'annotationView') {
     return (
@@ -114,6 +135,7 @@ const App = () => {
             height: 1000,
           }}
         >
+          <div onClick={handler}>变个颜色</div>
           <AnnotationView
             src={car1}
             annotations={data}
@@ -126,6 +148,7 @@ const App = () => {
               height: 720,
             }}
             onChange={onChange}
+            staticMode={true}
           />{' '}
         </div>{' '}
       </div>

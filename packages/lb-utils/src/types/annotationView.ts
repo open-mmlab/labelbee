@@ -95,6 +95,10 @@ export interface ICuboid extends IDrawingCuboid, IBasicStyle {
   renderEnhance?: (params: IRenderEnhanceParams) => void;
 }
 
+export interface IStaticPoint extends ICoordinate {
+  color: string;
+}
+
 export type TAnnotationViewRect = {
   type: 'rect';
   annotation: IBasicRect;
@@ -130,8 +134,14 @@ export declare type TAnnotationViewCuboid = {
   annotation: ICuboid;
 };
 
+export declare type TAnnotationViewStaticPoint = {
+  type: 'staticPoint';
+  annotation: IStaticPoint[];
+};
+
 export type TAnnotationViewData =
   | TAnnotationViewRect
+  | TAnnotationViewStaticPoint
   | TAnnotationViewPolygon
   | TAnnotationViewPoint
   | TAnnotationViewBox3d
