@@ -112,6 +112,7 @@ class PointCloudStore {
     this.addStash2Store = this.addStash2Store.bind(this);
     this.updateCheck2Edit = this.updateCheck2Edit.bind(this);
     this.setAttribute = this.setAttribute.bind(this);
+    this.setSubAttribute = this.setSubAttribute.bind(this);
     this.setSegmentMode = this.setSegmentMode.bind(this);
     this.setSegmentCoverMode = this.setSegmentCoverMode.bind(this);
     this.setSegmentFocusMode = this.setSegmentFocusMode.bind(this);
@@ -196,6 +197,7 @@ class PointCloudStore {
     for (const v of newArray) {
       arr.push({
         attribute: v.attribute,
+        subAttribute: v.subAttribute,
         id: v.id,
         indexes: v.indexes,
       });
@@ -209,6 +211,7 @@ class PointCloudStore {
   }
 
   public clearAllSegmentData() {
+    this.resetSelectedSegmentStatus();
     this.segmentData = new Map();
     this.syncSegmentData();
   }
@@ -434,6 +437,7 @@ class PointCloudStore {
           this.cacheSegData = {
             id: uuid(),
             attribute: this.currentAttribute,
+            subAttribute: {},
             points: verticesArray,
             coverPoints: covers,
             indexes,
@@ -560,6 +564,7 @@ class PointCloudStore {
   }
 
   public clearStash() {
+    this.resetSelectedSegmentStatus();
     if (this.isEditStatus && this.cacheSegData) {
       this.updateCloudDataStatus(this.cacheSegData.points, { visible: false });
       if (this.segmentData.has(this.cacheSegData.id)) {
@@ -574,8 +579,6 @@ class PointCloudStore {
         this.emit('clearStashRender');
       }
       this.syncSegmentData();
-      this.cacheSegData = undefined;
-      this.syncPointCloudStatus();
     }
   }
 
@@ -718,6 +721,20 @@ class PointCloudStore {
 
   public setAttribute(attribute: string) {
     this.currentAttribute = attribute;
+  }
+
+  public setSubAttribute(key: string, value: string) {
+    if (!this.cacheSegData) {
+      return;
+    }
+    this.cacheSegData.subAttribute = {
+      ...this.cacheSegData.subAttribute,
+      [key]: value,
+    };
+    this.emit('syncPointCloudStatus', {
+      segmentStatus: this.segmentStatus,
+      cacheSegData: this.cacheSegData,
+    });
   }
 }
 

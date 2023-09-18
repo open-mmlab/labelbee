@@ -1,4 +1,4 @@
-import React, { useContext, useEffect, useState } from 'react';
+import React, { ReactNode, useContext, useEffect, useState } from 'react';
 import { getClassName } from '@/utils/dom';
 import FinishSvg from '@/assets/annotation/pointCloudTool/finish.svg';
 import CancelSvg from '@/assets/annotation/pointCloudTool/cancel.svg';
@@ -6,11 +6,13 @@ import { PointCloudContext } from './PointCloudContext';
 import {
   EPointCloudSegmentFocusMode,
   EPointCloudSegmentStatus,
+  IPointCloudConfig,
   IPointCloudSegmentation,
+  PointCloudUtils,
 } from '@labelbee/lb-utils';
 import { useTranslation } from 'react-i18next';
 
-const SegmentInfo: React.FC<{ infoList?: Array<{ key: string; value: string | number }> }> = ({
+const SegmentInfo: React.FC<{ infoList?: Array<{ key: string; value: ReactNode }> }> = ({
   infoList,
 }) => {
   const { t } = useTranslation();
@@ -31,7 +33,8 @@ const SegmentInfo: React.FC<{ infoList?: Array<{ key: string; value: string | nu
   );
 };
 
-const PointCloudSegmentStatus = () => {
+const PointCloudSegmentStatus = (props: { config: IPointCloudConfig }) => {
+  const { config } = props;
   const { t } = useTranslation();
   const { ptSegmentInstance, setDefaultAttribute } = useContext(PointCloudContext);
 
@@ -80,7 +83,20 @@ const PointCloudSegmentStatus = () => {
     },
     {
       key: 'Attribute',
-      value: data.cacheSegData?.attribute ?? '',
+      value:
+        config.attributeList.find((item) => item.value === data.cacheSegData?.attribute)?.key ?? '',
+    },
+    {
+      key: 'SubAttribute',
+      value: PointCloudUtils.getSubAttributeName(data.cacheSegData?.subAttribute || {}, config).map(
+        (item) => {
+          return (
+            <div key={item.label}>
+              {item.label} - {item.value}
+            </div>
+          );
+        },
+      ),
     },
   ];
   if (isCheckStatus) {

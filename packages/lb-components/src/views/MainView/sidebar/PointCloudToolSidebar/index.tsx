@@ -16,7 +16,13 @@ import { useTranslation } from 'react-i18next';
 import { LabelBeeContext, useDispatch } from '@/store/ctx';
 import BatchUpdateModal from './components/batchUpdateModal';
 import { IFileItem } from '@/types/data';
-import { PointCloudUtils, IInputList, IDefaultSize } from '@labelbee/lb-utils';
+import {
+  PointCloudUtils,
+  IInputList,
+  IDefaultSize,
+  EPointCloudSegmentStatus,
+  IPointCloudSegmentation,
+} from '@labelbee/lb-utils';
 import AttributeList from '@/components/attributeList';
 import { useAttribute } from '@/components/pointCloudView/hooks/useAttribute';
 import LassoSelectorSvg from '@/assets/annotation/pointCloudTool/lassoSelector.svg';
@@ -220,8 +226,16 @@ const AttributeUpdater = ({
   stepInfo: IStepInfo;
   enableColorPicker?: boolean;
 }) => {
+  const [segmentData, setSegmentData] = useState<{
+    segmentStatus: EPointCloudSegmentStatus;
+    cacheSegData?: IPointCloudSegmentation;
+  }>({
+    segmentStatus: EPointCloudSegmentStatus.Ready,
+  });
+
   const { selectedBox } = useSingleBox();
   const ptx = useContext(PointCloudContext);
+  const { ptSegmentInstance } = ptx;
   const { t } = useTranslation();
   const { defaultAttribute } = useAttribute();
   const pointCloudViews = usePointCloudViews();
@@ -240,6 +254,17 @@ const AttributeUpdater = ({
     fontWeight: 500,
     wordWrap: 'break-word' as any, // WordWrap Type ?
   };
+
+  useEffect(() => {
+    if (!ptSegmentInstance) {
+      return;
+    }
+    ptSegmentInstance.on('syncPointCloudStatus', setSegmentData);
+
+    return () => {
+      ptSegmentInstance.unbind('syncPointCloudStatus', setSegmentData);
+    };
+  }, [ptSegmentInstance]);
 
   const updateColorConfig = (value: string, color: string) => {
     const attributeList = config?.attributeList?.map((i: any) => {
@@ -299,7 +324,7 @@ const AttributeUpdater = ({
         updateSize={updateSize}
       />
       <Divider style={{ margin: 0 }} />
-      {selectedBox && (
+      {(selectedBox || segmentData.cacheSegData) && (
         <>
           {subAttributeList.map(
             (subAttribute) =>
@@ -315,7 +340,8 @@ const AttributeUpdater = ({
                         value: v.value,
                       }))}
                       selectedAttribute={
-                        ptx.selectedPointCloudBox?.subAttribute?.[subAttribute.value]
+                        ptx.selectedPointCloudBox?.subAttribute?.[subAttribute.value] ||
+                        segmentData.cacheSegData?.subAttribute?.[subAttribute.value]
                       }
                       num='-'
                       forbidColor={true}
