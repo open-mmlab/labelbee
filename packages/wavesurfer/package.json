@@ -1,0 +1,100 @@
+{
+  "name": "@labelbee/wavesurfer",
+  "version": "1.0.0",
+  "description": "Interactive navigable audio visualization using Web Audio and Canvas",
+  "main": "dist/wavesurfer.js",
+  "directories": {
+    "example": "example"
+  },
+  "files": [
+    "dist/",
+    "src/"
+  ],
+  "scripts": {
+    "start": "npm run build:plugins && npm run build:htmlinit && webpack serve --config ./build-config/webpack.dev.main.js",
+    "start:htmlinit": "npm run build:main && npm run build:plugins && webpack serve --config ./build-config/webpack.dev.htmlinit.js",
+    "start:plugins": "npm run build:main && npm run build:htmlinit && webpack serve --config ./build-config/webpack.dev.plugins.js",
+    "build": "npm run build:normal && npm run build:minified",
+    "build:main": "webpack --config ./build-config/webpack.prod.main.js",
+    "build:main:min": "webpack --config ./build-config/webpack.prod.main.min.js",
+    "build:plugins": "webpack --config ./build-config/webpack.prod.plugins.js",
+    "build:plugins:min": "webpack --config ./build-config/webpack.prod.plugins.min.js",
+    "build:htmlinit": "webpack --config ./build-config/webpack.prod.htmlinit.js",
+    "build:htmlinit:min": "webpack --config ./build-config/webpack.prod.htmlinit.min.js",
+    "build:normal": "npm run build:main && npm run build:plugins && npm run build:htmlinit",
+    "build:minified": "npm run build:main:min && npm run build:plugins:min && npm run build:htmlinit:min",
+    "lint": "npm run lint:js",
+    "lint:js": "eslint src",
+    "lint-js-html": "lint-staged",
+    "doc": "esdoc",
+    "test": "karma start karma.conf.js",
+    "test:chrome": "karma start karma.conf.js --browsers=Chrome --single-run=false",
+    "prepublishOnly": "not-in-install && npm run build || in-install",
+    "prepare": "npm run build"
+  },
+  "publishConfig": {
+    "access": "public"
+  },
+  "author": "",
+  "license": "Apache-2.0",
+  "bugs": {
+    "url": "https://github.com/open-mmlab/labelbee/issues"
+  },
+  "keywords": [
+    "waveform",
+    "audio",
+    "music",
+    "player",
+    "webaudio",
+    "microphone",
+    "visualization"
+  ],
+  "devDependencies": {
+    "@babel/core": "^7.18.9",
+    "@babel/eslint-parser": "^7.18.9",
+    "@babel/plugin-proposal-class-properties": "^7.18.6",
+    "@babel/preset-env": "^7.18.9",
+    "@babel/register": "^7.18.9",
+    "@chiragrupani/karma-chromium-edge-launcher": "^2.2.2",
+    "babel-loader": "^8.2.5",
+    "babel-plugin-add-module-exports": "^1.0.4",
+    "babel-plugin-istanbul": "^6.1.1",
+    "date-fns": "^2.29.1",
+    "debounce": "^1.2.1",
+    "esdoc": "^1.1.0",
+    "esdoc-accessor-plugin": "^1.0.0",
+    "esdoc-brand-plugin": "^1.0.1",
+    "esdoc-coverage-plugin": "^1.1.0",
+    "esdoc-ecmascript-proposal-plugin": "^1.0.0",
+    "esdoc-integrate-test-plugin": "^1.0.0",
+    "esdoc-standard-plugin": "^1.0.0",
+    "eslint": "^8.20.0",
+    "htmlhint": "^1.1.4",
+    "in-publish": "^2.0.1",
+    "jasmine-core": "^4.3.0",
+    "karma": "^6.4.0",
+    "karma-chrome-launcher": "3.1.1",
+    "karma-coverage": "^2.2.0",
+    "karma-firefox-launcher": "^2.1.2",
+    "karma-jasmine": "5.1.0",
+    "karma-jasmine-matchers": "5.0.0",
+    "karma-verbose-reporter": "0.0.8",
+    "karma-webpack": "^5.0.0",
+    "lint-staged": "^13.0.3",
+    "load-script": "^2.0.0",
+    "pre-commit": "^1.2.2",
+    "webpack": "^5.74.0",
+    "webpack-cli": "^4.10.0",
+    "webpack-dev-server": "^4.9.3",
+    "webpack-merge": "^5.8.0"
+  },
+  "homepage": "https://github.com/open-mmlab/labelbee",
+  "lint-staged": {
+    "*.js": [
+      "eslint"
+    ],
+    "*.html": [
+      "htmlhint"
+    ]
+  }
+}

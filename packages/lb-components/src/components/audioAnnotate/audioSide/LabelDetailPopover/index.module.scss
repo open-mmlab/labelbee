@@ -1,0 +1,70 @@
+$MAX_WIDTH: 300px;
+$LEFT_PADDING: 14px;
+$RIGHT_PADDING: 14px;
+$IMG_WIDTH: 272px; // 300 - LEFT_PADDING - RIGHT_PADDING
+
+.errorMsg {
+  color: red;
+}
+
+.content {
+  width: $MAX_WIDTH;
+  max-height: 100vh;
+  padding: 12px $RIGHT_PADDING 0 $LEFT_PADDING;
+  overflow: scroll;
+
+  &::-webkit-scrollbar {
+    margin-left: 20px;
+  }
+  .nameList {
+    margin-bottom: 20px;
+    .nameZH {
+      margin-bottom: 2px;
+      color: #333333;
+      font-weight: 500;
+      font-size: 20px;
+    }
+    .nameEN {
+      font-weight: 400;
+      font-size: 16px;
+      font-style: italic;
+    }
+    .number {
+      font-style: italic;
+    }
+  }
+
+  .item {
+    margin-bottom: 20px;
+    font-size: 14px;
+    .title {
+      display: flex;
+      align-items: center;
+      margin-bottom: 4px;
+      .dot {
+        display: inline-block;
+        width: 6px;
+        height: 6px;
+        margin-right: 5px;
+        background-color: #666666;
+        border-radius: 50%;
+      }
+    }
+
+    .contentEN {
+      margin-top: 4px;
+      font-style: italic;
+    }
+    &:last-child {
+      margin-bottom: 0;
+    }
+  }
+  .img {
+    width: 100%;
+    margin-bottom: 10px;
+    object-fit: contain;
+  }
+  .video {
+    margin-bottom: 10px;
+  }
+}

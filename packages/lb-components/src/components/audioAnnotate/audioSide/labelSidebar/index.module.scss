@@ -1,0 +1,126 @@
+.optionMenu {
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+  overflow: auto;
+
+  :global {
+    .ant-collapse {
+      background-color: #fff;
+    }
+    .ant-tabs {
+      .ant-tabs-content-holder {
+        padding: 0;
+      }
+    }
+
+    .ant-tabs-tabpane {
+      height: 100%;
+    }
+  }
+}
+
+.main {
+  width: 100%;
+  padding: 8px 8px;
+  overflow: auto;
+  -moz-user-select: none;
+  -webkit-user-select: none;
+  -ms-user-select: none;
+  user-select: none;
+}
+
+.main::-webkit-scrollbar {
+  width: 0;
+}
+
+.keyDownIcon {
+  display: inline-block;
+  width: 20px;
+  height: 20px;
+  line-height: 20px;
+  text-align: center;
+  border: 1px solid rgba(204, 204, 204, 1);
+  border-radius: 2px;
+}
+
+.keyDownIconActive {
+  display: inline-block;
+  width: 20px;
+  height: 20px;
+  color: white;
+  line-height: 20px;
+  text-align: center;
+  background: #6371ff;
+  border: 1px solid rgba(204, 204, 204, 1);
+  border-radius: 2px;
+}
+
+.level {
+  margin: 0px 0 0 -6px;
+
+  .radioOption {
+    display: flex;
+    justify-content: space-between;
+    width: 100%;
+    margin-bottom: 10px;
+    padding: 4px 16px 4px 20px;
+    cursor: pointer;
+
+    .labelMouseClick {
+      margin: 0 26px;
+    }
+  }
+
+  .radioOption:hover {
+    background: rgba(158, 158, 158, 0.18);
+  }
+
+  .radioOption:active {
+    color: #666fff;
+    background: none;
+  }
+}
+
+.singleBar {
+  padding: 0 3px 0 8px;
+}
+
+:global {
+  .ant-collapse-borderless > .ant-collapse-item > .ant-collapse-content > .ant-collapse-content-box {
+    padding-top: 4px;
+  }
+
+  .ant-collapse-content > .ant-collapse-content-box {
+    padding: 0;
+  }
+
+  .ant-collapse-icon-position-right > .ant-collapse-item > .ant-collapse-header {
+    padding-right: 40px;
+  }
+
+  .ant-collapse-borderless > .ant-collapse-item {
+    border-bottom: 0px;
+    .ant-collapse-header {
+      padding: 16px;
+    }
+  }
+}
+
+.filterContainer {
+  position: relative;
+  height: 100%;
+  padding-top: 15px;
+  background-color: #fff;
+  .filterInputContainer {
+    margin: 0 20px;
+  }
+  .filterContent {
+    position: absolute;
+    top: 52px;
+    right: 0;
+    bottom: 0;
+    left: 0;
+    overflow: auto;
+  }
+}

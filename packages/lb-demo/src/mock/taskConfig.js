@@ -1,5 +1,5 @@
 import { cTool } from '@labelbee/lb-annotation';
-const { EVideoToolName, EToolName, EPointCloudName } = cTool;
+const { EVideoToolName, EToolName, EPointCloudName, EAudioToolName } = cTool;
 
 const rectToolConfig = {
   showConfirm: false,
@@ -267,6 +267,91 @@ const LLMToolConfig = {
   ],
 };
 
+const audioToolConfig = {
+  "showConfirm": true,
+  "showDirection": false,
+  "skipWhileNoDependencies": false,
+  "configList": [
+    {
+      "label": "文本",
+      "key": "text",
+      "required": false,
+      "default": "",
+      "maxLength": 1000
+    }
+  ],
+  "inputList": [
+    {
+      "key": "类别1",
+      "value": "class1",
+      "isMulti": false,
+      "subSelected": [
+        {
+          "key": "选项1",
+          "value": "option1",
+          "isDefault": false
+        }
+      ]
+    },
+    {
+      "key": "类别xl",
+      "value": "class-xl",
+      "isMulti": false,
+      "subSelected": [
+        {
+          "key": "选项2-1",
+          "value": "option2-1",
+          "isMulti": false
+        }
+      ]
+    },
+    {
+      "key": "类别dg",
+      "value": "class-dg",
+      "isMulti": false,
+      "subSelected": [
+        {
+          "key": "选项3-1",
+          "value": "option3-1",
+          "isMulti": false
+        }
+      ]
+    }
+  ],
+  "tagConfigurable": true,
+  "textConfigurable": true,
+  "filterData": [
+    "valid",
+    "invalid"
+  ],
+  "clipConfigurable": true,
+  "clipTextConfigurable": true,
+  "clipAttributeList": [
+    {
+      "key": "类别1",
+      "value": "类别1"
+    },
+    {
+      "key": "类别Jy",
+      "value": "class-Jy"
+    },
+    {
+      "key": "类别JU",
+      "value": "class-JU"
+    },
+    {
+      "key": "类别EZ",
+      "value": "class-EZ"
+    },
+    {
+      "key": "类别4E",
+      "value": "class-4E"
+    }
+  ],
+  "clipAttributeConfigurable": true
+}
+
+
 export const getConfig = (tool) => {
   if (tool === EToolName.Line) {
     return lineToolConfig;
@@ -306,6 +391,10 @@ export const getConfig = (tool) => {
 
   if (tool === EToolName.LLM) {
     return LLMToolConfig;
+  }
+
+  if (tool === EAudioToolName.AudioTextTool) {
+    return audioToolConfig
   }
 
   return rectToolConfig;

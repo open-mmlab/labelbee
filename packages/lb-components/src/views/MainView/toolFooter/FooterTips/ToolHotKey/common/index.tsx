@@ -21,6 +21,13 @@ import IconPlayPause from '@/assets/annotation/toolHotKeyIcon/icon_playPause.svg
 import IconFastForward from '@/assets/annotation/toolHotKeyIcon/icon_forward_kj.svg';
 import IconRewind from '@/assets/annotation/toolHotKeyIcon/icon_back_kj.svg';
 import IconSpeed from '@/assets/annotation/toolHotKeyIcon/icon_speed_kj.svg';
+import ToggleTagModeSvg from '@/assets/annotation/audio/tag.svg';
+import IconTagKj from '@/assets/annotation/toolHotKeyIcon/icon_tag_kj.svg'
+import IconClip from '@/assets/annotation/video/icon_clip.svg'
+import IconClipSelected from '@/assets/annotation/toolHotKeyIcon/icon_frameActive_kj.svg';
+import IconDeleteRemark from '@/assets/annotation/toolHotKeyIcon/deleteRemark.svg';
+import IconPreRemark from '@/assets/annotation/toolHotKeyIcon/preRemark.svg';
+import IconNextRemark from '@/assets/annotation/toolHotKeyIcon/nextRemark.svg';
 
 export const revoke = {
   name: 'Undo',
@@ -177,4 +184,50 @@ export const rewind = {
   icon: IconRewind,
   shortCut: ['&#8592;'],
   shortCutUseHtml: true,
+};
+
+export const toggleTagMode = {
+  name: '切换标签模式',
+  icon: ToggleTagModeSvg,
+  shortCut: ['L'],
+};
+
+export const tag = {
+  name: '打标签',
+  icon: IconTagKj,
+  shortCut: [DragWithLeftClickSvg],
+  noticeInfo: '左击',
+};
+
+export const period = {
+  name: '截取片段',
+  icon: IconClip,
+  noticeInfo: '两次',
+  shortCut: ['X'],
+};
+
+export const clipSelected = {
+  name: '截取选中',
+  icon: IconClipSelected,
+  shortCut: [DragWithRightClickShortCutSvg],
+  noticeInfo: '右击',
+};
+
+export const deleteRemark = {
+  name: '删除批注',
+  icon: IconDeleteRemark,
+  shortCut: ['Delete'],
+  noticeInfo: '选中时',
+};
+
+export const nextRemark = {
+  name: '下一条批注',
+  icon: IconNextRemark,
+  shortCut: ['Tab'],
+};
+
+export const preRemark = {
+  name: '上一条批注',
+  icon: IconPreRemark,
+  shortCut: ['Shift', 'Tab'],
 };

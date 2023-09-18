@@ -73,10 +73,11 @@ const updateToolInstance = (annotation: AnnotationState, imgNode: HTMLImageEleme
   const stepConfig = StepUtils.getCurrentStepInfo(step, stepList);
   const config = ConfigUtils.jsonParser(stepConfig.config);
 
-  // 视频工具不支持实例化
-  if (ToolUtils.isVideoTool(stepConfig?.tool)) {
+  // 音频、视频工具不支持实例化
+  if (ToolUtils.isVideoTool(stepConfig?.tool) || ToolUtils.isAudioTool(stepConfig?.tool)) {
     return;
   }
+
 
   // TODO: 点云实例化对接
   if (ToolUtils.isPointCloudTool(stepConfig?.tool)) {
@@ -118,12 +119,13 @@ export const LoadFileAndFileData =
     const currentIsVideo = StepUtils.currentToolIsVideo(step, stepList);
     const currentIsPointCloud = StepUtils.currentToolIsPointCloud(step, stepList);
     const currentIsLLM = StepUtils.getCurrentStepInfo(step, stepList)?.tool === EToolName.LLM;
+    const currentIsAudio = StepUtils.currentToolIsAudio(step, stepList)
 
     SetAnnotationLoading(dispatch, true);
 
     await dispatch(TryGetFileDataByAPI(nextIndex));
 
-    if (currentIsVideo || currentIsPointCloud || currentIsLLM) {
+    if (currentIsVideo || currentIsPointCloud || currentIsLLM || currentIsAudio) {
       dispatch(AfterVideoLoaded(nextIndex));
       return;
     }
@@ -140,7 +142,6 @@ const TryGetFileDataByAPI = (nextIndex: number) => async (dispatch: any, getStat
 
   if (getFileData) {
     const fileData = await getFileData(imgList[nextIndex], nextIndex);
-
     dispatch({
       type: ANNOTATION_ACTIONS.SET_FILE_DATA,
       payload: {
@@ -436,6 +437,7 @@ export const annotationReducer = (
       if (!toolInstance) {
         return { ...state, imgIndex: action.payload.nextIndex };
       }
+
 
       const currentStepInfo = StepUtils.getCurrentStepInfo(step, stepList);
 

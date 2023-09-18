@@ -821,16 +821,6 @@ class BasicToolOperation extends EventListener {
       return true;
     }
 
-    // if (window.getSelection) {
-    //   // 获取选中
-    //   const selection = window.getSelection();
-    //   // 清除选中
-    //   selection.removeAllRanges();
-    // } else if (document.selection && document.selection.empty) {
-    //   // 兼容 IE8 以下，但 IE9+ 以上同样可用
-    //   document.selection.empty();
-    // }
-
     const coord = this.getCoordinate(e);
 
     if ((this.isSpaceKey && e.button === 0) || e.button === 2) {

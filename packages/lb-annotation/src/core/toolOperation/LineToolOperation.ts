@@ -101,7 +101,10 @@ class LineToolOperation extends BasicToolOperation {
       }
 
       this.drawLine(line.pointList, coord, color, true, true);
-      this.drawLineNumber(line.pointList[0], line.order, color, '', this.defaultAttribute, isActiveLineValid);
+
+      if (line.pointList[0]) {
+        this.drawLineNumber(line.pointList[0], line.order, color, '', this.defaultAttribute, isActiveLineValid);
+      }
 
       if (coord && this.isCreate) {
         this.arc(coord, POINT_RADIUS, color);
@@ -207,6 +210,8 @@ class LineToolOperation extends BasicToolOperation {
 
   private selection: Selection;
 
+  public historyDisabled: boolean;
+
   constructor(props: ILineOperationProps) {
     super(props);
     this.status = EStatus.None;
@@ -227,6 +232,8 @@ class LineToolOperation extends BasicToolOperation {
     this.dependToolConfig = {
       lineType: ELineTypes.Line,
     };
+
+    this.historyDisabled = false;
   }
 
   /** 创建状态 */
@@ -1164,6 +1171,9 @@ class LineToolOperation extends BasicToolOperation {
   };
 
   public historyChanged(funcName: 'undo' | 'redo') {
+    if (this.historyDisabled) {
+      return;
+    }
     const enableKeyName = `${funcName}Enabled` as 'undoEnabled' | 'redoEnabled';
 
     if (this.isCreate) {
@@ -1467,15 +1477,14 @@ class LineToolOperation extends BasicToolOperation {
       }
     }
 
-    this.setNoneStatus();
-
     if (setActiveAfterCreating) {
       this.activeLine = [];
       this.setSelectedLineID(selectedID, false, false);
+    } else {
+      this.setNoneStatus();
     }
 
     this.actionsHistory?.empty();
-    this.emit('dataUpdated', this.lineList, this.selectedIDs);
     this.render();
   }
 
@@ -1821,6 +1830,8 @@ class LineToolOperation extends BasicToolOperation {
 
   public setSelectedLineID(id?: string, isAppend = false, triggerAttrUpdate = true) {
     this.selection.setSelectedIDs(id, isAppend);
+
+    this.status = EStatus.Active;
 
     if (triggerAttrUpdate && id) {
       this.updateAttrWhileIDChanged(this.selectedID);

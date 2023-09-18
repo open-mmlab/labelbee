@@ -18,7 +18,6 @@ import {
   IPolygonPoint,
   IPointUnit,
   UpdatePolygonByDragList,
-  ILine,
   DEFAULT_SPHERE_PARAMS,
   IDefaultSize,
   IPolygonData,
@@ -45,6 +44,7 @@ import { useHistory } from './useHistory';
 import { usePolygon } from './usePolygon';
 import { IFileItem, IMappingImg } from '@/types/data';
 import { ICoordinate } from '@labelbee/lb-utils/src/types/common';
+import { useLatest } from 'ahooks';
 
 const DEFAULT_SCOPE = 5;
 const DEFAULT_RADIUS = 90;
@@ -620,8 +620,7 @@ export const usePointCloudViews = () => {
     cuboidBoxIn2DView,
     imageSizes,
   } = ptCtx;
-  const { addHistory, initHistory, pushHistoryUnderUpdatePolygon, pushHistoryUnderUpdateLine } =
-    useHistory();
+  const { addHistory, initHistory, pushHistoryUnderUpdatePolygon } = useHistory();
   const { selectedPolygon } = usePolygon();
 
   const { getPointCloudSphereByID, updatePointCloudSphere, selectedSphere } = useSphere();
@@ -635,8 +634,10 @@ export const usePointCloudViews = () => {
   });
   const dispatch = useDispatch();
 
+  const cuboidBoxIn2DViewLatest = useLatest(cuboidBoxIn2DView);
+
   const generateRects = (boxParams: IPointCloudBox) => {
-    if (!cuboidBoxIn2DView) {
+    if (!cuboidBoxIn2DViewLatest.current) {
       const { mappingImgList = [] } = currentData;
       const rects: Array<ReturnType<typeof getRectPointCloudBox>> = mappingImgList.map(
         (v: IMappingImg) =>
@@ -1015,14 +1016,6 @@ export const usePointCloudViews = () => {
     viewUpdateBox(newPolygon, originPolygon, PointCloudView.Back);
   };
 
-  const topViewUpdateLine = (updateList: ILine, size: ISize) => {
-    // updateList.pointList = updateList.pointList.map((v) =>
-    //   PointCloudUtils.transferCanvas2World(v, size),
-    // );
-
-    pushHistoryUnderUpdateLine(updateList);
-    return;
-  };
   const topViewUpdatePoint = (updatePoint: IPointUnit, size: ISize) => {
     const pointCloudSphere = getPointCloudSphereByID(updatePoint.id);
     const newSphereParams = topViewPoint2PointCloud(
@@ -1343,7 +1336,6 @@ export const usePointCloudViews = () => {
     sideViewUpdatePoint,
     backViewUpdatePoint,
     topViewUpdateBox,
-    topViewUpdateLine,
     sideViewUpdateBox,
     backViewUpdateBox,
     pointCloudBoxListUpdated,

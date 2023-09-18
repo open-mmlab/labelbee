@@ -3,14 +3,21 @@ import React, { useContext } from 'react';
 import { useTranslation } from 'react-i18next';
 
 import { PointCloudContext } from '@/components/pointCloudView/PointCloudContext';
+import { useStatus } from '@/components/pointCloudView/hooks/useStatus';
 
 const SwitchCuboidBoxIn2DView = () => {
   const { cuboidBoxIn2DView, setCuboidBoxIn2DView } = useContext(PointCloudContext);
   const { t } = useTranslation();
 
+  const { isPointCloudSegmentationPattern } = useStatus();
+
   const onChange = (checked: boolean) => {
     setCuboidBoxIn2DView(checked);
   };
+
+  if (isPointCloudSegmentationPattern) {
+    return null;
+  }
 
   return (
     <>
