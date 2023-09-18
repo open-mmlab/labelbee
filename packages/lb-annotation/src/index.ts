@@ -16,6 +16,7 @@ import { BasicToolOperation } from './core/toolOperation/basicToolOperation';
 import ViewOperation from './core/toolOperation/ViewOperation';
 import ScribbleTool from './core/toolOperation/ScribbleTool';
 import PointCloud2dOperation from './core/toolOperation/pointCloud2dOperation';
+import SegmentByRect from './core/toolOperation/segmentByRect';
 
 // Constant
 import * as cAnnotation from './constant/annotation';
@@ -62,6 +63,7 @@ export {
   MeasureOperation,
   ViewOperation,
   PointCloud2dOperation,
+  SegmentByRect,
   // 固定操作
   cAnnotation,
   cAnnotationTask,
