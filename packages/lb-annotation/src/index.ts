@@ -11,6 +11,7 @@ import LineToolOperation from './core/toolOperation/LineToolOperation';
 import TextToolOperation from './core/toolOperation/TextToolOperation';
 import PolygonOperation from './core/toolOperation/polygonOperation';
 import MeasureOperation from './core/toolOperation/measureOperation';
+import PointCloud2DRectOperation from './core/toolOperation/pointCloud2DRectOperation';
 import { BasicToolOperation } from './core/toolOperation/basicToolOperation';
 import ViewOperation from './core/toolOperation/ViewOperation';
 import ScribbleTool from './core/toolOperation/ScribbleTool';
@@ -35,6 +36,7 @@ import ImgUtils from './utils/ImgUtils';
 import MathUtils from './utils/MathUtils';
 import AttributeUtils from './utils/tool/AttributeUtils';
 import ActionsHistory from './utils/ActionsHistory';
+import EventBus from './utils/EventBus';
 
 // ToolListener
 import DblClickEventListener from './utils/tool/DblClickEventListener'; // temporarily supports the use of external tools in this way
@@ -56,6 +58,7 @@ export {
   PolygonOperation,
   TextToolOperation,
   BasicToolOperation,
+  PointCloud2DRectOperation,
   MeasureOperation,
   ViewOperation,
   PointCloud2dOperation,
@@ -84,6 +87,7 @@ export {
   StyleUtils,
   // 其他特殊基础功能
   ActionsHistory,
+  EventBus,
 };
 
 export * from './newCore';

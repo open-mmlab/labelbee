@@ -104,6 +104,7 @@ export interface AppProps {
   highlightAttribute?: string;
   onLoad?: ({ toolInstance }: { toolInstance: ToolInstance }) => void;
   preDataProcess?: (params: IPreDataProcessParams) => IPointCloudBox[];
+  auditContext?: any;
 }
 
 const App: React.FC<AppProps> = (props) => {
@@ -227,7 +228,11 @@ const App: React.FC<AppProps> = (props) => {
   return (
     <div>
       <ConfigProvider locale={i18n.language === 'en' ? enUS : zhCN}>
-        <MainView {...props} intelligentFit={intelligentFit} />
+        <MainView
+          {...props}
+          intelligentFit={intelligentFit}
+          checkMode={checkMode}
+        />
       </ConfigProvider>
     </div>
   );

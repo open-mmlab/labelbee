@@ -1,0 +1,52 @@
+.containerWrapper {
+  position: relative;
+  flex: 1;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  .audioWrapper {
+    position: relative;
+  }
+}
+
+.textareaContainer {
+  flex: 1;
+  overflow: scroll;
+  text-align: center;
+
+  .textareaContent {
+    display: inline-block;
+    width: 65%;
+  }
+}
+
+:global {
+  .audio-tool-spinner {
+    height: calc(100vh - 60px);
+
+    .ant-spin-container {
+      height: 100%;
+    }
+  }
+}
+
+.toggleAudioOption {
+  display: flex;
+  height: 63px;
+  border-bottom: 1px solid #eee;
+  flex-shrink: 0;
+  background-color: #fff;
+  .option {
+    width: 50%;
+    padding: 10px;
+    display: flex;
+    align-items: center;
+    &:first-child {
+      justify-content: flex-end;
+    }
+    img {
+      cursor: pointer;
+    }
+  }
+}
+

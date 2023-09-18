@@ -4,6 +4,7 @@ import { TMatrix13Tuple, TMatrix14Tuple, ICalib } from '@labelbee/lb-utils';
 export interface IMappingImg {
   url: string;
   calib: ICalib;
+  path: string;
 }
 
 export interface IFileItem {
@@ -11,6 +12,7 @@ export interface IFileItem {
   url?: string;
   result?: string;
   mappingImgList?: IMappingImg[];
+  preResult?: string;
 }
 export type AnnotationFileList = IFileItem[];
 export interface KVObject {

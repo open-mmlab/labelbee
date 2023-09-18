@@ -1,0 +1,17 @@
+.labelContainer {
+  position: absolute;
+  right: 0;
+  z-index: 5;
+  overflow: auto;
+  .label {
+    clear: both;
+    padding: 0 20px;
+    color: white;
+    font-size: 15px;
+    line-height: 32px;
+    white-space: pre;
+    text-align: right;
+    background: rgba(102, 111, 255, 1);
+    opacity: 0.6;
+  }
+}

@@ -219,6 +219,12 @@ export class ToolScheduler implements IToolSchedulerOperation {
     toolInstance?.init();
     toolInstance.canvas.id = tool ?? 'basicCanvas';
 
+    /**
+     * Disabled tool internal history event while init by scheduler
+     * Should use history which managed outside
+     */
+    toolInstance.historyDisabled = true;
+
     // Drag and Zoom sync to each canvas.
     toolInstance.on(
       'dragMove',

@@ -8,7 +8,7 @@ import { ViewOperation, ImgUtils } from '@labelbee/lb-annotation';
 import { Spin } from 'antd/es';
 import useRefCache from '@/hooks/useRefCache';
 
-type TAfterImgOnLoad = (img: HTMLImageElement) => void;
+export type TAfterImgOnLoad = (img: HTMLImageElement) => void;
 
 interface IProps {
   src: string; // 图片路径

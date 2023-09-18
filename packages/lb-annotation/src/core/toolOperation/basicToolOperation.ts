@@ -9,7 +9,7 @@ import CommonToolUtils from '@/utils/tool/CommonToolUtils';
 import LineToolUtils from '@/utils/tool/LineToolUtils';
 import { EDragStatus, EGrowthMode, ELang } from '../../constant/annotation';
 import EKeyCode from '../../constant/keyCode';
-import { BASE_ICON, COLORS_ARRAY, styleString } from '../../constant/style';
+import { BASE_ICON, styleString } from '../../constant/style';
 import locale from '../../locales';
 import { EMessage } from '../../locales/constants';
 import ActionsHistory from '../../utils/ActionsHistory';
@@ -205,12 +205,6 @@ class BasicToolOperation extends EventListener {
       y: 0,
     };
     this.isShowCursor = false;
-    this.style = {
-      strokeColor: COLORS_ARRAY[4],
-      fillColor: COLORS_ARRAY[4],
-      strokeWidth: 2,
-      opacity: 1,
-    };
     this.attributeLockList = [];
     this.history = new ActionsHistory();
     this.style = props.style ?? CommonToolUtils.jsonParser(styleString);
@@ -826,16 +820,6 @@ class BasicToolOperation extends EventListener {
     if (!this.canvas || this.isImgError) {
       return true;
     }
-
-    // if (window.getSelection) {
-    //   // 获取选中
-    //   const selection = window.getSelection();
-    //   // 清除选中
-    //   selection.removeAllRanges();
-    // } else if (document.selection && document.selection.empty) {
-    //   // 兼容 IE8 以下，但 IE9+ 以上同样可用
-    //   document.selection.empty();
-    // }
 
     const coord = this.getCoordinate(e);
 

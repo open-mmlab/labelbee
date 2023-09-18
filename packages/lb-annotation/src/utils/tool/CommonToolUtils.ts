@@ -1,6 +1,7 @@
 import { isObject } from 'lodash';
 import { IPolygonPoint } from '../../types/tool/polygon';
 import { ESortDirection, EStepType } from '../../constant/annotation';
+import EKeyCode from '../../constant/keyCode';
 
 type point = {
   id: string;
@@ -41,6 +42,23 @@ export default class CommonToolUtils {
       // 后续要判断预标注的情况
     }
     return currentStepInfo;
+  }
+
+  /**
+   * 获取当前步骤的步骤的步骤配置
+   */
+  public static getCurrentStepToolAndConfig(currentStep: number, stepList: IStepInfo[]) {
+    const currentStepInfo = this.getStepInfo(currentStep, stepList);
+    if (currentStepInfo) {
+      // 获取标注的步骤的配置信息
+      const annotationStepInfo = this.getCurrentStepInfo(currentStep, stepList);
+      return {
+        ...currentStepInfo,
+        tool: annotationStepInfo.tool,
+        config: annotationStepInfo.config,
+      };
+    }
+    return false;
   }
 
   public static jsonParser = (content: any, defaultValue: any = {}) => {
@@ -99,6 +117,14 @@ export default class CommonToolUtils {
       flag = false;
     }
     return flag;
+  }
+
+  /**
+   * 判断是否移动按钮
+   * @param keyCode
+   */
+  public static isMoveKey(keyCode: number) {
+    return [EKeyCode.Left, EKeyCode.Right, EKeyCode.Down, EKeyCode.Up, EKeyCode.Space].includes(keyCode);
   }
 
   public static getNextSelectedRectID(

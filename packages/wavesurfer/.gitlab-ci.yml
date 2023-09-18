@@ -1,0 +1,40 @@
+image: registry.sensetime.com/fdc/docker-node:node14
+
+variables:
+    AUTH: "$PKG_SENSETIME_AUTH"
+
+.only: &only
+    only:
+        - master
+        - dev
+        - test
+        - staging
+
+stages:
+    - build
+    - publish
+
+install_packages:
+    <<: *only
+    stage: build
+    script:
+        - npm config set registry https://registry.npmmirror.com
+        - npm install
+        - npm run build
+    artifacts:
+        paths:
+            - ./node_modules
+            - ./dist
+        expire_in: 1 days
+
+publish:sensetime:
+    stage: publish
+    dependencies:
+        - install_packages
+    only:
+        changes:
+            - "package.json"
+    script:
+        - ls dist 
+        - npm config set //pkg.sensetime.com/repository/dps-components-npm-hosted-public/:_auth $AUTH
+        - npm publish

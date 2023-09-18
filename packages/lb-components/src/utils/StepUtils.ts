@@ -46,12 +46,22 @@ export default class StepUtils {
     return ToolUtils.isVideoTool(currentStepInfo?.tool);
   }
 
+  /**
+   * 根据toolName判断当前步骤是否为音频工具
+   * @param step 步骤
+   * @param stepList 步骤列表
+   * @returns {Number} 是否为音频工具
+   */
+  public static currentToolIsAudio(step: number, stepList: IStepInfo[]) {
+    const currentStepInfo = StepUtils.getCurrentStepInfo(step, stepList);
+    return ToolUtils.isAudioTool(currentStepInfo?.tool);
+  }
 
   /**
    * Check for PointCloud
-   * @param step 
-   * @param stepList 
-   * @returns 
+   * @param step
+   * @param stepList
+   * @returns
    */
   public static currentToolIsPointCloud(step: number, stepList: IStepInfo[]) {
     const currentStepInfo = StepUtils.getCurrentStepInfo(step, stepList);
