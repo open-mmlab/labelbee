@@ -24,6 +24,7 @@ import RenderDomClass from '@/utils/tool/RenderDomClass';
 import { DEFAULT_FONT, ELineTypes, SEGMENT_NUMBER } from '@/constant/tool';
 import { DEFAULT_TEXT_SHADOW, DEFAULT_TEXT_OFFSET, TEXT_ATTRIBUTE_OFFSET } from '@/constant/annotation';
 import ImgUtils, { cropAndEnlarge } from '@/utils/ImgUtils';
+import { getColorValues } from '@/utils/color';
 import { BasicToolOperation, IBasicToolOperationProps } from './basicToolOperation';
 import { pointCloudLidar2image } from '../pointCloud/matrix';
 
@@ -610,13 +611,20 @@ export default class ViewOperation extends BasicToolOperation {
       return;
     }
     const data = annotation.annotation;
+    const ctx = this.canvas.getContext('2d');
+    if (ctx) {
+      const imageData = ctx.getImageData(0, 0, this.canvas.width, this.canvas.height);
 
-    data.forEach((v) => {
-      const tmpRect = { ...v, width: 1, height: 1 };
-      // @ts-ignore
-      const renderRect = AxisUtils.changeRectByZoom(tmpRect, this.zoom, this.currentPos);
-      DrawUtils.drawRectWithFill(this.canvas, renderRect, { color: v.color });
-    });
+      data.forEach((item) => {
+        const color = getColorValues(item.color);
+        imageData.data[item.x * (imageData.width * 4) + item.y * 4] = color.red;
+        imageData.data[item.x * (imageData.width * 4) + item.y * 4 + 1] = color.green;
+        imageData.data[item.x * (imageData.width * 4) + item.y * 4 + 2] = color.blue;
+        imageData.data[item.x * (imageData.width * 4) + item.y * 4 + 3] = 255;
+      });
+
+      ctx.putImageData(imageData, this.currentPos.x, this.currentPos.y);
+    }
   }
 
   public render() {
