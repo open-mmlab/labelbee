@@ -54,6 +54,7 @@ const PointCloudView: React.FC<IProps> = ({
   intelligentFit,
   imgIndex,
   loadPCDFileLoading,
+  config,
 }) => {
   const ptCtx = useContext(PointCloudContext);
   const { globalPattern, setGlobalPattern, selectedIDs } = ptCtx;
@@ -132,7 +133,8 @@ const PointCloudView: React.FC<IProps> = ({
           <PointCloudSegment checkMode={checkMode} />
           <PointCloudSegment2DView />
         </div>
-        <PointCloudSegmentStatus />
+        <PointCloudSegment checkMode={checkMode} />
+        <PointCloudSegmentStatus config={config} />
         {drawLayerSlot?.({
           direct: true,
         })}

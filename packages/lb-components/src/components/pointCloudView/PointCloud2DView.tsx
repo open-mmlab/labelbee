@@ -42,7 +42,7 @@ export interface IAnnotationData2dView {
   annotations: IAnnotationDataTemporarily[];
   url: string;
   calName?: string;
-  calib: ICalib;
+  calib?: ICalib;
   path: string;
 }
 
@@ -188,7 +188,7 @@ const PointCloud2DView = ({
         newAnnotations2dList.push({
           annotations: newAnnotations2d,
           url: mappingData?.url,
-          calName: mappingData.calib?.calName,
+          calName: mappingData?.calib?.calName,
           calib: mappingData?.calib,
           path: mappingData?.path,
         });

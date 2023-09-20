@@ -22,8 +22,9 @@ const PointCloudSegmentListener: React.FC<IProps> = ({
   config,
   toolInstanceRef,
 }) => {
-  const { updateSegmentAttribute } = useAttribute();
   const dispatch = useDispatch();
+  const { updateSegmentAttribute, updateSegmentSubAttribute } = useAttribute();
+
   const ptCtx = useContext(PointCloudContext);
   const { ptSegmentInstance, setSegmentation } = ptCtx;
 
@@ -68,6 +69,10 @@ const PointCloudSegmentListener: React.FC<IProps> = ({
         break;
 
       case 'j':
+        ptSegmentInstance?.emit('RectSelector');
+        break;
+
+      case 'k':
         ptSegmentInstance?.emit('CircleSelector');
         break;
 
@@ -107,6 +112,10 @@ const PointCloudSegmentListener: React.FC<IProps> = ({
     toolInstanceRef.current.setDefaultAttribute = (newAttribute: string) => {
       updateSegmentAttribute(newAttribute);
       ptSegmentInstance?.emit('updateDefaultAttribute', { newAttribute });
+    };
+
+    toolInstanceRef.current.setSubAttribute = (key: string, value: string) => {
+      updateSegmentSubAttribute(key, value);
     };
 
     return () => {

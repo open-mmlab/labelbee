@@ -8,6 +8,7 @@ import { EPointCloudSegmentStatus } from '@labelbee/lb-utils';
 import LassoSelector from './selector/lassoSelector';
 import PointCloudStore, { ThreePoints } from './store';
 import CircleSelector from './selector/circleSelector';
+import RectSelector from './selector/rectSelector';
 
 interface IProps {
   dom: HTMLElement;
@@ -18,14 +19,16 @@ class PointCloudSegmentOperation {
   private dom: HTMLElement;
 
   // Operation Selector
-  public currentTool: LassoSelector | CircleSelector;
+  public currentTool: LassoSelector | CircleSelector | RectSelector;
 
-  public currentToolName: 'LassoSelector' | 'CircleSelector';
+  public currentToolName: 'LassoSelector' | 'CircleSelector' | 'RectSelector';
 
   public store: PointCloudStore;
 
   // Selector
   public lassoSelector: LassoSelector;
+
+  public rectSelector: RectSelector;
 
   public circleSelector: CircleSelector;
 
@@ -34,6 +37,7 @@ class PointCloudSegmentOperation {
     this.store = props.store;
 
     this.lassoSelector = new LassoSelector(this.store);
+    this.rectSelector = new RectSelector(this.store);
     this.circleSelector = new CircleSelector(this.store);
     this.currentTool = this.lassoSelector;
     this.currentToolName = 'LassoSelector';
@@ -65,6 +69,11 @@ class PointCloudSegmentOperation {
   public updateSelector2Lasso() {
     this.currentTool = this.lassoSelector;
     this.currentToolName = 'LassoSelector';
+  }
+
+  public updateSelector2Rect() {
+    this.currentTool = this.rectSelector;
+    this.currentToolName = 'RectSelector';
   }
 
   public updateSelector2Circle() {

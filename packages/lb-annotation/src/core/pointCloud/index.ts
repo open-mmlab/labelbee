@@ -253,6 +253,7 @@ export class PointCloud extends EventListener {
 
     this.on('CircleSelector', this.segmentOperation.updateSelector2Circle.bind(this.segmentOperation));
     this.on('LassoSelector', this.segmentOperation.updateSelector2Lasso.bind(this.segmentOperation));
+    this.on('RectSelector', this.segmentOperation.updateSelector2Rect.bind(this.segmentOperation));
     this.on('clearPointCloud', this.clearPointCloud.bind(this));
     this.on('loadPCDFile', this.loadPCDFile.bind(this));
   }
@@ -264,6 +265,7 @@ export class PointCloud extends EventListener {
 
     this.unbind('CircleSelector', this.segmentOperation.updateSelector2Circle.bind(this.segmentOperation));
     this.unbind('LassoSelector', this.segmentOperation.updateSelector2Lasso.bind(this.segmentOperation));
+    this.unbind('RectSelector', this.segmentOperation.updateSelector2Rect.bind(this.segmentOperation));
     this.unbind('clearPointCloud', this.clearPointCloud.bind(this));
     this.unbind('loadPCDFile', this.loadPCDFile.bind(this));
   }
@@ -978,7 +980,7 @@ export class PointCloud extends EventListener {
     mappingImgList,
     points,
   }: {
-    mappingImgList: Array<{ url: string; calib: ICalib }>;
+    mappingImgList: Array<{ url: string; calib?: ICalib }>;
     points: ArrayLike<number>;
   }) => {
     /**
