@@ -8,7 +8,7 @@ import {
   TAnnotationViewLine,
   TAnnotationViewPolygon,
   TAnnotationViewBox3d,
-  TAnnotationViewStaticPoint,
+  TAnnotationViewPixelPoints,
   IBasicStyle,
   TAnnotationViewCuboid,
   ImgPosUtils,
@@ -606,8 +606,8 @@ export default class ViewOperation extends BasicToolOperation {
     });
   }
 
-  public renderStaticPoint(annotation: TAnnotationViewStaticPoint) {
-    if (annotation.type !== 'staticPoint') {
+  public renderPixelPoints(annotation: TAnnotationViewPixelPoints) {
+    if (annotation.type !== 'pixelPoints') {
       return;
     }
     const data = annotation.annotation;
@@ -819,8 +819,8 @@ export default class ViewOperation extends BasicToolOperation {
             break;
           }
 
-          case 'staticPoint': {
-            this.renderStaticPoint(annotation);
+          case 'pixelPoints': {
+            this.renderPixelPoints(annotation);
             break;
           }
 

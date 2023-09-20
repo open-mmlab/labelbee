@@ -191,12 +191,12 @@ const generateCoordinates = (
   return coordinates;
 };
 
-const staticPointsData = generateCoordinates(1000 * 100, 500, 500);
+const pixelPointsData = generateCoordinates(1000 * 100, 500, 500);
 
 export const DEFAULT_ANNOTATIONS = [
   {
-    type: 'staticPoint',
-    annotation: staticPointsData,
+    type: 'pixelPoints',
+    annotation: pixelPointsData,
   },
   // {
   //   type: 'rect',

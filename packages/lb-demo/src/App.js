@@ -109,7 +109,7 @@ const App = () => {
     const color = generateRandomColor();
     setData((pre) => {
       return pre.map((item) => {
-        if (item.type === 'staticPoint') {
+        if (item.type === 'pixelPoints') {
           const { annotation } = item;
           return {
             ...item,
