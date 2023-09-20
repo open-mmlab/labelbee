@@ -45,7 +45,7 @@ type AttrPanelLayout = '' | 'left' | 'right';
 
 interface IHighlight2DData {
   url: string;
-  calib: ICalib;
+  calib?: ICalib;
 }
 
 export interface IPointCloudContext

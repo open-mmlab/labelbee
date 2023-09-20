@@ -86,7 +86,7 @@ export interface IBasicBox3d extends IGraphicsBasicConfig {
   height: number; // The length of Y-Axis
   depth: number; // The length of Z-Axis
   rotation: number; // Right-handed system, angle of rotation around Z-Axis, Range: [0, 2 * Pi]
-  calib: ICalib; // Calibration parameters of the current picture.
+  calib?: ICalib; // Calibration parameters of the current picture.
 }
 
 export interface ICuboid extends IDrawingCuboid, IBasicStyle {

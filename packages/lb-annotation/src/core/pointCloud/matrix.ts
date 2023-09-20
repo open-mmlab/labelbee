@@ -193,7 +193,7 @@ export const isInImage = ({
   height,
 }: {
   point: I3DSpaceCoord;
-  calib: ICalib;
+  calib?: ICalib;
   width: number;
   height: number;
 }) => {
@@ -223,7 +223,7 @@ export const getHighlightIndexByPoints = ({
   height,
 }: {
   points: ArrayLike<number>;
-  calib: ICalib;
+  calib?: ICalib;
   width: number;
   height: number;
 }) => {
@@ -270,7 +270,7 @@ export const mergeHighlightList = (indexList: number[][]) => {
 
 export function pointCloudLidar2image(
   boxParams: IPointCloudBox,
-  cameraMatrix: {
+  cameraMatrix?: {
     P: [TMatrix14Tuple, TMatrix14Tuple, TMatrix14Tuple];
     R: [TMatrix13Tuple, TMatrix13Tuple, TMatrix13Tuple];
     T: [TMatrix14Tuple, TMatrix14Tuple, TMatrix14Tuple];
@@ -279,6 +279,10 @@ export function pointCloudLidar2image(
     createRange: boolean; // Calculate the range of cuboid.
   } = { createRange: false },
 ) {
+  if (!cameraMatrix) {
+    return { transferViewData: [], viewRangePointList: [] };
+  }
+
   const { createRange } = options;
   const allViewData = PointCloudUtils.getAllViewData(boxParams);
   const { P, R, T } = cameraMatrix;

@@ -986,7 +986,7 @@ export class PointCloud extends EventListener {
     mappingImgList,
     points,
   }: {
-    mappingImgList: Array<{ url: string; calib: ICalib }>;
+    mappingImgList: Array<{ url: string; calib?: ICalib }>;
     points: ArrayLike<number>;
   }) => {
     /**
