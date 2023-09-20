@@ -47,14 +47,27 @@ export const useAttribute = () => {
     mainViewInstance?.generateBox(newBox);
   };
 
-  const updateSegmentAttribute = useCallback((attribute: string) => {
-    if (!ptSegmentInstance) {
-      return
-    }
-    ptSegmentInstance.store?.setAttribute(attribute)
-    ptSegmentInstance.pointCloudRender?.updatePointsColor()
-    setDefaultAttribute(attribute)
-  }, [ptSegmentInstance])
+  const updateSegmentAttribute = useCallback(
+    (attribute: string) => {
+      if (!ptSegmentInstance) {
+        return;
+      }
+      ptSegmentInstance.store?.setAttribute(attribute);
+      ptSegmentInstance.pointCloudRender?.updatePointsColor();
+      setDefaultAttribute(attribute);
+    },
+    [ptSegmentInstance],
+  );
+
+  const updateSegmentSubAttribute = useCallback(
+    (key: string, value: string) => {
+      if (!ptSegmentInstance) {
+        return;
+      }
+      ptSegmentInstance.store?.setSubAttribute(key, value);
+    },
+    [ptSegmentInstance],
+  );
 
   return {
     syncThreeViewsAttribute,
@@ -62,5 +75,6 @@ export const useAttribute = () => {
     reRenderPointCloud3DBox,
     defaultAttribute,
     updateSegmentAttribute,
+    updateSegmentSubAttribute,
   };
 };

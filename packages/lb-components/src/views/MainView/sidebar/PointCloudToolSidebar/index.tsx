@@ -16,13 +16,21 @@ import { useTranslation } from 'react-i18next';
 import { LabelBeeContext, useDispatch } from '@/store/ctx';
 import BatchUpdateModal from './components/batchUpdateModal';
 import { IFileItem } from '@/types/data';
-import { PointCloudUtils, IInputList, IDefaultSize } from '@labelbee/lb-utils';
+import {
+  PointCloudUtils,
+  IInputList,
+  IDefaultSize,
+  EPointCloudSegmentStatus,
+  IPointCloudSegmentation,
+} from '@labelbee/lb-utils';
 import AttributeList from '@/components/attributeList';
 import { useAttribute } from '@/components/pointCloudView/hooks/useAttribute';
 import LassoSelectorSvg from '@/assets/annotation/pointCloudTool/lassoSelector.svg';
 import LassoSelectorSvgA from '@/assets/annotation/pointCloudTool/lassoSelector_a.svg';
 import CirCleSelectorSvg from '@/assets/annotation/pointCloudTool/circleSelector.svg';
 import CirCleSelectorSvgA from '@/assets/annotation/pointCloudTool/circleSelector_a.svg';
+import RectSvg from '@/assets/annotation/rectTool/icon_rect.svg';
+import RectASvg from '@/assets/annotation/rectTool/icon_rect_a.svg';
 import { sidebarCls } from '..';
 import { SetTaskStepList } from '@/store/annotation/actionCreators';
 import { usePointCloudViews } from '@/components/pointCloudView/hooks/usePointCloudViews';
@@ -220,8 +228,16 @@ const AttributeUpdater = ({
   stepInfo: IStepInfo;
   enableColorPicker?: boolean;
 }) => {
+  const [segmentData, setSegmentData] = useState<{
+    segmentStatus: EPointCloudSegmentStatus;
+    cacheSegData?: IPointCloudSegmentation;
+  }>({
+    segmentStatus: EPointCloudSegmentStatus.Ready,
+  });
+
   const { selectedBox } = useSingleBox();
   const ptx = useContext(PointCloudContext);
+  const { ptSegmentInstance } = ptx;
   const { t } = useTranslation();
   const { defaultAttribute } = useAttribute();
   const pointCloudViews = usePointCloudViews();
@@ -240,6 +256,17 @@ const AttributeUpdater = ({
     fontWeight: 500,
     wordWrap: 'break-word' as any, // WordWrap Type ?
   };
+
+  useEffect(() => {
+    if (!ptSegmentInstance) {
+      return;
+    }
+    ptSegmentInstance.on('syncPointCloudStatus', setSegmentData);
+
+    return () => {
+      ptSegmentInstance.unbind('syncPointCloudStatus', setSegmentData);
+    };
+  }, [ptSegmentInstance]);
 
   const updateColorConfig = (value: string, color: string) => {
     const attributeList = config?.attributeList?.map((i: any) => {
@@ -299,7 +326,7 @@ const AttributeUpdater = ({
         updateSize={updateSize}
       />
       <Divider style={{ margin: 0 }} />
-      {selectedBox && (
+      {(selectedBox || segmentData.cacheSegData) && (
         <>
           {subAttributeList.map(
             (subAttribute) =>
@@ -315,7 +342,8 @@ const AttributeUpdater = ({
                         value: v.value,
                       }))}
                       selectedAttribute={
-                        ptx.selectedPointCloudBox?.subAttribute?.[subAttribute.value]
+                        ptx.selectedPointCloudBox?.subAttribute?.[subAttribute.value] ||
+                        segmentData.cacheSegData?.subAttribute?.[subAttribute.value]
                       }
                       num='-'
                       forbidColor={true}
@@ -355,6 +383,11 @@ const renderSegmentTools = [
     selectedSvg: LassoSelectorSvgA,
   },
   {
+    toolName: 'RectSelector',
+    commonSvg: RectSvg,
+    selectedSvg: RectASvg,
+  },
+  {
     toolName: 'CircleSelector',
     commonSvg: CirCleSelectorSvg,
     selectedSvg: CirCleSelectorSvgA,
@@ -375,14 +408,20 @@ export const PointCloudSegToolIcon = ({ toolInstance }: { toolInstance: ICustomT
       setCurrentTool('LassoSelector');
     };
 
+    const updateRectSelector = () => {
+      setCurrentTool('RectSelector');
+    };
+
     const updateCircleSelector = () => {
       setCurrentTool('CircleSelector');
     };
 
     ptSegmentInstance.on('LassoSelector', updateLassoSelector);
+    ptSegmentInstance.on('RectSelector', updateRectSelector);
     ptSegmentInstance.on('CircleSelector', updateCircleSelector);
     return () => {
       ptSegmentInstance.unbind('LassoSelector', updateLassoSelector);
+      ptSegmentInstance.unbind('RectSelector', updateRectSelector);
       ptSegmentInstance.unbind('CircleSelector', updateCircleSelector);
     };
   }, [ptSegmentInstance]);
