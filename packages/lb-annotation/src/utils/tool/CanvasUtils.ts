@@ -96,4 +96,14 @@ export default class CanvasUtils {
 
     return (window.devicePixelRatio || 1) / backingStore;
   };
+
+  public static createCanvas(size: ISize) {
+    const offsetCanvas = document.createElement('canvas');
+    const { width, height } = size;
+    offsetCanvas.width = width;
+    offsetCanvas.height = height;
+    const ctx = offsetCanvas.getContext('2d');
+
+    return { canvas: offsetCanvas, ctx };
+  }
 }

@@ -24,7 +24,7 @@ import RenderDomClass from '@/utils/tool/RenderDomClass';
 import { DEFAULT_FONT, ELineTypes, SEGMENT_NUMBER } from '@/constant/tool';
 import { DEFAULT_TEXT_SHADOW, DEFAULT_TEXT_OFFSET, TEXT_ATTRIBUTE_OFFSET } from '@/constant/annotation';
 import ImgUtils, { cropAndEnlarge } from '@/utils/ImgUtils';
-import { getColorValues } from '@/utils/color';
+import CanvasUtils from '@/utils/tool/CanvasUtils';
 import { BasicToolOperation, IBasicToolOperationProps } from './basicToolOperation';
 import { pointCloudLidar2image } from '../pointCloud/matrix';
 
@@ -67,6 +67,8 @@ export default class ViewOperation extends BasicToolOperation {
   private connectPointsStatus?: {
     close: () => void;
   };
+
+  private cacheCanvas?: { [url: string]: HTMLCanvasElement }; // Cache the temporary canvas.
 
   constructor(props: IViewOperationProps) {
     super({ ...props, showDefaultCursor: true });
@@ -234,8 +236,10 @@ export default class ViewOperation extends BasicToolOperation {
       this.staticImgNode = undefined;
     }
 
+    // 1. Update the render.
     this.render();
-    // generateStaticImgNode需要用到render后的结果
+
+    // 2. Crop the staticNode
     if (this.staticMode) {
       const preZoom = this.zoom;
       const preCurrentPos = this.currentPos;
@@ -610,20 +614,43 @@ export default class ViewOperation extends BasicToolOperation {
     if (annotation.type !== 'pixelPoints') {
       return;
     }
-    const data = annotation.annotation;
-    const ctx = this.canvas.getContext('2d');
-    if (ctx) {
-      const imageData = ctx.getImageData(0, 0, this.canvas.width, this.canvas.height);
 
-      data.forEach((item) => {
-        const color = getColorValues(item.color);
-        imageData.data[item.x * (imageData.width * 4) + item.y * 4] = color.red;
-        imageData.data[item.x * (imageData.width * 4) + item.y * 4 + 1] = color.green;
-        imageData.data[item.x * (imageData.width * 4) + item.y * 4 + 2] = color.blue;
-        imageData.data[item.x * (imageData.width * 4) + item.y * 4 + 3] = 255;
+    const data = annotation.annotation;
+    if (!this.imgNode) {
+      console.error('Need to load after imgLoaded');
+      return;
+    }
+    if (!(data.length > 0)) {
+      console.warn('Empty pixelPoints');
+      return;
+    }
+
+    // 1. Get the cached.
+    const uid = this.imgNode.src + data.length;
+    const cacheCanvas = this.cacheCanvas?.[uid];
+    if (cacheCanvas) {
+      DrawUtils.drawImg(this.canvas, cacheCanvas, {
+        zoom: this.zoom,
+        currentPos: this.currentPos,
+      });
+      return;
+    }
+
+    // 2. Create New offsetCanvas to render
+    const size = { width: this.imgNode.width, height: this.imgNode.height };
+    const { ctx, canvas: offsetCanvas } = CanvasUtils.createCanvas(size);
+    if (ctx && data?.length > 0) {
+      // 1.
+      DrawUtils.drawPixel({ canvas: offsetCanvas, points: data, size });
+      DrawUtils.drawImg(this.canvas, offsetCanvas, {
+        zoom: this.zoom,
+        currentPos: this.currentPos,
       });
 
-      ctx.putImageData(imageData, this.currentPos.x, this.currentPos.y);
+      // Clear Cached.
+      this.cacheCanvas = {
+        [uid]: offsetCanvas,
+      };
     }
   }
 

@@ -2,20 +2,15 @@ onmessage = function onmessage(e) {
   const { cacheMap, indexes, color } = e.data;
   const dataList = [];
   const len = indexes.length;
+  const annotation = [];
   for (let i = 0; i < len; i = i + 1) {
     const point2d = cacheMap[indexes[i]];
-    point2d &&
-      dataList.push({
-        type: 'rect',
-        annotation: {
-          ...point2d,
-          width: 1,
-          height: 1,
-          fill: color,
-          stroke: color,
-          hiddenText: true,
-        },
+    if (point2d) {
+      annotation.push({
+        ...point2d,
+        color,
       });
+    }
   }
-  postMessage({ annotations: dataList });
+  postMessage({ annotations: [{ type: 'pixelPoints', annotation }] });
 };

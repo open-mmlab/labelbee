@@ -357,7 +357,8 @@ export function pointMappingLidar2image(
         continue;
       }
 
-      pcdMapping[i] = { x: point2d.x, y: point2d.y };
+      // 2. the Mapping is int.
+      pcdMapping[i] = { x, y };
     }
   }
   return { pcdMapping };

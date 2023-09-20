@@ -93,7 +93,7 @@ const PointCloudSegment2DSingleView = ({
 
     const indexesList = ptSegmentInstance.store.getHighlightAttribute(highlightAttribute ?? '');
     const toolStyle = ptSegmentInstance?.getColorFromConfig(highlightAttribute ?? '');
-    highlight2DPoints(indexesList.flat(), toolStyle.fill);
+    highlight2DPoints(indexesList.flat(), toolStyle.stroke);
   }, [highlightAttribute, ptSegmentInstance]);
 
   /**
@@ -138,7 +138,7 @@ const PointCloudSegment2DSingleView = ({
           const { cacheSegData } = data;
           if (cacheSegData?.indexes) {
             const toolStyle = ptSegmentInstance.getColorFromConfig(cacheSegData.attribute);
-            highlight2DPoints(cacheSegData?.indexes, toolStyle.fill);
+            highlight2DPoints(cacheSegData?.indexes, toolStyle.stroke);
           }
         } else {
           // clear annotations.
