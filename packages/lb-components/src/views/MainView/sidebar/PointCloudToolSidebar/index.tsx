@@ -29,6 +29,8 @@ import LassoSelectorSvg from '@/assets/annotation/pointCloudTool/lassoSelector.s
 import LassoSelectorSvgA from '@/assets/annotation/pointCloudTool/lassoSelector_a.svg';
 import CirCleSelectorSvg from '@/assets/annotation/pointCloudTool/circleSelector.svg';
 import CirCleSelectorSvgA from '@/assets/annotation/pointCloudTool/circleSelector_a.svg';
+import RectSvg from '@/assets/annotation/rectTool/icon_rect.svg';
+import RectASvg from '@/assets/annotation/rectTool/icon_rect_a.svg';
 import { sidebarCls } from '..';
 import { SetTaskStepList } from '@/store/annotation/actionCreators';
 import { usePointCloudViews } from '@/components/pointCloudView/hooks/usePointCloudViews';
@@ -381,6 +383,11 @@ const renderSegmentTools = [
     selectedSvg: LassoSelectorSvgA,
   },
   {
+    toolName: 'RectSelector',
+    commonSvg: RectSvg,
+    selectedSvg: RectASvg,
+  },
+  {
     toolName: 'CircleSelector',
     commonSvg: CirCleSelectorSvg,
     selectedSvg: CirCleSelectorSvgA,
@@ -401,14 +408,20 @@ export const PointCloudSegToolIcon = ({ toolInstance }: { toolInstance: ICustomT
       setCurrentTool('LassoSelector');
     };
 
+    const updateRectSelector = () => {
+      setCurrentTool('RectSelector');
+    };
+
     const updateCircleSelector = () => {
       setCurrentTool('CircleSelector');
     };
 
     ptSegmentInstance.on('LassoSelector', updateLassoSelector);
+    ptSegmentInstance.on('RectSelector', updateRectSelector);
     ptSegmentInstance.on('CircleSelector', updateCircleSelector);
     return () => {
       ptSegmentInstance.unbind('LassoSelector', updateLassoSelector);
+      ptSegmentInstance.unbind('RectSelector', updateRectSelector);
       ptSegmentInstance.unbind('CircleSelector', updateCircleSelector);
     };
   }, [ptSegmentInstance]);

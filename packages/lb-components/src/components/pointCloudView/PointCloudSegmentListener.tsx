@@ -65,6 +65,10 @@ const PointCloudSegmentListener: React.FC<IProps> = ({
         break;
 
       case 'j':
+        ptSegmentInstance?.emit('RectSelector');
+        break;
+
+      case 'k':
         ptSegmentInstance?.emit('CircleSelector');
         break;
 
