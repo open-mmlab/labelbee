@@ -214,16 +214,19 @@ const PointCloudSegment2DView = ({ currentData, highlightAttribute }: IProps) =>
           width: 300,
         }}
       >
-        {mappingImgList?.map((data, i) => (
-          <PointCloudSegment2DSingleView
-            key={data.path}
-            path={data.path}
-            url={data.url}
-            calib={data.calib}
-            pcdUrl={currentData.url}
-            highlightAttribute={highlightAttribute}
-          />
-        ))}
+        {mappingImgList?.map(
+          (data, i) =>
+            data.calib && (
+              <PointCloudSegment2DSingleView
+                key={data.path}
+                path={data.path}
+                url={data.url}
+                calib={data.calib}
+                pcdUrl={currentData.url}
+                highlightAttribute={highlightAttribute}
+              />
+            ),
+        )}
       </div>
     );
   }
