@@ -828,15 +828,17 @@ export default class ViewOperation extends BasicToolOperation {
             break;
           }
         }
-        // @ts-ignore
-        annotation.annotation?.renderEnhance?.({
-          ctx: this.ctx,
-          canvas: this.canvas,
-          currentPos: this.currentPos,
-          zoom: this.zoom,
-          data: annotation,
-          toolInstance: this,
-        });
+
+        if ('renderEnhance' in annotation.annotation) {
+          annotation.annotation.renderEnhance?.({
+            ctx: this.ctx,
+            canvas: this.canvas,
+            currentPos: this.currentPos,
+            zoom: this.zoom,
+            data: annotation,
+            toolInstance: this,
+          });
+        }
       });
 
       this.renderConnectionPoints();
