@@ -6,3 +6,4 @@ export * from './point';
 export * from './common';
 export * from './base';
 export * from './audio';
+export * from './styles';

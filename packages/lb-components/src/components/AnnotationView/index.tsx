@@ -35,6 +35,7 @@ interface IProps {
     max: number;
     ratio: number;
   };
+  staticMode?: boolean;
 }
 
 const DEFAULT_SIZE = {
@@ -113,6 +114,7 @@ const AnnotationView = (props: IProps, ref: any) => {
         annotations,
         config: '{}', // TODO，暂时不需要
         zoomInfo: props.zoomInfo,
+        staticMode: props.staticMode,
       });
 
       viewOperation.current.init();

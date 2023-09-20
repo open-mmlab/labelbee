@@ -24,6 +24,7 @@ interface IBasicToolOperationProps {
   container: HTMLElement;
   size: ISize;
   imgNode?: HTMLImageElement; // 展示图片的内容
+  staticMode?: boolean; // 是否为静态模式
   style?: any; // 后期一定要补上!!
 
   rotate?: number;
@@ -73,6 +74,8 @@ class BasicToolOperation extends EventListener {
 
   public imgNode?: HTMLImageElement;
 
+  public staticImgNode?: HTMLImageElement;
+
   public basicImgInfo: any; // 用于存储当前图片的信息
 
   public isImgError: boolean; // 图片是否错误
@@ -115,6 +118,8 @@ class BasicToolOperation extends EventListener {
   public isDrag = false; // 判断是否进行拖拽
 
   public isSpaceKey = false; // 是否点击空格键
+
+  public staticMode = false; // 以静态截图模式渲染
 
   public attributeLockList: string[]; // 属性限制列表
 
@@ -180,6 +185,7 @@ class BasicToolOperation extends EventListener {
     this.destroyCanvas();
     this.createCanvas(props.size, props.isAppend);
     this.imgNode = props.imgNode;
+    this.staticMode = props.staticMode ?? false;
     this.isImgError = !props.imgNode;
     this.basicImgInfo = {
       width: props.imgNode?.width ?? 0,
@@ -422,6 +428,9 @@ class BasicToolOperation extends EventListener {
     this.container.style.cursor = this.defaultCursor;
     this.ctx?.scale(pixel, pixel);
     this.basicCtx?.scale(pixel, pixel);
+    if (this.ctx) {
+      this.ctx.imageSmoothingEnabled = false;
+    }
   }
 
   public destroyCanvas() {
@@ -939,6 +948,7 @@ class BasicToolOperation extends EventListener {
     switch (e.keyCode) {
       case EKeyCode.Space:
         this.isSpaceKey = true;
+        e.preventDefault();
         break;
 
       case EKeyCode.Z:
@@ -1095,6 +1105,19 @@ class BasicToolOperation extends EventListener {
     if (!this.imgNode || this.hiddenImg === true) return;
 
     DrawUtils.drawImg(this.basicCanvas, this.imgNode, {
+      zoom: this.zoom,
+      currentPos: this.currentPos,
+      rotate: this.rotate,
+      imgAttribute: this._imgAttribute,
+    });
+    this.drawStaticImg();
+  };
+
+  public drawStaticImg = () => {
+    if (!this.staticImgNode || !this.staticMode) return;
+
+    this.clearCanvas();
+    DrawUtils.drawImg(this.canvas, this.staticImgNode, {
       zoom: this.zoom,
       currentPos: this.currentPos,
       rotate: this.rotate,

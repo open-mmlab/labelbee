@@ -1,12 +1,13 @@
 import React, { useContext, useEffect } from 'react';
 import { a2MapStateToProps, IA2MapStateProps } from '@/store/annotation/map';
 import { connect } from 'react-redux';
-import { LabelBeeContext } from '@/store/ctx';
+import { LabelBeeContext, useDispatch } from '@/store/ctx';
 import { ICustomToolInstance } from '@/hooks/annotation';
 import { PointCloudContext } from './PointCloudContext';
 import { CommonToolUtils } from '@labelbee/lb-annotation';
 import { EPointCloudSegmentMode, PointCloudUtils } from '@labelbee/lb-utils';
 import { useAttribute } from './hooks/useAttribute';
+import { SetPointCloudLoading } from '@/store/annotation/actionCreators';
 
 interface IProps extends IA2MapStateProps {
   checkMode?: boolean;
@@ -21,6 +22,7 @@ const PointCloudSegmentListener: React.FC<IProps> = ({
   config,
   toolInstanceRef,
 }) => {
+  const dispatch = useDispatch();
   const { updateSegmentAttribute, updateSegmentSubAttribute } = useAttribute();
 
   const ptCtx = useContext(PointCloudContext);
@@ -38,11 +40,13 @@ const PointCloudSegmentListener: React.FC<IProps> = ({
        * 2. clear all segment data.
        *
        */
+      SetPointCloudLoading(dispatch, true);
       ptSegmentInstance.emit('clearStash');
       ptSegmentInstance.emit('clearAllSegmentData');
       ptSegmentInstance.loadPCDFile(currentData?.url ?? '').then(() => {
         const segmentData = PointCloudUtils.getSegmentFromResultList(currentData?.result ?? '');
         ptSegmentInstance?.store?.updateCurrentSegment(segmentData);
+        SetPointCloudLoading(dispatch, false);
       });
 
       // Update segmentData.
@@ -107,6 +111,7 @@ const PointCloudSegmentListener: React.FC<IProps> = ({
 
     toolInstanceRef.current.setDefaultAttribute = (newAttribute: string) => {
       updateSegmentAttribute(newAttribute);
+      ptSegmentInstance?.emit('updateDefaultAttribute', { newAttribute });
     };
 
     toolInstanceRef.current.setSubAttribute = (key: string, value: string) => {
@@ -123,6 +128,7 @@ const PointCloudSegmentListener: React.FC<IProps> = ({
       if (!ptCtx.ptSegmentInstance) {
         return;
       }
+      ptCtx.ptSegmentInstance.emit('clearStash');
       ptCtx.ptSegmentInstance.emit('clearAllSegmentData');
     };
   }, [

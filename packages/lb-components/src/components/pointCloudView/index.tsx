@@ -23,6 +23,7 @@ import PointCloudSegmentListener from './PointCloudSegmentListener';
 import PointCloudSegment from './PointCloudSegment';
 import PointCloudSegmentStatus from './PointCloudSegmentStatus';
 import PointCloudSegmentToolbar from './PointCloudSegmentToolbar';
+import PointCloudSegment2DView from './PointCloudSegment2DView';
 import { connect } from 'react-redux';
 import { LabelBeeContext, useDispatch } from '@/store/ctx';
 import {
@@ -128,6 +129,10 @@ const PointCloudView: React.FC<IProps> = ({
       <>
         <PointCloudSegmentListener checkMode={checkMode} toolInstanceRef={toolInstanceRef} />
         <PointCloudSegmentToolbar />
+        <div className={getClassName('point-cloud-layout')}>
+          <PointCloudSegment checkMode={checkMode} />
+          <PointCloudSegment2DView />
+        </div>
         <PointCloudSegment checkMode={checkMode} />
         <PointCloudSegmentStatus config={config} />
         {drawLayerSlot?.({

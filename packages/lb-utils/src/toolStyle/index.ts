@@ -2,6 +2,7 @@
  * Config2Color
  */
 
+import { IToolStyle } from '..';
 import ToolStyleUtils from './ToolStyleUtils';
 
 /**
@@ -67,11 +68,6 @@ export const COLORS_ARRAY_MULTI = [
 export const INVALID_COLOR = 'rgba(255, 153, 102, 1)';
 export const NULL_COLOR = 'rgba(204, 204, 204, 1)';
 
-interface IToolStyle {
-  stroke: string;
-  fill: string;
-  hex?: number;
-}
 
 interface IToolConfig {
   [key: string]: any;
