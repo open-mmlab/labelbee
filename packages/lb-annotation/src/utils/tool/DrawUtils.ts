@@ -1,4 +1,6 @@
 import type { ICuboid, ICuboidConfig, IDrawingCuboid } from '@/types/tool/cuboid';
+import rgba from 'color-rgba';
+import { IPixelPoints, MathUtils } from '@labelbee/lb-utils';
 import { DEFAULT_FONT, ELineTypes, SEGMENT_NUMBER } from '../../constant/tool';
 import { IPolygonPoint } from '../../types/tool/polygon';
 import PolygonUtils from './PolygonUtils';
@@ -835,5 +837,47 @@ export default class DrawUtils {
         textMaxWidth: textWidth,
       });
     }
+  }
+
+  /**
+   * Draw by points
+   *
+   * points.length === 100,000++.
+   * @param param0
+   * @returns
+   */
+  public static drawPixel({
+    canvas,
+    points,
+    size,
+  }: {
+    canvas: HTMLCanvasElement;
+    points: IPixelPoints[];
+    size: ISize;
+  }) {
+    const ctx = canvas.getContext('2d')!;
+    const { width, height } = size;
+    const imageData = ctx.getImageData(0, 0, width, height);
+    const updateColor = (baseIndex: number, color: string) => {
+      const [red, green, blue, alpha] = rgba(color);
+      imageData.data[baseIndex] = red;
+      imageData.data[baseIndex + 1] = green;
+      imageData.data[baseIndex + 2] = blue;
+      imageData.data[baseIndex + 3] = Math.floor(255 * alpha);
+    };
+
+    const maxSize = Math.max(width, height);
+    const pixelSize = Math.floor(Math.pow(MathUtils.calculateThousandsPlace(maxSize), 2));
+    const offsetArr = MathUtils.generateCoordinates(pixelSize);
+
+    points.forEach((item) => {
+      for (const [x, y] of offsetArr) {
+        const baseIndex = (item.y + y) * (imageData.width * 4) + (item.x + x) * 4;
+        updateColor(baseIndex, item.color);
+      }
+    });
+
+    ctx.putImageData(imageData, 0, 0);
+    return { canvas };
   }
 }

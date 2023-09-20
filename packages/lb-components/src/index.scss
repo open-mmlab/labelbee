@@ -1476,6 +1476,15 @@ $headerHeight: 40px;
   position: relative;
 }
 
+.#{$ptPrefix}-container {
+    &__title-button {
+      border-radius: 2px;
+      padding: 4px 8px;
+      background-color: #fff;
+      color: #000000;
+    }
+}
+
 .#{$ptPrefix}-wrapper {
   display: flex;
   height: 100%;
@@ -1570,13 +1579,6 @@ $headerHeight: 40px;
       top: 16px;
       left: 16px;
       z-index: 1000;
-    }
-
-    &__title-button {
-      border-radius: 2px;
-      padding: 4px 8px;
-      background-color: #fff;
-      color: #000000;
     }
   }
 
@@ -2126,6 +2128,7 @@ $ptToolHeight: 40px;
     max-height: 400px;
     overflow: auto;
     word-break: break-all;
+    white-space: pre-wrap;
   }
 }
 /** PointCloud样式 end */

@@ -8,6 +8,7 @@ import {
   TAnnotationViewLine,
   TAnnotationViewPolygon,
   TAnnotationViewBox3d,
+  TAnnotationViewPixelPoints,
   IBasicStyle,
   TAnnotationViewCuboid,
   ImgPosUtils,
@@ -22,6 +23,8 @@ import MathUtils from '@/utils/MathUtils';
 import RenderDomClass from '@/utils/tool/RenderDomClass';
 import { DEFAULT_FONT, ELineTypes, SEGMENT_NUMBER } from '@/constant/tool';
 import { DEFAULT_TEXT_SHADOW, DEFAULT_TEXT_OFFSET, TEXT_ATTRIBUTE_OFFSET } from '@/constant/annotation';
+import ImgUtils, { cropAndEnlarge } from '@/utils/ImgUtils';
+import CanvasUtils from '@/utils/tool/CanvasUtils';
 import { BasicToolOperation, IBasicToolOperationProps } from './basicToolOperation';
 import { pointCloudLidar2image } from '../pointCloud/matrix';
 
@@ -31,6 +34,7 @@ const DEFAULT_STROKE_COLOR = '#6371FF';
 
 interface IViewOperationProps extends IBasicToolOperationProps {
   style: IBasicStyle;
+  staticMode?: boolean;
   annotations: TAnnotationViewData[];
 }
 
@@ -63,6 +67,8 @@ export default class ViewOperation extends BasicToolOperation {
   private connectPointsStatus?: {
     close: () => void;
   };
+
+  private cacheCanvas?: { [url: string]: HTMLCanvasElement }; // Cache the temporary canvas.
 
   constructor(props: IViewOperationProps) {
     super({ ...props, showDefaultCursor: true });
@@ -136,6 +142,21 @@ export default class ViewOperation extends BasicToolOperation {
     }
   }
 
+  public setImgNode(imgNode: HTMLImageElement, basicImgInfo: Partial<{ valid: boolean; rotate: number }> = {}) {
+    super.setImgNode(imgNode, basicImgInfo);
+    if (this.staticMode) {
+      this.generateStaticImgNode();
+    }
+  }
+
+  public generateStaticImgNode() {
+    const tmpUrl = cropAndEnlarge(this.canvas, this.basicImgInfo?.width, this.basicImgInfo?.height, 1);
+    ImgUtils.load(tmpUrl).then((imgNode) => {
+      this.staticImgNode = imgNode;
+      this.drawStaticImg();
+    });
+  }
+
   public onMouseMove(e: MouseEvent) {
     if (super.onMouseMove(e) || this.forbidMouseOperation || !this.imgInfo) {
       return;
@@ -206,8 +227,32 @@ export default class ViewOperation extends BasicToolOperation {
   };
 
   public updateData(annotations: TAnnotationViewData[]) {
+    if (_.isEqual(this.annotations, annotations)) {
+      return;
+    }
     this.annotations = annotations;
+
+    if (this.staticMode) {
+      this.staticImgNode = undefined;
+    }
+
+    // 1. Update the render.
     this.render();
+
+    // 2. Crop the staticNode
+    if (this.staticMode) {
+      const preZoom = this.zoom;
+      const preCurrentPos = this.currentPos;
+      this.initImgPos();
+      this.generateStaticImgNode();
+      const tmp = this.staticImgNode;
+      this.staticImgNode = undefined;
+      this.updatePosition({
+        zoom: preZoom,
+        currentPos: preCurrentPos,
+      });
+      this.staticImgNode = tmp;
+    }
   }
 
   /**
@@ -565,8 +610,55 @@ export default class ViewOperation extends BasicToolOperation {
     });
   }
 
+  public renderPixelPoints(annotation: TAnnotationViewPixelPoints) {
+    if (annotation.type !== 'pixelPoints') {
+      return;
+    }
+
+    const data = annotation.annotation;
+    if (!this.imgNode) {
+      console.error('Need to load after imgLoaded');
+      return;
+    }
+    if (!(data.length > 0)) {
+      console.warn('Empty pixelPoints');
+      return;
+    }
+
+    // 1. Get the cached.
+    const uid = this.imgNode.src + data.length;
+    const cacheCanvas = this.cacheCanvas?.[uid];
+    if (cacheCanvas) {
+      DrawUtils.drawImg(this.canvas, cacheCanvas, {
+        zoom: this.zoom,
+        currentPos: this.currentPos,
+      });
+      return;
+    }
+
+    // 2. Create New offsetCanvas to render
+    const size = { width: this.imgNode.width, height: this.imgNode.height };
+    const { ctx, canvas: offsetCanvas } = CanvasUtils.createCanvas(size);
+    if (ctx && data?.length > 0) {
+      // 1.
+      DrawUtils.drawPixel({ canvas: offsetCanvas, points: data, size });
+      DrawUtils.drawImg(this.canvas, offsetCanvas, {
+        zoom: this.zoom,
+        currentPos: this.currentPos,
+      });
+
+      // Clear Cached.
+      this.cacheCanvas = {
+        [uid]: offsetCanvas,
+      };
+    }
+  }
+
   public render() {
     try {
+      if (this.staticImgNode) {
+        return;
+      }
       super.render();
       if (this.loading === true) {
         return;
@@ -754,19 +846,26 @@ export default class ViewOperation extends BasicToolOperation {
             break;
           }
 
+          case 'pixelPoints': {
+            this.renderPixelPoints(annotation);
+            break;
+          }
+
           default: {
             break;
           }
         }
 
-        annotation.annotation?.renderEnhance?.({
-          ctx: this.ctx,
-          canvas: this.canvas,
-          currentPos: this.currentPos,
-          zoom: this.zoom,
-          data: annotation,
-          toolInstance: this,
-        });
+        if ('renderEnhance' in annotation.annotation) {
+          annotation.annotation.renderEnhance?.({
+            ctx: this.ctx,
+            canvas: this.canvas,
+            currentPos: this.currentPos,
+            zoom: this.zoom,
+            data: annotation,
+            toolInstance: this,
+          });
+        }
       });
 
       this.renderConnectionPoints();

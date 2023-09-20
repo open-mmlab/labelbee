@@ -5,7 +5,7 @@ import resolve from '@rollup/plugin-node-resolve';
 import postcss from 'rollup-plugin-postcss';
 import sass from 'sass';
 import url from 'postcss-url';
-
+import webWorkerLoader from 'rollup-plugin-web-worker-loader';
 import path from 'path';
 
 const customResolver = resolve({
@@ -52,6 +52,7 @@ export default {
     },
   ],
   plugins: [
+    webWorkerLoader(/* configuration */ { targetPlatform: 'browser' }),
     alias({
       entries: [
         { find: '@', replacement: path.resolve(projectRootDir, './src') },

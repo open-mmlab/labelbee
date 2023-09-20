@@ -48,7 +48,7 @@ const PointCloudSegment: React.FC<IProps> = ({ currentData, config, checkMode })
     }
   }, [size]);
 
-  return <div className={getClassName('point-cloud-layout')} ref={domRef} />;
+  return <div className={getClassName('point-cloud-wrapper')} ref={domRef} />;
 };
 
 export default connect(a2MapStateToProps, null, null, { context: LabelBeeContext })(

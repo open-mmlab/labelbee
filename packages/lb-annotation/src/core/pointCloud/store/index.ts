@@ -564,7 +564,11 @@ class PointCloudStore {
   }
 
   public clearStash() {
-    this.resetSelectedSegmentStatus();
+    if (this.isCheckStatus) {
+      this.resetSelectedSegmentStatus();
+      return;
+    }
+
     if (this.isEditStatus && this.cacheSegData) {
       this.updateCloudDataStatus(this.cacheSegData.points, { visible: false });
       if (this.segmentData.has(this.cacheSegData.id)) {
@@ -717,6 +721,21 @@ class PointCloudStore {
       }
     });
     this.emit('reRender3d');
+  }
+
+  /**
+   * Get All segment indexes by attribute.
+   * @param attribute
+   * @returns
+   */
+  public getHighlightAttribute(attribute: string) {
+    const list: number[][] = [];
+    this.segmentData.forEach((seg) => {
+      if (seg.attribute === attribute) {
+        list.push(seg.indexes);
+      }
+    });
+    return list;
   }
 
   public setAttribute(attribute: string) {
