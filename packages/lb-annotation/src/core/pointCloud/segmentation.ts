@@ -9,10 +9,12 @@ import LassoSelector from './selector/lassoSelector';
 import PointCloudStore, { ThreePoints } from './store';
 import CircleSelector from './selector/circleSelector';
 import RectSelector from './selector/rectSelector';
+import EventListener from '@/core/toolOperation/eventListener';
 
 interface IProps {
   dom: HTMLElement;
   store: PointCloudStore;
+  emit: EventListener['emit'];
 }
 
 class PointCloudSegmentOperation {
@@ -32,6 +34,8 @@ class PointCloudSegmentOperation {
 
   public circleSelector: CircleSelector;
 
+  private emit: EventListener['emit'];
+
   constructor(props: IProps) {
     this.dom = props.dom;
     this.store = props.store;
@@ -47,6 +51,7 @@ class PointCloudSegmentOperation {
     this.updateSelector2Lasso = this.updateSelector2Lasso.bind(this);
     this.updateSelector2Circle = this.updateSelector2Circle.bind(this);
 
+    this.emit = props.emit;
     // this.setupRaycaster();
   }
 
@@ -149,6 +154,10 @@ class PointCloudSegmentOperation {
 
       const intersect = intersects[0];
 
+      this.emit('hoverSegmentInstance', {
+        segmentData: this.store.segmentData.get(intersect?.object?.name),
+        currentSegmentStatus: this.store.segmentStatus,
+      });
       if (intersect) {
         this.store.highlightPoints(intersect.object as ThreePoints);
       } else {

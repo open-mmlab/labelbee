@@ -207,6 +207,7 @@ export class PointCloud extends EventListener {
     this.segmentOperation = new PointCloudSegmentOperation({
       dom: this.container,
       store: this.store,
+      ...this.eventBus,
     });
 
     this.pointCloudRender = new PointCloudRender({
