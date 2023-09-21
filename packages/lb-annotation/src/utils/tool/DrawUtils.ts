@@ -851,11 +851,13 @@ export default class DrawUtils {
     points,
     size,
     defaultRGBA,
+    pixelSize = 13,
   }: {
     canvas: HTMLCanvasElement;
     points: IPixelPoints[];
     size: ISize;
     defaultRGBA?: string;
+    pixelSize?: number;
   }) {
     const ctx = canvas.getContext('2d')!;
     const { width, height } = size;
@@ -868,10 +870,7 @@ export default class DrawUtils {
       imageData.data[baseIndex + 3] = Math.floor(255 * alpha);
     };
 
-    const maxSize = Math.max(width, height);
-    const pixelSize = Math.floor(Math.pow(MathUtils.calculateThousandsPlace(maxSize), 2));
     const offsetArr = MathUtils.generateCoordinates(pixelSize);
-
     points.forEach((item) => {
       for (const [x, y] of offsetArr) {
         const baseIndex = (item.y + y) * (imageData.width * 4) + (item.x + x) * 4;

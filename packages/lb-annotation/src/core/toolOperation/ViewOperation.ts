@@ -640,8 +640,13 @@ export default class ViewOperation extends BasicToolOperation {
     const size = { width: this.imgNode.width, height: this.imgNode.height };
     const { ctx, canvas: offsetCanvas } = CanvasUtils.createCanvas(size);
     if (ctx && data?.length > 0) {
-      // 1.
-      DrawUtils.drawPixel({ canvas: offsetCanvas, points: data, size, defaultRGBA: annotation.defaultRGBA });
+      DrawUtils.drawPixel({
+        canvas: offsetCanvas,
+        points: data,
+        size,
+        defaultRGBA: annotation.defaultRGBA,
+        pixelSize: 13,
+      });
       DrawUtils.drawImg(this.canvas, offsetCanvas, {
         zoom: this.zoom,
         currentPos: this.currentPos,
