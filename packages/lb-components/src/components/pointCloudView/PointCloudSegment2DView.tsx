@@ -69,13 +69,13 @@ const PointCloudSegment2DSingleView = ({
   }, [ptSegmentInstance]);
 
   // Highlight the points by indexes & pcdMapping.
-  const highlight2DPoints = useCallback((indexes: number[], color: string) => {
+  const highlight2DPoints = useCallback((indexes: number[], defaultRGBA: string) => {
     if (indexes) {
       if (imgSizeRef.current) {
         const cacheMap = pcdMapping.current;
         const highlightWorker = new HighlightSegmentWorker();
         setLoading(true);
-        highlightWorker.postMessage({ cacheMap, indexes, color });
+        highlightWorker.postMessage({ cacheMap, indexes, defaultRGBA });
         highlightWorker.onmessage = (e: any) => {
           setAnnotations(e.data.annotations);
           highlightWorker.terminate();
@@ -107,11 +107,7 @@ const PointCloudSegment2DSingleView = ({
           setAnnotations(
             annotations.map((v) => ({
               ...v,
-              annotation: {
-                ...v.annotation,
-                fill: toolStyle.fill,
-                stroke: toolStyle.fill,
-              },
+              defaultRGBA: toolStyle.stroke,
             })),
           );
         }

@@ -1,6 +1,6 @@
 import type { ICuboid, ICuboidConfig, IDrawingCuboid } from '@/types/tool/cuboid';
 import rgba from 'color-rgba';
-import { IPixelPoints, MathUtils } from '@labelbee/lb-utils';
+import { IPixelPoints, MathUtils, NULL_COLOR } from '@labelbee/lb-utils';
 import { DEFAULT_FONT, ELineTypes, SEGMENT_NUMBER } from '../../constant/tool';
 import { IPolygonPoint } from '../../types/tool/polygon';
 import PolygonUtils from './PolygonUtils';
@@ -850,16 +850,18 @@ export default class DrawUtils {
     canvas,
     points,
     size,
+    defaultRGBA,
   }: {
     canvas: HTMLCanvasElement;
     points: IPixelPoints[];
     size: ISize;
+    defaultRGBA?: string;
   }) {
     const ctx = canvas.getContext('2d')!;
     const { width, height } = size;
     const imageData = ctx.getImageData(0, 0, width, height);
-    const updateColor = (baseIndex: number, color: string) => {
-      const [red, green, blue, alpha] = rgba(color);
+    const [red, green, blue, alpha] = rgba(defaultRGBA ?? NULL_COLOR);
+    const updateColor = (baseIndex: number) => {
       imageData.data[baseIndex] = red;
       imageData.data[baseIndex + 1] = green;
       imageData.data[baseIndex + 2] = blue;
@@ -873,7 +875,7 @@ export default class DrawUtils {
     points.forEach((item) => {
       for (const [x, y] of offsetArr) {
         const baseIndex = (item.y + y) * (imageData.width * 4) + (item.x + x) * 4;
-        updateColor(baseIndex, item.color);
+        updateColor(baseIndex);
       }
     });
 
