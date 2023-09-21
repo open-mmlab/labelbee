@@ -626,7 +626,7 @@ export default class ViewOperation extends BasicToolOperation {
     }
 
     // 1. Get the cached.
-    const uid = this.imgNode.src + data.length;
+    const uid = this.imgNode.src + data.length + annotation.defaultRGBA;
     const cacheCanvas = this.cacheCanvas?.[uid];
     if (cacheCanvas) {
       DrawUtils.drawImg(this.canvas, cacheCanvas, {
@@ -640,8 +640,13 @@ export default class ViewOperation extends BasicToolOperation {
     const size = { width: this.imgNode.width, height: this.imgNode.height };
     const { ctx, canvas: offsetCanvas } = CanvasUtils.createCanvas(size);
     if (ctx && data?.length > 0) {
-      // 1.
-      DrawUtils.drawPixel({ canvas: offsetCanvas, points: data, size });
+      DrawUtils.drawPixel({
+        canvas: offsetCanvas,
+        points: data,
+        size,
+        defaultRGBA: annotation.defaultRGBA,
+        pixelSize: 13,
+      });
       DrawUtils.drawImg(this.canvas, offsetCanvas, {
         zoom: this.zoom,
         currentPos: this.currentPos,

@@ -1,6 +1,5 @@
 onmessage = function onmessage(e) {
-  const { cacheMap, indexes, color } = e.data;
-  const dataList = [];
+  const { cacheMap, indexes, defaultRGBA } = e.data;
   const len = indexes.length;
   const annotation = [];
   for (let i = 0; i < len; i = i + 1) {
@@ -8,9 +7,8 @@ onmessage = function onmessage(e) {
     if (point2d) {
       annotation.push({
         ...point2d,
-        color,
       });
     }
   }
-  postMessage({ annotations: [{ type: 'pixelPoints', annotation }] });
+  postMessage({ annotations: [{ type: 'pixelPoints', annotation, defaultRGBA }] });
 };
