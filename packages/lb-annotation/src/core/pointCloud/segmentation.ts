@@ -5,11 +5,11 @@
  */
 
 import { EPointCloudSegmentStatus } from '@labelbee/lb-utils';
+import EventListener from '@/core/toolOperation/eventListener';
 import LassoSelector from './selector/lassoSelector';
 import PointCloudStore, { ThreePoints } from './store';
 import CircleSelector from './selector/circleSelector';
 import RectSelector from './selector/rectSelector';
-import EventListener from '@/core/toolOperation/eventListener';
 
 interface IProps {
   dom: HTMLElement;

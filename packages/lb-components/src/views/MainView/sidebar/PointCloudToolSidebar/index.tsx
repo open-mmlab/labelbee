@@ -324,6 +324,7 @@ const AttributeUpdater = ({
         updateColorConfig={updateColorConfig}
         enableColorPicker={enableColorPicker}
         updateSize={updateSize}
+        forbidShowLimitPopover={true}
       />
       <Divider style={{ margin: 0 }} />
       {(selectedBox || segmentData.cacheSegData) && (
