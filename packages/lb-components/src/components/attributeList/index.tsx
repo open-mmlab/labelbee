@@ -29,6 +29,7 @@ interface IProps {
   updateColorConfig?: (value: string, color: string) => void;
   updateSize?: (size: IDefaultSize) => void;
   attributeLockChange?: (list: any) => void;
+  forbidShowLimitPopover?: boolean;
 }
 
 const AttributeList = React.forwardRef((props: IProps, ref) => {
@@ -93,7 +94,7 @@ const AttributeList = React.forwardRef((props: IProps, ref) => {
           // Determine if a scope configuration exists
           const hasLimit =
             i?.limit?.positionLimit || defaultSize || sizeRange || logicalCondition?.length > 0;
-          const showLimitPopover = isChosen && hasLimit;
+          const showLimitPopover = isChosen && hasLimit && props.forbidShowLimitPopover !== true;
 
           return (
             <Radio value={i.value} ref={radioRef} key={i.label + index}>
