@@ -135,7 +135,10 @@ const App = () => {
             height: 1000,
           }}
         >
-          <div onClick={handler}>变个颜色</div>
+          {/* 暂时隐藏 */}
+          <div style={{ display: 'none' }} onClick={handler}>
+            Change Color
+          </div>
           <AnnotationView
             src={car1}
             annotations={data}
@@ -148,9 +151,8 @@ const App = () => {
               height: 720,
             }}
             onChange={onChange}
-            staticMode={true}
-          />{' '}
-        </div>{' '}
+          />
+        </div>
       </div>
     );
   }

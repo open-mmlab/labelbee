@@ -7,6 +7,7 @@ import React, { useEffect, useRef, useImperativeHandle, useState } from 'react';
 import { ViewOperation, ImgUtils } from '@labelbee/lb-annotation';
 import { Spin } from 'antd/es';
 import useRefCache from '@/hooks/useRefCache';
+import { TAnnotationViewData } from '@labelbee/lb-utils';
 
 export type TAfterImgOnLoad = (img: HTMLImageElement) => void;
 
@@ -86,6 +87,8 @@ const AnnotationView = (props: IProps, ref: any) => {
   const annotationRef = useRef<HTMLDivElement>(null);
   const viewOperation = useRef<ViewOperation>();
   const afterImgOnLoadRef = useRefCache<TAfterImgOnLoad | undefined>(afterImgOnLoad);
+  const annotationListCacheRef = useRef<TAnnotationViewData[][]>([]);
+  const canUpdateRef = useRef(true); // Judge if rending is Possible.
 
   useImperativeHandle(
     ref,
@@ -149,10 +152,37 @@ const AnnotationView = (props: IProps, ref: any) => {
 
   /**
    * 基础数据绘制监听
+   *
+   * 1. 设置更新缓存列表，若发现当前渲染未完成，则不进行更新，等上一次的渲染结束再进行最终更新列表的数据。
    */
   useEffect(() => {
+    if (canUpdateRef.current === false) {
+      annotationListCacheRef.current.push(annotations);
+      return;
+    }
+
+    const clearAllStatus = () => {
+      canUpdateRef.current = true;
+      annotationListCacheRef.current = [];
+    };
+
+    const updateData = () => {
+      // 1. Check the list.
+      const len = annotationListCacheRef.current.length;
+      if (len > 0) {
+        // 2. Update the last data.
+        const lastAnnotations = annotationListCacheRef.current[len - 1];
+        annotationListCacheRef.current = [];
+        viewOperation.current?.updateData(lastAnnotations).then(updateData).catch(clearAllStatus);
+      } else {
+        // 3. Allow to render.
+        canUpdateRef.current = true;
+      }
+    };
+
     if (viewOperation.current) {
-      viewOperation.current.updateData(annotations);
+      canUpdateRef.current = false;
+      viewOperation.current.updateData(annotations).then(updateData).catch(clearAllStatus);
     }
   }, [annotations]);
 

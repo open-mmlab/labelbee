@@ -144,11 +144,21 @@ export default class ViewOperation extends BasicToolOperation {
 
   public setImgNode(imgNode: HTMLImageElement, basicImgInfo: Partial<{ valid: boolean; rotate: number }> = {}) {
     super.setImgNode(imgNode, basicImgInfo);
+
+    /**
+     * TODO: New Pattern.
+     * 1. Initialize the staticImgNode.
+     */
     if (this.staticMode) {
       this.generateStaticImgNode();
     }
   }
 
+  /**
+   * TODO: New Pattern.
+   *
+   * 1. crop the canvas.
+   */
   public generateStaticImgNode() {
     const tmpUrl = cropAndEnlarge(this.canvas, this.basicImgInfo?.width, this.basicImgInfo?.height, 1);
     ImgUtils.load(tmpUrl).then((imgNode) => {
@@ -226,7 +236,7 @@ export default class ViewOperation extends BasicToolOperation {
     return id;
   };
 
-  public updateData(annotations: TAnnotationViewData[]) {
+  public async updateData(annotations: TAnnotationViewData[]) {
     if (_.isEqual(this.annotations, annotations)) {
       return;
     }
@@ -639,13 +649,14 @@ export default class ViewOperation extends BasicToolOperation {
     // 2. Create New offsetCanvas to render
     const size = { width: this.imgNode.width, height: this.imgNode.height };
     const { ctx, canvas: offsetCanvas } = CanvasUtils.createCanvas(size);
+    const pixelSize = typeof annotation.pixelSize === 'number' ? annotation.pixelSize : 13;
     if (ctx && data?.length > 0) {
       DrawUtils.drawPixel({
         canvas: offsetCanvas,
         points: data,
         size,
         defaultRGBA: annotation.defaultRGBA,
-        pixelSize: 13,
+        pixelSize,
       });
       DrawUtils.drawImg(this.canvas, offsetCanvas, {
         zoom: this.zoom,

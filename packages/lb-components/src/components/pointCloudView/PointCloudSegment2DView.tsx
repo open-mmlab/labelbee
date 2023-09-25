@@ -1,6 +1,6 @@
 import { IA2MapStateProps, a2MapStateToProps } from '@/store/annotation/map';
 import { LabelBeeContext } from '@/store/ctx';
-import React, { useCallback, useContext, useEffect, useRef, useState } from 'react';
+import React, { useCallback, useContext, useEffect, useMemo, useRef, useState } from 'react';
 import AnnotationView from '@/components/AnnotationView';
 import { connect } from 'react-redux';
 import { PointCloudContext } from './PointCloudContext';
@@ -14,6 +14,7 @@ import {
 import { Spin } from 'antd';
 import HighlightSegmentWorker from 'web-worker:./highlightSegmentWorker.js';
 import { pointMappingLidar2image } from '@labelbee/lb-annotation';
+import { debounce } from 'lodash';
 
 interface IProps extends IA2MapStateProps {
   checkMode?: boolean;
@@ -40,6 +41,7 @@ const PointCloudSegment2DSingleView = ({
 
   const [annotations, setAnnotations] = useState<any[]>([]);
   const [loading, setLoading] = useState(false);
+  const highlightWorkerRef = useRef<Worker | undefined>(undefined);
 
   useEffect(() => {
     return () => {
@@ -69,20 +71,30 @@ const PointCloudSegment2DSingleView = ({
   }, [ptSegmentInstance]);
 
   // Highlight the points by indexes & pcdMapping.
-  const highlight2DPoints = useCallback((indexes: number[], defaultRGBA: string) => {
-    if (indexes) {
-      if (imgSizeRef.current) {
-        const cacheMap = pcdMapping.current;
-        const highlightWorker = new HighlightSegmentWorker();
-        setLoading(true);
-        highlightWorker.postMessage({ cacheMap, indexes, defaultRGBA });
-        highlightWorker.onmessage = (e: any) => {
-          setAnnotations(e.data.annotations);
-          highlightWorker.terminate();
-          setLoading(false);
-        };
+  const highlight2DPoints = useMemo(() => {
+    const func = (indexes: number[], defaultRGBA: string) => {
+      if (indexes) {
+        if (imgSizeRef.current) {
+          if (highlightWorkerRef.current) {
+            highlightWorkerRef.current?.terminate?.();
+          }
+
+          const cacheMap = pcdMapping.current;
+          const highlightWorker = new HighlightSegmentWorker();
+          highlightWorker.current = highlightWorker;
+          setLoading(true);
+          highlightWorker.postMessage({ cacheMap, indexes, defaultRGBA });
+          highlightWorker.onmessage = (e: any) => {
+            setAnnotations(e.data.annotations);
+            highlightWorker.terminate();
+            setLoading(false);
+            highlightWorker.current = undefined;
+          };
+        }
       }
-    }
+    };
+
+    return debounce(func, 100);
   }, []);
 
   // Highlight Data by 'highlightAttribute';

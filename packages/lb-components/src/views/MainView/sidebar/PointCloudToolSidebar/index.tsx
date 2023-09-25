@@ -398,7 +398,10 @@ const AttributeUpdater = ({
                   ) : (
                     <Select
                       style={{ margin: '0px 21px 17px 16px', width: '87%' }}
-                      value={ptx.selectedPointCloudBox?.subAttribute?.[subAttribute.value]}
+                      value={
+                        ptx.selectedPointCloudBox?.subAttribute?.[subAttribute.value] ||
+                        segmentData.cacheSegData?.subAttribute?.[subAttribute.value]
+                      }
                       placeholder={t('PleaseSelect')}
                       onChange={(value) => setSubAttribute(subAttribute.value, value)}
                       allowClear={true}
