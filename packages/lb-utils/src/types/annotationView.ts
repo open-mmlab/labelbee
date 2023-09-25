@@ -137,7 +137,8 @@ export declare type TAnnotationViewCuboid = {
 export declare type TAnnotationViewPixelPoints = {
   type: 'pixelPoints';
   annotation: IPixelPoints[];
-  defaultRGBA?: string;
+  defaultRGBA?: string; // Default RGBA color.
+  pixelSize?: number; // PixelSize.
 };
 
 export type TAnnotationViewData =
