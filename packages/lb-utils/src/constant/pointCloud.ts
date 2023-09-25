@@ -45,4 +45,5 @@ export enum EPointCloudSegmentStatus {
   Ready = 'READY',
   Check = 'CHECK',
   Edit = 'EDIT',
+  Hover = "HOVER",
 }

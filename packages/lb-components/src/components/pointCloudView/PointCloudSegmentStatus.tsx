@@ -57,10 +57,36 @@ const PointCloudSegmentStatus = (props: { config: IPointCloudConfig }) => {
         }
       };
 
+      const updateHoverData = ({
+        segmentData,
+        currentSegmentStatus,
+      }: {
+        segmentData?: IPointCloudSegmentation;
+        currentSegmentStatus: EPointCloudSegmentStatus;
+      }) => {
+        // Just run in ready.
+        if (currentSegmentStatus !== EPointCloudSegmentStatus.Ready) {
+          return;
+        }
+
+        if (!segmentData) {
+          setData({
+            segmentStatus: EPointCloudSegmentStatus.Ready,
+          });
+          return;
+        }
+        setData({
+          segmentStatus: EPointCloudSegmentStatus.Hover,
+          cacheSegData: segmentData,
+        });
+      };
+
       ptSegmentInstance?.on('syncPointCloudStatus', updateVisible);
+      ptSegmentInstance?.on('hoverSegmentInstance', updateHoverData);
 
       return () => {
         ptSegmentInstance?.unbind('syncPointCloudStatus', updateVisible);
+        ptSegmentInstance?.unbind('hoverSegmentInstance', updateHoverData);
       };
     }
   }, [ptSegmentInstance]);

@@ -22,6 +22,7 @@ import {
   IDefaultSize,
   EPointCloudSegmentStatus,
   IPointCloudSegmentation,
+  EPointCloudPattern,
 } from '@labelbee/lb-utils';
 import AttributeList from '@/components/attributeList';
 import { useAttribute } from '@/components/pointCloudView/hooks/useAttribute';
@@ -211,6 +212,22 @@ const BoxTrackIDInput = () => {
   );
 };
 
+/**
+ * Determine if the
+ */
+const isAllowUpdateInSegment = ({
+  segmentStatus,
+  globalPattern,
+}: {
+  segmentStatus: EPointCloudSegmentStatus;
+  globalPattern: EPointCloudPattern;
+}) => {
+  return (
+    globalPattern === EPointCloudPattern.Segmentation &&
+    ![EPointCloudSegmentStatus.Edit, EPointCloudSegmentStatus.Ready].includes(segmentStatus)
+  );
+};
+
 const AttributeUpdater = ({
   attributeList,
   subAttributeList,
@@ -241,6 +258,7 @@ const AttributeUpdater = ({
   const { t } = useTranslation();
   const { defaultAttribute } = useAttribute();
   const pointCloudViews = usePointCloudViews();
+  const { isPointCloudSegmentationPattern } = useStatus();
 
   const dispatch = useDispatch();
 
@@ -298,10 +316,28 @@ const AttributeUpdater = ({
   };
 
   const setAttribute = (attribute: string) => {
+    if (
+      isAllowUpdateInSegment({
+        globalPattern: ptx.globalPattern,
+        segmentStatus: segmentData.segmentStatus,
+      })
+    ) {
+      return;
+    }
+
     toolInstance.setDefaultAttribute(attribute);
   };
 
   const setSubAttribute = (key: string, value: string) => {
+    if (
+      isAllowUpdateInSegment({
+        globalPattern: ptx.globalPattern,
+        segmentStatus: segmentData.segmentStatus,
+      })
+    ) {
+      return;
+    }
+
     toolInstance.setSubAttribute(key, value);
   };
 
@@ -312,6 +348,13 @@ const AttributeUpdater = ({
     limit: i?.limit,
     isDefault: i?.isDefault,
   }));
+
+  const isSelected =
+    selectedBox ||
+    (segmentData.cacheSegData && segmentData.segmentStatus === EPointCloudSegmentStatus.Edit);
+
+  // Just segment pattern forbid limitPopover
+  const forbidShowLimitPopover = isPointCloudSegmentationPattern;
 
   return (
     <div>
@@ -324,9 +367,10 @@ const AttributeUpdater = ({
         updateColorConfig={updateColorConfig}
         enableColorPicker={enableColorPicker}
         updateSize={updateSize}
+        forbidShowLimitPopover={forbidShowLimitPopover}
       />
       <Divider style={{ margin: 0 }} />
-      {(selectedBox || segmentData.cacheSegData) && (
+      {isSelected && (
         <>
           {subAttributeList.map(
             (subAttribute) =>
