@@ -144,11 +144,21 @@ export default class ViewOperation extends BasicToolOperation {
 
   public setImgNode(imgNode: HTMLImageElement, basicImgInfo: Partial<{ valid: boolean; rotate: number }> = {}) {
     super.setImgNode(imgNode, basicImgInfo);
+
+    /**
+     * TODO: New Pattern.
+     * 1. Initialize the staticImgNode.
+     */
     if (this.staticMode) {
       this.generateStaticImgNode();
     }
   }
 
+  /**
+   * TODO: New Pattern.
+   *
+   * 1. crop the canvas.
+   */
   public generateStaticImgNode() {
     const tmpUrl = cropAndEnlarge(this.canvas, this.basicImgInfo?.width, this.basicImgInfo?.height, 1);
     ImgUtils.load(tmpUrl).then((imgNode) => {
