@@ -32,20 +32,23 @@ export function transferKitti2Matrix(
   R: [TMatrix13Tuple, TMatrix13Tuple, TMatrix13Tuple],
   T: [TMatrix14Tuple, TMatrix14Tuple, TMatrix14Tuple],
 ) {
-  const PMA = MatrixUtils.transferMatrix34FromKitti2Three(P);
-  const RMA = MatrixUtils.transferMatrix33FromKitti2Three(R);
-  const TMA = MatrixUtils.transferMatrix34FromKitti2Three(T);
+  try {
+    const PMA = MatrixUtils.transferMatrix34FromKitti2Three(P);
+    const RMA = MatrixUtils.transferMatrix33FromKitti2Three(R);
+    const TMA = MatrixUtils.transferMatrix34FromKitti2Three(T);
 
-  const PM = createThreeMatrix4(PMA);
-  const RM = createThreeMatrix4(RMA);
-  const TM = createThreeMatrix4(TMA);
-
-  return {
-    composeMatrix4: TM.clone().premultiply(RM).premultiply(PM),
-    PM,
-    RM,
-    TM,
-  };
+    const PM = createThreeMatrix4(PMA);
+    const RM = createThreeMatrix4(RMA);
+    const TM = createThreeMatrix4(TMA);
+    return {
+      composeMatrix4: TM.clone().premultiply(RM).premultiply(PM),
+      PM,
+      RM,
+      TM,
+    };
+  } catch (error) {
+    // console.log(error);
+  }
 }
 
 export function rotatePoint(
@@ -173,13 +176,19 @@ function buildConvexHull(points: IPolygonPoint[]): IPolygonPoint[] {
 
 export const point3DLidar2Image = (point: { x: number; y: number; z: number }, cameraMatrix: ICalib) => {
   const { P, R, T } = cameraMatrix;
-  const { composeMatrix4 } = transferKitti2Matrix(P, R, T);
+  const { composeMatrix4 } = transferKitti2Matrix(P, R, T) ?? {};
+  if (!composeMatrix4) {
+    return;
+  }
   return lidar2image(point, composeMatrix4);
 };
 
 export const point2dTo3D = (point: { x: number; y: number; z: number }, cameraMatrix: ICalib) => {
   const { P, R, T } = cameraMatrix;
-  const { composeMatrix4 } = transferKitti2Matrix(P, R, T);
+  const { composeMatrix4 } = transferKitti2Matrix(P, R, T) ?? {};
+  if (!composeMatrix4) {
+    return;
+  }
   const vector = new THREE.Vector4(point.x, point.y, point.z);
   const newV = vector.applyMatrix4(composeMatrix4.invert());
 
@@ -286,8 +295,10 @@ export function pointCloudLidar2image(
   const { createRange } = options;
   const allViewData = PointCloudUtils.getAllViewData(boxParams);
   const { P, R, T } = cameraMatrix;
-  const { composeMatrix4 } = transferKitti2Matrix(P, R, T);
-
+  const { composeMatrix4 } = transferKitti2Matrix(P, R, T) ?? {};
+  if (!composeMatrix4) {
+    return;
+  }
   const transferViewData = allViewData
     .map((viewData) => ({
       type: viewData.type,
@@ -337,8 +348,10 @@ export function pointMappingLidar2image(
   },
 ) {
   const { P, R, T } = cameraMatrix;
-  const { composeMatrix4 } = transferKitti2Matrix(P, R, T);
-
+  const { composeMatrix4 } = transferKitti2Matrix(P, R, T) ?? {};
+  if (!composeMatrix4) {
+    return;
+  }
   const len = points.length / 3;
 
   const pcdMapping: { [key: number]: { x: number; y: number } } = {};
