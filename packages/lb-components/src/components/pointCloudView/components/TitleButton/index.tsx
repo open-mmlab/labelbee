@@ -9,7 +9,7 @@ interface IProps {
 }
 
 const TitleButton = ({ title, onClick, style }: IProps) => {
-  if (!title) {
+  if (!onClick && !title) {
     return null;
   }
   return (
