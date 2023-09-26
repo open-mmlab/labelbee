@@ -66,7 +66,8 @@ const PointCloudSegment2DSingleView = ({
         return;
       }
 
-      pcdMapping.current = pointMappingLidar2image(points, calib, imgSizeRef.current).pcdMapping;
+      pcdMapping.current =
+        pointMappingLidar2image(points, calib, imgSizeRef.current)?.pcdMapping ?? {};
     }
   }, [ptSegmentInstance]);
 

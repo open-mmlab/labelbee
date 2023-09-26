@@ -150,7 +150,11 @@ const PointCloud2DView = ({
             const { transferViewData: viewDataPointList, viewRangePointList } =
               pointCloudLidar2image(pointCloudBox, mappingData.calib, {
                 createRange,
-              });
+              }) ?? {};
+
+            if (!viewDataPointList || !viewRangePointList) {
+              return [];
+            }
 
             const stroke = toolStyleConverter.getColorFromConfig(
               { attribute: pointCloudBox.attribute },
@@ -260,7 +264,10 @@ const PointCloud2DView = ({
     };
     stroke: string;
   }) => {
-    return viewDataPointList!.map((v: ITransferViewData) => {
+    if (!viewDataPointList) {
+      return [];
+    }
+    return viewDataPointList.map((v: ITransferViewData) => {
       return {
         type: v.type,
         annotation: {

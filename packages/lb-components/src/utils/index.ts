@@ -101,10 +101,12 @@ interface IGetRectPointCloudBoxParams {
 export const getRectPointCloudBox = (params: IGetRectPointCloudBoxParams) => {
   const { pointCloudBox, mappingData, imageSizes } = params;
   // 需要新建一个Rect
-  const { transferViewData: viewDataPointList } = pointCloudLidar2image(
-    pointCloudBox,
-    mappingData.calib,
-  );
+  const { transferViewData: viewDataPointList } =
+    pointCloudLidar2image(pointCloudBox, mappingData.calib) ?? {};
+
+  if (!viewDataPointList) {
+    return;
+  }
 
   const tmpPoints = viewDataPointList.reduce((acc: ICoordinate[], v) => {
     if (v.type === 'line') {
