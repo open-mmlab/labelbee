@@ -47,7 +47,7 @@ export function transferKitti2Matrix(
       TM,
     };
   } catch (error) {
-    // console.log(error);
+    console.error(error);
   }
 }
 
