@@ -227,7 +227,7 @@ const PointCloudSegment2DView = ({ currentData, highlightAttribute }: IProps) =>
           (data, i) =>
             data.calib && (
               <PointCloudSegment2DSingleView
-                key={data.path}
+                key={data.path + i}
                 path={data.path}
                 url={data.url}
                 calib={data.calib}
