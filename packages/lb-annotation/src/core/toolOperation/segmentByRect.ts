@@ -99,6 +99,7 @@ class SegmentByRect extends RectOperation {
     const padding = 10; // 框的边界
     const lineWidth = 1;
     const { x, y } = this.coord;
+    const currentColor = this.getLineColor(this.defaultAttribute);
     ctx.save();
     ctx.strokeStyle = 'white';
     ctx.setLineDash([6]);
@@ -133,7 +134,7 @@ class SegmentByRect extends RectOperation {
     }
 
     ctx.save();
-    ctx.fillStyle = this.style.strokeColor;
+    ctx.fillStyle = currentColor;
     ctx.fillRect(x + padding, y - padding * 4 - 1, rectWidth, 32);
     ctx.restore();
     ctx.save();
@@ -141,23 +142,28 @@ class SegmentByRect extends RectOperation {
     ctx.fillStyle = 'white';
     ctx.fillText(text, x + padding + 14, y - padding * 2);
     ctx.restore();
-    super.renderCursorLine();
+    super.renderCursorLine(currentColor);
   }
 
   public renderDrawingRect(rect: IRect, zoom: number, isZoom = false) {
     if (this.ctx && rect) {
       const transformRect = AxisUtils.changeRectByZoom(rect, isZoom ? zoom : this.zoom, this.currentPos);
       const { x, y, width, height } = transformRect;
-
+      const currentZoom = zoom ?? this.zoom ?? 1;
       this.ctx.save();
       this.ctx.lineCap = 'butt';
-      this.ctx.lineWidth = this.style.strokeWidth;
+
+      const borderWidth = this.style.strokeWidth;
+      const dashWidth = 10;
+
+      this.ctx.lineWidth = borderWidth;
 
       this.ctx.strokeStyle = 'white';
+      this.ctx.setLineDash([]);
       this.ctx.strokeRect(x, y, width, height); // 白底
 
-      this.ctx.strokeStyle = this.style.strokeColor;
-      this.ctx.setLineDash([6]);
+      this.ctx.strokeStyle = this.getLineColor(this.defaultAttribute);
+      this.ctx.setLineDash([dashWidth * currentZoom]);
       this.ctx.strokeRect(x, y, width, height); // 线段
 
       this.ctx.restore();
