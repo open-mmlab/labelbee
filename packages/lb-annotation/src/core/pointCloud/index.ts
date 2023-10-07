@@ -20,7 +20,6 @@ import {
   DEFAULT_SPHERE_PARAMS,
   ICalib,
 } from '@labelbee/lb-utils';
-import { isNumber } from 'lodash';
 import { BufferAttribute, OrthographicCamera, PerspectiveCamera } from 'three';
 import HighlightWorker from 'web-worker:./highlightWorker.js';
 import FilterBoxWorker from 'web-worker:./filterBoxWorker.js';
@@ -72,6 +71,7 @@ export interface IPointCloudDelegate extends IEventBus {
   camera: THREE.OrthographicCamera | THREE.PerspectiveCamera;
   container: HTMLElement;
   checkMode: boolean;
+  config?: IPointCloudConfig;
 }
 
 const DEFAULT_DISTANCE = 30;
@@ -215,7 +215,6 @@ export class PointCloud extends EventListener {
       store: this.store,
       ...this.eventBus,
       nextTick: this.nextTick,
-      config: this.config,
     });
     this.initMsg();
     document.addEventListener('keydown', this.keydown);
@@ -329,6 +328,7 @@ export class PointCloud extends EventListener {
       camera: this.camera,
       renderer: this.renderer,
       checkMode: this.checkMode,
+      config: this.config,
       ...this.eventBus,
     };
   }
@@ -352,6 +352,8 @@ export class PointCloud extends EventListener {
 
   public setConfig(config: IPointCloudConfig) {
     this.config = config;
+
+    this.store?.setConfig(config);
   }
 
   /**
@@ -1314,9 +1316,10 @@ export class PointCloud extends EventListener {
 
     /**
      * Verify the Reliability of Data
+     *
+     * Both of x and y must be number.
      */
-    const isErrorNumber = fittedCoordinates.some((v) => !isNumber(v.x) || !isNumber(v.y));
-
+    const isErrorNumber = fittedCoordinates.some((v) => !(Number.isFinite(v.x) && Number.isFinite(v.y)));
     if (isErrorNumber) {
       return polygon;
     }
