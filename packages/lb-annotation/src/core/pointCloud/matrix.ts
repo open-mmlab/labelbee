@@ -94,7 +94,16 @@ export const isFisheyeCalibValid = (calib: ICalib) => {
   return false;
 };
 
-export const lidar2ImageByFisheye = (point: I3DSpaceCoord, calib: ICalib) => {
+/**
+ * Calculate lidar to fisheyeImage.
+ *
+ * In comparison to "lidar2Image",
+ * the main difference lies in the computation of distortion parameters during the 2's step.
+ * @param point
+ * @param calib
+ * @returns
+ */
+export const lidar2FisheyeImage = (point: I3DSpaceCoord, calib: ICalib): THREE.Vector4 | undefined => {
   if (isFisheyeCalibValid(calib) === false) {
     console.error('Error Calib, it need fisheye calib');
     return;
@@ -238,7 +247,7 @@ function buildConvexHull(points: IPolygonPoint[]): IPolygonPoint[] {
 
 export const point3DLidar2Image = (point: { x: number; y: number; z: number }, calib: ICalib) => {
   if (isFisheyeCalibValid(calib)) {
-    return lidar2ImageByFisheye(point, calib);
+    return lidar2FisheyeImage(point, calib);
   }
 
   const { P, R, T } = calib;
@@ -369,7 +378,7 @@ export function pointCloudLidar2image(
         .map((point) => {
           // FisheyeCalib Pattern
           if (isFisheyeCalib) {
-            return lidar2ImageByFisheye(point, calib);
+            return lidar2FisheyeImage(point, calib);
           }
 
           return composeMatrix4 && lidar2image(point, composeMatrix4);
@@ -446,7 +455,7 @@ export function pointMappingLidar2image(
     };
     let point2d;
     if (isFisheyeCalib) {
-      point2d = lidar2ImageByFisheye(point3d, calib);
+      point2d = lidar2FisheyeImage(point3d, calib);
     } else {
       point2d =
         composeMatrix4 &&
