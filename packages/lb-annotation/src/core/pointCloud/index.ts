@@ -20,7 +20,6 @@ import {
   DEFAULT_SPHERE_PARAMS,
   ICalib,
 } from '@labelbee/lb-utils';
-import { isNumber } from 'lodash';
 import { BufferAttribute, OrthographicCamera, PerspectiveCamera } from 'three';
 import HighlightWorker from 'web-worker:./highlightWorker.js';
 import FilterBoxWorker from 'web-worker:./filterBoxWorker.js';
@@ -1317,9 +1316,10 @@ export class PointCloud extends EventListener {
 
     /**
      * Verify the Reliability of Data
+     *
+     * Both of x and y must be number.
      */
-    const isErrorNumber = fittedCoordinates.some((v) => !isNumber(v.x) || !isNumber(v.y));
-
+    const isErrorNumber = fittedCoordinates.some((v) => !(Number.isFinite(v.x) && Number.isFinite(v.y)));
     if (isErrorNumber) {
       return polygon;
     }
