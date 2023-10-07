@@ -6,6 +6,7 @@
 
 import { IPointCloudBox, IPointCloudConfig, IPointCloudSphere } from './types/pointCloud';
 import { ICoordinate, ISize } from './types/common';
+import { IBasicBox3d } from './types';
 
 class PointCloudUtils {
   public static genColorByCoord(x: number, y: number, z: number) {
@@ -165,7 +166,7 @@ class PointCloudUtils {
     return pointCloudDataList;
   }
 
-  public static getFrontViewPolygon(boxParams: IPointCloudBox) {
+  public static getFrontViewPolygon(boxParams: IPointCloudBox | IBasicBox3d) {
     const {
       center: { x, y, z },
       width,
@@ -202,7 +203,7 @@ class PointCloudUtils {
     ];
   }
 
-  public static getBackViewPolygon(boxParams: IPointCloudBox) {
+  public static getBackViewPolygon(boxParams: IPointCloudBox | IBasicBox3d) {
     const {
       center: { x, y, z },
       width,
@@ -239,7 +240,7 @@ class PointCloudUtils {
     ];
   }
 
-  public static getAllDirectionLine(boxParams: IPointCloudBox) {
+  public static getAllDirectionLine(boxParams: IPointCloudBox | IBasicBox3d) {
     const {
       center: { x, y, z },
       width,
@@ -305,7 +306,7 @@ class PointCloudUtils {
    * @param boxParams
    * @returns
    */
-  public static getAllViewData(boxParams: IPointCloudBox) {
+  public static getAllViewData(boxParams: IPointCloudBox | IBasicBox3d)  {
     const {
       center: { x, y, z },
       width,

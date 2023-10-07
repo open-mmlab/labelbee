@@ -173,7 +173,7 @@ const PointCloud2DView = ({
             const newArr = [...acc, ...viewDataPointLists];
 
             if (viewRangePointList?.length > 0) {
-              newArr.push({
+              newArr.unshift({
                 type: 'polygon',
                 annotation: {
                   id: selectedID,
