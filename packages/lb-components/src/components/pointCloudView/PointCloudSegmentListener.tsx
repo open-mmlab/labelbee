@@ -8,6 +8,7 @@ import { CommonToolUtils } from '@labelbee/lb-annotation';
 import { EPointCloudSegmentMode, PointCloudUtils } from '@labelbee/lb-utils';
 import { useAttribute } from './hooks/useAttribute';
 import { SetPointCloudLoading } from '@/store/annotation/actionCreators';
+import { jsonParser } from '@/utils';
 
 interface IProps extends IA2MapStateProps {
   checkMode?: boolean;
@@ -21,6 +22,7 @@ const PointCloudSegmentListener: React.FC<IProps> = ({
   highlightAttribute,
   config,
   toolInstanceRef,
+  configString,
 }) => {
   const dispatch = useDispatch();
   const { updateSegmentAttribute, updateSegmentSubAttribute } = useAttribute();
@@ -61,6 +63,13 @@ const PointCloudSegmentListener: React.FC<IProps> = ({
   useEffect(() => {
     ptSegmentInstance?.store?.highlightPointsByAttribute(highlightAttribute ?? '');
   }, [highlightAttribute, ptSegmentInstance]);
+
+  /**
+   * Monitor external data, and if there are changes, update accordingly.
+   */
+  useEffect(() => {
+    ptSegmentInstance?.setConfig(jsonParser(configString))
+  }, [configString]);
 
   const segmentKeydownEvents = (lowerCaseKey: string, e: KeyboardEvent) => {
     switch (lowerCaseKey) {
