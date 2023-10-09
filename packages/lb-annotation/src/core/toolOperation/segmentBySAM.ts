@@ -11,6 +11,8 @@ import SegmentByRect, { ISegmentByRectProps } from './segmentByRect';
 
 export interface ISegmentBySAMProps extends ISegmentByRectProps {
   onOutSide: () => void;
+  // 点击完成将结果传出去由外部处理
+  onFinish: (result: IPolygonData[]) => void;
 }
 
 class SegmentBySAM extends SegmentByRect {
@@ -28,6 +30,8 @@ class SegmentBySAM extends SegmentByRect {
 
   public onOutSide: () => void;
 
+  public onFinish: (result: IPolygonData[]) => void;
+
   constructor(props: any) {
     super(props);
     this.clickType = 'add';
@@ -35,12 +39,9 @@ class SegmentBySAM extends SegmentByRect {
     this.removePoints = [];
     this.predictionResult = [];
     this.onOutSide = props.onOutSide;
+    this.onFinish = props.onFinish;
     this.SAMHistory = new ActionsHistory();
     this.clearPredictionInfo = this.clearPredictionInfo.bind(this);
-  }
-
-  public renderCursorLine() {
-    super.renderCursorLine();
   }
 
   public onKeydown(e: KeyboardEvent) {
@@ -170,7 +171,10 @@ class SegmentBySAM extends SegmentByRect {
       this.toolbarInstance = new SAMToolbarClass({
         container: this.container,
         toggleClickType: (type: 'add' | 'remove') => this.toggleClickType(type),
-        finish: () => this.clearPredictionInfo(),
+        finish: () => {
+          this.onFinish(this.predictionResult ?? []);
+          this.clearPredictionInfo();
+        },
         reset: () => this.reset(),
       });
     }
