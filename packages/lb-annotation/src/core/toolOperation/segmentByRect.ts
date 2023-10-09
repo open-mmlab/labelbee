@@ -169,7 +169,7 @@ class SegmentByRect extends RectOperation {
   public renderSelectedRect() {}
 
   public segmentPrediction = async (e: MouseEvent) => {
-    const coord = this.getCoordinateUnderZoom(e);
+    const coord = this.getCoordinateInOrigin(e); // Use the origin coordinate.
     this.isRunSegment = true;
     this.render();
 
