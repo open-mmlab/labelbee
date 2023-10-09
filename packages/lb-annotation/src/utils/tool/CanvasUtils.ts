@@ -97,12 +97,17 @@ export default class CanvasUtils {
     return (window.devicePixelRatio || 1) / backingStore;
   };
 
-  public static createCanvas(size: ISize) {
+  public static createCanvas(size: ISize, color?: string) {
     const offsetCanvas = document.createElement('canvas');
     const { width, height } = size;
     offsetCanvas.width = width;
     offsetCanvas.height = height;
     const ctx = offsetCanvas.getContext('2d');
+
+    if (color && ctx) {
+      ctx.fillStyle = color;
+      ctx.fillRect(0, 0, size.width, size.height);
+    }
 
     return { canvas: offsetCanvas, ctx };
   }
