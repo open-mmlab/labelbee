@@ -2,12 +2,12 @@ import { ELineTypes, IPolygonData, i18n } from '@labelbee/lb-utils';
 import EKeyCode from '@/constant/keyCode';
 import RectUtils from '@/utils/tool/RectUtils';
 import uuid from '@/utils/uuid';
-import SegmentByRect, { ISegmentByRectProps } from './segmentByRect';
-import SAMToolbarClass, { getSAMToolbarOffset } from './SAMToolbarClass';
 import DrawUtils from '@/utils/tool/DrawUtils';
 import AxisUtils from '@/utils/tool/AxisUtils';
 import StyleUtils from '@/utils/tool/StyleUtils';
 import ActionsHistory from '@/utils/ActionsHistory';
+import SAMToolbarClass, { getSAMToolbarOffset } from './SAMToolbarClass';
+import SegmentByRect, { ISegmentByRectProps } from './segmentByRect';
 
 export interface ISegmentBySAMProps extends ISegmentByRectProps {
   onOutSide: () => void;
@@ -61,7 +61,7 @@ class SegmentBySAM extends SegmentByRect {
   }
 
   public onMouseUp(e: MouseEvent) {
-    if (this.rectList?.length) {
+    if (e.button === 0 && this.rectList?.length) {
       this.segmentPrediction(e);
       return;
     }
@@ -130,7 +130,7 @@ class SegmentBySAM extends SegmentByRect {
   };
 
   public onMouseDown(e: MouseEvent) {
-    if (this.rectList?.length) {
+    if (e.button === 0 && this.rectList?.length) {
       return;
     }
     super.onMouseDown(e);
