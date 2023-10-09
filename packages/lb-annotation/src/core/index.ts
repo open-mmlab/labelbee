@@ -242,6 +242,9 @@ export default class AnnotationEngine {
   public switchLastTwoCanvas() {
     const newInstance = this.toolScheduler.switchLastTwoCanvas();
     if (newInstance) {
+      // 暂时只有SAM工具需要
+      // @ts-ignore
+      newInstance.prevToolInstance = this.toolInstance;
       this.toolInstance = newInstance;
       return newInstance;
     }

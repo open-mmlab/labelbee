@@ -92,7 +92,8 @@ class PolygonOperation extends BasicToolOperation {
 
     this.getCurrentSelectedData = this.getCurrentSelectedData.bind(this);
     this.updateSelectedTextAttribute = this.updateSelectedTextAttribute.bind(this);
-
+    this.addPolygons = this.addPolygons.bind(this);
+    this.removePolygons = this.removePolygons.bind(this);
     this.selection = new Selection(this);
   }
 
@@ -115,10 +116,14 @@ class PolygonOperation extends BasicToolOperation {
 
     this.container.addEventListener('mouseup', this.dragMouseUp);
     this.dblClickListener.addEvent(this.onMouseUp, this.onLeftDblClick, this.onRightDblClick, this.isAllowDouble);
+    this.on('addPolygons', this.addPolygons);
+    this.on('removePolygons', this.removePolygons);
   }
 
   public eventUnbinding() {
     super.eventUnbinding();
+    this.unbind('addPolygons', this.addPolygons);
+    this.unbind('removePolygons', this.removePolygons);
     this.container.removeEventListener('mouseup', this.dragMouseUp);
   }
 
@@ -1099,6 +1104,20 @@ class PolygonOperation extends BasicToolOperation {
       );
       newPolygonList = newPolygonList.filter((v) => v.id !== this.selectedID);
     }
+    this.setPolygonList(newPolygonList);
+    this.history.pushHistory(newPolygonList);
+    this.render();
+  }
+
+  public addPolygons(polygonList: IPolygonData[]) {
+    const newPolygonList = [...this.polygonList, ...polygonList];
+    this.setPolygonList(newPolygonList);
+    this.history.pushHistory(newPolygonList);
+    this.render();
+  }
+
+  public removePolygons(polygonList: IPolygonData[]) {
+    const newPolygonList = this.polygonList.filter((v) => !polygonList.find((i) => i.id === v.id));
     this.setPolygonList(newPolygonList);
     this.history.pushHistory(newPolygonList);
     this.render();

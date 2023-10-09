@@ -82,10 +82,10 @@ export const ViewportProviderComponent = (props: any) => {
      * User: Software Engineer
      */
     if (
-      e.shiftKey === true &&
-      e.ctrlKey === true &&
-      e.altKey === true &&
-      e.keyCode === EKeyCode.C
+      // e.shiftKey === true &&
+      // e.ctrlKey === true &&
+      // e.altKey === true &&
+      e.keyCode === EKeyCode.Q
     ) {
       message.success('DEVELOPMENT TESTING - Switch Last Two Canvas');
       const newInstance = props.annotation?.annotationEngine.switchLastTwoCanvas();

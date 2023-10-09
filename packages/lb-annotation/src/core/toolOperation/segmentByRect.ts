@@ -1,15 +1,17 @@
-import { i18n } from '@labelbee/lb-utils';
+import { IPolygonData, i18n } from '@labelbee/lb-utils';
 import AxisUtils from '@/utils/tool/AxisUtils';
 import { RectOperation } from './rectOperation';
 import type { IRectOperationProps } from './rectOperation';
 import EKeyCode from '../../constant/keyCode';
 
 type TRunPrediction = (params: {
-  point: ICoordinate;
+  point?: ICoordinate;
+  addPoints?: ICoordinate[];
+  removePoints?: ICoordinate[];
   rect: { x: number; y: number; w: number; h: number };
-}) => Promise<unknown>;
+}) => Promise<IPolygonData[]>;
 
-interface ISegmentByRectProps extends IRectOperationProps {
+export interface ISegmentByRectProps extends IRectOperationProps {
   runPrediction: TRunPrediction;
 }
 
@@ -33,7 +35,7 @@ class SegmentByRect extends RectOperation {
     super.eventBinding();
   }
 
-  public onKeydown = (e: KeyboardEvent) => {
+  public onKeydown(e: KeyboardEvent) {
     switch (e.keyCode) {
       case EKeyCode.Esc:
         e.preventDefault();
@@ -52,7 +54,7 @@ class SegmentByRect extends RectOperation {
       default:
         break;
     }
-  };
+  }
 
   public clearPredictionInfo() {
     this.rectList = [];
@@ -107,13 +109,10 @@ class SegmentByRect extends RectOperation {
     ctx.strokeRect(x - padding, y - padding, padding * 2, padding * 2);
     ctx.restore();
 
-    // 提示编写
-    let text = `① ${i18n.t('FramingOfObjectToBeDivided')}`;
     const isEn = i18n.language === 'en';
     let rectWidth = isEn ? 326 : 186;
 
     if (this.rectList?.length === 1) {
-      text = `② ${i18n.t('ClickOnTarget')}`;
       rectWidth = isEn ? 232 : 142;
       const radius = 2;
       ctx.save();
@@ -130,7 +129,6 @@ class SegmentByRect extends RectOperation {
     if (this.isRunSegment) {
       // 进行算法中
       rectWidth = isEn ? 316 : 136;
-      text = i18n.t('SplittingAlgorithmPrediction');
     }
 
     ctx.save();
@@ -140,7 +138,7 @@ class SegmentByRect extends RectOperation {
     ctx.save();
     ctx.font = '14px Source Han Sans CN';
     ctx.fillStyle = 'white';
-    ctx.fillText(text, x + padding + 14, y - padding * 2);
+    ctx.fillText(this.cursorText(), x + padding + 14, y - padding * 2);
     ctx.restore();
     super.renderCursorLine(currentColor);
   }
@@ -168,6 +166,18 @@ class SegmentByRect extends RectOperation {
 
       this.ctx.restore();
     }
+  }
+
+  public cursorText() {
+    // 提示编写
+    let text = `① ${i18n.t('FramingOfObjectToBeDivided')}`;
+    if (this.rectList?.length === 1) {
+      text = `② ${i18n.t('ClickOnTarget')}`;
+    }
+    if (this.isRunSegment) {
+      text = i18n.t('SplittingAlgorithmPrediction');
+    }
+    return text;
   }
 
   public renderTextAttribute() {}
