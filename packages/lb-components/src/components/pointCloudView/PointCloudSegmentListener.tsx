@@ -1,12 +1,14 @@
 import React, { useContext, useEffect } from 'react';
 import { a2MapStateToProps, IA2MapStateProps } from '@/store/annotation/map';
 import { connect } from 'react-redux';
-import { LabelBeeContext } from '@/store/ctx';
+import { LabelBeeContext, useDispatch } from '@/store/ctx';
 import { ICustomToolInstance } from '@/hooks/annotation';
 import { PointCloudContext } from './PointCloudContext';
 import { CommonToolUtils } from '@labelbee/lb-annotation';
 import { EPointCloudSegmentMode, PointCloudUtils } from '@labelbee/lb-utils';
 import { useAttribute } from './hooks/useAttribute';
+import { SetPointCloudLoading } from '@/store/annotation/actionCreators';
+import { jsonParser } from '@/utils';
 
 interface IProps extends IA2MapStateProps {
   checkMode?: boolean;
@@ -20,8 +22,10 @@ const PointCloudSegmentListener: React.FC<IProps> = ({
   highlightAttribute,
   config,
   toolInstanceRef,
+  configString,
 }) => {
-  const { updateSegmentAttribute } = useAttribute();
+  const dispatch = useDispatch();
+  const { updateSegmentAttribute, updateSegmentSubAttribute } = useAttribute();
 
   const ptCtx = useContext(PointCloudContext);
   const { ptSegmentInstance, setSegmentation } = ptCtx;
@@ -38,11 +42,13 @@ const PointCloudSegmentListener: React.FC<IProps> = ({
        * 2. clear all segment data.
        *
        */
+      SetPointCloudLoading(dispatch, true);
       ptSegmentInstance.emit('clearStash');
       ptSegmentInstance.emit('clearAllSegmentData');
       ptSegmentInstance.loadPCDFile(currentData?.url ?? '').then(() => {
         const segmentData = PointCloudUtils.getSegmentFromResultList(currentData?.result ?? '');
         ptSegmentInstance?.store?.updateCurrentSegment(segmentData);
+        SetPointCloudLoading(dispatch, false);
       });
 
       // Update segmentData.
@@ -58,6 +64,13 @@ const PointCloudSegmentListener: React.FC<IProps> = ({
     ptSegmentInstance?.store?.highlightPointsByAttribute(highlightAttribute ?? '');
   }, [highlightAttribute, ptSegmentInstance]);
 
+  /**
+   * Monitor external data, and if there are changes, update accordingly.
+   */
+  useEffect(() => {
+    ptSegmentInstance?.setConfig(jsonParser(configString))
+  }, [configString]);
+
   const segmentKeydownEvents = (lowerCaseKey: string, e: KeyboardEvent) => {
     switch (lowerCaseKey) {
       case 'h':
@@ -65,6 +78,10 @@ const PointCloudSegmentListener: React.FC<IProps> = ({
         break;
 
       case 'j':
+        ptSegmentInstance?.emit('RectSelector');
+        break;
+
+      case 'k':
         ptSegmentInstance?.emit('CircleSelector');
         break;
 
@@ -103,6 +120,11 @@ const PointCloudSegmentListener: React.FC<IProps> = ({
 
     toolInstanceRef.current.setDefaultAttribute = (newAttribute: string) => {
       updateSegmentAttribute(newAttribute);
+      ptSegmentInstance?.emit('updateDefaultAttribute', { newAttribute });
+    };
+
+    toolInstanceRef.current.setSubAttribute = (key: string, value: string) => {
+      updateSegmentSubAttribute(key, value);
     };
 
     return () => {
@@ -115,6 +137,7 @@ const PointCloudSegmentListener: React.FC<IProps> = ({
       if (!ptCtx.ptSegmentInstance) {
         return;
       }
+      ptCtx.ptSegmentInstance.emit('clearStash');
       ptCtx.ptSegmentInstance.emit('clearAllSegmentData');
     };
   }, [

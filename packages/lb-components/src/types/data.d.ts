@@ -3,7 +3,7 @@ import { TMatrix13Tuple, TMatrix14Tuple, ICalib } from '@labelbee/lb-utils';
 
 export interface IMappingImg {
   url: string;
-  calib: ICalib;
+  calib?: ICalib;
   path: string;
 }
 

@@ -19,8 +19,8 @@ const useHighlight = ({ currentData }: Partial<IAnnotationStateProps>) => {
   } = useContext(PointCloudContext);
   const mappingImgList = currentData?.mappingImgList ?? [];
 
-  const toggle2dVisible = async (url: string, calib: ICalib) => {
-    let newHighlightList: Array<{ url: string; calib: ICalib }> = [...highlight2DDataList];
+  const toggle2dVisible = async (url: string, calib?: ICalib) => {
+    let newHighlightList: Array<{ url: string; calib?: ICalib }> = [...highlight2DDataList];
 
     // Update highlight Status.
     if (highlight2DDataList.find((v) => v.url === url)) {

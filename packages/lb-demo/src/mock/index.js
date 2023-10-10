@@ -170,6 +170,29 @@ export const mockFileList = [
   },
 ];
 
+export const generateRandomColor = () => {
+  const r = Math.floor(Math.random() * 256);
+  const g = Math.floor(Math.random() * 256);
+  const b = Math.floor(Math.random() * 256);
+  return `rgb(${r}, ${g}, ${b})`;
+};
+
+const generateCoordinates = (num, width, height) => {
+  const coordinates = [];
+  const defaultOffset = {
+    x: 400,
+    y: 400,
+  };
+  for (let i = 0; i < num; i++) {
+    const x = Math.floor(Math.random() * width) + defaultOffset.x;
+    const y = Math.floor(Math.random() * height) + defaultOffset.y;
+    coordinates.push({ x, y, color: generateRandomColor() });
+  }
+  return coordinates;
+};
+
+const pixelPointsData = generateCoordinates(10000, 200, 200);
+
 export const DEFAULT_ANNOTATIONS = [
   {
     type: 'rect',
@@ -432,55 +455,65 @@ export const DEFAULT_ANNOTATIONS = [
       },
     },
   },
+  {
+    type: 'pixelPoints',
+    annotation: pixelPointsData,
+    defaultRGBA: 'rgba(23,0,255,1)',
+    pixelSize: 1,
+  },
 ];
 
 export const mockAudioList = [
   {
-    "id": 1,
-    "path": "230150176229189149233159179.mp3",
-    "name": "",
-    "url": "https://sensebee.oss-accelerate.aliyuncs.com/Development%2F8799%2F2.mp3?Expires=1693562399&OSSAccessKeyId=LTAI4Fcnhge5ysEwVNGjQCpU&Signature=ze0073LJhvux%2FJ%2FTVbquGVKlZX0%3D",
-    "processedUrl": "https://sensebee.oss-accelerate.aliyuncs.com/Development%2F8799%2F2.mp3?Expires=1693378799&OSSAccessKeyId=LTAI4Fcnhge5ysEwVNGjQCpU&Signature=5u3nNCoKi64X487g%2F23wJR1486w%3D",
-    "result": "",
-    "auditStatus": 0,
-    "preAnnotationJsonUrl": "https://sensebee.oss-accelerate.aliyuncs.com/Development%2F8799%2Fpre_annotation_data%2F2.json?Expires=1693378799&OSSAccessKeyId=LTAI4Fcnhge5ysEwVNGjQCpU&Signature=EvfnLs9qn%2FWWfYASFqPWA0%2B30FM%3D",
-    "preResult": "{}",
-    "thumbnail": "",
-    "standStatus": 0,
-    "unitFileList": null,
-    "webPointCloudFile": {
-      "lidar": {
-        "id": 0,
-        "path": "",
-        "url": "",
-        "processedUrl": "",
-        "thumbnail": ""
+    id: 1,
+    path: '230150176229189149233159179.mp3',
+    name: '',
+    url: 'https://sensebee.oss-accelerate.aliyuncs.com/Development%2F8799%2F2.mp3?Expires=1693562399&OSSAccessKeyId=LTAI4Fcnhge5ysEwVNGjQCpU&Signature=ze0073LJhvux%2FJ%2FTVbquGVKlZX0%3D',
+    processedUrl:
+      'https://sensebee.oss-accelerate.aliyuncs.com/Development%2F8799%2F2.mp3?Expires=1693378799&OSSAccessKeyId=LTAI4Fcnhge5ysEwVNGjQCpU&Signature=5u3nNCoKi64X487g%2F23wJR1486w%3D',
+    result: '',
+    auditStatus: 0,
+    preAnnotationJsonUrl:
+      'https://sensebee.oss-accelerate.aliyuncs.com/Development%2F8799%2Fpre_annotation_data%2F2.json?Expires=1693378799&OSSAccessKeyId=LTAI4Fcnhge5ysEwVNGjQCpU&Signature=EvfnLs9qn%2FWWfYASFqPWA0%2B30FM%3D',
+    preResult: '{}',
+    thumbnail: '',
+    standStatus: 0,
+    unitFileList: null,
+    webPointCloudFile: {
+      lidar: {
+        id: 0,
+        path: '',
+        url: '',
+        processedUrl: '',
+        thumbnail: '',
       },
-      "cameras": null
-    }
+      cameras: null,
+    },
   },
   {
-    "id": 2,
-    "path": "20220721_iatcut_p1_00-Copy1.h1.wav",
-    "name": "",
-    "url": "https://sensebee.oss-accelerate.aliyuncs.com/Development%2F8799%2F1.wav?Expires=1693562399&OSSAccessKeyId=LTAI4Fcnhge5ysEwVNGjQCpU&Signature=T%2FVoiFZK3DPkGdjMubRKY2fq%2B%2F8%3D",
-    "processedUrl": "https://sensebee.oss-accelerate.aliyuncs.com/Development%2F8799%2F1.wav?Expires=1693378799&OSSAccessKeyId=LTAI4Fcnhge5ysEwVNGjQCpU&Signature=2DxHuj3N7huPBEHIOGGwNniqWRk%3D",
-    "result": "",
-    "auditStatus": 0,
-    "preAnnotationJsonUrl": "https://sensebee.oss-accelerate.aliyuncs.com/Development%2F8799%2Fpre_annotation_data%2F1.json?Expires=1693378799&OSSAccessKeyId=LTAI4Fcnhge5ysEwVNGjQCpU&Signature=dX42luevW6YJky4fO2O9%2F18t8oY%3D",
-    "preResult": "{}",
-    "thumbnail": "",
-    "standStatus": 0,
-    "unitFileList": null,
-    "webPointCloudFile": {
-      "lidar": {
-        "id": 0,
-        "path": "",
-        "url": "",
-        "processedUrl": "",
-        "thumbnail": ""
+    id: 2,
+    path: '20220721_iatcut_p1_00-Copy1.h1.wav',
+    name: '',
+    url: 'https://sensebee.oss-accelerate.aliyuncs.com/Development%2F8799%2F1.wav?Expires=1693562399&OSSAccessKeyId=LTAI4Fcnhge5ysEwVNGjQCpU&Signature=T%2FVoiFZK3DPkGdjMubRKY2fq%2B%2F8%3D',
+    processedUrl:
+      'https://sensebee.oss-accelerate.aliyuncs.com/Development%2F8799%2F1.wav?Expires=1693378799&OSSAccessKeyId=LTAI4Fcnhge5ysEwVNGjQCpU&Signature=2DxHuj3N7huPBEHIOGGwNniqWRk%3D',
+    result: '',
+    auditStatus: 0,
+    preAnnotationJsonUrl:
+      'https://sensebee.oss-accelerate.aliyuncs.com/Development%2F8799%2Fpre_annotation_data%2F1.json?Expires=1693378799&OSSAccessKeyId=LTAI4Fcnhge5ysEwVNGjQCpU&Signature=dX42luevW6YJky4fO2O9%2F18t8oY%3D',
+    preResult: '{}',
+    thumbnail: '',
+    standStatus: 0,
+    unitFileList: null,
+    webPointCloudFile: {
+      lidar: {
+        id: 0,
+        path: '',
+        url: '',
+        processedUrl: '',
+        thumbnail: '',
       },
-      "cameras": null
-    }
-  }
-]
+      cameras: null,
+    },
+  },
+];

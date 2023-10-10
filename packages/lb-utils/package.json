@@ -1,6 +1,6 @@
 {
   "name": "@labelbee/lb-utils",
-  "version": "1.12.0",
+  "version": "1.13.0-alpha.5",
   "description": "utils for label-bee",
   "author": "Glenfiddish <edwinlee0927@hotmail.com>",
   "publishConfig": {

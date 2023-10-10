@@ -124,10 +124,19 @@ export interface IPointCloudConfig {
   trackConfigurable: boolean;
 }
 
-export interface ICalib {
+interface ICalib {
   P: [TMatrix14Tuple, TMatrix14Tuple, TMatrix14Tuple]; // 3x4 Camera Intrinsic matrix
   R: [TMatrix13Tuple, TMatrix13Tuple, TMatrix13Tuple]; // 3x3 rotation matrix
   T: [TMatrix14Tuple, TMatrix14Tuple, TMatrix14Tuple]; // 3x4 Lidar to camera matrix
+
+  calName?: string; // Camera Name
+}
+
+interface ICalib {
+  P: [TMatrix14Tuple, TMatrix14Tuple, TMatrix14Tuple]; // 3x4 Camera Intrinsic matrix
+  T: [TMatrix14Tuple, TMatrix14Tuple, TMatrix14Tuple]; // 3x4 Lidar to camera matrix
+  fisheyeDistortion: number[]; // Omnidirectional camera: fisheye distortion. 全方向摄像机 - 鱼眼畸变参数。
+
   calName?: string; // Camera Name
 }
 
@@ -149,3 +158,5 @@ export interface IPointCloudSegmentation {
   coverPoints?: number[];
   indexes: number[];
 }
+
+export { ICalib };

@@ -71,6 +71,7 @@ export interface IPointCloudDelegate extends IEventBus {
   camera: THREE.OrthographicCamera | THREE.PerspectiveCamera;
   container: HTMLElement;
   checkMode: boolean;
+  config?: IPointCloudConfig;
 }
 
 const DEFAULT_DISTANCE = 30;
@@ -207,13 +208,13 @@ export class PointCloud extends EventListener {
     this.segmentOperation = new PointCloudSegmentOperation({
       dom: this.container,
       store: this.store,
+      ...this.eventBus,
     });
 
     this.pointCloudRender = new PointCloudRender({
       store: this.store,
       ...this.eventBus,
       nextTick: this.nextTick,
-      config: this.config,
     });
     this.initMsg();
     document.addEventListener('keydown', this.keydown);
@@ -253,6 +254,7 @@ export class PointCloud extends EventListener {
 
     this.on('CircleSelector', this.segmentOperation.updateSelector2Circle.bind(this.segmentOperation));
     this.on('LassoSelector', this.segmentOperation.updateSelector2Lasso.bind(this.segmentOperation));
+    this.on('RectSelector', this.segmentOperation.updateSelector2Rect.bind(this.segmentOperation));
     this.on('clearPointCloud', this.clearPointCloud.bind(this));
     this.on('loadPCDFile', this.loadPCDFile.bind(this));
   }
@@ -264,6 +266,7 @@ export class PointCloud extends EventListener {
 
     this.unbind('CircleSelector', this.segmentOperation.updateSelector2Circle.bind(this.segmentOperation));
     this.unbind('LassoSelector', this.segmentOperation.updateSelector2Lasso.bind(this.segmentOperation));
+    this.unbind('RectSelector', this.segmentOperation.updateSelector2Rect.bind(this.segmentOperation));
     this.unbind('clearPointCloud', this.clearPointCloud.bind(this));
     this.unbind('loadPCDFile', this.loadPCDFile.bind(this));
   }
@@ -325,6 +328,7 @@ export class PointCloud extends EventListener {
       camera: this.camera,
       renderer: this.renderer,
       checkMode: this.checkMode,
+      config: this.config,
       ...this.eventBus,
     };
   }
@@ -348,6 +352,8 @@ export class PointCloud extends EventListener {
 
   public setConfig(config: IPointCloudConfig) {
     this.config = config;
+
+    this.store?.setConfig(config);
   }
 
   /**
@@ -442,6 +448,10 @@ export class PointCloud extends EventListener {
     }
   }
 
+  public getColorFromConfig(attribute: string) {
+    return toolStyleConverter.getColorFromConfig({ attribute }, { ...this.config, attributeConfigurable: true }, {});
+  }
+
   /**
    * Render box by params
    * @param boxParams
@@ -465,11 +475,7 @@ export class PointCloud extends EventListener {
 
   public getAllAttributeColor(boxes: IPointCloudBox[]) {
     return boxes.reduce((acc: { [k: string]: any }, box) => {
-      acc[box.attribute] = toolStyleConverter.getColorFromConfig(
-        { attribute: box.attribute },
-        { ...this.config, attributeConfigurable: true },
-        {},
-      );
+      acc[box.attribute] = this.getColorFromConfig(box.attribute);
       return acc;
     }, {});
   }
@@ -496,22 +502,14 @@ export class PointCloud extends EventListener {
   };
 
   public generateSphere = (sphereParams: IPointCloudSphere) => {
-    const { fill } = toolStyleConverter.getColorFromConfig(
-      { attribute: sphereParams.attribute },
-      { ...this.config, attributeConfigurable: true },
-      {},
-    );
+    const { fill } = this.getColorFromConfig(sphereParams.attribute);
     this.addSphereToSense(sphereParams, fill);
     this.render();
   };
 
   public generateSpheres = (spheres: IPointCloudSphere[]) => {
     spheres.forEach((sphere) => {
-      const { fill } = toolStyleConverter.getColorFromConfig(
-        { attribute: sphere.attribute },
-        { ...this.config, attributeConfigurable: true },
-        {},
-      );
+      const { fill } = this.getColorFromConfig(sphere.attribute);
       this.addSphereToSense(sphere, fill);
     });
     this.render();
@@ -973,6 +971,8 @@ export class PointCloud extends EventListener {
 
     const newPoints = new THREE.Points(geometry);
     this.renderPointCloud(newPoints, radius);
+
+    this.emit('loadPCDFileEnd');
   };
 
   /**
@@ -984,7 +984,7 @@ export class PointCloud extends EventListener {
     mappingImgList,
     points,
   }: {
-    mappingImgList: Array<{ url: string; calib: ICalib }>;
+    mappingImgList: Array<{ url: string; calib?: ICalib }>;
     points: ArrayLike<number>;
   }) => {
     /**
@@ -1313,6 +1313,17 @@ export class PointCloud extends EventListener {
         line2: [p2, p3],
       });
     });
+
+    /**
+     * Verify the Reliability of Data
+     *
+     * Both of x and y must be number.
+     */
+    const isErrorNumber = fittedCoordinates.some((v) => !(Number.isFinite(v.x) && Number.isFinite(v.y)));
+    if (isErrorNumber) {
+      return polygon;
+    }
+
     return fittedCoordinates;
   }
 

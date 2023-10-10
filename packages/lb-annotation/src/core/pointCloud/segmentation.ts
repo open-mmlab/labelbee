@@ -5,35 +5,43 @@
  */
 
 import { EPointCloudSegmentStatus } from '@labelbee/lb-utils';
+import EventListener from '@/core/toolOperation/eventListener';
 import LassoSelector from './selector/lassoSelector';
 import PointCloudStore, { ThreePoints } from './store';
 import CircleSelector from './selector/circleSelector';
+import RectSelector from './selector/rectSelector';
 
 interface IProps {
   dom: HTMLElement;
   store: PointCloudStore;
+  emit: EventListener['emit'];
 }
 
 class PointCloudSegmentOperation {
   private dom: HTMLElement;
 
   // Operation Selector
-  public currentTool: LassoSelector | CircleSelector;
+  public currentTool: LassoSelector | CircleSelector | RectSelector;
 
-  public currentToolName: 'LassoSelector' | 'CircleSelector';
+  public currentToolName: 'LassoSelector' | 'CircleSelector' | 'RectSelector';
 
   public store: PointCloudStore;
 
   // Selector
   public lassoSelector: LassoSelector;
 
+  public rectSelector: RectSelector;
+
   public circleSelector: CircleSelector;
+
+  private emit: EventListener['emit'];
 
   constructor(props: IProps) {
     this.dom = props.dom;
     this.store = props.store;
 
     this.lassoSelector = new LassoSelector(this.store);
+    this.rectSelector = new RectSelector(this.store);
     this.circleSelector = new CircleSelector(this.store);
     this.currentTool = this.lassoSelector;
     this.currentToolName = 'LassoSelector';
@@ -43,6 +51,7 @@ class PointCloudSegmentOperation {
     this.updateSelector2Lasso = this.updateSelector2Lasso.bind(this);
     this.updateSelector2Circle = this.updateSelector2Circle.bind(this);
 
+    this.emit = props.emit;
     // this.setupRaycaster();
   }
 
@@ -65,6 +74,11 @@ class PointCloudSegmentOperation {
   public updateSelector2Lasso() {
     this.currentTool = this.lassoSelector;
     this.currentToolName = 'LassoSelector';
+  }
+
+  public updateSelector2Rect() {
+    this.currentTool = this.rectSelector;
+    this.currentToolName = 'RectSelector';
   }
 
   public updateSelector2Circle() {
@@ -140,6 +154,10 @@ class PointCloudSegmentOperation {
 
       const intersect = intersects[0];
 
+      this.emit('hoverSegmentInstance', {
+        segmentData: this.store.segmentData.get(intersect?.object?.name),
+        currentSegmentStatus: this.store.segmentStatus,
+      });
       if (intersect) {
         this.store.highlightPoints(intersect.object as ThreePoints);
       } else {

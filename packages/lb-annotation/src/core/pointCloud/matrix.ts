@@ -13,6 +13,7 @@ import {
   TMatrix13Tuple,
   IPolygonPoint,
   ICalib,
+  IBasicBox3d,
 } from '@labelbee/lb-utils';
 import uuid from '@/utils/uuid';
 
@@ -32,20 +33,23 @@ export function transferKitti2Matrix(
   R: [TMatrix13Tuple, TMatrix13Tuple, TMatrix13Tuple],
   T: [TMatrix14Tuple, TMatrix14Tuple, TMatrix14Tuple],
 ) {
-  const PMA = MatrixUtils.transferMatrix34FromKitti2Three(P);
-  const RMA = MatrixUtils.transferMatrix33FromKitti2Three(R);
-  const TMA = MatrixUtils.transferMatrix34FromKitti2Three(T);
+  try {
+    const PMA = MatrixUtils.transferMatrix34FromKitti2Three(P);
+    const RMA = MatrixUtils.transferMatrix33FromKitti2Three(R);
+    const TMA = MatrixUtils.transferMatrix34FromKitti2Three(T);
 
-  const PM = createThreeMatrix4(PMA);
-  const RM = createThreeMatrix4(RMA);
-  const TM = createThreeMatrix4(TMA);
-
-  return {
-    composeMatrix4: TM.clone().premultiply(RM).premultiply(PM),
-    PM,
-    RM,
-    TM,
-  };
+    const PM = createThreeMatrix4(PMA);
+    const RM = createThreeMatrix4(RMA);
+    const TM = createThreeMatrix4(TMA);
+    return {
+      composeMatrix4: TM.clone().premultiply(RM).premultiply(PM),
+      PM,
+      RM,
+      TM,
+    };
+  } catch (error) {
+    console.error(error);
+  }
 }
 
 export function rotatePoint(
@@ -60,6 +64,76 @@ export function rotatePoint(
 
   return pointVector.clone().applyMatrix4(TBack).applyMatrix4(Rz).applyMatrix4(TFrom);
 }
+
+/**
+ * Check if the matrix is valid
+ * @param matrix
+ * @param numRows
+ * @param numColumns
+ * @returns
+ */
+export function isMatrixValid(matrix: number[][], numRows: number, numColumns: number): boolean {
+  // Check if the number of rows and columns match the expected values
+  if (matrix.length !== numRows || matrix.some((row) => row.length !== numColumns)) {
+    return false;
+  }
+
+  return true; // Compliant with the rule
+}
+
+/**
+ * Check if the calib is in fisheyeCalib.
+ * @param calib
+ * @returns
+ */
+export const isFisheyeCalibValid = (calib: ICalib) => {
+  if (calib.fisheyeDistortion?.length > 0 && isMatrixValid(calib.P, 3, 4) && isMatrixValid(calib.T, 3, 4)) {
+    return true;
+  }
+
+  return false;
+};
+
+/**
+ * Calculate lidar to fisheyeImage.
+ *
+ * In comparison to "lidar2Image",
+ * the main difference lies in the computation of distortion parameters during the 2's step.
+ * @param point
+ * @param calib
+ * @returns
+ */
+export const lidar2FisheyeImage = (point: I3DSpaceCoord, calib: ICalib): THREE.Vector4 | undefined => {
+  if (isFisheyeCalibValid(calib) === false) {
+    console.error('Error Calib, it need fisheye calib');
+    return;
+  }
+
+  const { P, fisheyeDistortion, T } = calib;
+
+  const vector4 = new THREE.Vector4(point.x, point.y, point.z);
+
+  const lidar2CamThree = createThreeMatrix4(MatrixUtils.transferMatrix34FromKitti2Three(T));
+  const cam2ImgThree = createThreeMatrix4(MatrixUtils.transferMatrix34FromKitti2Three(P));
+
+  // 1. Extrinsic Matrix (Lidar 2 Camera)
+  const coord = vector4.applyMatrix4(lidar2CamThree);
+
+  // 2. Distort Params 畸变参数。
+  const norm = (coord.x ** 2 + coord.y ** 2) ** 0.5;
+  const theta = Math.atan(coord.z / norm);
+  const rho = fisheyeDistortion.reduce((acc, cur, i) => {
+    return acc + cur * theta ** i;
+  }, 0);
+  coord.x = (coord.x / norm) * rho;
+  coord.y = (coord.y / norm) * rho;
+  coord.z = 1;
+
+  // 3. Intrinsic Matrix
+  const lastCoord = coord.applyMatrix4(cam2ImgThree);
+
+  return lastCoord;
+};
 
 export function lidar2image(point: { x: number; y: number; z: number }, composeMatrix4: THREE.Matrix4) {
   const vector = new THREE.Vector4(point.x, point.y, point.z);
@@ -171,19 +245,17 @@ function buildConvexHull(points: IPolygonPoint[]): IPolygonPoint[] {
   return convexHull;
 }
 
-export const point3DLidar2Image = (point: { x: number; y: number; z: number }, cameraMatrix: ICalib) => {
-  const { P, R, T } = cameraMatrix;
-  const { composeMatrix4 } = transferKitti2Matrix(P, R, T);
+export const point3DLidar2Image = (point: { x: number; y: number; z: number }, calib: ICalib) => {
+  if (isFisheyeCalibValid(calib)) {
+    return lidar2FisheyeImage(point, calib);
+  }
+
+  const { P, R, T } = calib;
+  const { composeMatrix4 } = transferKitti2Matrix(P, R, T) ?? {};
+  if (!composeMatrix4) {
+    return;
+  }
   return lidar2image(point, composeMatrix4);
-};
-
-export const point2dTo3D = (point: { x: number; y: number; z: number }, cameraMatrix: ICalib) => {
-  const { P, R, T } = cameraMatrix;
-  const { composeMatrix4 } = transferKitti2Matrix(P, R, T);
-  const vector = new THREE.Vector4(point.x, point.y, point.z);
-  const newV = vector.applyMatrix4(composeMatrix4.invert());
-
-  return newV;
 };
 
 export const isInImage = ({
@@ -193,7 +265,7 @@ export const isInImage = ({
   height,
 }: {
   point: I3DSpaceCoord;
-  calib: ICalib;
+  calib?: ICalib;
   width: number;
   height: number;
 }) => {
@@ -223,7 +295,7 @@ export const getHighlightIndexByPoints = ({
   height,
 }: {
   points: ArrayLike<number>;
-  calib: ICalib;
+  calib?: ICalib;
   width: number;
   height: number;
 }) => {
@@ -269,27 +341,48 @@ export const mergeHighlightList = (indexList: number[][]) => {
 };
 
 export function pointCloudLidar2image(
-  boxParams: IPointCloudBox,
-  cameraMatrix: {
-    P: [TMatrix14Tuple, TMatrix14Tuple, TMatrix14Tuple];
-    R: [TMatrix13Tuple, TMatrix13Tuple, TMatrix13Tuple];
-    T: [TMatrix14Tuple, TMatrix14Tuple, TMatrix14Tuple];
-  },
+  boxParams: IPointCloudBox | IBasicBox3d,
+  calib?: ICalib,
   options: {
     createRange: boolean; // Calculate the range of cuboid.
   } = { createRange: false },
 ) {
+  if (!calib) {
+    return { transferViewData: [], viewRangePointList: [] };
+  }
+
   const { createRange } = options;
   const allViewData = PointCloudUtils.getAllViewData(boxParams);
-  const { P, R, T } = cameraMatrix;
-  const { composeMatrix4 } = transferKitti2Matrix(P, R, T);
 
+  const isFisheyeCalib = isFisheyeCalibValid(calib);
+  const { P, R, T } = calib;
+  let composeMatrix4: THREE.Matrix4 | undefined;
+
+  /**
+   * 1. Default pattern initialize composeMatrix4
+   *
+   * Avoid double counting
+   */
+  if (isFisheyeCalib === false) {
+    const { composeMatrix4: newComposeMatrix4 } = transferKitti2Matrix(P, R, T) ?? {};
+    if (!newComposeMatrix4) {
+      return;
+    }
+    composeMatrix4 = newComposeMatrix4;
+  }
   const transferViewData = allViewData
     .map((viewData) => ({
       type: viewData.type,
       pointList: viewData.pointList
         .map((point) => rotatePoint(point, boxParams.center, boxParams.rotation))
-        .map((point) => lidar2image(point, composeMatrix4))
+        .map((point) => {
+          // FisheyeCalib Pattern
+          if (isFisheyeCalib) {
+            return lidar2FisheyeImage(point, calib);
+          }
+
+          return composeMatrix4 && lidar2image(point, composeMatrix4);
+        })
         .map((point) => {
           if (!point) {
             return undefined;
@@ -301,6 +394,11 @@ export function pointCloudLidar2image(
     // Clear Empty PointList
     .filter((v) => v.pointList.length !== 0);
 
+  // The front polygon need to highlight.
+  if (transferViewData[0] && transferViewData[0].pointList && isFisheyeCalib) {
+    transferViewData[0].pointList = transferViewData[0].pointList.map((v) => ({ ...v, specialEdge: true }));
+  }
+
   let viewRangePointList: IPolygonPoint[] = [];
 
   // All Line is showing.
@@ -311,4 +409,78 @@ export function pointCloudLidar2image(
   }
 
   return { transferViewData, viewRangePointList };
+}
+
+/**
+ * Calculate the pcdMapping from point3d to point2d.
+ * @param points
+ * @param cameraMatrix
+ * @param filterSize
+ * @returns
+ */
+export function pointMappingLidar2image(
+  points: Float32Array,
+  calib: ICalib,
+  filterSize: {
+    width: number;
+    height: number;
+  },
+) {
+  const isFisheyeCalib = isFisheyeCalibValid(calib);
+
+  const { P, R, T } = calib;
+  let composeMatrix4: THREE.Matrix4 | undefined;
+
+  /**
+   * 1. Default pattern initialize composeMatrix4
+   *
+   * Avoid double counting
+   */
+  if (isFisheyeCalib === false) {
+    const { composeMatrix4: matrix4 } = transferKitti2Matrix(P, R, T) ?? {};
+    if (!matrix4) {
+      return;
+    }
+
+    composeMatrix4 = matrix4;
+  }
+  const len = points.length / 3;
+
+  const pcdMapping: { [key: number]: { x: number; y: number } } = {};
+  for (let i = 0; i < len; i++) {
+    const point3d = {
+      x: points[i * 3],
+      y: points[i * 3 + 1],
+      z: points[i * 3 + 2],
+    };
+    let point2d;
+    if (isFisheyeCalib) {
+      point2d = lidar2FisheyeImage(point3d, calib);
+    } else {
+      point2d =
+        composeMatrix4 &&
+        lidar2image(
+          {
+            x: points[i * 3],
+            y: points[i * 3 + 1],
+            z: points[i * 3 + 2],
+          },
+          composeMatrix4,
+        );
+    }
+
+    if (point2d) {
+      const x = Math.floor(point2d.x);
+      const y = Math.floor(point2d.y);
+
+      // 1. Filter the points outside imgSize.
+      if (x > filterSize.width || y > filterSize.height || x < 0 || y < 0) {
+        continue;
+      }
+
+      // 2. the Mapping is int.
+      pcdMapping[i] = { x, y };
+    }
+  }
+  return { pcdMapping };
 }

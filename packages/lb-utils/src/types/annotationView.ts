@@ -86,13 +86,17 @@ export interface IBasicBox3d extends IGraphicsBasicConfig {
   height: number; // The length of Y-Axis
   depth: number; // The length of Z-Axis
   rotation: number; // Right-handed system, angle of rotation around Z-Axis, Range: [0, 2 * Pi]
-  calib: ICalib; // Calibration parameters of the current picture.
+  calib?: ICalib; // Calibration parameters of the current picture.
 }
 
 export interface ICuboid extends IDrawingCuboid, IBasicStyle {
   hiddenText?: boolean; // 是否隐藏文本
   isReference?: boolean; // 是否进行的参考显示
   renderEnhance?: (params: IRenderEnhanceParams) => void;
+}
+
+export interface IPixelPoints extends ICoordinate {
+  color?: string;
 }
 
 export type TAnnotationViewRect = {
@@ -130,8 +134,16 @@ export declare type TAnnotationViewCuboid = {
   annotation: ICuboid;
 };
 
+export declare type TAnnotationViewPixelPoints = {
+  type: 'pixelPoints';
+  annotation: IPixelPoints[];
+  defaultRGBA?: string; // Default RGBA color.
+  pixelSize?: number; // PixelSize.
+};
+
 export type TAnnotationViewData =
   | TAnnotationViewRect
+  | TAnnotationViewPixelPoints
   | TAnnotationViewPolygon
   | TAnnotationViewPoint
   | TAnnotationViewBox3d

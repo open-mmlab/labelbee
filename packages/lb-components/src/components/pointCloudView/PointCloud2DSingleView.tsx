@@ -105,17 +105,19 @@ const PointCloud2DSingleView = ({
         />
       )}
 
-      <HighlightVisible
-        visible={isHighlightVisible(url)}
-        onClick={highlightOnClick}
-        loading={loading}
-        style={{
-          position: 'absolute',
-          right: 16,
-          top: 16,
-          zIndex: showEnlarge ? -1 : 101,
-        }}
-      />
+      {calib && (
+        <HighlightVisible
+          visible={isHighlightVisible(url)}
+          onClick={highlightOnClick}
+          loading={loading}
+          style={{
+            position: 'absolute',
+            right: 16,
+            top: 16,
+            zIndex: showEnlarge ? -1 : 101,
+          }}
+        />
+      )}
     </div>
   );
 };

@@ -14,6 +14,7 @@ import selectMultiple from '@/assets/annotation/pointCloudTool/selectMultiple.sv
 import TabChangeSelectedSvg from '@/assets/annotation/toolHotKeyIcon/icon_tab_kj.svg';
 import DeleteSvg from '@/assets/annotation/toolHotKeyIcon/icon_del_kj.svg';
 import LassoSelectorSvg from '@/assets/annotation/pointCloudTool/lassoSelector.svg';
+import RectSvg from '@/assets/annotation/rectTool/icon_rect.svg';
 import CirCleSelectorSvg from '@/assets/annotation/pointCloudTool/circleSelector.svg';
 import AddSvg from '@/assets/annotation/pointCloudTool/addSvg.svg';
 import ClearSvg from '@/assets/annotation/pointCloudTool/clearSvg.svg';
@@ -157,14 +158,21 @@ const LassoSelector = {
   name: 'LassoSelector',
   icon: LassoSelectorSvg,
   shortCut: ['H'],
-  noticeInfo: 'SelectorMsg'
+  noticeInfo: 'SelectorMsg',
+};
+
+const RectSelector = {
+  name: 'RectSelector',
+  icon: RectSvg,
+  shortCut: ['J'],
+  noticeInfo: 'SelectorMsg',
 };
 
 const CircleSelector = {
   name: 'CircleSelector',
   icon: CirCleSelectorSvg,
-  shortCut: ['J'],
-  noticeInfo: 'SelectorMsg'
+  shortCut: ['K'],
+  noticeInfo: 'SelectorMsg',
 };
 
 const Drag3DBySpace = {
@@ -237,6 +245,7 @@ const pointCloudShortCutTable_SEGMENT: IShortcut[] = [
   rotateRoundCenter,
   Drag3DBySpace,
   LassoSelector,
+  RectSelector,
   CircleSelector,
   AddMove,
   DeletePoint,

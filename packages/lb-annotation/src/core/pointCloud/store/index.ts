@@ -9,6 +9,7 @@ import {
   EPointCloudSegmentCoverMode,
   EPointCloudSegmentFocusMode,
   EPointCloudSegmentMode,
+  IPointCloudConfig,
   IPointCloudSegmentation,
   PointCloudUtils,
 } from '@labelbee/lb-utils';
@@ -90,13 +91,15 @@ class PointCloudStore {
   // TODO. clear later.
   public pointCloudObjectName = 'pointCloud';
 
+  public config?: IPointCloudConfig;
+
   private emit: EventListener['emit'];
 
   private on: EventListener['on'];
 
   private unbind: EventListener['unbind'];
 
-  constructor({ container, scene, camera, renderer, emit, on, unbind, checkMode }: IPointCloudDelegate) {
+  constructor({ container, scene, camera, renderer, emit, on, unbind, checkMode, config }: IPointCloudDelegate) {
     this.container = container;
     this.scene = scene;
     this.camera = camera;
@@ -105,6 +108,7 @@ class PointCloudStore {
     this.on = on;
     this.unbind = unbind;
     this.checkMode = checkMode;
+    this.config = config;
 
     this.createCanvas2d();
 
@@ -112,6 +116,7 @@ class PointCloudStore {
     this.addStash2Store = this.addStash2Store.bind(this);
     this.updateCheck2Edit = this.updateCheck2Edit.bind(this);
     this.setAttribute = this.setAttribute.bind(this);
+    this.setSubAttribute = this.setSubAttribute.bind(this);
     this.setSegmentMode = this.setSegmentMode.bind(this);
     this.setSegmentCoverMode = this.setSegmentCoverMode.bind(this);
     this.setSegmentFocusMode = this.setSegmentFocusMode.bind(this);
@@ -196,6 +201,7 @@ class PointCloudStore {
     for (const v of newArray) {
       arr.push({
         attribute: v.attribute,
+        subAttribute: v.subAttribute,
         id: v.id,
         indexes: v.indexes,
       });
@@ -209,6 +215,7 @@ class PointCloudStore {
   }
 
   public clearAllSegmentData() {
+    this.resetSelectedSegmentStatus();
     this.segmentData = new Map();
     this.syncSegmentData();
   }
@@ -283,6 +290,10 @@ class PointCloudStore {
 
   public setSegmentMode(mode: EPointCloudSegmentMode) {
     this.segmentMode = mode;
+  }
+
+  public setConfig(config: IPointCloudConfig) {
+    this.config = config;
   }
 
   public setSegmentCoverMode(coverMode: EPointCloudSegmentCoverMode) {
@@ -434,6 +445,7 @@ class PointCloudStore {
           this.cacheSegData = {
             id: uuid(),
             attribute: this.currentAttribute,
+            subAttribute: {},
             points: verticesArray,
             coverPoints: covers,
             indexes,
@@ -574,9 +586,8 @@ class PointCloudStore {
         this.emit('clearStashRender');
       }
       this.syncSegmentData();
-      this.cacheSegData = undefined;
-      this.syncPointCloudStatus();
     }
+    this.resetSelectedSegmentStatus();
   }
 
   public deleteSelectedSegmentData(id = '') {
@@ -716,8 +727,37 @@ class PointCloudStore {
     this.emit('reRender3d');
   }
 
+  /**
+   * Get All segment indexes by attribute.
+   * @param attribute
+   * @returns
+   */
+  public getHighlightAttribute(attribute: string) {
+    const list: number[][] = [];
+    this.segmentData.forEach((seg) => {
+      if (seg.attribute === attribute) {
+        list.push(seg.indexes);
+      }
+    });
+    return list;
+  }
+
   public setAttribute(attribute: string) {
     this.currentAttribute = attribute;
+  }
+
+  public setSubAttribute(key: string, value: string) {
+    if (!this.cacheSegData) {
+      return;
+    }
+    this.cacheSegData.subAttribute = {
+      ...this.cacheSegData.subAttribute,
+      [key]: value,
+    };
+    this.emit('syncPointCloudStatus', {
+      segmentStatus: this.segmentStatus,
+      cacheSegData: this.cacheSegData,
+    });
   }
 }
 
