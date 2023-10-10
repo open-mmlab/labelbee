@@ -4,7 +4,7 @@
  * @createdate 2023-05-05
  */
 import * as THREE from 'three';
-import { colorArr, IPointCloudConfig, IPointCloudSegmentation, toolStyleConverter } from '@labelbee/lb-utils';
+import { colorArr, IPointCloudSegmentation, toolStyleConverter } from '@labelbee/lb-utils';
 import DrawUtils from '@/utils/tool/DrawUtils';
 import EventListener from '@/core/toolOperation/eventListener';
 import PointCloudStore from '../store';
@@ -13,7 +13,6 @@ import { IEventBus } from '..';
 interface IPointCloudRenderProps extends IEventBus {
   store: PointCloudStore;
   nextTick: () => void;
-  config?: IPointCloudConfig;
 }
 
 class PointCloudRender {
@@ -25,14 +24,11 @@ class PointCloudRender {
 
   public unbind: EventListener['unbind'];
 
-  public config?: IPointCloudConfig;
-
-  constructor({ store, on, unbind, nextTick, config }: IPointCloudRenderProps) {
+  constructor({ store, on, unbind, nextTick }: IPointCloudRenderProps) {
     this.store = store;
     this.on = on;
     this.unbind = unbind;
     this.nextTick = nextTick;
-    this.config = config;
 
     this.generateNewPoints = this.generateNewPoints.bind(this);
     this.clearStash = this.clearStash.bind(this);
@@ -51,12 +47,12 @@ class PointCloudRender {
   }
 
   public getCurrentColor(attribute = this.store.currentAttribute) {
-    if (!attribute || !this.config) {
+    if (!attribute || !this.store.config) {
       return colorArr[0].hexString;
     }
     const { fill } = toolStyleConverter.getColorFromConfig(
       { attribute },
-      { ...this.config, attributeConfigurable: true },
+      { ...this.store.config, attributeConfigurable: true },
       {},
     );
     return fill;

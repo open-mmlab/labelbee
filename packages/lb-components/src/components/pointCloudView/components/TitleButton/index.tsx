@@ -9,6 +9,9 @@ interface IProps {
 }
 
 const TitleButton = ({ title, onClick, style }: IProps) => {
+  if (!onClick && !title) {
+    return null;
+  }
   return (
     <span className={getClassName('point-cloud-container', 'title-button')} style={style}>
       {title}

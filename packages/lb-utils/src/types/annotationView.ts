@@ -96,7 +96,7 @@ export interface ICuboid extends IDrawingCuboid, IBasicStyle {
 }
 
 export interface IPixelPoints extends ICoordinate {
-  color: string;
+  color?: string;
 }
 
 export type TAnnotationViewRect = {
@@ -137,6 +137,8 @@ export declare type TAnnotationViewCuboid = {
 export declare type TAnnotationViewPixelPoints = {
   type: 'pixelPoints';
   annotation: IPixelPoints[];
+  defaultRGBA?: string; // Default RGBA color.
+  pixelSize?: number; // PixelSize.
 };
 
 export type TAnnotationViewData =

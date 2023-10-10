@@ -109,31 +109,31 @@ export const BoxInfos = ({
     let infos = [
       {
         label: 'x',
-        value: x.toFixed(DECIMAL_PLACES),
+        value: x?.toFixed(DECIMAL_PLACES),
       },
       {
         label: 'y',
-        value: y.toFixed(DECIMAL_PLACES),
+        value: y?.toFixed(DECIMAL_PLACES),
       },
       {
         label: 'z',
-        value: z.toFixed(DECIMAL_PLACES),
+        value: z?.toFixed(DECIMAL_PLACES),
       },
       {
         label: t('Length'),
-        value: length.toFixed(DECIMAL_PLACES),
+        value: length?.toFixed(DECIMAL_PLACES),
       },
       {
         label: t('Width'),
-        value: width.toFixed(DECIMAL_PLACES),
+        value: width?.toFixed(DECIMAL_PLACES),
       },
       {
         label: t('Height'),
-        value: height.toFixed(DECIMAL_PLACES),
+        value: height?.toFixed(DECIMAL_PLACES),
       },
       {
         label: t('Rotation_y'),
-        value: UnitUtils.rad2deg(rotation_y).toFixed(DECIMAL_PLACES),
+        value: UnitUtils.rad2deg(rotation_y)?.toFixed(DECIMAL_PLACES),
       },
     ];
     // Get Point Count.

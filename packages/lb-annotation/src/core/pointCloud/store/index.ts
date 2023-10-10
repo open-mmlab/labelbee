@@ -9,6 +9,7 @@ import {
   EPointCloudSegmentCoverMode,
   EPointCloudSegmentFocusMode,
   EPointCloudSegmentMode,
+  IPointCloudConfig,
   IPointCloudSegmentation,
   PointCloudUtils,
 } from '@labelbee/lb-utils';
@@ -90,13 +91,15 @@ class PointCloudStore {
   // TODO. clear later.
   public pointCloudObjectName = 'pointCloud';
 
+  public config?: IPointCloudConfig;
+
   private emit: EventListener['emit'];
 
   private on: EventListener['on'];
 
   private unbind: EventListener['unbind'];
 
-  constructor({ container, scene, camera, renderer, emit, on, unbind, checkMode }: IPointCloudDelegate) {
+  constructor({ container, scene, camera, renderer, emit, on, unbind, checkMode, config }: IPointCloudDelegate) {
     this.container = container;
     this.scene = scene;
     this.camera = camera;
@@ -105,6 +108,7 @@ class PointCloudStore {
     this.on = on;
     this.unbind = unbind;
     this.checkMode = checkMode;
+    this.config = config;
 
     this.createCanvas2d();
 
@@ -286,6 +290,10 @@ class PointCloudStore {
 
   public setSegmentMode(mode: EPointCloudSegmentMode) {
     this.segmentMode = mode;
+  }
+
+  public setConfig(config: IPointCloudConfig) {
+    this.config = config;
   }
 
   public setSegmentCoverMode(coverMode: EPointCloudSegmentCoverMode) {
@@ -564,11 +572,6 @@ class PointCloudStore {
   }
 
   public clearStash() {
-    if (this.isCheckStatus) {
-      this.resetSelectedSegmentStatus();
-      return;
-    }
-
     if (this.isEditStatus && this.cacheSegData) {
       this.updateCloudDataStatus(this.cacheSegData.points, { visible: false });
       if (this.segmentData.has(this.cacheSegData.id)) {
@@ -584,6 +587,7 @@ class PointCloudStore {
       }
       this.syncSegmentData();
     }
+    this.resetSelectedSegmentStatus();
   }
 
   public deleteSelectedSegmentData(id = '') {

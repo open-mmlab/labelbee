@@ -144,11 +144,21 @@ export default class ViewOperation extends BasicToolOperation {
 
   public setImgNode(imgNode: HTMLImageElement, basicImgInfo: Partial<{ valid: boolean; rotate: number }> = {}) {
     super.setImgNode(imgNode, basicImgInfo);
+
+    /**
+     * TODO: New Pattern.
+     * 1. Initialize the staticImgNode.
+     */
     if (this.staticMode) {
       this.generateStaticImgNode();
     }
   }
 
+  /**
+   * TODO: New Pattern.
+   *
+   * 1. crop the canvas.
+   */
   public generateStaticImgNode() {
     const tmpUrl = cropAndEnlarge(this.canvas, this.basicImgInfo?.width, this.basicImgInfo?.height, 1);
     ImgUtils.load(tmpUrl).then((imgNode) => {
@@ -226,7 +236,7 @@ export default class ViewOperation extends BasicToolOperation {
     return id;
   };
 
-  public updateData(annotations: TAnnotationViewData[]) {
+  public async updateData(annotations: TAnnotationViewData[]) {
     if (_.isEqual(this.annotations, annotations)) {
       return;
     }
@@ -573,7 +583,10 @@ export default class ViewOperation extends BasicToolOperation {
     }
 
     const data = annotation.annotation;
-    const { transferViewData: viewDataPointList } = pointCloudLidar2image(data as any, data.calib);
+    const { transferViewData: viewDataPointList } = pointCloudLidar2image(data as any, data.calib) ?? {};
+    if (!viewDataPointList) {
+      return;
+    }
     const defaultViewStyle = {
       fill: 'transparent',
       // stroke: style.stroke,
@@ -626,7 +639,7 @@ export default class ViewOperation extends BasicToolOperation {
     }
 
     // 1. Get the cached.
-    const uid = this.imgNode.src + data.length;
+    const uid = this.imgNode.src + data.length + annotation.defaultRGBA;
     const cacheCanvas = this.cacheCanvas?.[uid];
     if (cacheCanvas) {
       DrawUtils.drawImg(this.canvas, cacheCanvas, {
@@ -639,9 +652,15 @@ export default class ViewOperation extends BasicToolOperation {
     // 2. Create New offsetCanvas to render
     const size = { width: this.imgNode.width, height: this.imgNode.height };
     const { ctx, canvas: offsetCanvas } = CanvasUtils.createCanvas(size);
+    const pixelSize = typeof annotation.pixelSize === 'number' ? annotation.pixelSize : 13;
     if (ctx && data?.length > 0) {
-      // 1.
-      DrawUtils.drawPixel({ canvas: offsetCanvas, points: data, size });
+      DrawUtils.drawPixel({
+        canvas: offsetCanvas,
+        points: data,
+        size,
+        defaultRGBA: annotation.defaultRGBA,
+        pixelSize,
+      });
       DrawUtils.drawImg(this.canvas, offsetCanvas, {
         zoom: this.zoom,
         currentPos: this.currentPos,

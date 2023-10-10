@@ -57,10 +57,36 @@ const PointCloudSegmentStatus = (props: { config: IPointCloudConfig }) => {
         }
       };
 
+      const updateHoverData = ({
+        segmentData,
+        currentSegmentStatus,
+      }: {
+        segmentData?: IPointCloudSegmentation;
+        currentSegmentStatus: EPointCloudSegmentStatus;
+      }) => {
+        // Just run in ready.
+        if (currentSegmentStatus !== EPointCloudSegmentStatus.Ready) {
+          return;
+        }
+
+        if (!segmentData) {
+          setData({
+            segmentStatus: EPointCloudSegmentStatus.Ready,
+          });
+          return;
+        }
+        setData({
+          segmentStatus: EPointCloudSegmentStatus.Hover,
+          cacheSegData: segmentData,
+        });
+      };
+
       ptSegmentInstance?.on('syncPointCloudStatus', updateVisible);
+      ptSegmentInstance?.on('hoverSegmentInstance', updateHoverData);
 
       return () => {
         ptSegmentInstance?.unbind('syncPointCloudStatus', updateVisible);
+        ptSegmentInstance?.unbind('hoverSegmentInstance', updateHoverData);
       };
     }
   }, [ptSegmentInstance]);
@@ -76,7 +102,7 @@ const PointCloudSegmentStatus = (props: { config: IPointCloudConfig }) => {
 
   let customButton: React.ReactNode = null;
   const pointsLength = (data.cacheSegData?.points?.length ?? 0) / 3;
-  let infoList = [
+  const infoList: Array<{ key: string; value: ReactNode }> = [
     {
       key: 'SelectedPoints',
       value: pointsLength,
@@ -86,7 +112,10 @@ const PointCloudSegmentStatus = (props: { config: IPointCloudConfig }) => {
       value:
         config.attributeList.find((item) => item.value === data.cacheSegData?.attribute)?.key ?? '',
     },
-    {
+  ];
+
+  if (Object.keys(data.cacheSegData?.subAttribute || {}).length > 0) {
+    infoList.push({
       key: 'SubAttribute',
       value: PointCloudUtils.getSubAttributeName(data.cacheSegData?.subAttribute || {}, config).map(
         (item) => {
@@ -97,8 +126,9 @@ const PointCloudSegmentStatus = (props: { config: IPointCloudConfig }) => {
           );
         },
       ),
-    },
-  ];
+    });
+  }
+
   if (isCheckStatus) {
     customButton = (
       <div className={getClassName('point-cloud-status', 'operation')}>

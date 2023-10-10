@@ -71,6 +71,7 @@ export interface IPointCloudDelegate extends IEventBus {
   camera: THREE.OrthographicCamera | THREE.PerspectiveCamera;
   container: HTMLElement;
   checkMode: boolean;
+  config?: IPointCloudConfig;
 }
 
 const DEFAULT_DISTANCE = 30;
@@ -207,13 +208,13 @@ export class PointCloud extends EventListener {
     this.segmentOperation = new PointCloudSegmentOperation({
       dom: this.container,
       store: this.store,
+      ...this.eventBus,
     });
 
     this.pointCloudRender = new PointCloudRender({
       store: this.store,
       ...this.eventBus,
       nextTick: this.nextTick,
-      config: this.config,
     });
     this.initMsg();
     document.addEventListener('keydown', this.keydown);
@@ -327,6 +328,7 @@ export class PointCloud extends EventListener {
       camera: this.camera,
       renderer: this.renderer,
       checkMode: this.checkMode,
+      config: this.config,
       ...this.eventBus,
     };
   }
@@ -350,6 +352,8 @@ export class PointCloud extends EventListener {
 
   public setConfig(config: IPointCloudConfig) {
     this.config = config;
+
+    this.store?.setConfig(config);
   }
 
   /**
@@ -1309,6 +1313,17 @@ export class PointCloud extends EventListener {
         line2: [p2, p3],
       });
     });
+
+    /**
+     * Verify the Reliability of Data
+     *
+     * Both of x and y must be number.
+     */
+    const isErrorNumber = fittedCoordinates.some((v) => !(Number.isFinite(v.x) && Number.isFinite(v.y)));
+    if (isErrorNumber) {
+      return polygon;
+    }
+
     return fittedCoordinates;
   }
 

@@ -319,6 +319,7 @@ const AudioAnnotate: React.FC<AppProps & IProps> = (props) => {
   const [loading, setLoading] = useState<boolean>(true);
   const [result, setResult] = useState<any>(null)
   const [autoFocus, setAutoFocus] = useState<boolean>(false)
+  const [duration, setDuration] = useState<number>(0)
 
   useEffect(() => {
     setLoading(true)
@@ -333,7 +334,7 @@ const AudioAnnotate: React.FC<AppProps & IProps> = (props) => {
 
   useEffect(() => {
     toolInstanceRef.current.exportData = () => {
-      return [[result], {}];
+      return [[result], { duration, valid }];
     };
 
     toolInstanceRef.current.setResult = updateResult
@@ -426,6 +427,7 @@ const AudioAnnotate: React.FC<AppProps & IProps> = (props) => {
 
   const onLoaded = ({ duration, hasError }: any) => {
     setLoading(false);
+    setDuration(duration);
   }
 
   const removeRegion = (id: string) => {

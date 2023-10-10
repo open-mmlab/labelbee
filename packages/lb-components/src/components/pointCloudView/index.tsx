@@ -133,7 +133,6 @@ const PointCloudView: React.FC<IProps> = ({
           <PointCloudSegment checkMode={checkMode} />
           <PointCloudSegment2DView />
         </div>
-        <PointCloudSegment checkMode={checkMode} />
         <PointCloudSegmentStatus config={config} />
         {drawLayerSlot?.({
           direct: true,
