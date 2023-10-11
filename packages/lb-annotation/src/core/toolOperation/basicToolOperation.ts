@@ -1,4 +1,4 @@
-import { IBasicText, ImgPosUtils, toolStyleConverter } from '@labelbee/lb-utils';
+import { IBasicText, ImgPosUtils, i18n, toolStyleConverter } from '@labelbee/lb-utils';
 import { isNumber } from 'lodash';
 import { EOperationMode, EToolName } from '@/constant/tool';
 import { IPolygonConfig, IPolygonData } from '@/types/tool/polygon';
@@ -220,7 +220,7 @@ class BasicToolOperation extends EventListener {
     this.defaultAttribute = props?.defaultAttribute ?? '';
     this.forbidCursorLine = !!props.forbidCursorLine;
     this.lang = ELang.Zh;
-
+    i18n.changeLanguage('cn');
     // 阻止右键菜单栏
     this.onMouseDown = this.onMouseDown.bind(this);
     this.onMouseMove = this.onMouseMove.bind(this);
@@ -354,6 +354,8 @@ class BasicToolOperation extends EventListener {
 
   public setLang(lang: ELang) {
     this.lang = lang;
+    const i18nLanguage = lang === ELang.Zh ? 'cn' : 'en';
+    i18n.changeLanguage(i18nLanguage);
   }
 
   public setShowDefaultCursor(showDefaultCursor: boolean) {
