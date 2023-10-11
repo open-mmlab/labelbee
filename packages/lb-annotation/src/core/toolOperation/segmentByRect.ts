@@ -3,11 +3,13 @@ import AxisUtils from '@/utils/tool/AxisUtils';
 import { RectOperation } from './rectOperation';
 import type { IRectOperationProps } from './rectOperation';
 import EKeyCode from '../../constant/keyCode';
+import CursorTextClass from './cursorTextClass';
+import { ISAMCoordinate } from './segmentBySAM';
 
 type TRunPrediction = (params: {
   point?: ICoordinate;
-  addPoints?: ICoordinate[];
-  removePoints?: ICoordinate[];
+  addPoints?: ISAMCoordinate[];
+  removePoints?: ISAMCoordinate[];
   rect: { x: number; y: number; w: number; h: number };
 }) => Promise<IPolygonData[]>;
 
@@ -16,6 +18,8 @@ export interface ISegmentByRectProps extends IRectOperationProps {
 }
 
 class SegmentByRect extends RectOperation {
+  private cursorTextInstance?: CursorTextClass;
+
   public isRunSegment: boolean; // 是否进行算法预算
 
   public runPrediction: TRunPrediction; // 分割方法
@@ -62,6 +66,8 @@ class SegmentByRect extends RectOperation {
     this.coord = { x: -1, y: -1 };
     this.drawingRect = undefined;
     this.isRunSegment = false;
+    this.cursorTextInstance?.clearTextDOM();
+    this.cursorTextInstance = undefined;
     this.clearCanvas();
     this.render();
   }
@@ -108,38 +114,7 @@ class SegmentByRect extends RectOperation {
     ctx.lineWidth = lineWidth;
     ctx.strokeRect(x - padding, y - padding, padding * 2, padding * 2);
     ctx.restore();
-
-    const isEn = i18n.language === 'en';
-    let rectWidth = isEn ? 326 : 186;
-
-    if (this.rectList?.length === 1) {
-      rectWidth = isEn ? 232 : 142;
-      const radius = 2;
-      ctx.save();
-      ctx.strokeStyle = 'white';
-      const margin = lineWidth + padding;
-
-      ctx.beginPath();
-      ctx.moveTo(x + margin + radius * 2, y + margin + radius);
-      ctx.arc(x + margin + radius, y + margin + radius, radius, 0, Math.PI * 2, true);
-      ctx.stroke();
-      ctx.restore();
-    }
-
-    if (this.isRunSegment) {
-      // 进行算法中
-      rectWidth = isEn ? 316 : 136;
-    }
-
-    ctx.save();
-    ctx.fillStyle = currentColor;
-    ctx.fillRect(x + padding, y - padding * 4 - 1, rectWidth, 32);
-    ctx.restore();
-    ctx.save();
-    ctx.font = '14px Source Han Sans CN';
-    ctx.fillStyle = 'white';
-    ctx.fillText(this.cursorText(), x + padding + 14, y - padding * 2);
-    ctx.restore();
+    this.renderCursorText();
     super.renderCursorLine(currentColor);
   }
 
@@ -206,5 +181,26 @@ class SegmentByRect extends RectOperation {
     });
     this.clearPredictionInfo();
   };
+
+  public renderCursorText() {
+    if (this.coord.x < 0 || this.coord.y < 0) {
+      this.cursorTextInstance?.clearTextDOM();
+      this.cursorTextInstance = undefined;
+      return;
+    }
+
+    if (!this.cursorTextInstance) {
+      this.cursorTextInstance = new CursorTextClass({
+        container: this.container,
+      });
+    }
+
+    const offset = {
+      left: this.coord.x,
+      top: this.coord.y,
+    };
+
+    this.cursorTextInstance.update(offset, this.getLineColor(this.defaultAttribute), this.cursorText());
+  }
 }
 export default SegmentByRect;
