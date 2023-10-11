@@ -15,12 +15,14 @@ export interface ISegmentBySAMProps extends ISegmentByRectProps {
   onFinish: (result: IPolygonData[]) => void;
 }
 
+export type ISAMCoordinate = [x: number, y: number];
+
 class SegmentBySAM extends SegmentByRect {
   private clickType: 'add' | 'remove';
 
-  private addPoints: ICoordinate[];
+  private addPoints: ISAMCoordinate[];
 
-  private removePoints: ICoordinate[];
+  private removePoints: ISAMCoordinate[];
 
   private toolbarInstance?: SAMToolbarClass;
 
@@ -47,9 +49,6 @@ class SegmentBySAM extends SegmentByRect {
   public onKeydown(e: KeyboardEvent) {
     super.onKeydown(e);
     switch (e.keyCode) {
-      case EKeyCode.Q:
-        this.clearPredictionInfo();
-        break;
       case EKeyCode.Minus:
         this.toggleClickType('remove');
         break;
@@ -80,20 +79,21 @@ class SegmentBySAM extends SegmentByRect {
       return;
     }
 
-    const coord = this.getCoordinateUnderZoom(e);
-    const isOutSide = !RectUtils.isInRect(coord, this.rectList[0], 0, this.zoom);
+    const coord = this.getCoordinateInOrigin(e);
+
+    const isOutSide = !RectUtils.isInRect(coord, this.rectList[0], 0, 1);
 
     if (isOutSide) {
-      this.onOutSide();
+      this.onOutSide?.();
       return;
     }
 
     if (this.clickType === 'add') {
-      this.addPoints.push(coord);
+      this.addPoints.push([coord.x, coord.y]);
     }
 
     if (this.clickType === 'remove') {
-      this.removePoints.push(coord);
+      this.removePoints.push([coord.x, coord.y]);
     }
 
     this.isRunSegment = true;
@@ -107,27 +107,28 @@ class SegmentBySAM extends SegmentByRect {
 
     this.toolbarInstance?.setDisabled(true);
 
-    const result = await this.runPrediction({
-      addPoints: this.addPoints,
-      removePoints: this.removePoints,
-      rect: {
-        x: this.rectList[0].x,
-        y: this.rectList[0].y,
-        w: this.rectList[0].width,
-        h: this.rectList[0].height,
-      },
-    });
+    try {
+      const result = await this.runPrediction({
+        addPoints: this.addPoints,
+        removePoints: this.removePoints,
+        rect: {
+          x: this.rectList[0].x,
+          y: this.rectList[0].y,
+          w: this.rectList[0].width,
+          h: this.rectList[0].height,
+        },
+      });
 
-    this.toolbarInstance?.setDisabled(false);
+      const data = result
+        ?.filter((v) => v?.pointList?.length > 2)
+        .map((v: any) => ({ ...v, id: uuid(), attribute: this.defaultAttribute }));
 
-    this.isRunSegment = false;
-
-    const data = result
-      ?.filter((v) => v?.pointList?.length > 2)
-      .map((v: any) => ({ ...v, id: uuid(), attribute: this.defaultAttribute }));
-
-    this.predictionResult = data;
-    this.SAMHistory?.pushHistory(this.predictionResult);
+      this.predictionResult = data;
+      this.SAMHistory?.pushHistory(this.predictionResult);
+    } finally {
+      this.toolbarInstance?.setDisabled(false);
+      this.isRunSegment = false;
+    }
   };
 
   public onMouseDown(e: MouseEvent) {
@@ -148,9 +149,11 @@ class SegmentBySAM extends SegmentByRect {
 
   public drawPolygon(data: IPolygonData, currentColor: IToolColorStyle) {
     const polygon = AxisUtils.changePointListByZoom(data.pointList, this.zoom, this.currentPos);
-    const fillColor = StyleUtils.getStrokeAndFill(currentColor, true, { isHover: true }).fill;
-    DrawUtils.drawPolygonWithFill(this.canvas, polygon, {
-      color: fillColor,
+    const style = StyleUtils.getStrokeAndFill(currentColor, true, { isHover: true });
+    DrawUtils.drawPolygonWithFillAndLine(this.canvas, polygon, {
+      fillColor: style.fill,
+      strokeColor: style.stroke,
+      thickness: this.style?.width ?? 2,
       lineType: ELineTypes.Line,
     });
   }
@@ -172,7 +175,7 @@ class SegmentBySAM extends SegmentByRect {
         container: this.container,
         toggleClickType: (type: 'add' | 'remove') => this.toggleClickType(type),
         finish: () => {
-          this.onFinish(this.predictionResult ?? []);
+          this.onFinish?.(this.predictionResult ?? []);
           this.clearPredictionInfo();
         },
         reset: () => this.reset(),
