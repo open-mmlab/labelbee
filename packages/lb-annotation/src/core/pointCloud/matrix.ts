@@ -14,6 +14,7 @@ import {
   IPolygonPoint,
   ICalib,
   IBasicBox3d,
+  ICoordinate,
 } from '@labelbee/lb-utils';
 import uuid from '@/utils/uuid';
 
@@ -483,4 +484,57 @@ export function pointMappingLidar2image(
     }
   }
   return { pcdMapping };
+}
+
+export function pointListLidar2Img(
+  pointList3D: I3DSpaceCoord[],
+  calib: ICalib,
+  filterSize: {
+    width: number;
+    height: number;
+  },
+) {
+  const isFisheyeCalib = isFisheyeCalibValid(calib);
+
+  const { P, R, T } = calib;
+  let composeMatrix4: THREE.Matrix4 | undefined;
+
+  /**
+   * 1. Default pattern initialize composeMatrix4
+   *
+   * Avoid double counting
+   */
+  if (isFisheyeCalib === false) {
+    const { composeMatrix4: matrix4 } = transferKitti2Matrix(P, R, T) ?? {};
+    if (!matrix4) {
+      return;
+    }
+
+    composeMatrix4 = matrix4;
+  }
+  const pointList2D: Array<ICoordinate> = [];
+
+  // 2. Transform pointList3D
+  pointList3D.forEach((point3D) => {
+    let point2d;
+    if (isFisheyeCalib) {
+      point2d = lidar2FisheyeImage(point3D, calib);
+    } else {
+      point2d = composeMatrix4 && lidar2image(point3D, composeMatrix4);
+    }
+
+    if (point2d) {
+      const { x, y } = point2d;
+
+      // // 1. Filter the points outside imgSize.
+      if (x > filterSize.width || y > filterSize.height || x < 0 || y < 0) {
+        return;
+      }
+
+      // 2. the Mapping is int.
+      pointList2D.push({ x, y });
+    }
+  });
+
+  return pointList2D;
 }
