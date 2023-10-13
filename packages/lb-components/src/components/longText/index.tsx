@@ -42,11 +42,11 @@ const LongText = (props: IProps) => {
       const showText = text.slice(0, wordCount);
       return (
         <Popover placement={placement} overlayClassName={`${longTextCls}-popover`} content={text}>
-          <span style={{ cursor: 'pointer' }}>{showText}...</span>
+          <span style={{ cursor: 'pointer', whiteSpace: 'pre-wrap' }}>{showText}...</span>
         </Popover>
       );
     } else {
-      return <div> {text}</div>;
+      return <div style={{ whiteSpace: 'pre-wrap' }}> {text}</div>;
     }
   }
 
