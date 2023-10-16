@@ -1046,12 +1046,12 @@ export const usePointCloudViews = () => {
       /**
        * Notice. The Polygon need to be converted to pointCloud coordinate system for storage.
        */
-      const polygon = updateList[0].newPolygon;
+      const polygon = { ...updateList[0].newPolygon };
       polygon.pointList = polygon.pointList.map((v) =>
         PointCloudUtils.transferCanvas2World(v, size),
       );
 
-      pushHistoryUnderUpdatePolygon(updateList[0].newPolygon);
+      pushHistoryUnderUpdatePolygon(polygon);
       return;
     }
 
