@@ -16,6 +16,7 @@ import EscSvg from '@/assets/annotation/common/icon_esc.svg';
 import LeftSquareOutlined from '@/assets/annotation/common/icon_left_squareOutlined.svg';
 import RightSquareOutlined from '@/assets/annotation/common/icon_right_squareOutlined.svg';
 import { IMappingImg } from '@/types/data';
+import { isNumber } from 'lodash';
 
 // TODO, It will be deleted when the exported type of lb-annotation is work.
 export interface IAnnotationDataTemporarily {
@@ -28,8 +29,6 @@ export interface IAnnotationDataTemporarily {
     fill: string;
   };
 }
-
-const DEFAULT_GROUND_HEIGHT = -1.345;
 
 interface ITransferViewData {
   type: string;
@@ -195,13 +194,15 @@ const PointCloud2DView = ({
 
         const imageSize = imageSizes[mappingData?.path ?? ''];
 
-        if (imageSize) {
+        if (imageSize && isNumber(mappingData?.calib?.groundHeight)) {
           polygonList.forEach((polygon) => {
             // eslint-disable-next-line
             const polygonPoints = polygon.pointList.map((v) => ({
               ...v,
-              z: mappingData?.calib?.groundHeight ?? DEFAULT_GROUND_HEIGHT,
+              z: mappingData?.calib?.groundHeight,
             }));
+            // 上面用isNumber确保z的值是number，但是ts还是报错，所以这里用//@ts-ignore忽略
+            // @ts-ignore
             const result = pointListLidar2Img(polygonPoints, mappingData?.calib, imageSize);
 
             if (result) {
