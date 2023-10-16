@@ -4,7 +4,7 @@ import { PointCloudContainer } from './PointCloudLayout';
 import { PointCloudContext } from './PointCloudContext';
 import { connect } from 'react-redux';
 
-import { pointCloudLidar2image, cKeyCode } from '@labelbee/lb-annotation';
+import { pointCloudLidar2image, cKeyCode, pointListLidar2Img } from '@labelbee/lb-annotation';
 import { LabelBeeContext } from '@/store/ctx';
 import { a2MapStateToProps, IA2MapStateProps } from '@/store/annotation/map';
 import { ICalib, IPointCloudBox, IPolygonPoint, toolStyleConverter } from '@labelbee/lb-utils';
@@ -28,6 +28,8 @@ export interface IAnnotationDataTemporarily {
     fill: string;
   };
 }
+
+const DEFAULT_GROUND_HEIGHT = -1.345;
 
 interface ITransferViewData {
   type: string;
@@ -120,7 +122,8 @@ const PointCloud2DView = ({
   checkMode,
 }: IProps) => {
   const [annotations2d, setAnnotations2d] = useState<IAnnotationData2dView[]>([]);
-  const { topViewInstance, displayPointCloudList } = useContext(PointCloudContext);
+  const { topViewInstance, displayPointCloudList, polygonList, imageSizes, selectedIDs } =
+    useContext(PointCloudContext);
   const [selectedID, setSelectedID] = useState<number | string>('');
   const [isEnlarge, setIsEnlarge] = useState<boolean>(false);
   const [curIndex, setCurIndex] = useState<number | undefined>(undefined);
@@ -189,6 +192,44 @@ const PointCloud2DView = ({
           },
           [],
         );
+
+        const imageSize = imageSizes[mappingData?.path ?? ''];
+
+        if (imageSize) {
+          polygonList.forEach((polygon) => {
+            // eslint-disable-next-line
+            const polygonPoints = polygon.pointList.map((v) => ({
+              ...v,
+              z: mappingData?.calib?.groundHeight ?? DEFAULT_GROUND_HEIGHT,
+            }));
+            const result = pointListLidar2Img(polygonPoints, mappingData?.calib, imageSize);
+
+            if (result) {
+              const polygonColor = toolStyleConverter.getColorFromConfig(
+                { attribute: polygon.attribute },
+                {
+                  ...config,
+                  attributeConfigurable: true,
+                },
+                {},
+              );
+
+              newAnnotations2d.push({
+                type: 'polygon',
+                annotation: {
+                  id: polygon.id,
+                  pointList: result,
+                  ...defaultViewStyle,
+                  stroke: polygonColor?.stroke,
+                  fill: selectedIDs.includes(polygon.id)
+                    ? polygonColor?.fill
+                    : 'rgba(255, 255, 255, 0.6)',
+                },
+              });
+            }
+          });
+        }
+
         newAnnotations2dList.push({
           annotations: newAnnotations2d,
           url: mappingData?.url,
@@ -205,6 +246,9 @@ const PointCloud2DView = ({
     selectedID,
     highlightAttribute,
     loadPCDFileLoading,
+    polygonList,
+    imageSizes,
+    selectedIDs,
   ]);
 
   useEffect(() => {

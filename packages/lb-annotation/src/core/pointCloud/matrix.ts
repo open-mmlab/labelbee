@@ -488,12 +488,16 @@ export function pointMappingLidar2image(
 
 export function pointListLidar2Img(
   pointList3D: I3DSpaceCoord[],
-  calib: ICalib,
-  filterSize: {
+  calib?: ICalib,
+  filterSize?: {
     width: number;
     height: number;
   },
 ) {
+  if (!calib || !filterSize) {
+    return;
+  }
+
   const isFisheyeCalib = isFisheyeCalibValid(calib);
 
   const { P, R, T } = calib;
@@ -526,15 +530,15 @@ export function pointListLidar2Img(
     if (point2d) {
       const { x, y } = point2d;
 
-      // // 1. Filter the points outside imgSize.
-      if (x > filterSize.width || y > filterSize.height || x < 0 || y < 0) {
-        return;
-      }
-
-      // 2. the Mapping is int.
       pointList2D.push({ x, y });
     }
   });
+  // 有一个点在图像内就返回整个多边形
+  const hasInImagePoint = pointList2D.some((point) => {
+    return point.x > 0 && point.x < filterSize.width && point.y > 0 && point.y < filterSize.height;
+  });
 
-  return pointList2D;
+  if (hasInImagePoint) {
+    return pointList2D;
+  }
 }
