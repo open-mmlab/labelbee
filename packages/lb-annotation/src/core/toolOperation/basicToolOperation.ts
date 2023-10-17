@@ -20,6 +20,11 @@ import RenderDomUtils from '../../utils/tool/RenderDomUtils';
 import ZoomUtils from '../../utils/tool/ZoomUtils';
 import EventListener from './eventListener';
 
+const LANGUAGE_MAP = {
+  [ELang.Zh]: 'cn',
+  [ELang.US]: 'en',
+};
+
 interface IBasicToolOperationProps {
   container: HTMLElement;
   size: ISize;
@@ -47,6 +52,7 @@ interface IBasicToolOperationProps {
     max: number;
     ratio: number;
   };
+  language?: ELang;
 }
 
 /**
@@ -219,8 +225,8 @@ class BasicToolOperation extends EventListener {
     this.dragStatus = EDragStatus.Wait;
     this.defaultAttribute = props?.defaultAttribute ?? '';
     this.forbidCursorLine = !!props.forbidCursorLine;
-    this.lang = ELang.Zh;
-    i18n.changeLanguage('cn');
+    this.lang = props?.language ?? ELang.Zh;
+    i18n.changeLanguage(LANGUAGE_MAP[this.lang]);
     // 阻止右键菜单栏
     this.onMouseDown = this.onMouseDown.bind(this);
     this.onMouseMove = this.onMouseMove.bind(this);
@@ -354,7 +360,7 @@ class BasicToolOperation extends EventListener {
 
   public setLang(lang: ELang) {
     this.lang = lang;
-    const i18nLanguage = lang === ELang.Zh ? 'cn' : 'en';
+    const i18nLanguage = LANGUAGE_MAP[lang];
     i18n.changeLanguage(i18nLanguage);
   }
 
