@@ -189,7 +189,7 @@ class SegmentBySAM extends SegmentByRect {
           this.clearPredictionInfo();
         },
         reset: () => this.reset(),
-        i18n: i18n,
+        i18n,
       });
     }
     const toggleOffset = getSAMToolbarOffset({
