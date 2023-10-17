@@ -8,37 +8,13 @@ import AxisUtils from '@/utils/tool/AxisUtils';
 import StyleUtils from '@/utils/tool/StyleUtils';
 
 const TOOLBAR_SIZE = {
-  width: 280,
   height: 38,
 };
 
 // 距离框左上角高出的距离
 const TOOLBAR_TOP_OFFSET = 8;
 
-const RADIO_GROUP = [
-  {
-    text: '增加(+)',
-    value: 'add',
-  },
-  {
-    text: '删减(-)',
-    value: 'remove',
-  },
-];
-
-const BUTTON_GROUP = [
-  {
-    text: '重置',
-    value: 'rest',
-  },
-  {
-    text: '完成',
-    value: 'finish',
-  },
-];
-
 const BUTTON_GROUP_STYLE = {
-  width: '40px',
   height: '22px',
   border: '1px solid #666fff',
   color: '#666fff',
@@ -47,6 +23,7 @@ const BUTTON_GROUP_STYLE = {
   alignItems: 'center',
   cursor: 'pointer',
   borderRadius: '4px',
+  padding: '0 8px',
 };
 
 export default class SAMToolbarClass {
@@ -60,6 +37,8 @@ export default class SAMToolbarClass {
 
   private _buttonGroupDOM?: HTMLElement;
 
+  private i18n: any;
+
   private onToggleClickType: (type: 'add' | 'remove') => void;
 
   private onReset: () => void;
@@ -67,12 +46,13 @@ export default class SAMToolbarClass {
   private onFinish: () => void;
 
   constructor(props: any) {
-    const { container, toggleClickType, finish, reset } = props;
+    const { container, toggleClickType, finish, reset, i18n } = props;
     this.container = container;
     this.onToggleClickType = toggleClickType;
     this.onFinish = finish;
     this.onReset = reset;
     this.disabled = false;
+    this.i18n = i18n;
     this._toolbarDOM = this.initToolbarDOM();
     this._radioGroupDOM = this.initRadioGroupDOM();
     this._buttonGroupDOM = this.initButtonGroupDOM();
@@ -106,7 +86,6 @@ export default class SAMToolbarClass {
       display: 'flex',
       position: 'absolute',
       fontSize: '14px',
-      width: `${TOOLBAR_SIZE.width}px`,
       height: `${TOOLBAR_SIZE.height}px`,
       padding: '0 8px',
       borderRadius: '4px',
@@ -117,6 +96,17 @@ export default class SAMToolbarClass {
   }
 
   public initRadioGroupDOM() {
+    const RADIO_GROUP = [
+      {
+        text: `${this.i18n.t('AddPoints')}(+)`,
+        value: 'add',
+      },
+      {
+        text: `${this.i18n.t('RemovePoints')}(-)`,
+        value: 'remove',
+      },
+    ];
+
     const radioGroupDOM = document.createElement('div');
     radioGroupDOM.setAttribute('id', 'LABELBEE_SAM_TOOLBAR_RADIO_GROUP');
 
@@ -146,6 +136,17 @@ export default class SAMToolbarClass {
   }
 
   public initButtonGroupDOM() {
+    const BUTTON_GROUP = [
+      {
+        text: `${this.i18n.t('Reset')}`,
+        value: 'reset',
+      },
+      {
+        text: `${this.i18n.t('Finish')}`,
+        value: 'finish',
+      },
+    ];
+
     const buttonGroupDOM = document.createElement('div');
     buttonGroupDOM.setAttribute('id', 'LABELBEE_SAM_TOOLBAR_BUTTON_GROUP');
 
@@ -209,7 +210,7 @@ export default class SAMToolbarClass {
       const target = e.target as HTMLElement;
       const value = target.getAttribute('data-value');
 
-      if (value === 'rest') {
+      if (value === 'reset') {
         this.onReset();
       }
 

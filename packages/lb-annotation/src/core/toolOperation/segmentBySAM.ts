@@ -44,6 +44,11 @@ class SegmentBySAM extends SegmentByRect {
     this.onFinish = props.onFinish;
     this.SAMHistory = new ActionsHistory();
     this.clearPredictionInfo = this.clearPredictionInfo.bind(this);
+    i18n.on('languageChanged', () => {
+      this.toolbarInstance?.clearToolbarDOM();
+      this.toolbarInstance = undefined;
+      this.renderToolbar();
+    });
   }
 
   public onKeydown(e: KeyboardEvent) {
@@ -170,6 +175,11 @@ class SegmentBySAM extends SegmentByRect {
 
   public renderToolbar() {
     const rect = this.rectList[0];
+
+    if (!rect) {
+      return;
+    }
+
     if (!this.toolbarInstance) {
       this.toolbarInstance = new SAMToolbarClass({
         container: this.container,
@@ -179,6 +189,7 @@ class SegmentBySAM extends SegmentByRect {
           this.clearPredictionInfo();
         },
         reset: () => this.reset(),
+        i18n: i18n,
       });
     }
     const toggleOffset = getSAMToolbarOffset({
@@ -205,14 +216,20 @@ class SegmentBySAM extends SegmentByRect {
   }
 
   public cursorText() {
-    let text = `① 请先框出需分割的物体`;
+    let text = `① ${i18n.t('PleaseFrameTheObjectToBeDividedFirst')}`;
 
     if (this.rectList?.length === 1) {
       if (this.clickType === 'add') {
-        text = this.addPoints.length === 0 ? `② 单击目标物体进行分割` : `② 再次单击目标物体增加分割`;
+        text =
+          this.addPoints.length === 0
+            ? `② ${i18n.t('ClickOnTheTargetObjectToSplitIt')}`
+            : `② ${i18n.t('ClickTheTargetObjectAgainToIncreaseTheSegmentation')}`;
       }
       if (this.clickType === 'remove') {
-        text = this.removePoints.length === 0 ? `② 单击目标物体删减分割` : `② 再次单击目标物体删减分割`;
+        text =
+          this.removePoints.length === 0
+            ? `② ${i18n.t('ClickOnTheTargetObjectToDeleteTheSegmentation')}`
+            : `② ${i18n.t('ClickAgainOnTheTargetObjectToDeleteTheSegmentation')}`;
       }
     }
 
