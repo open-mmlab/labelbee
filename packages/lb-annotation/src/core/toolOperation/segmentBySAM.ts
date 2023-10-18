@@ -44,11 +44,7 @@ class SegmentBySAM extends SegmentByRect {
     this.onFinish = props.onFinish;
     this.SAMHistory = new ActionsHistory();
     this.clearPredictionInfo = this.clearPredictionInfo.bind(this);
-    i18n.on('languageChanged', () => {
-      this.toolbarInstance?.clearToolbarDOM();
-      this.toolbarInstance = undefined;
-      this.renderToolbar();
-    });
+    this.onLanguageChanged = this.onLanguageChanged.bind(this);
   }
 
   public onKeydown(e: KeyboardEvent) {
@@ -73,6 +69,16 @@ class SegmentBySAM extends SegmentByRect {
     super.onMouseUp(e);
 
     return undefined;
+  }
+
+  public eventBinding() {
+    super.eventBinding();
+    i18n.on('languageChanged', this.onLanguageChanged);
+  }
+
+  public eventUnbinding() {
+    super.eventUnbinding();
+    i18n.off('languageChanged', this.onLanguageChanged);
   }
 
   public setOnOutSide(onOutSide: () => void) {
@@ -143,6 +149,12 @@ class SegmentBySAM extends SegmentByRect {
     super.onMouseDown(e);
 
     return undefined;
+  }
+
+  public onLanguageChanged() {
+    this.toolbarInstance?.clearToolbarDOM();
+    this.toolbarInstance = undefined;
+    this.renderToolbar();
   }
 
   public drawPredictionResult() {
