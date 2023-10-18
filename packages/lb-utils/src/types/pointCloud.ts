@@ -128,7 +128,7 @@ interface ICalib {
   P: [TMatrix14Tuple, TMatrix14Tuple, TMatrix14Tuple]; // 3x4 Camera Intrinsic matrix
   R: [TMatrix13Tuple, TMatrix13Tuple, TMatrix13Tuple]; // 3x3 rotation matrix
   T: [TMatrix14Tuple, TMatrix14Tuple, TMatrix14Tuple]; // 3x4 Lidar to camera matrix
-
+  groundHeight?: number; // Ground height. 地面高度。
   calName?: string; // Camera Name
 }
 
@@ -136,7 +136,7 @@ interface ICalib {
   P: [TMatrix14Tuple, TMatrix14Tuple, TMatrix14Tuple]; // 3x4 Camera Intrinsic matrix
   T: [TMatrix14Tuple, TMatrix14Tuple, TMatrix14Tuple]; // 3x4 Lidar to camera matrix
   fisheyeDistortion: number[]; // Omnidirectional camera: fisheye distortion. 全方向摄像机 - 鱼眼畸变参数。
-
+  groundHeight?: number; // Ground height. 地面高度。
   calName?: string; // Camera Name
 }
 
