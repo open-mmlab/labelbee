@@ -713,4 +713,62 @@ export default class PolygonUtils {
       console.error(e);
     }
   }
+
+  /**
+   * 合成两个点集在一起
+   * @param pointList1 被插入点集
+   * @param pointList2 插入点集
+   */
+  public static composePointList(pointList1: IPolygonPoint[], pointList2: IPolygonPoint[]) {
+    let indexA = 0;
+    let indexB = 0;
+
+    let min = Number.MAX_VALUE;
+
+    pointList1.forEach((v, i) => {
+      pointList2.forEach((d, j) => {
+        const minDis = LineToolUtils.calcDistance(v, d);
+
+        if (minDis < min) {
+          indexA = i + 1;
+          indexB = j + 1;
+          min = minDis;
+        }
+      });
+    });
+
+    return [
+      ...pointList1.slice(0, indexA),
+      ...pointList2.slice(indexB, pointList2.length),
+      ...pointList2.slice(0, indexB),
+      ...pointList1.slice(indexA, pointList1.length),
+    ];
+  }
+
+  /**
+   * 将分割辅助算法得到的结果拼接起来
+   * 1. 将被包裹的结果与包裹的多边形合成
+   * @param polygonList
+   */
+  public static composeSegmentPolygonList(polygonList: any[]) {
+    const deleteList: any[] = [];
+    for (let i = 0; i < polygonList.length; i++) {
+      for (let j = 0; j < polygonList.length; j++) {
+        const p1 = polygonList[i]?.pointList;
+        const p2 = polygonList[j]?.pointList;
+
+        if (i !== j && p1 && p2 && PolygonUtils.isPointListInPolygon(p2, p1)) {
+          // 将 j 合入 i 多边形中
+          polygonList[i].pointList = PolygonUtils.composePointList(p1, p2);
+          deleteList.unshift(j);
+        }
+      }
+    }
+
+    deleteList.forEach((v) => {
+      polygonList.splice(v, 1);
+    });
+
+    return polygonList;
+  }
 }

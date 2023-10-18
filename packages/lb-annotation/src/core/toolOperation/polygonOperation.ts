@@ -92,7 +92,6 @@ class PolygonOperation extends BasicToolOperation {
 
     this.getCurrentSelectedData = this.getCurrentSelectedData.bind(this);
     this.updateSelectedTextAttribute = this.updateSelectedTextAttribute.bind(this);
-
     this.selection = new Selection(this);
   }
 

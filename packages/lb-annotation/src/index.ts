@@ -17,6 +17,7 @@ import ViewOperation from './core/toolOperation/ViewOperation';
 import ScribbleTool from './core/toolOperation/ScribbleTool';
 import PointCloud2dOperation from './core/toolOperation/pointCloud2dOperation';
 import SegmentByRect from './core/toolOperation/segmentByRect';
+import SegmentBySAM from './core/toolOperation/segmentBySAM';
 
 // Constant
 import * as cAnnotation from './constant/annotation';
@@ -47,6 +48,7 @@ import AnnotationEngine from './core';
 
 import UnitUtils from './utils/tool/UnitUtils';
 import StyleUtils from './utils/tool/StyleUtils';
+import CursorTextClass from './core/toolOperation/cursorTextClass';
 
 const CommonToolUtils = EnhanceCommonToolUtils;
 const toolUtils = EnhanceCommonToolUtils; // Compatible with the old version of the definition
@@ -65,6 +67,8 @@ export {
   ViewOperation,
   PointCloud2dOperation,
   SegmentByRect,
+  SegmentBySAM,
+  CursorTextClass,
   // 固定操作
   cAnnotation,
   cAnnotationTask,

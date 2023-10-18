@@ -41,4 +41,21 @@ export default class StyleUtils {
 
     return Object.entries(style).reduce((acc, cur) => `${acc} ${cur[0]}: ${cur[1]};`, '');
   }
+
+  /**
+   * Apply a map of styles to an element
+   *
+   * @param {HTMLElement} el The element that the styles will be applied to
+   * @param {Object} styles The map of propName: attribute, both are used as-is
+   *
+   * @return {HTMLElement} el
+   */
+  public static setDOMStyle(el: HTMLElement, styles: any) {
+    Object.keys(styles).forEach((prop) => {
+      if (el.style[prop as any] !== styles[prop]) {
+        el.style[prop as any] = styles[prop];
+      }
+    });
+    return el;
+  }
 }
