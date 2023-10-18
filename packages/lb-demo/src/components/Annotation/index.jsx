@@ -11,6 +11,85 @@ import { message } from 'antd';
 //   rect: { x: number; y: number; w: number; h: number };
 // }) => Promise<unknown>;
 
+const tmpRes = {
+  status: 2,
+  polygonList: [
+    {
+      pointList: [
+        {
+          x: 682,
+          y: 422,
+        },
+        {
+          x: 678,
+          y: 418,
+        },
+        {
+          x: 655,
+          y: 414,
+        },
+        {
+          x: 633,
+          y: 416,
+        },
+        {
+          x: 605,
+          y: 415,
+        },
+        {
+          x: 593,
+          y: 419,
+        },
+        {
+          x: 586,
+          y: 419,
+        },
+        {
+          x: 582,
+          y: 424,
+        },
+        {
+          x: 583,
+          y: 441,
+        },
+        {
+          x: 586,
+          y: 456,
+        },
+        {
+          x: 588,
+          y: 458,
+        },
+        {
+          x: 630,
+          y: 457,
+        },
+        {
+          x: 636,
+          y: 459,
+        },
+        {
+          x: 641,
+          y: 463,
+        },
+        {
+          x: 669,
+          y: 469,
+        },
+        {
+          x: 681,
+          y: 467,
+        },
+        {
+          x: 683,
+          y: 462,
+        },
+      ],
+    },
+  ],
+  errorMsg: '',
+};
+
 const Annotation = (props) => {
   const ref = useRef();
   const { fileList, goBack, stepList, step } = props;
@@ -30,13 +109,18 @@ const Annotation = (props) => {
             // 模拟异步的操作
             setTimeout(() => {
               // 关键，需要返回成功
-              resolve('');
-              message.success('Predict successfully');
+              if (tmpRes.status === 2) {
+                resolve(tmpRes.polygonList);
+                message.success('Predict successfully');
+              }
 
               // 返回的原来的工具
-              annotationEngine.switchLastTwoCanvas();
-            }, 1000);
+              // annotationEngine.switchLastTwoCanvas();
+            }, 500);
           });
+        });
+        firstToolInstance?.setOnOutSide?.(() => {
+          message.warning('请在框内进行点击');
         });
       }
     });

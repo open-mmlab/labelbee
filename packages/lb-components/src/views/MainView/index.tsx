@@ -26,7 +26,7 @@ import LLMLayout from './LLMLayout';
 import AudioAnnotate from '@/components/audioAnnotate'
 import { LoadingOutlined } from '@ant-design/icons';
 import { useTranslation } from 'react-i18next';
-import { EAudioToolName } from '@labelbee/lb-annotation';
+import { EAudioToolName, EPointCloudName } from '@labelbee/lb-annotation';
 
 interface IProps {
   path: string;
@@ -87,7 +87,7 @@ const ViewportProviderLayout = (props: AppProps & IProps & { children: any }) =>
   const currentToolName = getStepConfig(stepList, step)?.tool;
   const hasLangNode = ![EToolName.LLM, EAudioToolName.AudioTextTool].includes(currentToolName)
   const hasHeaderOption = ![EToolName.LLM].includes(currentToolName)
-  const hasPredictTrackingIcon = ![EToolName.LLM, EAudioToolName.AudioTextTool].includes(currentToolName)
+  const hasPredictTrackingIcon = [EPointCloudName.PointCloud].includes(currentToolName)
   return (
     <ViewportProvider>
       <Spin
