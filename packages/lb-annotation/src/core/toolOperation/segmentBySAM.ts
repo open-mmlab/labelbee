@@ -92,7 +92,9 @@ class SegmentBySAM extends SegmentByRect {
 
     const coord = this.getCoordinateInOrigin(e);
 
-    const isOutSide = !RectUtils.isInRect(coord, this.rectList[0], 0, 1);
+    const imgRect = { x: 0, y: 0, width: this.basicImgInfo?.width ?? 0, height: this.basicImgInfo?.height ?? 0 };
+
+    const isOutSide = !RectUtils.isInRect(coord, imgRect, 0, 1);
 
     if (isOutSide) {
       this.onOutSide?.();
