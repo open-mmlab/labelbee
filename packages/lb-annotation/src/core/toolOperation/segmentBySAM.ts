@@ -221,6 +221,11 @@ class SegmentBySAM extends SegmentByRect {
     this.render();
   }
 
+  public setDefaultAttribute(attribute: any) {
+    super.setDefaultAttribute(attribute);
+    this.predictionResult = this.predictionResult?.map((v) => ({ ...v, attribute })) ?? [];
+  }
+
   public reset() {
     this.addPoints = [];
     this.removePoints = [];

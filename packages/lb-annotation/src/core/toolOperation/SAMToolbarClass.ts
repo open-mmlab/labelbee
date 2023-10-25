@@ -115,6 +115,7 @@ export default class SAMToolbarClass {
       display: 'flex',
       justifyContent: 'space-around',
       alignItems: 'center',
+      flexShrink: 0,
     });
 
     let str: string = '';
@@ -156,6 +157,7 @@ export default class SAMToolbarClass {
       justifyContent: 'space-around',
       alignItems: 'center',
       gap: '8px',
+      flexShrink: 0,
     });
 
     BUTTON_GROUP.forEach((item) => {
