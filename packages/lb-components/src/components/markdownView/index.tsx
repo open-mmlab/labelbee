@@ -15,9 +15,6 @@ import 'github-markdown-css';
 import styles from './index.module.scss';
 import { classnames } from '@/utils';
 
-
-
-
 interface IProps {
   value: string;
   transformImageUri?: (uri: string) => string;
@@ -30,19 +27,26 @@ const MarkdownView = (props: IProps) => {
   const code = ({ node, inline, className, children, ...props }: any) => {
     const match = /language-(\w+)/.exec(className || '');
     return !inline && match ? (
+      /**
+       * Difference version' React cause type error
+       * https://github.com/react-syntax-highlighter/react-syntax-highlighter/issues/539
+       */
+      // @ts-ignore
       <SyntaxHighlighter
         {...props}
         className='markdown-code-viewer'
         language={match[1]}
         style={docco}
         PreTag='div'
-      >{String(children).replace(/\n$/, '')}</SyntaxHighlighter>
+      >
+        {String(children).replace(/\n$/, '')}
+      </SyntaxHighlighter>
     ) : (
       <code {...props} className={className}>
         {children}
       </code>
     );
-  }
+  };
 
   return (
     <Markdown
