@@ -158,7 +158,7 @@ export class PointCloud extends EventListener {
     this.config = config;
     this.checkMode = checkMode ?? false;
 
-    // TODO
+    // TODO: Need to extracted.
     if (isOrthographicCamera && orthographicParams) {
       this.isOrthographicCamera = true;
       this.camera = new THREE.OrthographicCamera(
@@ -396,7 +396,7 @@ export class PointCloud extends EventListener {
     // Camera setting must be set before Control's initial.
     const { camera } = this;
 
-    // TODO
+    // TODO: Need to change it to a better way.
     if (this.isOrthographicCamera) {
       const { x, y, z } = this.initCameraPosition;
       camera.position.set(x, y, z);
@@ -1168,7 +1168,7 @@ export class PointCloud extends EventListener {
     const cb = async (points: Float32Array, color: Float32Array) => {
       const { width = 0, height = 0, depth = 0 } = scope ?? {};
 
-      // TODO. Speed can be optimized.
+      // TODO. Speed can be optimized. It can use octree to optimize it.
       const filterData = await this.filterPointsByBox(
         {
           ...boxParams,
@@ -1648,7 +1648,7 @@ export class PointCloud extends EventListener {
   public getBoxTopPolygon2DCoordinate(boxParams: IPointCloudBox) {
     const { width, height } = boxParams;
     const vectorList = this.getPolygonTopPoints(boxParams);
-    // TODO. Need to update
+    // TODO. Need to optimize
     const polygon2d = vectorList
       .map((vector) => new THREE.Vector3(vector.x, vector.y, vector.z))
       // .map((vector) => vector.applyMatrix4(invertMatrix)); // Direct invertMatrix

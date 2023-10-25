@@ -59,7 +59,6 @@ class PointCloudRender {
   }
 
   public initMsg() {
-    // TODO, Just for showing.
     this.on('addNewPointsCloud', this.generateNewPoints);
     this.on('updateNewPoints', this.updateNewPoints);
     this.on('clearStashRender', this.clearStash);
@@ -123,7 +122,7 @@ class PointCloudRender {
     }
   }
 
-  // TODO, Just for showing.
+  // TODO. Try optimizing by changing the color of individual points.
   public generateNewPoints = (segmentData: IPointCloudSegmentation) => {
     const geometry = new THREE.BufferGeometry();
     // itemSize = 3 因为每个顶点都是一个三元组。
