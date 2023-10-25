@@ -130,7 +130,6 @@ class PointCloudStore {
   }
 
   public initMsg() {
-    // TODO, Just for showing.
     this.on('clearStash', this.clearStash);
     this.on('addStash2Store', this.addStash2Store);
     this.on('updateCheck2Edit', this.updateCheck2Edit);
@@ -344,7 +343,7 @@ class PointCloudStore {
     this.polygon2d = polygon2d;
   }
 
-  // TODO. Not the last version.
+  // TODO. It can be optimized. Use octree.
   public getPointsInPolygon(originPolygon: ICoordinate[]) {
     /**
      * Status Limit;
