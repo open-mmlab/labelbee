@@ -14,6 +14,7 @@ import {
   IPolygonPoint,
   ICalib,
   IBasicBox3d,
+  ICoordinate,
 } from '@labelbee/lb-utils';
 import uuid from '@/utils/uuid';
 
@@ -483,4 +484,61 @@ export function pointMappingLidar2image(
     }
   }
   return { pcdMapping };
+}
+
+export function pointListLidar2Img(
+  pointList3D: I3DSpaceCoord[],
+  calib?: ICalib,
+  filterSize?: {
+    width: number;
+    height: number;
+  },
+) {
+  if (!calib || !filterSize) {
+    return;
+  }
+
+  const isFisheyeCalib = isFisheyeCalibValid(calib);
+
+  const { P, R, T } = calib;
+  let composeMatrix4: THREE.Matrix4 | undefined;
+
+  /**
+   * 1. Default pattern initialize composeMatrix4
+   *
+   * Avoid double counting
+   */
+  if (isFisheyeCalib === false) {
+    const { composeMatrix4: matrix4 } = transferKitti2Matrix(P, R, T) ?? {};
+    if (!matrix4) {
+      return;
+    }
+
+    composeMatrix4 = matrix4;
+  }
+  const pointList2D: Array<ICoordinate> = [];
+
+  // 2. Transform pointList3D
+  pointList3D.forEach((point3D) => {
+    let point2d;
+    if (isFisheyeCalib) {
+      point2d = lidar2FisheyeImage(point3D, calib);
+    } else {
+      point2d = composeMatrix4 && lidar2image(point3D, composeMatrix4);
+    }
+
+    if (point2d) {
+      const { x, y } = point2d;
+
+      pointList2D.push({ x, y });
+    }
+  });
+  // 有一个点在图像内就返回整个多边形
+  const hasInImagePoint = pointList2D.some((point) => {
+    return point.x > 0 && point.x < filterSize.width && point.y > 0 && point.y < filterSize.height;
+  });
+
+  if (hasInImagePoint) {
+    return pointList2D;
+  }
 }
