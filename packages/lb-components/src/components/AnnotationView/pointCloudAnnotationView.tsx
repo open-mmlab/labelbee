@@ -5,7 +5,7 @@
  * @LastEditTime: 2022-06-27 19:43:25
  */
 
-import { PointCloud } from '@labelbee/lb-annotation';
+import {  PointCloud } from '@labelbee/lb-annotation';
 import { IPointCloudBox, PointCloudUtils } from '@labelbee/lb-utils';
 import React, { useCallback, useEffect, useRef } from 'react';
 
@@ -20,10 +20,11 @@ interface IProps {
 
   // Camera Update
   isOrthographicCamera?: boolean;
+  getInstance?: (Instance: PointCloud) => void
 }
 
 const PointCloudAnnotationView = (props: IProps) => {
-  const { src, result, size, isOrthographicCamera = false, backgroundColor = '#ccc' } = props;
+  const { src, result, size, isOrthographicCamera = false, backgroundColor = '#ccc', getInstance } = props;
   let viewOperation = useRef<any>();
   const instance = useRef<any>();
 
@@ -49,6 +50,11 @@ const PointCloudAnnotationView = (props: IProps) => {
 
     const pointCloud = new PointCloud(pointCloudProps);
     instance.current = pointCloud;
+    if(getInstance){
+      instance.current.on('loadPCDFileEnd', () =>{
+        getInstance(instance.current)
+      })
+    }
     return () => {
       instance.current.renderer?.forceContextLoss();
     };
