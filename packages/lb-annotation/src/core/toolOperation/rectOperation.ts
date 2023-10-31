@@ -35,8 +35,6 @@ class RectOperation extends BasicToolOperation {
 
   public rectList: IRect[];
 
-  public drawOutSideTarget: boolean; // 是否能在边界外进行标注
-
   // 具体操作
   public hoverRectID?: string; // 当前是否hover rect
 
@@ -52,6 +50,8 @@ class RectOperation extends BasicToolOperation {
 
   public _textAttributeInstance?: TextAttributeClass;
 
+  private _drawOutSideTarget: boolean; // 是否能在边界外进行标注
+
   private selection: Selection;
 
   private dragInfo?: {
@@ -65,7 +65,7 @@ class RectOperation extends BasicToolOperation {
 
   constructor(props: IRectOperationProps) {
     super(props);
-    this.drawOutSideTarget = props.drawOutSideTarget || false;
+    this._drawOutSideTarget = props.drawOutSideTarget || false;
     this.rectList = [];
     this.isFlow = true;
     this.config = CommonToolUtils.jsonParser(props.config);
@@ -135,6 +135,10 @@ class RectOperation extends BasicToolOperation {
 
   get selectedID() {
     return this.selectedRectID;
+  }
+
+  get drawOutSideTarget() {
+    return this._drawOutSideTarget || this.config.drawOutsideTarget;
   }
 
   public get selectedRect() {
@@ -473,7 +477,7 @@ class RectOperation extends BasicToolOperation {
    * @returns
    */
   public isRectsOutOfTarget(rects: IRect[], offset: ICoordinate) {
-    if (this.config.drawOutsideTarget !== false) {
+    if (this.drawOutSideTarget !== false) {
       return false;
     }
 
@@ -707,7 +711,7 @@ class RectOperation extends BasicToolOperation {
     }
 
     // 边缘判断
-    if (this.config.drawOutsideTarget === false) {
+    if (this.drawOutSideTarget === false) {
       if (this.basicResult) {
         if (this.basicResult?.pointList?.length > 0) {
           // 多边形判断
@@ -829,7 +833,7 @@ class RectOperation extends BasicToolOperation {
       coordinateZoom,
       { x: 0, y: 0 },
       this.imgInfo,
-      this.config.drawOutsideTarget,
+      this.drawOutSideTarget,
       this.basicResult,
       this.zoom,
     );
@@ -881,7 +885,7 @@ class RectOperation extends BasicToolOperation {
         y = coordinate.y;
       }
 
-      if (this.config.drawOutsideTarget === false) {
+      if (this.drawOutSideTarget === false) {
         if (this.basicResult?.pointList?.length > 0) {
           // changeDrawOutsideTarget 最好还是在这里下功夫这里暂时进行多边形的判断
           if (
@@ -977,7 +981,7 @@ class RectOperation extends BasicToolOperation {
       coordinateZoom,
       { x: 0, y: 0 },
       this.imgInfo,
-      this.config.drawOutsideTarget,
+      this.drawOutSideTarget,
       this.basicResult,
       this.zoom,
     );
