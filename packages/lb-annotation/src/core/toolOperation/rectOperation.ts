@@ -35,8 +35,6 @@ class RectOperation extends BasicToolOperation {
 
   public rectList: IRect[];
 
-  public propsDrawOutSideTarget: boolean; // 是否能在边界外进行标注
-
   // 具体操作
   public hoverRectID?: string; // 当前是否hover rect
 
@@ -52,6 +50,8 @@ class RectOperation extends BasicToolOperation {
 
   public _textAttributeInstance?: TextAttributeClass;
 
+  private _drawOutSideTarget: boolean; // 是否能在边界外进行标注
+
   private selection: Selection;
 
   private dragInfo?: {
@@ -65,7 +65,7 @@ class RectOperation extends BasicToolOperation {
 
   constructor(props: IRectOperationProps) {
     super(props);
-    this.propsDrawOutSideTarget = props.drawOutSideTarget || false;
+    this._drawOutSideTarget = props.drawOutSideTarget || false;
     this.rectList = [];
     this.isFlow = true;
     this.config = CommonToolUtils.jsonParser(props.config);
@@ -138,7 +138,7 @@ class RectOperation extends BasicToolOperation {
   }
 
   get drawOutSideTarget() {
-    return this.propsDrawOutSideTarget || this.config.drawOutsideTarget;
+    return this._drawOutSideTarget || this.config.drawOutsideTarget;
   }
 
   public get selectedRect() {
