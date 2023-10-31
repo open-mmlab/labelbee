@@ -274,7 +274,6 @@ class ScribbleTool extends BasicToolOperation {
       this.cacheContext.beginPath();
       this.cacheContext.arc(originCoordinate.x, originCoordinate.y, this.penSizeWithZoom / 2, 0, Math.PI * 2, false);
       this.cacheContext.clip();
-      // TODO
       this.cacheContext.clearRect(0, 0, this.cacheContext.canvas.width, this.cacheContext.canvas.height);
       this.cacheContext?.restore();
     }

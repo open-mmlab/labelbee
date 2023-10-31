@@ -184,7 +184,9 @@ export class PointCloud extends EventListener {
     // this.scene.add(this.axesHelper);
 
     this.scene.add(this.camera);
-    // TODO
+    /**
+     * Temporary: Avoid domElement mounted
+     */
     if (!noAppend) {
       container.appendChild(this.renderer.domElement);
     }

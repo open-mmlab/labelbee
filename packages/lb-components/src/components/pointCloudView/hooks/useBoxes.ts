@@ -58,7 +58,6 @@ export const useBoxes = ({ config }: { config: IPointCloudConfig }) => {
       pointCloudBoxListUpdated?.(newPointCloudBoxList);
       setCopiedBoxes([]);
 
-      // TODO: It need to update in global.
       syncAllViewPointCloudColor(newPointCloudBoxList);
     };
 

@@ -145,7 +145,9 @@ export type UpdatePolygonByDragList = Array<{
   originPolygon: IPolygonData;
 }>;
 
-// TODO: Need to think more about the store of points. Not the last version.
+/**
+ * The definition of points in IPointCloudSegmentation is Float32Array dual to size of memory usage
+ */
 export type TSegmentPoints = Float32Array;
 
 export interface IPointCloudSegmentation {

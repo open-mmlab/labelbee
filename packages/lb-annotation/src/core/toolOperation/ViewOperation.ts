@@ -146,7 +146,7 @@ export default class ViewOperation extends BasicToolOperation {
     super.setImgNode(imgNode, basicImgInfo);
 
     /**
-     * TODO: New Pattern.
+     * Temporary: New Pattern
      * 1. Initialize the staticImgNode.
      */
     if (this.staticMode) {
@@ -155,7 +155,7 @@ export default class ViewOperation extends BasicToolOperation {
   }
 
   /**
-   * TODO: New Pattern.
+   * Temporary: New Pattern
    *
    * 1. crop the canvas.
    */

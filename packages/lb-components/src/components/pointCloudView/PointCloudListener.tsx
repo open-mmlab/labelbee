@@ -293,7 +293,6 @@ const PointCloudListener: React.FC<IProps> = ({
         );
 
         if (ptCtx.mainViewInstance) {
-          // TODO: Poor performance.
           topViewSelectedChanged({
             newSelectedBox: selectBox,
             newPointCloudList: newPointCloudList,

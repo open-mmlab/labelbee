@@ -84,7 +84,6 @@ const BatchUpdateModal = ({
         id,
         newID: values.newID,
         rangeIndex: [values.prevPage - 1, values.nextPage - 1],
-        // TODO: Not to submit result, just to compose result.
         imgList: composeImgList,
       }),
     );
