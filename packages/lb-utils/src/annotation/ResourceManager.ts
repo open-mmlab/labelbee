@@ -57,7 +57,7 @@ class ResourceManager {
    * Quick get the list of resource urls
    *
    * @param currentIndex
-   * @param imgList TODO: Need to define the imgList
+   * @param imgList TODO: Need to define the imgList for more file type(Such as Img、Video...)
    * @returns
    */
   public getResourceList({

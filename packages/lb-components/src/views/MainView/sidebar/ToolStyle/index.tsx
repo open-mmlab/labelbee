@@ -135,7 +135,7 @@ const ToolStyle = (props: IProps) => {
   };
   const { t } = useTranslation();
 
-  // TODO - 样式标准的定义
+  // TODO - 样式标准的定义 Update type
   const annotationConfig: any = props.config;
 
   const changeToolStyle = (obj: { [key: string]: number }) => {
