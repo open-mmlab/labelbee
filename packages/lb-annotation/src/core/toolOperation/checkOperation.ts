@@ -99,7 +99,7 @@ class CheckOperation extends BasicToolOperation {
     if (oldMouseHoverID !== newMouseHoverID) {
       this.mouseHoverID = newMouseHoverID;
       let hoverID = [newMouseHoverID];
-      // TODO：外层特殊判断，跟 mousedown 操作有区别
+      // 外层特殊判断，跟 mousedown 操作有区别
       if (!newMouseHoverID) {
         hoverID = [];
       }

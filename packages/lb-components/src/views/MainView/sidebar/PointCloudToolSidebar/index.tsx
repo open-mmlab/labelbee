@@ -239,7 +239,7 @@ const AttributeUpdater = ({
 }: {
   toolInstance: ICustomToolInstance;
   attributeList: IInputList[];
-  subAttributeList: any[]; // TODO
+  subAttributeList: any[]; // TODO: Type definition
   config: any;
   stepList: IStepInfo[];
   stepInfo: IStepInfo;

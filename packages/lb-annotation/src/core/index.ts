@@ -72,7 +72,7 @@ export default class AnnotationEngine {
 
   /**
    * 同步各种基础类型信息
-   * 1. imgNode （TODO，后续是否将 imgNode 放置在内部管理）
+   * 1. imgNode
    * 2. size
    * 3. config
    * 4. style

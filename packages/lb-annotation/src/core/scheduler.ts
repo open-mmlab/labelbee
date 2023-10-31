@@ -258,10 +258,8 @@ export class ToolScheduler implements IToolSchedulerOperation {
   }
 
   /**
-   * Notice & TODO. Temporary additions
-   * Just to switch last two canvas。
-   *
-   * It will be deleted later.
+   * Just to switch last two canvas
+   * @returns
    */
   public switchLastTwoCanvas() {
     if (this.toolOperationDom.length < 3) {
@@ -296,7 +294,7 @@ export class ToolScheduler implements IToolSchedulerOperation {
   }
 
   /**
-   * Notice & TODO. Temporary additions
+   * Notice & TODO. Temporary Resolution
    * Just to set data to toolInstance.
    * @returns
    */

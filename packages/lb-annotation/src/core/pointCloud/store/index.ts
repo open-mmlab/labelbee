@@ -23,12 +23,6 @@ const DEFAULT_PREFIX = 'LABELBEE_CANVAS_';
 
 export type ThreePoints = THREE.Points<THREE.BufferGeometry, THREE.PointsMaterial>;
 
-/**
- * TODO:
- * Need to think about store:
- * 1. The definition of points in IPointCloudSegmentation is Float32Array ?
- * 2. CloudData store the status ?
- */
 class PointCloudStore {
   public canvas2d: HTMLCanvasElement | null = null;
 
@@ -88,7 +82,7 @@ class PointCloudStore {
 
   public hiddenAttributes: string[] = [];
 
-  // TODO. clear later.
+  // TODO: Can be configured externally
   public pointCloudObjectName = 'pointCloud';
 
   public config?: IPointCloudConfig;
@@ -377,10 +371,6 @@ class PointCloudStore {
           const z = cloudDataArrayLike[i + 2];
           const key = PointCloudUtils.getCloudKeys(x, y, z);
 
-          /**
-           * TODO: Has visible.
-           *
-           */
           if (this.segmentMode === EPointCloudSegmentMode.Remove) {
             this.cloudData.get(key).visible = false;
             vertices.push(cloudDataArrayLike[i], cloudDataArrayLike[i + 1], cloudDataArrayLike[i + 2]);

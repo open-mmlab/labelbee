@@ -840,7 +840,6 @@ class CuboidOperation extends BasicToolOperation implements ITextAttributeFuc {
   }
 
   /**
-   * TODO - Need to optimize.
    * @param cuboid
    */
   public renderSingleCuboid(cuboid: ICuboid | IDrawingCuboid) {
@@ -1057,14 +1056,12 @@ class CuboidOperation extends BasicToolOperation implements ITextAttributeFuc {
             );
           });
 
-          // TODO - Update cursor
           break;
         case 'line': {
           const pointList = data.points?.map((point) => AxisUtils.changePointByZoom(point, this.zoom, this.currentPos));
           if (pointList) {
             DrawUtils.drawLineWithPointList(this.canvas, pointList, { color: strokeColor, thickness });
           }
-          // TODO - Update cursor
           break;
         }
         default: {

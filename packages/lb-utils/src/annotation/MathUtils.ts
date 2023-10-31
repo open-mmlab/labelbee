@@ -1,7 +1,3 @@
-/**
- * TODO: Need to migrate from lb-annotation to current location.
- */
-
 export default class MathUtils {
   /**
    * 是否在指定范围内
