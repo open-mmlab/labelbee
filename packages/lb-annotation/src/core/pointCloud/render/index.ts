@@ -122,7 +122,7 @@ class PointCloudRender {
     }
   }
 
-  // TODO. Try optimizing by changing the color of individual points.
+  // TODO. Try optimizing by changing the color of original point cloud
   public generateNewPoints = (segmentData: IPointCloudSegmentation) => {
     const geometry = new THREE.BufferGeometry();
     // itemSize = 3 因为每个顶点都是一个三元组。
