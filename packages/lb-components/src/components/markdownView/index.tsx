@@ -51,7 +51,14 @@ const MarkdownView = (props: IProps) => {
         [styles.markdownView]: true,
       })}
       remarkPlugins={[remarkGfm, remarkMath]}
-      rehypePlugins={[rehypeKatex]}
+      rehypePlugins={[
+        [
+          rehypeKatex,
+          {
+            output: 'mathml',
+          },
+        ],
+      ]}
       transformImageUri={transformImageUri}
       transformLinkUri={transformLinkUri}
       components={{
