@@ -19,6 +19,7 @@ export interface IAnswerList {
   indicatorDetermine?: {
     [key: string]: boolean;
   };
+  newAnswer?: string;
 }
 
 export interface IModelAPIAnswer {
@@ -48,16 +49,24 @@ export interface ILLMToolConfig {
   indicatorDetermine?: IndicatorDetermine[]; // 指标判断
   score?: number; // 整体评分
   text?: ITextList[];
+  dataType: {
+    prompt: string;
+    response: string;
+  };
+  isTextEdit: boolean;
+  textEdit: ITextList[];
 }
 
 // LLM文本
 export interface ITextList {
-  textId: string;
-  title?: string;
+  textId?: string;
+  title?: string | number;
   tip?: string;
   min?: number;
   max?: number;
   value?: string;
+  isFillAnswer?: boolean;
+  textControl?: boolean;
 }
 
 // 单个答案

@@ -10,11 +10,12 @@ import LongText from '@/components/longText';
 import { EDataFormatType, prefix } from '@/constant';
 import classNames from 'classnames';
 import { useTranslation, I18nextProvider } from 'react-i18next';
-import { IAnswerList, IModelAPIAnswer } from '@/components/LLMToolView/types';
+import { IAnswerList, IModelAPIAnswer, ILLMToolConfig, ITextList  } from '@/components/LLMToolView/types';
 import { i18n } from '@labelbee/lb-utils';
 import MarkdownView from '@/components/markdownView';
 import { FileTextOutlined } from '@ant-design/icons';
 import ModelAPIView from '../modelAPIView';
+import DiffMatchPatchComponent from '@/components/diffMatchPatchComponent';
 interface IProps {
   hoverKey?: number;
   question: string;
@@ -24,6 +25,7 @@ interface IProps {
   lang?: string;
   checkMode?: boolean;
   annotation?: any;
+  LLMConfig?: ILLMToolConfig;
 }
 
 export const LLMViewCls = `${prefix}-LLMView`;
@@ -69,6 +71,24 @@ const Header = ({
   );
 };
 
+const RenderAnswer = ({
+  i,
+  dataFormatType,
+  isTextControl
+}: {
+  i: IAnswerList;
+  dataFormatType: EDataFormatType;
+  isTextControl: boolean;
+}) => {
+  if (dataFormatType === EDataFormatType.Markdown) {
+    return <MarkdownView value={i?.newAnswer ?? i?.answer} />;
+  }
+  if (isTextControl) {
+    return <DiffMatchPatchComponent originString={i?.answer} currentString={i?.newAnswer} />;
+  }
+  return <div>{i?.answer}</div>;
+};
+
 const QuestionView: React.FC<IProps> = (props) => {
   const {
     hoverKey,
@@ -78,6 +98,7 @@ const QuestionView: React.FC<IProps> = (props) => {
     modelAPIResponse,
     setModelAPIResponse,
     checkMode = true,
+    LLMConfig
   } = props;
   const [dataFormatType, setDataFormatType] = useState(EDataFormatType.Default);
   const { t } = useTranslation();
@@ -87,6 +108,14 @@ const QuestionView: React.FC<IProps> = (props) => {
       i18n?.changeLanguage(lang);
     }
   }, []);
+
+  const getTextControlByConfig = (result: IAnswerList) => {
+    if (LLMConfig?.isTextEdit) {
+      const textEdit = LLMConfig?.textEdit || [];
+      return !!textEdit.filter((v: ITextList) => v?.title === result.order)[0]?.textControl;
+    }
+    return false
+  }
 
   return (
     <div className={LLMViewCls}>
@@ -102,33 +131,32 @@ const QuestionView: React.FC<IProps> = (props) => {
       </div>
       <div className={`${LLMViewCls}__textBox`}>
         <div className={`${LLMViewCls}__title`}>{t('Answer')}</div>
-        {answerList.map((i: IAnswerList, index: number) => (
-          <div
-            className={classNames({
-              [`${LLMViewCls}__content`]: true,
-              [`${LLMViewCls}__contentActive`]: hoverKey === i?.order,
-            })}
-            key={index}
-          >
-            <Tag
-              style={{
-                color: '#666FFF',
-                background: '#eeefff',
-                height: '20px',
-                padding: '0px 8px',
-                border: 'none',
-              }}
+        {answerList.map((i: IAnswerList, index: number) => {
+          const isTextControl = getTextControlByConfig(i)
+          return (
+            <div
+              className={classNames({
+                [`${LLMViewCls}__content`]: true,
+                [`${LLMViewCls}__contentActive`]: hoverKey === i?.order,
+              })}
+              key={index}
             >
-              {i?.order}
-            </Tag>
-            {dataFormatType === EDataFormatType.Markdown ? (
-              <MarkdownView value={i?.answer} />
-            ) : (
-              <LongText wordCount={1000} text={i?.answer} />
-            )}
-          </div>
-        ))}
-        <ModelAPIView
+              <Tag
+                style={{
+                  color: '#666FFF',
+                  background: '#eeefff',
+                  height: '20px',
+                  padding: '0px 8px',
+                  border: 'none',
+                }}
+              >
+                {i?.order}
+              </Tag>
+              <RenderAnswer i={i} isTextControl={isTextControl} dataFormatType={dataFormatType} />
+            </div>
+          );
+        })}
+         <ModelAPIView
           dataFormatType={dataFormatType}
           modelAPIResponse={modelAPIResponse}
           question={question}
