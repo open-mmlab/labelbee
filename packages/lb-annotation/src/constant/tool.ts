@@ -67,7 +67,7 @@ export enum EToolName {
   Cuboid = 'cuboidTool',
   /** 点云多边形工具 */
   PointCloudPolygon = 'pointCloudPolygon',
-  /** LLM标注工具 */
+  /** LLM标注工具-大模型 */
   LLM = 'LLMTool',
 }
 
@@ -106,7 +106,7 @@ export const TOOL_NAME: { [a: string]: string } = {
   [EVideoToolName.VideoClipTool]: '视频截取',
   [EPointCloudName.PointCloud]: '点云',
   [EToolName.Cuboid]: '立体框',
-  [EToolName.LLM]: 'LLM标注',
+  [EToolName.LLM]: '大模型',
 };
 
 export const TOOL_NAME_EN: { [a: string]: string } = {
