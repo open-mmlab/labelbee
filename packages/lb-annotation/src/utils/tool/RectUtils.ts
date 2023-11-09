@@ -167,7 +167,12 @@ export default class RectUtils {
    * @param scope
    * @param zoom
    */
-  public static isInRect(coordinate: ICoordinate, rect: IRect, scope: number = 0, zoom = 1) {
+  public static isInRect(
+    coordinate: ICoordinate,
+    rect: Pick<IRect, 'x' | 'y' | 'width' | 'height'>,
+    scope: number = 0,
+    zoom = 1,
+  ) {
     return (
       coordinate.x >= rect.x * zoom - scope &&
       coordinate.x <= (rect.x + rect.width) * zoom + scope &&

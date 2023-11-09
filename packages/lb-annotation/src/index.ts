@@ -16,6 +16,8 @@ import { BasicToolOperation } from './core/toolOperation/basicToolOperation';
 import ViewOperation from './core/toolOperation/ViewOperation';
 import ScribbleTool from './core/toolOperation/ScribbleTool';
 import PointCloud2dOperation from './core/toolOperation/pointCloud2dOperation';
+import SegmentByRect from './core/toolOperation/segmentByRect';
+import SegmentBySAM from './core/toolOperation/segmentBySAM';
 
 // Constant
 import * as cAnnotation from './constant/annotation';
@@ -37,6 +39,7 @@ import MathUtils from './utils/MathUtils';
 import AttributeUtils from './utils/tool/AttributeUtils';
 import ActionsHistory from './utils/ActionsHistory';
 import EventBus from './utils/EventBus';
+import CanvasUtils from './utils/tool/CanvasUtils';
 
 // ToolListener
 import DblClickEventListener from './utils/tool/DblClickEventListener'; // temporarily supports the use of external tools in this way
@@ -45,6 +48,7 @@ import AnnotationEngine from './core';
 
 import UnitUtils from './utils/tool/UnitUtils';
 import StyleUtils from './utils/tool/StyleUtils';
+import CursorTextClass from './core/toolOperation/cursorTextClass';
 
 const CommonToolUtils = EnhanceCommonToolUtils;
 const toolUtils = EnhanceCommonToolUtils; // Compatible with the old version of the definition
@@ -62,6 +66,9 @@ export {
   MeasureOperation,
   ViewOperation,
   PointCloud2dOperation,
+  SegmentByRect,
+  SegmentBySAM,
+  CursorTextClass,
   // 固定操作
   cAnnotation,
   cAnnotationTask,
@@ -81,6 +88,7 @@ export {
   ImgUtils,
   MathUtils,
   AttributeUtils,
+  CanvasUtils,
   AnnotationEngine,
   ScribbleTool,
   UnitUtils,

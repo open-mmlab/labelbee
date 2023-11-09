@@ -23,3 +23,8 @@ export enum ESubmitType {
 export const prefix = 'bee';
 export const componentCls = `${prefix}-component`;
 
+// 数据格式类型
+export enum EDataFormatType {
+  Default = 'default', // 原文
+  Markdown = 'markdown', // markdown
+}

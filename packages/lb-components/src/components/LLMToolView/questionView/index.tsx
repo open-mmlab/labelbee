@@ -4,14 +4,16 @@
  * @Date: 2023-04-10
  */
 
-import React, { useEffect } from 'react';
-import { Tag } from 'antd';
+import React, { useEffect, useState } from 'react';
+import { Tag, Radio } from 'antd';
 import LongText from '@/components/longText';
-import { prefix } from '@/constant';
+import { EDataFormatType, prefix } from '@/constant';
 import classNames from 'classnames';
 import { useTranslation, I18nextProvider } from 'react-i18next';
 import { IAnswerList } from '@/components/LLMToolView/types';
 import { i18n } from '@labelbee/lb-utils';
+import MarkdownView from '@/components/markdownView';
+import { FileTextOutlined } from '@ant-design/icons';
 
 interface IProps {
   hoverKey?: number;
@@ -19,10 +21,53 @@ interface IProps {
   answerList: IAnswerList[];
   lang?: string;
 }
-const LLMViewCls = `${prefix}-LLMView`;
-const QuestionView: React.FC<IProps> = (props) => {
-  const { hoverKey, question, answerList, lang } = props;
 
+const LLMViewCls = `${prefix}-LLMView`;
+
+const Header = ({
+  setDataFormatType,
+  dataFormatType,
+}: {
+  setDataFormatType: (type: EDataFormatType) => void;
+  dataFormatType: EDataFormatType;
+}) => {
+  const { t } = useTranslation();
+  return (
+    <div
+      className={`${LLMViewCls}__title`}
+      style={{
+        display: 'flex',
+        justifyContent: 'space-between',
+      }}
+    >
+      {t('Title')}
+      <span style={{ display: 'flex' }}>
+        <Radio.Group
+          value={dataFormatType}
+          onChange={(e) => {
+            setDataFormatType(e.target.value);
+          }}
+        >
+          <Radio.Button
+            value={EDataFormatType.Default}
+            style={{ textAlign: 'center', width: '52px' }}
+          >{`</>`}</Radio.Button>
+          <Radio.Button
+            value={EDataFormatType.Markdown}
+            style={{ textAlign: 'center', width: '52px' }}
+          >
+            <FileTextOutlined />
+          </Radio.Button>
+        </Radio.Group>
+        <span style={{ marginLeft: '8px', width: '4px', background: '#1890ff' }} />
+      </span>
+    </div>
+  );
+};
+
+const QuestionView: React.FC<IProps> = (props) => {
+  const { hoverKey, answerList, question, lang } = props;
+  const [dataFormatType, setDataFormatType] = useState(EDataFormatType.Default);
   const { t } = useTranslation();
 
   useEffect(() => {
@@ -34,9 +79,13 @@ const QuestionView: React.FC<IProps> = (props) => {
   return (
     <div className={LLMViewCls}>
       <div className={`${LLMViewCls}__textBox`} style={{ borderBottom: '1px solid #EBEBEB' }}>
-        <div className={`${LLMViewCls}__title`}>{t('Title')}</div>
+        <Header setDataFormatType={setDataFormatType} dataFormatType={dataFormatType} />
         <div className={`${LLMViewCls}__content`}>
-          <LongText wordCount={200} text={question} />
+          {dataFormatType === EDataFormatType.Markdown ? (
+            <MarkdownView value={question} />
+          ) : (
+            <LongText wordCount={200} text={question} />
+          )}
         </div>
       </div>
       <div className={`${LLMViewCls}__textBox`}>
@@ -60,7 +109,11 @@ const QuestionView: React.FC<IProps> = (props) => {
             >
               {i?.order}
             </Tag>
-            <LongText wordCount={1000} text={i?.answer} />
+            {dataFormatType === EDataFormatType.Markdown ? (
+              <MarkdownView value={i?.answer} />
+            ) : (
+              <LongText wordCount={1000} text={i?.answer} />
+            )}
           </div>
         ))}
       </div>
