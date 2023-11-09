@@ -18,9 +18,11 @@ import {
   IndicatorDetermine,
   ILLMToolConfig,
   IAnswerList,
+  ITextList,
 } from '@/components/LLMToolView/types';
 import { isBoolean } from 'lodash';
 import LongText from '@/components/longText';
+import TextEditor from '../textEditor';
 
 interface IProps {
   list?: IAnswerList[];
@@ -32,7 +34,7 @@ interface IProps {
     key,
   }: {
     order: number;
-    value: number | { key: string; value: number | boolean };
+    value: number | string | { key: string; value: number | boolean };
     key?: string;
   }) => void;
 }
@@ -53,9 +55,10 @@ const AnswerList = (props: IProps) => {
   const isDisableAll = checkMode;
 
   const getFinishStatus = (i: IAnswerList) => {
-    const { indicatorScore = [], indicatorDetermine = [] } = LLMConfig;
+    const { indicatorScore = [], indicatorDetermine = [], textEdit = [], isTextEdit = false } = LLMConfig;
 
     let finishStatus = ETagType.Default;
+    // 指标评分校验
     if (indicatorScore?.length > 0) {
       const scoreUnFinish = indicatorScore.some(
         (item: IndicatorScore) =>
@@ -67,6 +70,7 @@ const AnswerList = (props: IProps) => {
       }
       finishStatus = ETagType.Finish;
     }
+    // 指标判断校验
     if (indicatorDetermine?.length > 0) {
       const determineUnFinish = indicatorDetermine.some((item: IndicatorDetermine) => {
         const determineResult = i?.indicatorDetermine?.[item.value];
@@ -75,6 +79,20 @@ const AnswerList = (props: IProps) => {
       if (determineUnFinish) {
         finishStatus = ETagType.UnFinish;
         return finishStatus;
+      }
+      finishStatus = ETagType.Finish;
+    }
+    // 回答文本编辑校验
+    if (isTextEdit && textEdit?.length > 0) {
+      // 匹配当前答案的配置
+      const textEditconfigObj = textEdit.filter((v: ITextList) => v?.title === i.order)[0]
+      const { min } = textEditconfigObj
+      const newValue = i?.newAnswer || ''
+
+      const textEditUnFinish = min && newValue?.length < Number(min)
+      if (textEditUnFinish) {
+        finishStatus = ETagType.UnFinish;
+        return finishStatus
       }
       finishStatus = ETagType.Finish;
     }
@@ -112,6 +130,9 @@ const AnswerList = (props: IProps) => {
     }
   };
 
+  const getAnswerTextEditConfig = (answer: IAnswerList, textEdit: ITextList[]) =>
+    textEdit.filter((i) => i?.title === answer.order)[0];
+
   return (
     <Collapse
       bordered={false}
@@ -123,8 +144,9 @@ const AnswerList = (props: IProps) => {
       style={{ margin: '16px 0px' }}
     >
       {list.map((i: IAnswerList, index: number) => {
-        const { indicatorScore = [], indicatorDetermine = [] } = LLMConfig;
+        const { indicatorScore = [], indicatorDetermine = [], textEdit = [], isTextEdit = false } = LLMConfig;
         const { backgroundColor, fontColor, tagText, tagStatus } = getTagStyle(i);
+        const textEditObject = getAnswerTextEditConfig(i, textEdit) || {};
 
         const header = (
           <div
@@ -218,6 +240,15 @@ const AnswerList = (props: IProps) => {
                   />
                 ) : null;
               })}
+            {/* 文本编辑 */}
+            {isTextEdit && <TextEditor
+              checkMode={checkMode}
+              newAnswer={i?.newAnswer}
+              textEditObject={textEditObject}
+              updateValue={(changeValue) => {
+                updateValue({ order: i.order, value: changeValue, key: 'textEdit' });
+              }}
+            />}
           </Panel>
         );
       })}

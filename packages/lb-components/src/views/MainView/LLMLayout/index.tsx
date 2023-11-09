@@ -22,12 +22,20 @@ const layoutCls = `${prefix}-layout`;
 const LLMLayout: React.FC<AppProps & IProps> = (props) => {
   const [hoverKey, setHoverKey] = useState(-1);
   const [modelAPIResponse, setModelAPIResponse] = useState<IModelAPIAnswer[]>([]);
+  const [newAnswerList, setNewAnswerList] = useState([]);
   return (
     <Layout className={getClassName('layout', 'container')}>
       <LLMContext.Provider
         value={useMemo(() => {
-          return { hoverKey, setHoverKey, modelAPIResponse, setModelAPIResponse };
-        }, [hoverKey, modelAPIResponse])}
+          return {
+            hoverKey,
+            setHoverKey,
+            modelAPIResponse,
+            setModelAPIResponse,
+            newAnswerList,
+            setNewAnswerList,
+          };
+        }, [hoverKey, modelAPIResponse, newAnswerList])}
       >
         {props?.leftSider}
         <Content
