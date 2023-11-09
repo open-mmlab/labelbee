@@ -4,7 +4,7 @@ import { createDispatchHook, createSelectorHook } from 'react-redux';
 import { AnyAction, Dispatch } from 'redux';
 interface ILLMContext {
   hoverKey: number;
-  newAnswerList: [];
+  newAnswerList: IAnswerList[];
   setHoverKey: (value: number) => void;
   modelAPIResponse: IModelAPIAnswer[];
   setModelAPIResponse: (value: IModelAPIAnswer[]) => void;

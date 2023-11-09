@@ -29,7 +29,7 @@ const LLMViewCls = `${prefix}-LLMView`;
 const LLMToolView: React.FC<IProps> = (props) => {
   const { annotation, checkMode = true, tips, showTips } = props;
   const { imgIndex, imgList, stepList, step } = annotation;
-  const { hoverKey, modelAPIResponse, setModelAPIResponse ,newAnswerList} = useContext(LLMContext);
+  const { hoverKey, modelAPIResponse, setModelAPIResponse, newAnswerList } = useContext(LLMContext);
   const [answerList, setAnswerList] = useState<IAnswerList[]>([]);
   const [question, setQuestion] = useState<string>('');
   const [LLMConfig, setLLMConfig] = useState<ILLMToolConfig>();

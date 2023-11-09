@@ -48,14 +48,14 @@ enum ETagType {
 const { Panel } = Collapse;
 const LLMSidebarCls = `${prefix}-LLMSidebar`;
 const AnswerList = (props: IProps) => {
-  const { list = [], LLMConfig = {}, updateValue, checkMode } = props;
+  const { list = [], LLMConfig, updateValue, checkMode } = props;
 
   const { hoverKey, setHoverKey } = useContext(LLMContext);
   const { t } = useTranslation();
   const isDisableAll = checkMode;
 
   const getFinishStatus = (i: IAnswerList) => {
-    const { indicatorScore = [], indicatorDetermine = [], textEdit = [], isTextEdit = false } = LLMConfig;
+    const { indicatorScore = [], indicatorDetermine = [], textEdit = [], isTextEdit = false } = LLMConfig || {};
 
     let finishStatus = ETagType.Default;
     // 指标评分校验
@@ -144,7 +144,7 @@ const AnswerList = (props: IProps) => {
       style={{ margin: '16px 0px' }}
     >
       {list.map((i: IAnswerList, index: number) => {
-        const { indicatorScore = [], indicatorDetermine = [], textEdit = [], isTextEdit = false } = LLMConfig;
+        const { indicatorScore = [], indicatorDetermine = [], textEdit = [], isTextEdit = false } = LLMConfig || {};
         const { backgroundColor, fontColor, tagText, tagStatus } = getTagStyle(i);
         const textEditObject = getAnswerTextEditConfig(i, textEdit) || {};
 

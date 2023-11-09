@@ -74,7 +74,7 @@ const Header = ({
 const RenderAnswer = ({
   i,
   dataFormatType,
-  isTextControl
+  isTextControl,
 }: {
   i: IAnswerList;
   dataFormatType: EDataFormatType;
@@ -114,14 +114,14 @@ const QuestionView: React.FC<IProps> = (props) => {
       const textEdit = LLMConfig?.textEdit || [];
       return !!textEdit.filter((v: ITextList) => v?.title === result.order)[0]?.textControl;
     }
-    return false
-  }
+    return false;
+  };
 
   return (
     <div className={LLMViewCls}>
       <div className={`${LLMViewCls}__textBox`} style={{ borderBottom: '1px solid #EBEBEB' }}>
         <Header setDataFormatType={setDataFormatType} dataFormatType={dataFormatType} />
-        <div className={`${LLMViewCls}__content`}>
+        <div className={`${LLMViewCls}__content`} style={{ marginBottom: 0 }}>
           {dataFormatType === EDataFormatType.Markdown ? (
             <MarkdownView value={question} />
           ) : (
@@ -132,7 +132,7 @@ const QuestionView: React.FC<IProps> = (props) => {
       <div className={`${LLMViewCls}__textBox`}>
         <div className={`${LLMViewCls}__title`}>{t('Answer')}</div>
         {answerList.map((i: IAnswerList, index: number) => {
-          const isTextControl = getTextControlByConfig(i)
+          const isTextControl = getTextControlByConfig(i);
           return (
             <div
               className={classNames({

@@ -79,6 +79,7 @@
     "@rollup/plugin-eslint": "^8.0.1",
     "@rollup/plugin-image": "^2.0.6",
     "@rollup/plugin-node-resolve": "^11.2.1",
+    "@types/diff-match-patch": "^1.0.36",
     "@types/lodash": "^4.14.168",
     "@types/react": "^16.13.1",
     "@types/react-redux": "^7.1.16",

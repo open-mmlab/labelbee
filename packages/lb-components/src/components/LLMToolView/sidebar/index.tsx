@@ -49,7 +49,7 @@ const LLMToolSidebar: React.FC<IProps> = (props) => {
   const currentData = imgList[imgIndex] ?? {};
   const basicInfo = jsonParser(currentData?.result);
   const { toolInstanceRef } = useCustomToolInstance({ basicInfo });
-  const [LLMConfig, setLLMConfig] = useState<ILLMToolConfig>({});
+  const [LLMConfig, setLLMConfig] = useState<ILLMToolConfig>();
   const [answerList, setAnswerList] = useState<IAnswerList[]>([]);
   const [text, setText] = useState<ITextList[] | undefined>(undefined);
   const [sortList, setSortList] = useState<IAnswerSort[][]>([]);
@@ -72,7 +72,7 @@ const LLMToolSidebar: React.FC<IProps> = (props) => {
     let qaData = result?.answerList ? result : currentData?.questionList;
     if (qaData?.answerList) {
       getWaitSortList(qaData.answerList);
-      const initData = initAnswerList(qaData.answerList) || []
+      const initData = initAnswerList(qaData.answerList) || [];
       setAnswerList(initData);
     }
 
@@ -98,7 +98,7 @@ const LLMToolSidebar: React.FC<IProps> = (props) => {
     };
 
     toolInstanceRef.current.currentPageResult = result;
-    setNewAnswerList(answerList)
+    setNewAnswerList(answerList);
   }, [answerList, sortList, text, modelAPIResponse]);
 
   useEffect(() => {
@@ -110,16 +110,16 @@ const LLMToolSidebar: React.FC<IProps> = (props) => {
   }, []);
 
   const initAnswerList = (initValue: IAnswerList[]) => {
-    const { isTextEdit, textEdit } = LLMConfig
+    const { isTextEdit, textEdit = [] } = LLMConfig || {};
     if (!isTextEdit) {
-      return initValue
+      return initValue;
     }
-    const data = initValue.map(i => {
-      const isFillAnswer = textEdit.filter(v => v.title === i.order)[0]?.isFillAnswer
-      return isFillAnswer ? { ...i, newAnswer: i?.newAnswer ?? i.answer } : i
-    })
-    return data
-  }
+    const data = initValue.map((i) => {
+      const isFillAnswer = textEdit.filter((v) => v.title === i.order)[0]?.isFillAnswer;
+      return isFillAnswer ? { ...i, newAnswer: i?.newAnswer ?? i.answer } : i;
+    });
+    return data;
+  };
 
   const onKeyDown = (e: KeyboardEvent) => {
     if (e.ctrlKey && e.keyCode === EKeyCode.Enter) {
@@ -188,14 +188,26 @@ const LLMToolSidebar: React.FC<IProps> = (props) => {
   };
 
   const isNoConfig = () => {
-    const { indicatorScore = [], indicatorDetermine = [], text = [], enableSort, isTextEdit } = LLMConfig;
+    const {
+      indicatorScore = [],
+      indicatorDetermine = [],
+      text = [],
+      enableSort,
+      isTextEdit,
+    } = LLMConfig || {};
     const hasIndicatorScore =
       indicatorScore?.filter((i: IndicatorScore) => i.label && i.value && i.score)?.length > 0;
 
     const hasIndicatorDetermine =
       indicatorDetermine?.filter((i: IndicatorDetermine) => i.label && i.value)?.length > 0;
     const hasText = text?.length > 0;
-    const noConfig = !(hasIndicatorScore || hasIndicatorDetermine || hasText || enableSort || isTextEdit);
+    const noConfig = !(
+      hasIndicatorScore ||
+      hasIndicatorDetermine ||
+      hasText ||
+      enableSort ||
+      isTextEdit
+    );
     return noConfig;
   };
 
@@ -218,9 +230,10 @@ const LLMToolSidebar: React.FC<IProps> = (props) => {
       </div>
     );
   }
-  const { indicatorScore = [], indicatorDetermine = [], enableSort, isTextEdit } = LLMConfig;
+  const { indicatorScore = [], indicatorDetermine = [], enableSort, isTextEdit } = LLMConfig || {};
   const showAnwerList =
-    answerList.length > 0 && (indicatorDetermine?.length > 0 || indicatorScore?.length > 0 || isTextEdit);
+    answerList.length > 0 &&
+    (indicatorDetermine?.length > 0 || indicatorScore?.length > 0 || isTextEdit);
   return (
     <div className={`${sidebarCls}`}>
       <div className={`${sidebarCls}__content`}>
