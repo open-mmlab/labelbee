@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useContext } from 'react';
 import { prefix } from '@/constant';
 import { Button, Empty } from 'antd';
 import AnswerSort from './components/answerSort';
@@ -6,7 +6,7 @@ import { AppState } from '@/store';
 import { connect } from 'react-redux';
 import { isNumber, isObject } from 'lodash';
 import AnswerList from './components/answerList';
-import { LabelBeeContext } from '@/store/ctx';
+import { LabelBeeContext, LLMContext } from '@/store/ctx';
 import { jsonParser } from '@/utils';
 import { getStepConfig } from '@/store/annotation/reducer';
 import { useCustomToolInstance } from '@/hooks/annotation';
@@ -44,6 +44,7 @@ const sidebarCls = `${prefix}-sidebar`;
 const LLMToolSidebar: React.FC<IProps> = (props) => {
   const { annotation, dispatch, checkMode } = props;
   const { imgIndex, imgList, stepList, step, skipBeforePageTurning } = annotation;
+  const { modelAPIResponse } = useContext(LLMContext);
   const { t } = useTranslation();
   const currentData = imgList[imgIndex] ?? {};
   const basicInfo = jsonParser(currentData?.result);
@@ -79,7 +80,9 @@ const LLMToolSidebar: React.FC<IProps> = (props) => {
   useEffect(() => {
     toolInstanceRef.current.exportData = () => {
       const sort = formatSort(sortList);
-      const result = [{ answerList, sort, textAttribute: text, id: currentData?.id }];
+      const result = [
+        { answerList, sort, textAttribute: text, id: currentData?.id, modelAPIResponse },
+      ];
       return [result, {}];
     };
     const sort = formatSort(sortList);
@@ -89,10 +92,11 @@ const LLMToolSidebar: React.FC<IProps> = (props) => {
       textAttribute: text,
       id: currentData?.id,
       toolName: EToolName.LLM,
+      modelAPIResponse,
     };
 
     toolInstanceRef.current.currentPageResult = result;
-  }, [answerList, sortList, text]);
+  }, [answerList, sortList, text, modelAPIResponse]);
 
   useEffect(() => {
     window.addEventListener('keydown', onKeyDown);

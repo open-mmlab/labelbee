@@ -15,6 +15,7 @@ import QuestionView from './questionView';
 import { useTranslation } from 'react-i18next';
 import { IAnswerList } from './types';
 import AnnotationTips from '@/views/MainView/annotationTips';
+import { getCurrentResultFromResultList } from './utils/data';
 
 interface IProps {
   checkMode?: boolean;
@@ -24,12 +25,13 @@ interface IProps {
 }
 const LLMViewCls = `${prefix}-LLMView`;
 const LLMToolView: React.FC<IProps> = (props) => {
-  const { annotation, checkMode, tips, showTips } = props;
+  const { annotation, checkMode = true, tips, showTips } = props;
   const { imgIndex, imgList } = annotation;
-  const { hoverKey } = useContext(LLMContext);
+  const { hoverKey, modelAPIResponse, setModelAPIResponse } = useContext(LLMContext);
   const [answerList, setAnswerList] = useState<IAnswerList[]>([]);
   const [question, setQuestion] = useState<string>('');
   const { t } = useTranslation();
+
   useEffect(() => {
     let interval: undefined | ReturnType<typeof setInterval>;
 
@@ -52,16 +54,28 @@ const LLMToolView: React.FC<IProps> = (props) => {
     }
 
     const qaData = imgList[imgIndex]?.questionList;
+    const currentData = imgList[imgIndex] ?? {};
+    const result = getCurrentResultFromResultList(currentData?.result);
+    const currentResult = result?.length > 0 ? result[0] : result;
 
     setQuestion(qaData?.question);
     setAnswerList(qaData?.answerList || []);
+    setModelAPIResponse(currentResult?.modelAPIResponse || []);
   }, [imgIndex]);
 
   return (
     <Layout className={LLMViewCls}>
       <div className={`${LLMViewCls}-question`}>
         {showTips === true && <AnnotationTips tips={tips} />}
-        <QuestionView hoverKey={hoverKey} question={question} answerList={answerList} />
+        <QuestionView
+          hoverKey={hoverKey}
+          question={question}
+          answerList={answerList}
+          modelAPIResponse={modelAPIResponse}
+          setModelAPIResponse={setModelAPIResponse}
+          checkMode={checkMode}
+          annotation={annotation}
+        />
       </div>
     </Layout>
   );
