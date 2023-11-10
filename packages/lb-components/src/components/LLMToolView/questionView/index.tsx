@@ -6,7 +6,6 @@
 
 import React, { useEffect, useState } from 'react';
 import { Tag, Radio } from 'antd';
-import LongText from '@/components/longText';
 import { EDataFormatType, prefix } from '@/constant';
 import classNames from 'classnames';
 import { useTranslation, I18nextProvider } from 'react-i18next';
@@ -16,6 +15,8 @@ import MarkdownView from '@/components/markdownView';
 import { FileTextOutlined } from '@ant-design/icons';
 import ModelAPIView from '../modelAPIView';
 import DiffMatchPatchComponent from '@/components/diffMatchPatchComponent';
+import { Resizable } from 're-resizable';
+
 interface IProps {
   hoverKey?: number;
   question: string;
@@ -101,6 +102,7 @@ const QuestionView: React.FC<IProps> = (props) => {
     LLMConfig
   } = props;
   const [dataFormatType, setDataFormatType] = useState(EDataFormatType.Default);
+  const DEFAULT_HEIGHT = 200;
   const { t } = useTranslation();
 
   useEffect(() => {
@@ -119,16 +121,24 @@ const QuestionView: React.FC<IProps> = (props) => {
 
   return (
     <div className={LLMViewCls}>
-      <div className={`${LLMViewCls}__textBox`} style={{ borderBottom: '1px solid #EBEBEB' }}>
+      <Resizable
+        defaultSize={{
+          width: '100%',
+          height: DEFAULT_HEIGHT,
+        }}
+        minHeight={DEFAULT_HEIGHT}
+        enable={{ bottom: true }}
+        style={{ padding: '26px 32px', borderBottom: '1px solid #EBEBEB', overflow: 'hidden' }}
+      >
         <Header setDataFormatType={setDataFormatType} dataFormatType={dataFormatType} />
-        <div className={`${LLMViewCls}__content`} style={{ marginBottom: 0 }}>
+        <div className={`${LLMViewCls}__headerContent`}>
           {dataFormatType === EDataFormatType.Markdown ? (
             <MarkdownView value={question} />
           ) : (
-            <LongText wordCount={200} text={question} />
+            question
           )}
         </div>
-      </div>
+      </Resizable>
       <div className={`${LLMViewCls}__textBox`}>
         <div className={`${LLMViewCls}__title`}>{t('Answer')}</div>
         {answerList.map((i: IAnswerList, index: number) => {

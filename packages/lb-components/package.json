@@ -63,6 +63,7 @@
     "redux-thunk": "^2.3.0",
     "rehype-katex": "^6.0.3",
     "diff-match-patch": "^1.0.5",
+    "re-resizable": "^6.9.9",
     "remark-math": "^5.1.1",
     "remark-gfm": "^3.0.1",
     "resize-observer-polyfill": "^1.5.1"
