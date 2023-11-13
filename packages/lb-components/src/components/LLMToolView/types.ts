@@ -21,8 +21,28 @@ export interface IAnswerList {
   };
 }
 
+export interface IModelAPIAnswer {
+  id: string;
+  answer: string;
+}
+
+declare interface IModelAPIConfig {
+  id: string;
+  name: string;
+  enableAdvanced: boolean;
+  endpoint: string;
+  authorization: string;
+  key: string;
+  templateParams?: string;
+  template?: any;
+  responseSelector?: string;
+  secretKey?: string;
+}
+
 // LLM工具配置
 export interface ILLMToolConfig {
+  enableModelAPI?: boolean;
+  modelAPIConfigList?: IModelAPIConfig[];
   enableSort?: boolean;
   indicatorScore?: IndicatorScore[]; // 指标评分
   indicatorDetermine?: IndicatorDetermine[]; // 指标判断

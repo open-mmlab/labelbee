@@ -10,19 +10,23 @@ import LongText from '@/components/longText';
 import { EDataFormatType, prefix } from '@/constant';
 import classNames from 'classnames';
 import { useTranslation, I18nextProvider } from 'react-i18next';
-import { IAnswerList } from '@/components/LLMToolView/types';
+import { IAnswerList, IModelAPIAnswer } from '@/components/LLMToolView/types';
 import { i18n } from '@labelbee/lb-utils';
 import MarkdownView from '@/components/markdownView';
 import { FileTextOutlined } from '@ant-design/icons';
-
+import ModelAPIView from '../modelAPIView';
 interface IProps {
   hoverKey?: number;
   question: string;
   answerList: IAnswerList[];
+  modelAPIResponse: IModelAPIAnswer[];
+  setModelAPIResponse?: (data: IModelAPIAnswer[]) => void;
   lang?: string;
+  checkMode?: boolean;
+  annotation?: any;
 }
 
-const LLMViewCls = `${prefix}-LLMView`;
+export const LLMViewCls = `${prefix}-LLMView`;
 
 const Header = ({
   setDataFormatType,
@@ -66,7 +70,15 @@ const Header = ({
 };
 
 const QuestionView: React.FC<IProps> = (props) => {
-  const { hoverKey, answerList, question, lang } = props;
+  const {
+    hoverKey,
+    answerList,
+    question,
+    lang,
+    modelAPIResponse,
+    setModelAPIResponse,
+    checkMode = true,
+  } = props;
   const [dataFormatType, setDataFormatType] = useState(EDataFormatType.Default);
   const { t } = useTranslation();
 
@@ -116,6 +128,14 @@ const QuestionView: React.FC<IProps> = (props) => {
             )}
           </div>
         ))}
+        <ModelAPIView
+          dataFormatType={dataFormatType}
+          modelAPIResponse={modelAPIResponse}
+          question={question}
+          setModelAPIResponse={setModelAPIResponse}
+          checkMode={checkMode}
+          annotation={props.annotation}
+        />
       </div>
     </div>
   );

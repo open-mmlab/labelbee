@@ -9,6 +9,7 @@ import { getClassName } from '@/utils/dom';
 import { classnames } from '@/utils';
 import { LLMContext } from '@/store/ctx';
 import LLMToolView from '@/components/LLMToolView';
+import { IModelAPIAnswer } from '@/components/LLMToolView/types';
 
 interface IProps {
   path: string;
@@ -20,12 +21,13 @@ const layoutCls = `${prefix}-layout`;
 
 const LLMLayout: React.FC<AppProps & IProps> = (props) => {
   const [hoverKey, setHoverKey] = useState(-1);
+  const [modelAPIResponse, setModelAPIResponse] = useState<IModelAPIAnswer[]>([]);
   return (
     <Layout className={getClassName('layout', 'container')}>
       <LLMContext.Provider
         value={useMemo(() => {
-          return { hoverKey, setHoverKey };
-        }, [hoverKey])}
+          return { hoverKey, setHoverKey, modelAPIResponse, setModelAPIResponse };
+        }, [hoverKey, modelAPIResponse])}
       >
         {props?.leftSider}
         <Content
