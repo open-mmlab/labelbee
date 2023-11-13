@@ -11,6 +11,7 @@ import { InfoCircleFilled, SyncOutlined } from '@ant-design/icons';
 
 import { LLMViewCls } from '../questionView';
 import { ILLMToolConfig, IModelAPIAnswer } from '../types';
+import { i18n } from '@labelbee/lb-utils';
 
 interface IProps {
   dataFormatType: EDataFormatType;
@@ -100,7 +101,7 @@ const LoadingMessage = () => {
         [`${LLMViewCls}__loading`]: true,
       })}
     >
-      回答生成中
+      {i18n.t('AnswersAreBeingGenerated')}
       <img src={loadingSvg} />
     </div>
   );
@@ -113,7 +114,7 @@ const FailedMessage = () => {
         [`${LLMViewCls}__failed`]: true,
       })}
     >
-      回答生成失败，请稍后重试 <InfoCircleFilled />
+      {i18n.t('AnswerGenerationFailedPleaseTryAgainLater')} <InfoCircleFilled />
     </span>
   );
 };
@@ -203,7 +204,7 @@ const ModelAPIContent = ({
             })}
           >
             <span onClick={refreshAnswer}>
-              重新生成
+              {i18n.t('ReGenerate')}
               <SyncOutlined />
             </span>
           </div>
