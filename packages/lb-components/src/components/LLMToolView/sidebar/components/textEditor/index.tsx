@@ -19,7 +19,7 @@ interface IProps {
 const TextEditor = (props: IProps) => {
   const { checkMode, newAnswer, textEditObject, updateValue } = props;
 
-  const { max, min, } = textEditObject
+  const { max, min } = textEditObject;
   const { TextArea } = Input;
   const [form] = Form.useForm();
   const { t } = useTranslation();
@@ -29,25 +29,28 @@ const TextEditor = (props: IProps) => {
   });
 
   useEffect(() => {
-    // 填充答案开启是针对未编辑过的答案填充，已经编辑过的就填充上一次的编辑答案
-    form.setFieldsValue({ value: newAnswer })
+    /**
+     * When filling in answers is turned on, unedited answers will be filled in,
+     * and answers that have been edited will be filled in with the last edited answer.
+     */
+    form.setFieldsValue({ value: newAnswer });
     if (!checkMode) {
-      form.validateFields()
+      form.validateFields();
     }
-  }, [newAnswer])
+  }, [newAnswer]);
 
   return (
     <Form
       form={form}
       onValuesChange={(__, allValues) => {
-        const value = allValues.value
-        updateValue(value)
+        const value = allValues.value;
+        updateValue(value);
       }}
       style={{ marginBottom: '16px' }}
     >
       <div style={{ marginBottom: '16px' }}>
-        回答文本编辑
-        <Popover placement='bottom' content='仅文本模式下显示编辑结果差异' >
+        {t('AnswerTextEdit')}
+        <Popover placement='bottom' content='仅文本模式下显示编辑结果差异'>
           <InfoCircleOutlined style={{ margin: '0px 4px', cursor: 'pointer' }} />
         </Popover>
       </div>

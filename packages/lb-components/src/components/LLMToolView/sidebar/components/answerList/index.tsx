@@ -58,7 +58,7 @@ const AnswerList = (props: IProps) => {
     const { indicatorScore = [], indicatorDetermine = [], textEdit = [], isTextEdit = false } = LLMConfig || {};
 
     let finishStatus = ETagType.Default;
-    // 指标评分校验
+    // Indicator score verification
     if (indicatorScore?.length > 0) {
       const scoreUnFinish = indicatorScore.some(
         (item: IndicatorScore) =>
@@ -70,7 +70,7 @@ const AnswerList = (props: IProps) => {
       }
       finishStatus = ETagType.Finish;
     }
-    // 指标判断校验
+    // Indicator judgment verification
     if (indicatorDetermine?.length > 0) {
       const determineUnFinish = indicatorDetermine.some((item: IndicatorDetermine) => {
         const determineResult = i?.indicatorDetermine?.[item.value];
@@ -82,9 +82,9 @@ const AnswerList = (props: IProps) => {
       }
       finishStatus = ETagType.Finish;
     }
-    // 回答文本编辑校验
+    // Answer text editing check
     if (isTextEdit && textEdit?.length > 0) {
-      // 匹配当前答案的配置
+      // Configuration that matches the current answer
       const textEditconfigObj = textEdit.filter((v: ITextList) => v?.title === i.order)[0]
       const { min } = textEditconfigObj
       const newValue = i?.newAnswer || ''
@@ -184,7 +184,7 @@ const AnswerList = (props: IProps) => {
               [`${LLMSidebarCls}-errorPanel`]: tagStatus === ETagType.UnFinish,
             })}
           >
-            {/* 指标评分 */}
+            {/* Indicator score  */}
             {indicatorScore?.length > 0 &&
               indicatorScore.map((item: IndicatorScore, index: number) => {
                 const { label, text, value, score } = item;
@@ -219,7 +219,7 @@ const AnswerList = (props: IProps) => {
                   />
                 ) : null;
               })}
-            {/* 指标判断 */}
+            {/* Indicator judgment */}
             {indicatorDetermine?.length > 0 &&
               indicatorDetermine.map((item: IndicatorDetermine, index: number) => {
                 const { label, value } = item;
@@ -240,7 +240,7 @@ const AnswerList = (props: IProps) => {
                   />
                 ) : null;
               })}
-            {/* 文本编辑 */}
+            {/* Text Editor */}
             {isTextEdit && <TextEditor
               checkMode={checkMode}
               newAnswer={i?.newAnswer}
