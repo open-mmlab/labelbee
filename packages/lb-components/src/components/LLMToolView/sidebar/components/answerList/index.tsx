@@ -18,9 +18,11 @@ import {
   IndicatorDetermine,
   ILLMToolConfig,
   IAnswerList,
+  ITextList,
 } from '@/components/LLMToolView/types';
 import { isBoolean } from 'lodash';
 import LongText from '@/components/longText';
+import TextEditor from '../textEditor';
 
 interface IProps {
   list?: IAnswerList[];
@@ -32,7 +34,7 @@ interface IProps {
     key,
   }: {
     order: number;
-    value: number | { key: string; value: number | boolean };
+    value: number | string | { key: string; value: number | boolean };
     key?: string;
   }) => void;
 }
@@ -46,16 +48,17 @@ enum ETagType {
 const { Panel } = Collapse;
 const LLMSidebarCls = `${prefix}-LLMSidebar`;
 const AnswerList = (props: IProps) => {
-  const { list = [], LLMConfig = {}, updateValue, checkMode } = props;
+  const { list = [], LLMConfig, updateValue, checkMode } = props;
 
   const { hoverKey, setHoverKey } = useContext(LLMContext);
   const { t } = useTranslation();
   const isDisableAll = checkMode;
 
   const getFinishStatus = (i: IAnswerList) => {
-    const { indicatorScore = [], indicatorDetermine = [] } = LLMConfig;
+    const { indicatorScore = [], indicatorDetermine = [], textEdit = [], isTextEdit = false } = LLMConfig || {};
 
     let finishStatus = ETagType.Default;
+    // Indicator score verification
     if (indicatorScore?.length > 0) {
       const scoreUnFinish = indicatorScore.some(
         (item: IndicatorScore) =>
@@ -67,6 +70,7 @@ const AnswerList = (props: IProps) => {
       }
       finishStatus = ETagType.Finish;
     }
+    // Indicator judgment verification
     if (indicatorDetermine?.length > 0) {
       const determineUnFinish = indicatorDetermine.some((item: IndicatorDetermine) => {
         const determineResult = i?.indicatorDetermine?.[item.value];
@@ -75,6 +79,20 @@ const AnswerList = (props: IProps) => {
       if (determineUnFinish) {
         finishStatus = ETagType.UnFinish;
         return finishStatus;
+      }
+      finishStatus = ETagType.Finish;
+    }
+    // Answer text editing check
+    if (isTextEdit && textEdit?.length > 0) {
+      // Configuration that matches the current answer
+      const textEditconfigObj = textEdit.filter((v: ITextList) => v?.title === i.order)[0]
+      const { min } = textEditconfigObj
+      const newValue = i?.newAnswer || ''
+
+      const textEditUnFinish = min && newValue?.length < Number(min)
+      if (textEditUnFinish) {
+        finishStatus = ETagType.UnFinish;
+        return finishStatus
       }
       finishStatus = ETagType.Finish;
     }
@@ -112,6 +130,9 @@ const AnswerList = (props: IProps) => {
     }
   };
 
+  const getAnswerTextEditConfig = (answer: IAnswerList, textEdit: ITextList[]) =>
+    textEdit.filter((i) => i?.title === answer.order)[0];
+
   return (
     <Collapse
       bordered={false}
@@ -123,8 +144,9 @@ const AnswerList = (props: IProps) => {
       style={{ margin: '16px 0px' }}
     >
       {list.map((i: IAnswerList, index: number) => {
-        const { indicatorScore = [], indicatorDetermine = [] } = LLMConfig;
+        const { indicatorScore = [], indicatorDetermine = [], textEdit = [], isTextEdit = false } = LLMConfig || {};
         const { backgroundColor, fontColor, tagText, tagStatus } = getTagStyle(i);
+        const textEditObject = getAnswerTextEditConfig(i, textEdit) || {};
 
         const header = (
           <div
@@ -162,7 +184,7 @@ const AnswerList = (props: IProps) => {
               [`${LLMSidebarCls}-errorPanel`]: tagStatus === ETagType.UnFinish,
             })}
           >
-            {/* 指标评分 */}
+            {/* Indicator score  */}
             {indicatorScore?.length > 0 &&
               indicatorScore.map((item: IndicatorScore, index: number) => {
                 const { label, text, value, score } = item;
@@ -197,7 +219,7 @@ const AnswerList = (props: IProps) => {
                   />
                 ) : null;
               })}
-            {/* 指标判断 */}
+            {/* Indicator judgment */}
             {indicatorDetermine?.length > 0 &&
               indicatorDetermine.map((item: IndicatorDetermine, index: number) => {
                 const { label, value } = item;
@@ -218,6 +240,15 @@ const AnswerList = (props: IProps) => {
                   />
                 ) : null;
               })}
+            {/* Text Editor */}
+            {isTextEdit && <TextEditor
+              checkMode={checkMode}
+              newAnswer={i?.newAnswer}
+              textEditObject={textEditObject}
+              updateValue={(changeValue) => {
+                updateValue({ order: i.order, value: changeValue, key: 'textEdit' });
+              }}
+            />}
           </Panel>
         );
       })}

@@ -265,7 +265,9 @@
     "ClickAgainOnTheTargetObjectToDeleteTheSegmentation": "Click again on the target object to delete the segmentation",
     "AnswersAreBeingGenerated": "Answers are being generated",
     "AnswerGenerationFailedPleaseTryAgainLater": "Answer generation failed, please try again later",
-    "ReGenerate": "Re-generate"
+    "ReGenerate": "Re-generate",
+    "AnswerTextEdit": "Answer text edit",
+    "ShowEditingResultDifferencesInTextModeOnly": "Show editing result differences in text mode only"
   },
   "cn": {
     "TextInput": "文本输入",
@@ -533,6 +535,8 @@
     "ClickAgainOnTheTargetObjectToDeleteTheSegmentation": "再次单击目标物体删减分割",
     "AnswersAreBeingGenerated": "回答生成中",
     "AnswerGenerationFailedPleaseTryAgainLater": "回答生成失败，请稍后重试",
-    "ReGenerate": "重新生成"
+    "ReGenerate": "重新生成",
+    "AnswerTextEdit": "回答文本编辑",
+    "ShowEditingResultDifferencesInTextModeOnly": "仅文本模式下显示编辑结果差异"
   }
 }

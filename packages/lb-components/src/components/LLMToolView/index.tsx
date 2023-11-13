@@ -13,9 +13,11 @@ import { prefix } from '@/constant';
 import { Layout } from 'antd/es';
 import QuestionView from './questionView';
 import { useTranslation } from 'react-i18next';
-import { IAnswerList } from './types';
+import { IAnswerList, ILLMToolConfig } from './types';
 import AnnotationTips from '@/views/MainView/annotationTips';
 import { getCurrentResultFromResultList } from './utils/data';
+import { getStepConfig } from '@/store/annotation/reducer';
+import { jsonParser } from '@/utils';
 
 interface IProps {
   checkMode?: boolean;
@@ -26,10 +28,12 @@ interface IProps {
 const LLMViewCls = `${prefix}-LLMView`;
 const LLMToolView: React.FC<IProps> = (props) => {
   const { annotation, checkMode = true, tips, showTips } = props;
-  const { imgIndex, imgList } = annotation;
-  const { hoverKey, modelAPIResponse, setModelAPIResponse } = useContext(LLMContext);
+  const { imgIndex, imgList, stepList, step } = annotation;
+  const { hoverKey, modelAPIResponse, setModelAPIResponse, newAnswerList } = useContext(LLMContext);
   const [answerList, setAnswerList] = useState<IAnswerList[]>([]);
   const [question, setQuestion] = useState<string>('');
+  const [LLMConfig, setLLMConfig] = useState<ILLMToolConfig>();
+
   const { t } = useTranslation();
 
   useEffect(() => {
@@ -59,9 +63,20 @@ const LLMToolView: React.FC<IProps> = (props) => {
     const currentResult = result?.length > 0 ? result[0] : result;
 
     setQuestion(qaData?.question);
-    setAnswerList(qaData?.answerList || []);
+    let list = qaData?.answerList || [];
+    if (newAnswerList.length > 0) {
+      list = newAnswerList;
+    }
+    setAnswerList(list);
     setModelAPIResponse(currentResult?.modelAPIResponse || []);
-  }, [imgIndex]);
+  }, [imgIndex, newAnswerList]);
+
+  useEffect(() => {
+    if (stepList && step) {
+      const LLMStepConfig = getStepConfig(stepList, step)?.config;
+      setLLMConfig(jsonParser(LLMStepConfig));
+    }
+  }, [stepList, step]);
 
   return (
     <Layout className={LLMViewCls}>
@@ -75,6 +90,7 @@ const LLMToolView: React.FC<IProps> = (props) => {
           setModelAPIResponse={setModelAPIResponse}
           checkMode={checkMode}
           annotation={annotation}
+          LLMConfig={LLMConfig}
         />
       </div>
     </Layout>
