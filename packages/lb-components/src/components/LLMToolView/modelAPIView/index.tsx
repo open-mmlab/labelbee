@@ -50,8 +50,8 @@ const ModelAPIView: React.FC<IProps> = (props) => {
     setModelAPIResponse,
   } = props;
   const { stepList, step, toolInstance } = annotation;
-  const [LLMConfig, setLLMConfig] = useState<ILLMToolConfig>({});
-  const { enableModelAPI = false, modelAPIConfigList = [] } = LLMConfig;
+  const [LLMConfig, setLLMConfig] = useState<ILLMToolConfig>();
+  const { enableModelAPI = false, modelAPIConfigList = [] } = LLMConfig || {};
 
   const updateModelAPIResponse = (res: IModelAPIAnswer) => {
     let found = false;
