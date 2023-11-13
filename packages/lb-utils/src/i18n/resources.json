@@ -266,7 +266,8 @@
     "AnswersAreBeingGenerated": "Answers are being generated",
     "AnswerGenerationFailedPleaseTryAgainLater": "Answer generation failed, please try again later",
     "ReGenerate": "Re-generate",
-    "AnswerTextEdit": "Answer text edit"
+    "AnswerTextEdit": "Answer text edit",
+    "ShowEditingResultDifferencesInTextModeOnly": "Show editing result differences in text mode only"
   },
   "cn": {
     "TextInput": "文本输入",
@@ -536,5 +537,6 @@
     "AnswerGenerationFailedPleaseTryAgainLater": "回答生成失败，请稍后重试",
     "ReGenerate": "重新生成",
     "AnswerTextEdit": "回答文本编辑",
+    "ShowEditingResultDifferencesInTextModeOnly": "仅文本模式下显示编辑结果差异"
   }
 }

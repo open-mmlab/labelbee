@@ -50,7 +50,7 @@ const TextEditor = (props: IProps) => {
     >
       <div style={{ marginBottom: '16px' }}>
         {t('AnswerTextEdit')}
-        <Popover placement='bottom' content='仅文本模式下显示编辑结果差异'>
+        <Popover placement='bottom' content={t('ShowEditingResultDifferencesInTextModeOnly')}>
           <InfoCircleOutlined style={{ margin: '0px 4px', cursor: 'pointer' }} />
         </Popover>
       </div>
