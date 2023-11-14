@@ -20,6 +20,7 @@ export interface IAnswerList {
     [key: string]: boolean;
   };
   newAnswer?: string;
+  url?: string;
 }
 
 export interface IModelAPIAnswer {

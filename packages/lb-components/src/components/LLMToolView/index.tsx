@@ -9,7 +9,7 @@ import { AppState } from '@/store';
 import { connect } from 'react-redux';
 import { LabelBeeContext, LLMContext } from '@/store/ctx';
 import { message } from 'antd';
-import { prefix } from '@/constant';
+import { ELLMDataType, prefix } from '@/constant';
 import { Layout } from 'antd/es';
 import QuestionView from './questionView';
 import { useTranslation } from 'react-i18next';
@@ -56,20 +56,32 @@ const LLMToolView: React.FC<IProps> = (props) => {
     if (!imgList[imgIndex]) {
       return;
     }
+    const questionIsImg = LLMConfig?.dataType?.prompt === ELLMDataType.Picture;
+    const answerIsImg = LLMConfig?.dataType?.response === ELLMDataType.Picture;
 
     const qaData = imgList[imgIndex]?.questionList;
     const currentData = imgList[imgIndex] ?? {};
     const result = getCurrentResultFromResultList(currentData?.result);
     const currentResult = result?.length > 0 ? result[0] : result;
 
-    setQuestion(qaData?.question);
+    const llmFile = imgList[imgIndex]?.llmFile;
+    const titleQuestion = questionIsImg ? llmFile?.question : qaData?.question;
+    setQuestion(titleQuestion);
     let list = qaData?.answerList || [];
-    if (newAnswerList.length > 0) {
-      list = newAnswerList;
+    if (answerIsImg) {
+      list = llmFile?.answerList || [];
+    }
+    if (LLMConfig?.dataType?.response === ELLMDataType.None) {
+      list = [];
+    }
+    if (LLMConfig?.dataType?.response === ELLMDataType.Text) {
+      if (newAnswerList.length > 0) {
+        list = newAnswerList;
+      }
     }
     setAnswerList(list);
     setModelAPIResponse(currentResult?.modelAPIResponse || []);
-  }, [imgIndex, newAnswerList]);
+  }, [imgIndex, newAnswerList, LLMConfig]);
 
   useEffect(() => {
     if (stepList && step) {

@@ -48,12 +48,18 @@ const TextEditor = (props: IProps) => {
       }}
       style={{ marginBottom: '16px' }}
     >
-      <div style={{ marginBottom: '16px' }}>
+      <Form.Item
+        name='title'
+        style={{ marginBottom: '16px' }}
+        label={' '}
+        colon={false}
+        required={!!min}
+      >
         {t('AnswerTextEdit')}
         <Popover placement='bottom' content={t('ShowEditingResultDifferencesInTextModeOnly')}>
           <InfoCircleOutlined style={{ margin: '0px 4px', cursor: 'pointer' }} />
         </Popover>
-      </div>
+      </Form.Item>
       <Form.Item
         name='value'
         style={{
