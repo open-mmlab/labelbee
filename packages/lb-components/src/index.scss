@@ -1981,6 +1981,12 @@ $ptToolHeight: 40px;
     flex: 1;
   }
 
+  .#{$prefix}-LLMView-image {
+    .ant-image {
+      display: flex ;
+     }
+    }
+
   &__textBox {
     padding: 26px 32px;
   }
@@ -2002,7 +2008,7 @@ $ptToolHeight: 40px;
   &__headerContent {
     font-weight: 500;
     font-size: 14px;
-    overflow-y: auto;
+    overflow: auto;
     height: calc(100% - 54px);
   }
 
