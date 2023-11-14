@@ -156,6 +156,7 @@ const ModelAPIContent = ({
       updateModelAPIResponse({
         id: config?.id,
         answer: result,
+        name: config?.name,
       });
     } catch (error) {
       setFailed(true);
