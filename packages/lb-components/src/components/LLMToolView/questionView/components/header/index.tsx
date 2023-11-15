@@ -57,7 +57,7 @@ const Content = ({
     return <Image src={url || ImgFail} width={400} fallback={ImgFail} />;
   }
   return (
-    <div>
+    <div style={{ whiteSpace: 'pre-wrap' }}>
       {dataFormatType === EDataFormatType.Markdown ? <MarkdownView value={textValue} /> : textValue}
     </div>
   );

@@ -171,16 +171,18 @@ const AnswerList = (props: IProps) => {
             <Tag color={backgroundColor} style={{ color: fontColor, padding: '0px 8px' }}>
               {tagText}
             </Tag>
-            <span
-              style={{
-                textOverflow: 'ellipsis',
-                overflow: 'hidden',
-                lineHeight: '32px',
-                paddingRight: '24px',
-              }}
-            >
-              {i.answer}
-            </span>
+            {i.answer && (
+              <span
+                style={{
+                  textOverflow: 'ellipsis',
+                  overflow: 'hidden',
+                  lineHeight: '32px',
+                  paddingRight: '24px',
+                }}
+              >
+                {i.answer}
+              </span>
+            )}
           </div>
         );
 

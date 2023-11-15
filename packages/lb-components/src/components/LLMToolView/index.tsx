@@ -75,7 +75,7 @@ const LLMToolView: React.FC<IProps> = (props) => {
       list = [];
     }
     if (LLMConfig?.dataType?.response === ELLMDataType.Text) {
-      if (newAnswerList.length > 0) {
+      if (newAnswerList?.length > 0) {
         list = newAnswerList;
       }
     }
