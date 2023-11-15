@@ -26,6 +26,7 @@ export interface IAnswerList {
 export interface IModelAPIAnswer {
   id: string;
   answer: string;
+  name: string;
 }
 
 declare interface IModelAPIConfig {

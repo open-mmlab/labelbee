@@ -1,8 +1,7 @@
 import { Tag } from 'antd';
 import classNames from 'classnames';
-import React, { useEffect, useState } from 'react';
+import React, { useCallback, useEffect, useState } from 'react';
 import loadingSvg from '@/assets/annotation/LLMTool/loading.svg';
-import LongText from '@/components/longText';
 import MarkdownView from '@/components/markdownView';
 import { EDataFormatType } from '@/constant';
 import { getStepConfig } from '@/store/annotation/reducer';
@@ -19,7 +18,7 @@ interface IProps {
   annotation?: any;
   modelAPIResponse: IModelAPIAnswer[];
   question: string;
-  setModelAPIResponse?: (data: IModelAPIAnswer[]) => void;
+  setModelAPIResponse?: React.Dispatch<React.SetStateAction<IModelAPIAnswer[]>>;
 }
 
 const RenderContent = ({
@@ -33,7 +32,7 @@ const RenderContent = ({
     return <MarkdownView value={answer} />;
   }
 
-  return <LongText wordCount={1000} text={answer} />;
+  return <span>{answer}</span>;
 };
 
 const getAnswer = (id: string, modelAPIResponse: IModelAPIAnswer[]) => {
@@ -51,23 +50,36 @@ const ModelAPIView: React.FC<IProps> = (props) => {
   } = props;
   const { stepList, step, toolInstance } = annotation;
   const [LLMConfig, setLLMConfig] = useState<ILLMToolConfig>();
+  const [loadingModelIDs, setLoadingModelIDs] = useState<string[]>([]);
   const { enableModelAPI = false, modelAPIConfigList = [] } = LLMConfig || {};
 
-  const updateModelAPIResponse = (res: IModelAPIAnswer) => {
-    let found = false;
-    const newModelAPIResponse = modelAPIResponse.map((i) => {
-      if (i.id === res.id) {
-        found = true;
-        return res;
-      }
-      return i;
-    });
-
-    if (!found) {
-      newModelAPIResponse.push(res);
+  useEffect(() => {
+    if (toolInstance) {
+      toolInstance.loading = loadingModelIDs?.length > 0;
     }
-    setModelAPIResponse?.(newModelAPIResponse);
-  };
+  }, [loadingModelIDs]);
+
+  const updateModelAPIResponse = useCallback(
+    (res: IModelAPIAnswer) => {
+      setModelAPIResponse?.((prev) => {
+        let found = false;
+        const newModelAPIResponse = prev.map((i: IModelAPIAnswer) => {
+          if (i.id === res.id) {
+            found = true;
+            return res;
+          }
+          return i;
+        });
+
+        if (!found) {
+          newModelAPIResponse.push(res);
+        }
+
+        return newModelAPIResponse;
+      });
+    },
+    [modelAPIResponse],
+  );
 
   useEffect(() => {
     if (stepList && step) {
@@ -87,6 +99,7 @@ const ModelAPIView: React.FC<IProps> = (props) => {
       modelAPIResponse={modelAPIResponse}
       key={i?.id}
       toolInstance={toolInstance}
+      setLoadingModelIDs={setLoadingModelIDs}
       question={question}
       updateModelAPIResponse={updateModelAPIResponse}
       checkMode={checkMode}
@@ -124,6 +137,7 @@ const ModelAPIContent = ({
   config,
   modelAPIResponse,
   toolInstance,
+  setLoadingModelIDs,
   question,
   updateModelAPIResponse,
   checkMode,
@@ -132,6 +146,7 @@ const ModelAPIContent = ({
   config: any;
   modelAPIResponse: any;
   toolInstance: any;
+  setLoadingModelIDs: any;
   question: string;
   updateModelAPIResponse: (res: IModelAPIAnswer) => void;
   checkMode: boolean;
@@ -142,9 +157,12 @@ const ModelAPIContent = ({
 
   const syncLoading = (loading: boolean) => {
     setLoading(loading);
-    if (toolInstance) {
-      toolInstance.loading = loading;
-    }
+    setLoadingModelIDs((prev: string[]) => {
+      if (loading) {
+        return [...prev, config?.id];
+      }
+      return prev.filter((i) => i !== config?.id);
+    });
   };
 
   const refreshAnswer = async () => {
@@ -156,6 +174,7 @@ const ModelAPIContent = ({
       updateModelAPIResponse({
         id: config?.id,
         answer: result,
+        name: config?.name,
       });
     } catch (error) {
       setFailed(true);
@@ -163,6 +182,10 @@ const ModelAPIContent = ({
       syncLoading(false);
     }
   };
+
+  useEffect(() => {
+    setFailed(false);
+  }, [question]);
 
   return (
     <div

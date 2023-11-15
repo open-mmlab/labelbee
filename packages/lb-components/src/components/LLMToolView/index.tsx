@@ -60,9 +60,6 @@ const LLMToolView: React.FC<IProps> = (props) => {
     const answerIsImg = LLMConfig?.dataType?.response === ELLMDataType.Picture;
 
     const qaData = imgList[imgIndex]?.questionList;
-    const currentData = imgList[imgIndex] ?? {};
-    const result = getCurrentResultFromResultList(currentData?.result);
-    const currentResult = result?.length > 0 ? result[0] : result;
 
     const llmFile = imgList[imgIndex]?.llmFile;
     const titleQuestion = questionIsImg ? llmFile?.question : qaData?.question;
@@ -80,8 +77,17 @@ const LLMToolView: React.FC<IProps> = (props) => {
       }
     }
     setAnswerList(list);
-    setModelAPIResponse(currentResult?.modelAPIResponse || []);
   }, [imgIndex, newAnswerList, LLMConfig]);
+
+  useEffect(() => {
+    if (!imgList[imgIndex]) {
+      return;
+    }
+    const currentData = imgList[imgIndex] ?? {};
+    const result = getCurrentResultFromResultList(currentData?.result);
+    const currentResult = result?.length > 0 ? result[0] : result;
+    setModelAPIResponse(currentResult?.modelAPIResponse || []);
+  }, [imgIndex]);
 
   useEffect(() => {
     if (stepList && step) {
