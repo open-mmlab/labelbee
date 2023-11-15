@@ -1,6 +1,6 @@
 import { Tag } from 'antd';
 import classNames from 'classnames';
-import React, { useEffect, useState } from 'react';
+import React, { useCallback, useEffect, useState } from 'react';
 import loadingSvg from '@/assets/annotation/LLMTool/loading.svg';
 import LongText from '@/components/longText';
 import MarkdownView from '@/components/markdownView';
@@ -19,7 +19,7 @@ interface IProps {
   annotation?: any;
   modelAPIResponse: IModelAPIAnswer[];
   question: string;
-  setModelAPIResponse?: (data: IModelAPIAnswer[]) => void;
+  setModelAPIResponse?: React.Dispatch<React.SetStateAction<IModelAPIAnswer[]>>;
 }
 
 const RenderContent = ({
@@ -53,21 +53,27 @@ const ModelAPIView: React.FC<IProps> = (props) => {
   const [LLMConfig, setLLMConfig] = useState<ILLMToolConfig>();
   const { enableModelAPI = false, modelAPIConfigList = [] } = LLMConfig || {};
 
-  const updateModelAPIResponse = (res: IModelAPIAnswer) => {
-    let found = false;
-    const newModelAPIResponse = modelAPIResponse.map((i) => {
-      if (i.id === res.id) {
-        found = true;
-        return res;
-      }
-      return i;
-    });
+  const updateModelAPIResponse = useCallback(
+    (res: IModelAPIAnswer) => {
+      setModelAPIResponse?.((prev) => {
+        let found = false;
+        const newModelAPIResponse = prev.map((i: IModelAPIAnswer) => {
+          if (i.id === res.id) {
+            found = true;
+            return res;
+          }
+          return i;
+        });
 
-    if (!found) {
-      newModelAPIResponse.push(res);
-    }
-    setModelAPIResponse?.(newModelAPIResponse);
-  };
+        if (!found) {
+          newModelAPIResponse.push(res);
+        }
+
+        return newModelAPIResponse;
+      });
+    },
+    [modelAPIResponse],
+  );
 
   useEffect(() => {
     if (stepList && step) {

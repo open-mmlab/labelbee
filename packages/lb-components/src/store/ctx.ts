@@ -1,4 +1,4 @@
-import { IModelAPIAnswer,IAnswerList } from '@/components/LLMToolView/types';
+import { IModelAPIAnswer, IAnswerList } from '@/components/LLMToolView/types';
 import React from 'react';
 import { createDispatchHook, createSelectorHook } from 'react-redux';
 import { AnyAction, Dispatch } from 'redux';
@@ -7,7 +7,7 @@ interface ILLMContext {
   newAnswerList: IAnswerList[];
   setHoverKey: (value: number) => void;
   modelAPIResponse: IModelAPIAnswer[];
-  setModelAPIResponse: (value: IModelAPIAnswer[]) => void;
+  setModelAPIResponse: React.Dispatch<React.SetStateAction<IModelAPIAnswer[]>>;
   setNewAnswerList: (value: IAnswerList[]) => void;
 }
 export const LabelBeeContext = React.createContext(undefined) as any;

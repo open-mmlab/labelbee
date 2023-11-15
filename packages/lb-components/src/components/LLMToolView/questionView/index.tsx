@@ -36,7 +36,7 @@ interface IProps {
       };
   answerList: IAnswerList[];
   modelAPIResponse: IModelAPIAnswer[];
-  setModelAPIResponse?: (data: IModelAPIAnswer[]) => void;
+  setModelAPIResponse?: React.Dispatch<React.SetStateAction<IModelAPIAnswer[]>>;
   lang?: string;
   checkMode?: boolean;
   annotation?: any;
@@ -110,14 +110,16 @@ const QuestionView: React.FC<IProps> = (props) => {
           </div>
         );
       })}
-      <ModelAPIView
-        dataFormatType={dataFormatType}
-        modelAPIResponse={modelAPIResponse}
-        question={isString(question) ? question : ''}
-        setModelAPIResponse={setModelAPIResponse}
-        checkMode={checkMode}
-        annotation={props.annotation}
-      />
+      {isString(question) && (
+        <ModelAPIView
+          dataFormatType={dataFormatType}
+          modelAPIResponse={modelAPIResponse}
+          question={question}
+          setModelAPIResponse={setModelAPIResponse}
+          checkMode={checkMode}
+          annotation={props.annotation}
+        />
+      )}
     </div>
   );
   return (
