@@ -1,0 +1,28 @@
+.clipToolbar {
+  display: flex;
+  vertical-align: middle;
+
+  .buttonWrapper {
+    display: flex;
+    margin-left: 16px;
+  }
+
+  .cutButton,
+  .localButton {
+    display: inline-block;
+    align-self: center;
+    width: 20px;
+    height: 20px;
+    margin-right: 5px;
+    color: #bbbbbb;
+    cursor: pointer;
+  }
+
+  .cutButton {
+    margin-left: 20px;
+  }
+
+  .localButton {
+    margin-left: 10px;
+  }
+}

@@ -7,15 +7,15 @@
 
 import React from 'react';
 import { CommonToolUtils, uuid } from '@labelbee/lb-annotation';
-import StepUtils from '@/utils/StepUtils';
-import { jsonParser } from '@/utils';
-import { VideoPlayer } from './index';
-import { VideoTagLayer } from './VideoTagLayer';
-import { IStepInfo } from '@/types/step';
+import StepUtils from '../../../utils/StepUtils';
+import { jsonParser } from '../../../utils';
+import { VideoPlayer } from '../../videoPlayer';
+import { VideoTagLayer } from '../../videoPlayer/VideoTagLayer';
+import { IStepInfo } from '../../../types/step';
 import _ from 'lodash';
-import type { ObjectString } from './types';
-import { getKeyCodeNumber } from './utils';
-import { IFileItem } from '@/types/data';
+import type { ObjectString } from '../../videoPlayer/types';
+import { getKeyCodeNumber } from '../../videoPlayer/utils';
+import { IFileItem } from '../../../types/data';
 
 export interface IVideoTagInstanceAdaptorProps {
   imgIndex: number;
@@ -23,7 +23,7 @@ export interface IVideoTagInstanceAdaptorProps {
   pageForward: () => void;
   pageJump: (page: string) => void;
   pageBackward: () => void;
-  onMounted: (instance: TagToolInstanceAdaptor) => void;
+  onMounted: (instance: any) => void;
   onUnmounted: () => void;
   step: number;
   stepList: IStepInfo[];

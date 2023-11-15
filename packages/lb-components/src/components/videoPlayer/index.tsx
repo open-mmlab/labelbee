@@ -6,6 +6,7 @@
 
 import React from 'react';
 import VideoController from './components/controller';
+import VideoTrack from '@/components/videoAnnotate/videoClipTool/components/videoTrack'
 import { getClassName } from '@/utils/dom';
 import { cKeyCode } from '@labelbee/lb-annotation';
 import { IFileItem } from '@/types/data';
@@ -13,6 +14,8 @@ import { decimalReserved } from './utils';
 import FileException from '../fileException';
 
 const EKeyCode = cKeyCode.default;
+
+export const PLAYER_CONTROL_BAR_HEIGHT = 60;
 
 export const VideoPlayerCtx = React.createContext<{
   videoRef?: React.RefObject<HTMLVideoElement> | null;
@@ -29,6 +32,8 @@ export const VideoPlayerCtx = React.createContext<{
   pageBackward: () => void;
   pageJump: (page: string) => void;
   pageForward: () => void;
+  addTime?: () => void;
+  toggleClipStatus?: () => void;
 }>({
   isPlay: false,
   playPause: () => {},
@@ -43,6 +48,8 @@ export const VideoPlayerCtx = React.createContext<{
   pageBackward: () => {},
   pageJump: (page: string) => {},
   pageForward: () => {},
+  addTime: () => {},
+  toggleClipStatus: () => {},
 });
 
 const PER_INTERVAL = 50;
@@ -57,6 +64,13 @@ interface IVideoPlayerProps {
   pageForward: () => void;
   valid: boolean;
   setVideoRef?: (video: HTMLVideoElement) => void;
+  showVideoTrack?: boolean;
+  onTrackResize?: any;
+  footer?: any;
+  dataLoaded?: (totalTime: number) => void;
+  drawLayerSlot?: any,
+  addTime?: () => void;
+  toggleClipStatus?: () => void;
 }
 
 interface IVideoPlayerState {
@@ -222,13 +236,14 @@ export class VideoPlayer extends React.Component<IVideoPlayerProps, IVideoPlayer
     if (this.videoElm) {
       this.videoElm.playbackRate = this.state.playbackRate;
     }
+
     this.onVideoStopped();
   };
 
   public setDuration = () => {
     if (this.videoElm) {
       const duration = decimalReserved(this.videoElm?.duration, 1);
-
+      this.props.dataLoaded?.(duration)
       this.setState({
         duration,
       });
@@ -266,7 +281,7 @@ export class VideoPlayer extends React.Component<IVideoPlayerProps, IVideoPlayer
 
   public render() {
     const { isPlay, playbackRate, currentTime, duration, buffered, error } = this.state;
-    const { imgList, imgIndex, pageBackward, pageJump, pageForward, valid } = this.props;
+    const { imgList, imgIndex, pageBackward, pageJump, pageForward, valid, footer, drawLayerSlot } = this.props;
 
     const {
       playPause,
@@ -286,6 +301,8 @@ export class VideoPlayer extends React.Component<IVideoPlayerProps, IVideoPlayer
         // eslint-disable-next-line react/jsx-no-constructed-context-values
         value={{
           videoRef: this.videoRef,
+          addTime: this.props.addTime,
+          toggleClipStatus: this.props.toggleClipStatus,
           isPlay,
           playPause,
           updateNextPlaybackRate,
@@ -316,7 +333,17 @@ export class VideoPlayer extends React.Component<IVideoPlayerProps, IVideoPlayer
               height='100%'
               onClick={playPause}
             />
-
+            {drawLayerSlot?.()}
+            {
+              this.props.showVideoTrack && <VideoTrack
+                currentTime={currentTime}
+                onTrackResize={this.props.onTrackResize}
+                onTrackResizeStart={() => {
+                  this.videoElm?.pause();
+                }}
+                readonly={false}
+              />
+            }
             <FileException
               fileType='video'
               errorProps={{
@@ -330,7 +357,7 @@ export class VideoPlayer extends React.Component<IVideoPlayerProps, IVideoPlayer
               }}
             />
           </div>
-          <VideoController />
+          <VideoController footer={footer}/>
         </div>
       </VideoPlayerCtx.Provider>
     );

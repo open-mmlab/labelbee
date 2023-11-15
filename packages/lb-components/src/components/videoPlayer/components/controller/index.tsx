@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useContext } from 'react';
 import { getClassName } from '@/utils/dom';
 import {
   CaretRightOutlined,
@@ -14,6 +14,8 @@ import { useTranslation } from 'react-i18next';
 import { decimalReserved } from '../../utils';
 import { cTool } from '@labelbee/lb-annotation';
 const { EVideoToolName } = cTool;
+import VideoClipToolHotkey from '@/components/videoAnnotate/videoClipTool/components/videoClipToolHotkey'
+import { VideoClipToolContext } from '@/components/videoAnnotate/videoClipTool/VideoClipToolContext'
 
 /**
  * Format video time to display
@@ -132,35 +134,69 @@ const VideoPageChange = () => {
 const VideoTime = () => {
   const { currentTime, duration } = React.useContext(VideoPlayerCtx);
   const remained10x = duration * 10 - currentTime * 10;
-  const remaingTime = (remained10x > 0 ? remained10x : 0) / 10;
+  const remainingTime = (remained10x > 0 ? remained10x : 0) / 10;
 
   return (
     <div className={getClassName('video-controller', 'time')}>
-      {`${videoTimeFormat(currentTime)} / -${videoTimeFormat(remaingTime)}`}
+      {`${videoTimeFormat(currentTime)} / -${videoTimeFormat(remainingTime)}`}
     </div>
   );
 };
 
-const VideoController = () => {
-  const { playPause, isPlay } = React.useContext(VideoPlayerCtx);
+interface IProps {
+  footer?: any;
+}
+const VideoController = (props: IProps) => {
+  const { footer } = props
+  const { playPause, isPlay, addTime, toggleClipStatus } = React.useContext(VideoPlayerCtx);
+  const { result } = useContext(VideoClipToolContext)
+  const count = result?.filter((i) => i.end !== null)?.length ?? 0
 
+  const videoProgress = <VideoProgress/>
+  const videoPlay = () => (
+    <span
+      onClick={() => {
+        playPause();
+      }}
+      className={getClassName('video-controller', 'playButton')}
+    >
+      {isPlay ? <PauseOutlined /> : <CaretRightOutlined />}
+    </span>
+  )
+  const videoTime = <VideoTime />
+  const videoSpeed = <VideoSpeedButton />
+  const videoPageChange = <VideoPageChange />
+  const videoHotKeys = <VideoHotKeys />
+  const videoClipHotKey = <VideoClipToolHotkey addTime={addTime} toggleClipStatus={toggleClipStatus} />
+  const videoResultCount = <span style={{ margin: '0px 8px', fontSize: 12 }}>{`本页件数: ${count}`}</span>
+
+  if (footer) {
+    if (typeof footer === 'function') {
+      return footer({
+        videoProgress,
+        videoPlayIcon: videoPlay(),
+        videoTime,
+        videoSpeed,
+        videoPageChange,
+        videoHotKeys,
+        videoClipHotKey,
+        videoResultCount
+      })
+    } else {
+      return footer
+    }
+  }
   return (
     <div className={getClassName('video-controller', 'wrapper')}>
-      <VideoProgress />
+      {videoProgress}
       <div className={getClassName('video-controller')}>
-        <span
-          onClick={() => {
-            playPause();
-          }}
-          className={getClassName('video-controller', 'playButton')}
-        >
-          {isPlay ? <PauseOutlined /> : <CaretRightOutlined />}
-        </span>
-        <VideoTime />
-        <VideoSpeedButton />
+        {videoPlay()}
+        {videoTime}
+        {videoSpeed}
         <div className={getClassName('video-controller', 'holder')} />
-        <VideoPageChange />
-        <VideoHotKeys />
+        {videoResultCount}
+        {videoPageChange}
+        {videoHotKeys}
       </div>
     </div>
   );

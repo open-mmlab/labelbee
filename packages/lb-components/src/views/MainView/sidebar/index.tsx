@@ -23,6 +23,7 @@ import { Tabs } from 'antd';
 import { classnames } from '@/utils';
 import menuFoldSvg from '@/assets/annotation/common/icon_menu_fold.svg';
 import LLMToolSidebar from '@/components/LLMToolView/sidebar';
+import VideoClipAnnotatedList from '@/components/videoAnnotate/videoClipTool/components/annotatedList'
 
 const { EVideoToolName, EPointCloudName } = cTool;
 
@@ -125,6 +126,9 @@ const Sidebar: React.FC<IProps> = ({
     />
   );
 
+  const videoClipSidebar = (
+    <VideoClipAnnotatedList />
+  )
   const LLMSidebar = <LLMToolSidebar checkMode={checkMode} />;
 
   const horizontal = <div className={`${sidebarCls}__horizontal`} />;
@@ -152,6 +156,7 @@ const Sidebar: React.FC<IProps> = ({
             pointCloudOperation,
             scribbleSidebar,
             LLMSidebar,
+            videoClipSidebar,
           })}
         </div>
       );
@@ -194,6 +199,18 @@ const Sidebar: React.FC<IProps> = ({
         <TagSidebar />
       </div>
     );
+  }
+
+  if (toolName === EVideoToolName.VideoClipTool) {
+    return (
+      <div className={`${sidebarCls}`}>
+        <div className={`${sidebarCls}__content`}>
+          {videoClipSidebar}
+          {attributeList}
+        </div>
+        {operation}
+      </div>
+    )
   }
 
   if (toolName === EVideoToolName.VideoTagTool) {
