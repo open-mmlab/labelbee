@@ -2,7 +2,6 @@ import { Tag } from 'antd';
 import classNames from 'classnames';
 import React, { useCallback, useEffect, useState } from 'react';
 import loadingSvg from '@/assets/annotation/LLMTool/loading.svg';
-import LongText from '@/components/longText';
 import MarkdownView from '@/components/markdownView';
 import { EDataFormatType } from '@/constant';
 import { getStepConfig } from '@/store/annotation/reducer';
@@ -33,7 +32,7 @@ const RenderContent = ({
     return <MarkdownView value={answer} />;
   }
 
-  return <LongText wordCount={1000} text={answer} />;
+  return answer;
 };
 
 const getAnswer = (id: string, modelAPIResponse: IModelAPIAnswer[]) => {
