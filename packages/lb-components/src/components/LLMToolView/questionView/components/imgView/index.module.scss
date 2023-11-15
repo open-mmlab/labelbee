@@ -1,0 +1,26 @@
+.imgView {
+  display: flex;
+  flex-wrap: wrap;
+
+  .item {
+    margin: 0px 40px 40px 0px;
+    min-width: 400px;
+    max-width: 500px;
+    display: flex;
+    height: 300px;
+
+    .image {
+      height: 260px;
+      min-width: 300px;
+      flex: 1;
+      background: #E9EBF1;
+      display: flex;
+      justify-content: center;
+      align-content: center;
+
+      .ant-image {
+        display: flex;
+      }
+    }
+  }
+}

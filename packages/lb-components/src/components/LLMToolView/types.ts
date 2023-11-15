@@ -20,7 +20,7 @@ export interface IAnswerList {
     [key: string]: boolean;
   };
   newAnswer?: string;
-  url?: string;
+  url?: string; // used to display picture
 }
 
 export interface IModelAPIAnswer {

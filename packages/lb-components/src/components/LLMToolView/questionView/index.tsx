@@ -60,7 +60,7 @@ const RenderAnswer = ({
   if (isTextControl) {
     return <DiffMatchPatchComponent originString={i?.answer} currentString={i?.newAnswer} />;
   }
-  return <div>{i?.answer}</div>;
+  return <div style={{ whiteSpace: 'pre-wrap' }}>{i?.answer}</div>;
 };
 
 const QuestionView: React.FC<IProps> = (props) => {
@@ -105,17 +105,7 @@ const QuestionView: React.FC<IProps> = (props) => {
             })}
             key={index}
           >
-            <Tag
-              style={{
-                color: '#666FFF',
-                background: '#eeefff',
-                height: '20px',
-                padding: '0px 8px',
-                border: 'none',
-              }}
-            >
-              {i?.order}
-            </Tag>
+            <Tag className={`${LLMViewCls}__tag`}>{i?.order}</Tag>
             <RenderAnswer i={i} isTextControl={isTextControl} dataFormatType={dataFormatType} />
           </div>
         );

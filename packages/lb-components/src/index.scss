@@ -1981,12 +1981,6 @@ $ptToolHeight: 40px;
     flex: 1;
   }
 
-  .#{$prefix}-LLMView-image {
-    .ant-image {
-      display: flex ;
-     }
-    }
-
   &__textBox {
     padding: 26px 32px;
   }
@@ -2003,6 +1997,14 @@ $ptToolHeight: 40px;
     display: flex;
     margin-bottom: 24px;
     width: 100%;
+  }
+
+  &__tag {
+    color: #666FFF;
+    background: #eeefff;
+    height: 20px;
+    padding: 0px 8px;
+    border: none;
   }
 
   &__headerContent {
