@@ -171,6 +171,10 @@ const ModelAPIContent = ({
     }
   };
 
+  useEffect(() => {
+    setFailed(false);
+  }, [question]);
+
   return (
     <div
       className={classNames({
