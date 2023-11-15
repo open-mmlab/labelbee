@@ -55,7 +55,12 @@ const AnswerList = (props: IProps) => {
   const isDisableAll = checkMode;
 
   const getFinishStatus = (i: IAnswerList) => {
-    const { indicatorScore = [], indicatorDetermine = [], textEdit = [], isTextEdit = false } = LLMConfig || {};
+    const {
+      indicatorScore = [],
+      indicatorDetermine = [],
+      textEdit = [],
+      isTextEdit = false,
+    } = LLMConfig || {};
 
     let finishStatus = ETagType.Default;
     // Indicator score verification
@@ -85,14 +90,14 @@ const AnswerList = (props: IProps) => {
     // Answer text editing check
     if (isTextEdit && textEdit?.length > 0) {
       // Configuration that matches the current answer
-      const textEditconfigObj = textEdit.filter((v: ITextList) => v?.title === i.order)[0]
-      const { min } = textEditconfigObj
-      const newValue = i?.newAnswer || ''
+      const textEditconfigObj = textEdit.filter((v: ITextList) => v?.title === i.order)[0];
+      const { min } = textEditconfigObj || {};
+      const newValue = i?.newAnswer || '';
 
-      const textEditUnFinish = min && newValue?.length < Number(min)
+      const textEditUnFinish = min && newValue?.length < Number(min);
       if (textEditUnFinish) {
         finishStatus = ETagType.UnFinish;
-        return finishStatus
+        return finishStatus;
       }
       finishStatus = ETagType.Finish;
     }
@@ -144,7 +149,12 @@ const AnswerList = (props: IProps) => {
       style={{ margin: '16px 0px' }}
     >
       {list.map((i: IAnswerList, index: number) => {
-        const { indicatorScore = [], indicatorDetermine = [], textEdit = [], isTextEdit = false } = LLMConfig || {};
+        const {
+          indicatorScore = [],
+          indicatorDetermine = [],
+          textEdit = [],
+          isTextEdit = false,
+        } = LLMConfig || {};
         const { backgroundColor, fontColor, tagText, tagStatus } = getTagStyle(i);
         const textEditObject = getAnswerTextEditConfig(i, textEdit) || {};
 
@@ -161,16 +171,18 @@ const AnswerList = (props: IProps) => {
             <Tag color={backgroundColor} style={{ color: fontColor, padding: '0px 8px' }}>
               {tagText}
             </Tag>
-            <span
-              style={{
-                textOverflow: 'ellipsis',
-                overflow: 'hidden',
-                lineHeight: '32px',
-                paddingRight: '24px',
-              }}
-            >
-              {i.answer}
-            </span>
+            {i.answer && (
+              <span
+                style={{
+                  textOverflow: 'ellipsis',
+                  overflow: 'hidden',
+                  lineHeight: '32px',
+                  paddingRight: '24px',
+                }}
+              >
+                {i.answer}
+              </span>
+            )}
           </div>
         );
 
@@ -241,14 +253,16 @@ const AnswerList = (props: IProps) => {
                 ) : null;
               })}
             {/* Text Editor */}
-            {isTextEdit && <TextEditor
-              checkMode={checkMode}
-              newAnswer={i?.newAnswer}
-              textEditObject={textEditObject}
-              updateValue={(changeValue) => {
-                updateValue({ order: i.order, value: changeValue, key: 'textEdit' });
-              }}
-            />}
+            {isTextEdit && (
+              <TextEditor
+                checkMode={checkMode}
+                newAnswer={i?.newAnswer}
+                textEditObject={textEditObject}
+                updateValue={(changeValue) => {
+                  updateValue({ order: i.order, value: changeValue, key: 'textEdit' });
+                }}
+              />
+            )}
           </Panel>
         );
       })}

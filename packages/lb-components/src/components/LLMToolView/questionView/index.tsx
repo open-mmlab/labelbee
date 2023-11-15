@@ -5,21 +5,35 @@
  */
 
 import React, { useEffect, useState } from 'react';
-import { Tag, Radio } from 'antd';
-import { EDataFormatType, prefix } from '@/constant';
+import { Tag } from 'antd';
+import { EDataFormatType, ELLMDataType, prefix } from '@/constant';
 import classNames from 'classnames';
 import { useTranslation, I18nextProvider } from 'react-i18next';
-import { IAnswerList, IModelAPIAnswer, ILLMToolConfig, ITextList  } from '@/components/LLMToolView/types';
+import {
+  IAnswerList,
+  IModelAPIAnswer,
+  ILLMToolConfig,
+  ITextList,
+} from '@/components/LLMToolView/types';
 import { i18n } from '@labelbee/lb-utils';
 import MarkdownView from '@/components/markdownView';
-import { FileTextOutlined } from '@ant-design/icons';
 import ModelAPIView from '../modelAPIView';
 import DiffMatchPatchComponent from '@/components/diffMatchPatchComponent';
-import { Resizable } from 're-resizable';
+import Header from './components/header';
+import ImgView from './components/imgView';
+import { isString } from 'lodash';
 
 interface IProps {
   hoverKey?: number;
-  question: string;
+  question:
+    | string
+    | {
+        id: number;
+        path: string;
+        url: string;
+        processedUrl: string;
+        thumbnail: string;
+      };
   answerList: IAnswerList[];
   modelAPIResponse: IModelAPIAnswer[];
   setModelAPIResponse?: (data: IModelAPIAnswer[]) => void;
@@ -30,47 +44,6 @@ interface IProps {
 }
 
 export const LLMViewCls = `${prefix}-LLMView`;
-
-const Header = ({
-  setDataFormatType,
-  dataFormatType,
-}: {
-  setDataFormatType: (type: EDataFormatType) => void;
-  dataFormatType: EDataFormatType;
-}) => {
-  const { t } = useTranslation();
-  return (
-    <div
-      className={`${LLMViewCls}__title`}
-      style={{
-        display: 'flex',
-        justifyContent: 'space-between',
-      }}
-    >
-      {t('Title')}
-      <span style={{ display: 'flex' }}>
-        <Radio.Group
-          value={dataFormatType}
-          onChange={(e) => {
-            setDataFormatType(e.target.value);
-          }}
-        >
-          <Radio.Button
-            value={EDataFormatType.Default}
-            style={{ textAlign: 'center', width: '52px' }}
-          >{`</>`}</Radio.Button>
-          <Radio.Button
-            value={EDataFormatType.Markdown}
-            style={{ textAlign: 'center', width: '52px' }}
-          >
-            <FileTextOutlined />
-          </Radio.Button>
-        </Radio.Group>
-        <span style={{ marginLeft: '8px', width: '4px', background: '#1890ff' }} />
-      </span>
-    </div>
-  );
-};
 
 const RenderAnswer = ({
   i,
@@ -87,7 +60,7 @@ const RenderAnswer = ({
   if (isTextControl) {
     return <DiffMatchPatchComponent originString={i?.answer} currentString={i?.newAnswer} />;
   }
-  return <div>{i?.answer}</div>;
+  return <div style={{ whiteSpace: 'pre-wrap' }}>{i?.answer}</div>;
 };
 
 const QuestionView: React.FC<IProps> = (props) => {
@@ -99,10 +72,11 @@ const QuestionView: React.FC<IProps> = (props) => {
     modelAPIResponse,
     setModelAPIResponse,
     checkMode = true,
-    LLMConfig
+    LLMConfig,
   } = props;
   const [dataFormatType, setDataFormatType] = useState(EDataFormatType.Default);
-  const DEFAULT_HEIGHT = 200;
+  const questionIsImg = LLMConfig?.dataType?.prompt === ELLMDataType.Picture;
+  const answerIsImg = LLMConfig?.dataType?.response === ELLMDataType.Picture;
   const { t } = useTranslation();
 
   useEffect(() => {
@@ -119,61 +93,44 @@ const QuestionView: React.FC<IProps> = (props) => {
     return false;
   };
 
+  const textAnswer = (
+    <div>
+      {answerList.map((i: IAnswerList, index: number) => {
+        const isTextControl = getTextControlByConfig(i);
+        return (
+          <div
+            className={classNames({
+              [`${LLMViewCls}__content`]: true,
+              [`${LLMViewCls}__contentActive`]: hoverKey === i?.order,
+            })}
+            key={index}
+          >
+            <Tag className={`${LLMViewCls}__tag`}>{i?.order}</Tag>
+            <RenderAnswer i={i} isTextControl={isTextControl} dataFormatType={dataFormatType} />
+          </div>
+        );
+      })}
+      <ModelAPIView
+        dataFormatType={dataFormatType}
+        modelAPIResponse={modelAPIResponse}
+        question={isString(question) ? question : ''}
+        setModelAPIResponse={setModelAPIResponse}
+        checkMode={checkMode}
+        annotation={props.annotation}
+      />
+    </div>
+  );
   return (
     <div className={LLMViewCls}>
-      <Resizable
-        defaultSize={{
-          width: '100%',
-          height: DEFAULT_HEIGHT,
-        }}
-        minHeight={DEFAULT_HEIGHT}
-        enable={{ bottom: true }}
-        style={{ padding: '26px 32px', borderBottom: '1px solid #EBEBEB', overflow: 'hidden' }}
-      >
-        <Header setDataFormatType={setDataFormatType} dataFormatType={dataFormatType} />
-        <div className={`${LLMViewCls}__headerContent`}>
-          {dataFormatType === EDataFormatType.Markdown ? (
-            <MarkdownView value={question} />
-          ) : (
-            question
-          )}
-        </div>
-      </Resizable>
+      <Header
+        question={question}
+        dataFormatType={dataFormatType}
+        setDataFormatType={setDataFormatType}
+        isImg={questionIsImg}
+      />
       <div className={`${LLMViewCls}__textBox`}>
         <div className={`${LLMViewCls}__title`}>{t('Answer')}</div>
-        {answerList.map((i: IAnswerList, index: number) => {
-          const isTextControl = getTextControlByConfig(i);
-          return (
-            <div
-              className={classNames({
-                [`${LLMViewCls}__content`]: true,
-                [`${LLMViewCls}__contentActive`]: hoverKey === i?.order,
-              })}
-              key={index}
-            >
-              <Tag
-                style={{
-                  color: '#666FFF',
-                  background: '#eeefff',
-                  height: '20px',
-                  padding: '0px 8px',
-                  border: 'none',
-                }}
-              >
-                {i?.order}
-              </Tag>
-              <RenderAnswer i={i} isTextControl={isTextControl} dataFormatType={dataFormatType} />
-            </div>
-          );
-        })}
-         <ModelAPIView
-          dataFormatType={dataFormatType}
-          modelAPIResponse={modelAPIResponse}
-          question={question}
-          setModelAPIResponse={setModelAPIResponse}
-          checkMode={checkMode}
-          annotation={props.annotation}
-        />
+        {answerIsImg ? <ImgView hoverKey={hoverKey} answerList={answerList} /> : textAnswer}
       </div>
     </div>
   );

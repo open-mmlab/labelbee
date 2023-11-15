@@ -1999,10 +1999,18 @@ $ptToolHeight: 40px;
     width: 100%;
   }
 
+  &__tag {
+    color: #666FFF;
+    background: #eeefff;
+    height: 20px;
+    padding: 0px 8px;
+    border: none;
+  }
+
   &__headerContent {
     font-weight: 500;
     font-size: 14px;
-    overflow-y: auto;
+    overflow: auto;
     height: calc(100% - 54px);
   }
 
