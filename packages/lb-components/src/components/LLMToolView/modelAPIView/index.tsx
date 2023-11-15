@@ -32,7 +32,7 @@ const RenderContent = ({
     return <MarkdownView value={answer} />;
   }
 
-  return answer;
+  return <span>{answer}</span>;
 };
 
 const getAnswer = (id: string, modelAPIResponse: IModelAPIAnswer[]) => {
@@ -50,7 +50,14 @@ const ModelAPIView: React.FC<IProps> = (props) => {
   } = props;
   const { stepList, step, toolInstance } = annotation;
   const [LLMConfig, setLLMConfig] = useState<ILLMToolConfig>();
+  const [loadingModelIDs, setLoadingModelIDs] = useState<string[]>([]);
   const { enableModelAPI = false, modelAPIConfigList = [] } = LLMConfig || {};
+
+  useEffect(() => {
+    if (toolInstance) {
+      toolInstance.loading = loadingModelIDs?.length > 0;
+    }
+  }, [loadingModelIDs]);
 
   const updateModelAPIResponse = useCallback(
     (res: IModelAPIAnswer) => {
@@ -92,6 +99,7 @@ const ModelAPIView: React.FC<IProps> = (props) => {
       modelAPIResponse={modelAPIResponse}
       key={i?.id}
       toolInstance={toolInstance}
+      setLoadingModelIDs={setLoadingModelIDs}
       question={question}
       updateModelAPIResponse={updateModelAPIResponse}
       checkMode={checkMode}
@@ -129,6 +137,7 @@ const ModelAPIContent = ({
   config,
   modelAPIResponse,
   toolInstance,
+  setLoadingModelIDs,
   question,
   updateModelAPIResponse,
   checkMode,
@@ -137,6 +146,7 @@ const ModelAPIContent = ({
   config: any;
   modelAPIResponse: any;
   toolInstance: any;
+  setLoadingModelIDs: any;
   question: string;
   updateModelAPIResponse: (res: IModelAPIAnswer) => void;
   checkMode: boolean;
@@ -147,9 +157,12 @@ const ModelAPIContent = ({
 
   const syncLoading = (loading: boolean) => {
     setLoading(loading);
-    if (toolInstance) {
-      toolInstance.loading = loading;
-    }
+    setLoadingModelIDs((prev: string[]) => {
+      if (loading) {
+        return [...prev, config?.id];
+      }
+      return prev.filter((i) => i !== config?.id);
+    });
   };
 
   const refreshAnswer = async () => {
