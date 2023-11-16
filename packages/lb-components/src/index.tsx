@@ -3,7 +3,7 @@ import AnnotationView from '@/components/AnnotationView';
 import PointCloudAnnotationView from '@/components/AnnotationView/pointCloudAnnotationView';
 import QuestionView from '@/components/LLMToolView/questionView';
 import { i18n } from '@labelbee/lb-utils';
-import React, { useImperativeHandle, useState } from 'react';
+import React, { useImperativeHandle, useState, useCallback } from 'react';
 import { I18nextProvider } from 'react-i18next';
 import { Provider } from 'react-redux';
 import { AnyAction } from 'redux';
@@ -24,19 +24,46 @@ export const store = configureStore();
 
 const OutputApp = (props: AppProps, ref: any) => {
   const [toolInstance, setToolInstance] = useState<ToolInstance>();
+  const storeState = store.getState() as AppState;
+  const { skipBeforePageTurning } = storeState?.annotation ?? {};
+
+  const dispatchAction = useCallback(
+    (action: AnyAction) => {
+      if (skipBeforePageTurning) {
+        return skipBeforePageTurning(() => store.dispatch(action));
+      }
+      store.dispatch(action);
+    },
+    [skipBeforePageTurning, store.dispatch],
+  );
+
+  const pageBackwardActions = useCallback(() => {
+    dispatchAction(PageBackward() as unknown as AnyAction);
+  }, [dispatchAction]);
+
+  const pageForwardActions = useCallback(() => {
+    dispatchAction(PageForward() as unknown as AnyAction);
+  }, [dispatchAction]);
+
+  const pageJump = useCallback(
+    (page: string) => {
+      const imgIndex = ~~page - 1;
+      const result = dispatchAction(PageJump(imgIndex) as unknown as AnyAction);
+      return !!result;
+    },
+    [dispatchAction],
+  );
+
   // 暴露给 ref 的一些方法
   useImperativeHandle(
     ref,
     () => {
       return {
         toolInstance,
-        annotationEngine: (store.getState() as AppState).annotation.annotationEngine,
-        pageBackwardActions: () => store.dispatch(PageBackward() as unknown as AnyAction),
-        pageForwardActions: () => store.dispatch(PageForward() as unknown as AnyAction),
-        pageJump: (page: string) => {
-          const imgIndex = ~~page - 1;
-          store.dispatch(PageJump(imgIndex) as unknown as AnyAction);
-        },
+        annotationEngine: storeState.annotation.annotationEngine,
+        pageBackwardActions,
+        pageForwardActions,
+        pageJump,
         hello: () => alert(`hello labelBee!!!`),
       };
     },
@@ -70,7 +97,7 @@ export {
   i18n,
   VideoTagTool,
   PredictTracking,
-  SwitchCuboidBoxIn2DView
+  SwitchCuboidBoxIn2DView,
 };
 
 export * from './constant';
