@@ -58,7 +58,11 @@ const RenderAnswer = ({
     return <MarkdownView value={i?.newAnswer ?? i?.answer} />;
   }
   if (isTextControl) {
-    return <DiffMatchPatchComponent originString={i?.answer} currentString={i?.newAnswer} />;
+    return (
+      <div style={{ width: '100%', overflowWrap: 'break-word' }}>
+        <DiffMatchPatchComponent originString={i?.answer} currentString={i?.newAnswer} />
+      </div>
+    );
   }
   return <div style={{ whiteSpace: 'pre-wrap' }}>{i?.answer}</div>;
 };
