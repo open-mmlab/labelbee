@@ -1,4 +1,4 @@
-import React, { useContext } from 'react';
+import React, { useContext, useMemo } from 'react';
 import { getClassName } from '@/utils/dom';
 import {
   CaretRightOutlined,
@@ -39,8 +39,15 @@ export enum EPlayerType {
 const VideoProgress = () => {
   const { currentTime, duration, buffered, setCurrentTime } = React.useContext(VideoPlayerCtx);
   const progressRef = React.useRef<HTMLDivElement>(null);
-  const bufferLoadedPercent = `${decimalReserved((buffered / duration) * 100, 1)}%`;
-  const playedPercent = `${decimalReserved((currentTime / duration) * 100, 1)}%`;
+
+  const bufferLoadedPercent = useMemo(() => {
+    return `${decimalReserved((buffered / duration) * 100, 1)}%`
+  }, [buffered, duration]);
+
+  const playedPercent = useMemo(() => {
+    return `${decimalReserved((currentTime / duration) * 100, 1)}%`
+  }, [currentTime, duration]);
+
   const toCurrentTime = (event: React.MouseEvent<HTMLDivElement>) => {
     if (progressRef.current) {
       const offsetX = event.clientX;

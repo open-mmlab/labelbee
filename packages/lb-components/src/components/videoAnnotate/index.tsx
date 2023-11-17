@@ -10,22 +10,33 @@ import { useDispatch, LabelBeeContext } from '@/store/ctx';
 import { ANNOTATION_ACTIONS } from '@/store/Actions';
 import { PageBackward, PageForward, PageJump } from '@/store/annotation/actionCreators';
 import { TagToolInstanceAdaptor } from '@/components/videoAnnotate/videoTagTool/TagToolInstanceAdaptor';
-import { getStepConfig } from '@/store/annotation/reducer';
 import { cTool } from '@labelbee/lb-annotation';
 import VideoClipTool from '@/components/videoAnnotate/videoClipTool';
-import { a2MapStateToProps, IA2MapStateProps } from '@/store/annotation/map';
-import { AppProps } from '@/App';
+import { TDrawLayerSlot } from '@/types/main';
+import { AppState } from '@/store';
+import StepUtils from '@/utils/StepUtils';
+import { jsonParser } from '@/utils';
+import { IStepInfo } from '@/types/step';
+import { IFileItem } from '@/types/data';
 const { EVideoToolName } = cTool;
 
-export interface IVideoAnnotateProps extends IA2MapStateProps {
+export interface IVideoAnnotateProps {
   path: string;
   loading: boolean;
   videoContext?: any;
+  stepInfo: IStepInfo;
+  step: number;
+  stepList: IStepInfo[];
+  config: any;
+  imgIndex: number;
+  imgList: IFileItem[];
+  drawLayerSlot?: TDrawLayerSlot;
+  footer?: any;
 }
 
-const VideoAnnotate: React.FC<AppProps & IVideoAnnotateProps> = (props) => {
-  const { imgList, imgIndex, stepList, step } = props;
-  const currentToolName = getStepConfig(stepList, step)?.tool;
+const VideoAnnotate: React.FC<IVideoAnnotateProps> = (props) => {
+  const { stepInfo } = props;
+  const currentToolName = stepInfo?.tool;
 
   const dispatch = useDispatch();
   const onMounted = (instance: any) => {
@@ -58,19 +69,34 @@ const VideoAnnotate: React.FC<AppProps & IVideoAnnotateProps> = (props) => {
   }
   return (
     <TagToolInstanceAdaptor
-      imgIndex={imgIndex}
-      imgList={imgList}
+      {...props}
       pageBackward={() => dispatch(PageBackward())}
       pageForward={() => dispatch(PageForward())}
       pageJump={(page) => dispatch(PageJump(~~page))}
       onMounted={onMounted}
       onUnmounted={onUnmounted}
-      stepList={stepList}
-      step={step}
     />
   );
 };
 
-export default connect(a2MapStateToProps, null, null, {
+const mapStateToProps = (state : AppState) => {
+  const {
+    annotation: { imgList, imgIndex, step, stepList, loading },
+  } = state;
+  const stepInfo = StepUtils.getCurrentStepInfo(state.annotation?.step, state.annotation?.stepList);
+  const imgInfo = imgList[imgIndex] ?? {};
+
+  return {
+    imgIndex,
+    imgList,
+    stepInfo,
+    config: jsonParser(stepInfo?.config),
+    step,
+    stepList,
+    path: imgInfo?.path ?? imgInfo?.url ?? '', // 将当前路径的数据注入
+    loading,
+  };
+};
+export default connect(mapStateToProps, null, null, {
   context: LabelBeeContext,
 })(VideoAnnotate);

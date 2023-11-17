@@ -1313,6 +1313,10 @@ $hotkey-container-padding: 7px;
 }
 
 /** VideoPlayer样式 start */
+$videoContainerHeight: 80px;
+$videoTrackHeight: 45px;
+$timeTrackHeight: 24px;
+$videoHeight: calc(100% - #{$videoContainerHeight} - #{$videoTrackHeight * 2} - #{$timeTrackHeight});
 .#{$prefix}-video-wrapper {
   width: 100%;
   height: 100%;
@@ -1325,6 +1329,13 @@ $hotkey-container-padding: 7px;
     flex: 1;
     overflow: hidden;
     position: relative;
+
+    .#{$prefix}-video {
+      height: calc(100% - #{$videoContainerHeight});
+    }
+    .#{$prefix}-video-track{
+      height: $videoHeight;
+    }
   }
 }
 
@@ -1384,7 +1395,10 @@ $hotkey-container-padding: 7px;
 
 // Controller 样式
 .#{$prefix}-video-controller__wrapper {
-  position: relative;
+  position: absolute;
+  bottom: 0px;
+  left: 0px;
+  right: 0px;
 }
 
 .#{$prefix}-video-controller {

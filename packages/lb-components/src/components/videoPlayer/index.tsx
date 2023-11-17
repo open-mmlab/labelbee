@@ -12,6 +12,7 @@ import { cKeyCode } from '@labelbee/lb-annotation';
 import { IFileItem } from '@/types/data';
 import { decimalReserved } from './utils';
 import FileException from '../fileException';
+import { TDrawLayerSlot } from '@/types/main';
 
 const EKeyCode = cKeyCode.default;
 
@@ -68,7 +69,7 @@ interface IVideoPlayerProps {
   onTrackResize?: any;
   footer?: any;
   dataLoaded?: (totalTime: number) => void;
-  drawLayerSlot?: any,
+  drawLayerSlot?: TDrawLayerSlot,
   addTime?: () => void;
   toggleClipStatus?: () => void;
 }
@@ -190,6 +191,14 @@ export class VideoPlayer extends React.Component<IVideoPlayerProps, IVideoPlayer
     this.onVideoStopped();
   };
 
+  public onTimeUpdate = () => {
+    if (this.videoElm) {
+      this.setState({
+        currentTime: decimalReserved(this.videoElm?.currentTime, 1),
+      })
+    }
+  }
+
   public onVideoStopped = () => {
     this.setState({
       isPlay: false,
@@ -288,6 +297,7 @@ export class VideoPlayer extends React.Component<IVideoPlayerProps, IVideoPlayer
       updateNextPlaybackRate,
       onPause,
       onPlay,
+      onTimeUpdate,
       resetVideoData,
       setDuration,
       setCurrentTime,
@@ -320,12 +330,14 @@ export class VideoPlayer extends React.Component<IVideoPlayerProps, IVideoPlayer
       >
         <div className={getClassName('video-wrapper')}>
           <div className={getClassName('video-container')}>
+            {drawLayerSlot?.({ zoom: 1, currentPos: { x: 0, y: 0 } })}
             <video
               ref={videoRef}
-              className={getClassName('video')}
+              className={getClassName(this.props.showVideoTrack ? 'video-track' : 'video')}
               src={videoSrc}
               onPause={onPause}
               onPlay={onPlay}
+              onTimeUpdate={onTimeUpdate}
               onLoadedMetadata={resetVideoData}
               onError={onError}
               onDurationChange={setDuration}
@@ -333,7 +345,6 @@ export class VideoPlayer extends React.Component<IVideoPlayerProps, IVideoPlayer
               height='100%'
               onClick={playPause}
             />
-            {drawLayerSlot?.()}
             {
               this.props.showVideoTrack && <VideoTrack
                 currentTime={currentTime}

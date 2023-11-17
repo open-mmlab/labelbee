@@ -1,6 +1,5 @@
 import { AttributeUtils, MathUtils, CommonToolUtils, uuid } from '@labelbee/lb-annotation';
 import { jsonParser } from '@/utils';
-import StepUtils from '@/utils/StepUtils';
 import { precisionAdd, precisionMinus, isImageValue } from '@/utils/audio'
 import { getFormatSize } from '@/components/customResizeHook';
 import { message } from 'antd';
@@ -18,14 +17,9 @@ import {
   PER_SLICE_CHANGE,
   SLICE_MIN_TIME,
 } from './constant';
-import InvalidPage from '@/components/invalidPage';
-import VideoPlayer, { PLAYER_CONTROL_BAR_HEIGHT } from '@/components/videoPlayer';
+import VideoPlayer  from '@/components/videoPlayer';
 import VideoTimeSlicesOverVideo from './components/videoTimeSlicesOverVideo';
-import { a2MapStateToProps } from '@/store/annotation/map';
-import { LabelBeeContext } from '@/store/ctx';
-import { connect } from 'react-redux';
-import { IVideoAnnotateProps } from '../index'
-import { AppProps } from '@/App';
+import { IVideoAnnotateProps } from '@/components/videoAnnotate';
 import ClipIconSvg from '@/assets/annotation/video/icon_videoCutting.svg'
 import { decimalReserved } from '@/components/videoPlayer/utils'
 
@@ -51,7 +45,7 @@ interface IState {
   valid: boolean;
 }
 
-class VideoClipTool extends React.Component<AppProps & IVideoClipProps, IState> {
+class VideoClipTool extends React.Component<IVideoClipProps, IState> {
   public get videoUrl() {
     const { imgIndex, imgList } = this.props;
     return imgList[imgIndex]?.url || '';
@@ -120,7 +114,7 @@ class VideoClipTool extends React.Component<AppProps & IVideoClipProps, IState> 
     },
   );
 
-  public constructor(props: AppProps & IVideoClipProps) {
+  public constructor(props: IVideoClipProps) {
     super(props);
     this.state = {
       result: [],
@@ -143,8 +137,7 @@ class VideoClipTool extends React.Component<AppProps & IVideoClipProps, IState> 
 
   /** 步骤信息 */
   public stepInfo = () => {
-    const { step, stepList } = this.props;
-    return StepUtils.getCurrentStepInfo(step, stepList);
+    return this.props.stepInfo;
   };
 
   public componentDidMount() {
@@ -547,6 +540,7 @@ class VideoClipTool extends React.Component<AppProps & IVideoClipProps, IState> 
    */
   public renderMediaContent = () => {
     const canvasSize = this.getCanvasSize();
+    console.log(canvasSize)
     const { pageForward, pageJump, pageBackward } = this.props;
 
     const {
@@ -586,14 +580,6 @@ class VideoClipTool extends React.Component<AppProps & IVideoClipProps, IState> 
           attributeList={this.props.config.attributeList}
         />
         {this.isClipping && <i className={styles.clipping} style={{ backgroundImage: ClipIconSvg }}/>}
-
-        {!valid && (
-          <InvalidPage
-            width={canvasSize.width}
-            height={canvasSize.height - PLAYER_CONTROL_BAR_HEIGHT}
-            isVideo={true}
-          />
-        )}
       </div>
     );
   };
@@ -730,12 +716,10 @@ class VideoClipTool extends React.Component<AppProps & IVideoClipProps, IState> 
           contextToCancel: this.contextToCancel,
         }}
       >
-        {this.props?.videoContext?.promptLayer()}
         {this.renderMediaContent()}
       </VideoClipToolContextProvider>
     );
   }
 }
 
-
-export default connect(a2MapStateToProps, null, null, { context: LabelBeeContext })(VideoClipTool)
+export default VideoClipTool

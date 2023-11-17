@@ -132,7 +132,7 @@ const VideoClipAnnotatedItem = ({
 
 const VideoClipAnnotatedList = (props: { toolInstance: any }) => {
   const { toolInstance } = props
-  const { selectedID, result, videoPlayer, clipStatus, updateSelectedSliceTimeProperty } = toolInstance.exportContext
+  const { selectedID, result, videoPlayer, clipStatus, updateSelectedSliceTimeProperty } = toolInstance.exportContext || {}
 
   const [_, forceRender] = useState(0);
 
@@ -143,23 +143,26 @@ const VideoClipAnnotatedList = (props: { toolInstance: any }) => {
       });
     }
     return () => {
-      toolInstance?.unbindAll('changeClipSidebar');
+      toolInstance?.unbindAll?.('changeClipSidebar');
     };
   }, [toolInstance]);
 
-  const selectedTimeSlice = result.find((i: any) => i.id === selectedID);
-  const resultList = result.filter((i: any) => i.end !== null);
+  const selectedTimeSlice = result?.find((i: any) => i.id === selectedID);
+  const resultList = result?.filter((i: any) => i.end !== null);
 
+  if (!toolInstance?.exportContext) {
+    return null
+  }
   return (
     <div>
       <div className={styles.timeSliceListHeader}>已标注列表</div>
       <VideoClipAnnotatedListWrapper>
-        {resultList.map((timeSliceProps: IVideoTimeSlice, index: number) => (
+        {resultList?.map((timeSliceProps: IVideoTimeSlice, index: number) => (
           <VideoClipAnnotatedItem
             timeSliceProps={timeSliceProps}
             index={index}
             key={timeSliceProps.id}
-            exportContext={toolInstance?.exportContext}
+            exportContext={toolInstance?.exportContext || {}}
           />
         ))}
       </VideoClipAnnotatedListWrapper>
