@@ -108,7 +108,7 @@ const AnswerList = (props: IProps) => {
   const getTagStyle = (item: IAnswerList) => {
     const tagStatus = getFinishStatus(item);
 
-    let tagText = item.order;
+    let tagText = item?.order || '';
     switch (tagStatus) {
       case ETagType.Finish:
         return {
