@@ -38,12 +38,21 @@ export enum EPointCloudSegmentCoverMode {
 
 export enum EPointCloudSegmentFocusMode {
   Focus = 'Focus',
-  Unfocus = 'Unfocus'
+  Unfocus = 'Unfocus',
 }
 
 export enum EPointCloudSegmentStatus {
   Ready = 'READY',
   Check = 'CHECK',
   Edit = 'EDIT',
-  Hover = "HOVER",
+  Hover = 'HOVER',
+}
+
+export enum ECameraType {
+  // Normal camera
+  Normal = 1,
+  // Omnidirectional Camera
+  OmniCamera = 2,
+  // KannalaBrandt Camera
+  KannalaBrandt = 3,
 }

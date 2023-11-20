@@ -138,6 +138,7 @@ interface ICalib {
   fisheyeDistortion: number[]; // Omnidirectional camera: fisheye distortion. 全方向摄像机 - 鱼眼畸变参数。
   groundHeight?: number; // Ground height. 地面高度。
   calName?: string; // Camera Name
+  cameraType: number;
 }
 
 export type UpdatePolygonByDragList = Array<{
