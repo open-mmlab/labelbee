@@ -41,7 +41,7 @@ interface IProps {
   checkMode?: boolean;
   annotation?: any;
   LLMConfig?: ILLMToolConfig;
-  noNeedDiff?: boolean
+  answerHeaderSlot?: React.ReactDOM | string;
 }
 
 export const LLMViewCls = `${prefix}-LLMView`;
@@ -50,17 +50,15 @@ const RenderAnswer = ({
   i,
   dataFormatType,
   isTextControl,
-  noNeedDiff
 }: {
   i: IAnswerList;
   dataFormatType: EDataFormatType;
   isTextControl: boolean;
-  noNeedDiff?: boolean;
 }) => {
   if (dataFormatType === EDataFormatType.Markdown) {
     return <MarkdownView value={i?.newAnswer ?? i?.answer} />;
   }
-  if (isTextControl && !noNeedDiff) {
+  if (isTextControl) {
     return (
       <div style={{ width: '100%', overflowWrap: 'break-word' }}>
         <DiffMatchPatchComponent originString={i?.answer} currentString={i?.newAnswer} />
@@ -80,7 +78,7 @@ const QuestionView: React.FC<IProps> = (props) => {
     setModelAPIResponse,
     checkMode = true,
     LLMConfig,
-    noNeedDiff
+    answerHeaderSlot
   } = props;
   const [dataFormatType, setDataFormatType] = useState(EDataFormatType.Default);
   const questionIsImg = LLMConfig?.dataType?.prompt === ELLMDataType.Picture;
@@ -114,7 +112,7 @@ const QuestionView: React.FC<IProps> = (props) => {
             key={index}
           >
             <Tag className={`${LLMViewCls}__tag`}>{i?.order}</Tag>
-            <RenderAnswer i={i} isTextControl={isTextControl} dataFormatType={dataFormatType} noNeedDiff={noNeedDiff} />
+            <RenderAnswer i={i} isTextControl={isTextControl} dataFormatType={dataFormatType}/>
           </div>
         );
       })}
@@ -139,7 +137,7 @@ const QuestionView: React.FC<IProps> = (props) => {
         isImg={questionIsImg}
       />
       <div className={`${LLMViewCls}__textBox`}>
-        <div className={`${LLMViewCls}__title`}>{t('Answer')}</div>
+        <div className={`${LLMViewCls}__title`}>{t('Answer')} {answerHeaderSlot}</div>
         {answerIsImg ? <ImgView hoverKey={hoverKey} answerList={answerList} /> : textAnswer}
       </div>
     </div>
