@@ -26,14 +26,14 @@ import { isString } from 'lodash';
 interface IProps {
   hoverKey?: number;
   question:
-    | string
-    | {
-        id: number;
-        path: string;
-        url: string;
-        processedUrl: string;
-        thumbnail: string;
-      };
+  | string
+  | {
+    id: number;
+    path: string;
+    url: string;
+    processedUrl: string;
+    thumbnail: string;
+  };
   answerList: IAnswerList[];
   modelAPIResponse: IModelAPIAnswer[];
   setModelAPIResponse?: React.Dispatch<React.SetStateAction<IModelAPIAnswer[]>>;
@@ -41,6 +41,7 @@ interface IProps {
   checkMode?: boolean;
   annotation?: any;
   LLMConfig?: ILLMToolConfig;
+  noNeedDiff?: boolean
 }
 
 export const LLMViewCls = `${prefix}-LLMView`;
@@ -49,15 +50,17 @@ const RenderAnswer = ({
   i,
   dataFormatType,
   isTextControl,
+  noNeedDiff
 }: {
   i: IAnswerList;
   dataFormatType: EDataFormatType;
   isTextControl: boolean;
+  noNeedDiff?: boolean;
 }) => {
   if (dataFormatType === EDataFormatType.Markdown) {
     return <MarkdownView value={i?.newAnswer ?? i?.answer} />;
   }
-  if (isTextControl) {
+  if (isTextControl && !noNeedDiff) {
     return (
       <div style={{ width: '100%', overflowWrap: 'break-word' }}>
         <DiffMatchPatchComponent originString={i?.answer} currentString={i?.newAnswer} />
@@ -77,6 +80,7 @@ const QuestionView: React.FC<IProps> = (props) => {
     setModelAPIResponse,
     checkMode = true,
     LLMConfig,
+    noNeedDiff
   } = props;
   const [dataFormatType, setDataFormatType] = useState(EDataFormatType.Default);
   const questionIsImg = LLMConfig?.dataType?.prompt === ELLMDataType.Picture;
@@ -110,7 +114,7 @@ const QuestionView: React.FC<IProps> = (props) => {
             key={index}
           >
             <Tag className={`${LLMViewCls}__tag`}>{i?.order}</Tag>
-            <RenderAnswer i={i} isTextControl={isTextControl} dataFormatType={dataFormatType} />
+            <RenderAnswer i={i} isTextControl={isTextControl} dataFormatType={dataFormatType} noNeedDiff={noNeedDiff} />
           </div>
         );
       })}
