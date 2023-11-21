@@ -50,9 +50,9 @@ export enum EPointCloudSegmentStatus {
 
 export enum ECameraType {
   // Normal camera
-  Normal = 1,
+  Normal,
   // Omnidirectional Camera
-  OmniCamera = 2,
+  OmniCamera,
   // KannalaBrandt Camera
-  KannalaBrandt = 3,
+  KannalaBrandt,
 }
