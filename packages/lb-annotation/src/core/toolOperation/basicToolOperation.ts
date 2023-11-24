@@ -649,6 +649,41 @@ class BasicToolOperation extends EventListener {
     };
   }
 
+  /**
+   * Get the coordinates of the outer canvas by scaling the coordinates of the relative image under rotation
+   *
+   * @param e
+   * @returns
+   */
+  public getCoordinateUnderZoomByRotateFromImgPoint(point: ICoordinate) {
+    const { x, y } = point;
+    if (this.basicImgInfo.rotate === 90) {
+      return {
+        x: (this.basicImgInfo.height - y) * this.zoom + this.currentPos.x,
+        y: x * this.zoom + this.currentPos.y,
+      };
+    }
+
+    if (this.basicImgInfo.rotate === 180) {
+      return {
+        x: (this.basicImgInfo.width - x) * this.zoom + this.currentPos.x,
+        y: (this.basicImgInfo.height - y) * this.zoom + this.currentPos.y,
+      };
+    }
+
+    if (this.basicImgInfo.rotate === 270) {
+      return {
+        x: y * this.zoom + this.currentPos.x,
+        y: (this.basicImgInfo.width - x) * this.zoom + this.currentPos.y,
+      };
+    }
+
+    return {
+      x: x * this.zoom + this.currentPos.x,
+      y: y * this.zoom + this.currentPos.y,
+    };
+  }
+
   public getGetCenterCoordinate() {
     return {
       x: this.size.width / 2,
@@ -1108,6 +1143,37 @@ class BasicToolOperation extends EventListener {
     DrawUtils.drawLine(this.canvas, { x, y: 0 }, { x, y: 10000 }, { color: lineColor });
     DrawUtils.drawCircleWithFill(this.canvas, { x, y }, 1, { color: 'white' });
   }
+
+  public drawStraightLine = (
+    points: ICoordinate[],
+    config: {
+      color: string;
+      lineWidth: number;
+      globalAlpha: number;
+    },
+  ) => {
+    const { ctx } = this;
+    if (ctx) {
+      ctx.save();
+      ctx.lineCap = 'round';
+      ctx.lineJoin = 'round';
+      ctx.strokeStyle = config.color;
+      ctx.lineWidth = config.lineWidth;
+      ctx.globalAlpha = config.globalAlpha;
+      points.forEach((point, index) => {
+        ctx.beginPath();
+        if (index > 0) {
+          const prePoint = points[index - 1];
+          ctx.save();
+          ctx.moveTo(prePoint.x, prePoint.y);
+          ctx.lineTo(point.x, point.y);
+          ctx.stroke();
+          ctx.restore();
+        }
+      });
+      ctx.restore();
+    }
+  };
 
   public drawImg = () => {
     if (!this.imgNode || this.hiddenImg === true) return;

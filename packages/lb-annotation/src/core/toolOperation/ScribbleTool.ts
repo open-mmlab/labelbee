@@ -5,6 +5,7 @@ import { EScribblePattern, EToolName } from '@/constant/tool';
 import CommonToolUtils from '@/utils/tool/CommonToolUtils';
 import AttributeUtils from '@/utils/tool/AttributeUtils';
 import { BasicToolOperation, IBasicToolOperationProps } from './basicToolOperation';
+import EKeyCode from '@/constant/keyCode';
 
 interface IProps extends IBasicToolOperationProps {}
 
@@ -18,6 +19,8 @@ class ScribbleTool extends BasicToolOperation {
 
   public config!: IScribbleConfig;
 
+  public isHidden: boolean;
+
   private action = EScribblePattern.Scribble;
 
   private cacheCanvas?: HTMLCanvasElement;
@@ -28,10 +31,19 @@ class ScribbleTool extends BasicToolOperation {
 
   private startPoint?: ICoordinate; // Origin Coordinate
 
+  private prePoint?: ICoordinate; // preview Coordinate
+
+  private pointList: ICoordinate[]; // line Coordinate
+
+  private lineActive?: boolean; // line active
+
   constructor(props: IProps) {
     super(props);
 
     this.penSize = DEFAULT_PEN_SIZE;
+
+    this.isHidden = false;
+    this.pointList = [];
 
     // Init defaultAttributeInfo
     if (this.config.attributeList?.length > 0) {
@@ -72,6 +84,7 @@ class ScribbleTool extends BasicToolOperation {
 
   public setPenSize(size: number) {
     this.penSize = size;
+    this.render();
   }
 
   public initCacheCanvas(imgNode?: HTMLImageElement) {
@@ -146,6 +159,30 @@ class ScribbleTool extends BasicToolOperation {
     if (keyCode2Attribute !== undefined) {
       this.setDefaultAttribute(keyCode2Attribute);
     }
+
+    if (keyCode === EKeyCode.Z && !e.ctrlKey) {
+      this.toggleIsHide();
+    }
+
+    if (e.ctrlKey && this.action === EScribblePattern.Scribble) {
+      this.lineActive = true;
+      this.render();
+    }
+  }
+
+  public onKeyUp(e: KeyboardEvent) {
+    super.onKeyUp(e);
+
+    if (e.keyCode === EKeyCode.Ctrl) {
+      this.lineActive = false;
+      this.pointList = [];
+      this.render();
+    }
+  }
+
+  public toggleIsHide() {
+    this.setIsHidden(!this.isHidden);
+    this.render();
   }
 
   public eventBinding() {
@@ -246,12 +283,43 @@ class ScribbleTool extends BasicToolOperation {
     const originCoordinate = this.getOriginCoordinate(e);
     this.cacheContext.moveTo(originCoordinate.x, originCoordinate.y);
     this.startPoint = originCoordinate;
+
+    if (this.lineActive) {
+      this.scribbleOnImgByLine(originCoordinate);
+    }
+  }
+
+  // Draw lines on the image
+  public scribbleOnImgByLine(endPoint: ICoordinate) {
+    const ctx = this.cacheContext;
+    if (!ctx) {
+      return;
+    }
+    this.pointList.push(endPoint);
+    if (this.pointList.length > 1) {
+      this.pointList.forEach((point, index) => {
+        ctx.beginPath();
+        if (index > 0) {
+          const prePoint = this.pointList[index - 1];
+          ctx.save();
+          ctx.moveTo(prePoint.x, prePoint.y);
+          ctx.lineTo(point.x, point.y);
+          ctx.stroke();
+          ctx.restore();
+        }
+      });
+    }
   }
 
   public onScribbleMove(e: MouseEvent) {
+    const originCoordinate = this.getOriginCoordinate(e);
+    if (this.lineActive) {
+      this.prePoint = originCoordinate;
+      return;
+    }
+
     if (e.buttons === 1 && this.cacheContext && this.startPoint) {
       // this.cacheContext.lineTo(e.offsetX, e.offsetY);
-      const originCoordinate = this.getOriginCoordinate(e);
       this.cacheContext.lineTo(originCoordinate.x, originCoordinate.y);
       this.cacheContext.stroke();
       // this.prevAxis = { x: e.offsetX, y: e.offsetY };
@@ -322,13 +390,29 @@ class ScribbleTool extends BasicToolOperation {
     DrawUtils.drawCircle(this.canvas, this.coord, radius, { color: 'black' });
   }
 
+  // Draw line before scribbling on the image
+  public drawLineSegment() {
+    if (this.prePoint && this.pointList.length > 0) {
+      const endPoint = this.pointList[this.pointList.length - 1];
+      const points = [endPoint].concat(this.prePoint);
+      const drawPoints = points.map((p: ICoordinate) => this.getCoordinateUnderZoomByRotateFromImgPoint(p));
+      this.drawStraightLine(drawPoints, {
+        color: this.color,
+        lineWidth: this.penSize,
+        globalAlpha: 0.5,
+      });
+    }
+  }
+
   public render() {
     super.render();
-
-    if (!this.ctx || !this.cacheCanvas) {
+    if (!this.ctx || !this.cacheCanvas || this.isHidden) {
       return;
     }
-
+    if (this.lineActive) {
+      this.renderCursorLine(this.color);
+      this.drawLineSegment();
+    }
     this.ctx.save();
     this.ctx.globalAlpha = 0.5;
     DrawUtils.drawImg(this.canvas, this.cacheCanvas, {
