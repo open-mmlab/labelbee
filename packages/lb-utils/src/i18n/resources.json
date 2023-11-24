@@ -290,7 +290,12 @@
     "Forward0.1": "Advance by 0.1 seconds",
     "Back0.1": "Rewind by 0.1 seconds",
     "LeftClick": "Left-click",
-    "RightClick": "Right-click"
+    "RightClick": "Right-click",
+    "Scribble": "Scribble",
+    "Erase": "Erase",
+    "ScribbleLine": "Scribble (Connect)",
+    "StrokeEnlarge": "Stroke to enlarge",
+    "StrokeReduction": "Stroke reduction"
   },
   "cn": {
     "TextInput": "文本输入",
@@ -583,6 +588,11 @@
     "Forward0.1": "前进0.1s",
     "Back0.1": "后退0.1s",
     "LeftClick": "左击",
-    "RightClick": "右击"
+    "RightClick": "右击",
+    "Scribble": "涂抹",
+    "Erase": "擦除",
+    "ScribbleLine": "涂抹（连线）",
+    "StrokeEnlarge": "笔触放大",
+    "StrokeReduction": "笔触缩小"
   }
 }
