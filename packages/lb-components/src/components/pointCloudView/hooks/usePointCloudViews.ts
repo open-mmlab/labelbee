@@ -1296,16 +1296,35 @@ export const usePointCloudViews = () => {
      * 2. Reload PointCloud
      * 3. Clear Polygon
      */
-    topViewInstance.updateData(newData.url, newData.result, {
-      radius: config?.radius ?? DEFAULT_RADIUS,
-    });
 
     if (newData.result) {
       boxParamsList = PointCloudUtils.getBoxParamsFromResultList(newData.result);
+
+      if (
+        boxParamsList?.length > 0 &&
+        newData.isPreResult &&
+        config?.lowerLimitPointsNumInBox > 0
+      ) {
+        // @ts-ignore
+        boxParamsList = await mainViewInstance?.filterPreResult(newData.url, config, boxParamsList);
+
+        const newDataResultObj = jsonParser(newData.result);
+
+        const DEFAULT_STEP = `step_1`;
+
+        newDataResultObj[DEFAULT_STEP].result = boxParamsList;
+
+        newData.result = JSON.stringify(newDataResultObj);
+
+        ptCtx.setPointCloudResult(boxParamsList);
+      }
       polygonList = PointCloudUtils.getPolygonListFromResultList(newData.result);
       lineList = PointCloudUtils.getLineListFromResultList(newData.result);
       sphereParamsList = PointCloudUtils.getSphereParamsFromResultList(newData.result);
 
+      topViewInstance.updateData(newData.url, newData.result, {
+        radius: config?.radius ?? DEFAULT_RADIUS,
+      });
       // Add Init Box
       mainViewInstance?.generateBoxes(boxParamsList);
       mainViewInstance?.generateSpheres(sphereParamsList);

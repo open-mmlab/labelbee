@@ -4,6 +4,7 @@
  * @author Ron <ron.f.luo@gmail.com>
  */
 
+// eslint-disable-next-line
 import GenerateIndexWorker from 'web-worker:./generateIndexWorker.js';
 import { PCDLoader } from './PCDLoader';
 

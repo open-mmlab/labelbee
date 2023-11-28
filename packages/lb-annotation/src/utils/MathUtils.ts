@@ -81,6 +81,7 @@ function getCubePosition(bigCube: Cube, smallCube: Cube): CubePosition {
   // 计算在大立方体内的顶点数量
   let insideCount = 0;
   for (let i = 0; i < smallCubeVertices.length; i++) {
+    // eslint-disable-next-line
     if (MathUtils.isPointInsideCube(smallCubeVertices[i], bigCube)) {
       insideCount++;
     }
