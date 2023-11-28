@@ -331,14 +331,43 @@ const AudioAnnotate: React.FC<AppProps & IProps> = (props) => {
   }, [loading])
 
   useEffect(() => {
+    toolInstanceRef.current.emit = (event: string) => {
+      const listener = toolInstanceRef.current.fns.get(event);
+      if (listener) {
+        listener.forEach((fn: any) => {
+          if (fn) {
+            fn?.();
+          }
+        });
+      }
+    };
+
+    toolInstanceRef.current.fns = new Map()
+    toolInstanceRef.current.singleOn = (event: string, func: () => void) => {
+      toolInstanceRef.current.fns.set(event, [func]);
+    };
+
+    toolInstanceRef.current.on = (event: string, func: () => void) => {
+      toolInstanceRef.current.singleOn(event, func);
+    };
+
+    toolInstanceRef.current.unbindAll = (eventName: string) => {
+      toolInstanceRef.current.fns.delete(eventName);
+    };
+  }, [])
+
+  useEffect(() => {
     toolInstanceRef.current.exportData = () => {
       return [[result], { duration, valid }];
     };
 
     toolInstanceRef.current.setResult = updateResult
     toolInstanceRef.current.clearResult = clearResult
-
+    toolInstanceRef.current.currentPageResult = result?.regions
+    toolInstanceRef.current.emit('updatePageNumber')
   }, [result]);
+
+
 
   const currentResult = useMemo(() => {
     const stepResult = basicInfo[`step_${stepInfo?.step}`]

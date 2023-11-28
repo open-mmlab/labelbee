@@ -437,14 +437,12 @@ export const AudioPlayer = ({
       playImmediately: true,
     });
 
-    const regionParam: IAudioTimeSlice = {
+    const regionParam = {
       id,
       start: decimalReserved(start, 3),
       end: decimalReserved(end, 3),
-      attribute: '',
-      text: '',
     }
-    updateRegion?.(regionParam);
+    updateRegion?.(regionParam as IAudioTimeSlice);
     update();
   };
 

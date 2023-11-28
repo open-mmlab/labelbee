@@ -25,6 +25,7 @@ import {
 } from '../line'
 import IconPolygonMerge from '@/assets/annotation/toolHotKeyIcon/icon_polygonMerge_kj.svg';
 import IconPolygonCut from '@/assets/annotation/toolHotKeyIcon/icon_polygonCut_kj.svg';
+import DrawRectSvg from '@/assets/annotation/toolHotKeyIcon/icon_frame_kj.svg';
 
 const audioForward = _.cloneDeep(forward);
 const audioBackward = _.cloneDeep(backward);
@@ -53,6 +54,21 @@ export const splitAudio = {
   shortCut: ['Alt', 'X'],
 };
 
+audioForward.name = '下一个';
+audioBackward.name = '上一个';
+audioBackTrack.name = '后退0.1s';
+audioForwardTrack.name = '前进0.1s';
+audioToggleClipMode.name = '切换截取模式';
+audioClipped.name = '截取';
+audioTag.name = '打标签/属性';
+audioPrev.name = '上一区间';
+audioNext.name = '下一区间';
+
+audioClipped.icon = DrawRectSvg;
+
+audioToggleClipMode.noticeInfo = '';
+
+console.log(audioClipped)
 const audioTextToolShortCurTable = [
   saveResult,
   audioToggleTagMode,

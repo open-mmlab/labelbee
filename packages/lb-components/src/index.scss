@@ -349,6 +349,9 @@ $prefix: bee;
 
       &:hover {
         background: #f3f4ff;
+        .sensebee-radio-icon{
+          display: inline-block;
+        }
       }
 
       > span:nth-child(2) {
@@ -373,6 +376,10 @@ $prefix: bee;
         flex: 1;
         overflow: hidden;
         text-overflow: ellipsis;
+      }
+      .sensebee-radio-icon{
+        margin-right: 10px;
+        display: none;
       }
     }
   }
