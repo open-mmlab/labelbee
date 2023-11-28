@@ -21,3 +21,8 @@ declare module 'web-worker:./MathUtilsWorker.js' {
   const content: any;
   export default content;
 }
+
+declare module 'web-worker:./generateIndexWorker.js' {
+  const content: any;
+  export default content;
+}

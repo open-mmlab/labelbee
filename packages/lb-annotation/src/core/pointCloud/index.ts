@@ -1013,6 +1013,21 @@ export class PointCloud extends EventListener {
     return mergeList;
   };
 
+  public filterPreResult = async (src: string, config: any, boxParamsList) => {
+    const { points } = await this.cacheInstance.loadPCDFile(src);
+    const indexMap = await this.cacheInstance.loadIndexMap(src, points as Float32Array);
+
+    return new Promise((resolve) => {
+      const boxes = boxParamsList.map((boxParams) => {
+        const newBox = MathUtils.calculatePointsInsideBox(indexMap, boxParams);
+
+        const valid = newBox.count > config.lowerLimitPointsNumInBox;
+        return { ...newBox, valid };
+      });
+      resolve(boxes);
+    });
+  };
+
   /**
    * It needs to be updated after load PointCloud's data.
    * @param boxParams

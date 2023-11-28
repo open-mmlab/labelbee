@@ -4,13 +4,12 @@
 
 // eslint-disable-next-line
 import MathUtilsWorker from 'web-worker:./MathUtilsWorker.js';
-import { IBasicLine, IBasicPoint, TAnnotationViewData } from '@labelbee/lb-utils';
+import { IBasicLine, IBasicPoint, IPointCloudBox, TAnnotationViewData } from '@labelbee/lb-utils';
 import { DEFAULT_FONT, DEFAULT_TEXT_MAX_WIDTH, ELineTypes, SEGMENT_NUMBER } from '@/constant/tool';
 import { IPolygonData, IPolygonPoint } from '@/types/tool/polygon';
-import { createSmoothCurvePointsFromPointList } from './tool/polygonTool';
+import { createSmoothCurvePointsFromPointList, isInPolygon } from './tool/polygonTool';
 import PolygonUtils from './tool/PolygonUtils';
 import Vector from './VectorUtils';
-
 /**
  * 基础的三角运算
  */
@@ -26,6 +25,90 @@ export class Trigonometric {
   public static cosAPlusB(sinA: number, cosA: number, sinB: number, cosB: number) {
     return cosA * cosB - sinA * sinB;
   }
+}
+
+enum CubePosition {
+  Outside = 0,
+  PartiallyInside = 1,
+  FullyInside = 2,
+}
+
+function getCubePosition(bigCube: Cube, smallCube: Cube): CubePosition {
+  // 计算小立方体的8个顶点
+  const smallCubeVertices: Point[] = [
+    {
+      x: smallCube.x - smallCube.width / 2,
+      y: smallCube.y - smallCube.height / 2,
+      z: smallCube.z - smallCube.depth / 2,
+    },
+    {
+      x: smallCube.x + smallCube.width / 2,
+      y: smallCube.y - smallCube.height / 2,
+      z: smallCube.z - smallCube.depth / 2,
+    },
+    {
+      x: smallCube.x - smallCube.width / 2,
+      y: smallCube.y + smallCube.height / 2,
+      z: smallCube.z - smallCube.depth / 2,
+    },
+    {
+      x: smallCube.x + smallCube.width / 2,
+      y: smallCube.y + smallCube.height / 2,
+      z: smallCube.z - smallCube.depth / 2,
+    },
+    {
+      x: smallCube.x - smallCube.width / 2,
+      y: smallCube.y - smallCube.height / 2,
+      z: smallCube.z + smallCube.depth / 2,
+    },
+    {
+      x: smallCube.x + smallCube.width / 2,
+      y: smallCube.y - smallCube.height / 2,
+      z: smallCube.z + smallCube.depth / 2,
+    },
+    {
+      x: smallCube.x - smallCube.width / 2,
+      y: smallCube.y + smallCube.height / 2,
+      z: smallCube.z + smallCube.depth / 2,
+    },
+    {
+      x: smallCube.x + smallCube.width / 2,
+      y: smallCube.y + smallCube.height / 2,
+      z: smallCube.z + smallCube.depth / 2,
+    },
+  ];
+
+  // 计算在大立方体内的顶点数量
+  let insideCount = 0;
+  for (let i = 0; i < smallCubeVertices.length; i++) {
+    if (MathUtils.isPointInsideCube(smallCubeVertices[i], bigCube)) {
+      insideCount++;
+    }
+  }
+
+  // 根据在大立方体内的顶点数量返回结果
+  if (insideCount === 0) {
+    return CubePosition.Outside; // 所有顶点都在大立方体外
+  }
+  if (insideCount === 8) {
+    return CubePosition.FullyInside; // 所有顶点都在大立方体内
+  }
+  return CubePosition.PartiallyInside; // 部分顶点在大立方体内，部分顶点在大立方体外
+}
+
+interface Point {
+  x: number;
+  y: number;
+  z: number;
+}
+
+interface Cube {
+  x: number;
+  y: number;
+  z: number;
+  width: number;
+  height: number;
+  depth: number;
 }
 
 export default class MathUtils {
@@ -653,5 +736,92 @@ export default class MathUtils {
     };
 
     return [fixedPoint, newSecondPoint, newThirdPoint, newFourthPoint];
+  }
+
+  public static calculatePointsInsideBox = (
+    indexMap: Map<string, { x: number; y: number; z: number }[]>,
+    box: IPointCloudBox,
+  ) => {
+    const { center, width, height, depth } = box;
+    const { x, y, z } = center;
+
+    const boxCube = {
+      x,
+      y,
+      z,
+      width,
+      height,
+      depth,
+    };
+
+    let count = 0;
+
+    indexMap.forEach((point, key) => {
+      const keyArr = key.split('@');
+      const cubicX = Number(keyArr[0]);
+      const cubicY = Number(keyArr[1]);
+      const cubicZ = Number(keyArr[2]);
+
+      const cubePosition = getCubePosition(boxCube, {
+        x: cubicX - 0.5,
+        y: cubicY - 0.5,
+        z: cubicZ - 0.5,
+        width: 1,
+        height: 1,
+        depth: 1,
+      });
+
+      if (cubePosition === CubePosition.FullyInside) {
+        count += point.length;
+      }
+
+      if (cubePosition === CubePosition.PartiallyInside) {
+        point.forEach((p) => {
+          if (MathUtils.isPointInsideCube(p, boxCube)) {
+            count++;
+          }
+        });
+      }
+    });
+
+    return { ...box, count };
+  };
+
+  public static isPointInsideCube(point: Point, cube: Cube): boolean {
+    const halfWidth = cube.width / 2;
+    const halfHeight = cube.height / 2;
+    const halfDepth = cube.depth / 2;
+
+    const xMin = cube.x - halfWidth;
+    const xMax = cube.x + halfWidth;
+    const yMin = cube.y - halfHeight;
+    const yMax = cube.y + halfHeight;
+    const zMin = cube.z - halfDepth;
+    const zMax = cube.z + halfDepth;
+
+    const polygon = [
+      {
+        x: xMin,
+        y: yMin,
+      },
+      {
+        x: xMax,
+        y: yMin,
+      },
+      {
+        x: xMax,
+        y: yMax,
+      },
+      {
+        x: xMin,
+        y: yMax,
+      },
+    ];
+
+    const inPolygon = isInPolygon({ x: point.x, y: point.y }, polygon);
+    if (inPolygon && point.z >= zMin && point.z <= zMax) {
+      return true;
+    }
+    return false;
   }
 }

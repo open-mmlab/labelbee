@@ -4,11 +4,14 @@
  * @author Ron <ron.f.luo@gmail.com>
  */
 
+import GenerateIndexWorker from 'web-worker:./generateIndexWorker.js';
 import { PCDLoader } from './PCDLoader';
 
 type TCacheInfo = {
   src: string;
 };
+
+const generateIndexWorker = new GenerateIndexWorker({ type: 'module' });
 
 export class PointCloudCache {
   public pcdLoader: PCDLoader;
@@ -18,6 +21,8 @@ export class PointCloudCache {
   private pointsMap: Map<string, Float32Array>;
 
   private colorMap: Map<string, Float32Array>;
+
+  private cacheIndexMap: Map<string, Map<string, { x: number; y: number; z: number }[]>>;
 
   private cacheList: Array<TCacheInfo> = [];
 
@@ -29,7 +34,7 @@ export class PointCloudCache {
     this.pcdLoader = new PCDLoader();
     this.pointsMap = new Map();
     this.colorMap = new Map();
-
+    this.cacheIndexMap = new Map();
     this.cache2DHighlightIndex = new Map();
   }
 
@@ -95,4 +100,36 @@ export class PointCloudCache {
   public clearCache2DHighlightIndex() {
     this.cache2DHighlightIndex.clear();
   }
+
+  /**
+   * Asynchronously loads an index map from a given source.
+   * If the index map is already cached, it returns the cached version.
+   * Otherwise, it creates a new worker to generate the index map,
+   * caches it for future use, and then returns it.
+   *
+   * @param {string} src - The source from which to load the index map.
+   * @param {Float32Array} points - The points to be used in generating the index map.
+   * @returns {Promise} - A promise that resolves to the loaded index map.
+   */
+  public loadIndexMap = async (src: string, points: Float32Array) => {
+    const currentCacheIndexMap = this.cacheIndexMap.get(src);
+
+    if (currentCacheIndexMap) {
+      return currentCacheIndexMap;
+    }
+
+    return new Promise((resolve) => {
+      if (window.Worker) {
+        generateIndexWorker.postMessage({
+          points,
+        });
+
+        generateIndexWorker.onmessage = (e: any) => {
+          const { indexMap } = e.data;
+          this.cacheIndexMap.set(src, indexMap);
+          resolve(indexMap);
+        };
+      }
+    });
+  };
 }
