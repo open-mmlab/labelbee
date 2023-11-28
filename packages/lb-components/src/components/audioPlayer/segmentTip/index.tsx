@@ -7,6 +7,7 @@
 import React, { useRef } from 'react';
 import { timeFormat } from '@/utils/audio';
 import { useMouse } from 'ahooks';
+import styles from '../index.module.scss';
 
 interface IProps {
   /** 分割点时间提示 */
@@ -23,12 +24,15 @@ const SegmentTip = (props: IProps) => {
     return null;
   }
 
+
   return (
     <div
+      className={styles.tips}
       style={{
         left: mouse.clientX,
         top: 75,
         marginLeft: -130,
+        zIndex: 999,
       }}
     >
       请选择希望截取的时间点（{timeFormat(segmentTimeTip, 'ss.SSS')}）

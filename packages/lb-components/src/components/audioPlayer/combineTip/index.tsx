@@ -7,6 +7,7 @@
 import React from 'react';
 import { useAudioClipStore } from '@/components/audioAnnotate/audioContext';
 import { useHover, useMouse } from 'ahooks';
+import styles from '../index.module.scss';
 
 interface IProps {
   /**  展示的容器 */
@@ -26,6 +27,7 @@ const CombineTip = (props: IProps) => {
 
   return (
     <div
+      className={styles.tips}
       style={{
         left: mouse.clientX + 20,
         top: mouse.clientY - 20,

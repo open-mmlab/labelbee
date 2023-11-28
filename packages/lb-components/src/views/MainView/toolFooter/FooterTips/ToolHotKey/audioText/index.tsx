@@ -68,7 +68,6 @@ audioClipped.icon = DrawRectSvg;
 
 audioToggleClipMode.noticeInfo = '';
 
-console.log(audioClipped)
 const audioTextToolShortCurTable = [
   saveResult,
   audioToggleTagMode,

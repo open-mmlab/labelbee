@@ -806,8 +806,8 @@ export const AudioPlayer = ({
           }}
           className={classnames({
             [styles.waveform]: true,
-            [styles.combined]: audioClipStateRef.current.combined,
-            [styles.clip]: audioClipStateRef.current.clipConfigurable,
+            'bee-audio-combined': audioClipStateRef.current.combined,
+            'bee-audio-clip': audioClipStateRef.current.clipConfigurable,
           })}
         >
           {invalid && <InvalidPage isAudio={true} />}

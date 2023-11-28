@@ -2271,3 +2271,10 @@ $predictTrackingPrefix: #{$prefix}-point-cloud-predict-tracking;
   right: 0;
   z-index: -200;
 }
+
+.bee-audio-clip{
+  cursor: url('./assets/annotation/audio/blackClip.svg'), default;
+}
+.bee-audio-combined{
+  cursor: url('./assets/annotation/audio/combine.svg') 10 12, default;
+}
