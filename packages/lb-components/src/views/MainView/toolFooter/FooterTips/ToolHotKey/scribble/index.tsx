@@ -22,33 +22,33 @@ import {
   // changeSpecialLine,
   saveResult,
   // dargWithLeftClick,
-  hidden
+  hidden,
 } from '../common';
 
 export const scribbleImg = {
-  name: 'scribble',
+  name: 'Scribble',
   icon: scribbleSvg,
   shortCut: ['Q'],
 };
 export const eraseImg = {
-  name: 'erase',
+  name: 'Erase',
   icon: eraserSvg,
   shortCut: ['W'],
 };
 
 export const scribbleLine = {
-  name: 'scribbleLine',
+  name: 'ScribbleLine',
   icon: IconLineStatic,
   shortCut: ['Ctrl', DragWithLeftClickSvg],
 };
 
 export const strokeEnlarge = {
-  name: 'strokeEnlarge',
+  name: 'StrokeEnlarge',
   icon: strokeEnlargeSvg,
   shortCut: ['F'],
 };
 export const strokeReduction = {
-  name: 'strokeReduction',
+  name: 'StrokeReduction',
   icon: strokeReductionSvg,
   shortCut: ['G'],
 };
@@ -68,7 +68,7 @@ const scribbleShortCutTable = [
   forward,
   dargWithRightClick,
   setValid,
-  hidden
+  hidden,
   // copyBackwardResult,
 ];
 

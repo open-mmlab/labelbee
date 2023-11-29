@@ -4,8 +4,8 @@ import DrawUtils from '@/utils/tool/DrawUtils';
 import { EScribblePattern, EToolName } from '@/constant/tool';
 import CommonToolUtils from '@/utils/tool/CommonToolUtils';
 import AttributeUtils from '@/utils/tool/AttributeUtils';
-import { BasicToolOperation, IBasicToolOperationProps } from './basicToolOperation';
 import EKeyCode from '@/constant/keyCode';
+import { BasicToolOperation, IBasicToolOperationProps } from './basicToolOperation';
 
 interface IProps extends IBasicToolOperationProps {}
 

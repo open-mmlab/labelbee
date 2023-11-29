@@ -268,11 +268,11 @@
     "ReGenerate": "Re-generate",
     "AnswerTextEdit": "Answer text edit",
     "ShowEditingResultDifferencesInTextModeOnly": "Show editing result differences in text mode only",
-    "scribble": "Scribble",
-    "erase": "Erase",
-    "scribbleLine": "Scribble (Connect)",
-    "strokeEnlarge": "Stroke to enlarge",
-    "strokeReduction": "Stroke reduction"
+    "Scribble": "Scribble",
+    "Erase": "Erase",
+    "ScribbleLine": "Scribble (Connect)",
+    "StrokeEnlarge": "Stroke to enlarge",
+    "StrokeReduction": "Stroke reduction"
   },
   "cn": {
     "TextInput": "文本输入",
@@ -543,10 +543,10 @@
     "ReGenerate": "重新生成",
     "AnswerTextEdit": "回答文本编辑",
     "ShowEditingResultDifferencesInTextModeOnly": "仅文本模式下显示编辑结果差异",
-    "scribble": "涂抹",
-    "erase": "擦除",
-    "scribbleLine": "涂抹（连线）",
-    "strokeEnlarge": "笔触放大",
-    "strokeReduction": "笔触缩小"
+    "Scribble": "涂抹",
+    "Erase": "擦除",
+    "ScribbleLine": "涂抹（连线）",
+    "StrokeEnlarge": "笔触放大",
+    "StrokeReduction": "笔触缩小"
   }
 }
