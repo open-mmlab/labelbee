@@ -6,7 +6,7 @@ import { Layout } from 'antd/es';
 import { Spin } from 'antd';
 import { prefix } from '@/constant';
 import { AppProps } from '@/App';
-import { cKeyCode, CommonToolUtils, cTool, uuid, TagUtils } from '@labelbee/lb-annotation';
+import { cKeyCode, CommonToolUtils, cTool, uuid, TagUtils, EventBus } from '@labelbee/lb-annotation';
 import styles from './index.module.scss';
 import TagResultShow from '@/components/audioAnnotate/tagResultShow';
 import { AudioClipProvider, useAudioClipStore } from './audioContext';
@@ -518,6 +518,7 @@ const AudioAnnotate: React.FC<AppProps & IProps> = (props) => {
       tag: {},
       regions: [],
     }))
+    EventBus.emit('clearRegions');
   }
 
   return <AudioClipProvider>
