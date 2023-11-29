@@ -145,7 +145,7 @@ export const BoxInfos = ({
 
       infos.push({
         label: t('PointCount'),
-        value: `${data.num}`,
+        value: `${selectedBox.info?.count ?? 0}`,
       });
 
       //  SubAttribute is shown in checkMode

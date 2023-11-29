@@ -776,17 +776,6 @@ export const usePointCloudViews = () => {
 
     boxParams = nextResult[0];
 
-    // If the count is less than lowerLimitPointsNumInBox, needs to delete it
-    if (
-      config?.lowerLimitPointsNumInBox &&
-      typeof boxParams.count === 'number' &&
-      boxParams.count < config.lowerLimitPointsNumInBox
-    ) {
-      message.info(t('LowerLimitPointsNumInBox', { num: config.lowerLimitPointsNumInBox }));
-      polygonOperation.deletePolygon(boxParams.id);
-      return;
-    }
-
     if (intelligentFit && newPointList?.length) {
       newPolygon.pointList = newPointList;
     }
@@ -927,20 +916,6 @@ export const usePointCloudViews = () => {
         sideViewInstance.pointCloudInstance,
       );
 
-      const nextResult = dispatch(
-        PreDataProcess({
-          tool: EPointCloudName.PointCloud,
-          dataList: [newBoxParams],
-          stepConfig: config,
-          action: 'viewUpdateBox',
-        }),
-      ) as unknown as IPointCloudBox[];
-      const newBox = nextResult[0];
-      // 如果更新后的box valid没有变化，则不更新当前视图
-      const updateCurrentView = newBoxParams.valid !== newBox.valid;
-
-      newBoxParams = newBox;
-
       // Update count
       if (mainViewInstance) {
         const { count } = mainViewInstance.getSensesPointZAxisInPolygon(
@@ -956,6 +931,20 @@ export const usePointCloudViews = () => {
           count,
         };
       }
+
+      const nextResult = dispatch(
+        PreDataProcess({
+          tool: EPointCloudName.PointCloud,
+          dataList: [newBoxParams],
+          stepConfig: config,
+          action: 'viewUpdateBox',
+        }),
+      ) as unknown as IPointCloudBox[];
+      const newBox = nextResult[0];
+      // 如果更新后的box valid没有变化，则不更新当前视图
+      const updateCurrentView = newBoxParams.valid !== newBox.valid;
+
+      newBoxParams = newBox;
 
       const newPointCloudBoxList = updateSelectedBox(newBoxParams);
 
