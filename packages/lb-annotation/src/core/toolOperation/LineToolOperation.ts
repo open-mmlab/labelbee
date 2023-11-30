@@ -1989,10 +1989,10 @@ class LineToolOperation extends BasicToolOperation {
 
   /** 更新文本输入，并且进行关闭 */
   public updateSelectedTextAttribute(newTextAttribute?: string) {
-    if (this._textAttributeInstance && newTextAttribute && this.selectedID) {
+    if (this._textAttributeInstance && newTextAttribute !== undefined && this.selectedID) {
       let textAttribute = newTextAttribute;
       const textAttributeInvalid = !AttributeUtils.textAttributeValidate(this.config.textCheckType, '', textAttribute);
-      if (textAttributeInvalid) {
+      if (textAttributeInvalid && textAttribute !== '') {
         this.emit('messageError', AttributeUtils.getErrorNotice(this.config.textCheckType, this.lang));
         textAttribute = '';
       }
