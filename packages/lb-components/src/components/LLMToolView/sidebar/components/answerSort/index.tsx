@@ -92,7 +92,7 @@ const AnswerSort = (props: IProps) => {
           [`${contentBoxCls}__answerTag`]: true,
         })}
         style={targetTagKey === item?.id && activateDirection ? borderStyle : undefined}
-        draggable={isDisableAll ? '' : 'true'}
+        draggable={isDisableAll || !item?.id ? '' : 'true'}
         onMouseMove={() => {
           setHoverKey(item.id);
         }}

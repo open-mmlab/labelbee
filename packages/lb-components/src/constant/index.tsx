@@ -28,3 +28,10 @@ export enum EDataFormatType {
   Default = 'default', // 原文
   Markdown = 'markdown', // markdown
 }
+
+// LLM工具的数据类型
+export enum ELLMDataType {
+  Picture = 'picture',
+  Text = 'text',
+  None = 'none',
+}

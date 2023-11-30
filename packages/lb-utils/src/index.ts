@@ -33,3 +33,5 @@ export * from './annotation';
 export * from './toolStyle';
 
 export * from './constant/color';
+
+export * from './types/common';

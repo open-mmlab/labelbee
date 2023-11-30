@@ -21,7 +21,7 @@ const TextInputBox = (props: IProps) => {
 
   useEffect(() => {
     const combinResult = textConfig.map((i, index) => {
-      const value = textAttribute.filter((item) => item?.textId === i?.textId) || [];
+      const value = textAttribute?.filter((item) => item?.textId === i?.textId) || [];
       return { ...i, value: value[0]?.value };
     });
     form.setFieldsValue({ text: combinResult });
