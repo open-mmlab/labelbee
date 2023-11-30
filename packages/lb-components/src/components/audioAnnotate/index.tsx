@@ -331,16 +331,7 @@ const AudioAnnotate: React.FC<AppProps & IProps> = (props) => {
   }, [loading])
 
   useEffect(() => {
-    toolInstanceRef.current.emit = (event: string) => {
-      const listener = toolInstanceRef.current.fns.get(event);
-      if (listener) {
-        listener.forEach((fn: any) => {
-          if (fn) {
-            fn?.();
-          }
-        });
-      }
-    };
+    toolInstanceRef.current.emit = emitEvent
 
     toolInstanceRef.current.fns = new Map()
     toolInstanceRef.current.singleOn = (event: string, func: () => void) => {
@@ -511,6 +502,7 @@ const AudioAnnotate: React.FC<AppProps & IProps> = (props) => {
   const updateResult = (result: any) => {
     setResult(result)
   }
+
   const clearResult = () => {
     setResult((result: any) => ({
       ...result,
@@ -520,6 +512,17 @@ const AudioAnnotate: React.FC<AppProps & IProps> = (props) => {
     }))
     EventBus.emit('clearRegions');
   }
+
+  const emitEvent = (event: string) => {
+    const listener = toolInstanceRef.current.fns.get(event);
+    if (listener) {
+      listener.forEach((fn: any) => {
+        if (fn) {
+          fn?.();
+        }
+      });
+    }
+  };
 
   return <AudioClipProvider>
     <Spin spinning={loading} wrapperClassName='audio-tool-spinner'>

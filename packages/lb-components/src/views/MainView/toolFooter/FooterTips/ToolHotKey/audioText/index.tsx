@@ -41,28 +41,28 @@ const audioPrev = _.cloneDeep(preLine);
 const audioNext = _.cloneDeep(nextLine);
 
 export const combineAudio = {
-  name: '合并区间',
+  name: 'CombineAudio',
   icon: IconPolygonMerge,
   noticeInfo: '',
   shortCut: ['Alt', 'Z'],
 };
 
 export const splitAudio = {
-  name: '分割区间',
+  name: 'ClipAudio',
   icon: IconPolygonCut,
   noticeInfo: '',
   shortCut: ['Alt', 'X'],
 };
 
-audioForward.name = '下一个';
-audioBackward.name = '上一个';
-audioBackTrack.name = '后退0.1s';
-audioForwardTrack.name = '前进0.1s';
-audioToggleClipMode.name = '切换截取模式';
-audioClipped.name = '截取';
-audioTag.name = '打标签/属性';
-audioPrev.name = '上一区间';
-audioNext.name = '下一区间';
+audioForward.name = 'NextFile';
+audioBackward.name = 'PreviousFile';
+audioBackTrack.name = 'Forward0.1';
+audioForwardTrack.name = 'Back0.1';
+audioToggleClipMode.name = 'SwitchClipMode';
+audioClipped.name = 'Clip';
+audioTag.name = 'TaggingOrAttr';
+audioPrev.name = 'PreviousInterval';
+audioNext.name = 'NextInterval';
 
 audioClipped.icon = DrawRectSvg;
 

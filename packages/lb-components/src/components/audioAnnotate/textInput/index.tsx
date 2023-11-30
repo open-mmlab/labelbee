@@ -9,6 +9,7 @@ import classnames from 'classnames';
 import AudioContext, { useAudioClipStore } from '../audioContext';
 import styles from './index.module.scss';
 import { IInputList } from '@/types/main';
+import { useTranslation } from 'react-i18next';
 // import { AlgorithmButtonForText } from '../icons/algorithmButton';
 
 const EKeyCode = cKeyCode.default
@@ -74,6 +75,8 @@ interface IProps {
 }
 
 export const SingleTextInput = (props: any) => {
+  const { t } = useTranslation();
+
   const ref = useRef(null);
   const [textAreaFocus, setTextAreaFocus] = useState(false);
   const [invalid, setInvalid] = useState(false);
@@ -172,8 +175,8 @@ export const SingleTextInput = (props: any) => {
   const TextareaFooter = (
     <div className={styles.textAreaFooter}>
       <div className={styles.hotkeyTip}>
-        {tabToSwitchEnabled && <span>[切换]Tab</span>}
-        <span>[翻页]Ctrl+Enter</span>
+        {tabToSwitchEnabled && <span>[{t('Switch')}]Tab</span>}
+        <span>[{t('TurnPage')}]Ctrl+Enter</span>
       </div>
       <div className={styles.wordCount}>
         <span className={textLength >= maxLength ? styles.warning : ''}>{textLength}</span>/
@@ -260,6 +263,8 @@ const TextInput = (props: IProps) => {
     updateRegion,
     clipAttributeList = [],
   } = props;
+
+  const { t } = useTranslation();
 
   const [focusIndex, setFocusIndex] = useState(0);
   const [placeholder, setPlaceholder] = useState('');
@@ -429,7 +434,7 @@ const TextInput = (props: IProps) => {
             const { id, start, end, attribute } = item;
             // 兼容SingleTextInput的props
             const config = {
-              label: `文本（${timeFormat(start, 'ss.SSS')} - ${timeFormat(end, 'ss.SSS')}）`,
+              label: `${t('textTool')}（${timeFormat(start, 'ss.SSS')} - ${timeFormat(end, 'ss.SSS')}）`,
               key: id,
               maxLength: 3000,
             };

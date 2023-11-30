@@ -124,7 +124,7 @@ const AttributeList = React.forwardRef((props: IProps, ref) => {
     setAttributeLockList(newAttributeLockList);
     props?.attributeLockChange?.(newAttributeLockList);
     if (!hadLock) {
-      message.success(`查看属性：${attributeInfo.label}，只显示所选属性的标注内容`);
+      message.success(t('AttributeLockNotify', { label: attributeInfo.label }))
     }
     e.preventDefault();
   };
