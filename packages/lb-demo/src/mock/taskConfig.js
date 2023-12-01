@@ -270,7 +270,7 @@ const LLMToolConfig = {
     {
       title: 1,
       min: 11,
-      max: 100,
+      max: 1000,
       isFillAnswer: true, // 是否填充答案
       textControl: true // 文本对照
     },

@@ -8,6 +8,8 @@ import { Form, Input, Popover } from 'antd';
 import { ITextList } from '@/components/LLMToolView/types';
 import { useTranslation } from 'react-i18next';
 import { InfoCircleOutlined } from '@ant-design/icons';
+import MarkdownView from '@/components/markdownView';
+import LatexEditor from '@/components/latexEditor';
 
 interface IProps {
   newAnswer?: string;
@@ -39,6 +41,32 @@ const TextEditor = (props: IProps) => {
     }
   }, [newAnswer]);
 
+  const insertText = (newText: string) => {
+    const textarea = document.getElementById('inputTextarea') as HTMLInputElement;
+
+    const text = textarea.value || '';
+    // Get cursor position
+    const start = textarea?.selectionStart ?? text.length;
+    const end = textarea.selectionEnd ?? text.length;
+
+    // Get cursor character
+    const before = text.substring(0, start);
+    const after = text.substring(end, text.length);
+
+    const newValue = before + newText + after;
+    textarea.value = newValue;
+
+    form.setFieldsValue({ value: newValue });
+    updateValue(newValue);
+
+    // 将光标定位到插入文本的末尾
+    textarea.selectionStart = start + newText.length;
+    textarea.selectionEnd = start + newText.length;
+
+    // 使 TextArea 获取焦点
+    textarea.focus();
+  };
+
   return (
     <Form
       form={form}
@@ -60,6 +88,7 @@ const TextEditor = (props: IProps) => {
           <InfoCircleOutlined style={{ margin: '0px 4px', cursor: 'pointer' }} />
         </Popover>
       </Form.Item>
+      <LatexEditor onSelectLatex={insertText} />
       <Form.Item
         name='value'
         style={{
@@ -83,7 +112,31 @@ const TextEditor = (props: IProps) => {
           disabled={checkMode}
           showCount={max ? true : false}
           style={{ width: '100%' }}
+          id='inputTextarea'
         />
+      </Form.Item>
+      <Form.Item shouldUpdate={true} noStyle={true}>
+        {() => {
+          const inputValue = form.getFieldValue('value') || '';
+          const markdownText = inputValue.replace(/\n/g, '  \n');
+
+          return (
+            <>
+              <div style={{ lineHeight: '32px' }}>输出展示</div>
+              <div
+                style={{
+                  minHeight: '100px',
+                  overflow: 'auto',
+                  maxHeight: '200px',
+                  background: '#fff',
+                  padding: '4px',
+                }}
+              >
+                {inputValue ? <MarkdownView value={markdownText} /> : ''}
+              </div>
+            </>
+          );
+        }}
       </Form.Item>
     </Form>
   );
