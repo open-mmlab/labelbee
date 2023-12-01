@@ -38,8 +38,6 @@ import {
   SetPointCloudLoading,
   SetLoadPCDFileLoading,
 } from '@/store/annotation/actionCreators';
-import { message } from 'antd';
-import { useTranslation } from 'react-i18next';
 import { useHistory } from './useHistory';
 import { usePolygon } from './usePolygon';
 import { IFileItem, IMappingImg } from '@/types/data';
@@ -654,7 +652,6 @@ export const usePointCloudViews = () => {
   const { selectedBox, updateSelectedBox, updateSelectedBoxes, getPointCloudByID } = useSingleBox({
     generateRects,
   });
-  const { t } = useTranslation();
 
   const selectedPointCloudBox = selectedBox?.info;
 

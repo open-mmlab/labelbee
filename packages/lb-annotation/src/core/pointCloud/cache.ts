@@ -12,7 +12,7 @@ type TCacheInfo = {
   src: string;
 };
 
-const generateIndexWorker = new GenerateIndexWorker({ type: 'module' });
+export type TIndexMap = Map<string, { x: number; y: number; z: number }[]>;
 
 export class PointCloudCache {
   public pcdLoader: PCDLoader;
@@ -23,7 +23,7 @@ export class PointCloudCache {
 
   private colorMap: Map<string, Float32Array>;
 
-  private cacheIndexMap: Map<string, Map<string, { x: number; y: number; z: number }[]>>;
+  private cacheIndexMap: Map<string, TIndexMap>;
 
   private cacheList: Array<TCacheInfo> = [];
 
@@ -103,24 +103,21 @@ export class PointCloudCache {
   }
 
   /**
-   * Asynchronously loads an index map from a given source.
-   * If the index map is already cached, it returns the cached version.
-   * Otherwise, it creates a new worker to generate the index map,
-   * caches it for future use, and then returns it.
+   * Loads index map from cache or generates it in a worker.
    *
-   * @param {string} src - The source from which to load the index map.
-   * @param {Float32Array} points - The points to be used in generating the index map.
-   * @returns {Promise} - A promise that resolves to the loaded index map.
+   * @param src The path to the source image.
+   * @param points The points of the source image.
+   * @returns A promise that resolves to the index map.
    */
   public loadIndexMap = async (src: string, points: Float32Array) => {
     const currentCacheIndexMap = this.cacheIndexMap.get(src);
 
-    if (currentCacheIndexMap) {
-      return currentCacheIndexMap;
-    }
-
     return new Promise((resolve) => {
+      if (currentCacheIndexMap) {
+        return resolve(currentCacheIndexMap);
+      }
       if (window.Worker) {
+        const generateIndexWorker = new GenerateIndexWorker({ type: 'module' });
         generateIndexWorker.postMessage({
           points,
         });
@@ -129,6 +126,7 @@ export class PointCloudCache {
           const { indexMap } = e.data;
           this.cacheIndexMap.set(src, indexMap);
           resolve(indexMap);
+          generateIndexWorker.terminate();
         };
       }
     });
