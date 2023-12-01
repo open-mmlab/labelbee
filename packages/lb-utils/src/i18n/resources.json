@@ -295,7 +295,9 @@
     "Erase": "Erase",
     "ScribbleLine": "Scribble (Connect)",
     "StrokeEnlarge": "Stroke to enlarge",
-    "StrokeReduction": "Stroke reduction"
+    "StrokeReduction": "Stroke reduction",
+    "OutputDisplay":"Output display",
+    "MaximumCharacterError":"The number of characters cannot exceed {{num}}"
   },
   "cn": {
     "TextInput": "文本输入",
@@ -593,6 +595,8 @@
     "Erase": "擦除",
     "ScribbleLine": "涂抹（连线）",
     "StrokeEnlarge": "笔触放大",
-    "StrokeReduction": "笔触缩小"
+    "StrokeReduction": "笔触缩小",
+    "OutputDisplay":"输出展示",
+    "MaximumCharacterError": "字符数不能超过{{num}}"
   }
 }

@@ -272,6 +272,7 @@ const LLMToolConfig = {
       min: 11,
       max: 1000,
       isFillAnswer: true, // 是否填充答案
+      isLaText: true, // 是否打开LaTex编辑
       textControl: true // 文本对照
     },
     {

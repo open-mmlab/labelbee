@@ -4,7 +4,7 @@
  * @Date: 2023-11-09
  */
 import React, { useEffect } from 'react';
-import { Form, Input, Popover } from 'antd';
+import { Form, Input, message, Popover } from 'antd';
 import { ITextList } from '@/components/LLMToolView/types';
 import { useTranslation } from 'react-i18next';
 import { InfoCircleOutlined } from '@ant-design/icons';
@@ -21,7 +21,7 @@ interface IProps {
 const TextEditor = (props: IProps) => {
   const { checkMode, newAnswer, textEditObject, updateValue } = props;
 
-  const { max, min } = textEditObject;
+  const { max, min, isLaText } = textEditObject;
   const { TextArea } = Input;
   const [form] = Form.useForm();
   const { t } = useTranslation();
@@ -54,16 +54,23 @@ const TextEditor = (props: IProps) => {
     const after = text.substring(end, text.length);
 
     const newValue = before + newText + after;
+    if (max && newValue?.length > max) {
+      message.error(
+        t('MaximumCharacterError', {
+          num: max,
+        }),
+      );
+      return;
+    }
     textarea.value = newValue;
-
     form.setFieldsValue({ value: newValue });
     updateValue(newValue);
 
-    // 将光标定位到插入文本的末尾
+    // Position the cursor at the end of the inserted text
     textarea.selectionStart = start + newText.length;
     textarea.selectionEnd = start + newText.length;
 
-    // 使 TextArea 获取焦点
+    // Give TextArea focus
     textarea.focus();
   };
 
@@ -88,7 +95,7 @@ const TextEditor = (props: IProps) => {
           <InfoCircleOutlined style={{ margin: '0px 4px', cursor: 'pointer' }} />
         </Popover>
       </Form.Item>
-      <LatexEditor onSelectLatex={insertText} />
+      {isLaText && <LatexEditor onSelectLatex={insertText} />}
       <Form.Item
         name='value'
         style={{
@@ -115,29 +122,31 @@ const TextEditor = (props: IProps) => {
           id='inputTextarea'
         />
       </Form.Item>
-      <Form.Item shouldUpdate={true} noStyle={true}>
-        {() => {
-          const inputValue = form.getFieldValue('value') || '';
-          const markdownText = inputValue.replace(/\n/g, '  \n');
+      {isLaText && (
+        <Form.Item shouldUpdate={true} noStyle={true}>
+          {() => {
+            const inputValue = form.getFieldValue('value') || '';
+            const markdownText = inputValue.replace(/\n/g, '  \n');
 
-          return (
-            <>
-              <div style={{ lineHeight: '32px' }}>输出展示</div>
-              <div
-                style={{
-                  minHeight: '100px',
-                  overflow: 'auto',
-                  maxHeight: '200px',
-                  background: '#fff',
-                  padding: '4px',
-                }}
-              >
-                {inputValue ? <MarkdownView value={markdownText} /> : ''}
-              </div>
-            </>
-          );
-        }}
-      </Form.Item>
+            return (
+              <>
+                <div style={{ lineHeight: '32px' }}>{t('OutputDisplay')}</div>
+                <div
+                  style={{
+                    minHeight: '100px',
+                    overflow: 'auto',
+                    maxHeight: '200px',
+                    background: '#fff',
+                    padding: '4px',
+                  }}
+                >
+                  {inputValue ? <MarkdownView value={markdownText} /> : ''}
+                </div>
+              </>
+            );
+          }}
+        </Form.Item>
+      )}
     </Form>
   );
 };
