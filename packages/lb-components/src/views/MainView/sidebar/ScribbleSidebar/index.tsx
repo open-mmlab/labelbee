@@ -27,11 +27,11 @@ const ScribbleSidebar: React.FC<IProps> = (props) => {
   const { onChange } = props;
   // 查看时候默认值
   const toolInstance = useSelector((state: AppState) => state.annotation.toolInstance);
-  const [silderValue, setSilderValue] = useState(DEFAULT_SLIDER_SIZE);
+  const [sliderValue, setSliderValue] = useState(DEFAULT_SLIDER_SIZE);
   const [selectTool, setSelectTool] = useState(EScribblePattern.Scribble);
 
   const changeValue = () => {
-    onChange(selectTool, silderValue);
+    onChange(selectTool, sliderValue);
   };
 
   useEffect(() => {
@@ -39,7 +39,7 @@ const ScribbleSidebar: React.FC<IProps> = (props) => {
     return () => {
       window.removeEventListener('keydown', onKeyDown);
     };
-  }, [silderValue]);
+  }, [sliderValue]);
 
   const onKeyDown = (event: KeyboardEvent) => {
     const { keyCode } = event;
@@ -52,34 +52,34 @@ const ScribbleSidebar: React.FC<IProps> = (props) => {
         break;
 
       case EKeyCode.F:
-        addSilder();
+        addSlider();
         break;
 
       case EKeyCode.G:
-        cutSilder();
+        cutSlider();
         break;
     }
   };
 
 
-  const addSilder = () => {
+  const addSlider = () => {
 
-    if (silderValue === SLIDER_MAX_SIZE) {
+    if (sliderValue === SLIDER_MAX_SIZE) {
       return;
     }
-    setSilderValue(silderValue+1);
+    setSliderValue(sliderValue+1);
     changeValue();
-    toolInstance?.setPenSize(silderValue+1);
+    toolInstance?.setPenSize(sliderValue+1);
   };
 
-  const cutSilder = () => {
+  const cutSlider = () => {
 
-    if (silderValue === SLIDER_MIN_SIZE) {
+    if (sliderValue === SLIDER_MIN_SIZE) {
       return;
     }
-    setSilderValue(silderValue-1);
+    setSliderValue(sliderValue-1);
     changeValue();
-    toolInstance?.setPenSize(silderValue-1);
+    toolInstance?.setPenSize(sliderValue-1);
   };
 
   const onSelectPattern = (pattern: EScribblePattern) => {
@@ -100,18 +100,18 @@ const ScribbleSidebar: React.FC<IProps> = (props) => {
           onClick={() => onSelectPattern(EScribblePattern.Erase)}
         />
       </div>
-      <div className={getClassName('scribble', 'silder')}>
+      <div className={getClassName('scribble', 'slider')}>
         <span className={getClassName('scribble', 'circle')} />
         <Slider
           onChange={(v: number) => {
-            setSilderValue(v);
+            setSliderValue(v);
             changeValue();
             toolInstance?.setPenSize(v);
           }}
           min={SLIDER_MIN_SIZE}
           max={SLIDER_MAX_SIZE}
           style={{ width: '60%' }}
-          value={silderValue}
+          value={sliderValue}
         />
         <span
           className={getClassName('scribble', 'circle')}

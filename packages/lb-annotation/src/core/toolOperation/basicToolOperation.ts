@@ -651,9 +651,6 @@ class BasicToolOperation extends EventListener {
 
   /**
    * Get the coordinates of the outer canvas by scaling the coordinates of the relative image under rotation
-   *
-   * @param e
-   * @returns
    */
   public getCoordinateUnderZoomByRotateFromImgPoint(point: ICoordinate) {
     const { x, y } = point;
