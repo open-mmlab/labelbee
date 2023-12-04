@@ -8,6 +8,8 @@ import { IPointCloudBox, IPointCloudConfig, IPointCloudSphere } from './types/po
 import { ICoordinate, ISize } from './types/common';
 import { IBasicBox3d } from './types';
 
+export const POINT_CLOUD_DEFAULT_STEP = `step_1`;
+
 class PointCloudUtils {
   public static genColorByCoord(x: number, y: number, z: number) {
     if (z <= 0) {
@@ -46,9 +48,8 @@ class PointCloudUtils {
 
   public static parsePointCloudCurrentResult(result: string) {
     const data = this.jsonParser(result);
-    const DEFAULT_STEP = `step_1`;
 
-    const ptResult = data?.[DEFAULT_STEP] ?? {};
+    const ptResult = data?.[POINT_CLOUD_DEFAULT_STEP] ?? {};
 
     const boxParamsList = ptResult?.result ?? [];
     /**
@@ -73,8 +74,7 @@ class PointCloudUtils {
   public static getBoxParamsFromResultList(result: string): IPointCloudBox[] {
     const data = this.jsonParser(result);
 
-    const DEFAULT_STEP = `step_1`;
-    const pointCloudDataList = data?.[DEFAULT_STEP]?.result ?? [];
+    const pointCloudDataList = data?.[POINT_CLOUD_DEFAULT_STEP]?.result ?? [];
 
     return pointCloudDataList;
   }
@@ -82,8 +82,7 @@ class PointCloudUtils {
   public static getSphereParamsFromResultList(result: string): IPointCloudSphere[] {
     const data = this.jsonParser(result);
 
-    const DEFAULT_STEP = `step_1`;
-    const pointCloudDataList = data?.[DEFAULT_STEP]?.resultPoint ?? [];
+    const pointCloudDataList = data?.[POINT_CLOUD_DEFAULT_STEP]?.resultPoint ?? [];
 
     return pointCloudDataList;
   }
@@ -91,8 +90,7 @@ class PointCloudUtils {
   public static getSegmentFromResultList(result: string) {
     const data = this.jsonParser(result);
 
-    const DEFAULT_STEP = `step_1`;
-    const pointCloudDataList = data?.[DEFAULT_STEP]?.segmentation ?? [];
+    const pointCloudDataList = data?.[POINT_CLOUD_DEFAULT_STEP]?.segmentation ?? [];
 
     return pointCloudDataList;
   }
@@ -143,9 +141,7 @@ class PointCloudUtils {
   public static getLineListFromResultList(result: string): any[] {
     const data = this.jsonParser(result);
 
-    const DEFAULT_STEP = `step_1`;
-
-    const pointCloudDataList = data?.[DEFAULT_STEP]?.resultLine ?? [];
+    const pointCloudDataList = data?.[POINT_CLOUD_DEFAULT_STEP]?.resultLine ?? [];
 
     return pointCloudDataList;
   }
@@ -153,15 +149,15 @@ class PointCloudUtils {
   public static getPolygonListFromResultList(result: string): any[] {
     const data = this.jsonParser(result);
 
-    const DEFAULT_STEP = `step_1`;
-
     /**
      * Notice.
      *
      * It needs to be compatible with the error data structure(`renderPolygon`), `resultPolygon` is the correct one.
      */
     const pointCloudDataList =
-      data?.[DEFAULT_STEP]?.resultPolygon ?? data?.[DEFAULT_STEP]?.renderPolygon ?? [];
+      data?.[POINT_CLOUD_DEFAULT_STEP]?.resultPolygon ??
+      data?.[POINT_CLOUD_DEFAULT_STEP]?.renderPolygon ??
+      [];
 
     return pointCloudDataList;
   }
@@ -306,7 +302,7 @@ class PointCloudUtils {
    * @param boxParams
    * @returns
    */
-  public static getAllViewData(boxParams: IPointCloudBox | IBasicBox3d)  {
+  public static getAllViewData(boxParams: IPointCloudBox | IBasicBox3d) {
     const {
       center: { x, y, z },
       width,
@@ -567,9 +563,8 @@ class PointCloudUtils {
     let basicSize: { width: number; height: number; depth: number } | undefined = undefined;
 
     imgList.forEach((imgInfo) => {
-      const DEFAULT_STEP_NAME = `step_${1}`;
       const originResult = this.jsonParser(imgInfo.result);
-      const dataList = originResult?.[DEFAULT_STEP_NAME]?.result; // PointCloudData1
+      const dataList = originResult?.[POINT_CLOUD_DEFAULT_STEP]?.result; // PointCloudData1
 
       if (!dataList) {
         return;
