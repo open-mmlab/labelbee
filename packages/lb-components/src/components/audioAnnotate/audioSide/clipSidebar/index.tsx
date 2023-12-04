@@ -11,6 +11,7 @@ import LongText from '@/components/longText';
 import { classnames } from '@/utils';
 
 import styles from './index.module.scss';
+import { useTranslation } from 'react-i18next';
 
 interface IClipSidebarProps {
   /** 截取片段数组 */
@@ -22,6 +23,7 @@ interface IClipSidebarProps {
 const ClipSidebar = (props: IClipSidebarProps) => {
   const { regions = [], updateRegion, useAudioClipStore } = props;
   const { audioClipState, setAudioClipState } = useAudioClipStore();
+  const { t } = useTranslation();
 
   const {
     selectedAttribute,
@@ -57,7 +59,7 @@ const ClipSidebar = (props: IClipSidebarProps) => {
   return (
     <div className={styles.clipSidebar}>
       <div className={styles.clipResults}>
-        <div className={styles.title}>已截取音频</div>
+        <div className={styles.title}>{t('ClippedAudio')}</div>
         {regions.length > 0 ? (
           <div className={styles.regions}>
             {regions.map((item) => {
@@ -67,7 +69,7 @@ const ClipSidebar = (props: IClipSidebarProps) => {
               const showText = `${
                 clipAttributeConfigurable ? getAttributeShowText(attribute, list) : ''
               }${clipAttributeConfigurable && clipTextConfigurable ? '，' : ''}${
-                clipTextConfigurable ? `文本：${text}` : ''
+                clipTextConfigurable ? `${t('textTool')}：${text}` : ''
               }`;
               return (
                 <div
@@ -103,7 +105,7 @@ const ClipSidebar = (props: IClipSidebarProps) => {
             })}
           </div>
         ) : (
-          <div className={styles.empty}>暂无截取内容</div>
+          <div className={styles.empty}>{t('NoClippedData')}</div>
         )}
       </div>
       {clipAttributeConfigurable && clipAttributeList?.length > 0 && (

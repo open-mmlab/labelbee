@@ -6,7 +6,7 @@ import { Layout } from 'antd/es';
 import { Spin } from 'antd';
 import { prefix } from '@/constant';
 import { AppProps } from '@/App';
-import { cKeyCode, CommonToolUtils, cTool, uuid, TagUtils } from '@labelbee/lb-annotation';
+import { cKeyCode, CommonToolUtils, cTool, uuid, TagUtils, EventBus } from '@labelbee/lb-annotation';
 import styles from './index.module.scss';
 import TagResultShow from '@/components/audioAnnotate/tagResultShow';
 import { AudioClipProvider, useAudioClipStore } from './audioContext';
@@ -331,14 +331,45 @@ const AudioAnnotate: React.FC<AppProps & IProps> = (props) => {
   }, [loading])
 
   useEffect(() => {
+    initToolInstance()
+  }, [])
+
+  useEffect(() => {
     toolInstanceRef.current.exportData = () => {
       return [[result], { duration, valid }];
     };
 
     toolInstanceRef.current.setResult = updateResult
     toolInstanceRef.current.clearResult = clearResult
-
+    toolInstanceRef.current.currentPageResult = result?.regions
+    toolInstanceRef.current.emit('updatePageNumber')
   }, [result]);
+
+
+  const initToolInstance = () => {
+    toolInstanceRef.current.emit = (event: string) => {
+      const listener = toolInstanceRef.current.fns.get(event);
+      if (listener) {
+        listener.forEach((fn: any) => {
+          if (fn) {
+            fn?.();
+          }
+        });
+      }
+    }
+    toolInstanceRef.current.fns = new Map()
+    toolInstanceRef.current.singleOn = (event: string, func: () => void) => {
+      toolInstanceRef.current.fns.set(event, [func]);
+    };
+
+    toolInstanceRef.current.on = (event: string, func: () => void) => {
+      toolInstanceRef.current.singleOn(event, func);
+    };
+
+    toolInstanceRef.current.unbindAll = (eventName: string) => {
+      toolInstanceRef.current.fns.delete(eventName);
+    };
+  }
 
   const currentResult = useMemo(() => {
     const stepResult = basicInfo[`step_${stepInfo?.step}`]
@@ -482,6 +513,7 @@ const AudioAnnotate: React.FC<AppProps & IProps> = (props) => {
   const updateResult = (result: any) => {
     setResult(result)
   }
+
   const clearResult = () => {
     setResult((result: any) => ({
       ...result,
@@ -489,6 +521,7 @@ const AudioAnnotate: React.FC<AppProps & IProps> = (props) => {
       tag: {},
       regions: [],
     }))
+    EventBus.emit('clearRegions');
   }
 
   return <AudioClipProvider>

@@ -1,13 +1,17 @@
+import lockSvg from '@/assets/attributeIcon/icon_eyeLock_a.svg';
+import unlockSvg from '@/assets/attributeIcon/icon_eyeLock_h.svg';
 import { COLORS_ARRAY, NULL_COLOR } from '@/data/Style';
 import { ColorTag } from '@/components/colorTag';
 import { Radio } from 'antd/es';
-import React, { useState } from 'react';
-import { Popover } from 'antd';
+import React, { useState, useEffect } from 'react';
+import { Popover, message } from 'antd';
 import ColorPalette from '../colorPalette';
 import { CloseOutlined } from '@ant-design/icons';
 import { useTranslation } from 'react-i18next';
 import { ILimit, IDefaultSize } from '@labelbee/lb-utils';
 import LimitPopover from './components/limitPopover';
+import _ from 'lodash';
+import { CommonToolUtils, MathUtils } from '@labelbee/lb-annotation';
 
 export const ATTRIBUTE_COLORS = [NULL_COLOR].concat(COLORS_ARRAY);
 
@@ -39,6 +43,7 @@ const AttributeList = React.forwardRef((props: IProps, ref) => {
 
   const [paletteVisible, setPaletteVisible] = useState<boolean>(false);
   const [editConfigIndex, setEditConfigIndex] = useState<number | undefined>(undefined);
+  const [attributeLockList, setAttributeLockList] = useState<any[]>([]);
 
   let NEW_ATTRIBUTE_COLORS = [...ATTRIBUTE_COLORS];
 
@@ -52,10 +57,76 @@ const AttributeList = React.forwardRef((props: IProps, ref) => {
     className = 'sensebee-radio-group-no-limit-height';
   }
 
+  const keyDown = (e: any) => {
+    if (!CommonToolUtils.hotkeyFilter(e) || props?.forbidColor) {
+      // 如果为输入框则进行过滤
+      return;
+    }
+    let keyCode = e.keyCode;
+    // 文件夹标签工具没有无属性
+    if (props.forbidDefault === true) {
+      keyCode = keyCode - 1;
+    }
+    let attributeInfo;
+
+    if (MathUtils.isInRange(e.keyCode, [48, 57])) {
+      attributeInfo = props.list[keyCode - 48];
+    }
+
+    if (MathUtils.isInRange(e.keyCode, [96, 105])) {
+      attributeInfo = props.list[keyCode - 96];
+    }
+    if (e.shiftKey && attributeInfo) {
+      if (!props?.attributeLockChange) {
+        // 过滤属性查看事件
+        return;
+      }
+      checkLock(e, attributeInfo);
+      e.preventDefault();
+      return;
+    }
+
+    if (MathUtils.isInRange(e.keyCode, [48, 57]) || MathUtils.isInRange(e.keyCode, [96, 105])) {
+      props?.attributeChanged?.(attributeInfo?.value ?? '');
+    }
+  };
+
+  useEffect(() => {
+    window.addEventListener('keydown', keyDown);
+    return () => window.removeEventListener('keydown', keyDown);
+  });
+
   const changeColor = (value: string, color: string) => {
     if (props.updateColorConfig) {
       props.updateColorConfig(value, color);
     }
+  };
+
+  const attributeClick = (e: any, attributeInfo: any) => {
+    if (e.shiftKey && props?.attributeLockChange) {
+      checkLock(e, attributeInfo);
+      return;
+    }
+    props.attributeChanged(e.target.value);
+  };
+
+  const checkLock = (e: any, attributeInfo: any) => {
+    if (props?.forbidColor) {
+      return;
+    }
+    const hadLock = attributeLockList.includes(attributeInfo.value);
+    let newAttributeLockList = _.cloneDeep(attributeLockList);
+    if (hadLock) {
+      newAttributeLockList = newAttributeLockList.filter((i) => i !== attributeInfo.value);
+    } else {
+      newAttributeLockList.push(attributeInfo.value);
+    }
+    setAttributeLockList(newAttributeLockList);
+    props?.attributeLockChange?.(newAttributeLockList);
+    if (!hadLock) {
+      message.success(t('AttributeLockNotify', { label: attributeInfo.label }))
+    }
+    e.preventDefault();
   };
 
   return (
@@ -64,7 +135,6 @@ const AttributeList = React.forwardRef((props: IProps, ref) => {
         name='radiogroup'
         defaultValue={props?.selectedAttribute}
         value={props?.selectedAttribute}
-        onChange={(e) => props.attributeChanged(e.target.value)}
         ref={ref as any}
       >
         {list.map((i: any, index: number) => {
@@ -97,7 +167,7 @@ const AttributeList = React.forwardRef((props: IProps, ref) => {
           const showLimitPopover = isChosen && hasLimit && props.forbidShowLimitPopover !== true;
 
           return (
-            <Radio value={i.value} ref={radioRef} key={i.label + index}>
+            <Radio value={i.value} ref={radioRef} key={i.label + index} onClick={(e) => attributeClick(e, i)}>
               <span className='sensebee-radio-label' title={i.label}>
                 {!props?.forbidColor && (
                   <Popover
@@ -142,6 +212,16 @@ const AttributeList = React.forwardRef((props: IProps, ref) => {
                 {i.label}
               </span>
 
+              {!props?.forbidColor && props?.attributeLockChange && (
+                <img
+                  onClick={(e) => checkLock(e, i)}
+                  src={attributeLockList.includes(i.value) ? lockSvg : unlockSvg}
+                  style={{
+                    display: attributeLockList.includes(i.value) ? 'inline-block' : '',
+                  }}
+                  className='sensebee-radio-icon'
+                />
+              )}
               {showLimitPopover && <LimitPopover limit={i.limit} updateSize={props?.updateSize} />}
               <span className='sensebee-radio-num'>{hotKey}</span>
             </Radio>

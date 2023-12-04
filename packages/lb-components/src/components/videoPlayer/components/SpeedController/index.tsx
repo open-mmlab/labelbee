@@ -2,6 +2,7 @@ import { CaretUpOutlined, CaretDownOutlined } from '@ant-design/icons';
 import React, { useEffect, useState } from 'react';
 import styles from './index.module.scss';
 import { CommonToolUtils, cKeyCode } from '@labelbee/lb-annotation';
+import { useTranslation } from 'react-i18next';
 
 const EKeyCode = cKeyCode.default
 
@@ -29,6 +30,7 @@ interface IProps {
 
 const SpeedController = (props: IProps) => {
   const { onChange, playerType } = props;
+  const { t } = useTranslation();
   const PLAYBACK_RATE_SPEED = PLAYER_TYPE_RATE_SPEED[playerType];
   const MAX_PLAYBACK_RATE_SPEED = PLAYBACK_RATE_SPEED.slice(-1)[0];
   const MIN_PLAYBACK_RATE_SPEED = PLAYBACK_RATE_SPEED[0];
@@ -72,7 +74,7 @@ const SpeedController = (props: IProps) => {
           alignItems: 'center',
         }}
       >
-        <span style={{ fontSize: 12 }}>倍速</span>
+        <span style={{ fontSize: 12 }}>{t('Speed')}</span>
         {rate}x
       </span>
       <span className={styles.speedController}>
