@@ -9,12 +9,15 @@ import { AppState } from '@/store';
 import { connect } from 'react-redux';
 import { LabelBeeContext, LLMContext } from '@/store/ctx';
 import { message } from 'antd';
-import { prefix } from '@/constant';
+import { ELLMDataType, prefix } from '@/constant';
 import { Layout } from 'antd/es';
 import QuestionView from './questionView';
 import { useTranslation } from 'react-i18next';
-import { IAnswerList } from './types';
+import { IAnswerList, ILLMToolConfig } from './types';
 import AnnotationTips from '@/views/MainView/annotationTips';
+import { getCurrentResultFromResultList } from './utils/data';
+import { getStepConfig } from '@/store/annotation/reducer';
+import { jsonParser } from '@/utils';
 
 interface IProps {
   checkMode?: boolean;
@@ -24,12 +27,15 @@ interface IProps {
 }
 const LLMViewCls = `${prefix}-LLMView`;
 const LLMToolView: React.FC<IProps> = (props) => {
-  const { annotation, checkMode, tips, showTips } = props;
-  const { imgIndex, imgList } = annotation;
-  const { hoverKey } = useContext(LLMContext);
+  const { annotation, checkMode = true, tips, showTips } = props;
+  const { imgIndex, imgList, stepList, step } = annotation;
+  const { hoverKey, modelAPIResponse, setModelAPIResponse, newAnswerList } = useContext(LLMContext);
   const [answerList, setAnswerList] = useState<IAnswerList[]>([]);
   const [question, setQuestion] = useState<string>('');
+  const [LLMConfig, setLLMConfig] = useState<ILLMToolConfig>();
+
   const { t } = useTranslation();
+
   useEffect(() => {
     let interval: undefined | ReturnType<typeof setInterval>;
 
@@ -50,18 +56,60 @@ const LLMToolView: React.FC<IProps> = (props) => {
     if (!imgList[imgIndex]) {
       return;
     }
+    const questionIsImg = LLMConfig?.dataType?.prompt === ELLMDataType.Picture;
+    const answerIsImg = LLMConfig?.dataType?.response === ELLMDataType.Picture;
 
     const qaData = imgList[imgIndex]?.questionList;
 
-    setQuestion(qaData?.question);
-    setAnswerList(qaData?.answerList || []);
+    const llmFile = imgList[imgIndex]?.llmFile;
+    const titleQuestion = questionIsImg ? llmFile?.question : qaData?.question;
+    setQuestion(titleQuestion);
+    let list = qaData?.answerList || [];
+    if (answerIsImg) {
+      list = llmFile?.answerList || [];
+    }
+    if (LLMConfig?.dataType?.response === ELLMDataType.None) {
+      list = [];
+    }
+    if (LLMConfig?.dataType?.response === ELLMDataType.Text) {
+      if (newAnswerList?.length > 0) {
+        list = newAnswerList;
+      }
+    }
+    setAnswerList(list);
+  }, [imgIndex, newAnswerList, LLMConfig]);
+
+  useEffect(() => {
+    if (!imgList[imgIndex]) {
+      return;
+    }
+    const currentData = imgList[imgIndex] ?? {};
+    const result = getCurrentResultFromResultList(currentData?.result);
+    const currentResult = result?.length > 0 ? result[0] : result;
+    setModelAPIResponse(currentResult?.modelAPIResponse || []);
   }, [imgIndex]);
+
+  useEffect(() => {
+    if (stepList && step) {
+      const LLMStepConfig = getStepConfig(stepList, step)?.config;
+      setLLMConfig(jsonParser(LLMStepConfig));
+    }
+  }, [stepList, step]);
 
   return (
     <Layout className={LLMViewCls}>
       <div className={`${LLMViewCls}-question`}>
         {showTips === true && <AnnotationTips tips={tips} />}
-        <QuestionView hoverKey={hoverKey} question={question} answerList={answerList} />
+        <QuestionView
+          hoverKey={hoverKey}
+          question={question}
+          answerList={answerList}
+          modelAPIResponse={modelAPIResponse}
+          setModelAPIResponse={setModelAPIResponse}
+          checkMode={checkMode}
+          annotation={annotation}
+          LLMConfig={LLMConfig}
+        />
       </div>
     </Layout>
   );

@@ -261,9 +261,36 @@ const LLMToolConfig = {
     { label: '包含敏感信息', value: 'sensitiveInfo' },
     { label: '包含敏感信息2', value: 'sensitiveInfo2' },
   ], // 指标判断
-  text: [
-    { title: '这是标题1', tip: '这是提示语1', min: 0, max: 100 },
-    { title: '这是标题2', tip: '这是提示语2', min: 10, max: 100 },
+  dataType: {
+    prompt: 'picture',
+    response: 'text',
+  },
+  isTextEdit: true, // 是否打开文本编辑
+  textEdit: [
+    {
+      title: 1,
+      min: 11,
+      max: 100,
+      isFillAnswer: true, // 是否填充答案
+      textControl: true // 文本对照
+    },
+    {
+      title: 2,
+      min: 10,
+      isFillAnswer: false, // 是否填充答案
+      textControl: true // 文本对照
+    },
+    {
+      title: 3,
+      max: 100,
+      isFillAnswer: true, // 是否填充答案
+      textControl: false // 文本对照
+    },
+    {
+      title: 4,
+      isFillAnswer: false, // 是否填充答案
+      textControl: false // 文本对照
+    },
   ],
 };
 

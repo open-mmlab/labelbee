@@ -19,25 +19,56 @@ export interface IAnswerList {
   indicatorDetermine?: {
     [key: string]: boolean;
   };
+  newAnswer?: string;
+  url?: string; // used to display picture
+}
+
+export interface IModelAPIAnswer {
+  id: string;
+  answer: string;
+  name: string;
+}
+
+declare interface IModelAPIConfig {
+  id: string;
+  name: string;
+  enableAdvanced: boolean;
+  endpoint: string;
+  authorization: string;
+  key: string;
+  templateParams?: string;
+  template?: any;
+  responseSelector?: string;
+  secretKey?: string;
 }
 
 // LLM工具配置
 export interface ILLMToolConfig {
+  enableModelAPI?: boolean;
+  modelAPIConfigList?: IModelAPIConfig[];
   enableSort?: boolean;
   indicatorScore?: IndicatorScore[]; // 指标评分
   indicatorDetermine?: IndicatorDetermine[]; // 指标判断
   score?: number; // 整体评分
   text?: ITextList[];
+  dataType: {
+    prompt: string;
+    response: string;
+  };
+  isTextEdit: boolean;
+  textEdit: ITextList[];
 }
 
 // LLM文本
 export interface ITextList {
-  textId: string;
-  title?: string;
+  textId?: string;
+  title?: string | number;
   tip?: string;
   min?: number;
   max?: number;
   value?: string;
+  isFillAnswer?: boolean;
+  textControl?: boolean;
 }
 
 // 单个答案

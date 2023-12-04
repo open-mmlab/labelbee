@@ -318,12 +318,10 @@ const AudioAnnotate: React.FC<AppProps & IProps> = (props) => {
 
   const [loading, setLoading] = useState<boolean>(true);
   const [result, setResult] = useState<any>(null)
-  const [autoFocus, setAutoFocus] = useState<boolean>(false)
   const [duration, setDuration] = useState<number>(0)
 
   useEffect(() => {
     setLoading(true)
-    setAutoFocus(true)
   }, [imgIndex])
 
   useEffect(() => {
@@ -531,7 +529,7 @@ const AudioAnnotate: React.FC<AppProps & IProps> = (props) => {
                 updateText={updateText}
                 updateRegion={updateRegion}
                 configList={configList}
-                autofocus={autoFocus}
+                autofocus={false}
                 textConfigurable={textConfigurable}
                 clipTextConfigurable={clipTextConfigurable}
                 clipAttributeList={clipAttributeList}

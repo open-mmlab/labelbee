@@ -15,6 +15,7 @@ import {
   ICalib,
   IBasicBox3d,
   ICoordinate,
+  ECameraType,
 } from '@labelbee/lb-utils';
 import uuid from '@/utils/uuid';
 
@@ -82,13 +83,26 @@ export function isMatrixValid(matrix: number[][], numRows: number, numColumns: n
   return true; // Compliant with the rule
 }
 
+export const isMatrixValidByArr = (matrix: number[][], rowArr: Array<number[]>) =>
+  rowArr.some((row) => isMatrixValid(matrix, row[0], row[1]));
+
 /**
  * Check if the calib is in fisheyeCalib.
  * @param calib
  * @returns
  */
 export const isFisheyeCalibValid = (calib: ICalib) => {
-  if (calib.fisheyeDistortion?.length > 0 && isMatrixValid(calib.P, 3, 4) && isMatrixValid(calib.T, 3, 4)) {
+  if (
+    calib.fisheyeDistortion?.length > 0 &&
+    isMatrixValidByArr(calib.P, [
+      [3, 4],
+      [4, 4],
+    ]) &&
+    isMatrixValidByArr(calib.T, [
+      [3, 4],
+      [4, 4],
+    ])
+  ) {
     return true;
   }
 
@@ -104,7 +118,7 @@ export const isFisheyeCalibValid = (calib: ICalib) => {
  * @param calib
  * @returns
  */
-export const lidar2FisheyeImage = (point: I3DSpaceCoord, calib: ICalib): THREE.Vector4 | undefined => {
+export const oCamFisheyeTransfer = (point: I3DSpaceCoord, calib: ICalib): THREE.Vector4 | undefined => {
   if (isFisheyeCalibValid(calib) === false) {
     console.error('Error Calib, it need fisheye calib');
     return;
@@ -134,6 +148,88 @@ export const lidar2FisheyeImage = (point: I3DSpaceCoord, calib: ICalib): THREE.V
   const lastCoord = coord.applyMatrix4(cam2ImgThree);
 
   return lastCoord;
+};
+
+/**
+ * For kbCamFisheyeTransfer
+ * @param fisheyeDistortion
+ * @param theta
+ * @returns
+ */
+const batchPolyval = (fisheyeDistortion: number[], theta: number) => {
+  const n = fisheyeDistortion.length;
+  let res = 0;
+  const rec = [];
+  for (let itr = 0; itr < fisheyeDistortion.length; itr++) {
+    rec.push(fisheyeDistortion[n - itr - 1] + res * theta);
+    res = fisheyeDistortion[n - itr - 1] + res * theta;
+  }
+
+  return res;
+};
+
+/**
+ * Calculate lidar to fisheyeImage.
+ *
+ * In comparison to "lidar2Image",
+ * the main difference lies in the computation of distortion parameters during the 2's step.
+ * @param point
+ * @param calib
+ * @returns
+ */
+const kbCamFisheyeTransfer = (point: I3DSpaceCoord, calib: ICalib): ICoordinate | undefined => {
+  const { P, fisheyeDistortion } = calib;
+
+  const { x, y, z } = point;
+
+  const aff_ = [
+    [P[0][0], P[0][1]],
+    [P[1][0], P[1][1]],
+  ];
+
+  const xc_ = P[0][2];
+  const yc_ = P[1][2];
+
+  // Calculate the norm of the 2D points and inverse of the norm
+  const invNorm = 1 / Math.hypot(x, y);
+
+  // Initialize arrays for xn
+  const xn = [];
+
+  // Calculate theta and rho based on the camera type
+  const theta = Math.atan2(Math.hypot(x, y), z);
+  const rho = batchPolyval(fisheyeDistortion, theta);
+  xn[0] = x * invNorm * rho;
+  xn[1] = y * invNorm * rho;
+
+  return {
+    x: aff_[0][0] * xn[0] + aff_[0][1] * xn[1] + xc_,
+    y: aff_[1][0] * xn[0] + aff_[1][1] * xn[1] + yc_,
+  };
+};
+
+/**
+ * Calculate lidar to fisheyeImage.
+ *
+ * In comparison to "lidar2Image",
+ * the main difference lies in the computation of distortion parameters during the 2's step.
+ * @param point
+ * @param calib
+ * @returns
+ */
+export const lidar2FisheyeImage = (point: I3DSpaceCoord, calib: ICalib) => {
+  if (isFisheyeCalibValid(calib) === false) {
+    console.error('Error Calib, it need fisheye calib');
+    return;
+  }
+
+  if (calib?.cameraType === ECameraType.OmniCamera) {
+    return oCamFisheyeTransfer(point, calib);
+  }
+
+  if (calib?.cameraType === ECameraType.KannalaBrandt) {
+    return kbCamFisheyeTransfer(point, calib);
+  }
 };
 
 export function lidar2image(point: { x: number; y: number; z: number }, composeMatrix4: THREE.Matrix4) {

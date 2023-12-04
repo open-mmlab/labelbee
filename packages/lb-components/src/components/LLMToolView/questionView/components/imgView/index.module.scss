@@ -1,0 +1,28 @@
+.imgView {
+  display: flex;
+  flex-wrap: wrap;
+
+  .item {
+    margin: 0px 40px 40px 0px;
+    width: 400px;
+    display: flex;
+    height: 300px;
+
+
+    .image {
+      height: 260px;
+      min-width: 300px;
+      flex: 1;
+      background: #E9EBF1;
+      display: flex;
+      justify-content: center;
+      align-content: center;
+
+      :global {
+        .ant-image {
+          display: flex;
+        }
+      }
+    }
+  }
+}

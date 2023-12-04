@@ -262,7 +262,12 @@
     "ClickOnTheTargetObjectToSplitIt": "Click on the target object to split it",
     "ClickTheTargetObjectAgainToIncreaseTheSegmentation": "Click the target object again to increase the segmentation",
     "ClickOnTheTargetObjectToDeleteTheSegmentation": "Click on the target object to delete the segmentation",
-    "ClickAgainOnTheTargetObjectToDeleteTheSegmentation": "Click again on the target object to delete the segmentation"
+    "ClickAgainOnTheTargetObjectToDeleteTheSegmentation": "Click again on the target object to delete the segmentation",
+    "AnswersAreBeingGenerated": "Answers are being generated",
+    "AnswerGenerationFailedPleaseTryAgainLater": "Answer generation failed, please try again later",
+    "ReGenerate": "Re-generate",
+    "AnswerTextEdit": "Answer text edit",
+    "ShowEditingResultDifferencesInTextModeOnly": "Show editing result differences in text mode only"
   },
   "cn": {
     "TextInput": "文本输入",
@@ -527,6 +532,11 @@
     "ClickOnTheTargetObjectToSplitIt": "单击目标物体进行分割",
     "ClickTheTargetObjectAgainToIncreaseTheSegmentation": "再次单击目标物体增加分割",
     "ClickOnTheTargetObjectToDeleteTheSegmentation": "单击目标物体删减分割",
-    "ClickAgainOnTheTargetObjectToDeleteTheSegmentation": "再次单击目标物体删减分割"
+    "ClickAgainOnTheTargetObjectToDeleteTheSegmentation": "再次单击目标物体删减分割",
+    "AnswersAreBeingGenerated": "回答生成中",
+    "AnswerGenerationFailedPleaseTryAgainLater": "回答生成失败，请稍后重试",
+    "ReGenerate": "重新生成",
+    "AnswerTextEdit": "回答文本编辑",
+    "ShowEditingResultDifferencesInTextModeOnly": "仅文本模式下显示编辑结果差异"
   }
 }

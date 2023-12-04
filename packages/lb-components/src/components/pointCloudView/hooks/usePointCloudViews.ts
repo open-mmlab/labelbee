@@ -43,7 +43,7 @@ import { useTranslation } from 'react-i18next';
 import { useHistory } from './useHistory';
 import { usePolygon } from './usePolygon';
 import { IFileItem, IMappingImg } from '@/types/data';
-import { ICoordinate } from '@labelbee/lb-utils/src/types/common';
+import type { ICoordinate } from '@labelbee/lb-utils';
 import { useLatest } from 'ahooks';
 
 const DEFAULT_SCOPE = 5;
