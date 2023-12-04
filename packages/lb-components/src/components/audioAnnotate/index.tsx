@@ -331,20 +331,7 @@ const AudioAnnotate: React.FC<AppProps & IProps> = (props) => {
   }, [loading])
 
   useEffect(() => {
-    toolInstanceRef.current.emit = emitEvent
-
-    toolInstanceRef.current.fns = new Map()
-    toolInstanceRef.current.singleOn = (event: string, func: () => void) => {
-      toolInstanceRef.current.fns.set(event, [func]);
-    };
-
-    toolInstanceRef.current.on = (event: string, func: () => void) => {
-      toolInstanceRef.current.singleOn(event, func);
-    };
-
-    toolInstanceRef.current.unbindAll = (eventName: string) => {
-      toolInstanceRef.current.fns.delete(eventName);
-    };
+    initToolInstance()
   }, [])
 
   useEffect(() => {
@@ -359,6 +346,30 @@ const AudioAnnotate: React.FC<AppProps & IProps> = (props) => {
   }, [result]);
 
 
+  const initToolInstance = () => {
+    toolInstanceRef.current.emit = (event: string) => {
+      const listener = toolInstanceRef.current.fns.get(event);
+      if (listener) {
+        listener.forEach((fn: any) => {
+          if (fn) {
+            fn?.();
+          }
+        });
+      }
+    }
+    toolInstanceRef.current.fns = new Map()
+    toolInstanceRef.current.singleOn = (event: string, func: () => void) => {
+      toolInstanceRef.current.fns.set(event, [func]);
+    };
+
+    toolInstanceRef.current.on = (event: string, func: () => void) => {
+      toolInstanceRef.current.singleOn(event, func);
+    };
+
+    toolInstanceRef.current.unbindAll = (eventName: string) => {
+      toolInstanceRef.current.fns.delete(eventName);
+    };
+  }
 
   const currentResult = useMemo(() => {
     const stepResult = basicInfo[`step_${stepInfo?.step}`]
@@ -512,17 +523,6 @@ const AudioAnnotate: React.FC<AppProps & IProps> = (props) => {
     }))
     EventBus.emit('clearRegions');
   }
-
-  const emitEvent = (event: string) => {
-    const listener = toolInstanceRef.current.fns.get(event);
-    if (listener) {
-      listener.forEach((fn: any) => {
-        if (fn) {
-          fn?.();
-        }
-      });
-    }
-  };
 
   return <AudioClipProvider>
     <Spin spinning={loading} wrapperClassName='audio-tool-spinner'>
