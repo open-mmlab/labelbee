@@ -125,6 +125,12 @@ export class PointCloudCache {
         generateIndexWorker.onmessage = (e: any) => {
           const { indexMap } = e.data;
           this.cacheIndexMap.set(src, indexMap);
+          // 按照缓存一个 1.8M PCD（包含 points.length:360804）文件需要占用 2.8MB 内存粗略估算，缓存 50 个 pcd 文件大概需要 140MB 内存
+          if (this.cacheIndexMap.size > this.MAX_SIZE) {
+            const firstKey = Array.from(this.cacheIndexMap.keys())[0];
+            this.cacheIndexMap.delete(firstKey);
+          }
+
           resolve(indexMap);
           generateIndexWorker.terminate();
         };
