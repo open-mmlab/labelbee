@@ -22,6 +22,7 @@ import {
   IDefaultSize,
   IPolygonData,
   IBasicRect,
+  POINT_CLOUD_DEFAULT_STEP,
 } from '@labelbee/lb-utils';
 import { useContext } from 'react';
 import { PointCloudContext } from '../PointCloudContext';
@@ -1296,9 +1297,7 @@ export const usePointCloudViews = () => {
 
         const newDataResultObj = jsonParser(newData.result);
 
-        const DEFAULT_STEP = `step_1`;
-
-        newDataResultObj[DEFAULT_STEP].result = boxParamsList;
+        newDataResultObj[POINT_CLOUD_DEFAULT_STEP].result = boxParamsList;
 
         newData.result = JSON.stringify(newDataResultObj);
 
