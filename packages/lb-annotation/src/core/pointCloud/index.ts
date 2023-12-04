@@ -30,7 +30,7 @@ import MathUtils from '@/utils/MathUtils';
 import ImgUtils from '@/utils/ImgUtils';
 import { PCDLoader } from './PCDLoader';
 import { OrbitControls } from './OrbitControls';
-import { PointCloudCache } from './cache';
+import { PointCloudCache, TIndexMap } from './cache';
 import { getCuboidFromPointCloudBox, getHighlightIndexByPoints, mergeHighlightList } from './matrix';
 import { PointCloudSegmentOperation } from './segmentation';
 import PointCloudStore from './store';
@@ -1011,6 +1011,26 @@ export class PointCloud extends EventListener {
     });
     const mergeList = mergeHighlightList(highlightIndexList);
     return mergeList;
+  };
+
+  public filterPreResult = async (src: string, config: any, boxParamsList: IPointCloudBox[]) => {
+    const { points } = await this.cacheInstance.loadPCDFile(src);
+    const indexMap = (await this.cacheInstance.loadIndexMap(src, points as Float32Array)) as TIndexMap;
+
+    return new Promise((resolve) => {
+      const boxes = boxParamsList.map((boxParams: IPointCloudBox) => {
+        const count = MathUtils.calculatePointsInsideBox({
+          indexMap,
+          polygon: getCuboidFromPointCloudBox(boxParams).polygonPointList as IPolygonPoint[],
+          zScope: [boxParams.center.z - boxParams.depth / 2, boxParams.center.z + boxParams.depth / 2],
+          box: boxParams,
+        });
+        const valid = count >= config.lowerLimitPointsNumInBox;
+
+        return { ...boxParams, valid, count };
+      });
+      resolve(boxes);
+    });
   };
 
   /**

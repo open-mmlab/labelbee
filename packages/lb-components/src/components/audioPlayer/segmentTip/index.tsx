@@ -7,6 +7,8 @@
 import React, { useRef } from 'react';
 import { timeFormat } from '@/utils/audio';
 import { useMouse } from 'ahooks';
+import styles from '../index.module.scss';
+import { useTranslation } from 'react-i18next';
 
 interface IProps {
   /** 分割点时间提示 */
@@ -15,6 +17,8 @@ interface IProps {
 
 const SegmentTip = (props: IProps) => {
   const ref = useRef<Element | null>(null);
+  const { t } = useTranslation();
+
   const { segmentTimeTip } = props;
 
   const mouse = useMouse(ref.current);
@@ -23,15 +27,18 @@ const SegmentTip = (props: IProps) => {
     return null;
   }
 
+
   return (
     <div
+      className={styles.tips}
       style={{
         left: mouse.clientX,
         top: 75,
         marginLeft: -130,
+        zIndex: 999,
       }}
     >
-      请选择希望截取的时间点（{timeFormat(segmentTimeTip, 'ss.SSS')}）
+      {t('AudioSegmentTip', { time: timeFormat(segmentTimeTip, 'ss.SSS')})}
     </div>
   );
 };

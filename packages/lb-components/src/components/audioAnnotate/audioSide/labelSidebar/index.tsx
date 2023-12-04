@@ -12,6 +12,7 @@ import { TagUtils } from '@labelbee/lb-annotation';
 import clearSmall from '@/assets/annotation/common/icon_clearSmall.svg';
 import clearSmallA from '@/assets/annotation/common/icon_clearSmall_a.svg';
 import { IEntityDetail } from '@/types/tool'
+import { withTranslation } from 'react-i18next';
 
 const createHighlightLabel = (key: string, val: string) => {
   return highlightKeyword(key, val, '#666FFF');
@@ -69,11 +70,12 @@ interface IProps {
   entityMap?: Map<string, IEntityDetail>;
   dynamicTag?: boolean; // 是否开始动态标签
   withPanelTab?: boolean;
+  t: any;
 }
 
 const { Panel } = Collapse;
 
-export default class LabelSidebar extends Component<IProps, IState> {
+class LabelSidebar extends Component<IProps, IState> {
   private sideBar: React.RefObject<HTMLDivElement> = React.createRef();
 
   public constructor(props: IProps) {
@@ -165,6 +167,7 @@ export default class LabelSidebar extends Component<IProps, IState> {
       tagResult,
       clearResult,
       entityMap,
+      t,
     } = this.props;
     const { hoverDeleteIndex, expandKeyList, inputValue } = this.state;
 
@@ -206,7 +209,6 @@ export default class LabelSidebar extends Component<IProps, IState> {
       if (!labelInfoSet) {
         return;
       }
-
       return labelInfoSet.map((info: ILabelInfo | IFilteredLabelInfo, index: number) => {
         if (info.subSelected) {
           if (inputValue && !info.hasShow) {
@@ -216,6 +218,7 @@ export default class LabelSidebar extends Component<IProps, IState> {
 
           // 判断是否有数据
           const isResult = TagUtils.judgeResultIsInInputList(info.value, tagResult?.[info.value as keyof typeof tagResult], inputList);
+
           return (
             <Collapse
               bordered={false}
@@ -235,7 +238,7 @@ export default class LabelSidebar extends Component<IProps, IState> {
                   >
                     <span>
                       {info.key}
-                      <Tooltip placement='bottom' title='清空此选项'>
+                      <Tooltip placement='bottom' title={t('ClearThisOption')}>
                         <img
                           style={{ marginLeft: 5, cursor: 'pointer' }}
                           onClick={(e) => {
@@ -325,7 +328,7 @@ export default class LabelSidebar extends Component<IProps, IState> {
 
     return (
       labelInfoSet.length === 0 ? (
-        <div style={{ padding: 20, textAlign: 'center' }}>暂无信息配置</div>
+        <div style={{ padding: 20, textAlign: 'center' }}>{t('NoConfiguration')}</div>
       ) : (
         <div className={styles.filterContainer}>
           <div className={styles.filterInputContainer}>
@@ -341,7 +344,7 @@ export default class LabelSidebar extends Component<IProps, IState> {
                     color: '#999',
                   }}
                 >
-                  暂无数据
+                  {t('NoData')}
                 </div>
               )}
             </div>
@@ -351,3 +354,6 @@ export default class LabelSidebar extends Component<IProps, IState> {
     );
   }
 }
+
+const LabelSidebarWithTrans = withTranslation()(LabelSidebar)
+export default LabelSidebarWithTrans

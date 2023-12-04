@@ -2,11 +2,13 @@ import { Switch } from 'antd';
 import React, { useState } from 'react';
 
 import styles from './index.module.scss';
+import { useTranslation } from 'react-i18next';
 
 interface IProps {
   EventBus: any
 }
 const LabelDisplayToggle = (props: IProps) => {
+  const { t } = useTranslation();
   const { EventBus } = props
   const [visible, setVisible] = useState(true);
   const onChange = (val: boolean) => {
@@ -16,7 +18,7 @@ const LabelDisplayToggle = (props: IProps) => {
 
   return (
     <span className={styles.remarkDisplayToggle}>
-      <span className={styles.text}>标签对照显示</span>
+      <span className={styles.text}>{t('CompareTags')}</span>
       <Switch
         checked={visible}
         onChange={onChange}

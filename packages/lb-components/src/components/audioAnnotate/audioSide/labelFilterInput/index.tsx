@@ -2,6 +2,7 @@ import styles from './index.module.scss';
 import React from 'react';
 import { Input } from 'antd';
 import { SearchOutlined } from '@ant-design/icons';
+import { useTranslation } from 'react-i18next';
 
 const syntheticEventStopPagination = (e: React.KeyboardEvent<HTMLInputElement>) => {
   e.stopPropagation();
@@ -16,6 +17,8 @@ const LabelFilterInput = ({
   value: string;
   onChange: (event: React.ChangeEvent<HTMLInputElement>) => void;
 }) => {
+  const { t } = useTranslation();
+
   return (
     <Input
       className={styles.filterInput}
@@ -31,7 +34,7 @@ const LabelFilterInput = ({
         syntheticEventStopPagination(e);
       }}
       allowClear={true}
-      placeholder='搜索标签'
+      placeholder={t('SearchTag')}
       value={value}
       onChange={onChange}
     />

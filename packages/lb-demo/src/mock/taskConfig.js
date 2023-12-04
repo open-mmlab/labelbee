@@ -300,7 +300,7 @@ const audioToolConfig = {
   "skipWhileNoDependencies": false,
   "configList": [
     {
-      "label": "文本",
+      "label": "测试文本",
       "key": "text",
       "required": false,
       "default": "",

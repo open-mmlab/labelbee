@@ -187,7 +187,7 @@ export const rewind = {
 };
 
 export const toggleTagMode = {
-  name: '切换标签模式',
+  name: 'SwitchTagMode',
   icon: ToggleTagModeSvg,
   shortCut: ['L'],
 };
@@ -196,7 +196,7 @@ export const tag = {
   name: '打标签',
   icon: IconTagKj,
   shortCut: [DragWithLeftClickSvg],
-  noticeInfo: '左击',
+  noticeInfo: 'LeftClick',
 };
 
 export const period = {
@@ -207,27 +207,27 @@ export const period = {
 };
 
 export const clipSelected = {
-  name: '截取选中',
+  name: 'ClipSelect',
   icon: IconClipSelected,
   shortCut: [DragWithRightClickShortCutSvg],
-  noticeInfo: '右击',
+  noticeInfo: 'RightClick',
 };
 
 export const deleteRemark = {
-  name: '删除批注',
+  name: 'DeleteComment',
   icon: IconDeleteRemark,
   shortCut: ['Delete'],
-  noticeInfo: '选中时',
+  noticeInfo: 'SelectedStatus',
 };
 
 export const nextRemark = {
-  name: '下一条批注',
+  name: 'NextComment',
   icon: IconNextRemark,
   shortCut: ['Tab'],
 };
 
 export const preRemark = {
-  name: '上一条批注',
+  name: 'PreviousComment',
   icon: IconPreRemark,
   shortCut: ['Shift', 'Tab'],
 };

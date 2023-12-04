@@ -90,12 +90,6 @@
     position: relative;
     padding-bottom: 10px;
     transform: scaleY(-1);
-    &.clip {
-      //cursor: url('../../assets/annotation/audio/blackClip.svg'), default;
-    }
-    &.combined {
-      //cursor: url('../../assets/annotation/audio/combine.svg') 10 12, default;
-    }
   }
   &::-webkit-scrollbar {
     width: 8px;

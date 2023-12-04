@@ -7,7 +7,7 @@
 import i18n from './i18n/index';
 import toolStyleConverter, { ToolStyleUtils } from './toolStyle';
 import PerspectiveShiftUtils from './PerspectiveShiftUtils';
-import PointCloudUtils from './PointCloudUtils';
+import PointCloudUtils, { POINT_CLOUD_DEFAULT_STEP } from './PointCloudUtils';
 import MatrixUtils from './MatrixUtils';
 import { resourceManagerInstance } from './annotation/ResourceManager';
 
@@ -24,6 +24,7 @@ export {
   ToolStyleUtils,
   PerspectiveShiftUtils,
   PointCloudUtils,
+  POINT_CLOUD_DEFAULT_STEP,
   MatrixUtils,
   resourceManagerInstance,
 };
