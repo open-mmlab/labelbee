@@ -10,6 +10,7 @@ import { useTranslation } from 'react-i18next';
 import { InfoCircleOutlined } from '@ant-design/icons';
 import MarkdownView from '@/components/markdownView';
 import LatexEditor from '@/components/latexEditor';
+import styles from './index.module.scss';
 
 interface IProps {
   newAnswer?: string;
@@ -81,25 +82,28 @@ const TextEditor = (props: IProps) => {
         const value = allValues.value;
         updateValue(value);
       }}
-      style={{ marginBottom: '16px' }}
+      className={styles.form}
     >
       <Form.Item
         name='title'
         style={{ marginBottom: '16px' }}
-        label={' '}
+        label={
+          <>
+            {t('AnswerTextEdit')}
+            <Popover placement='bottom' content={t('ShowEditingResultDifferencesInTextModeOnly')}>
+              <InfoCircleOutlined style={{ margin: '0px 4px', cursor: 'pointer' }} />
+            </Popover>
+          </>
+        }
         colon={false}
         required={!!min}
-      >
-        {t('AnswerTextEdit')}
-        <Popover placement='bottom' content={t('ShowEditingResultDifferencesInTextModeOnly')}>
-          <InfoCircleOutlined style={{ margin: '0px 4px', cursor: 'pointer' }} />
-        </Popover>
-      </Form.Item>
-      {isLaText && <LatexEditor onSelectLatex={insertText} />}
+      />
+
+      {isLaText && <LatexEditor onSelectLatex={insertText} disabled={checkMode} />}
       <Form.Item
         name='value'
         style={{
-          marginBottom: 8,
+          marginBottom: 24,
         }}
         rules={[
           {
@@ -129,20 +133,12 @@ const TextEditor = (props: IProps) => {
             const markdownText = inputValue.replace(/\n/g, '  \n');
 
             return (
-              <>
-                <div style={{ lineHeight: '32px' }}>{t('OutputDisplay')}</div>
-                <div
-                  style={{
-                    minHeight: '100px',
-                    overflow: 'auto',
-                    maxHeight: '200px',
-                    background: '#fff',
-                    padding: '4px',
-                  }}
-                >
+              <div className={styles.outputDisplay}>
+                <div className={styles.title}>{t('OutputDisplay')}</div>
+                <div className={styles.content}>
                   {inputValue ? <MarkdownView value={markdownText} /> : ''}
                 </div>
-              </>
+              </div>
             );
           }}
         </Form.Item>

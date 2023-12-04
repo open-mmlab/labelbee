@@ -13,6 +13,7 @@ import classNames from 'classnames';
 
 interface IProps {
   onSelectLatex: (value: string) => void;
+  disabled?: boolean;
 }
 
 interface IOptionData {
@@ -29,6 +30,7 @@ const LatexItem = ({
   setActiveKeys,
   activeKeys,
   getInitActiveKey,
+  disabled,
 }: {
   data: IOptionData | null;
   columnIndex: number;
@@ -36,8 +38,11 @@ const LatexItem = ({
   setActiveKeys: (value: string[]) => void;
   getInitActiveKey: (data: IOptionData) => string[];
   activeKeys: string[];
+  disabled?: boolean;
 }) => {
   const isLastNode = data?.children?.some((i) => !i?.children);
+
+  // Formula rendering area can be selected
   if (isLastNode) {
     if (data?.children) {
       return (
@@ -57,6 +62,7 @@ const LatexItem = ({
                     onClick={() => {
                       onSelectLatex(curValue);
                     }}
+                    disabled={disabled}
                   >
                     <MarkdownView value={curValue} />
                   </Button>
@@ -70,6 +76,7 @@ const LatexItem = ({
                 onClick={() => {
                   onSelectLatex(curValue);
                 }}
+                disabled={disabled}
               >
                 <MarkdownView value={curValue} />
               </Button>
@@ -105,7 +112,7 @@ const LatexItem = ({
   );
 };
 
-const LatexEditor = ({ onSelectLatex }: IProps) => {
+const LatexEditor = ({ onSelectLatex, disabled }: IProps) => {
   const [activeKeys, setActiveKeys] = useState<string[]>([]);
   const latexDom = useRef(null);
   const getItemByKey = (data: IOptionData[], key: string): IOptionData | null => {
@@ -133,7 +140,7 @@ const LatexEditor = ({ onSelectLatex }: IProps) => {
   };
 
   return (
-    <div className={styles.LatexEditor} ref={latexDom}>
+    <div className={styles.latexEditor} ref={latexDom}>
       {latexList.map((i) => {
         return (
           <Dropdown
@@ -153,6 +160,7 @@ const LatexEditor = ({ onSelectLatex }: IProps) => {
                             setActiveKeys={setActiveKeys}
                             activeKeys={activeKeys}
                             getInitActiveKey={getInitActiveKey}
+                            disabled={disabled}
                           />
                         </div>
                       );
