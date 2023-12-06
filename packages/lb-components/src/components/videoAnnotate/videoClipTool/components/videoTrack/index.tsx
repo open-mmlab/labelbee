@@ -131,8 +131,7 @@ const VideoTrack = (props: IProps) => {
   const attributeColor = AttributeUtils.getAttributeColor(attribute, attributeList);
   const containerWidth = containerRef.current?.clientWidth || 0;
 
-  const Controller_Padding = 10
-  const transformX = decimalReserved(Math.max(containerWidth * left + Controller_Padding, 0), 0);
+  const transformX = decimalReserved(Math.max(containerWidth * left, 0), 0);
 
   const transformXForFlag = decimalReserved(Math.min(transformX, Math.floor(containerWidth - 68)), 0);
 

@@ -1313,10 +1313,10 @@ $hotkey-container-padding: 7px;
 }
 
 /** VideoPlayer样式 start */
-$videoContainerHeight: 80px;
+$videoTipHeight: 40px;
 $videoTrackHeight: 45px;
 $timeTrackHeight: 24px;
-$videoHeight: calc(100% - #{$videoContainerHeight} - #{$videoTrackHeight * 2} - #{$timeTrackHeight});
+$videoHeight: calc(100% - #{$videoTrackHeight * 2} - #{$timeTrackHeight});
 .#{$prefix}-video-wrapper {
   width: 100%;
   height: 100%;
@@ -1324,14 +1324,17 @@ $videoHeight: calc(100% - #{$videoContainerHeight} - #{$videoTrackHeight * 2} - 
   flex-direction: column;
   background-color: black;
   overflow: hidden;
+  flex: 1 1;
 
   .#{$prefix}-video-container {
-    flex: 1;
+    height: calc(100% - 80px);
     overflow: hidden;
     position: relative;
+    display: flex;
+    flex-direction:column;
 
     .#{$prefix}-video {
-      height: calc(100% - #{$videoContainerHeight});
+      flex: 1 1;
     }
     .#{$prefix}-video-track{
       height: $videoHeight;

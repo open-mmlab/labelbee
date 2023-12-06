@@ -288,7 +288,7 @@ export class TagToolInstanceAdaptor extends React.Component<
     const { tagResult, valid } = this.state;
 
     return (
-      <div style={{ height: '100%', width: '100%', position: 'relative' }}>
+      <div style={{ height: '100%', width: '100%', position: 'relative', display: 'flex', flexDirection: 'column' }}>
         <VideoPlayer
           imgIndex={imgIndex}
           imgList={imgList}

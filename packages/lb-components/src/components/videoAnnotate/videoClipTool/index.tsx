@@ -1,7 +1,6 @@
 import { AttributeUtils, MathUtils, CommonToolUtils, uuid } from '@labelbee/lb-annotation';
 import { jsonParser } from '@/utils';
 import { precisionAdd, precisionMinus, isImageValue } from '@/utils/audio'
-import { getFormatSize } from '@/components/customResizeHook';
 import { message } from 'antd';
 import _ from 'lodash';
 import React from 'react';
@@ -361,10 +360,6 @@ class VideoClipTool extends React.Component<IVideoClipProps, IState> {
     this.updateSidebar()
   };
 
-  public getCanvasSize = () => {
-    return getFormatSize({width: window.innerWidth, height: window.innerHeight});
-  };
-
   /** 取消截取 */
   public cancelClipped = () => {
     const { result, selectedID, clipStatus } = this.state;
@@ -539,8 +534,6 @@ class VideoClipTool extends React.Component<IVideoClipProps, IState> {
    * @returns
    */
   public renderMediaContent = () => {
-    const canvasSize = this.getCanvasSize();
-    console.log(canvasSize)
     const { pageForward, pageJump, pageBackward } = this.props;
 
     const {
@@ -551,13 +544,7 @@ class VideoClipTool extends React.Component<IVideoClipProps, IState> {
     } = this.state;
 
     return (
-      <div
-        style={{
-          width: '100%',
-          height: '100%',
-          position: 'relative',
-        }}
-      >
+      <div className={styles.clipContainer}>
         <VideoPlayer
           imgIndex={this.props.imgIndex}
           imgList={this.props.imgList}
@@ -570,14 +557,15 @@ class VideoClipTool extends React.Component<IVideoClipProps, IState> {
           }}
           showVideoTrack={!videoError}
           onTrackResize={this.onTrackResize}
+          drawLayerSlot={this.props.drawLayerSlot}
           footer={this.props.footer}
           dataLoaded={this.videoLoaded}
-          drawLayerSlot={this.props.drawLayerSlot}
         />
         <VideoTimeSlicesOverVideo
           result={result}
           currentTime={currentTime}
           attributeList={this.props.config.attributeList}
+          extraStyle={{ top: this.props.drawLayerSlot ? 40 : 0 }}
         />
         {this.isClipping && <i className={styles.clipping} style={{ backgroundImage: ClipIconSvg }}/>}
       </div>

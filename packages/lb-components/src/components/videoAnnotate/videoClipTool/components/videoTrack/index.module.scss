@@ -12,7 +12,7 @@ $trackHotZoneWidth: 6px;
 }
 .videoTrackContainer {
   position: absolute;
-  bottom: $containerHeight;
+  bottom: 0px;
   width: 100%;
   overflow-x: hidden;
   overflow-y: auto;

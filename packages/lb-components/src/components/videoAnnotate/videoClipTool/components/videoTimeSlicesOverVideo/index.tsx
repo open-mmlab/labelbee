@@ -11,7 +11,7 @@ import { ETimeSliceType, TIME_SLICE_TYPE } from '../../constant';
 import styles from './index.module.scss';
 
 const VideoTimeSlicesOverVideo = (props: any) => {
-  const { attributeList, result, currentTime } = props;
+  const { attributeList, result, currentTime, extraStyle } = props;
 
   const determineIfWithinTime = (i: any) => {
     const { type, start, end } = i;
@@ -71,7 +71,7 @@ const VideoTimeSlicesOverVideo = (props: any) => {
   ));
 
   return (
-    <div className={styles.videoTimeSlices}>
+    <div className={styles.videoTimeSlices} style={extraStyle}>
       <TransitionGroup className='fade-group'>{children}</TransitionGroup>
     </div>
   );
