@@ -7,13 +7,13 @@
  */
 
 const common = {
-  key: 'common',
-  label: '常用符号',
+  key: 'commonSymbols',
+  label: 'CommonSymbols',
 
   children: [
     {
       key: 'binaryOperator',
-      label: '二元运算符',
+      label: 'BinaryOperations',
       children: [
         { key: '+', remark: '' },
         { key: '-' },
@@ -57,7 +57,7 @@ const common = {
     },
     {
       key: 'binaryRelation',
-      label: '二元关系符',
+      label: 'BinaryRelations',
       children: [
         { key: '<' },
         { key: '>' },
@@ -105,7 +105,7 @@ const common = {
     },
     {
       key: 'arrowSymbol',
-      label: '箭头符号',
+      label: 'Arrows',
       children: [
         { key: '\\gets' },
         { key: '\\to' },
@@ -143,7 +143,7 @@ const common = {
     },
     {
       key: 'otherSymbol',
-      label: '其他符号',
+      label: 'Others',
       children: [
         { key: '\\because' },
         { key: '\\therefore' },
@@ -183,11 +183,11 @@ const common = {
 
 const greek = {
   key: 'greek',
-  label: '希腊字母',
+  label: 'Greek',
   children: [
     {
       key: 'lower',
-      label: '小写',
+      label: 'Lowercase',
       children: [
         { key: '\\alpha' },
         { key: '\\beta' },
@@ -222,8 +222,8 @@ const greek = {
       ],
     },
     {
-      key: 'capital',
-      label: '大写',
+      key: 'uppercase',
+      label: 'Uppercase',
       children: [
         { key: '\\Gamma' },
         { key: '\\Delta' },
@@ -241,17 +241,17 @@ const greek = {
   ],
 };
 
-const higherMath = {
-  key: 'higherMath',
-  label: '高等数学',
+const advancedMathematics = {
+  key: 'advancedMathematics',
+  label: 'AdvancedMathematics',
   children: [
     {
       key: 'fractionalDifferentiation',
-      label: '分数微分',
+      label: 'FractionalDifferentiation',
       children: [
         {
           key: 'fraction',
-          label: '分数',
+          label: 'Fraction',
           children: [
             { key: '\\frac{a}{b}' },
             { key: '\\tfrac{a}{b}' },
@@ -265,7 +265,7 @@ const higherMath = {
         },
         {
           key: 'derivative',
-          label: '导数',
+          label: 'Derivative',
           children: [
             {
               key: '\\dot{a}',
@@ -286,7 +286,7 @@ const higherMath = {
         },
         {
           key: 'modularArithmetic',
-          label: '模算术',
+          label: 'ModularArithmetic',
           children: [
             {
               key: 'a \\bmod b',
@@ -306,16 +306,16 @@ const higherMath = {
     },
     {
       key: 'radical',
-      label: '根式',
+      label: 'Radical',
       children: [
         {
           key: 'radicalItem',
-          label: '根式',
+          label: 'Radical',
           children: [{ key: '\\sqrt{x}' }, { key: '\\sqrt[n]{x}' }],
         },
         {
           key: 'mark',
-          label: '上下标',
+          label: 'SupAndSub',
           children: [
             {
               key: 'x^{a}',
@@ -332,11 +332,11 @@ const higherMath = {
     },
     {
       key: 'limitLogarithm',
-      label: '极限对数',
+      label: 'LimitLogarithm',
       children: [
         {
           key: 'limits',
-          label: '极限',
+          label: 'Limits',
           children: [
             { key: '\\lim a' },
             { key: '\\displaystyle \\lim_{x \\to 0}' },
@@ -348,7 +348,7 @@ const higherMath = {
         },
         {
           key: 'maLogarithmsAndExponentsrk',
-          label: '对数指数',
+          label: 'LogarithmsAndExponents',
           children: [
             { key: '\\log_{a}{b}' },
             { key: '\\lg_{a}{b}' },
@@ -358,7 +358,7 @@ const higherMath = {
         },
         {
           key: 'bounds',
-          label: '界限',
+          label: 'Bounds',
           children: [
             { key: '\\min x' },
             { key: '\\max y' },
@@ -374,17 +374,17 @@ const higherMath = {
       ],
     },
     {
-      key: 'IntegralOperation',
-      label: '积分运算',
+      key: 'integralOperation',
+      label: 'IntegralOperation',
       children: [
         {
           key: 'integral',
-          label: '积分',
+          label: 'Integral',
           children: [{ key: '\\int' }, { key: '\\int_{a}^{b}' }, { key: '\\int\\limits_{a}^{b}' }],
         },
         {
           key: 'doubleIntegral',
-          label: '双重积分',
+          label: 'DoubleIntegral',
           children: [
             { key: '\\iint' },
             { key: '\\iint_{a}^{b}' },
@@ -393,7 +393,7 @@ const higherMath = {
         },
         {
           key: 'tripleIntegral',
-          label: '三重积分',
+          label: 'TripleIntegral',
           children: [
             { key: '\\iiint' },
             { key: '\\iiint_{a}^{b}' },
@@ -404,7 +404,7 @@ const higherMath = {
     },
     {
       key: 'largeOperations',
-      label: '大型运算',
+      label: 'LargeOperations',
       children: [
         {
           key: 'summation',
@@ -417,7 +417,7 @@ const higherMath = {
         },
         {
           key: 'productsAndCoproducts',
-          label: '乘积余积',
+          label: 'ProductsAndCoproducts',
           children: [
             { key: '\\prod' },
             { key: '\\displaystyle \\prod_{a}^{b}' },
@@ -429,7 +429,7 @@ const higherMath = {
         },
         {
           key: 'intersectionAndUnion',
-          label: '交集并集',
+          label: 'IntersectionAndUnion',
           children: [
             { key: '\\bigcup' },
             { key: '\\displaystyle \\bigcup_{a}^{b}' },
@@ -446,15 +446,15 @@ const higherMath = {
 
 const linearAlgebra = {
   key: 'linearAlgebra',
-  label: '线性代数',
+  label: 'LinearAlgebra',
   children: [
     {
       key: 'bracketForensics',
-      label: '括号取证',
+      label: 'BracketForensics',
       children: [
         {
           key: 'bracket',
-          label: '括号',
+          label: 'Bracket',
           children: [
             { key: '\\left ( a \\right )' },
             { key: '\\left [ a \\right ]' },
@@ -465,8 +465,8 @@ const linearAlgebra = {
           ],
         },
         {
-          key: 'commons',
-          label: '常用',
+          key: 'common',
+          label: 'Common',
           children: [
             { key: '\\binom{n}{r}' },
             { key: '\\left [ 0,1 \\right )' },
@@ -479,7 +479,7 @@ const linearAlgebra = {
     },
     {
       key: 'arrayMatrix',
-      label: '数组矩阵',
+      label: 'ArrayMatrix',
       children: [
         { key: '\\begin{matrix} 11& 11 &11 \\\\ 11& 11 &11 \\end{matrix}' },
         { key: '\\begin{bmatrix} 11 & 11\\\\ 11 & 11 \\end{bmatrix}' },
@@ -493,11 +493,11 @@ const linearAlgebra = {
 
 const trigonometric = {
   key: 'trigonometric',
-  label: '三角函数',
+  label: 'TrigonometricFunctions',
   children: [
     {
       key: 'trigonometricFunctions',
-      label: '三角函数',
+      label: 'TrigonometricFunctions',
       children: [
         { key: '\\sin\\alpha' },
         { key: '\\cos\\alpha' },
@@ -509,7 +509,7 @@ const trigonometric = {
     },
     {
       key: 'inverseTrigonometricFunctions',
-      label: '反三角函数',
+      label: 'InverseTrigonometricFunctions',
       children: [
         { key: '\\sin^{-1}\\alpha' },
         { key: '\\cos^{-1}\\alpha' },
@@ -526,7 +526,7 @@ const trigonometric = {
     },
     {
       key: 'hyperblicFunctions',
-      label: '双曲函数',
+      label: 'HyperblicFunctions',
       children: [
         { key: '\\sinh\\alpha' },
         { key: '\\cosh\\alpha' },
@@ -538,7 +538,7 @@ const trigonometric = {
     },
     {
       key: 'inverseHyperblicFunctions',
-      label: '反双曲函数',
+      label: 'InverseHyperblicFunctions',
       children: [
         { key: '\\sinh^{-1}\\alpha' },
         { key: '\\cosh^{-1}\\alpha' },
@@ -553,11 +553,11 @@ const trigonometric = {
 
 const formulaTemplate = {
   key: 'formulaTemplate',
-  label: '公式模板',
+  label: 'FormulaTemplate',
   children: [
     {
       key: 'algebraFormula',
-      label: '代数',
+      label: 'Algebra',
       children: [
         { key: '\\left(x-1\\right)\\left(x+3\\right)' },
         { key: '\\frac{a}{b}\\pm \\frac{c}{d}= \\frac{ad \\pm bc}{bd}' },
@@ -569,7 +569,7 @@ const formulaTemplate = {
     },
     {
       key: 'geometryFormula',
-      label: '几何',
+      label: 'Geometry',
       children: [
         { key: '\\Delta ABC' },
         { key: 'a \\parallel c,b \\parallel c \\Rightarrow a \\parallel b' },
@@ -583,7 +583,7 @@ const formulaTemplate = {
     },
     {
       key: 'inequalityFormula',
-      label: '不等式',
+      label: 'Inequality',
       children: [
         { key: 'a > b,b > c \\Rightarrow a > c' },
         { key: '\\left | a-b \\right | \\geqslant \\left | a \\right | -\\left | b \\right |' },
@@ -598,7 +598,7 @@ const formulaTemplate = {
     },
     {
       key: 'integralFormula',
-      label: '积分',
+      label: 'Integral',
       children: [
         { key: '\\frac{\\mathrm{d}}{\\mathrm{d}x}x^n=nx^{n-1}' },
         { key: '\\frac{\\mathrm{d}}{\\mathrm{d}x}\\sin x=\\cos x' },
@@ -608,7 +608,7 @@ const formulaTemplate = {
     },
     {
       key: 'matrixFormula',
-      label: '矩阵',
+      label: 'Matrix',
       children: [
         { key: '\\begin{pmatrix}  1 & 0 \\\\  0 & 1\\end{pmatrix}' },
         {
@@ -624,7 +624,7 @@ const formulaTemplate = {
     },
     {
       key: 'triangleFormula',
-      label: '三角',
+      label: 'Triangle',
       children: [
         { key: 'e^{i \\theta}' },
         { key: '\\text{sin}^{2}\\frac{\\alpha}{2}=\\frac{1- \\text{cos}\\alpha}{2}' },
@@ -638,7 +638,7 @@ const formulaTemplate = {
     },
     {
       key: 'statisticsFormula',
-      label: '统计',
+      label: 'Statistics',
       children: [
         { key: 'C_{r}^{n}' },
         { key: '\\sum_{i=1}^{n}{X_i}' },
@@ -650,7 +650,7 @@ const formulaTemplate = {
     },
     {
       key: 'sequenceFormula',
-      label: '数列',
+      label: 'Sequence',
       children: [
         { key: 'a_{n}=a_{1}q^{n-1}' },
         { key: 'S_{n}=\\frac{n \\left( a_{1}+a_{n}\\right)}{2}' },
@@ -662,7 +662,7 @@ const formulaTemplate = {
     },
     {
       key: 'physicsFormula',
-      label: '物理',
+      label: 'Physics',
       children: [
         {
           key: '\\sum \\vec{F}_i = \\frac{d\\vec{v}}{dt} = 0',
@@ -677,4 +677,11 @@ const formulaTemplate = {
   ],
 };
 
-export const latexList = [common, greek, higherMath, linearAlgebra, trigonometric, formulaTemplate];
+export const latexList = [
+  common,
+  greek,
+  advancedMathematics,
+  linearAlgebra,
+  trigonometric,
+  formulaTemplate,
+];

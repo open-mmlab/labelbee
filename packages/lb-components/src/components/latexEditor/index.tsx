@@ -10,6 +10,7 @@ import { latexList } from './constant/config';
 import MarkdownView from '@/components/markdownView';
 import styles from './index.module.scss';
 import classNames from 'classnames';
+import { useTranslation } from 'react-i18next';
 
 interface IProps {
   onSelectLatex: (value: string) => void;
@@ -40,6 +41,7 @@ const LatexItem = ({
   activeKeys: string[];
   disabled?: boolean;
 }) => {
+  const { t } = useTranslation();
   const isLastNode = data?.children?.some((i) => !i?.children);
 
   // Formula rendering area can be selected
@@ -103,7 +105,7 @@ const LatexItem = ({
               [`${styles.itemActive}`]: activeKeys.includes(item.key),
             })}
           >
-            {item.label}
+            {t(item.label || '')}
             <RightOutlined style={{ marginLeft: 4, fontSize: 10 }} />
           </div>
         );
@@ -113,6 +115,7 @@ const LatexItem = ({
 };
 
 const LatexEditor = ({ onSelectLatex, disabled }: IProps) => {
+  const { t } = useTranslation();
   const [activeKeys, setActiveKeys] = useState<string[]>([]);
   const latexDom = useRef(null);
   const getItemByKey = (data: IOptionData[], key: string): IOptionData | null => {
@@ -185,7 +188,7 @@ const LatexEditor = ({ onSelectLatex, disabled }: IProps) => {
               }
             }}
           >
-            <span>{i.label}</span>
+            <span>{t(i.label)}</span>
           </Dropdown>
         );
       })}
