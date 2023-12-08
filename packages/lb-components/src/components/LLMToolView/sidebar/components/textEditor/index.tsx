@@ -4,10 +4,13 @@
  * @Date: 2023-11-09
  */
 import React, { useEffect } from 'react';
-import { Form, Input, Popover } from 'antd';
+import { Form, Input, message, Popover } from 'antd';
 import { ITextList } from '@/components/LLMToolView/types';
 import { useTranslation } from 'react-i18next';
 import { InfoCircleOutlined } from '@ant-design/icons';
+import MarkdownView from '@/components/markdownView';
+import LatexEditor from '@/components/latexEditor';
+import styles from './index.module.scss';
 
 interface IProps {
   newAnswer?: string;
@@ -19,7 +22,7 @@ interface IProps {
 const TextEditor = (props: IProps) => {
   const { checkMode, newAnswer, textEditObject, updateValue } = props;
 
-  const { max, min } = textEditObject;
+  const { max, min, isLaText } = textEditObject;
   const { TextArea } = Input;
   const [form] = Form.useForm();
   const { t } = useTranslation();
@@ -39,6 +42,39 @@ const TextEditor = (props: IProps) => {
     }
   }, [newAnswer]);
 
+  const insertText = (newText: string) => {
+    const textarea = document.getElementById('inputTextarea') as HTMLInputElement;
+
+    const text = textarea.value || '';
+    // Get cursor position
+    const start = textarea?.selectionStart ?? text.length;
+    const end = textarea.selectionEnd ?? text.length;
+
+    // Get cursor character
+    const before = text.substring(0, start);
+    const after = text.substring(end, text.length);
+
+    const newValue = before + newText + after;
+    if (max && newValue?.length > max) {
+      message.error(
+        t('MaximumCharacterError', {
+          num: max,
+        }),
+      );
+      return;
+    }
+    textarea.value = newValue;
+    form.setFieldsValue({ value: newValue });
+    updateValue(newValue);
+
+    // Position the cursor at the end of the inserted text
+    textarea.selectionStart = start + newText.length;
+    textarea.selectionEnd = start + newText.length;
+
+    // Give TextArea focus
+    textarea.focus();
+  };
+
   return (
     <Form
       form={form}
@@ -46,24 +82,28 @@ const TextEditor = (props: IProps) => {
         const value = allValues.value;
         updateValue(value);
       }}
-      style={{ marginBottom: '16px' }}
+      className={styles.form}
     >
       <Form.Item
         name='title'
         style={{ marginBottom: '16px' }}
-        label={' '}
+        label={
+          <>
+            {t('AnswerTextEdit')}
+            <Popover placement='bottom' content={t('ShowEditingResultDifferencesInTextModeOnly')}>
+              <InfoCircleOutlined style={{ margin: '0px 4px', cursor: 'pointer' }} />
+            </Popover>
+          </>
+        }
         colon={false}
         required={!!min}
-      >
-        {t('AnswerTextEdit')}
-        <Popover placement='bottom' content={t('ShowEditingResultDifferencesInTextModeOnly')}>
-          <InfoCircleOutlined style={{ margin: '0px 4px', cursor: 'pointer' }} />
-        </Popover>
-      </Form.Item>
+      />
+
+      {isLaText && <LatexEditor onSelectLatex={insertText} disabled={checkMode} />}
       <Form.Item
         name='value'
         style={{
-          marginBottom: 8,
+          marginBottom: 24,
         }}
         rules={[
           {
@@ -83,8 +123,26 @@ const TextEditor = (props: IProps) => {
           disabled={checkMode}
           showCount={max ? true : false}
           style={{ width: '100%' }}
+          id='inputTextarea'
         />
       </Form.Item>
+      {isLaText && (
+        <Form.Item shouldUpdate={true} noStyle={true}>
+          {() => {
+            const inputValue = form.getFieldValue('value') || '';
+            const markdownText = inputValue.replace(/\n/g, '  \n');
+
+            return (
+              <div className={styles.outputDisplay}>
+                <div className={styles.title}>{t('OutputDisplay')}</div>
+                <div className={styles.content}>
+                  {inputValue ? <MarkdownView value={markdownText} /> : ''}
+                </div>
+              </div>
+            );
+          }}
+        </Form.Item>
+      )}
     </Form>
   );
 };
