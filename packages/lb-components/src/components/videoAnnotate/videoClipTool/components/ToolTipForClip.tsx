@@ -5,6 +5,7 @@ import { Tooltip } from 'antd';
 import React from 'react';
 import { ETimeSliceType } from '../constant';
 import { decimalReserved } from '@/components/videoPlayer/utils'
+import { useTranslation } from 'react-i18next';
 
 const ToolTipForClip = (props: {
   slot: React.ReactElement | undefined;
@@ -12,6 +13,8 @@ const ToolTipForClip = (props: {
   attributeList: IInputList[];
 }) => {
   const { slot, item, attributeList } = props;
+  const { t } = useTranslation();
+
   if (!slot) {
     return null;
   }
@@ -33,8 +36,8 @@ const ToolTipForClip = (props: {
             )}s`
           : timeFormat(start, 'ss:SS')}
       </div>
-      <div>{`属性：${AttributeUtils.getAttributeShowText(attribute, attributeList) || '无属性'}`}</div>
-      <div>{`文本：${textAttribute}`}</div>
+      <div>{`${t('Attribute')}：${AttributeUtils.getAttributeShowText(attribute, attributeList) || t('NoAttribute')}`}</div>
+      <div>{`${t('textTool')}：${textAttribute}`}</div>
     </div>
   );
   return <Tooltip title={title}>{slot}</Tooltip>;

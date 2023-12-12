@@ -10,6 +10,7 @@ import styles from './index.module.scss';
 import { decimalReserved, hashCode } from '@/components/videoPlayer/utils'
 import { VideoClipToolContext } from '../../VideoClipToolContext'
 import { VideoPlayerCtx } from '@/components/videoPlayer'
+import { useTranslation } from 'react-i18next';
 
 interface IProps {
   currentTime: number;
@@ -20,9 +21,10 @@ interface IProps {
 
 /** 视频片段的显示内容 */
 export const getDisplayContent = (i: any, attributeList: any) => {
+  const { t } = useTranslation();
   const { attribute, textAttribute } = i;
-  const attr = AttributeUtils.getAttributeShowText(attribute, attributeList) || '无属性';
-  return [attr, textAttribute ? `文本: ${textAttribute}` : ''].filter((i) => i).join('，');
+  const attr = AttributeUtils.getAttributeShowText(attribute, attributeList) || t('NoAttribute');
+  return [attr, textAttribute ? `${t('textTool')}: ${textAttribute}` : ''].filter((i) => i).join('，');
 };
 
 /**

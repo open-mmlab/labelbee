@@ -197,6 +197,8 @@ const TextToolSidebar: React.FC<IProps> = ({
   const [showText, setShowText] = useState<boolean>(true);
   const [, forceRender] = useState(0);
 
+  const { t } = useTranslation();
+
   const switchToNextTextarea = (currentIndex: number) => {
     const nextIndex = (currentIndex + 1) % configList.length;
     textareaFocus(nextIndex);
@@ -265,7 +267,7 @@ const TextToolSidebar: React.FC<IProps> = ({
       ))}
       {showToggleText && (
         <div className='textToolSwitchItem'>
-          文本对照显示
+          {t('toggleShowText')}
           <Switch
             style={{ alignSelf: 'center' }}
             checked={showText}

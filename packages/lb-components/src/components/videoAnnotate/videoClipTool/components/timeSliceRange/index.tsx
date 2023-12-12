@@ -12,6 +12,7 @@ import { ETimeSliceType, PER_SLICE_CHANGE } from '../../constant';
 import styles from './index.module.scss';
 import { timeFormat, precisionAdd, precisionMinus } from '@/utils/audio'
 import { decimalReserved } from '@/components/videoPlayer/utils'
+import { useTranslation } from 'react-i18next';
 
 const TimeInput = ({
   initialVal,
@@ -31,6 +32,7 @@ const TimeInput = ({
   disabled?: boolean;
 }) => {
   const [time, setTime] = useState('');
+  const { t } = useTranslation()
 
   const applyTime = () => {
     validateTime(time)
@@ -133,7 +135,9 @@ const TimeInput = ({
         })}
         onClick={useCurrentTime}
       >
-        {`获取${timeType}时间`}
+        {
+          timeType === 'start' ? t('GetStartTime') : t('GetEndTime')
+        }
       </span>
     </div>
   );
@@ -157,15 +161,15 @@ const TimeSliceRange = ({
   if (!selectedTimeSlice) {
     return null;
   }
-
+  const { t } = useTranslation();
   if (selectedTimeSlice?.type === ETimeSliceType.Period) {
     return (
       <div className={styles.timeSliceInputContainer}>
-        <div className={styles.title}>截取时间</div>
+        <div className={styles.title}>{t('ClipTime')}</div>
         <div className={styles.inputContainer}>
           <TimeInput
             initialVal={selectedTimeSlice.start}
-            timeType='开始'
+            timeType='start'
             videoPlayer={videoPlayer}
             max={precisionMinus(selectedTimeSlice.end as number, PER_SLICE_CHANGE)}
             updateTime={(val) => {
@@ -176,7 +180,7 @@ const TimeSliceRange = ({
           <span className={styles.spliter} />
           <TimeInput
             initialVal={selectedTimeSlice.end as number}
-            timeType='结束'
+            timeType='end'
             videoPlayer={videoPlayer}
             min={precisionAdd(selectedTimeSlice.start as number, PER_SLICE_CHANGE)}
             updateTime={(val) => {
@@ -191,7 +195,7 @@ const TimeSliceRange = ({
 
   return (
     <div className={styles.timeSliceInputContainer}>
-      <div className={styles.title}>时间点时间</div>
+      <div className={styles.title}>{t('StampTime')}</div>
       <TimeInput
         initialVal={selectedTimeSlice.start as number}
         videoPlayer={videoPlayer}

@@ -54,6 +54,7 @@ export class VideoTextTool extends React.Component<
   }
 
   public getColor(config = this.config, attribute = '') {
+    console.log(config)
     return toolStyleConverter.getColorByConfig({ attribute, config });
   }
 

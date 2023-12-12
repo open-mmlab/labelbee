@@ -17,6 +17,7 @@ import { decimalReserved } from '@/components/videoPlayer/utils'
 import { LabelBeeContext } from '@/store/ctx';
 import { AppState } from '@/store';
 import { connect } from 'react-redux';
+import { useTranslation } from 'react-i18next';
 
 /**
  * 片段类型ICON
@@ -31,14 +32,16 @@ const TimeSliceIcon = ({ type }: { type: number }) => {
  * @returns
  */
 const EmptyVideoClipAnnotatedList = () => {
+  const { t } = useTranslation();
+
   return (
     <div className={styles.noContent}>
-      <div>暂无内容</div>
+      <div>{t('NoClippedData')}</div>
       <div>
-        <span className={styles.hotkey}>X</span>截取片段
+        <span className={styles.hotkey}>X</span>{t('ClipSlice')}
       </div>
       <div>
-        <span className={styles.hotkey}>E</span>标时间点
+        <span className={styles.hotkey}>E</span>{t('TimeStamp')}
       </div>
     </div>
   );
@@ -132,9 +135,10 @@ const VideoClipAnnotatedItem = ({
 
 const VideoClipAnnotatedList = (props: { toolInstance: any }) => {
   const { toolInstance } = props
-  const { selectedID, result, videoPlayer, clipStatus, updateSelectedSliceTimeProperty } = toolInstance.exportContext || {}
+  const { selectedID, result, videoPlayer, clipStatus, updateSelectedSliceTimeProperty } = toolInstance?.exportContext || {}
 
   const [_, forceRender] = useState(0);
+  const { t } = useTranslation();
 
   useEffect(() => {
     if (toolInstance) {
@@ -155,7 +159,7 @@ const VideoClipAnnotatedList = (props: { toolInstance: any }) => {
   }
   return (
     <div>
-      <div className={styles.timeSliceListHeader}>已标注列表</div>
+      <div className={styles.timeSliceListHeader}>{t('AnnotatedList')}</div>
       <VideoClipAnnotatedListWrapper>
         {resultList?.map((timeSliceProps: IVideoTimeSlice, index: number) => (
           <VideoClipAnnotatedItem

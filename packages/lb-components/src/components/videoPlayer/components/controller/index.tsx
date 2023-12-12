@@ -158,6 +158,7 @@ const VideoController = (props: IProps) => {
   const { playPause, isPlay, addTime, toggleClipStatus } = React.useContext(VideoPlayerCtx);
   const { result } = useContext(VideoClipToolContext)
   const count = result?.filter((i) => i.end !== null)?.length ?? 0
+  const { t } = useTranslation();
 
   const videoProgress = <VideoProgress/>
   const videoPlay = () => (
@@ -175,7 +176,7 @@ const VideoController = (props: IProps) => {
   const videoPageChange = <VideoPageChange />
   const videoHotKeys = <VideoHotKeys />
   const videoClipHotKey = <VideoClipToolHotkey addTime={addTime} toggleClipStatus={toggleClipStatus} />
-  const videoResultCount = <span style={{ margin: '0px 8px', fontSize: 12 }}>{`本页件数: ${count}`}</span>
+  const videoResultCount = <span style={{ margin: '0px 8px', fontSize: 12 }}>{`${t('ItemsOfThisPage')}: ${count}`}</span>
 
   if (footer) {
     if (typeof footer === 'function') {
