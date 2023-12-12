@@ -33,7 +33,6 @@ const ClipSidebar = (props: IClipSidebarProps) => {
     clipAttributeConfigurable,
   } = audioClipState;
 
-  console.log(audioClipState)
   const { id: selectedId } = selectedRegion;
 
   const attributeChanged = (attr: string) => {
