@@ -295,7 +295,7 @@
     "Erase": "Erase",
     "ScribbleLine": "Scribble (Connect)",
     "StrokeEnlarge": "Stroke to enlarge",
-    "StrokeReduction": "Stroke reduction"
+    "StrokeReduction": "Stroke reduction",
     "toggleShowText": "Text Comparison Display"
   },
   "cn": {
@@ -594,7 +594,7 @@
     "Erase": "擦除",
     "ScribbleLine": "涂抹（连线）",
     "StrokeEnlarge": "笔触放大",
-    "StrokeReduction": "笔触缩小"
+    "StrokeReduction": "笔触缩小",
     "toggleShowText": "文本对照显示"
   }
 }
