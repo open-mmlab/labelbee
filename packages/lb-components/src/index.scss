@@ -1049,6 +1049,13 @@ $hotkey-container-padding: 7px;
   overflow-y: scroll;
 }
 
+.textToolSwitchItem{
+  display: flex;
+  justify-content: space-between;
+  margin-top: 20px;
+  font-size: 12px;
+}
+
 .textareaContainer {
   position: relative;
   padding: 0;

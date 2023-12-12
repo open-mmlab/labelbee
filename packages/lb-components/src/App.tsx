@@ -23,7 +23,7 @@ import {
   OnStepChange,
   OnSubmit,
 } from './types/data';
-import { Header, RenderFooter, Sider, TDrawLayerSlot } from './types/main';
+import { Header, RenderFooter, Sider, DrawLayerSlot } from './types/main';
 import { IStepInfo } from './types/step';
 import { ConfigProvider } from 'antd/es';
 import zhCN from 'antd/es/locale/zh_CN';
@@ -86,7 +86,7 @@ export interface AppProps {
   skipBeforePageTurning?: (pageTurning: Function) => void;
   beforeRotate?: () => boolean;
 
-  drawLayerSlot?: TDrawLayerSlot;
+  drawLayerSlot?: DrawLayerSlot;
 
   // 标注信息扩展的功能
   dataInjectionAtCreation: (annotationData: any) => {};

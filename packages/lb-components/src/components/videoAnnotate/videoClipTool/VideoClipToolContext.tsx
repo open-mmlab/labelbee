@@ -1,3 +1,8 @@
+/**
+ * @author whq <752342314@qq.com>
+ * @file Store for VideoClipTool
+ * @date 2023-12-12
+ */
 import React from 'react';
 import { EClipStatus } from './constant';
 import { IInputList, IVideoTimeSlice } from '@labelbee/lb-utils';

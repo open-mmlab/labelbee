@@ -30,7 +30,7 @@ import {
   AnnotatedAttributesPanelFixedLeft,
   AnnotatedAttributesPanelFixedRight,
 } from '@/views/MainView/toolFooter/AnnotatedAttributes';
-import { TDrawLayerSlot } from '@/types/main';
+import { DrawLayerSlot } from '@/types/main';
 import { PointCloudContext } from './PointCloudContext';
 import { EPointCloudPattern, PointCloudUtils } from '@labelbee/lb-utils';
 import { useCustomToolInstance } from '@/hooks/annotation';
@@ -41,7 +41,7 @@ import SideAndBackOverView from './components/sideAndBackOverView';
 import { SetLoadPCDFileLoading } from '@/store/annotation/actionCreators';
 
 interface IProps extends IA2MapStateProps {
-  drawLayerSlot?: TDrawLayerSlot;
+  drawLayerSlot?: DrawLayerSlot;
   checkMode?: boolean;
   intelligentFit?: boolean;
 }

@@ -12,12 +12,13 @@ import { PageBackward, PageForward, PageJump } from '@/store/annotation/actionCr
 import { TagToolInstanceAdaptor } from '@/components/videoAnnotate/videoTagTool/TagToolInstanceAdaptor';
 import { cTool } from '@labelbee/lb-annotation';
 import VideoClipTool from '@/components/videoAnnotate/videoClipTool';
-import { TDrawLayerSlot } from '@/types/main';
+import { DrawLayerSlot } from '@/types/main';
 import { AppState } from '@/store';
 import StepUtils from '@/utils/StepUtils';
 import { jsonParser } from '@/utils';
 import { IStepInfo } from '@/types/step';
 import { IFileItem } from '@/types/data';
+import { VideoTextTool } from '@/components/videoAnnotate/videoTextTool';
 const { EVideoToolName } = cTool;
 
 export interface IVideoAnnotateProps {
@@ -30,7 +31,7 @@ export interface IVideoAnnotateProps {
   config: any;
   imgIndex: number;
   imgList: IFileItem[];
-  drawLayerSlot?: TDrawLayerSlot;
+  drawLayerSlot?: DrawLayerSlot;
   footer?: any;
 }
 
@@ -67,8 +68,9 @@ const VideoAnnotate: React.FC<IVideoAnnotateProps> = (props) => {
       onUnmounted={onUnmounted}
     />
   }
-  return (
-    <TagToolInstanceAdaptor
+
+  if (currentToolName === EVideoToolName.VideoTextTool) {
+    return <VideoTextTool
       {...props}
       pageBackward={() => dispatch(PageBackward())}
       pageForward={() => dispatch(PageForward())}
@@ -76,7 +78,21 @@ const VideoAnnotate: React.FC<IVideoAnnotateProps> = (props) => {
       onMounted={onMounted}
       onUnmounted={onUnmounted}
     />
-  );
+  }
+
+  if (currentToolName === EVideoToolName.VideoTagTool) {
+    return (
+      <TagToolInstanceAdaptor
+        {...props}
+        pageBackward={() => dispatch(PageBackward())}
+        pageForward={() => dispatch(PageForward())}
+        pageJump={(page) => dispatch(PageJump(~~page))}
+        onMounted={onMounted}
+        onUnmounted={onUnmounted}
+      />
+    );
+  }
+  return null
 };
 
 const mapStateToProps = (state : AppState) => {

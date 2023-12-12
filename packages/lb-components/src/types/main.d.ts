@@ -50,7 +50,7 @@ export type Sider = ({
   pointCloudOperation: React.ReactNode;
 }) => React.ReactNode | React.ReactNode;
 
-export type TDrawLayerSlot = (props: {
+export type DrawLayerSlot = (props: {
   zoom?: number;
   currentPos?: { x?: number; y?: number };
   direct?: boolean;

@@ -224,6 +224,14 @@ const Sidebar: React.FC<IProps> = ({
     );
   }
 
+  if (toolName === EVideoToolName.VideoTextTool) {
+    return (
+      <div className={`${sidebarCls}`}>
+        <TextToolSidebar />
+      </div>
+    )
+  }
+
   if (toolName === EToolName.Text) {
     return (
       <div className={`${sidebarCls}`}>
