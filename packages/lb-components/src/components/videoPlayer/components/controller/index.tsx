@@ -153,6 +153,17 @@ const VideoTime = () => {
 interface IProps {
   footer?: any;
 }
+const VideoPlay = (props: { isPlay: boolean; playPause: () => void}) => {
+  const { playPause, isPlay } = props
+  return <span
+    onClick={() => {
+      playPause();
+    }}
+    className={getClassName('video-controller', 'playButton')}
+  >
+    {isPlay ? <PauseOutlined /> : <CaretRightOutlined />}
+  </span>
+}
 const VideoController = (props: IProps) => {
   const { footer } = props
   const { playPause, isPlay, addTime, toggleClipStatus } = React.useContext(VideoPlayerCtx);
@@ -161,16 +172,7 @@ const VideoController = (props: IProps) => {
   const { t } = useTranslation();
 
   const videoProgress = <VideoProgress/>
-  const videoPlay = () => (
-    <span
-      onClick={() => {
-        playPause();
-      }}
-      className={getClassName('video-controller', 'playButton')}
-    >
-      {isPlay ? <PauseOutlined /> : <CaretRightOutlined />}
-    </span>
-  )
+  const videoPlayIcon = <VideoPlay playPause={playPause} isPlay={isPlay} />
   const videoTime = <VideoTime />
   const videoSpeed = <VideoSpeedButton />
   const videoPageChange = <VideoPageChange />
@@ -182,7 +184,7 @@ const VideoController = (props: IProps) => {
     if (typeof footer === 'function') {
       return footer({
         videoProgress,
-        videoPlayIcon: videoPlay(),
+        videoPlayIcon,
         videoTime,
         videoSpeed,
         videoPageChange,
@@ -198,7 +200,7 @@ const VideoController = (props: IProps) => {
     <div className={getClassName('video-controller', 'wrapper')}>
       {videoProgress}
       <div className={getClassName('video-controller')}>
-        {videoPlay()}
+        {videoPlayIcon}
         {videoTime}
         {videoSpeed}
         <div className={getClassName('video-controller', 'holder')} />
