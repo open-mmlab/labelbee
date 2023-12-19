@@ -17,10 +17,11 @@ interface IProps {
   textEditObject: ITextList;
   updateValue: (changeValue: string) => void;
   checkMode?: boolean;
+  answerIndex:number;
 }
 
 const TextEditor = (props: IProps) => {
-  const { checkMode, newAnswer, textEditObject, updateValue } = props;
+  const { checkMode, newAnswer, textEditObject, updateValue ,answerIndex} = props;
 
   const { max, min, isLaText } = textEditObject;
   const { TextArea } = Input;
@@ -42,8 +43,9 @@ const TextEditor = (props: IProps) => {
     }
   }, [newAnswer]);
 
-  const insertText = (newText: string) => {
-    const textarea = document.getElementById('inputTextarea') as HTMLInputElement;
+  const insertText = (newText: string,) => {
+    const id = `inputTextarea_${answerIndex}`
+    const textarea = document.getElementById(id) as HTMLInputElement;
 
     const text = textarea.value || '';
     // Get cursor position
@@ -123,7 +125,7 @@ const TextEditor = (props: IProps) => {
           disabled={checkMode}
           showCount={max ? true : false}
           style={{ width: '100%' }}
-          id='inputTextarea'
+          id={`inputTextarea_${answerIndex}`}
         />
       </Form.Item>
       {isLaText && (
