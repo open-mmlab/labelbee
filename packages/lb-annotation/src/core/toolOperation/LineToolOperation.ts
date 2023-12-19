@@ -757,7 +757,6 @@ class LineToolOperation extends BasicToolOperation {
 
         text = [text, `${!valid && keyForAttribute ? '无效' : ''}${keyForAttribute}`].filter((i) => i).join('_');
       }
-
       this.drawText(coord, text, color);
     }
   }
@@ -790,7 +789,9 @@ class LineToolOperation extends BasicToolOperation {
       }, 0);
 
       const renderPos = pointList[pointList.length - 1];
-      this.drawText(renderPos, `l = ${length.toFixed(2)}`, color);
+      if (renderPos) {
+        this.drawText(renderPos, `l = ${length.toFixed(2)}`, color);
+      }
     }
   }
 
@@ -1523,10 +1524,6 @@ class LineToolOperation extends BasicToolOperation {
     this.isShift = false;
     this.hoverLineSegmentIndex = -1;
 
-    if (this.selection.triggerKeyboardEvent(e, this.setLineList as unknown as SetDataList)) {
-      return;
-    }
-
     if (e.keyCode === EKeyCode.Esc) {
       this.stopLineCreating(false);
       return;
@@ -1575,6 +1572,9 @@ class LineToolOperation extends BasicToolOperation {
       this.toggleIsHide();
     }
 
+    if (this.selection.triggerKeyboardEvent(e, this.setLineList as unknown as SetDataList)) {
+      return;
+    }
     /** 绘制水平/垂直线 */
     if (e.keyCode === EKeyCode.Shift) {
       this.render();
