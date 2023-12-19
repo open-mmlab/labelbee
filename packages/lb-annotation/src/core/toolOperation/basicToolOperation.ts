@@ -979,8 +979,8 @@ class BasicToolOperation extends EventListener {
   }
 
   public onKeyDown(e: KeyboardEvent): boolean | void {
-    /** 取消window系统下默认的失焦事件 */
-    if (e.keyCode === EKeyCode.Alt) {
+    /** 取消window系统下默认的失焦和全选事件 */
+    if (e.keyCode === EKeyCode.Alt || e.keyCode === EKeyCode.A) {
       e.preventDefault();
     }
 
