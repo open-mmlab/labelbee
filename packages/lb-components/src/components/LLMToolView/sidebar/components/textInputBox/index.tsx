@@ -142,7 +142,7 @@ const TextInputBox = (props: IProps) => {
                       </Form.Item>
                     )}
 
-                    {isLaText && (
+                    {isLaText && showTextInput && (
                       <LatexEditor
                         onSelectLatex={(value) =>
                           insertText({ newText: value, fieldName: field.name, max })
@@ -175,10 +175,11 @@ const TextInputBox = (props: IProps) => {
                           autoSize={{ minRows: 4, maxRows: 10 }}
                           style={{ width: '100%' }}
                           id={`textInput_${field.name}`}
+                          onChange={() => updateValue()}
                         />
                       </Form.Item>
                     )}
-                    {isLaText && (
+                    {isLaText && showTextInput && (
                       <Form.Item shouldUpdate={true} noStyle={true}>
                         {() => {
                           const inputValue =
