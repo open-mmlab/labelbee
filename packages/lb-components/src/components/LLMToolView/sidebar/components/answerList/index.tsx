@@ -146,7 +146,7 @@ const AnswerList = (props: IProps) => {
       defaultActiveKey={
         list.length > 0 ? list.map((i: IAnswerList, index: number) => index) : undefined
       }
-      style={{ margin: '16px 0px' }}
+      style={{ margin: '16px 0px', background: '#fff' }}
     >
       {list.map((i: IAnswerList, index: number) => {
         const {
@@ -261,6 +261,7 @@ const AnswerList = (props: IProps) => {
                 updateValue={(changeValue) => {
                   updateValue({ order: i.order, value: changeValue, key: 'textEdit' });
                 }}
+                answerIndex={index}
               />
             )}
           </Panel>
