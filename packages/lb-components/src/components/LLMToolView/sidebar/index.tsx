@@ -42,7 +42,7 @@ interface IAnnotationResult {
   newSort?: IAnswerSort[][];
   waitSorts?: IWaitAnswerSort[];
   answerList?: IAnswerList[];
-  text?: ITextList[];
+  textAttribute?: ITextList[];
 }
 
 const EKeyCode = cKeyCode.default;
@@ -87,19 +87,19 @@ const LLMToolSidebar: React.FC<IProps> = (props) => {
       newSort,
       waitSorts,
       answerList,
-      text: result?.textAttribute,
+      textAttribute: result?.textAttribute,
     });
   }, [imgIndex, LLMConfig]);
 
   useEffect(() => {
-    const { newSort, answerList, text } = annotationResult;
+    const { newSort, answerList, textAttribute } = annotationResult;
     toolInstanceRef.current.exportData = () => {
       const sort = formatSort(newSort || []);
       const result = [
         {
           answerList,
           sort,
-          textAttribute: text,
+          textAttribute,
           id: currentData?.id,
           modelAPIResponse,
         },
@@ -110,7 +110,7 @@ const LLMToolSidebar: React.FC<IProps> = (props) => {
     const result = {
       answerList,
       sort,
-      textAttribute: text,
+      textAttribute,
       id: currentData?.id,
       toolName: EToolName.LLM,
       modelAPIResponse,
@@ -278,9 +278,9 @@ const LLMToolSidebar: React.FC<IProps> = (props) => {
         {LLMConfig?.text && (
           <div style={{ padding: '0px 16px', marginTop: '16px' }}>
             <TextInputBox
-              textAttribute={annotationResult?.text || []}
+              textAttribute={annotationResult?.textAttribute || []}
               LLMConfig={LLMConfig}
-              setText={(v) => setAnnotationResult({ ...annotationResult, text: v })}
+              setText={(v) => setAnnotationResult({ ...annotationResult, textAttribute: v })}
               checkMode={checkMode}
             />
           </div>
