@@ -414,21 +414,13 @@ class ScribbleTool extends BasicToolOperation {
 
   public render() {
     super.render();
-    if (!this.ctx || !this.cacheCanvas || this.isHidden) {
+    if (!this.ctx || !this.cacheCanvas) {
       return;
     }
     if (this.lineActive) {
       this.renderCursorLine(this.color);
       this.drawLineSegment();
     }
-    this.ctx.save();
-    this.ctx.globalAlpha = 0.5;
-    DrawUtils.drawImg(this.canvas, this.cacheCanvas, {
-      zoom: this.zoom,
-      currentPos: this.currentPos,
-      rotate: this.rotate,
-    });
-    this.ctx.restore();
 
     // Forbid Status stop render Point.
     if (this.forbidOperation || this.forbidCursorLine) {
@@ -441,6 +433,19 @@ class ScribbleTool extends BasicToolOperation {
     } else {
       this.renderPoint(radius);
     }
+
+    // Hide the drawn track
+    if (this.isHidden) {
+      return;
+    }
+    this.ctx.save();
+    this.ctx.globalAlpha = 0.5;
+    DrawUtils.drawImg(this.canvas, this.cacheCanvas, {
+      zoom: this.zoom,
+      currentPos: this.currentPos,
+      rotate: this.rotate,
+    });
+    this.ctx.restore();
   }
 
   /** 撤销 */
