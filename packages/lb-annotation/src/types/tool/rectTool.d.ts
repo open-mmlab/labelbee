@@ -10,6 +10,7 @@ declare interface IRect {
   attribute: string;
   textAttribute: string;
   disableDelete?: boolean; // 是否允许被删除
+  isHighlight?: boolean; // 是否为高亮框
 
   label?: string; // 列表标签
 }

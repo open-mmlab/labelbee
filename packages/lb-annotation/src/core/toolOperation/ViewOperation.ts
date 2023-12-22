@@ -702,9 +702,10 @@ export default class ViewOperation extends BasicToolOperation {
 
             const { x, y, width, height } = renderRect;
 
+            const fillArr = rgba(style?.fill ?? style?.stroke ?? DEFAULT_STROKE_COLOR);
+            const fill = `rgba(${fillArr[0]}, ${fillArr[1]}, ${fillArr[2]},${fillArr[3] * 0.8})`;
+
             if (rect.id === this.mouseHoverID || style.fill) {
-              const fillArr = rgba(style?.fill ?? style?.stroke ?? DEFAULT_STROKE_COLOR);
-              const fill = `rgba(${fillArr[0]}, ${fillArr[1]}, ${fillArr[2]},${fillArr[3] * 0.8})`;
               DrawUtils.drawRectWithFill(this.canvas, renderRect, { color: fill }); // color 看后续是否要改 TODO
             }
             DrawUtils.drawRect(this.canvas, renderRect, {
@@ -713,6 +714,16 @@ export default class ViewOperation extends BasicToolOperation {
               ...this.getReferenceOptions(isReference),
             });
 
+            if (rect?.isHighlight) {
+              DrawUtils.drawHighlightFlag({
+                canvas: this.canvas,
+                color: fill,
+                position: {
+                  x: x - 16,
+                  y: y - 16,
+                },
+              });
+            }
             // 文本渲染
             const { headerText, bottomText } = this.getRenderText(rect, rect?.hiddenText);
 
