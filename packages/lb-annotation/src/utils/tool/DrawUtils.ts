@@ -917,12 +917,9 @@ export default class DrawUtils {
       return;
     }
 
-    // 对于每个路径
     for (const path of HIGHLIGHT_ICON_SVG_PATHS) {
-      // 开始一个新的路径
       context.beginPath();
 
-      // 解析 'd' 属性中的命令，并使用 Canvas API 执行这些命令
       const commands = path.d.split(/(?=[CLMZclmz])/);
       for (const command of commands) {
         const originPoints = command.slice(1).split(' ').map(Number);
