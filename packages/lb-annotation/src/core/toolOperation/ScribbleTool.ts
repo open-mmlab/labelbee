@@ -421,21 +421,13 @@ class ScribbleTool extends BasicToolOperation {
       this.renderCursorLine(this.color);
       this.drawLineSegment();
     }
-
-    // Forbid Status stop render Point.
-    if (this.forbidOperation || this.forbidCursorLine) {
-      return;
-    }
     const radius = this.penSize / 2;
-
-    if (this.action === EScribblePattern.Erase) {
-      this.renderBorderPoint(radius);
-    } else {
-      this.renderPoint(radius);
-    }
-
     // Hide the drawn track
     if (this.isHidden) {
+      // When in scribble mode, points need to be displayed
+      if (this.action === EScribblePattern.Scribble) {
+        this.renderPoint(radius);
+      }
       return;
     }
     this.ctx.save();
@@ -446,6 +438,16 @@ class ScribbleTool extends BasicToolOperation {
       rotate: this.rotate,
     });
     this.ctx.restore();
+    // Forbid Status stop render Point.
+    if (this.forbidOperation || this.forbidCursorLine) {
+      return;
+    }
+
+    if (this.action === EScribblePattern.Erase) {
+      this.renderBorderPoint(radius);
+    } else {
+      this.renderPoint(radius);
+    }
   }
 
   /** 撤销 */
