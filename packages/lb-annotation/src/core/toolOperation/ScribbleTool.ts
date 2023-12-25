@@ -35,6 +35,8 @@ class ScribbleTool extends BasicToolOperation {
 
   private pointList: ICoordinate[]; // line Coordinate
 
+  private curIndexOnLine: number; // Location for connection state undo and redo record pointList
+
   private lineActive?: boolean; // line active
 
   constructor(props: IProps) {
@@ -44,6 +46,7 @@ class ScribbleTool extends BasicToolOperation {
 
     this.isHidden = false;
     this.pointList = [];
+    this.curIndexOnLine = 0;
 
     // Init defaultAttributeInfo
     if (this.config.attributeList?.length > 0) {
@@ -176,6 +179,7 @@ class ScribbleTool extends BasicToolOperation {
     if (e.keyCode === EKeyCode.Ctrl) {
       this.lineActive = false;
       this.pointList = [];
+      this.curIndexOnLine = 0;
       this.render();
     }
   }
@@ -284,7 +288,7 @@ class ScribbleTool extends BasicToolOperation {
     this.cacheContext.moveTo(originCoordinate.x, originCoordinate.y);
     this.startPoint = originCoordinate;
 
-    if (this.lineActive) {
+    if (this.lineActive && e.buttons === 1) {
       this.scribbleOnImgByLine(originCoordinate);
     }
   }
@@ -295,8 +299,10 @@ class ScribbleTool extends BasicToolOperation {
     if (!ctx) {
       return;
     }
+    this.pointList = this.pointList.slice(0, this.curIndexOnLine + 1);
     this.pointList.push(endPoint);
     if (this.pointList.length > 1) {
+      this.curIndexOnLine = this.pointList.length - 1;
       this.pointList.forEach((point, index) => {
         ctx.beginPath();
         if (index > 0) {
@@ -348,14 +354,14 @@ class ScribbleTool extends BasicToolOperation {
   }
 
   public onEraseStart(e: MouseEvent) {
-    if (!this.cacheContext || e.buttons !== 1) {
+    if (!this.cacheContext || e.buttons !== 1 || this.isHidden) {
       return;
     }
     this.eraseArc(e);
   }
 
   public onEraseMove(e: MouseEvent) {
-    if (!this.cacheContext || e.buttons !== 1) {
+    if (!this.cacheContext || e.buttons !== 1 || this.isHidden) {
       return;
     }
 
@@ -376,6 +382,8 @@ class ScribbleTool extends BasicToolOperation {
   }
 
   public clearResult() {
+    this.curIndexOnLine = 0;
+    this.pointList = [];
     this.clearCacheCanvas();
 
     // Need to add a record.
@@ -393,7 +401,7 @@ class ScribbleTool extends BasicToolOperation {
   // Draw line before scribbling on the image
   public drawLineSegment() {
     if (this.prePoint && this.pointList.length > 0) {
-      const endPoint = this.pointList[this.pointList.length - 1];
+      const endPoint = this.pointList[this.curIndexOnLine];
       const points = [endPoint].concat(this.prePoint);
       const drawPoints = points.map((p: ICoordinate) => this.getCoordinateUnderZoomByRotateFromImgPoint(p));
       this.drawStraightLine(drawPoints, {
@@ -406,12 +414,21 @@ class ScribbleTool extends BasicToolOperation {
 
   public render() {
     super.render();
-    if (!this.ctx || !this.cacheCanvas || this.isHidden) {
+    if (!this.ctx || !this.cacheCanvas) {
       return;
     }
     if (this.lineActive) {
       this.renderCursorLine(this.color);
       this.drawLineSegment();
+    }
+    const radius = this.penSize / 2;
+    // Hide the drawn track
+    if (this.isHidden) {
+      // When in scribble mode, points need to be displayed
+      if (this.action === EScribblePattern.Scribble) {
+        this.renderPoint(radius);
+      }
+      return;
     }
     this.ctx.save();
     this.ctx.globalAlpha = 0.5;
@@ -421,12 +438,10 @@ class ScribbleTool extends BasicToolOperation {
       rotate: this.rotate,
     });
     this.ctx.restore();
-
     // Forbid Status stop render Point.
     if (this.forbidOperation || this.forbidCursorLine) {
       return;
     }
-    const radius = this.penSize / 2;
 
     if (this.action === EScribblePattern.Erase) {
       this.renderBorderPoint(radius);
@@ -437,8 +452,13 @@ class ScribbleTool extends BasicToolOperation {
 
   /** 撤销 */
   public undo() {
+    if (this.lineActive && (this.curIndexOnLine < 1 || this.pointList?.length < 1)) {
+      return;
+    }
+    if (this.curIndexOnLine > 0 && this.pointList?.length > 0) {
+      this.curIndexOnLine -= 1;
+    }
     const url = this.history.undo();
-
     if (url && this.cacheCanvas) {
       this.updateUrl2CacheContext(url);
     }
@@ -446,6 +466,10 @@ class ScribbleTool extends BasicToolOperation {
 
   public redo() {
     const url = this.history.redo();
+    if (this.curIndexOnLine < this.pointList?.length - 1 && this.pointList?.length > 0) {
+      this.curIndexOnLine += 1;
+    }
+
     if (url && this.cacheCanvas) {
       this.updateUrl2CacheContext(url);
     }

@@ -1,0 +1,27 @@
+.form {
+  margin-bottom: 16px;
+}
+
+.outputDisplay {
+
+  .title {
+    line-height: 32px;
+    margin-bottom: 8px;
+  }
+
+  .content {
+    border: 1px solid #d9d9d9;
+    min-height: 100px;
+    overflow: auto;
+    max-height: 200px;
+    background-color: #ffffff;
+    padding: 4px 12px;
+
+    :global {
+      .markdown-body {
+        font-size: 14px;
+      }
+    }
+  }
+
+}

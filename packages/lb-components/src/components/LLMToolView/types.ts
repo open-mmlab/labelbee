@@ -69,6 +69,7 @@ export interface ITextList {
   value?: string;
   isFillAnswer?: boolean;
   textControl?: boolean;
+  isLaText?: boolean;
 }
 
 // 单个答案

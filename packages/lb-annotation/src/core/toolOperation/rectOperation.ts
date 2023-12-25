@@ -1289,6 +1289,10 @@ class RectOperation extends BasicToolOperation {
       return;
     }
 
+    if (this.selection.triggerKeyboardEvent(e, this.setRectList.bind(this) as unknown as SetDataList)) {
+      return;
+    }
+
     const { keyCode } = e;
     switch (keyCode) {
       case EKeyCode.Ctrl:
@@ -1374,10 +1378,6 @@ class RectOperation extends BasicToolOperation {
 
   public onKeyUp(e: KeyboardEvent) {
     super.onKeyUp(e);
-
-    if (this.selection.triggerKeyboardEvent(e, this.setRectList.bind(this) as unknown as SetDataList)) {
-      return;
-    }
 
     switch (e.keyCode) {
       case EKeyCode.Ctrl:

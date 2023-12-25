@@ -1,9 +1,9 @@
+import _ from 'lodash';
 import { edgeAdsorptionScope, ELineTypes, EToolName } from '@/constant/tool';
 import RectUtils from '@/utils/tool/RectUtils';
 import PolygonUtils from '@/utils/tool/PolygonUtils';
 import MarkerUtils from '@/utils/tool/MarkerUtils';
 import MathUtils from '@/utils/MathUtils';
-import _ from 'lodash';
 import { DEFAULT_TEXT_OFFSET, EDragStatus, ESortDirection } from '../../constant/annotation';
 import EKeyCode from '../../constant/keyCode';
 import locale from '../../locales';
@@ -417,11 +417,6 @@ class PointOperation extends BasicToolOperation {
     this.render();
   }
 
-  public onKeyUp(e: KeyboardEvent): boolean | void {
-    super.onKeyUp(e);
-    this.selection.triggerKeyboardEvent(e, this.setPointList.bind(this) as unknown as SetDataList);
-  }
-
   public onKeyDown(e: KeyboardEvent) {
     if (!CommonToolUtils.hotkeyFilter(e)) {
       // 如果为输入框则进行过滤
@@ -431,6 +426,8 @@ class PointOperation extends BasicToolOperation {
     if (super.onKeyDown(e) === false) {
       return;
     }
+
+    this.selection.triggerKeyboardEvent(e, this.setPointList.bind(this) as unknown as SetDataList);
 
     const { keyCode } = e;
     switch (keyCode) {
