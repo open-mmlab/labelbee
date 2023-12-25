@@ -22,7 +22,7 @@ interface IProps {
     fill?: string;
     thickness?: number;
   };
-  annotations: any[]; // TODO
+  annotations: any[]; // TODO: Update Type
   zoomChange?: (zoom: number) => void;
   backgroundStyle?: React.CSSProperties;
   onChange?: (type: 'hover' | 'selected', ids: string[]) => void;

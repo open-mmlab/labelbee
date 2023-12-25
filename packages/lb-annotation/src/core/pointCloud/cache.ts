@@ -4,11 +4,15 @@
  * @author Ron <ron.f.luo@gmail.com>
  */
 
+// eslint-disable-next-line
+import GenerateIndexWorker from 'web-worker:./generateIndexWorker.js';
 import { PCDLoader } from './PCDLoader';
 
 type TCacheInfo = {
   src: string;
 };
+
+export type TIndexMap = Map<string, { x: number; y: number; z: number }[]>;
 
 export class PointCloudCache {
   public pcdLoader: PCDLoader;
@@ -18,6 +22,8 @@ export class PointCloudCache {
   private pointsMap: Map<string, Float32Array>;
 
   private colorMap: Map<string, Float32Array>;
+
+  private cacheIndexMap: Map<string, TIndexMap>;
 
   private cacheList: Array<TCacheInfo> = [];
 
@@ -29,7 +35,7 @@ export class PointCloudCache {
     this.pcdLoader = new PCDLoader();
     this.pointsMap = new Map();
     this.colorMap = new Map();
-
+    this.cacheIndexMap = new Map();
     this.cache2DHighlightIndex = new Map();
   }
 
@@ -95,4 +101,40 @@ export class PointCloudCache {
   public clearCache2DHighlightIndex() {
     this.cache2DHighlightIndex.clear();
   }
+
+  /**
+   * Loads index map from cache or generates it in a worker.
+   *
+   * @param src The path to the source image.
+   * @param points The points of the source image.
+   * @returns A promise that resolves to the index map.
+   */
+  public loadIndexMap = async (src: string, points: Float32Array) => {
+    const currentCacheIndexMap = this.cacheIndexMap.get(src);
+
+    return new Promise((resolve) => {
+      if (currentCacheIndexMap) {
+        return resolve(currentCacheIndexMap);
+      }
+      if (window.Worker) {
+        const generateIndexWorker = new GenerateIndexWorker({ type: 'module' });
+        generateIndexWorker.postMessage({
+          points,
+        });
+
+        generateIndexWorker.onmessage = (e: any) => {
+          const { indexMap } = e.data;
+          this.cacheIndexMap.set(src, indexMap);
+          // 按照缓存一个 1.8M PCD（包含 points.length:360804）文件需要占用 2.8MB 内存粗略估算，缓存 50 个 pcd 文件大概需要 140MB 内存
+          if (this.cacheIndexMap.size > this.MAX_SIZE) {
+            const firstKey = Array.from(this.cacheIndexMap.keys())[0];
+            this.cacheIndexMap.delete(firstKey);
+          }
+
+          resolve(indexMap);
+          generateIndexWorker.terminate();
+        };
+      }
+    });
+  };
 }

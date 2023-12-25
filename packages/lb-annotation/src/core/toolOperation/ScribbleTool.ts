@@ -4,6 +4,7 @@ import DrawUtils from '@/utils/tool/DrawUtils';
 import { EScribblePattern, EToolName } from '@/constant/tool';
 import CommonToolUtils from '@/utils/tool/CommonToolUtils';
 import AttributeUtils from '@/utils/tool/AttributeUtils';
+import EKeyCode from '@/constant/keyCode';
 import { BasicToolOperation, IBasicToolOperationProps } from './basicToolOperation';
 
 interface IProps extends IBasicToolOperationProps {}
@@ -18,6 +19,8 @@ class ScribbleTool extends BasicToolOperation {
 
   public config!: IScribbleConfig;
 
+  public isHidden: boolean;
+
   private action = EScribblePattern.Scribble;
 
   private cacheCanvas?: HTMLCanvasElement;
@@ -28,10 +31,22 @@ class ScribbleTool extends BasicToolOperation {
 
   private startPoint?: ICoordinate; // Origin Coordinate
 
+  private prePoint?: ICoordinate; // preview Coordinate
+
+  private pointList: ICoordinate[]; // line Coordinate
+
+  private curIndexOnLine: number; // Location for connection state undo and redo record pointList
+
+  private lineActive?: boolean; // line active
+
   constructor(props: IProps) {
     super(props);
 
     this.penSize = DEFAULT_PEN_SIZE;
+
+    this.isHidden = false;
+    this.pointList = [];
+    this.curIndexOnLine = 0;
 
     // Init defaultAttributeInfo
     if (this.config.attributeList?.length > 0) {
@@ -72,6 +87,7 @@ class ScribbleTool extends BasicToolOperation {
 
   public setPenSize(size: number) {
     this.penSize = size;
+    this.render();
   }
 
   public initCacheCanvas(imgNode?: HTMLImageElement) {
@@ -146,6 +162,31 @@ class ScribbleTool extends BasicToolOperation {
     if (keyCode2Attribute !== undefined) {
       this.setDefaultAttribute(keyCode2Attribute);
     }
+
+    if (keyCode === EKeyCode.Z && !e.ctrlKey) {
+      this.toggleIsHide();
+    }
+
+    if (e.ctrlKey && this.action === EScribblePattern.Scribble) {
+      this.lineActive = true;
+      this.render();
+    }
+  }
+
+  public onKeyUp(e: KeyboardEvent) {
+    super.onKeyUp(e);
+
+    if (e.keyCode === EKeyCode.Ctrl) {
+      this.lineActive = false;
+      this.pointList = [];
+      this.curIndexOnLine = 0;
+      this.render();
+    }
+  }
+
+  public toggleIsHide() {
+    this.setIsHidden(!this.isHidden);
+    this.render();
   }
 
   public eventBinding() {
@@ -246,12 +287,45 @@ class ScribbleTool extends BasicToolOperation {
     const originCoordinate = this.getOriginCoordinate(e);
     this.cacheContext.moveTo(originCoordinate.x, originCoordinate.y);
     this.startPoint = originCoordinate;
+
+    if (this.lineActive && e.buttons === 1) {
+      this.scribbleOnImgByLine(originCoordinate);
+    }
+  }
+
+  // Draw lines on the image
+  public scribbleOnImgByLine(endPoint: ICoordinate) {
+    const ctx = this.cacheContext;
+    if (!ctx) {
+      return;
+    }
+    this.pointList = this.pointList.slice(0, this.curIndexOnLine + 1);
+    this.pointList.push(endPoint);
+    if (this.pointList.length > 1) {
+      this.curIndexOnLine = this.pointList.length - 1;
+      this.pointList.forEach((point, index) => {
+        ctx.beginPath();
+        if (index > 0) {
+          const prePoint = this.pointList[index - 1];
+          ctx.save();
+          ctx.moveTo(prePoint.x, prePoint.y);
+          ctx.lineTo(point.x, point.y);
+          ctx.stroke();
+          ctx.restore();
+        }
+      });
+    }
   }
 
   public onScribbleMove(e: MouseEvent) {
+    const originCoordinate = this.getOriginCoordinate(e);
+    if (this.lineActive) {
+      this.prePoint = originCoordinate;
+      return;
+    }
+
     if (e.buttons === 1 && this.cacheContext && this.startPoint) {
       // this.cacheContext.lineTo(e.offsetX, e.offsetY);
-      const originCoordinate = this.getOriginCoordinate(e);
       this.cacheContext.lineTo(originCoordinate.x, originCoordinate.y);
       this.cacheContext.stroke();
       // this.prevAxis = { x: e.offsetX, y: e.offsetY };
@@ -274,21 +348,20 @@ class ScribbleTool extends BasicToolOperation {
       this.cacheContext.beginPath();
       this.cacheContext.arc(originCoordinate.x, originCoordinate.y, this.penSizeWithZoom / 2, 0, Math.PI * 2, false);
       this.cacheContext.clip();
-      // TODO
       this.cacheContext.clearRect(0, 0, this.cacheContext.canvas.width, this.cacheContext.canvas.height);
       this.cacheContext?.restore();
     }
   }
 
   public onEraseStart(e: MouseEvent) {
-    if (!this.cacheContext || e.buttons !== 1) {
+    if (!this.cacheContext || e.buttons !== 1 || this.isHidden) {
       return;
     }
     this.eraseArc(e);
   }
 
   public onEraseMove(e: MouseEvent) {
-    if (!this.cacheContext || e.buttons !== 1) {
+    if (!this.cacheContext || e.buttons !== 1 || this.isHidden) {
       return;
     }
 
@@ -309,6 +382,8 @@ class ScribbleTool extends BasicToolOperation {
   }
 
   public clearResult() {
+    this.curIndexOnLine = 0;
+    this.pointList = [];
     this.clearCacheCanvas();
 
     // Need to add a record.
@@ -323,13 +398,38 @@ class ScribbleTool extends BasicToolOperation {
     DrawUtils.drawCircle(this.canvas, this.coord, radius, { color: 'black' });
   }
 
+  // Draw line before scribbling on the image
+  public drawLineSegment() {
+    if (this.prePoint && this.pointList.length > 0) {
+      const endPoint = this.pointList[this.curIndexOnLine];
+      const points = [endPoint].concat(this.prePoint);
+      const drawPoints = points.map((p: ICoordinate) => this.getCoordinateUnderZoomByRotateFromImgPoint(p));
+      this.drawStraightLine(drawPoints, {
+        color: this.color,
+        lineWidth: this.penSize,
+        globalAlpha: 0.5,
+      });
+    }
+  }
+
   public render() {
     super.render();
-
     if (!this.ctx || !this.cacheCanvas) {
       return;
     }
-
+    if (this.lineActive) {
+      this.renderCursorLine(this.color);
+      this.drawLineSegment();
+    }
+    const radius = this.penSize / 2;
+    // Hide the drawn track
+    if (this.isHidden) {
+      // When in scribble mode, points need to be displayed
+      if (this.action === EScribblePattern.Scribble) {
+        this.renderPoint(radius);
+      }
+      return;
+    }
     this.ctx.save();
     this.ctx.globalAlpha = 0.5;
     DrawUtils.drawImg(this.canvas, this.cacheCanvas, {
@@ -338,12 +438,10 @@ class ScribbleTool extends BasicToolOperation {
       rotate: this.rotate,
     });
     this.ctx.restore();
-
     // Forbid Status stop render Point.
     if (this.forbidOperation || this.forbidCursorLine) {
       return;
     }
-    const radius = this.penSize / 2;
 
     if (this.action === EScribblePattern.Erase) {
       this.renderBorderPoint(radius);
@@ -354,8 +452,13 @@ class ScribbleTool extends BasicToolOperation {
 
   /** 撤销 */
   public undo() {
+    if (this.lineActive && (this.curIndexOnLine < 1 || this.pointList?.length < 1)) {
+      return;
+    }
+    if (this.curIndexOnLine > 0 && this.pointList?.length > 0) {
+      this.curIndexOnLine -= 1;
+    }
     const url = this.history.undo();
-
     if (url && this.cacheCanvas) {
       this.updateUrl2CacheContext(url);
     }
@@ -363,6 +466,10 @@ class ScribbleTool extends BasicToolOperation {
 
   public redo() {
     const url = this.history.redo();
+    if (this.curIndexOnLine < this.pointList?.length - 1 && this.pointList?.length > 0) {
+      this.curIndexOnLine += 1;
+    }
+
     if (url && this.cacheCanvas) {
       this.updateUrl2CacheContext(url);
     }

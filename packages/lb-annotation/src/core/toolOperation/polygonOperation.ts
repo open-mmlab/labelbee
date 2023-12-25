@@ -766,6 +766,10 @@ class PolygonOperation extends BasicToolOperation {
       return;
     }
 
+    if (this.selection.triggerKeyboardEvent(e, this.setPolygonList.bind(this) as unknown as SetDataList)) {
+      return;
+    }
+
     const { keyCode } = e;
     switch (keyCode) {
       case EKeyCode.Space:
@@ -839,10 +843,6 @@ class PolygonOperation extends BasicToolOperation {
 
   public onKeyUp(e: KeyboardEvent) {
     super.onKeyUp(e);
-
-    if (this.selection.triggerKeyboardEvent(e, this.setPolygonList.bind(this) as unknown as SetDataList)) {
-      return;
-    }
 
     switch (e.keyCode) {
       case EKeyCode.Ctrl:

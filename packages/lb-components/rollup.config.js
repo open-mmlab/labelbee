@@ -80,7 +80,6 @@ export default {
         '.js': 'jsx',
       },
     }),
-    // TODO: COPY ICON TO ES DIR
     postcss({
       extract: true,
       assetsPath: './assets',

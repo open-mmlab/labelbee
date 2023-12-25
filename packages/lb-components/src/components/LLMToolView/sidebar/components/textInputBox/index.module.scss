@@ -1,0 +1,36 @@
+.form {
+  margin-bottom: 16px;
+}
+
+.outputDisplay {
+
+  .title {
+    line-height: 32px;
+    margin-bottom: 8px;
+  }
+
+  .content {
+    min-height: 100px;
+    overflow: auto;
+    max-height: 200px;
+    background-color: #ffffff;
+    padding: 4px 12px;
+    border: 1px solid #d9d9d9;
+
+    :global {
+      .markdown-body {
+        font-size: 14px;
+      }
+    }
+  }
+}
+
+.textTitle {
+  font-size: 16px;
+  line-height: 22px;
+  font-weight: 500;
+  color: #333333;
+  margin-bottom: 8px;
+  white-space: pre-wrap;
+  word-break: break-all;
+}

@@ -270,8 +270,9 @@ const LLMToolConfig = {
     {
       title: 1,
       min: 11,
-      max: 100,
+      max: 1000,
       isFillAnswer: true, // 是否填充答案
+      isLaText: true, // 是否打开LaTex编辑
       textControl: true // 文本对照
     },
     {
@@ -300,7 +301,7 @@ const audioToolConfig = {
   "skipWhileNoDependencies": false,
   "configList": [
     {
-      "label": "文本",
+      "label": "测试文本",
       "key": "text",
       "required": false,
       "default": "",

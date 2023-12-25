@@ -7,6 +7,7 @@ import { cKeyCode } from '@labelbee/lb-annotation';
 import { useLatest } from 'ahooks';
 
 import styles from './index.module.scss';
+import { useTranslation } from 'react-i18next';
 
 const EKeyCode = cKeyCode.default
 
@@ -25,6 +26,7 @@ interface IZoomSliderProps {
 
 const ZoomSlider = (props: IZoomSliderProps) => {
   const { onChange, zoom } = props;
+  const { t } = useTranslation();
   const zoomRef = useLatest(zoom);
 
   const changeHandler = (newValue: number) => {
@@ -72,7 +74,7 @@ const ZoomSlider = (props: IZoomSliderProps) => {
 
   return (
     <div className={styles.sliderContainer}>
-      <div>缩放</div>
+      <div>{t('Scale')}</div>
       <ZoomOutOutlined style={iconStyle} onClick={zoomOut} />
       <div
         style={{

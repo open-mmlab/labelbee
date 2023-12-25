@@ -437,14 +437,12 @@ export const AudioPlayer = ({
       playImmediately: true,
     });
 
-    const regionParam: IAudioTimeSlice = {
+    const regionParam = {
       id,
       start: decimalReserved(start, 3),
       end: decimalReserved(end, 3),
-      attribute: '',
-      text: '',
     }
-    updateRegion?.(regionParam);
+    updateRegion?.(regionParam as IAudioTimeSlice);
     update();
   };
 
@@ -808,8 +806,8 @@ export const AudioPlayer = ({
           }}
           className={classnames({
             [styles.waveform]: true,
-            [styles.combined]: audioClipStateRef.current.combined,
-            [styles.clip]: audioClipStateRef.current.clipConfigurable,
+            'bee-audio-combined': audioClipStateRef.current.combined,
+            'bee-audio-clip': audioClipStateRef.current.clipConfigurable,
           })}
         >
           {invalid && <InvalidPage isAudio={true} />}

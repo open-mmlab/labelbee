@@ -22,6 +22,7 @@ import {
   IDefaultSize,
   IPolygonData,
   IBasicRect,
+  POINT_CLOUD_DEFAULT_STEP,
 } from '@labelbee/lb-utils';
 import { useContext } from 'react';
 import { PointCloudContext } from '../PointCloudContext';
@@ -38,8 +39,6 @@ import {
   SetPointCloudLoading,
   SetLoadPCDFileLoading,
 } from '@/store/annotation/actionCreators';
-import { message } from 'antd';
-import { useTranslation } from 'react-i18next';
 import { useHistory } from './useHistory';
 import { usePolygon } from './usePolygon';
 import { IFileItem, IMappingImg } from '@/types/data';
@@ -654,7 +653,6 @@ export const usePointCloudViews = () => {
   const { selectedBox, updateSelectedBox, updateSelectedBoxes, getPointCloudByID } = useSingleBox({
     generateRects,
   });
-  const { t } = useTranslation();
 
   const selectedPointCloudBox = selectedBox?.info;
 
@@ -775,17 +773,6 @@ export const usePointCloudViews = () => {
     ) as unknown as IPointCloudBox[];
 
     boxParams = nextResult[0];
-
-    // If the count is less than lowerLimitPointsNumInBox, needs to delete it
-    if (
-      config?.lowerLimitPointsNumInBox &&
-      typeof boxParams.count === 'number' &&
-      boxParams.count < config.lowerLimitPointsNumInBox
-    ) {
-      message.info(t('LowerLimitPointsNumInBox', { num: config.lowerLimitPointsNumInBox }));
-      polygonOperation.deletePolygon(boxParams.id);
-      return;
-    }
 
     if (intelligentFit && newPointList?.length) {
       newPolygon.pointList = newPointList;
@@ -927,20 +914,6 @@ export const usePointCloudViews = () => {
         sideViewInstance.pointCloudInstance,
       );
 
-      const nextResult = dispatch(
-        PreDataProcess({
-          tool: EPointCloudName.PointCloud,
-          dataList: [newBoxParams],
-          stepConfig: config,
-          action: 'viewUpdateBox',
-        }),
-      ) as unknown as IPointCloudBox[];
-      const newBox = nextResult[0];
-      // 如果更新后的box valid没有变化，则不更新当前视图
-      const updateCurrentView = newBoxParams.valid !== newBox.valid;
-
-      newBoxParams = newBox;
-
       // Update count
       if (mainViewInstance) {
         const { count } = mainViewInstance.getSensesPointZAxisInPolygon(
@@ -956,6 +929,20 @@ export const usePointCloudViews = () => {
           count,
         };
       }
+
+      const nextResult = dispatch(
+        PreDataProcess({
+          tool: EPointCloudName.PointCloud,
+          dataList: [newBoxParams],
+          stepConfig: config,
+          action: 'viewUpdateBox',
+        }),
+      ) as unknown as IPointCloudBox[];
+      const newBox = nextResult[0];
+      // 如果更新后的box valid没有变化，则不更新当前视图
+      const updateCurrentView = newBoxParams.valid !== newBox.valid;
+
+      newBoxParams = newBox;
 
       const newPointCloudBoxList = updateSelectedBox(newBoxParams);
 
@@ -1296,16 +1283,33 @@ export const usePointCloudViews = () => {
      * 2. Reload PointCloud
      * 3. Clear Polygon
      */
-    topViewInstance.updateData(newData.url, newData.result, {
-      radius: config?.radius ?? DEFAULT_RADIUS,
-    });
 
     if (newData.result) {
       boxParamsList = PointCloudUtils.getBoxParamsFromResultList(newData.result);
+
+      if (
+        boxParamsList?.length > 0 &&
+        newData.isPreResult &&
+        config?.lowerLimitPointsNumInBox > 0
+      ) {
+        // @ts-ignore
+        boxParamsList = await mainViewInstance?.filterPreResult(newData.url, config, boxParamsList);
+
+        const newDataResultObj = jsonParser(newData.result);
+
+        newDataResultObj[POINT_CLOUD_DEFAULT_STEP].result = boxParamsList;
+
+        newData.result = JSON.stringify(newDataResultObj);
+
+        ptCtx.setPointCloudResult(boxParamsList);
+      }
       polygonList = PointCloudUtils.getPolygonListFromResultList(newData.result);
       lineList = PointCloudUtils.getLineListFromResultList(newData.result);
       sphereParamsList = PointCloudUtils.getSphereParamsFromResultList(newData.result);
 
+      topViewInstance.updateData(newData.url, newData.result, {
+        radius: config?.radius ?? DEFAULT_RADIUS,
+      });
       // Add Init Box
       mainViewInstance?.generateBoxes(boxParamsList);
       mainViewInstance?.generateSpheres(sphereParamsList);

@@ -45,8 +45,8 @@ module.exports = {
     'jsx-a11y/label-has-for': 0,
 
     'comma-dangle': ['error', 'always-multiline'],
-    'consistent-return': 0, // TODO: remove later
-    'no-param-reassign': 0, // TODO: remove later
+    'consistent-return': 0,
+    'no-param-reassign': 0,
     'no-underscore-dangle': 0,
     // for (let i = 0; i < len; i++)
     'no-plusplus': 0,
@@ -74,7 +74,7 @@ module.exports = {
     'no-restricted-properties': 0,
     'no-multi-assign': 0,
     'import/prefer-default-export': 0,
-    'no-restricted-syntax': 0, // TODO 后续严格限制
+    'no-restricted-syntax': 0,
     'no-console': ['error', { allow: ['warn', 'error'] }],
     'import/no-unresolved': [
       2,

@@ -30,7 +30,7 @@ import MathUtils from '@/utils/MathUtils';
 import ImgUtils from '@/utils/ImgUtils';
 import { PCDLoader } from './PCDLoader';
 import { OrbitControls } from './OrbitControls';
-import { PointCloudCache } from './cache';
+import { PointCloudCache, TIndexMap } from './cache';
 import { getCuboidFromPointCloudBox, getHighlightIndexByPoints, mergeHighlightList } from './matrix';
 import { PointCloudSegmentOperation } from './segmentation';
 import PointCloudStore from './store';
@@ -158,7 +158,7 @@ export class PointCloud extends EventListener {
     this.config = config;
     this.checkMode = checkMode ?? false;
 
-    // TODO
+    // TODO: Need to extracted.
     if (isOrthographicCamera && orthographicParams) {
       this.isOrthographicCamera = true;
       this.camera = new THREE.OrthographicCamera(
@@ -184,7 +184,9 @@ export class PointCloud extends EventListener {
     // this.scene.add(this.axesHelper);
 
     this.scene.add(this.camera);
-    // TODO
+    /**
+     * Temporary: Avoid domElement mounted
+     */
     if (!noAppend) {
       container.appendChild(this.renderer.domElement);
     }
@@ -396,7 +398,7 @@ export class PointCloud extends EventListener {
     // Camera setting must be set before Control's initial.
     const { camera } = this;
 
-    // TODO
+    // TODO: Need to change it to a better way.
     if (this.isOrthographicCamera) {
       const { x, y, z } = this.initCameraPosition;
       camera.position.set(x, y, z);
@@ -1011,6 +1013,26 @@ export class PointCloud extends EventListener {
     return mergeList;
   };
 
+  public filterPreResult = async (src: string, config: any, boxParamsList: IPointCloudBox[]) => {
+    const { points } = await this.cacheInstance.loadPCDFile(src);
+    const indexMap = (await this.cacheInstance.loadIndexMap(src, points as Float32Array)) as TIndexMap;
+
+    return new Promise((resolve) => {
+      const boxes = boxParamsList.map((boxParams: IPointCloudBox) => {
+        const count = MathUtils.calculatePointsInsideBox({
+          indexMap,
+          polygon: getCuboidFromPointCloudBox(boxParams).polygonPointList as IPolygonPoint[],
+          zScope: [boxParams.center.z - boxParams.depth / 2, boxParams.center.z + boxParams.depth / 2],
+          box: boxParams,
+        });
+        const valid = count >= config.lowerLimitPointsNumInBox;
+
+        return { ...boxParams, valid, count };
+      });
+      resolve(boxes);
+    });
+  };
+
   /**
    * It needs to be updated after load PointCloud's data.
    * @param boxParams
@@ -1168,7 +1190,7 @@ export class PointCloud extends EventListener {
     const cb = async (points: Float32Array, color: Float32Array) => {
       const { width = 0, height = 0, depth = 0 } = scope ?? {};
 
-      // TODO. Speed can be optimized.
+      // TODO. Speed can be optimized. It can use octree to optimize it.
       const filterData = await this.filterPointsByBox(
         {
           ...boxParams,
@@ -1648,7 +1670,7 @@ export class PointCloud extends EventListener {
   public getBoxTopPolygon2DCoordinate(boxParams: IPointCloudBox) {
     const { width, height } = boxParams;
     const vectorList = this.getPolygonTopPoints(boxParams);
-    // TODO. Need to update
+    // TODO. Need to optimize
     const polygon2d = vectorList
       .map((vector) => new THREE.Vector3(vector.x, vector.y, vector.z))
       // .map((vector) => vector.applyMatrix4(invertMatrix)); // Direct invertMatrix

@@ -7,6 +7,8 @@
 import React from 'react';
 import { useAudioClipStore } from '@/components/audioAnnotate/audioContext';
 import { useHover, useMouse } from 'ahooks';
+import styles from '../index.module.scss';
+import { useTranslation } from 'react-i18next';
 
 interface IProps {
   /**  展示的容器 */
@@ -14,6 +16,8 @@ interface IProps {
 }
 
 const CombineTip = (props: IProps) => {
+  const { t } = useTranslation();
+
   const { container } = props;
   const { audioClipState } = useAudioClipStore();
   const { combined } = audioClipState;
@@ -26,12 +30,13 @@ const CombineTip = (props: IProps) => {
 
   return (
     <div
+      className={styles.tips}
       style={{
         left: mouse.clientX + 20,
         top: mouse.clientY - 20,
       }}
     >
-      请点击希望合并的区间
+      {t('AudioCombineTip')}
     </div>
   );
 };

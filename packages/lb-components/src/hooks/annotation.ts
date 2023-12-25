@@ -12,9 +12,9 @@ export interface ICustomToolInstance {
   valid: boolean;
   exportData: () => [any, {}];
   exportCustomData: () => {};
-  singleOn: () => void;
+  singleOn: (eventName: string, callback: (...args: any[]) => void) => void;
   clearResult: () => void;
-  on: () => void;
+  on: (eventName: string, callback: (...args: any[]) => void) => void;
   unbind: () => void;
   setResult: (result: any) => void;
   setValid: (valid: boolean) => void;
