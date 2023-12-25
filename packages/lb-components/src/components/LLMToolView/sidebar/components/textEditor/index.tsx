@@ -17,11 +17,11 @@ interface IProps {
   textEditObject: ITextList;
   updateValue: (changeValue: string) => void;
   checkMode?: boolean;
-  answerIndex:number;
+  answerIndex: number;
 }
 
 const TextEditor = (props: IProps) => {
-  const { checkMode, newAnswer, textEditObject, updateValue ,answerIndex} = props;
+  const { checkMode, newAnswer, textEditObject, updateValue, answerIndex } = props;
 
   const { max, min, isLaText } = textEditObject;
   const { TextArea } = Input;
@@ -43,8 +43,8 @@ const TextEditor = (props: IProps) => {
     }
   }, [newAnswer]);
 
-  const insertText = (newText: string,) => {
-    const id = `inputTextarea_${answerIndex}`
+  const insertText = (newText: string) => {
+    const id = `inputTextarea_${answerIndex}`;
     const textarea = document.getElementById(id) as HTMLInputElement;
 
     const text = textarea.value || '';
@@ -88,7 +88,7 @@ const TextEditor = (props: IProps) => {
     >
       <Form.Item
         name='title'
-        style={{ marginBottom: '16px' }}
+        style={{ marginBottom: '8px' }}
         label={
           <>
             {t('AnswerTextEdit')}
