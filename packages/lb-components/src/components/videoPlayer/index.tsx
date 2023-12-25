@@ -6,6 +6,7 @@
 
 import React from 'react';
 import VideoController from './components/controller';
+import VideoTrack from '@/components/videoAnnotate/videoClipTool/components/videoTrack'
 import { getClassName } from '@/utils/dom';
 import { cKeyCode } from '@labelbee/lb-annotation';
 import { IFileItem } from '@/types/data';
@@ -13,6 +14,8 @@ import { decimalReserved } from './utils';
 import FileException from '../fileException';
 
 const EKeyCode = cKeyCode.default;
+
+export const PLAYER_CONTROL_BAR_HEIGHT = 60;
 
 export const VideoPlayerCtx = React.createContext<{
   videoRef?: React.RefObject<HTMLVideoElement> | null;
@@ -29,6 +32,8 @@ export const VideoPlayerCtx = React.createContext<{
   pageBackward: () => void;
   pageJump: (page: string) => void;
   pageForward: () => void;
+  addTime?: () => void;
+  toggleClipStatus?: () => void;
 }>({
   isPlay: false,
   playPause: () => {},
@@ -43,6 +48,8 @@ export const VideoPlayerCtx = React.createContext<{
   pageBackward: () => {},
   pageJump: (page: string) => {},
   pageForward: () => {},
+  addTime: () => {},
+  toggleClipStatus: () => {},
 });
 
 const PER_INTERVAL = 50;
@@ -57,6 +64,13 @@ interface IVideoPlayerProps {
   pageForward: () => void;
   valid: boolean;
   setVideoRef?: (video: HTMLVideoElement) => void;
+  showVideoTrack?: boolean;
+  onTrackResize?: any;
+  footer?: any;
+  dataLoaded?: (totalTime: number) => void;
+  addTime?: () => void;
+  toggleClipStatus?: () => void;
+  drawLayerSlot?: any;
 }
 
 interface IVideoPlayerState {
@@ -176,6 +190,14 @@ export class VideoPlayer extends React.Component<IVideoPlayerProps, IVideoPlayer
     this.onVideoStopped();
   };
 
+  public onTimeUpdate = () => {
+    if (this.videoElm) {
+      this.setState({
+        currentTime: decimalReserved(this.videoElm?.currentTime, 1),
+      })
+    }
+  }
+
   public onVideoStopped = () => {
     this.setState({
       isPlay: false,
@@ -222,13 +244,14 @@ export class VideoPlayer extends React.Component<IVideoPlayerProps, IVideoPlayer
     if (this.videoElm) {
       this.videoElm.playbackRate = this.state.playbackRate;
     }
+
     this.onVideoStopped();
   };
 
   public setDuration = () => {
     if (this.videoElm) {
       const duration = decimalReserved(this.videoElm?.duration, 1);
-
+      this.props.dataLoaded?.(duration)
       this.setState({
         duration,
       });
@@ -266,13 +289,15 @@ export class VideoPlayer extends React.Component<IVideoPlayerProps, IVideoPlayer
 
   public render() {
     const { isPlay, playbackRate, currentTime, duration, buffered, error } = this.state;
-    const { imgList, imgIndex, pageBackward, pageJump, pageForward, valid } = this.props;
+    const { imgList, imgIndex, pageBackward, pageJump, pageForward, valid, footer, drawLayerSlot } = this.props;
 
+    const remainingTime = isNaN(duration) ? 0 : Math.max(decimalReserved(duration, 1) - currentTime, 0);
     const {
       playPause,
       updateNextPlaybackRate,
       onPause,
       onPlay,
+      onTimeUpdate,
       resetVideoData,
       setDuration,
       setCurrentTime,
@@ -286,6 +311,8 @@ export class VideoPlayer extends React.Component<IVideoPlayerProps, IVideoPlayer
         // eslint-disable-next-line react/jsx-no-constructed-context-values
         value={{
           videoRef: this.videoRef,
+          addTime: this.props.addTime,
+          toggleClipStatus: this.props.toggleClipStatus,
           isPlay,
           playPause,
           updateNextPlaybackRate,
@@ -301,37 +328,50 @@ export class VideoPlayer extends React.Component<IVideoPlayerProps, IVideoPlayer
           pageForward,
         }}
       >
-        <div className={getClassName('video-wrapper')}>
-          <div className={getClassName('video-container')}>
-            <video
-              ref={videoRef}
-              className={getClassName('video')}
-              src={videoSrc}
-              onPause={onPause}
-              onPlay={onPlay}
-              onLoadedMetadata={resetVideoData}
-              onError={onError}
-              onDurationChange={setDuration}
-              width='100%'
-              height='100%'
-              onClick={playPause}
-            />
-
-            <FileException
-              fileType='video'
-              errorProps={{
-                reloadImage: this.reload,
-                backgroundColor: '#e2e2e2',
-                ignoreOffsetY: true,
-                isError: error,
-              }}
-              invalidProps={{
-                isValid: valid,
-              }}
-            />
+        <>
+          {drawLayerSlot?.({ currentTime, remainingTime, zoom: 1, currentPos: { x: 0, y: 0 } })}
+          <div className={getClassName('video-wrapper')}>
+            <div className={getClassName('video-container')}>
+              <video
+                ref={videoRef}
+                className={getClassName(this.props.showVideoTrack ? 'video-track' : 'video')}
+                src={videoSrc}
+                onPause={onPause}
+                onPlay={onPlay}
+                onTimeUpdate={onTimeUpdate}
+                onLoadedMetadata={resetVideoData}
+                onError={onError}
+                onDurationChange={setDuration}
+                width='100%'
+                height='100%'
+                onClick={playPause}
+              />
+              {
+                this.props.showVideoTrack && <VideoTrack
+                  currentTime={currentTime}
+                  onTrackResize={this.props.onTrackResize}
+                  onTrackResizeStart={() => {
+                    this.videoElm?.pause();
+                  }}
+                  readonly={false}
+                />
+              }
+              <FileException
+                fileType='video'
+                errorProps={{
+                  reloadImage: this.reload,
+                  backgroundColor: '#e2e2e2',
+                  ignoreOffsetY: true,
+                  isError: error,
+                }}
+                invalidProps={{
+                  isValid: valid,
+                }}
+              />
+            </div>
+            <VideoController footer={footer}/>
           </div>
-          <VideoController />
-        </div>
+        </>
       </VideoPlayerCtx.Provider>
     );
   }

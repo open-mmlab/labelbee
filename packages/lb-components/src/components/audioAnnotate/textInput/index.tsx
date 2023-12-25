@@ -478,7 +478,7 @@ const TextInput = (props: IProps) => {
                   clipAttributeConfigurable ? (
                     <div style={textStyle} className={styles.attribute}>
                       {getAttributeShowText(attribute, [
-                        { value: '', key: '无属性' },
+                        { value: '', key: t('NoAttribute') },
                         ...clipAttributeList,
                       ])}
                     </div>
@@ -491,7 +491,7 @@ const TextInput = (props: IProps) => {
         {/* 文本显示按钮，不会存储在配置或结果中 */}
         {toggleShowText && (
           <div className={styles.switchItem}>
-            文本对照显示
+            {t('toggleShowText')}
             <Switch
               style={{ alignSelf: 'center' }}
               checked={showText}

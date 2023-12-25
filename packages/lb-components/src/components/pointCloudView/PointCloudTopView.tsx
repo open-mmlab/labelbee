@@ -38,7 +38,7 @@ import useSize from '@/hooks/useSize';
 import { useTranslation } from 'react-i18next';
 import { LabelBeeContext } from '@/store/ctx';
 import { jsonParser } from '@/utils';
-import { TDrawLayerSlot } from '@/types/main';
+import { DrawLayerSlot } from '@/types/main';
 import ToolUtils from '@/utils/ToolUtils';
 import _ from 'lodash';
 import PointCloudSizeSlider from './components/PointCloudSizeSlider';
@@ -180,7 +180,7 @@ const ZAxisSlider = ({
 };
 
 interface IProps extends IA2MapStateProps {
-  drawLayerSlot?: TDrawLayerSlot;
+  drawLayerSlot?: DrawLayerSlot;
   checkMode?: boolean;
   intelligentFit?: boolean;
   setIsEnlargeTopView: (value: boolean) => void;

@@ -3,16 +3,18 @@ import { connect } from 'react-redux';
 import { AppState } from '@/store';
 import { cloneDeep } from 'lodash';
 import { classnames } from '@/utils';
-import { Input } from 'antd/es';
-import { cKeyCode } from '@labelbee/lb-annotation';
+import { Input, Switch } from 'antd/es';
+import { cKeyCode, cTool } from '@labelbee/lb-annotation';
 import { PageForward } from '@/store/annotation/actionCreators';
 import { ConfigUtils } from '@/utils/ConfigUtils';
 import { IStepInfo } from '@/types/step';
 import TextToolOperation from '@labelbee/lb-annotation/dist/types/core/toolOperation/TextToolOperation';
 import { useTranslation } from 'react-i18next';
 import { LabelBeeContext } from '@/store/ctx';
+import { VideoTextTool } from '@/components/videoAnnotate/videoTextTool';
 
 const EKeyCode = cKeyCode.default;
+const { EVideoToolName } = cTool
 
 const syntheticEventStopPagination = (e: React.KeyboardEvent<HTMLTextAreaElement>) => {
   e.stopPropagation();
@@ -50,7 +52,7 @@ export const TextareaWithFooter = (props: ITextareaWithFooterProps) => {
 
 interface IProps {
   dispatch: Function;
-  toolInstance: TextToolOperation;
+  toolInstance: TextToolOperation | VideoTextTool;
   imgIndex: number;
   triggerEventAfterIndexChanged: boolean;
   step: number;
@@ -192,7 +194,10 @@ const TextToolSidebar: React.FC<IProps> = ({
 }) => {
   const [configList, setConfigList] = useState<IConfigListItem[]>([]);
   const [focusIndex, setFocusIndex] = useState(0);
+  const [showText, setShowText] = useState<boolean>(true);
   const [, forceRender] = useState(0);
+
+  const { t } = useTranslation();
 
   const switchToNextTextarea = (currentIndex: number) => {
     const nextIndex = (currentIndex + 1) % configList.length;
@@ -220,8 +225,10 @@ const TextToolSidebar: React.FC<IProps> = ({
     }
   }, [toolInstance]);
 
+  const result = toolInstance?.textList?.[0]?.value ?? {};
+
   const updateText = (v: string, k: string) => {
-    toolInstance.updateTextValue(k, v);
+    toolInstance?.updateTextValue?.(k, v, toolInstance?.textList?.[0]);
   };
 
   useEffect(() => {
@@ -230,16 +237,19 @@ const TextToolSidebar: React.FC<IProps> = ({
     }
   }, [imgIndex]);
 
-  const result = toolInstance.textList[0]?.value ?? {};
-
   const onNext = () => {
     dispatch(PageForward(true));
   };
 
+  const toggleShowText = (v: boolean) => {
+    setShowText(v)
+    toolInstance?.toggleShowText(v)
+  }
+
   const stepConfig = ConfigUtils.getStepConfig(stepList, step);
   const disabled = stepConfig.dataSourceStep > 0 && basicResultList.length === 0;
-
-  return (
+  const showToggleText = stepConfig.tool === EVideoToolName.VideoTextTool
+  return toolInstance && (
     <div className='textToolOperationMenu'>
       {configList.map((i, index) => (
         <SingleTextInput
@@ -255,6 +265,18 @@ const TextToolSidebar: React.FC<IProps> = ({
           disabled={disabled}
         />
       ))}
+      {showToggleText && (
+        <div className='textToolSwitchItem'>
+          {t('toggleShowText')}
+          <Switch
+            style={{ alignSelf: 'center' }}
+            checked={showText}
+            onChange={(v) => {
+              toggleShowText(v);
+            }}
+          />
+        </div>
+      )}
     </div>
   );
 };
