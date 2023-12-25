@@ -63,6 +63,8 @@ class RectOperation extends BasicToolOperation {
     startTime: number;
   };
 
+  private highlightVisible = false;
+
   constructor(props: IRectOperationProps) {
     super(props);
     this._drawOutSideTarget = props.drawOutSideTarget || false;
@@ -935,9 +937,17 @@ class RectOperation extends BasicToolOperation {
     return undefined;
   }
 
+  public setHighlightVisible(highlightVisible: boolean) {
+    this.highlightVisible = highlightVisible;
+    this.setAttributeLockList([]);
+  }
+
   public setAttributeLockList(attributeLockList: string[]) {
     this.setSelectedRectID(undefined);
 
+    if (attributeLockList?.length) {
+      this.highlightVisible = false;
+    }
     super.setAttributeLockList(attributeLockList);
   }
 
@@ -1598,6 +1608,17 @@ class RectOperation extends BasicToolOperation {
         });
       }
 
+      if (this.highlightVisible && rect?.isHighlight) {
+        DrawUtils.drawHighlightFlag({
+          canvas: this.canvas,
+          color: strokeColor,
+          position: {
+            x: transformRect.x - 5,
+            y: transformRect.y - 16,
+          },
+        });
+      }
+
       const lineWidth = this.style?.width ?? 2;
 
       if (rect.id === this.hoverRectID || rect.id === this.selectedRectID || this.isMultiMoveMode) {
@@ -1663,6 +1684,7 @@ class RectOperation extends BasicToolOperation {
       CommonToolUtils.getSourceID(this.basicResult),
       this.attributeLockList,
       this.selectedIDs,
+      this.highlightVisible,
     );
     // 静态矩形
     if (!this.isHidden) {

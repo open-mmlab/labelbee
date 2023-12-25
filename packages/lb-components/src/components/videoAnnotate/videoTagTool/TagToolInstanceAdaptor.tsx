@@ -7,26 +7,20 @@
 
 import React from 'react';
 import { CommonToolUtils, uuid } from '@labelbee/lb-annotation';
-import StepUtils from '@/utils/StepUtils';
 import { jsonParser } from '@/utils';
-import { VideoPlayer } from './index';
-import { VideoTagLayer } from './VideoTagLayer';
-import { IStepInfo } from '@/types/step';
+import { VideoPlayer } from '../../videoPlayer';
+import { VideoTagLayer } from '../../videoPlayer/VideoTagLayer';
 import _ from 'lodash';
-import type { ObjectString } from './types';
-import { getKeyCodeNumber } from './utils';
-import { IFileItem } from '@/types/data';
+import type { ObjectString } from '../../videoPlayer/types';
+import { getKeyCodeNumber } from '../../videoPlayer/utils';
+import { IVideoAnnotateProps } from '@/components/videoAnnotate';
 
-export interface IVideoTagInstanceAdaptorProps {
-  imgIndex: number;
-  imgList: IFileItem[];
+export interface IVideoTagInstanceAdaptorProps extends IVideoAnnotateProps{
   pageForward: () => void;
   pageJump: (page: string) => void;
   pageBackward: () => void;
-  onMounted: (instance: TagToolInstanceAdaptor) => void;
+  onMounted: (instance: any) => void;
   onUnmounted: () => void;
-  step: number;
-  stepList: IStepInfo[];
 }
 
 interface IVideoTagInstanceAdaptorState {
@@ -41,7 +35,7 @@ export class TagToolInstanceAdaptor extends React.Component<
   IVideoTagInstanceAdaptorState
 > {
   public fns: { [key: string]: () => void } = {};
-  public videoRef?: HTMLVideoElement;
+  public videoPlayer?: HTMLVideoElement;
   public labelSelectedList: number[] = [];
 
   public constructor(props: IVideoTagInstanceAdaptorProps) {
@@ -54,8 +48,7 @@ export class TagToolInstanceAdaptor extends React.Component<
   }
 
   public get config() {
-    const stepInfo = StepUtils.getCurrentStepInfo(this.props.step, this.props.stepList);
-    return jsonParser(stepInfo?.config);
+    return jsonParser(this.props.stepInfo?.config);
   }
 
   /** Just implementation, no actual logic */
@@ -90,11 +83,11 @@ export class TagToolInstanceAdaptor extends React.Component<
   };
 
   public exportData = () => {
-    const duration = this.videoRef?.duration ?? 0;
-    const videoQulity = this.videoRef?.getVideoPlaybackQuality();
+    const duration = this.videoPlayer?.duration ?? 0;
+    const videoQulity = this.videoPlayer?.getVideoPlaybackQuality();
     const frames = videoQulity?.totalVideoFrames;
-    const videoWidth = this.videoRef?.videoWidth ?? 0;
-    const videoHeight = this.videoRef?.videoHeight ?? 0;
+    const videoWidth = this.videoPlayer?.videoWidth ?? 0;
+    const videoHeight = this.videoPlayer?.videoHeight ?? 0;
 
     return [
       this.state.tagResult,
@@ -108,6 +101,10 @@ export class TagToolInstanceAdaptor extends React.Component<
 
   public on(event: string, func: () => void) {
     this.singleOn(event, func);
+  }
+
+  public unbindAll(eventName: string) {
+    delete this.fns[eventName];
   }
 
   public getTagResultByCode(num1: number, num2?: number) {
@@ -291,7 +288,7 @@ export class TagToolInstanceAdaptor extends React.Component<
     const { tagResult, valid } = this.state;
 
     return (
-      <div style={{ height: '100%', width: '100%', position: 'relative' }}>
+      <div style={{ height: '100%', width: '100%', position: 'relative', display: 'flex', flexDirection: 'column' }}>
         <VideoPlayer
           imgIndex={imgIndex}
           imgList={imgList}
@@ -300,10 +297,12 @@ export class TagToolInstanceAdaptor extends React.Component<
           pageJump={pageJump}
           valid={valid}
           setVideoRef={(video) => {
-            this.videoRef = video;
+            this.videoPlayer = video;
           }}
+          drawLayerSlot={this.props.drawLayerSlot}
+          footer={this.props.footer}
         />
-        <VideoTagLayer result={tagResult} inputList={this.config?.inputList} />
+        <VideoTagLayer result={tagResult} inputList={this.config?.inputList} hasPromptLayer={!!this.props.drawLayerSlot}/>
       </div>
     );
   }

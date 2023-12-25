@@ -1,0 +1,47 @@
+$HEIGHT: 40px;
+$containerHeight: 80px;
+$containerVerticalPadding: 5px;
+$trackBorder: 1px solid #555555;
+$videoTrackHeight: 45px;
+$timeTrackHeight: 24px;
+$videoHeight: calc(100% - #{$containerHeight} - #{$videoTrackHeight * 2} - #{$timeTrackHeight});
+
+.videoTimeSlices  {
+    position: absolute;
+    top: 0;
+    right: 0;
+    max-height: $videoHeight;
+    padding-right: 4px;
+    overflow: auto;
+    z-index: 22;
+}
+
+.timeSliceWrapper {
+    height: #{$HEIGHT * 2};
+    margin-bottom: 8px;
+    transition: opacity 0.4s ease-in-out;
+    opacity: .3;
+
+    &.active {
+        opacity: 1;
+    }
+
+    .timeSliceItemText,
+    .timeSliceItemAttribute {
+        height: $HEIGHT;
+        font-size: 16px;
+        color: white;
+    }
+
+    .timeSliceItemText {
+        background-color: #CCC;
+        padding: 8px 24px;
+    }
+
+    .timeSliceItemAttribute span {
+        display: inline-block;
+        height: $HEIGHT;
+        line-height: $HEIGHT;
+        padding: 0 24px;
+    }
+}

@@ -31,6 +31,25 @@ export interface IDrawTextConfig {
   lineHeight: number;
 }
 
+interface IDrawHighlightFlagParams {
+  canvas: HTMLCanvasElement;
+  color: string;
+  position: {
+    x: number;
+    y: number;
+  };
+  scale?: number;
+}
+
+const HIGHLIGHT_ICON_SVG_PATHS = [
+  {
+    d: 'M0.423514 10.1595C-0.362666 7.22543 1.37854 4.20957 4.3126 3.42339C7.24666 2.63721 10.2625 4.37842 11.0487 7.31248L49.8716 152.201C50.6577 155.135 48.9165 158.151 45.9825 158.937C43.0484 159.724 40.0325 157.982 39.2464 155.048L0.423514 10.1595Z',
+  },
+  {
+    d: 'M14.0774 9.47294C28.5 -16.5001 91.5 25.5001 113.138 0.529419L131.773 70.076C112 96.9999 50.5 54 32.7124 79.0196L14.0774 9.47294Z',
+  },
+];
+
 export default class DrawUtils {
   public static drawImg = (
     canvas: HTMLCanvasElement,
@@ -880,5 +899,54 @@ export default class DrawUtils {
 
     ctx.putImageData(imageData, 0, 0);
     return { canvas };
+  }
+
+  /**
+   * Draws a highlight flag.
+   * @param {IDrawHighlightFlagParams} params - The parameters for drawing the highlight flag.
+   * @param {Canvas} params.canvas - The canvas on which to draw the highlight flag.
+   * @param {Object} params.position - The position at which to draw the highlight flag.
+   * @param {string} params.color - The color of the highlight flag.
+   * @param {number} [params.scale=0.1] - The scale of the highlight flag.
+   */
+  public static drawHighlightFlag(params: IDrawHighlightFlagParams) {
+    const { canvas, position, color, scale = 0.1 } = params;
+    const context = canvas.getContext('2d');
+
+    if (!context) {
+      return;
+    }
+
+    for (const path of HIGHLIGHT_ICON_SVG_PATHS) {
+      context.beginPath();
+
+      const commands = path.d.split(/(?=[CLMZclmz])/);
+      for (const command of commands) {
+        const originPoints = command.slice(1).split(' ').map(Number);
+        const points = originPoints.map((p, i) => (i % 2 === 0 ? p * scale + position.x : p * scale + position.y));
+        switch (command[0]) {
+          case 'M':
+            context.moveTo(points[0], points[1]);
+            break;
+          case 'C':
+            context.bezierCurveTo(points[0], points[1], points[2], points[3], points[4], points[5]);
+            break;
+          case 'L':
+            context.lineTo(points[0], points[1]);
+            break;
+          case 'Z':
+            context.closePath();
+            break;
+          default:
+            break;
+        }
+      }
+
+      // 设置填充颜色
+      context.fillStyle = color;
+
+      // 填充路径
+      context.fill();
+    }
   }
 }

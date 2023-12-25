@@ -98,3 +98,24 @@ export const getKeyCodeNumber = (keyCode: number) => {
  */
 export const decimalReserved = (num: number, places = 2) =>
   typeof num === 'number' ? parseFloat(num.toFixed(places)) : num;
+
+/**
+ * Compute the hash code of given string
+ * @param str
+ * @returns {Number}
+ */
+export const hashCode = function (str: string | undefined) {
+  if (str === undefined) return str
+  let hash = 0;
+  let i;
+  let chr;
+  if (str.length === 0) {
+    return hash;
+  }
+  for (i = 0; i < str.length; i++) {
+    chr = str.charCodeAt(i);
+    hash = (hash << 5) - hash + chr;
+    hash |= 0;
+  }
+  return hash;
+};

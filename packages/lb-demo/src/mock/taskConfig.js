@@ -85,6 +85,39 @@ const tagToolConfig = {
   ],
 };
 
+const textToolConfig = {
+  "showConfirm": true,
+  "showDirection": false,
+  "skipWhileNoDependencies": false,
+  "configList": [
+    {
+      "label": "文本",
+      "key": "text",
+      "required": false,
+      "default": "",
+      "maxLength": 1000
+    },
+    {
+      "label": "文本2",
+      "key": "text2",
+      "required": false,
+      "default": "",
+      "maxLength": 1000
+    },
+    {
+      "label": "文本3",
+      "key": "text3",
+      "required": false,
+      "default": "",
+      "maxLength": 1000
+    }
+  ],
+  "filterData": [
+    "valid",
+    "invalid"
+  ]
+}
+
 const lineToolConfig = {
   lineType: 0,
   lineColor: 0,
@@ -115,19 +148,6 @@ const lineToolConfig = {
   filterData: ['valid', 'invalid'],
 
   showLineLength: true,
-};
-
-const textToolConfig = {
-  showConfirm: false,
-  skipWhileNoDependencies: false,
-  enableTextRecognition: false,
-  recognitionMode: 'general',
-  configList: [
-    { label: '文本', key: 'text', required: false, default: 'default1', maxLength: 1000 },
-    { label: '文本2', key: 'text2', required: true, default: 'default2', maxLength: 1000 },
-    { label: '文本3', key: 'text3', required: true, default: 'default3', maxLength: 1000 },
-  ],
-  filterData: ['valid', 'invalid'],
 };
 
 const polygonConfig = {
@@ -403,6 +423,10 @@ export const getConfig = (tool) => {
 
   if (tool === EVideoToolName.VideoTagTool) {
     return tagToolConfig;
+  }
+
+  if (tool === EVideoToolName.VideoTextTool) {
+    return textToolConfig;
   }
 
   if (tool === EPointCloudName.PointCloud) {

@@ -67,15 +67,18 @@ const PointCloudAnnotate: React.FC<AppProps & IProps> = (props) => {
 const AnnotatedArea: React.FC<AppProps & IProps> = (props) => {
   const { stepList, step } = props;
   const currentToolName = getStepConfig(stepList, step)?.tool;
-  const isVideoTool = ToolUtils.isVideoTool(currentToolName);
   const isPointCloudTool = ToolUtils.isPointCloudTool(currentToolName);
-
-  if (isVideoTool) {
-    return <VideoAnnotate {...props} />;
-  }
+  const isVideoTool = ToolUtils.isVideoTool(currentToolName);
 
   if (isPointCloudTool) {
     return <PointCloudAnnotate {...props} />;
+  }
+
+  if (isVideoTool) {
+    return <VideoAnnotate
+      drawLayerSlot={props.drawLayerSlot}
+      footer={props.footer}
+    />
   }
 
   return <ImageAnnotate {...props} />;
@@ -122,6 +125,7 @@ const MainView: React.FC<AppProps & IProps> = (props) => {
   const currentToolName = getStepConfig(stepList, step)?.tool;
   const isLLMTool = EToolName.LLM === currentToolName;
   const isAudioTool = ToolUtils.isAudioTool(currentToolName);
+
   if (isLLMTool) {
     return (
       <ViewportProviderLayout {...props}>
@@ -135,6 +139,7 @@ const MainView: React.FC<AppProps & IProps> = (props) => {
       <AudioAnnotate {...props} />
     </ViewportProviderLayout>
   }
+
   return (
     <ViewportProviderLayout {...props}>
       <Layout className={getClassName('layout', 'container')}>
