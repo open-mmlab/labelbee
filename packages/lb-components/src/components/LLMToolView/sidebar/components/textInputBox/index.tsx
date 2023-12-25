@@ -105,13 +105,7 @@ const TextInputBox = (props: IProps) => {
                       <Form.Item
                         name={[field.name, 'title']}
                         extra={tip}
-                        style={{
-                          fontSize: '16px',
-                          lineHeight: '22px',
-                          fontWeight: 500,
-                          color: '#333333',
-                          marginBottom: 8,
-                        }}
+                        className={styles.textTitle}
                         required={!!min}
                         label={' '}
                         colon={false}
