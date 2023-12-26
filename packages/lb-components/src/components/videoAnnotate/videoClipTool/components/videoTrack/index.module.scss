@@ -1,0 +1,63 @@
+$containerHeight: 80px;
+$containerVerticalPadding: 5px;
+$trackBorder: 1px solid #555555;
+$videoTrackHeight: 45px;
+$timeTrackHeight: 24px;
+$videoHeight: calc(100% - #{$containerHeight} - #{$videoTrackHeight * 2} - #{$timeTrackHeight});
+$trackHotZoneWidth: 6px;
+
+@mixin trackStyle {
+  border-bottom: $trackBorder;
+  box-sizing: border-box;
+}
+.videoTrackContainer {
+  position: absolute;
+  bottom: 0px;
+  width: 100%;
+  overflow-x: hidden;
+  overflow-y: auto;
+  background-color: #333333;
+  .timeTrack {
+    height: $timeTrackHeight;
+    @include trackStyle;
+  }
+  .videoTrack {
+    display: flex;
+    flex-direction: column-reverse;
+    height: $videoTrackHeight * 2;
+    overflow-x: hidden;
+    overflow-y: auto;
+    .track {
+      position: relative;
+      flex: 0 0 $videoTrackHeight;
+      @include trackStyle;
+    }
+  }
+  .timeline {
+    position: absolute;
+    top: 50%;
+    transform: translateY(-50%);
+    display: inline-block;
+    height: 100%;
+    top: 0;
+    left: 0;
+    width: 2px;
+    z-index: 10;
+    height: 100%;
+  }
+  .displayTime {
+    position: absolute;
+    top: 0;
+    left: -1;
+    z-index: 11;
+    width: 68px;
+    padding: 5px;
+    color: black;
+    font-size: 14px;
+  }
+}
+.textOverflow {
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}

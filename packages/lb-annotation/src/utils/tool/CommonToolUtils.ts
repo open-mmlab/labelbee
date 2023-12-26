@@ -169,6 +169,7 @@ export default class CommonToolUtils {
     sourceID: string,
     attributeLockList: string[] = [],
     selectedIDs?: string[],
+    highlightVisible = false,
   ): [T[], T[]] {
     const selectedRect: T[] = [];
 
@@ -176,6 +177,10 @@ export default class CommonToolUtils {
       if (selectedIDs && selectedIDs.includes(result.id)) {
         selectedRect.push(result);
         return false;
+      }
+
+      if (highlightVisible) {
+        return result?.isHighlight;
       }
 
       if (attributeLockList.length > 0 && !attributeLockList.includes(result?.attribute)) {

@@ -19,7 +19,6 @@ class TextToolOperation extends BasicToolOperation {
     this.textList = [];
     this.setShowDefaultCursor(true);
     this.setConfig(props.config);
-    this.initTextDisplayContainer();
   }
 
   get dataList() {
@@ -81,6 +80,10 @@ class TextToolOperation extends BasicToolOperation {
     this.emit('valueUpdated');
   }
 
+  public toggleShowText(show: boolean) {
+    this.toggleTextContainerVisible(show);
+  }
+
   /**
    *
    * @param key
@@ -95,6 +98,11 @@ class TextToolOperation extends BasicToolOperation {
 
   public getTextDomID(key: string) {
     return `textKey${key}`;
+  }
+
+  public init() {
+    super.init();
+    this.initTextDisplayContainer();
   }
 
   /** 初始化文本渲染元素 */

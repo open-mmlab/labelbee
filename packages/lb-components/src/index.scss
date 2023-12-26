@@ -1049,6 +1049,13 @@ $hotkey-container-padding: 7px;
   overflow-y: scroll;
 }
 
+.textToolSwitchItem{
+  display: flex;
+  justify-content: space-between;
+  margin-top: 20px;
+  font-size: 12px;
+}
+
 .textareaContainer {
   position: relative;
   padding: 0;
@@ -1313,6 +1320,10 @@ $hotkey-container-padding: 7px;
 }
 
 /** VideoPlayer样式 start */
+$videoTipHeight: 40px;
+$videoTrackHeight: 45px;
+$timeTrackHeight: 24px;
+$videoHeight: calc(100% - #{$videoTrackHeight * 2} - #{$timeTrackHeight});
 .#{$prefix}-video-wrapper {
   width: 100%;
   height: 100%;
@@ -1320,11 +1331,21 @@ $hotkey-container-padding: 7px;
   flex-direction: column;
   background-color: black;
   overflow: hidden;
+  flex: 1 1;
 
   .#{$prefix}-video-container {
-    flex: 1;
+    height: calc(100% - 80px);
     overflow: hidden;
     position: relative;
+    display: flex;
+    flex-direction:column;
+
+    .#{$prefix}-video {
+      flex: 1 1;
+    }
+    .#{$prefix}-video-track{
+      height: $videoHeight;
+    }
   }
 }
 
@@ -1384,7 +1405,10 @@ $hotkey-container-padding: 7px;
 
 // Controller 样式
 .#{$prefix}-video-controller__wrapper {
-  position: relative;
+  position: absolute;
+  bottom: 0px;
+  left: 0px;
+  right: 0px;
 }
 
 .#{$prefix}-video-controller {

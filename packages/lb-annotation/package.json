@@ -95,6 +95,7 @@
   },
   "dependencies": {
     "@labelbee/lb-utils": "1.16.0",
+    "@labelbee/lb-utils": "1.16.0-alpha.4",
     "@turf/turf": "5.1.6",
     "color-rgba": "^2.3.0",
     "lodash": "^4.17.20",

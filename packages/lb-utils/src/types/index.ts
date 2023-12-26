@@ -7,3 +7,4 @@ export * from './common';
 export * from './base';
 export * from './audio';
 export * from './styles';
+export * from './video';

@@ -5,6 +5,9 @@ import img4 from './images/66.jpg';
 import { pointCloudResult1 } from './pointCloud';
 import { LLMToolResult } from './LLMTool';
 
+// audios
+import audio1 from './audios/audio1.mp3'
+
 // Cuboid_IMG
 import car1 from './cuboidImages/1.png';
 import car2 from './cuboidImages/2.png';
@@ -31,12 +34,7 @@ import calib2 from './pointCloud/calib/P2/2.json';
 // export const fileList = ['10', '19', '20', '66'].map((i) => `${MOCK_URL}${i}.jpg`);
 export const fileList = [car1, car2, car3, car4, car5];
 // export const fileList = [img1, img2, img3, img4];
-export const videoList = [
-  'http://127.0.0.1:8080/a.mp4',
-  'http://127.0.0.1:8080/d.mp4',
-  'http://127.0.0.1:8080/c.mp4',
-  'http://127.0.0.1:8080/e.mp4',
-];
+export const videoList = ['http://vjs.zencdn.net/v/oceans.mp4', 'https://media.w3.org/2010/05/sintel/trailer.mp4'];
 
 export const pointCloudList = [pcd1, pcd2, pcd3, pcd4, pcd5, pcd6, pcd7, pcd8, pcd9];
 

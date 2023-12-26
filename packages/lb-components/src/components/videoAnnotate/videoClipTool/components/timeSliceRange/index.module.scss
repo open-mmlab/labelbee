@@ -1,0 +1,39 @@
+.timeSliceInputContainer {
+  height: 120px;
+  padding: 16px;
+  .title {
+    margin-bottom: 16px;
+    margin-bottom: 8px;
+    color: rgba(0, 0, 0, 0.85);
+    font-weight: 500;
+    font-size: 14px;
+    font-family: SourceHanSansCN-Medium;
+  }
+
+  .inputWrapper {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+
+    .getCurr {
+      margin-top: 8px;
+      color: #666fff;
+      font-size: 12px;
+      cursor: pointer;
+      &.disabled {
+        color: #ccc;
+        cursor: not-allowed;
+      }
+    }
+  }
+
+  .inputContainer {
+    display: flex;
+    .inputWrapper {
+      width: 92px;
+    }
+    .spliter {
+      flex: 1;
+    }
+  }
+}

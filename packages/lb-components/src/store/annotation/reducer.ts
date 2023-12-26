@@ -499,7 +499,7 @@ export const annotationReducer = (
               CommonToolUtils.isSameSourceID(i.sourceID, sourceID),
             )
           : result;
-        toolInstance?.history.initRecord(result, true);
+        toolInstance?.history?.initRecord(result, true);
         toolInstance?.setResult(resultForBasicIndex);
       }
 
@@ -679,7 +679,7 @@ export const annotationReducer = (
         }
       }
 
-      toolInstance?.updateRotate();
+      toolInstance?.updateRotate?.();
       return state;
     }
 

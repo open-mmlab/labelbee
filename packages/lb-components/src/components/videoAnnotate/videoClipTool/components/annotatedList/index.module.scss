@@ -1,0 +1,58 @@
+.timeSliceListContent {
+  height: 224px;
+  overflow-y: auto;
+  font-size: 12px;
+  background-color: #fafafa;
+  &.empty {
+    display: flex;
+    justify-content: center;
+    .noContent {
+      align-self: center;
+      color: #999999;
+      > div {
+        margin-bottom: 10px;
+        text-align: center;
+      }
+      .hotkey {
+        display: inline-block;
+        width: 20px;
+        height: 20px;
+        margin-right: 5px;
+        line-height: 20px;
+        text-align: center;
+        border: 1px #ccc solid;
+      }
+    }
+  }
+  .timeSliceItem {
+    display: flex;
+    padding: 12px;
+    cursor: pointer;
+    &.timeSliceItemActivated {
+      color: #666fff;
+      background-color: #ebecfb;
+    }
+    .timeSliceAttribute {
+      overflow: hidden;
+      white-space: nowrap;
+      text-overflow: ellipsis;
+    }
+    .timeSliceItemContent {
+      flex: 1;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+    .timeSliceItemDeleteIcon {
+      align-self: center;
+      padding: 5px;
+      opacity: 0;
+      transition: opacity 0.3s ease-in-out;
+    }
+    &:hover {
+      .timeSliceItemDeleteIcon {
+        opacity: 1;
+      }
+    }
+  }
+}
