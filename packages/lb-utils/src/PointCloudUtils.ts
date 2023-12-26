@@ -719,10 +719,6 @@ class PointCloudUtils {
       far: 10000, // Need to set to a larger range, in conjunction with the camera's position on the z-axis.
     };
   }
-
-  public static add(num: number, num2: number) {
-    return num + num2;
-  }
 }
 
 export default PointCloudUtils;
