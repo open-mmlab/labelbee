@@ -116,7 +116,7 @@ export class VideoTextTool extends React.Component<
     this.setState(
       {
         result: newResult,
-      }, () => this.updateSidebar()
+      }
     );
   };
 
