@@ -35,7 +35,7 @@ const TagSidebar: React.FC<IProps> = ({ toolInstance, imgIndex }) => {
   useEffect(() => {
     if (toolInstance) {
       // 用于配置的初始化
-      setExpandKeyList(toolInstance.config.inputList.map((v: IInputList) => v.value));
+      setExpandKeyList(toolInstance.config?.inputList?.map((v: IInputList) => v.value));
 
       // 进行实时渲染
       toolInstance.singleOn('render', () => {

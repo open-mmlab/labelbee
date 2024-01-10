@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import { CommonToolUtils, uuid } from '@labelbee/lb-annotation';
+import { CommonToolUtils, uuid, TagUtils } from '@labelbee/lb-annotation';
 import { jsonParser } from '@/utils';
 import { VideoPlayer } from '../../videoPlayer';
 import { VideoTagLayer } from '../../videoPlayer/VideoTagLayer';
@@ -268,11 +268,19 @@ export class TagToolInstanceAdaptor extends React.Component<
     }
     const res = jsonParser(imgList[imgIndex].result);
     const stepRes = res[`step_${step}`];
+    const defaultTagResult = this.getInitResultList()
 
     this.setState({
-      tagResult: stepRes?.result ?? [],
+      tagResult: stepRes ? stepRes?.result : defaultTagResult,
       valid: res?.valid === undefined ? true : res.valid,
-    });
+    }, () => this.emitEvent('render'));
+  };
+
+  /**
+   * 获取初始值结果列表
+   */
+  public getInitResultList = () => {
+    return TagUtils.getDefaultTagResult(this.config.inputList, []);
   };
 
   /** Observer imgIndex and set tagResult */
