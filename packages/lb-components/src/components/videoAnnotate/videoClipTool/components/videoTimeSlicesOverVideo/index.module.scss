@@ -10,27 +10,27 @@ $videoHeight: calc(100% - #{$containerHeight} - #{$videoTrackHeight * 2} - #{$ti
     position: absolute;
     top: 0;
     right: 0;
-    max-height: $videoHeight;
+    //max-height: $videoHeight;
+    max-width:416px;
+    max-height: 80%;
     padding-right: 4px;
     overflow: auto;
     z-index: 22;
 }
 
 .timeSliceWrapper {
-    height: #{$HEIGHT * 2};
+    min-height: #{$HEIGHT * 2};
     margin-bottom: 8px;
     transition: opacity 0.4s ease-in-out;
-    opacity: .3;
+    opacity: .9;
 
-    &.active {
-        opacity: 1;
-    }
 
     .timeSliceItemText,
     .timeSliceItemAttribute {
-        height: $HEIGHT;
+        min-height: $HEIGHT;
         font-size: 16px;
         color: white;
+        word-break: break-all;
     }
 
     .timeSliceItemText {
