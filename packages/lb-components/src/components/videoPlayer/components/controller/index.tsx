@@ -203,6 +203,7 @@ const VideoController = (props: IProps) => {
         {videoPlayIcon}
         {videoTime}
         {videoSpeed}
+        {videoClipHotKey}
         <div className={getClassName('video-controller', 'holder')} />
         {videoResultCount}
         {videoPageChange}

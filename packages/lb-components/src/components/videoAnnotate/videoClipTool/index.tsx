@@ -560,6 +560,8 @@ class VideoClipTool extends React.Component<IVideoClipProps, IState> {
           drawLayerSlot={this.props.drawLayerSlot}
           footer={this.props.footer}
           dataLoaded={this.videoLoaded}
+          toggleClipStatus={this.toggleClipStatus}
+          addTime={this.addTime}
         />
         <VideoTimeSlicesOverVideo
           result={result}

@@ -33,6 +33,7 @@ export const TextareaWithFooter = (props: ITextareaWithFooterProps) => {
   return (
     <>
       <Input.TextArea
+        key={`${textareaProps.id}-${textareaProps.defaultValue}`}
         bordered={false}
         rows={6}
         onKeyDown={syntheticEventStopPagination}
@@ -79,11 +80,16 @@ export const SingleTextInput = (props: any) => {
   const { maxLength } = config;
 
   const value = result ? result[config.key] : '';
-  const textLength = value?.length ?? 0;
 
-  const updateTextWithKey = (newVal: string) => {
+  const [textLength, setTextLength] = useState(value?.length ?? 0)
+
+  useEffect(() => {
+    setTextLength(value?.length ?? 0)
+  }, [value])
+
+  const updateTextWithKey = (newVal: string, update: boolean) => {
     if (updateText) {
-      updateText(newVal, config.key);
+      updateText(newVal, config.key, update);
       if (config.required) {
         setInvalid(!newVal);
       }
@@ -96,18 +102,20 @@ export const SingleTextInput = (props: any) => {
     id: `textInput-${index}`,
     ref,
     disabled,
-    value,
+    defaultValue: value,
     maxLength,
     autoSize: { minRows: 2, maxRows: 6 },
     onChange: (e: FocusEvent<HTMLTextAreaElement>) => {
       const value = e.target.value;
-      updateTextWithKey(value);
+      setTextLength(e.target.value.length)
+      updateTextWithKey(value, false);
     },
     onFocus: () => {
       setTextAreaFocus(true);
     },
     onBlur: (e: FocusEvent<HTMLTextAreaElement>) => {
       setTextAreaFocus(false);
+      updateTextWithKey(e.target.value, true)
       if (config.required) {
         setInvalid(!e.target.value);
       }
@@ -163,7 +171,7 @@ export const SingleTextInput = (props: any) => {
             if (disabled) {
               return;
             }
-            updateTextWithKey('');
+            updateTextWithKey('', true);
           }}
         />
       </div>
@@ -218,17 +226,22 @@ const TextToolSidebar: React.FC<IProps> = ({
 
   useEffect(() => {
     if (toolInstance) {
-      setConfigList(cloneDeep(toolInstance.config.configList));
       toolInstance.singleOn('valueUpdated', () => {
         forceRender((s) => s + 1);
       });
     }
   }, [toolInstance]);
 
+  useEffect(() => {
+    if (toolInstance) {
+      setConfigList(cloneDeep(toolInstance?.config?.configList));
+    }
+  }, [JSON.stringify(toolInstance?.config?.configList)])
+
   const result = toolInstance?.textList?.[0]?.value ?? {};
 
-  const updateText = (v: string, k: string) => {
-    toolInstance?.updateTextValue?.(k, v, toolInstance?.textList?.[0]);
+  const updateText = (v: string, k: string, update = false) => {
+    toolInstance?.updateTextValue?.(k, v, update, toolInstance?.textList?.[0]);
   };
 
   useEffect(() => {

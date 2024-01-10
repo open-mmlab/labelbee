@@ -49,6 +49,13 @@ export class VideoTextTool extends React.Component<
     return this.state.valid;
   }
 
+  public get needConfirm() {
+    const { result } = this.state
+    return this.config.configList?.some(
+      (i: any) => i.required && !result?.value[i.key],
+    );
+  }
+
   public get textList() {
     return [this.state.result]
   }
@@ -85,15 +92,15 @@ export class VideoTextTool extends React.Component<
     })
   }
 
-  public singleOn(event: string, func: () => void) {
+  public singleOn = (event: string, func: () => void) => {
     this.fns[event] = func;
   }
 
-  public on(event: string, func: () => void) {
+  public on = (event: string, func: () => void) => {
     this.singleOn(event, func);
   }
 
-  public unbindAll(eventName: string) {
+  public unbindAll = (eventName: string) => {
     delete this.fns[eventName];
   }
 
@@ -107,7 +114,7 @@ export class VideoTextTool extends React.Component<
     this.emitEvent('valueUpdated');
   }
 
-  public updateTextValue = (key: string, text: string, result?: { [key: string]: string }) => {
+  public updateTextValue = (key: string, text: string, update: boolean, result?: { [key: string]: string }) => {
     const newResult = _.cloneDeep(result ?? {});
 
     newResult.value = Object.assign(newResult.value ?? {}, { [key]: text });
@@ -116,7 +123,7 @@ export class VideoTextTool extends React.Component<
     this.setState(
       {
         result: newResult,
-      }
+      }, () => update && this.updateSidebar()
     );
   };
 
