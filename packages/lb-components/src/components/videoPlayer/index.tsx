@@ -71,6 +71,7 @@ interface IVideoPlayerProps {
   addTime?: () => void;
   toggleClipStatus?: () => void;
   drawLayerSlot?: any;
+  updateCurrentTime?: (time: number) => void;
 }
 
 interface IVideoPlayerState {
@@ -264,6 +265,7 @@ export class VideoPlayer extends React.Component<IVideoPlayerProps, IVideoPlayer
       this.setState({
         currentTime,
       });
+      this.props.updateCurrentTime?.(currentTime)
     }
   };
 

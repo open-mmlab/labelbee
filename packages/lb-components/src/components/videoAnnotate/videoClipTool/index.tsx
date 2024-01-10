@@ -82,6 +82,10 @@ class VideoClipTool extends React.Component<IVideoClipProps, IState> {
     return this.state.selectedAttribute
   }
 
+  public get selectedID() {
+    return this.state.selectedID;
+  }
+
   public get selectedSliceIndex() {
     return this.state.result.findIndex((i) => i.id === this.state.selectedID);
   }
@@ -132,6 +136,14 @@ class VideoClipTool extends React.Component<IVideoClipProps, IState> {
 
   public get valid() {
     return this.state.valid;
+  }
+
+  public get config() {
+    return jsonParser(this.props.stepInfo?.config);
+  }
+
+  public get selectedText() {
+    return this.state.result?.[this.selectedSliceIndex]?.textAttribute;
   }
 
   /** 步骤信息 */
@@ -203,6 +215,8 @@ class VideoClipTool extends React.Component<IVideoClipProps, IState> {
 
   public updateSidebar = () => {
     this.emitEvent('changeClipSidebar');
+    this.emitEvent('updateTextAttribute');
+    this.emitEvent('changeAttributeSidebar');
   }
 
   public exportData = () => {
@@ -487,6 +501,14 @@ class VideoClipTool extends React.Component<IVideoClipProps, IState> {
     this.updateSidebar()
   };
 
+  /** 更新当前时间 */
+
+  public updateCurrentTime = (time: number) => {
+    this.setState({
+      currentTime: time,
+    })
+  }
+
   /**
    * 视频右键操作
    * @param e
@@ -538,9 +560,9 @@ class VideoClipTool extends React.Component<IVideoClipProps, IState> {
 
     const {
       result,
-      currentTime,
       videoError,
       valid,
+      currentTime
     } = this.state;
 
     return (
@@ -562,8 +584,10 @@ class VideoClipTool extends React.Component<IVideoClipProps, IState> {
           dataLoaded={this.videoLoaded}
           toggleClipStatus={this.toggleClipStatus}
           addTime={this.addTime}
+          updateCurrentTime={this.updateCurrentTime}
         />
         <VideoTimeSlicesOverVideo
+          key={this.videoPlayer?.currentTime}
           result={result}
           currentTime={currentTime}
           attributeList={this.props.config.attributeList}
@@ -673,7 +697,7 @@ class VideoClipTool extends React.Component<IVideoClipProps, IState> {
    * 设置当前选中片段的文本
    * @param textValue
    */
-  public setTextAttribute = (textValue: string) => {
+  public textChange = (textValue: string) => {
     const { result, selectedID } = this.state;
     this.setState({
       textValue,
