@@ -156,17 +156,17 @@ export class VideoTextTool extends React.Component<
   }
 
   public setResultFromImgList = (props: IVideoTextInstanceAdaptorProps) => {
-    const { imgList, imgIndex, step } = props;
+    const { imgList, imgIndex, stepInfo } = props;
 
     if (!imgList[imgIndex]) {
       return;
     }
     const res = jsonParser(imgList[imgIndex].result);
-    const stepRes = res[`step_${step}`];
+    const stepRes = res[`step_${stepInfo.step}`];
+
     const defaultTextResult = {
       value: this.getInitTextValue()
     }
-
     this.setState({
       result: stepRes ? (stepRes?.result?.[0] ?? {}) : defaultTextResult,
       valid: res?.valid === undefined ? true : res.valid,
