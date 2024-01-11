@@ -25,7 +25,7 @@ import { VideoClipToolContext } from '@/components/videoAnnotate/videoClipTool/V
  */
 export const videoTimeFormat = (time: number) => {
   const min = Math.floor(time / 60);
-  const sec = ~~(time % 60).toFixed();
+  const sec = ~~Math.floor((time % 60));
   const minSec = (time * 10).toString().split('').pop();
   const fillZero = (num: number) => (num < 10 ? `0${num}` : num);
   return `${fillZero(min)}:${fillZero(sec)}:${minSec}`;

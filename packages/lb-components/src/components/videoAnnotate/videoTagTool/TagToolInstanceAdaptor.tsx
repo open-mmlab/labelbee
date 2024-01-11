@@ -261,13 +261,13 @@ export class TagToolInstanceAdaptor extends React.Component<
   }
 
   public setResultFromImgList = (props: IVideoTagInstanceAdaptorProps) => {
-    const { imgList, imgIndex, step } = props;
+    const { imgList, imgIndex, stepInfo } = props;
 
     if (!imgList[imgIndex]) {
       return;
     }
     const res = jsonParser(imgList[imgIndex].result);
-    const stepRes = res[`step_${step}`];
+    const stepRes = res[`step_${stepInfo.step}`];
     const defaultTagResult = this.getInitResultList()
 
     this.setState({

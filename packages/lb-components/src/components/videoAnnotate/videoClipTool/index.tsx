@@ -612,6 +612,7 @@ class VideoClipTool extends React.Component<IVideoClipProps, IState> {
       selectedID: i.id,
       selectedAttribute: i.attribute,
       textValue: i.textAttribute,
+      currentTime: i.start,
     });
     this.updateSidebar()
     this.videoPlayer?.pause();
