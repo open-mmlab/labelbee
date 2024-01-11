@@ -52,7 +52,7 @@ export class VideoTextTool extends React.Component<
   public get needConfirm() {
     const { result } = this.state
     return this.config.configList?.some(
-      (i: any) => i.required && !result?.value[i.key],
+      (i: any) => i.required && !result?.value?.[i.key],
     );
   }
 
