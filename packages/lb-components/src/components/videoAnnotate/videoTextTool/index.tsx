@@ -163,11 +163,25 @@ export class VideoTextTool extends React.Component<
     }
     const res = jsonParser(imgList[imgIndex].result);
     const stepRes = res[`step_${step}`];
+    const defaultTextResult = {
+      value: this.getInitTextValue()
+    }
 
     this.setState({
-      result: stepRes?.result?.[0] ?? {},
+      result: stepRes ? (stepRes?.result?.[0] ?? {}) : defaultTextResult,
       valid: res?.valid === undefined ? true : res.valid,
     }, () => this.updateSidebar());
+  };
+
+  /**
+   * 获取初始值
+   */
+  public getInitTextValue = () => {
+    let result = {} as any
+    this.config.configList.forEach((i: { key: string, default: string }) => {
+      result[i.key] = i.default ?? '';
+    })
+    return result
   };
 
   /** Observer imgIndex and set result */

@@ -110,7 +110,7 @@ export class TagToolInstanceAdaptor extends React.Component<
   public getTagResultByCode(num1: number, num2?: number) {
     try {
       const inputList = this.config?.inputList ?? [];
-      const mulitTags = inputList.length > 1;
+      const mulitTags = inputList?.length > 1;
       const keycode1 = num2 !== undefined ? num1 : 0;
       const keycode2 = num2 !== undefined ? num2 : num1;
       const primaryTagConfig = mulitTags ? inputList[keycode1] : inputList[0];
@@ -214,7 +214,7 @@ export class TagToolInstanceAdaptor extends React.Component<
     if (keyCode) {
       const keyIndex = keyCode - 1;
 
-      if (this.config.inputList.length === 1) {
+      if (this.config.inputList?.length === 1) {
         // 说明标签只有一层
         this.labelSelectedList = [0, keyIndex];
         this.setLabel(0, keyIndex);
@@ -280,7 +280,7 @@ export class TagToolInstanceAdaptor extends React.Component<
    * 获取初始值结果列表
    */
   public getInitResultList = () => {
-    return TagUtils.getDefaultTagResult(this.config.inputList, []);
+    return TagUtils.getDefaultTagResult(this.config.inputList ?? [], []);
   };
 
   /** Observer imgIndex and set tagResult */
