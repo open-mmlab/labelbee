@@ -61,7 +61,7 @@ const VideoProgress = () => {
     <div
       className={getClassName('video-progress')}
       ref={progressRef}
-      onClick={(event: React.MouseEvent<HTMLDivElement>) => {
+      onMouseUp={(event: React.MouseEvent<HTMLDivElement>) => {
         event.stopPropagation();
         event.nativeEvent.stopImmediatePropagation();
         toCurrentTime(event);
