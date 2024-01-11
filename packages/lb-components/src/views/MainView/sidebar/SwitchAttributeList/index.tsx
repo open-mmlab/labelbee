@@ -67,15 +67,13 @@ const SwitchAttributeList: React.FC<IProps> = (props) => {
     };
 
     return (
-      <div>
-        <AttributeList
-          list={list}
-          attributeChanged={attributeChanged}
-          selectedAttribute={toolInstance?.defaultAttribute ?? ''}
-          ref={listRef}
-          forbidDefault={isScribbleTool}
-        />
-      </div>
+      <AttributeList
+        list={list}
+        attributeChanged={attributeChanged}
+        selectedAttribute={toolInstance?.defaultAttribute ?? ''}
+        ref={listRef}
+        forbidDefault={isScribbleTool}
+      />
     );
   }
 
