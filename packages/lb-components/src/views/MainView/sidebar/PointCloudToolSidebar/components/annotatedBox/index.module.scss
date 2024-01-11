@@ -1,0 +1,21 @@
+.tag {
+  color: #666;
+  background-color: #f3f4ff;
+  border-color: transparent;
+  cursor: pointer;
+  position: relative;
+  &.disabled {
+    color: #ccc;
+    background-color: #f5f5f5;
+    cursor: not-allowed;
+  }
+  &.selected {
+    color: #fff;
+    background-color: #666fff;
+  }
+  .highlight {
+    position: absolute;
+    right: -5px;
+    top: -5px;
+  }
+}
