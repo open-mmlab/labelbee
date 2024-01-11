@@ -3,7 +3,7 @@ import { EditFilled } from '@ant-design/icons';
 import { ToolIcons } from '../ToolIcons';
 import { cTool } from '@labelbee/lb-annotation';
 import { PointCloudContext } from '@/components/pointCloudView/PointCloudContext';
-import { Select, Tag, message, Input, Divider } from 'antd';
+import { Select, message, Input, Divider } from 'antd';
 import { AppState } from '@/store';
 import StepUtils from '@/utils/StepUtils';
 import { connect } from 'react-redux';
@@ -15,9 +15,10 @@ import { useSingleBox } from '@/components/pointCloudView/hooks/useSingleBox';
 import { useTranslation } from 'react-i18next';
 import { LabelBeeContext, useDispatch } from '@/store/ctx';
 import BatchUpdateModal from './components/batchUpdateModal';
+import AnnotatedBox from './components/annotatedBox';
+import FindTrackIDIndex from './components/findTrackIDIndex';
 import { IFileItem } from '@/types/data';
 import {
-  PointCloudUtils,
   IInputList,
   IDefaultSize,
   EPointCloudSegmentStatus,
@@ -44,58 +45,6 @@ interface IProps {
   stepList: IStepInfo[];
   enableColorPicker?: boolean;
 }
-
-// Temporarily hidden, this feature does not support the function for the time being.
-const AnnotatedBox = ({ imgList, imgIndex }: { imgList: IFileItem[]; imgIndex: number }) => {
-  const ptCtx = useContext(PointCloudContext);
-  const [showIDs, setShowIds] = useState<number[]>([]);
-  const { t } = useTranslation();
-
-  useEffect(() => {
-    const newImgList = imgList as Array<{ result: string }>;
-    let trackMap = new Map();
-    setShowIds(
-      PointCloudUtils.getAllPointCloudResult({
-        imgList: newImgList,
-        extraBoxList: pointCloudBoxList,
-        ignoreIndexList: [imgIndex],
-      })
-        .filter((v) => {
-          if (!v.trackID) {
-            return false;
-          }
-
-          if (trackMap.get(v.trackID)) {
-            return false;
-          }
-          trackMap.set(v.trackID, true);
-          return true;
-        })
-        .sort((a, b) => {
-          const aTrackID = a?.trackID ?? 0;
-          const bTrackID = b?.trackID ?? 0;
-
-          return aTrackID - bTrackID;
-        })
-        .map((v) => v?.trackID ?? 0),
-    );
-  }, [ptCtx.pointCloudBoxList, imgList]);
-
-  const { pointCloudBoxList } = ptCtx;
-
-  return (
-    <div style={{ padding: 24, borderBottom: '1px solid #eee' }}>
-      <div style={{ marginBottom: 16 }}>{t('AllTrackIDs')}</div>
-      <div>
-        {showIDs.map((id) => (
-          <Tag color='#F3F4FF' key={id} style={{ color: '#666', marginBottom: 8 }}>
-            {id}
-          </Tag>
-        ))}
-      </div>
-    </div>
-  );
-};
 
 const BoxTrackIDInput = () => {
   const [isEdit, setIsEdit] = useState(false);
@@ -555,6 +504,8 @@ const PointCloudToolSidebar: React.FC<IProps> = ({
           <BoxTrackIDInput />
           <Divider style={{ margin: 0 }} />
           <AnnotatedBox imgList={imgList} imgIndex={imgIndex} />
+          <Divider style={{ margin: 0 }} />
+          <FindTrackIDIndex imgList={imgList} imgIndex={imgIndex} />
         </>
       )}
     </>

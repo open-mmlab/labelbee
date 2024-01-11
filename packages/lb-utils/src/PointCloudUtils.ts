@@ -435,6 +435,26 @@ class PointCloudUtils {
     return boxList;
   }
 
+  public static getIndexByTrackID(id: number, imgList: any) {
+    const arr: number[] = [];
+    // 解析字符串
+    const resultList = imgList.map((v:any) => this.jsonParser(v.result));
+
+    const DEFAULT_STEP_NAME = `step_1`;
+
+    resultList.forEach((result:any, index:number) => {
+      const boxes = result?.[DEFAULT_STEP_NAME]?.['result'];
+      if (boxes?.length > 0) {
+        const box = boxes?.find((v:any) => v?.trackID === id);
+        if (box) {
+          arr.push(index);
+        }
+      }
+    });
+
+    return arr;
+  }
+
   public static getNextTrackID({
     imgList,
     step = 1,
