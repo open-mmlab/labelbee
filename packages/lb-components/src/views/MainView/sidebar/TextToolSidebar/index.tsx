@@ -59,6 +59,7 @@ interface IProps {
   step: number;
   stepList: IStepInfo[];
   basicResultList: any[];
+  disabled: boolean;
 }
 
 interface IConfigListItem {
@@ -199,6 +200,7 @@ const TextToolSidebar: React.FC<IProps> = ({
   step,
   stepList,
   basicResultList,
+  disabled,
 }) => {
   const [configList, setConfigList] = useState<IConfigListItem[]>([]);
   const [focusIndex, setFocusIndex] = useState(0);
@@ -260,7 +262,6 @@ const TextToolSidebar: React.FC<IProps> = ({
   }
 
   const stepConfig = ConfigUtils.getStepConfig(stepList, step);
-  const disabled = stepConfig.dataSourceStep > 0 && basicResultList.length === 0;
   const showToggleText = stepConfig.tool === EVideoToolName.VideoTextTool
   return toolInstance && (
     <div className='textToolOperationMenu'>

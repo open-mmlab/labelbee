@@ -60,6 +60,15 @@ export class VideoTextTool extends React.Component<
     return [this.state.result]
   }
 
+  /** 文本输入是否被禁止 */
+  public get inputDisabled() {
+    const { isCheck } = this.query;
+    if (this.props.isEdit) {
+      return isCheck === '1';
+    }
+    return this.dependPattern() === EDependPattern.noDepend;
+  }
+
   public getColor(config = this.config, attribute = '') {
     return toolStyleConverter.getColorByConfig({ attribute, config });
   }

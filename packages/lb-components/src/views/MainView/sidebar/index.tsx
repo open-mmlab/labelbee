@@ -116,7 +116,7 @@ const Sidebar: React.FC<IProps> = ({
 
   const tagToolSideBar = <TagSidebar />;
 
-  const textToolSideBar = <TextToolSidebar />;
+  const textToolSideBar = (disabled) => <TextToolSidebar disabled={disabled}/>;
 
   const scribbleSidebar = (
     <ScribbleSidebar
