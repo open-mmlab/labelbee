@@ -59,7 +59,7 @@ interface IProps {
   step: number;
   stepList: IStepInfo[];
   basicResultList: any[];
-  disabled: boolean;
+  disabled?: boolean;
 }
 
 interface IConfigListItem {
