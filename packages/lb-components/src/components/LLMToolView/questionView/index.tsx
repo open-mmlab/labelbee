@@ -111,7 +111,7 @@ const QuestionView: React.FC<IProps> = (props) => {
             })}
             key={index}
           >
-            <Tag className={`${LLMViewCls}__tag`}>{i?.order}</Tag>
+            <Tag className={`${LLMViewCls}-tag`}>{i?.order}</Tag>
             <RenderAnswer i={i} isTextControl={isTextControl} dataFormatType={dataFormatType} />
           </div>
         );
