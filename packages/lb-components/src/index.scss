@@ -2008,7 +2008,7 @@ $ptToolHeight: 40px;
     width: 100%;
   }
 
-  &__tag {
+  .#{$prefix}-LLMView-tag {
     color: #666FFF;
     background: #eeefff;
     height: 20px;
