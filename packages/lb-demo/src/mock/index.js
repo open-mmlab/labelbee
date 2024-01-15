@@ -34,7 +34,7 @@ import calib2 from './pointCloud/calib/P2/2.json';
 // export const fileList = ['10', '19', '20', '66'].map((i) => `${MOCK_URL}${i}.jpg`);
 export const fileList = [car1, car2, car3, car4, car5];
 // export const fileList = [img1, img2, img3, img4];
-export const videoList = ['http://vjs.zencdn.net/v/oceans.mp4', 'https://media.w3.org/2010/05/sintel/trailer.mp4'];
+export const videoList = ['http://vjs.zencdn.net/v/oceans.mp4', 'https://media.w3.org/2010/05/sintel/trailer.mp4', 'http://vjs.zencdn.net/v/oceans.mp4', 'https://media.w3.org/2010/05/sintel/trailer.mp4', 'http://vjs.zencdn.net/v/oceans.mp4'];
 
 export const pointCloudList = [pcd1, pcd2, pcd3, pcd4, pcd5, pcd6, pcd7, pcd8, pcd9];
 

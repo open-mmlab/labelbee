@@ -28,6 +28,7 @@ interface IVideoClipProps extends IVideoAnnotateProps {
   pageBackward: () => void;
   onMounted: (instance: any) => void;
   onUnmounted: () => void;
+  onVideoLoaded: () => void;
 }
 
 interface IState {
@@ -324,35 +325,6 @@ class VideoClipTool extends React.Component<IVideoClipProps, IState> {
     }
   };
 
-  public videoLoaded = (totalTime?: number) => {
-    const result = this.resultJSON;
-    const existResult = result && !['', '{}'].includes(result);
-    const duration = totalTime ? parseFloat(totalTime.toFixed(2)) : 0;
-    const payload = {
-      loading: false,
-    };
-    if (!jsonParser(result)?.duration) {
-      Object.assign(payload, {
-        result: JSON.stringify({ ...jsonParser(result), duration }),
-      });
-    }
-    if (!existResult) {
-      Object.assign(payload, {
-        result: JSON.stringify({
-          width: 0,
-          height: 0,
-          rotate: 0,
-          valid: true,
-          duration,
-        }),
-      });
-    }
-
-    this.setState({
-      loading: false,
-    });
-  };
-
   public setVideoError = (videoError: boolean, errorType: any, curTime: number) => {
     if (videoError) {
       const { clipStatus } = this.state;
@@ -581,7 +553,7 @@ class VideoClipTool extends React.Component<IVideoClipProps, IState> {
           onTrackResize={this.onTrackResize}
           drawLayerSlot={this.props.drawLayerSlot}
           footer={this.props.footer}
-          dataLoaded={this.videoLoaded}
+          dataLoaded={this.props.onVideoLoaded}
           toggleClipStatus={this.toggleClipStatus}
           addTime={this.addTime}
           updateCurrentTime={this.updateCurrentTime}
