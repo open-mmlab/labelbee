@@ -12,6 +12,7 @@ export interface IVideoTextInstanceAdaptorProps extends IVideoAnnotateProps{
   pageBackward: () => void;
   onMounted: (instance: any) => void;
   onUnmounted: () => void;
+  onVideoLoaded: () => void;
 }
 
 interface IVideoTextInstanceAdaptorState {
@@ -218,6 +219,7 @@ export class VideoTextTool extends React.Component<
           }}
           drawLayerSlot={this.props.drawLayerSlot}
           footer={this.props.footer}
+          dataLoaded={this.props.onVideoLoaded}
         />
       </div>
     );

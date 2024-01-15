@@ -21,6 +21,7 @@ export interface IVideoTagInstanceAdaptorProps extends IVideoAnnotateProps{
   pageBackward: () => void;
   onMounted: (instance: any) => void;
   onUnmounted: () => void;
+  onVideoLoaded: () => void;
 }
 
 interface IVideoTagInstanceAdaptorState {
@@ -307,6 +308,7 @@ export class TagToolInstanceAdaptor extends React.Component<
           setVideoRef={(video) => {
             this.videoPlayer = video;
           }}
+          dataLoaded={this.props.onVideoLoaded}
           drawLayerSlot={this.props.drawLayerSlot}
           footer={this.props.footer}
         />

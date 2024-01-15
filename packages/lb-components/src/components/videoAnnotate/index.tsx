@@ -59,6 +59,15 @@ const VideoAnnotate: React.FC<IVideoAnnotateProps> = (props) => {
     });
   };
 
+  const onVideoLoaded = () => {
+    dispatch({
+      type: ANNOTATION_ACTIONS.SET_LOADING,
+      payload: {
+        loading: false,
+      },
+    });
+  }
+
   const pageBackward = () => {
     if (skipBeforePageTurning) {
       skipBeforePageTurning(() => dispatch(PageBackward()));
@@ -83,6 +92,7 @@ const VideoAnnotate: React.FC<IVideoAnnotateProps> = (props) => {
       pageJump={(page) => dispatch(PageJump(~~page - 1))}
       onMounted={onMounted}
       onUnmounted={onUnmounted}
+      onVideoLoaded={onVideoLoaded}
     />
   }
 
@@ -94,6 +104,7 @@ const VideoAnnotate: React.FC<IVideoAnnotateProps> = (props) => {
       pageJump={(page) => dispatch(PageJump(~~page - 1))}
       onMounted={onMounted}
       onUnmounted={onUnmounted}
+      onVideoLoaded={onVideoLoaded}
     />
   }
 
@@ -106,6 +117,7 @@ const VideoAnnotate: React.FC<IVideoAnnotateProps> = (props) => {
         pageJump={(page) => dispatch(PageJump(~~page - 1))}
         onMounted={onMounted}
         onUnmounted={onUnmounted}
+        onVideoLoaded={onVideoLoaded}
       />
     );
   }
