@@ -44,18 +44,20 @@ interface IProps extends IA2MapStateProps {
   drawLayerSlot?: DrawLayerSlot;
   checkMode?: boolean;
   intelligentFit?: boolean;
+  measureVisible?: boolean;
 }
 
-const PointCloudView: React.FC<IProps> = ({
-  currentData,
-  imgList,
-  drawLayerSlot,
-  checkMode,
-  intelligentFit,
-  imgIndex,
-  loadPCDFileLoading,
-  config,
-}) => {
+const PointCloudView: React.FC<IProps> = (props) => {
+  const {
+    currentData,
+    imgList,
+    drawLayerSlot,
+    checkMode,
+    intelligentFit,
+    imgIndex,
+    config,
+    measureVisible
+  } = props
   const ptCtx = useContext(PointCloudContext);
   const { globalPattern, setGlobalPattern, selectedIDs } = ptCtx;
   const dispatch = useDispatch();
@@ -192,6 +194,7 @@ const PointCloudView: React.FC<IProps> = ({
                   isEnlargeTopView={isEnlargeTopView}
                   thumbnailWidth={isEnlargeTopView ? 300 : 455}
                   checkMode={checkMode}
+                  measureVisible={measureVisible}
                 />
               </div>
             </div>

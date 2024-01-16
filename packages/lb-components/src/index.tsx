@@ -19,6 +19,7 @@ import { LabelBeeContext } from '@/store/ctx';
 import PredictTracking from '@/components/predictTracking';
 import LLMToolView from '@/components/LLMToolView';
 import SwitchCuboidBoxIn2DView from '@/views/MainView/toolFooter/SwitchCuboidBoxIn2DView';
+import MeasureCanvas from './components/measureCanvas';
 
 export const store = configureStore();
 
@@ -70,7 +71,8 @@ export {
   i18n,
   VideoTagTool,
   PredictTracking,
-  SwitchCuboidBoxIn2DView
+  SwitchCuboidBoxIn2DView,
+  MeasureCanvas
 };
 
 export * from './constant';

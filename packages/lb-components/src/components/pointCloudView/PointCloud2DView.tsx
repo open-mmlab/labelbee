@@ -53,6 +53,7 @@ interface IProps extends IA2MapStateProps {
   thumbnailWidth?: number;
   isEnlargeTopView?: boolean;
   checkMode?: boolean;
+  measureVisible?: boolean;
 }
 
 const ContainerTitle = ({
@@ -119,6 +120,7 @@ const PointCloud2DView = ({
   highlightAttribute,
   loadPCDFileLoading,
   checkMode,
+  measureVisible
 }: IProps) => {
   const [annotations2d, setAnnotations2d] = useState<IAnnotationData2dView[]>([]);
   const { topViewInstance, displayPointCloudList, polygonList, imageSizes, selectedIDs } =
@@ -397,6 +399,7 @@ const PointCloud2DView = ({
                   setSelectedID={setSelectedID}
                   showEnlarge={showEnlarge}
                   checkMode={checkMode}
+                  measureVisible={measureVisible}
                 />
               )}
             </PointCloudContainer>

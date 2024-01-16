@@ -18,7 +18,7 @@ class TextToolOperation extends BasicToolOperation {
     super(props);
     this.textList = [];
     this.setShowDefaultCursor(true);
-    this.setConfig(props.config);
+    this.setConfig(props.config || '');
   }
 
   get dataList() {
