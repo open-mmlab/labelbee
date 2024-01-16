@@ -85,14 +85,10 @@ export class TagToolInstanceAdaptor extends React.Component<
 
   public exportData = () => {
     const duration = this.videoPlayer?.duration ?? 0;
-    const videoQulity = this.videoPlayer?.getVideoPlaybackQuality();
-    const frames = videoQulity?.totalVideoFrames;
-    const videoWidth = this.videoPlayer?.videoWidth ?? 0;
-    const videoHeight = this.videoPlayer?.videoHeight ?? 0;
 
     return [
       this.state.tagResult,
-      { valid: this.state.valid, duration, frames, videoWidth, videoHeight },
+      { valid: this.state.valid, duration },
     ];
   };
 
