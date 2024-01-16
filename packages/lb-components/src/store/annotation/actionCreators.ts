@@ -622,6 +622,9 @@ export const DispatcherTurning = async (
     return ChangeBasicIndex(dispatch, basicIndex);
   }
 
+  if (annotationStore.loading) {
+    return
+  }
   return dispatch(ToSubmitFileData(submitType));
 };
 
