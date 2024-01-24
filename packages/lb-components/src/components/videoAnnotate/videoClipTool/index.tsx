@@ -28,6 +28,7 @@ interface IVideoClipProps extends IVideoAnnotateProps {
   pageBackward: () => void;
   onMounted: (instance: any) => void;
   onUnmounted: () => void;
+  onVideoLoaded: () => void;
 }
 
 interface IState {
@@ -82,6 +83,10 @@ class VideoClipTool extends React.Component<IVideoClipProps, IState> {
     return this.state.selectedAttribute
   }
 
+  public get selectedID() {
+    return this.state.selectedID;
+  }
+
   public get selectedSliceIndex() {
     return this.state.result.findIndex((i) => i.id === this.state.selectedID);
   }
@@ -132,6 +137,14 @@ class VideoClipTool extends React.Component<IVideoClipProps, IState> {
 
   public get valid() {
     return this.state.valid;
+  }
+
+  public get config() {
+    return jsonParser(this.props.stepInfo?.config);
+  }
+
+  public get selectedText() {
+    return this.state.result?.[this.selectedSliceIndex]?.textAttribute;
   }
 
   /** 步骤信息 */
@@ -203,6 +216,8 @@ class VideoClipTool extends React.Component<IVideoClipProps, IState> {
 
   public updateSidebar = () => {
     this.emitEvent('changeClipSidebar');
+    this.emitEvent('updateTextAttribute');
+    this.emitEvent('changeAttributeSidebar');
   }
 
   public exportData = () => {
@@ -308,35 +323,6 @@ class VideoClipTool extends React.Component<IVideoClipProps, IState> {
       default:
         break;
     }
-  };
-
-  public videoLoaded = (totalTime?: number) => {
-    const result = this.resultJSON;
-    const existResult = result && !['', '{}'].includes(result);
-    const duration = totalTime ? parseFloat(totalTime.toFixed(2)) : 0;
-    const payload = {
-      loading: false,
-    };
-    if (!jsonParser(result)?.duration) {
-      Object.assign(payload, {
-        result: JSON.stringify({ ...jsonParser(result), duration }),
-      });
-    }
-    if (!existResult) {
-      Object.assign(payload, {
-        result: JSON.stringify({
-          width: 0,
-          height: 0,
-          rotate: 0,
-          valid: true,
-          duration,
-        }),
-      });
-    }
-
-    this.setState({
-      loading: false,
-    });
   };
 
   public setVideoError = (videoError: boolean, errorType: any, curTime: number) => {
@@ -487,6 +473,14 @@ class VideoClipTool extends React.Component<IVideoClipProps, IState> {
     this.updateSidebar()
   };
 
+  /** 更新当前时间 */
+
+  public updateCurrentTime = (time: number) => {
+    this.setState({
+      currentTime: time,
+    })
+  }
+
   /**
    * 视频右键操作
    * @param e
@@ -538,9 +532,9 @@ class VideoClipTool extends React.Component<IVideoClipProps, IState> {
 
     const {
       result,
-      currentTime,
       videoError,
       valid,
+      currentTime
     } = this.state;
 
     return (
@@ -559,9 +553,13 @@ class VideoClipTool extends React.Component<IVideoClipProps, IState> {
           onTrackResize={this.onTrackResize}
           drawLayerSlot={this.props.drawLayerSlot}
           footer={this.props.footer}
-          dataLoaded={this.videoLoaded}
+          dataLoaded={this.props.onVideoLoaded}
+          toggleClipStatus={this.toggleClipStatus}
+          addTime={this.addTime}
+          updateCurrentTime={this.updateCurrentTime}
         />
         <VideoTimeSlicesOverVideo
+          key={this.videoPlayer?.currentTime}
           result={result}
           currentTime={currentTime}
           attributeList={this.props.config.attributeList}
@@ -586,6 +584,7 @@ class VideoClipTool extends React.Component<IVideoClipProps, IState> {
       selectedID: i.id,
       selectedAttribute: i.attribute,
       textValue: i.textAttribute,
+      currentTime: i.start,
     });
     this.updateSidebar()
     this.videoPlayer?.pause();
@@ -671,7 +670,7 @@ class VideoClipTool extends React.Component<IVideoClipProps, IState> {
    * 设置当前选中片段的文本
    * @param textValue
    */
-  public setTextAttribute = (textValue: string) => {
+  public textChange = (textValue: string) => {
     const { result, selectedID } = this.state;
     this.setState({
       textValue,

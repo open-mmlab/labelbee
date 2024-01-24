@@ -13,20 +13,20 @@ const VideoClipToolHotkey = ({
   return (
     <div className={styles.clipToolbar}>
       <span className={styles.buttonWrapper}>
-        <i
+        <img
+          src={CutIconSvg}
           className={styles.cutButton}
           onClick={() => {
             toggleClipStatus?.();
           }}
-          style={{ backgroundImage: CutIconSvg }}
         />
         截取
       </span>
       <span className={styles.buttonWrapper}>
-        <i
+        <img
+          src={TimeIconSvg}
           className={styles.localButton}
           onClick={addTime}
-          style={{ backgroundImage: TimeIconSvg }}
         />
         标时间点
       </span>

@@ -26,14 +26,14 @@ import { isString } from 'lodash';
 interface IProps {
   hoverKey?: number;
   question:
-  | string
-  | {
-    id: number;
-    path: string;
-    url: string;
-    processedUrl: string;
-    thumbnail: string;
-  };
+    | string
+    | {
+        id: number;
+        path: string;
+        url: string;
+        processedUrl: string;
+        thumbnail: string;
+      };
   answerList: IAnswerList[];
   modelAPIResponse: IModelAPIAnswer[];
   setModelAPIResponse?: React.Dispatch<React.SetStateAction<IModelAPIAnswer[]>>;
@@ -65,7 +65,7 @@ const RenderAnswer = ({
       </div>
     );
   }
-  return <div style={{ whiteSpace: 'pre-wrap' }}>{i?.answer}</div>;
+  return <div style={{ whiteSpace: 'pre-wrap' }}>{i?.newAnswer || i?.answer}</div>;
 };
 
 const QuestionView: React.FC<IProps> = (props) => {
@@ -78,7 +78,7 @@ const QuestionView: React.FC<IProps> = (props) => {
     setModelAPIResponse,
     checkMode = true,
     LLMConfig,
-    answerHeaderSlot
+    answerHeaderSlot,
   } = props;
   const [dataFormatType, setDataFormatType] = useState(EDataFormatType.Default);
   const questionIsImg = LLMConfig?.dataType?.prompt === ELLMDataType.Picture;
@@ -111,8 +111,8 @@ const QuestionView: React.FC<IProps> = (props) => {
             })}
             key={index}
           >
-            <Tag className={`${LLMViewCls}__tag`}>{i?.order}</Tag>
-            <RenderAnswer i={i} isTextControl={isTextControl} dataFormatType={dataFormatType}/>
+            <Tag className={`${LLMViewCls}-tag`}>{i?.order}</Tag>
+            <RenderAnswer i={i} isTextControl={isTextControl} dataFormatType={dataFormatType} />
           </div>
         );
       })}
@@ -137,7 +137,9 @@ const QuestionView: React.FC<IProps> = (props) => {
         isImg={questionIsImg}
       />
       <div className={`${LLMViewCls}__textBox`}>
-        <div className={`${LLMViewCls}__title`}>{t('Answer')} {answerHeaderSlot}</div>
+        <div className={`${LLMViewCls}__title`}>
+          {t('Answer')} {answerHeaderSlot}
+        </div>
         {answerIsImg ? <ImgView hoverKey={hoverKey} answerList={answerList} /> : textAnswer}
       </div>
     </div>
