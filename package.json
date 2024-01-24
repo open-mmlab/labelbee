@@ -9,7 +9,7 @@
     "bootstrap": "lerna bootstrap --no-ci",
     "build": "lerna run build --scope=@labelbee/lb-utils --scope=@labelbee/lb-annotation --scope=@labelbee/lb-components --scope=@labelbee/wavesufer",
     "build:type": "lerna run build:type --scope=@labelbee/lb-utils --scope=@labelbee/lb-annotation --scope=@labelbee/lb-components --scope=@labelbee/wavesufer",
-    "lint": "lerna run --parallel --stream lint",
+    "lint": "npm run build:type && lerna run --parallel --stream lint",
     "clean": "lerna clean && rm -rf ./node_modules/ && rm -rf ./packages/**/node_modules && rm -rf ./packages/**/package-lock.json",
     "version": "lerna version --conventional-graduate --yes",
     "publish": "lerna publish from-package --yes",
