@@ -1017,7 +1017,7 @@ $hotkey-container-padding: 7px;
 
 .textInputContainer {
   padding: 20px;
-  height: 100%;
+  height: auto;
   overflow-y: scroll;
 }
 
@@ -2032,7 +2032,7 @@ $ptToolHeight: 40px;
     width: 100%;
   }
 
-  &__tag {
+  .#{$prefix}-LLMView-tag {
     color: #666FFF;
     background: #eeefff;
     height: 20px;

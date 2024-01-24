@@ -67,10 +67,11 @@ interface IVideoPlayerProps {
   showVideoTrack?: boolean;
   onTrackResize?: any;
   footer?: any;
-  dataLoaded?: (totalTime: number) => void;
+  dataLoaded?: () => void;
   addTime?: () => void;
   toggleClipStatus?: () => void;
   drawLayerSlot?: any;
+  updateCurrentTime?: (time: number) => void;
 }
 
 interface IVideoPlayerState {
@@ -251,7 +252,7 @@ export class VideoPlayer extends React.Component<IVideoPlayerProps, IVideoPlayer
   public setDuration = () => {
     if (this.videoElm) {
       const duration = decimalReserved(this.videoElm?.duration, 1);
-      this.props.dataLoaded?.(duration)
+      this.props.dataLoaded?.()
       this.setState({
         duration,
       });
@@ -264,6 +265,7 @@ export class VideoPlayer extends React.Component<IVideoPlayerProps, IVideoPlayer
       this.setState({
         currentTime,
       });
+      this.props.updateCurrentTime?.(currentTime)
     }
   };
 

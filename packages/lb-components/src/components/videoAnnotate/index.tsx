@@ -33,10 +33,11 @@ export interface IVideoAnnotateProps {
   imgList: IFileItem[];
   drawLayerSlot?: DrawLayerSlot;
   footer?: any;
+  skipBeforePageTurning?: (pageTurning: Function) => void;
 }
 
 const VideoAnnotate: React.FC<IVideoAnnotateProps> = (props) => {
-  const { stepInfo } = props;
+  const { stepInfo, skipBeforePageTurning } = props;
   const currentToolName = stepInfo?.tool;
 
   const dispatch = useDispatch();
@@ -58,25 +59,52 @@ const VideoAnnotate: React.FC<IVideoAnnotateProps> = (props) => {
     });
   };
 
+  const onVideoLoaded = () => {
+    dispatch({
+      type: ANNOTATION_ACTIONS.SET_LOADING,
+      payload: {
+        loading: false,
+      },
+    });
+  }
+
+  const pageBackward = () => {
+    if (skipBeforePageTurning) {
+      skipBeforePageTurning(() => dispatch(PageBackward()));
+      return;
+    }
+    dispatch(PageBackward());
+  };
+
+  const pageForward = () => {
+    if (skipBeforePageTurning) {
+      skipBeforePageTurning(() => dispatch(PageForward()));
+      return;
+    }
+    dispatch(PageForward());
+  };
+
   if (currentToolName === EVideoToolName.VideoClipTool) {
     return <VideoClipTool
       {...props}
-      pageBackward={() => dispatch(PageBackward())}
-      pageForward={() => dispatch(PageForward())}
-      pageJump={(page) => dispatch(PageJump(~~page))}
+      pageBackward={pageBackward}
+      pageForward={pageForward}
+      pageJump={(page) => dispatch(PageJump(~~page - 1))}
       onMounted={onMounted}
       onUnmounted={onUnmounted}
+      onVideoLoaded={onVideoLoaded}
     />
   }
 
   if (currentToolName === EVideoToolName.VideoTextTool) {
     return <VideoTextTool
       {...props}
-      pageBackward={() => dispatch(PageBackward())}
-      pageForward={() => dispatch(PageForward())}
-      pageJump={(page) => dispatch(PageJump(~~page))}
+      pageBackward={pageBackward}
+      pageForward={pageForward}
+      pageJump={(page) => dispatch(PageJump(~~page - 1))}
       onMounted={onMounted}
       onUnmounted={onUnmounted}
+      onVideoLoaded={onVideoLoaded}
     />
   }
 
@@ -84,11 +112,12 @@ const VideoAnnotate: React.FC<IVideoAnnotateProps> = (props) => {
     return (
       <TagToolInstanceAdaptor
         {...props}
-        pageBackward={() => dispatch(PageBackward())}
-        pageForward={() => dispatch(PageForward())}
-        pageJump={(page) => dispatch(PageJump(~~page))}
+        pageBackward={pageBackward}
+        pageForward={pageForward}
+        pageJump={(page) => dispatch(PageJump(~~page - 1))}
         onMounted={onMounted}
         onUnmounted={onUnmounted}
+        onVideoLoaded={onVideoLoaded}
       />
     );
   }
@@ -97,7 +126,7 @@ const VideoAnnotate: React.FC<IVideoAnnotateProps> = (props) => {
 
 const mapStateToProps = (state : AppState) => {
   const {
-    annotation: { imgList, imgIndex, step, stepList, loading },
+    annotation: { imgList, imgIndex, step, stepList, loading, skipBeforePageTurning },
   } = state;
   const stepInfo = StepUtils.getCurrentStepInfo(state.annotation?.step, state.annotation?.stepList);
   const imgInfo = imgList[imgIndex] ?? {};
@@ -111,6 +140,7 @@ const mapStateToProps = (state : AppState) => {
     stepList,
     path: imgInfo?.path ?? imgInfo?.url ?? '', // 将当前路径的数据注入
     loading,
+    skipBeforePageTurning,
   };
 };
 export default connect(mapStateToProps, null, null, {

@@ -25,7 +25,7 @@ import { VideoClipToolContext } from '@/components/videoAnnotate/videoClipTool/V
  */
 export const videoTimeFormat = (time: number) => {
   const min = Math.floor(time / 60);
-  const sec = ~~(time % 60).toFixed();
+  const sec = ~~Math.floor((time % 60));
   const minSec = (time * 10).toString().split('').pop();
   const fillZero = (num: number) => (num < 10 ? `0${num}` : num);
   return `${fillZero(min)}:${fillZero(sec)}:${minSec}`;
@@ -61,7 +61,7 @@ const VideoProgress = () => {
     <div
       className={getClassName('video-progress')}
       ref={progressRef}
-      onClick={(event: React.MouseEvent<HTMLDivElement>) => {
+      onMouseUp={(event: React.MouseEvent<HTMLDivElement>) => {
         event.stopPropagation();
         event.nativeEvent.stopImmediatePropagation();
         toCurrentTime(event);
@@ -203,6 +203,7 @@ const VideoController = (props: IProps) => {
         {videoPlayIcon}
         {videoTime}
         {videoSpeed}
+        {videoClipHotKey}
         <div className={getClassName('video-controller', 'holder')} />
         {videoResultCount}
         {videoPageChange}

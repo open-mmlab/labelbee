@@ -29,24 +29,21 @@ const AnnotationText: React.FC<IProps> = ({ toolInstance }) => {
       });
     }
   }, [toolInstance]);
+
   if (!toolInstance) {
     return null;
   }
 
   const { config } = toolInstance;
 
-  return (
-    <div>
-      {toolInstance?.config?.textConfigurable && toolInstance.selectedID && (
-        <TextAreaFormat
-          onChange={toolInstance.textChange}
-          textValue={toolInstance.selectedText}
-          checkString={TextUtils.checkString(config?.textCheckType, config?.customFormat)}
-          textCheckType={config.textCheckType}
-        />
-      )}
-    </div>
-  );
+  return toolInstance?.config?.textConfigurable && toolInstance.selectedID && (
+    <TextAreaFormat
+      onChange={toolInstance.textChange}
+      textValue={toolInstance.selectedText}
+      checkString={TextUtils.checkString(config?.textCheckType, config?.customFormat)}
+      textCheckType={config.textCheckType}
+    />
+  )
 };
 
 function mapStateToProps(state: AppState) {
