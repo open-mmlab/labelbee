@@ -23,7 +23,8 @@ import PreviewResult from '@/components/predictTracking/previewResult';
 import { LabelBeeContext } from '@/store/ctx';
 import { EToolName } from '@/data/enums/ToolType';
 import LLMLayout from './LLMLayout';
-import AudioAnnotate from '@/components/audioAnnotate'
+import NLPLayout from './NLPLayout';
+import AudioAnnotate from '@/components/audioAnnotate';
 import { LoadingOutlined } from '@ant-design/icons';
 import { useTranslation } from 'react-i18next';
 import { EPointCloudName } from '@labelbee/lb-annotation';
@@ -55,11 +56,7 @@ const PointCloudAnnotate: React.FC<AppProps & IProps> = (props) => {
         checkMode={props.checkMode}
         intelligentFit={props.intelligentFit}
       />
-      <ToolFooter
-        style={props.style?.footer}
-        mode={props.mode}
-        footer={props?.footer}
-      />
+      <ToolFooter style={props.style?.footer} mode={props.mode} footer={props?.footer} />
     </>
   );
 };
@@ -75,10 +72,7 @@ const AnnotatedArea: React.FC<AppProps & IProps> = (props) => {
   }
 
   if (isVideoTool) {
-    return <VideoAnnotate
-      drawLayerSlot={props.drawLayerSlot}
-      footer={props.footer}
-    />
+    return <VideoAnnotate drawLayerSlot={props.drawLayerSlot} footer={props.footer} />;
   }
 
   return <ImageAnnotate {...props} />;
@@ -88,9 +82,9 @@ const ViewportProviderLayout = (props: AppProps & IProps & { children: any }) =>
   const { t } = useTranslation();
   const { stepList, step } = props;
   const currentToolName = getStepConfig(stepList, step)?.tool;
-  const hasLangNode = ![EToolName.LLM].includes(currentToolName)
-  const hasHeaderOption = ![EToolName.LLM].includes(currentToolName)
-  const hasPredictTrackingIcon = [EPointCloudName.PointCloud].includes(currentToolName)
+  const hasLangNode = ![EToolName.LLM].includes(currentToolName);
+  const hasHeaderOption = ![EToolName.LLM].includes(currentToolName);
+  const hasPredictTrackingIcon = [EPointCloudName.PointCloud].includes(currentToolName);
   return (
     <ViewportProvider>
       <Spin
@@ -124,6 +118,7 @@ const MainView: React.FC<AppProps & IProps> = (props) => {
   const { stepList, step } = props;
   const currentToolName = getStepConfig(stepList, step)?.tool;
   const isLLMTool = EToolName.LLM === currentToolName;
+  const isNLPTool = EToolName.NLP === currentToolName;
   const isAudioTool = ToolUtils.isAudioTool(currentToolName);
 
   if (isLLMTool) {
@@ -134,10 +129,20 @@ const MainView: React.FC<AppProps & IProps> = (props) => {
     );
   }
 
+  if (isNLPTool) {
+    return (
+      <ViewportProviderLayout {...props}>
+        <NLPLayout {...props} />
+      </ViewportProviderLayout>
+    );
+  }
+
   if (isAudioTool) {
-    return <ViewportProviderLayout {...props}>
-      <AudioAnnotate {...props} />
-    </ViewportProviderLayout>
+    return (
+      <ViewportProviderLayout {...props}>
+        <AudioAnnotate {...props} />
+      </ViewportProviderLayout>
+    );
   }
 
   return (

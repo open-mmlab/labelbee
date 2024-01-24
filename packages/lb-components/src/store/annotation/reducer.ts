@@ -78,13 +78,12 @@ const updateToolInstance = (annotation: AnnotationState, imgNode: HTMLImageEleme
     return;
   }
 
-
   // TODO: 点云实例化对接
   if (ToolUtils.isPointCloudTool(stepConfig?.tool)) {
     return;
   }
 
-  if (EToolName.LLM === stepConfig?.tool) {
+  if ([EToolName.LLM, EToolName.NLP].includes(stepConfig?.tool)) {
     return;
   }
 
@@ -119,7 +118,8 @@ export const LoadFileAndFileData =
     const currentIsVideo = StepUtils.currentToolIsVideo(step, stepList);
     const currentIsPointCloud = StepUtils.currentToolIsPointCloud(step, stepList);
     const currentIsLLM = StepUtils.getCurrentStepInfo(step, stepList)?.tool === EToolName.LLM;
-    const currentIsAudio = StepUtils.currentToolIsAudio(step, stepList)
+    const currentIsNLP = StepUtils.getCurrentStepInfo(step, stepList)?.tool === EToolName.NLP;
+    const currentIsAudio = StepUtils.currentToolIsAudio(step, stepList);
 
     SetAnnotationLoading(dispatch, true);
 
@@ -129,7 +129,7 @@ export const LoadFileAndFileData =
       dispatch(AfterVideoLoaded(nextIndex));
       return;
     }
-    if (currentIsPointCloud || currentIsLLM || currentIsAudio) {
+    if (currentIsPointCloud || currentIsLLM || currentIsAudio || currentIsNLP) {
       dispatch(AfterCommonLoaded(nextIndex));
       return;
     }
@@ -450,7 +450,6 @@ export const annotationReducer = (
       if (!toolInstance) {
         return { ...state, imgIndex: action.payload.nextIndex };
       }
-
 
       const currentStepInfo = StepUtils.getCurrentStepInfo(step, stepList);
 
