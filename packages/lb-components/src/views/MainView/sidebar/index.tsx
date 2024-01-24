@@ -116,7 +116,7 @@ const Sidebar: React.FC<IProps> = ({
 
   const tagToolSideBar = <TagSidebar />;
 
-  const textToolSideBar = <TextToolSidebar />;
+  const textToolSideBar = (disabled: boolean) => <TextToolSidebar disabled={disabled}/>;
 
   const scribbleSidebar = (
     <ScribbleSidebar
@@ -234,7 +234,7 @@ const Sidebar: React.FC<IProps> = ({
 
   if (toolName === EToolName.Text) {
     return (
-      <div className={`${sidebarCls}`}>
+      <div className={`${sidebarCls}`}>s
         <TextToolSidebar />
       </div>
     );

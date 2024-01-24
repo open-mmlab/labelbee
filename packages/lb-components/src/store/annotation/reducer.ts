@@ -125,8 +125,12 @@ export const LoadFileAndFileData =
 
     await dispatch(TryGetFileDataByAPI(nextIndex));
 
-    if (currentIsVideo || currentIsPointCloud || currentIsLLM || currentIsAudio) {
+    if (currentIsVideo) {
       dispatch(AfterVideoLoaded(nextIndex));
+      return;
+    }
+    if (currentIsPointCloud || currentIsLLM || currentIsAudio) {
+      dispatch(AfterCommonLoaded(nextIndex));
       return;
     }
 
@@ -153,6 +157,15 @@ const TryGetFileDataByAPI = (nextIndex: number) => async (dispatch: any, getStat
 };
 
 const AfterVideoLoaded = (nextIndex: number) => (dispatch: any) => {
+  dispatch({
+    type: ANNOTATION_ACTIONS.LOAD_FILE_DATA,
+    payload: {
+      nextIndex,
+    },
+  });
+};
+
+const AfterCommonLoaded = (nextIndex: number) => (dispatch: any) => {
   SetAnnotationLoading(dispatch, false);
 
   dispatch({

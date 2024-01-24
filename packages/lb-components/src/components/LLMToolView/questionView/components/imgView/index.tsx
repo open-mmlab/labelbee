@@ -31,7 +31,7 @@ const ImgView = (props: IProps) => {
             className={styles.item}
           >
             <Tag
-              className={`${LLMViewCls}__tag`}
+              className={`${LLMViewCls}-tag`}
             >
               {i?.order}
             </Tag>

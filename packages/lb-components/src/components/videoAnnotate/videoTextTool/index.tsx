@@ -12,6 +12,7 @@ export interface IVideoTextInstanceAdaptorProps extends IVideoAnnotateProps{
   pageBackward: () => void;
   onMounted: (instance: any) => void;
   onUnmounted: () => void;
+  onVideoLoaded: () => void;
 }
 
 interface IVideoTextInstanceAdaptorState {
@@ -49,6 +50,13 @@ export class VideoTextTool extends React.Component<
     return this.state.valid;
   }
 
+  public get needConfirm() {
+    const { result } = this.state
+    return this.config.configList?.some(
+      (i: any) => i.required && !result?.value?.[i.key],
+    );
+  }
+
   public get textList() {
     return [this.state.result]
   }
@@ -68,14 +76,10 @@ export class VideoTextTool extends React.Component<
 
   public exportData = () => {
     const duration = this.videoPlayer?.duration ?? 0;
-    const videoQulity = this.videoPlayer?.getVideoPlaybackQuality();
-    const frames = videoQulity?.totalVideoFrames;
-    const videoWidth = this.videoPlayer?.videoWidth ?? 0;
-    const videoHeight = this.videoPlayer?.videoHeight ?? 0;
 
     return [
       [this.state.result],
-      { valid: this.state.valid, duration, frames, videoWidth, videoHeight },
+      { valid: this.state.valid, duration },
     ];
   };
 
@@ -85,15 +89,15 @@ export class VideoTextTool extends React.Component<
     })
   }
 
-  public singleOn(event: string, func: () => void) {
+  public singleOn = (event: string, func: () => void) => {
     this.fns[event] = func;
   }
 
-  public on(event: string, func: () => void) {
+  public on = (event: string, func: () => void) => {
     this.singleOn(event, func);
   }
 
-  public unbindAll(eventName: string) {
+  public unbindAll = (eventName: string) => {
     delete this.fns[eventName];
   }
 
@@ -107,7 +111,7 @@ export class VideoTextTool extends React.Component<
     this.emitEvent('valueUpdated');
   }
 
-  public updateTextValue = (key: string, text: string, result?: { [key: string]: string }) => {
+  public updateTextValue = (key: string, text: string, update: boolean, result?: { [key: string]: string }) => {
     const newResult = _.cloneDeep(result ?? {});
 
     newResult.value = Object.assign(newResult.value ?? {}, { [key]: text });
@@ -116,7 +120,7 @@ export class VideoTextTool extends React.Component<
     this.setState(
       {
         result: newResult,
-      }, () => this.updateSidebar()
+      }, () => update && this.updateSidebar()
     );
   };
 
@@ -149,18 +153,32 @@ export class VideoTextTool extends React.Component<
   }
 
   public setResultFromImgList = (props: IVideoTextInstanceAdaptorProps) => {
-    const { imgList, imgIndex, step } = props;
+    const { imgList, imgIndex, stepInfo } = props;
 
     if (!imgList[imgIndex]) {
       return;
     }
     const res = jsonParser(imgList[imgIndex].result);
-    const stepRes = res[`step_${step}`];
+    const stepRes = res[`step_${stepInfo.step}`];
 
+    const defaultTextResult = {
+      value: this.getInitTextValue()
+    }
     this.setState({
-      result: stepRes?.result?.[0] ?? {},
+      result: stepRes ? (stepRes?.result?.[0] ?? {}) : defaultTextResult,
       valid: res?.valid === undefined ? true : res.valid,
     }, () => this.updateSidebar());
+  };
+
+  /**
+   * 获取初始值
+   */
+  public getInitTextValue = () => {
+    let result = {} as any
+    this.config.configList.forEach((i: { key: string, default: string }) => {
+      result[i.key] = i.default ?? '';
+    })
+    return result
   };
 
   /** Observer imgIndex and set result */
@@ -197,6 +215,7 @@ export class VideoTextTool extends React.Component<
           }}
           drawLayerSlot={this.props.drawLayerSlot}
           footer={this.props.footer}
+          dataLoaded={this.props.onVideoLoaded}
         />
       </div>
     );

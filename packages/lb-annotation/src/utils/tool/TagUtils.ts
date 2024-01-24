@@ -151,7 +151,7 @@ export default class TagUtil {
    * @returns
    */
   public static getDefaultTagResult(inputList: IInputList[], basicResultList: any[]) {
-    const defaultResult: any = this.getDefaultResultByConfig(inputList);
+    const defaultResult: any = this.getDefaultResultByConfig(inputList ?? []);
 
     if (basicResultList.length > 0) {
       return basicResultList.map((v) => ({

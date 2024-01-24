@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import { CommonToolUtils, uuid } from '@labelbee/lb-annotation';
+import { CommonToolUtils, uuid, TagUtils } from '@labelbee/lb-annotation';
 import { jsonParser } from '@/utils';
 import { VideoPlayer } from '../../videoPlayer';
 import { VideoTagLayer } from '../../videoPlayer/VideoTagLayer';
@@ -21,6 +21,7 @@ export interface IVideoTagInstanceAdaptorProps extends IVideoAnnotateProps{
   pageBackward: () => void;
   onMounted: (instance: any) => void;
   onUnmounted: () => void;
+  onVideoLoaded: () => void;
 }
 
 interface IVideoTagInstanceAdaptorState {
@@ -84,14 +85,10 @@ export class TagToolInstanceAdaptor extends React.Component<
 
   public exportData = () => {
     const duration = this.videoPlayer?.duration ?? 0;
-    const videoQulity = this.videoPlayer?.getVideoPlaybackQuality();
-    const frames = videoQulity?.totalVideoFrames;
-    const videoWidth = this.videoPlayer?.videoWidth ?? 0;
-    const videoHeight = this.videoPlayer?.videoHeight ?? 0;
 
     return [
       this.state.tagResult,
-      { valid: this.state.valid, duration, frames, videoWidth, videoHeight },
+      { valid: this.state.valid, duration },
     ];
   };
 
@@ -110,7 +107,7 @@ export class TagToolInstanceAdaptor extends React.Component<
   public getTagResultByCode(num1: number, num2?: number) {
     try {
       const inputList = this.config?.inputList ?? [];
-      const mulitTags = inputList.length > 1;
+      const mulitTags = inputList?.length > 1;
       const keycode1 = num2 !== undefined ? num1 : 0;
       const keycode2 = num2 !== undefined ? num2 : num1;
       const primaryTagConfig = mulitTags ? inputList[keycode1] : inputList[0];
@@ -214,7 +211,7 @@ export class TagToolInstanceAdaptor extends React.Component<
     if (keyCode) {
       const keyIndex = keyCode - 1;
 
-      if (this.config.inputList.length === 1) {
+      if (this.config.inputList?.length === 1) {
         // 说明标签只有一层
         this.labelSelectedList = [0, keyIndex];
         this.setLabel(0, keyIndex);
@@ -261,18 +258,26 @@ export class TagToolInstanceAdaptor extends React.Component<
   }
 
   public setResultFromImgList = (props: IVideoTagInstanceAdaptorProps) => {
-    const { imgList, imgIndex, step } = props;
+    const { imgList, imgIndex, stepInfo } = props;
 
     if (!imgList[imgIndex]) {
       return;
     }
     const res = jsonParser(imgList[imgIndex].result);
-    const stepRes = res[`step_${step}`];
+    const stepRes = res[`step_${stepInfo.step}`];
+    const defaultTagResult = this.getInitResultList()
 
     this.setState({
-      tagResult: stepRes?.result ?? [],
+      tagResult: stepRes ? stepRes?.result : defaultTagResult,
       valid: res?.valid === undefined ? true : res.valid,
-    });
+    }, () => this.emitEvent('render'));
+  };
+
+  /**
+   * 获取初始值结果列表
+   */
+  public getInitResultList = () => {
+    return TagUtils.getDefaultTagResult(this.config.inputList ?? [], []);
   };
 
   /** Observer imgIndex and set tagResult */
@@ -299,6 +304,7 @@ export class TagToolInstanceAdaptor extends React.Component<
           setVideoRef={(video) => {
             this.videoPlayer = video;
           }}
+          dataLoaded={this.props.onVideoLoaded}
           drawLayerSlot={this.props.drawLayerSlot}
           footer={this.props.footer}
         />
