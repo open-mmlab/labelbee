@@ -41,7 +41,7 @@ const TextContent: React.FC<IProps> = (props) => {
     for (let i = 0; i < splitPoints.length - 1; i++){
       let start = splitPoints[i]
       let end = splitPoints[i + 1]
-      let annotations = textAnnotation.filter((range: INLPTextAnnotation) => range.start >= start && range.end <= end)
+      let annotations = textAnnotation.filter((range: INLPTextAnnotation) => (range.start >= start && range.end <= end) || (start >= range.start && end <= range.end))
       intervals.push({
         start,
         end,

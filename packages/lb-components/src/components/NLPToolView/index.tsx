@@ -114,7 +114,6 @@ const NLPToolView: React.FC<IProps> = (props) => {
     if (text === '') return
     let selection = window.getSelection()
     const { anchorOffset, focusOffset, anchorNode, focusNode } = selection
-    console.log(selection)
     if (anchorNode === focusNode) {
       // ignore the order of selection
       let start = Math.min(anchorOffset, focusOffset)
