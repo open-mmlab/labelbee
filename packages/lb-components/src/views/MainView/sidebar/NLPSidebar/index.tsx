@@ -7,6 +7,7 @@ import { LabelBeeContext } from '@/store/ctx';
 import { prefix } from '@/constant';
 import SwitchAttributeList from '../SwitchAttributeList';
 import GeneralOperation from '../GeneralOperation';
+import NLPAnnotatedList from './NLPAnnotatedList';
 
 interface IProps {
   imgIndex: number;
@@ -19,10 +20,14 @@ export const sidebarCls = `${prefix}-sidebar`;
 const NLPSidebar: React.FC<IProps> = ({ toolInstance, imgIndex }) => {
   const attributeList = <SwitchAttributeList />;
   const operation = <GeneralOperation />;
+  const annotatedList = <NLPAnnotatedList />;
 
   return (
     <div className={`${sidebarCls}`}>
-      <div className={`${sidebarCls}__content`}>{attributeList}</div>
+      <div className={`${sidebarCls}__content`}>
+        {attributeList}
+        {annotatedList}
+      </div>
       {operation}
     </div>
   );

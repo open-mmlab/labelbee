@@ -2215,6 +2215,25 @@ $ptToolHeight: 40px;
   }
 }
 
+.#{$prefix}-sidebar__content__NLPList{
+  display:flex;
+  flex-direction:column;
+  &__item{
+    padding: 16px;
+    font-weight: 400;
+    font-size: 14px;
+    line-height: 20px;
+    color: #666666;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    cursor:pointer;
+    &__active{
+      background-color: #eeefff;
+    }
+  }
+}
+
 /** longText style */
 .#{$prefix}-longText {
   display: flex;
