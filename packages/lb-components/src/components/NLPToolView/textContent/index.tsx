@@ -84,7 +84,7 @@ const TextContent: React.FC<IProps> = (props) => {
           const annotation = _.last(interval.annotations)
           if (annotation) {
             const color = getColor(annotation.attribute)
-            const highlight = annotation.id === highlightKey
+            const highlight = interval.annotations.find((v: INLPTextAnnotation) => v.id === highlightKey)
             return <span style={{ backgroundColor: color.valid.stroke, color: highlight ? 'white' : undefined }}>{interval.text}</span>
           } else {
             return <span>{interval.text}</span>
