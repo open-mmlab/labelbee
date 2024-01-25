@@ -99,7 +99,7 @@ const NLPToolView: React.FC<IProps> = (props) => {
     };
 
     toolInstanceRef.current.setResult = () => {}
-    toolInstanceRef.current.clearResult = () => {}
+    toolInstanceRef.current.clearResult = clearResult
     toolInstanceRef.current.setDefaultAttribute = setDefaultAttribute
     toolInstanceRef.current.setHighlightKey = setHighlightKey
     updateSidebar()
@@ -111,6 +111,16 @@ const NLPToolView: React.FC<IProps> = (props) => {
   const setDefaultAttribute = (attribute: string) => {
     toolInstanceRef.current.defaultAttribute = attribute
     setSelectedAttribute(attribute)
+    updateSidebar()
+  }
+
+  const clearResult = () => {
+    setResult({
+      id: 1,
+      newText: '',
+      indicatorDetermine: {},
+      textAnnotation: [],
+    })
     updateSidebar()
   }
 
