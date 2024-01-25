@@ -159,6 +159,7 @@ const Sidebar: React.FC<IProps> = ({
             scribbleSidebar,
             LLMSidebar,
             videoClipSidebar,
+            NLPSidebar
           })}
         </div>
       );

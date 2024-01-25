@@ -35,7 +35,7 @@ const NLPLayout: React.FC<AppProps & IProps> = (props) => {
         <Content
           className={classnames({
             [`${layoutCls}__content`]: true,
-            [`${prefix}-LLMLayout`]: true,
+            [`${prefix}-NLPLayout`]: true,
           })}
         >
           <NLPToolView checkMode={props.checkMode} showTips={props.showTips} tips={props.tips} />
