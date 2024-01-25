@@ -28,3 +28,17 @@ export interface ITextList {
 export interface ITextData {
   content: string;
 }
+
+export interface INLPResult {
+  id: number;
+  newText: string;
+  indicatorDetermine: any;
+  textAnnotation: INLPTextAnnotation[];
+}
+export interface INLPTextAnnotation {
+  id: string;
+  start: number;
+  end: number;
+  attribute: string;
+  text: string;
+}

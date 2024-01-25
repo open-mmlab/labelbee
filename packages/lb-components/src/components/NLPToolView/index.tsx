@@ -9,15 +9,18 @@ import { AppState } from '@/store';
 import { connect } from 'react-redux';
 import { LabelBeeContext, NLPContext } from '@/store/ctx';
 import { message } from 'antd';
-import { ELLMDataType, prefix } from '@/constant';
+import { prefix } from '@/constant';
 import { Layout } from 'antd/es';
 import TextContent from './textContent';
 import { useTranslation } from 'react-i18next';
-import { ITextList, INLPToolConfig, ITextData } from './types';
+import { ITextList, INLPToolConfig, ITextData, INLPTextAnnotation, INLPResult } from './types';
 import AnnotationTips from '@/views/MainView/annotationTips';
 import { getStepConfig } from '@/store/annotation/reducer';
 import { jsonParser } from '@/utils';
 import { getCurrentResultFromResultList } from '../LLMToolView/utils/data';
+import { useCustomToolInstance } from '@/hooks/annotation';
+import { toolStyleConverter } from '@labelbee/lb-utils';
+import { uuid } from '@labelbee/lb-annotation';
 
 interface IProps {
   checkMode?: boolean;
@@ -25,18 +28,26 @@ interface IProps {
   showTips?: boolean;
   tips?: string;
 }
-const LLMViewCls = `${prefix}-LLMView`;
+const NLPViewCls = `${prefix}-NLPView`;
 const NLPToolView: React.FC<IProps> = (props) => {
   const { annotation, checkMode = true, tips, showTips } = props;
   const { imgIndex, imgList, stepList, step } = annotation;
   const { highlightKey } = useContext(NLPContext);
+  const { toolInstanceRef } = useCustomToolInstance();
 
   const [NLPConfig, setNLPConfig] = useState<INLPToolConfig>();
+  const [selectedAttribute, setSelectedAttribute] = useState<string>('')
   const [textData, setTextData] = useState<ITextData[]>([
     {
       content: '',
     },
   ]);
+  const [result, setResult] = useState<INLPResult>({
+    id: 1,
+    newText: '',
+    indicatorDetermine: {},
+    textAnnotation: [],
+  })
 
   const { t } = useTranslation();
 
@@ -70,7 +81,7 @@ const NLPToolView: React.FC<IProps> = (props) => {
     }
     const currentData = imgList[imgIndex] ?? {};
     const result = getCurrentResultFromResultList(currentData?.result);
-    const currentResult = result?.length > 0 ? result[0] : result;
+    setResult(result)
   }, [imgIndex]);
 
   useEffect(() => {
@@ -80,9 +91,51 @@ const NLPToolView: React.FC<IProps> = (props) => {
     }
   }, [stepList, step]);
 
+  useEffect(() => {
+    toolInstanceRef.current.exportData = () => {
+      return [[result], { }];
+    };
+
+    toolInstanceRef.current.setResult = () => {}
+    toolInstanceRef.current.clearResult = () => {}
+    toolInstanceRef.current.setDefaultAttribute = setDefaultAttribute
+  }, [result]);
+
+  const updateSidebar = () => {
+    toolInstanceRef.current.emit('changeAttributeSidebar');
+  }
+  const setDefaultAttribute = (attribute: string) => {
+    toolInstanceRef.current.defaultAttribute = attribute
+    setSelectedAttribute(attribute)
+    updateSidebar()
+  }
+
+  const onSelectionChange = (text: string) => {
+    if (text === '') return
+    let selection = window.getSelection()
+    const { anchorOffset, focusOffset, anchorNode, focusNode } = selection
+    console.log(selection)
+    if (anchorNode === focusNode) {
+      // ignore the order of selection
+      let start = Math.min(anchorOffset, focusOffset)
+      let end = Math.max(anchorOffset, focusOffset)
+      setResult({
+        ...result,
+        textAnnotation: [...(result?.textAnnotation || []), {
+          id: uuid(8, 62),
+          start,
+          end,
+          attribute: selectedAttribute,
+          text,
+        }]
+      })
+      window.getSelection().empty()
+    }
+  }
+
   return (
-    <Layout className={LLMViewCls}>
-      <div className={`${LLMViewCls}-question`}>
+    <div className={NLPViewCls}>
+      <div className={`${NLPViewCls}-question`}>
         {showTips === true && <AnnotationTips tips={tips} />}
         <TextContent
           highlightKey={highlightKey}
@@ -90,9 +143,11 @@ const NLPToolView: React.FC<IProps> = (props) => {
           checkMode={checkMode}
           annotation={annotation}
           NLPConfig={NLPConfig}
+          textAnnotation={result.textAnnotation ?? []}
+          onSelectionChange={onSelectionChange}
         />
       </div>
-    </Layout>
+    </div>
   );
 };
 

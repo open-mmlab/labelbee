@@ -62,7 +62,7 @@ const App = () => {
         ...extraData,
         id: i + 1,
         url,
-        result: JSON.stringify(NLPToolResult.step_1.result.map((item) => i + 1 + item.answer)),
+        result: JSON.stringify(LLMToolResult.step_1.result.map((item) => i + 1 + item.answer)),
         questionList: {
           ...LLMToolQa,
           question: `${i + 1}-${LLMToolQa.question}`,
@@ -79,7 +79,7 @@ const App = () => {
         ...extraData,
         id: i + 1,
         url,
-        result: JSON.stringify(LLMToolResult.step_1.result.map((item) => i + 1 + item.answer)),
+        result: JSON.stringify(NLPToolResult.step_1.result),
         textData,
       }));
     }

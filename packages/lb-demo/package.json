@@ -1,53 +1,53 @@
 {
-  "name": "lb-demo",
-  "version": "1.11.0-alpha.2",
-  "private": true,
-  "publishConfig": {
-    "access": "public"
-  },
-  "license": "Apache-2.0",
-  "dependencies": {
-    "@labelbee/lb-annotation": "*",
-    "@labelbee/lb-components": "*",
-    "@labelbee/lb-utils": "*",
-    "@testing-library/jest-dom": "^5.11.4",
-    "@testing-library/react": "^11.1.0",
-    "@testing-library/user-event": "^12.1.10",
-    "@types/three": ">=0.141.0",
-    "qs": "^6.10.1",
-    "react": "^17.0.2",
-    "react-dom": "^17.0.2",
-    "react-error-overlay": "6.0.9",
-    "react-scripts": "4.0.3",
-    "three": ">=0.141.0",
-    "web-vitals": "^1.0.2"
-  },
-  "scripts": {
-    "start": "react-scripts start",
-    "dev": "npm run start",
-    "build:frontend": "react-scripts build",
-    "test": "react-scripts test",
-    "eject": "react-scripts eject"
-  },
-  "eslintConfig": {
-    "extends": [
-      "react-app",
-      "react-app/jest"
-    ]
-  },
-  "browserslist": {
-    "production": [
-      ">0.2%",
-      "not dead",
-      "not op_mini all"
-    ],
-    "development": [
-      "last 1 chrome version",
-      "last 1 firefox version",
-      "last 1 safari version"
-    ]
-  },
-  "devDependencies": {
-    "antd": "^4.16.13"
-  }
+	"name": "lb-demo",
+	"version": "1.11.0-alpha.2",
+	"private": true,
+	"publishConfig": {
+		"access": "public"
+	},
+	"license": "Apache-2.0",
+	"dependencies": {
+		"@labelbee/lb-annotation": "*",
+		"@labelbee/lb-components": "*",
+		"@labelbee/lb-utils": "*",
+		"@testing-library/jest-dom": "^5.11.4",
+		"@testing-library/react": "^11.1.0",
+		"@testing-library/user-event": "^12.1.10",
+		"@types/three": ">=0.141.0",
+		"qs": "^6.10.1",
+		"react": "^17.0.2",
+		"react-dom": "^17.0.2",
+		"react-error-overlay": "6.0.9",
+		"react-scripts": "4.0.3",
+		"three": ">=0.141.0",
+		"web-vitals": "^1.0.2"
+	},
+	"scripts": {
+		"start": "react-scripts start",
+		"dev": "npm run start",
+		"build:frontend": "react-scripts build",
+		"test": "react-scripts test",
+		"eject": "react-scripts eject"
+	},
+	"eslintConfig": {
+		"extends": [
+			"react-app",
+			"react-app/jest"
+		]
+	},
+	"browserslist": {
+		"production": [
+			">0.2%",
+			"not dead",
+			"not op_mini all"
+		],
+		"development": [
+			"last 1 chrome version",
+			"last 1 firefox version",
+			"last 1 safari version"
+		]
+	},
+	"devDependencies": {
+		"antd": "^4.16.13"
+	}
 }
