@@ -26,6 +26,13 @@ interface IProps {
   onSelectionChange?: (text: string) => void;
 }
 
+interface INLPInterval {
+  start: number;
+  end: number;
+  annotations: INLPTextAnnotation[];
+  text: string;
+}
+
 const NLPViewCls = `${prefix}-NLPView`;
 
 const TextContent: React.FC<IProps> = (props) => {
@@ -35,7 +42,7 @@ const TextContent: React.FC<IProps> = (props) => {
     return textData?.[0]?.content
   }, [textData])
 
-  const splitIntervals = useMemo(() => {
+  const splitIntervals: INLPInterval[] = useMemo(() => {
     const splitPoints =  _.uniq(_.concat(0, ...textAnnotation.map((range: INLPTextAnnotation) => [range.start, range.end]), content.length)).sort((a, b) => a - b)
     let intervals = []
     for (let i = 0; i < splitPoints.length - 1; i++){
@@ -73,11 +80,12 @@ const TextContent: React.FC<IProps> = (props) => {
   const renderContent = () => {
     return <div style={{ position: 'relative' }}>
       {
-        splitIntervals.map((interval: any) => {
+        splitIntervals.map((interval: INLPInterval) => {
           const annotation = _.last(interval.annotations)
           if (annotation) {
             const color = getColor(annotation.attribute)
-            return <span style={{ backgroundColor: color.valid.stroke }}>{interval.text}</span>
+            const highlight = annotation.id === highlightKey
+            return <span style={{ backgroundColor: color.valid.stroke, color: highlight ? 'white' : undefined }}>{interval.text}</span>
           } else {
             return <span>{interval.text}</span>
           }

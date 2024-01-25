@@ -32,16 +32,18 @@ const NLPViewCls = `${prefix}-NLPView`;
 const NLPToolView: React.FC<IProps> = (props) => {
   const { annotation, checkMode = true, tips, showTips } = props;
   const { imgIndex, imgList, stepList, step } = annotation;
-  const { highlightKey } = useContext(NLPContext);
+  const { highlightKey, setHighlightKey } = useContext(NLPContext);
   const { toolInstanceRef } = useCustomToolInstance();
 
   const [NLPConfig, setNLPConfig] = useState<INLPToolConfig>();
   const [selectedAttribute, setSelectedAttribute] = useState<string>('')
+
   const [textData, setTextData] = useState<ITextData[]>([
     {
       content: '',
     },
   ]);
+
   const [result, setResult] = useState<INLPResult>({
     id: 1,
     newText: '',
@@ -99,6 +101,8 @@ const NLPToolView: React.FC<IProps> = (props) => {
     toolInstanceRef.current.setResult = () => {}
     toolInstanceRef.current.clearResult = () => {}
     toolInstanceRef.current.setDefaultAttribute = setDefaultAttribute
+    toolInstanceRef.current.setHighlightKey = setHighlightKey
+    updateSidebar()
   }, [result]);
 
   const updateSidebar = () => {
@@ -113,7 +117,7 @@ const NLPToolView: React.FC<IProps> = (props) => {
   const onSelectionChange = (text: string) => {
     if (text === '') return
     let selection = window.getSelection()
-    const { anchorOffset, focusOffset, anchorNode, focusNode } = selection
+    const { anchorOffset = 0, focusOffset = 0, anchorNode, focusNode } = selection || {}
     if (anchorNode === focusNode) {
       // ignore the order of selection
       let start = Math.min(anchorOffset, focusOffset)
@@ -128,7 +132,7 @@ const NLPToolView: React.FC<IProps> = (props) => {
           text,
         }]
       })
-      window.getSelection().empty()
+      window.getSelection()?.empty()
     }
   }
 
