@@ -8,7 +8,9 @@ import { LabelBeeContext } from '@/store/ctx';
 import { ICustomToolInstance } from '@/hooks/annotation';
 import { prefix } from '@/constant';
 import { classnames } from '@/utils';
-import { INLPTextAnnotation } from '@/components/NLPToolView/types'
+import { INLPTextAnnotation } from '@/components/NLPToolView/types';
+import { Popconfirm, Tooltip } from 'antd';
+import { CloseOutlined } from '@ant-design/icons';
 
 interface IProps {
   toolInstance: ICustomToolInstance;
@@ -45,6 +47,10 @@ const NLPAnnotatedList: React.FC<IProps> = (props) => {
     setHighlight(key)
   }
 
+  const onDeleteTextAnnotation = (item: INLPTextAnnotation) => {
+    toolInstance?.deleteTextAnnotation(item.id)
+  }
+
   if (annotatedList?.length === 0) return null
   return <div className={`${sidebarCls}__content__NLPList`}>
     {
@@ -58,7 +64,22 @@ const NLPAnnotatedList: React.FC<IProps> = (props) => {
           })}
           onClick={() => setHighlightKey(v.id)}
         >
-          {`${k + 1}、${v.text}`}
+          <Tooltip title={v.text}>
+            <span className={`${sidebarCls}__content__NLPList__item__text`}>{`${v.attribute || t('NoAttribute')}，${t('textTool')}：${v.text}`}</span>
+          </Tooltip>
+          {
+            active && <Popconfirm
+              title={t('DeleteCommentConfirm')}
+              placement='topRight'
+              okText={t('Confirm')}
+              cancelText={t('Cancel')}
+              getPopupContainer={(trigger) => trigger.parentElement}
+              onConfirm={() => onDeleteTextAnnotation(v)}
+              overlayClassName={`${prefix}-pop-confirm`}
+            >
+              <CloseOutlined style={{ margin: '0px 16px' }}/>
+            </Popconfirm>
+          }
         </div>
       })
     }
