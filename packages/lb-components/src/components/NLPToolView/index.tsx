@@ -102,6 +102,7 @@ const NLPToolView: React.FC<IProps> = (props) => {
     toolInstanceRef.current.clearResult = clearResult
     toolInstanceRef.current.setDefaultAttribute = setDefaultAttribute
     toolInstanceRef.current.setHighlightKey = setHighlightKey
+    toolInstanceRef.current.deleteTextAnnotation = deleteTextAnnotation
     updateSidebar()
   }, [result]);
 
@@ -122,6 +123,13 @@ const NLPToolView: React.FC<IProps> = (props) => {
       textAnnotation: [],
     })
     updateSidebar()
+  }
+
+  const deleteTextAnnotation = (key: string) => {
+    setResult((origin: INLPResult) => ({
+      ...origin,
+      textAnnotation: origin.textAnnotation.filter((item: INLPTextAnnotation) => item.id !== key),
+    }))
   }
 
   const onSelectionChange = (text: string) => {

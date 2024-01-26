@@ -2219,17 +2219,25 @@ $ptToolHeight: 40px;
   display:flex;
   flex-direction:column;
   &__item{
-    padding: 16px;
-    font-weight: 400;
-    font-size: 14px;
-    line-height: 20px;
-    color: #666666;
-    overflow: hidden;
-    text-overflow: ellipsis;
-    white-space: nowrap;
+    display: flex;
+    align-items: center;
     cursor:pointer;
+    &__text{
+      flex: 1 1;
+      padding: 16px;
+      font-weight: 400;
+      font-size: 12px;
+      line-height: 20px;
+      color: #666666;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
     &__active{
       background-color: #eeefff;
+      &__text{
+        color: #666fff;
+      }
     }
   }
 }
