@@ -31,6 +31,7 @@ import { EPointCloudName } from '@labelbee/lb-annotation';
 interface IProps {
   path: string;
   loading: boolean;
+  measureVisible?: boolean;
 }
 
 const { Sider, Content } = Layout;
@@ -54,6 +55,7 @@ const PointCloudAnnotate: React.FC<AppProps & IProps> = (props) => {
         drawLayerSlot={props.drawLayerSlot}
         checkMode={props.checkMode}
         intelligentFit={props.intelligentFit}
+        measureVisible={props.measureVisible}
       />
       <ToolFooter
         style={props.style?.footer}

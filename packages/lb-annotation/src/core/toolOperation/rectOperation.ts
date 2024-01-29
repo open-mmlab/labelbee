@@ -20,8 +20,8 @@ import TextAttributeClass from './textAttributeClass';
 import Selection, { SetDataList } from './Selection';
 
 interface IRectOperationProps extends IBasicToolOperationProps {
-  drawOutSideTarget: boolean; // 是否可以在边界外进行标注
-  style: any;
+  drawOutSideTarget?: boolean; // 是否可以在边界外进行标注
+  style?: string;
 }
 
 const scope = 6;
