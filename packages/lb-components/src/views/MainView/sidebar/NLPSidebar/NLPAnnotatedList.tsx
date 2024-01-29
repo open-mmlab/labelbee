@@ -74,6 +74,7 @@ const NLPAnnotatedList: React.FC<IProps> = (props) => {
               placement='topRight'
               okText={t('Confirm')}
               cancelText={t('Cancel')}
+              // @ts-ignore
               getPopupContainer={(trigger) => trigger.parentElement}
               onConfirm={() => onDeleteTextAnnotation(v)}
               overlayClassName={`${prefix}-pop-confirm`}
