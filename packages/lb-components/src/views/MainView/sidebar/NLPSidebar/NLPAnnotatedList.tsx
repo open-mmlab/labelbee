@@ -43,8 +43,9 @@ const NLPAnnotatedList: React.FC<IProps> = (props) => {
   const annotatedList = result?.[0]?.textAnnotation ?? []
 
   const setHighlightKey = (key: string) => {
-    toolInstance?.setHighlightKey(key)
-    setHighlight(key)
+    let chooseKey = key === highlight ? '' : key
+    toolInstance?.setHighlightKey(chooseKey)
+    setHighlight(chooseKey)
   }
 
   const onDeleteTextAnnotation = (item: INLPTextAnnotation) => {

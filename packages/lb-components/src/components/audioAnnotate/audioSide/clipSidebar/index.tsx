@@ -114,7 +114,7 @@ const ClipSidebar = (props: IClipSidebarProps) => {
             list={list}
             attributeChanged={attributeChanged}
             selectedAttribute={selectedAttribute}
-            attributeLockChange={(list: any) => {
+            attributeLockChange={(list: string[]) => {
               setAudioClipState({
                 attributeLockList: list,
               });

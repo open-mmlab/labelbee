@@ -32,7 +32,7 @@ interface IProps {
   enableColorPicker?: boolean;
   updateColorConfig?: (value: string, color: string) => void;
   updateSize?: (size: IDefaultSize) => void;
-  attributeLockChange?: (list: any) => void;
+  attributeLockChange?: (list: string[]) => void;
   forbidShowLimitPopover?: boolean;
 }
 
