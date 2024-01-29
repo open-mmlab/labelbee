@@ -13,8 +13,8 @@ import DetermineGroup from '@/components/LLMToolView/sidebar/components/determin
 interface IProps {
   toolInstance: ICustomToolInstance;
   stepInfo: IStepInfo;
-  checkMode?: boolean;
   imgIndex: number;
+  checkMode?: boolean;
 }
 
 const IndicatorDetermineList = (props: IProps) => {
