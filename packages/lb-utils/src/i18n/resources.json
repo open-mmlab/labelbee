@@ -350,7 +350,8 @@
     "Triangle": "Triangle",
     "Statistics": "Statistics",
     "Sequence": "Sequence",
-    "Physics": "Physics"
+    "Physics": "Physics",
+    "IndicatorJudgment": "Indicator judgment"
   },
   "cn": {
     "TextInput": "文本输入",
@@ -703,6 +704,7 @@
     "Triangle": "三角",
     "Statistics": "统计",
     "Sequence": "数列",
-    "Physics": "物理"
+    "Physics": "物理",
+    "IndicatorJudgment":"指标判断"
   }
 }

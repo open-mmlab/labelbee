@@ -23,6 +23,7 @@ import _ from 'lodash';
 import { CommonToolUtils, uuid } from '@labelbee/lb-annotation';
 import styleString from '@/constant/styleString';
 import { getIntervals } from '../utils';
+import { classnames } from '@/utils';
 
 interface IProps {
   highlightKey?: string;
@@ -190,6 +191,8 @@ const TextContent: React.FC<IProps> = (props) => {
               <span
                 style={{
                   borderBottom: `2px solid ${color}`,
+                  display: 'inline-block',
+                  lineHeight: '22px',
                 }}
                 id={remarkAnnotation?.id}
                 key={index}
@@ -219,6 +222,8 @@ const TextContent: React.FC<IProps> = (props) => {
                 style={{
                   backgroundColor: color.valid.stroke,
                   color: highlight ? 'white' : undefined,
+                  display: 'inline-block',
+                  lineHeight: '22px',
                 }}
                 key={index}
               >
@@ -244,16 +249,17 @@ const TextContent: React.FC<IProps> = (props) => {
     );
   };
 
+  const noSplitIntervals = !(splitIntervals?.length > 0 || displayRemarkList?.length > 0);
   // Unlabeled data
-  if (isSourceView) {
+  if (isSourceView || noSplitIntervals) {
     return (
       <div
         style={{
           display: 'flex',
           flexFlow: 'column',
           height: '100%',
-          padding: '26px 32px',
           background: '#fff',
+          padding: isSourceView ? '26px 32px' : '0px',
         }}
       >
         <div className={`${NLPViewCls}-question-title`}>{t('textTool')}</div>
@@ -265,7 +271,12 @@ const TextContent: React.FC<IProps> = (props) => {
   return (
     <div>
       <div className={`${NLPViewCls}-question-title`}>{t('textTool')}</div>
-      <div className={`${NLPViewCls}-question-content`} style={{ position: 'relative' }}>
+      <div
+        className={classnames({
+          [`${NLPViewCls}-question-content`]: true,
+        })}
+        style={{ position: 'relative' }}
+      >
         {renderContent()}
       </div>
     </div>

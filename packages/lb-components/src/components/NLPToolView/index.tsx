@@ -12,13 +12,7 @@ import { message } from 'antd';
 import { prefix } from '@/constant';
 import TextContent from './textContent';
 import { useTranslation } from 'react-i18next';
-import {
-  INLPToolConfig,
-  ITextData,
-  INLPTextAnnotation,
-  INLPResult,
-  IRemarkLayer,
-} from './types';
+import { INLPToolConfig, ITextData, INLPTextAnnotation, INLPResult, IRemarkLayer } from './types';
 import AnnotationTips from '@/views/MainView/annotationTips';
 import { getStepConfig } from '@/store/annotation/reducer';
 import { jsonParser } from '@/utils';
@@ -115,7 +109,7 @@ const NLPToolView: React.FC<IProps> = (props) => {
       return [[result], {}];
     };
 
-    toolInstanceRef.current.setResult = () => {};
+    toolInstanceRef.current.setResult = (value) => setResult(value);
     toolInstanceRef.current.clearResult = clearResult;
     toolInstanceRef.current.setDefaultAttribute = setDefaultAttribute;
     toolInstanceRef.current.setHighlightKey = setHighlightKey;
