@@ -13,6 +13,8 @@ import NLPToolView from '@/components/NLPToolView';
 interface IProps {
   path: string;
   loading: boolean;
+  remarkLayer?: any;
+  remark: any;
 }
 
 const { Sider, Content } = Layout;
@@ -26,8 +28,8 @@ const NLPLayout: React.FC<AppProps & IProps> = (props) => {
       <NLPContext.Provider
         value={useMemo(() => {
           return {
-            highlightKey ,
-            setHighlightKey ,
+            highlightKey,
+            setHighlightKey,
           };
         }, [highlightKey])}
       >
@@ -38,11 +40,17 @@ const NLPLayout: React.FC<AppProps & IProps> = (props) => {
             [`${prefix}-NLPLayout`]: true,
           })}
         >
-          <NLPToolView checkMode={props.checkMode} showTips={props.showTips} tips={props.tips} />
+          <NLPToolView
+            checkMode={props.checkMode}
+            showTips={props.showTips}
+            tips={props.tips}
+            remarkLayer={props?.remarkLayer}
+            remark={props?.remark}
+          />
           <ToolFooter style={props.style?.footer} mode={props.mode} footer={props?.footer} />
         </Content>
 
-        <Sider className={`${layoutCls}__side`} width={600} style={{ position: 'relative' }}>
+        <Sider className={`${layoutCls}__side`} width={400} style={{ position: 'relative' }}>
           <Sidebar sider={props?.sider} checkMode={props?.checkMode} />
           {props.drawLayerSlot?.({})}
         </Sider>
