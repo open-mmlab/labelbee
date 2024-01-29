@@ -13,13 +13,14 @@ import { LabelBeeContext } from '@/store/ctx';
 interface IProps {
   toolInstance: GraphToolInstance;
   stepInfo: IStepInfo;
+  attributeLockChange: (list: string[]) => void;
 }
 
 const SwitchAttributeList: React.FC<IProps> = (props) => {
 
   const [_, forceRender] = useState(0);
   const listRef = useRef<HTMLElement>(null);
-  const { toolInstance } = props;
+  const { toolInstance, attributeLockChange } = props;
   const { t } = useTranslation();
 
   useEffect(() => {
@@ -73,6 +74,7 @@ const SwitchAttributeList: React.FC<IProps> = (props) => {
         selectedAttribute={toolInstance?.defaultAttribute ?? ''}
         ref={listRef}
         forbidDefault={isScribbleTool}
+        attributeLockChange={attributeLockChange}
       />
     );
   }

@@ -4,7 +4,7 @@
  * @Date: 2024-01-24
  */
 
-import React, { useContext, useEffect, useState } from 'react';
+import React, { useContext, useEffect, useState, useMemo } from 'react';
 import { AppState } from '@/store';
 import { connect } from 'react-redux';
 import { LabelBeeContext, NLPContext } from '@/store/ctx';
@@ -37,6 +37,7 @@ const NLPToolView: React.FC<IProps> = (props) => {
 
   const [NLPConfig, setNLPConfig] = useState<INLPToolConfig>();
   const [selectedAttribute, setSelectedAttribute] = useState<string>('')
+  const [lockList, setLockList] = useState<string[]>([])
 
   const [textData, setTextData] = useState<ITextData[]>([
     {
@@ -50,6 +51,15 @@ const NLPToolView: React.FC<IProps> = (props) => {
     indicatorDetermine: {},
     textAnnotation: [],
   })
+
+  const displayAnnotation = useMemo(() => {
+    if (!result?.textAnnotation) {
+      return []
+    }
+    return result.textAnnotation.filter((item: INLPTextAnnotation) => {
+      return lockList.length === 0 || lockList.includes(item.attribute)
+    })
+  }, [result, lockList])
 
   const { t } = useTranslation();
 
@@ -103,6 +113,7 @@ const NLPToolView: React.FC<IProps> = (props) => {
     toolInstanceRef.current.setDefaultAttribute = setDefaultAttribute
     toolInstanceRef.current.setHighlightKey = setHighlightKey
     toolInstanceRef.current.deleteTextAnnotation = deleteTextAnnotation
+    toolInstanceRef.current.setAttributeLockList = setAttributeLockList
     updateSidebar()
   }, [result]);
 
@@ -113,6 +124,10 @@ const NLPToolView: React.FC<IProps> = (props) => {
     toolInstanceRef.current.defaultAttribute = attribute
     setSelectedAttribute(attribute)
     updateSidebar()
+  }
+
+  const setAttributeLockList = (list: string[]) => {
+    setLockList(list)
   }
 
   const clearResult = () => {
@@ -164,7 +179,7 @@ const NLPToolView: React.FC<IProps> = (props) => {
           checkMode={checkMode}
           annotation={annotation}
           NLPConfig={NLPConfig}
-          textAnnotation={result.textAnnotation ?? []}
+          textAnnotation={displayAnnotation}
           onSelectionChange={onSelectionChange}
         />
       </div>

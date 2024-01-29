@@ -18,7 +18,12 @@ interface IProps {
 const { Panel } = Collapse;
 export const sidebarCls = `${prefix}-sidebar`;
 const NLPSidebar: React.FC<IProps> = ({ toolInstance, imgIndex }) => {
-  const attributeList = <SwitchAttributeList />;
+
+  const setAttributeLockList = (list: string[]) => {
+    toolInstance?.setAttributeLockList(list)
+  }
+
+  const attributeList = <SwitchAttributeList attributeLockChange={setAttributeLockList}/>;
   const operation = <GeneralOperation />;
   const annotatedList = <NLPAnnotatedList />;
 
