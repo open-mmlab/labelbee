@@ -1,4 +1,3 @@
-import { Collapse } from 'antd/es';
 import React from 'react';
 import { TagOperation } from '@labelbee/lb-annotation';
 import { connect } from 'react-redux';
@@ -15,15 +14,13 @@ interface IProps {
   checkMode?: boolean;
 }
 
-const { Panel } = Collapse;
 export const sidebarCls = `${prefix}-sidebar`;
-const NLPSidebar: React.FC<IProps> = ({ toolInstance, imgIndex }) => {
-
+const NLPSidebar: React.FC<IProps> = ({ toolInstance, checkMode }) => {
   const setAttributeLockList = (list: string[]) => {
-    toolInstance?.setAttributeLockList(list)
-  }
+    toolInstance?.setAttributeLockList(list);
+  };
 
-  const attributeList = <SwitchAttributeList attributeLockChange={setAttributeLockList}/>;
+  const attributeList = <SwitchAttributeList attributeLockChange={setAttributeLockList} />;
   const operation = <GeneralOperation />;
   const annotatedList = <NLPAnnotatedList />;
 
@@ -33,7 +30,7 @@ const NLPSidebar: React.FC<IProps> = ({ toolInstance, imgIndex }) => {
         {attributeList}
         {annotatedList}
       </div>
-      {operation}
+      {!checkMode && operation}
     </div>
   );
 };
