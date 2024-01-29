@@ -7,6 +7,7 @@ import { prefix } from '@/constant';
 import SwitchAttributeList from '../SwitchAttributeList';
 import GeneralOperation from '../GeneralOperation';
 import NLPAnnotatedList from './NLPAnnotatedList';
+import IndicatorDetermineList from './indicatorDetermine';
 
 interface IProps {
   imgIndex: number;
@@ -23,10 +24,12 @@ const NLPSidebar: React.FC<IProps> = ({ toolInstance, checkMode }) => {
   const attributeList = <SwitchAttributeList attributeLockChange={setAttributeLockList} />;
   const operation = <GeneralOperation />;
   const annotatedList = <NLPAnnotatedList />;
+  const indicatorDetermineList = <IndicatorDetermineList checkMode={checkMode} />;
 
   return (
     <div className={`${sidebarCls}`}>
       <div className={`${sidebarCls}__content`}>
+        {indicatorDetermineList}
         {attributeList}
         {annotatedList}
       </div>
@@ -36,7 +39,10 @@ const NLPSidebar: React.FC<IProps> = ({ toolInstance, checkMode }) => {
 };
 
 function mapStateToProps(state: AppState) {
-  return { toolInstance: state.annotation.toolInstance, imgIndex: state.annotation.imgIndex };
+  return {
+    toolInstance: state.annotation.toolInstance,
+    imgIndex: state.annotation.imgIndex,
+  };
 }
 
 export default connect(mapStateToProps, null, null, { context: LabelBeeContext })(NLPSidebar);

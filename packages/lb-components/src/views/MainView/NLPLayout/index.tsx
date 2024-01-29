@@ -14,7 +14,7 @@ interface IProps {
   path: string;
   loading: boolean;
   remarkLayer?: any;
-  remark: any;
+  remark?: any;
 }
 
 const { Sider, Content } = Layout;
