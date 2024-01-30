@@ -66,24 +66,8 @@ const NLPToolView: React.FC<IProps> = (props) => {
       const NLPStepConfig = getStepConfig(stepList, step)?.config;
       return jsonParser(NLPStepConfig);
     }
-    return undefined
+    return undefined;
   }, [stepList, step]);
-
-  useEffect(() => {
-    let interval: undefined | ReturnType<typeof setInterval>;
-
-    if (!checkMode) {
-      interval = setInterval(() => {
-        message.info(t('EfficientListening'));
-      }, 1000 * 60);
-
-      return () => {
-        if (interval) {
-          clearInterval(interval);
-        }
-      };
-    }
-  }, []);
 
   useEffect(() => {
     if (!imgList[imgIndex]) {
