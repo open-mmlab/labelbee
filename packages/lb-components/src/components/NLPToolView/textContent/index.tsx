@@ -42,6 +42,31 @@ interface IProps {
 
 const NLPViewCls = `${prefix}-NLPView`;
 
+const renderRemarkModal = ({
+  remarkLayer,
+  remarkStyle,
+  setRemarkStyle,
+  setRemarkResut,
+  remarkResut,
+}: {
+  setRemarkStyle: (value?: React.CSSProperties) => void;
+  remarkLayer?: (values: IRemarkLayer) => void;
+  remarkStyle: React.CSSProperties | undefined;
+  setRemarkResut: (value: ISelectText) => void;
+  remarkResut: ISelectText;
+}) => {
+  if (remarkLayer) {
+    remarkLayer({
+      style: remarkStyle,
+      onClose: () => {
+        setRemarkStyle(undefined);
+        setRemarkResut({});
+        window.getSelection()?.empty();
+      },
+      submitData: remarkResut,
+    });
+  }
+};
 const TextContent: React.FC<IProps> = (props) => {
   const {
     highlightKey,
@@ -154,27 +179,6 @@ const TextContent: React.FC<IProps> = (props) => {
     }
   };
 
-  const RemarkModal = () => {
-    if (props?.remarkLayer) {
-      return props.remarkLayer({
-        style: remarkStyle,
-        onClose: () => {
-          setRemarkStyle(undefined);
-          setRemarkResut({});
-          window.getSelection()?.empty();
-        },
-        submitData: remarkResut,
-      });
-    }
-    return null;
-  };
-
-  const renderMask = (
-    <div className={`${NLPViewCls}-question-content-mask`} ref={contentRef}>
-      {content}
-    </div>
-  );
-
   return (
     <div>
       <div className={`${NLPViewCls}-question-title`}>{t('textTool')}</div>
@@ -214,8 +218,17 @@ const TextContent: React.FC<IProps> = (props) => {
           {displayRemarkList?.length > 0 && (
             <RemarkMask remarkSplitIntervals={remarkSplitIntervals} remark={remark} />
           )}
-          {renderMask}
-          {RemarkModal()}
+          {renderRemarkModal({
+            setRemarkStyle,
+            remarkLayer: props?.remarkLayer,
+            remarkStyle,
+            remarkResut,
+            setRemarkResut,
+          })}
+
+          <div className={`${NLPViewCls}-question-content-mask`} ref={contentRef}>
+            {content}
+          </div>
         </div>
       </div>
     </div>

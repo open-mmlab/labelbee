@@ -26,7 +26,6 @@ const NLPAnnotatedList: React.FC<IProps> = (props) => {
   const { t } = useTranslation();
 
   const [highlight, setHighlight] = useState<string>('');
-  const [hoverId, setHoverId] = useState<string>('');
 
   useEffect(() => {
     if (toolInstance) {
@@ -57,7 +56,6 @@ const NLPAnnotatedList: React.FC<IProps> = (props) => {
     <div className={`${sidebarCls}__content__NLPList`}>
       {annotatedList.map((v: INLPTextAnnotation, k: number) => {
         const active = highlight === v.id;
-        const isRemove = hoverId === v.id;
         return (
           <div
             key={k}
@@ -66,33 +64,30 @@ const NLPAnnotatedList: React.FC<IProps> = (props) => {
               [`${sidebarCls}__content__NLPList__item__active`]: active,
             })}
             onClick={() => setHighlightKey(v.id)}
-            onMouseEnter={() => setHoverId(v.id)}
-            onMouseLeave={() => setHoverId('')}
           >
             <Tooltip title={v.text}>
               <span className={`${sidebarCls}__content__NLPList__item__text`}>{`${
                 v.attribute || t('NoAttribute')
               }，${t('textTool')}：${v.text}`}</span>
             </Tooltip>
-            {isRemove && (
-              <Popconfirm
-                title={t('DeleteCommentConfirm')}
-                placement='topRight'
-                okText={t('Confirm')}
-                cancelText={t('Cancel')}
-                // @ts-ignore
-                getPopupContainer={(trigger) => trigger.parentElement}
-                onConfirm={() => onDeleteTextAnnotation(v)}
-                overlayClassName={`${prefix}-pop-confirm`}
-              >
-                <CloseOutlined
-                  style={{ margin: '0px 16px' }}
-                  onClick={(e) => {
-                    e.stopPropagation();
-                  }}
-                />
-              </Popconfirm>
-            )}
+
+            <Popconfirm
+              title={t('DeleteCommentConfirm')}
+              placement='topRight'
+              okText={t('Confirm')}
+              cancelText={t('Cancel')}
+              // @ts-ignore
+              getPopupContainer={(trigger) => trigger.parentElement}
+              onConfirm={() => onDeleteTextAnnotation(v)}
+              overlayClassName={`${prefix}-pop-confirm`}
+            >
+              <CloseOutlined
+                className={`${sidebarCls}-pop-remove`}
+                onClick={(e) => {
+                  e.stopPropagation();
+                }}
+              />
+            </Popconfirm>
           </div>
         );
       })}

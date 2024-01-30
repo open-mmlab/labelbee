@@ -47,7 +47,7 @@ const NLPSidebar: React.FC<IProps> = ({ toolInstance, checkMode }) => {
         <NlpAttributeList setAttributeLockList={setAttributeLockList} checkMode={checkMode} />
         <NLPAnnotatedList />;
       </div>
-      {!checkMode && <GeneralOperation />}
+      {!checkMode && <GeneralOperation hideValidity={true}/>}
     </div>
   );
 };

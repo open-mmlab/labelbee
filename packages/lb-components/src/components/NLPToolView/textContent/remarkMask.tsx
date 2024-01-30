@@ -4,6 +4,7 @@
  * @date 2024.01.30
  */
 
+import _ from 'lodash';
 import React from 'react';
 import { IRemarkInterval } from '../types';
 
