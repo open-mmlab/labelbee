@@ -191,7 +191,7 @@ const TextContent: React.FC<IProps> = (props) => {
               <span
                 style={{
                   borderBottom: `2px solid ${color}`,
-                  padding:'2px 0px'
+                  padding: '2px 0px',
                 }}
                 id={remarkAnnotation?.id}
                 key={index}
@@ -221,7 +221,7 @@ const TextContent: React.FC<IProps> = (props) => {
                 style={{
                   backgroundColor: color.valid.stroke,
                   color: highlight ? 'white' : undefined,
-                  padding:'2px 0px'
+                  padding: '2px 0px',
                 }}
                 key={index}
               >
@@ -255,6 +255,9 @@ const TextContent: React.FC<IProps> = (props) => {
           [`${NLPViewCls}-question-content`]: true,
         })}
         style={{ position: 'relative' }}
+        onDoubleClick={(e) => {
+          e.preventDefault();
+        }}
       >
         {renderContent()}
       </div>
