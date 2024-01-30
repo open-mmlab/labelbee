@@ -20,13 +20,22 @@ interface IProps {
 const IndicatorDetermineList = (props: IProps) => {
   const { toolInstance, stepInfo, checkMode, imgIndex } = props;
   const [result] = toolInstance.exportData();
-  const [currentResult, setCurrentResult] = useState(result?.[0]);
+  const currentResult = result?.[0];
   const { t } = useTranslation();
 
+  const [_, forceRender] = useState(0);
+
   useEffect(() => {
-    const [result] = toolInstance.exportData();
-    setCurrentResult(result?.[0]);
-  }, [imgIndex]);
+    if (toolInstance) {
+      toolInstance.on('changeIndicatorDetermine', (index: number) => {
+        forceRender((s) => s + 1);
+      });
+    }
+    return () => {
+      toolInstance?.unbindAll('changeIndicatorDetermine');
+    };
+  }, [toolInstance, imgIndex]);
+
   const config = jsonParser(stepInfo.config);
   const { indicatorDetermine } = config;
 
@@ -36,10 +45,10 @@ const IndicatorDetermineList = (props: IProps) => {
       const selected = { [key]: value };
       const originData = currentResult?.indicatorDetermine ?? {};
       const newResult = { ...currentResult, indicatorDetermine: { ...originData, ...selected } };
-      setCurrentResult(newResult);
       toolInstance.setResult(newResult);
     }
   };
+
   if (indicatorDetermine?.length > 0) {
     return (
       <div style={{ padding: '12px', marginBottom: '24px' }}>

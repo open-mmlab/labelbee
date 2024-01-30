@@ -20,13 +20,12 @@ interface IProps {
 export const sidebarCls = `${prefix}-sidebar`;
 
 const NLPAnnotatedList: React.FC<IProps> = (props) => {
-
   const [_, forceRender] = useState(0);
   const listRef = useRef<HTMLElement>(null);
   const { toolInstance } = props;
   const { t } = useTranslation();
 
-  const [highlight, setHighlight] = useState<string>('')
+  const [highlight, setHighlight] = useState<string>('');
 
   useEffect(() => {
     if (toolInstance) {
@@ -39,53 +38,57 @@ const NLPAnnotatedList: React.FC<IProps> = (props) => {
     };
   }, [toolInstance, listRef]);
 
-  const [result] = toolInstance.exportData()
-  const annotatedList = result?.[0]?.textAnnotation ?? []
+  const [result] = toolInstance.exportData();
+  const annotatedList = result?.[0]?.textAnnotation ?? [];
 
   const setHighlightKey = (key: string) => {
-    let chooseKey = key === highlight ? '' : key
-    toolInstance?.setHighlightKey(chooseKey)
-    setHighlight(chooseKey)
-  }
+    let chooseKey = key === highlight ? '' : key;
+    toolInstance?.setHighlightKey(chooseKey);
+    setHighlight(chooseKey);
+  };
 
   const onDeleteTextAnnotation = (item: INLPTextAnnotation) => {
-    toolInstance?.deleteTextAnnotation(item.id)
-  }
+    toolInstance?.deleteTextAnnotation(item.id);
+  };
 
-  if (annotatedList?.length === 0) return null
-  return <div className={`${sidebarCls}__content__NLPList`}>
-    {
-      annotatedList.map((v: INLPTextAnnotation, k: number) => {
-        const active = highlight === v.id
-        return <div
-          key={k}
-          className={classnames({
-            [`${sidebarCls}__content__NLPList__item`]: true,
-            [`${sidebarCls}__content__NLPList__item__active`]: active,
-          })}
-          onClick={() => setHighlightKey(v.id)}
-        >
-          <Tooltip title={v.text}>
-            <span className={`${sidebarCls}__content__NLPList__item__text`}>{`${v.attribute || t('NoAttribute')}，${t('textTool')}：${v.text}`}</span>
-          </Tooltip>
-          {
-            active && <Popconfirm
-              title={t('DeleteCommentConfirm')}
-              placement='topRight'
-              okText={t('Confirm')}
-              cancelText={t('Cancel')}
-              // @ts-ignore
-              getPopupContainer={(trigger) => trigger.parentElement}
-              onConfirm={() => onDeleteTextAnnotation(v)}
-              overlayClassName={`${prefix}-pop-confirm`}
-            >
-              <CloseOutlined style={{ margin: '0px 16px' }}/>
-            </Popconfirm>
-          }
-        </div>
-      })
-    }
-  </div>
+  if (annotatedList?.length === 0) return null;
+  return (
+    <div className={`${sidebarCls}__content__NLPList`}>
+      {annotatedList.map((v: INLPTextAnnotation, k: number) => {
+        const active = highlight === v.id;
+        return (
+          <div
+            key={k}
+            className={classnames({
+              [`${sidebarCls}__content__NLPList__item`]: true,
+              [`${sidebarCls}__content__NLPList__item__active`]: active,
+            })}
+            onClick={() => setHighlightKey(v.id)}
+          >
+            <Tooltip title={v.text}>
+              <span className={`${sidebarCls}__content__NLPList__item__text`}>{`${
+                v.attribute || t('NoAttribute')
+              }，${t('textTool')}：${v.text}`}</span>
+            </Tooltip>
+            {active && (
+              <Popconfirm
+                title={t('DeleteCommentConfirm')}
+                placement='topRight'
+                okText={t('Confirm')}
+                cancelText={t('Cancel')}
+                // @ts-ignore
+                getPopupContainer={(trigger) => trigger.parentElement}
+                onConfirm={() => onDeleteTextAnnotation(v)}
+                overlayClassName={`${prefix}-pop-confirm`}
+              >
+                <CloseOutlined style={{ margin: '0px 16px' }} onClick={(e)=>{e.stopPropagation()}}/>
+              </Popconfirm>
+            )}
+          </div>
+        );
+      })}
+    </div>
+  );
 };
 
 const mapStateToProps = (state: AppState) => {
@@ -97,6 +100,4 @@ const mapStateToProps = (state: AppState) => {
   };
 };
 
-export default connect(mapStateToProps, null, null, { context: LabelBeeContext })(
-  NLPAnnotatedList,
-);
+export default connect(mapStateToProps, null, null, { context: LabelBeeContext })(NLPAnnotatedList);

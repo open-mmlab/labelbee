@@ -2,7 +2,7 @@ import _ from 'lodash';
 import { INLPInterval } from '../types';
 
 export const getIntervals = (content: string, textAnnotation: INLPInterval[], key: string) => {
-  if (!content?.length || !textAnnotation?.length) {
+  if (!content?.length) {
     return [];
   }
   const splitPoints = _.uniq(
