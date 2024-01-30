@@ -639,7 +639,7 @@
     "PreviousInterval": "上一区间",
     "NextInterval": "下一区间",
     "DeleteComment": "删除批注",
-    "DeleteCommentConfirm": "确定删除该条批注吗",
+    "DeleteCommentConfirm": "确定删除该条标注吗",
     "PreviousComment": "上一条批注",
     "NextComment": "下一条批注",
     "ClipSelect": "截取选中",
