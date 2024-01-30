@@ -50,15 +50,16 @@ const IndicatorDetermineList = (props: IProps) => {
   };
 
   if (indicatorDetermine?.length > 0) {
+    const displayList = indicatorDetermine.filter((i: IndicatorDetermine) => i?.label);
     return (
       <div style={{ padding: '12px', marginBottom: '24px' }}>
         <div style={{ fontSize: '16px', fontWeight: 500, lineHeight: '46px' }}>
           {t('IndicatorJudgment')}
         </div>
         <div style={{ maxHeight: '400px', overflow: 'auto' }}>
-          {indicatorDetermine.map((item: IndicatorDetermine, index: number) => {
+          {displayList.map((item: IndicatorDetermine, index: number) => {
             const { label, value } = item;
-            return label ? (
+            return (
               <DetermineGroup
                 selectValue={currentResult?.indicatorDetermine?.[value]}
                 title={label}
@@ -72,7 +73,7 @@ const IndicatorDetermineList = (props: IProps) => {
                 key={index}
                 isDisableAll={checkMode}
               />
-            ) : null;
+            );
           })}
         </div>
       </div>
