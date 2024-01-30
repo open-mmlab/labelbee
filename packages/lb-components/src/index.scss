@@ -2223,6 +2223,18 @@ $ptToolHeight: 40px;
     display: flex;
     align-items: center;
     cursor:pointer;
+
+    .#{$prefix}-sidebar-pop-remove{
+      margin: 0px 16px;
+      display: none;
+    }
+
+    &:hover{
+      .#{$prefix}-sidebar-pop-remove{
+        display: block;
+      }
+    }
+
     &__text{
       flex: 1 1;
       padding: 16px;
