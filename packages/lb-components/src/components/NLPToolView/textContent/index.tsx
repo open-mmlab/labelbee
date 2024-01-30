@@ -94,7 +94,7 @@ const TextContent: React.FC<IProps> = (props) => {
 
   useEffect(() => {
     if (enableRemark) {
-      onSelectiRemark(selection.text);
+      onSelectionRemark(selection.text);
     } else {
       onSelectionChange?.(selection.text);
     }
@@ -121,7 +121,7 @@ const TextContent: React.FC<IProps> = (props) => {
     }
   }, [remark?.editAuditID]);
 
-  const onSelectiRemark = (text: string) => {
+  const onSelectionRemark = (text: string) => {
     if (text === '') return;
     let curSelection = window.getSelection();
 

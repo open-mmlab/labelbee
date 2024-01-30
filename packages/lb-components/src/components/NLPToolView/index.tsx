@@ -35,8 +35,6 @@ const NLPToolView: React.FC<IProps> = (props) => {
   const { imgIndex, imgList, stepList, step } = annotation;
   const { highlightKey, setHighlightKey } = useContext(NLPContext);
   const { toolInstanceRef } = useCustomToolInstance();
-
-  const [NLPConfig, setNLPConfig] = useState<INLPToolConfig>();
   const [selectedAttribute, setSelectedAttribute] = useState<string>('');
   const [lockList, setLockList] = useState<string[]>([]);
 
@@ -63,6 +61,13 @@ const NLPToolView: React.FC<IProps> = (props) => {
   }, [result, lockList]);
 
   const { t } = useTranslation();
+  const NLPConfig = useMemo(() => {
+    if (stepList && step) {
+      const NLPStepConfig = getStepConfig(stepList, step)?.config;
+      return jsonParser(NLPStepConfig);
+    }
+    return undefined
+  }, [stepList, step]);
 
   useEffect(() => {
     let interval: undefined | ReturnType<typeof setInterval>;
@@ -96,13 +101,6 @@ const NLPToolView: React.FC<IProps> = (props) => {
     const result = getCurrentResultFromResultList(currentData?.result);
     setResult(result);
   }, [imgIndex]);
-
-  useEffect(() => {
-    if (stepList && step) {
-      const NLPStepConfig = getStepConfig(stepList, step)?.config;
-      setNLPConfig(jsonParser(NLPStepConfig));
-    }
-  }, [stepList, step]);
 
   useEffect(() => {
     toolInstanceRef.current.exportData = () => {
