@@ -32,8 +32,6 @@ const App = () => {
     comma: true,
   }).tool;
 
-  console.log(tool)
-
   const isSingleTool = !Array.isArray(tool);
   const stepList = isSingleTool ? getStepList(tool) : getDependStepList(tool);
   const currentIsVideo = StepUtils.currentToolIsVideo(1, stepList);

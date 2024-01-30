@@ -482,9 +482,7 @@ export const annotationReducer = (
       const { dataSourceStep, tool } = stepConfig;
       const dependStepConfig = getStepConfig(stepList, dataSourceStep);
       const hasDataSourceStep = dataSourceStep && tool;
-      const oldStepBasicResultList = fileResult[`step_${dataSourceStep}`]?.result ?? [];
 
-      console.log(fileResult)
       const stepBasicResultList = getBasicResult(
         currentStepInfo.step,
         currentStepInfo.dataSourceStep,
@@ -493,9 +491,6 @@ export const annotationReducer = (
         true,
         preResult,
       );
-
-      console.log(oldStepBasicResultList)
-      console.log(stepBasicResultList)
 
       const result = AnnotationDataUtils.getInitialResultList(
         stepResult?.result,

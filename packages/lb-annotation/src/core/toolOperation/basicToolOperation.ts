@@ -19,13 +19,14 @@ import DrawUtils from '../../utils/tool/DrawUtils';
 import RenderDomUtils from '../../utils/tool/RenderDomUtils';
 import ZoomUtils from '../../utils/tool/ZoomUtils';
 import EventListener from './eventListener';
+import { ICommonProps } from '../index'
 
 const LANGUAGE_MAP = {
   [ELang.Zh]: 'cn',
   [ELang.US]: 'en',
 };
 
-interface IBasicToolOperationProps {
+interface IBasicToolOperationProps extends ICommonProps {
   container: HTMLElement;
   size: ISize;
   imgNode?: HTMLImageElement; // 展示图片的内容
@@ -193,7 +194,7 @@ class BasicToolOperation extends EventListener {
     this.imgNode = props.imgNode;
     this.staticMode = props.staticMode ?? false;
     this.isImgError = !props.imgNode;
-    this.basicImgInfo = {
+    this.basicImgInfo = props.basicImgInfo ?? {
       width: props.imgNode?.width ?? 0,
       height: props.imgNode?.height ?? 0,
       valid: true,
@@ -203,11 +204,8 @@ class BasicToolOperation extends EventListener {
     this.forbidBasicResultRender = props.forbidBasicResultRender ?? false;
 
     this.size = props.size;
-    this.currentPos = {
-      x: 0,
-      y: 0,
-    };
-    this.zoom = 1;
+    this.zoom = props.zoom ?? 1
+    this.currentPos = props.currentPos ?? { x: 0, y: 0}
     this.coord = {
       x: -1,
       y: -1,
@@ -242,8 +240,8 @@ class BasicToolOperation extends EventListener {
 
     // 初始化监听事件
     this.dblClickListener = new DblClickEventListener(this.container, 200);
-    this.coordUtils = new CoordinateUtils(this);
-    this.coordUtils.setBasicImgInfo(this.basicImgInfo);
+    this.coordUtils = props.coordUtils ?? new CoordinateUtils(this);
+    this.coordUtils.setBasicImgInfo(this.basicImgInfo)
 
     this.hiddenImg = props.hiddenImg || false;
 
@@ -311,12 +309,10 @@ class BasicToolOperation extends EventListener {
   public setZoom(zoom: number) {
     this.zoom = zoom;
     this.innerZoom = zoom;
-    this.coordUtils.setZoomAndCurrentPos(this.zoom, this.currentPos);
   }
 
   public setCurrentPos(currentPos: ICoordinate) {
     this.currentPos = currentPos;
-    this.coordUtils.setZoomAndCurrentPos(this.zoom, this.currentPos);
   }
 
   public setReferenceData(referenceData: IReferenceData) {
@@ -495,6 +491,7 @@ class BasicToolOperation extends EventListener {
 
     this.initImgPos();
     this.render();
+
     this.renderBasicCanvas();
   }
 
@@ -539,7 +536,6 @@ class BasicToolOperation extends EventListener {
 
   public setBasicImgInfo(basicImgInfo: any) {
     this.basicImgInfo = basicImgInfo;
-    this.coordUtils.setBasicImgInfo(basicImgInfo);
   }
 
   public setForbidOperation(forbidOperation: boolean) {
@@ -709,6 +705,7 @@ class BasicToolOperation extends EventListener {
     this.setImgInfo(imgInfo);
     this.setZoom(zoom);
     this.render();
+
     this.renderBasicCanvas();
 
     this.emit('dependRender');
@@ -906,6 +903,7 @@ class BasicToolOperation extends EventListener {
         this.isDrag = true;
         this.container.style.cursor = 'grabbing';
         this.forbidCursorLine = true;
+
         this.renderBasicCanvas();
 
         // 依赖渲染触发
@@ -1071,6 +1069,7 @@ class BasicToolOperation extends EventListener {
     if (isRender) {
       this.render();
     }
+
     this.renderBasicCanvas();
   }
 
@@ -1175,6 +1174,9 @@ class BasicToolOperation extends EventListener {
   public drawImg = () => {
     if (!this.imgNode || this.hiddenImg === true) return;
 
+    console.log('basic operation draw')
+    console.log(this.zoom)
+
     DrawUtils.drawImg(this.basicCanvas, this.imgNode, {
       zoom: this.zoom,
       currentPos: this.currentPos,
@@ -1202,6 +1204,7 @@ class BasicToolOperation extends EventListener {
    */
   public setSize(size: ISize) {
     this.size = size;
+    console.log(size)
     this.updateZoomInfo();
     if (this.container.contains(this.canvas)) {
       this.destroyCanvas();

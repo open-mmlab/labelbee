@@ -28,16 +28,6 @@ export function getBasicResult(
   const currentStepInfo = CommonToolUtils.getCurrentStepInfo(currentStep, stepList);
   let dataSourceStepInfo = CommonToolUtils.getCurrentStepInfo(dataSourceStep, stepList);
 
-  console.log('result', result)
-  console.log(currentStepInfo)
-  console.log(dataSourceStepInfo)
-  console.log([
-    EToolName.Rect,
-    EToolName.RectTrack,
-    EToolName.Polygon,
-    EToolName.Point,
-    EToolName.Line,
-  ].includes(dataSourceStepInfo?.tool))
   if (currentStepInfo?.preDataSourceStep > 0) {
     if (typeof preResult === 'string') {
       result = jsonParser(preResult);
@@ -53,13 +43,11 @@ export function getBasicResult(
   }
 
   if (!result[`step_${dataSourceStep}`] || !result[`step_${dataSourceStep}`].result) {
-    console.log(111)
     return [];
   }
   const sourceData = result[`step_${dataSourceStep}`].result;
 
   if (!dataSourceStepInfo && currentStepInfo?.preDataSourceStep <= 0) {
-    console.log(222)
     return [];
   }
   try {
@@ -67,7 +55,6 @@ export function getBasicResult(
     // 如果为非框型工具就需要递归下去
     const filterData = filterDataAdaptor(currentStepInfoConfig.filterData, dataSourceStepInfo);
     if (!filterData && filterNeeded) {
-      console.log(333)
       return [];
     }
 
@@ -111,9 +98,9 @@ export function getBasicResult(
       }
       // 过滤出当前符合标准的标签数据
       const newData = sourceData.filter(
-        (v) => filterData.indexOf(v.filterLabel) > -1 || forbidFilter,
+        (v: any) => filterData.indexOf(v.filterLabel) > -1 || forbidFilter,
       );
-      const sourceIDList = newData.map((v) => ({ id: v.id, sourceID: v.sourceID }));
+      const sourceIDList = newData.map((v: any) => ({ id: v.id, sourceID: v.sourceID }));
       return getSourceData(
         dataSourceStepInfo.step,
         dataSourceStepInfo.dataSourceStep,
@@ -146,10 +133,10 @@ export function filterDataAdaptor(
 
   if (oldFilterData?.constructor === Object) {
     // 说明为旧数据
-    const keyList = Object.keys(oldFilterData).reduce((acc, cur) => {
+    const keyList = Object.keys(oldFilterData).reduce((acc: any[], cur: string) => {
       if (Array.isArray(oldFilterData[cur])) {
         // 在旧格式中仅为 标签工具
-        return [...acc, ...oldFilterData[cur].map((v) => `${cur}${DEFAULT_LINK}${v}`)];
+        return [...acc, ...oldFilterData[cur].map((v: any) => `${cur}${DEFAULT_LINK}${v}`)];
       }
 
       // 对之前旧的图形工具的适配
@@ -161,7 +148,7 @@ export function filterDataAdaptor(
         return [
           ...acc,
           `${cur}${DEFAULT_LINK}`, // 无属性
-          ...config.attributeList.reduce((a, v) => {
+          ...config.attributeList.reduce((a: any, v: any) => {
             return [...a, `${cur}${DEFAULT_LINK}${v?.value}`];
           }, []),
         ];
@@ -232,7 +219,7 @@ export function filterTagResult(
  */
 
 export function transformFilterDataToObject(filterData: string[]): any {
-  return filterData.reduce((acc, cur) => {
+  return filterData.reduce((acc: { [key: string]: any }, cur) => {
     const [key, value] = cur.split(DEFAULT_LINK);
 
     if (typeof value === 'undefined') {
@@ -278,7 +265,6 @@ export function useConfigFilterData(
   const dataSourceStepInfo = CommonToolUtils.getCurrentStepInfo(currentStepInfo.dataSourceStep, stepList);
   if (currentStepInfo.config) {
     const config = jsonParser(currentStepInfo.config);
-    console.log('===', config)
     if (config.filterData) {
       const filterData = filterDataAdaptor(config.filterData, dataSourceStepInfo);
 
@@ -345,7 +331,7 @@ export function getSourceData(
 
     if (result) {
       return (
-        result?.filter((v) => {
+        result?.filter((v: any) => {
           for (const i of sourceIDList) {
             if (i?.sourceID === v.id) {
               return true;
@@ -367,7 +353,7 @@ export function getSourceData(
 
   const sourceData = result[`step_${dataSourceStep}`].result;
   let resultList = [];
-  resultList = sourceData.filter((v) => {
+  resultList = sourceData.filter((v: any) => {
     for (const i of sourceIDList) {
       if (i?.sourceID === v.id) {
         return true;

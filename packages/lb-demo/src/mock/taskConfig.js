@@ -163,6 +163,7 @@ const polygonConfig = {
     { key: '纸巾', value: 'tissue' },
     { key: '水壶', value: 'kettle' },
   ],
+  filterData: ['valid', 'invalid'],
   textConfigurable: true,
   textCheckType: 0,
   customFormat: '',

@@ -11,10 +11,12 @@ import { RectOperation } from './toolOperation/rectOperation';
 import PolygonOperation from './toolOperation/polygonOperation';
 import { BasicToolOperation } from './toolOperation/basicToolOperation';
 import SegmentByRect from './toolOperation/segmentByRect';
+import { ICommonProps } from './index'
+import { CoordinateUtils } from '@/utils/tool/AxisUtils';
 
 interface IToolSchedulerOperation {}
 
-interface IToolSchedulerProps {
+interface IToolSchedulerProps extends ICommonProps{
   container: HTMLElement;
   size: ISize;
   toolName: THybridToolName;
@@ -82,6 +84,8 @@ export class ToolScheduler implements IToolSchedulerOperation {
 
   private proxyMode?: boolean;
 
+  private coordUtils?: CoordinateUtils;
+
   constructor(props: IToolSchedulerProps) {
     this.container = props.container;
     this.size = props.size;
@@ -89,6 +93,7 @@ export class ToolScheduler implements IToolSchedulerOperation {
     this.config = props.config ?? JSON.stringify(getConfig(HybridToolUtils.getTopToolName(props.toolName))); // 设置默认操作
     this.style = props.style ?? styleDefaultConfig; // 设置默认操作
     this.proxyMode = props.proxyMode;
+    this.coordUtils = props.coordUtils;
     this.onWheel = this.onWheel.bind(this);
     this.onMouseDown = this.onMouseDown.bind(this);
     this.onMouseMove = this.onMouseMove.bind(this);
@@ -105,6 +110,24 @@ export class ToolScheduler implements IToolSchedulerOperation {
   ) {
     this.toolOperationList.forEach((toolInstance) => {
       toolInstance.setImgNode(imgNode, basicImgInfo);
+    });
+  }
+
+  public setZoom(zoom: number){
+    this.toolOperationList.forEach((toolInstance) => {
+      toolInstance.setZoom(zoom)
+    });
+  }
+
+  public setCurrentPos(currentPos: ICoordinate) {
+    this.toolOperationList.forEach((toolInstance) => {
+      toolInstance.setCurrentPos(currentPos)
+    });
+  }
+
+  public setBasicImgInfo(basicImgInfo: any) {
+    this.toolOperationList.forEach((toolInstance) => {
+      toolInstance.setBasicImgInfo(basicImgInfo)
     });
   }
 
@@ -198,6 +221,18 @@ export class ToolScheduler implements IToolSchedulerOperation {
       style: this.style,
       imgNode: imgNode || emptyImgNode,
       hiddenImg: !!tool,
+      zoom: 1,
+      currentPos: {
+        x: 0,
+        y: 0,
+      },
+      basicImgInfo: {
+        width: imgNode?.width ?? 0,
+        height: imgNode?.height ?? 0,
+        valid: true,
+        rotate: 0,
+      },
+      coordUtils: this.coordUtils,
     };
     if (config) {
       Object.assign(defaultData, config);
