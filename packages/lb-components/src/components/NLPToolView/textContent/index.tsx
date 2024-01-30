@@ -72,13 +72,13 @@ const TextContent: React.FC<IProps> = (props) => {
       remarkAnnotation.push(remarkResut);
     }
 
-    return getIntervals(content, remarkAnnotation, 'remarkAnnotations');
+    return getIntervals(content, remarkAnnotation ?? [], 'remarkAnnotations');
   }, [displayRemarkList, remarkResut, content]);
 
   // annotation split intervals
   const splitIntervals: INLPInterval[] = useMemo(
-    () => getIntervals(content, textAnnotation, 'annotations'),
-    [textAnnotation],
+    () => getIntervals(content, textAnnotation ?? [], 'annotations'),
+    [textAnnotation, content],
   );
 
   const getColor = (attribute = '') => {
@@ -191,8 +191,7 @@ const TextContent: React.FC<IProps> = (props) => {
               <span
                 style={{
                   borderBottom: `2px solid ${color}`,
-                  display: 'inline-block',
-                  lineHeight: '22px',
+                  padding:'2px 0px'
                 }}
                 id={remarkAnnotation?.id}
                 key={index}
@@ -222,8 +221,7 @@ const TextContent: React.FC<IProps> = (props) => {
                 style={{
                   backgroundColor: color.valid.stroke,
                   color: highlight ? 'white' : undefined,
-                  display: 'inline-block',
-                  lineHeight: '22px',
+                  padding:'2px 0px'
                 }}
                 key={index}
               >
@@ -248,25 +246,6 @@ const TextContent: React.FC<IProps> = (props) => {
       </div>
     );
   };
-
-  const noSplitIntervals = !(splitIntervals?.length > 0 || displayRemarkList?.length > 0);
-  // Unlabeled data
-  if (isSourceView || noSplitIntervals) {
-    return (
-      <div
-        style={{
-          display: 'flex',
-          flexFlow: 'column',
-          height: '100%',
-          background: '#fff',
-          padding: isSourceView ? '26px 32px' : '0px',
-        }}
-      >
-        <div className={`${NLPViewCls}-question-title`}>{t('textTool')}</div>
-        <div style={{ flex: 1, background: '#f5f5f5', padding: 8 }}>{content}</div>
-      </div>
-    );
-  }
 
   return (
     <div>

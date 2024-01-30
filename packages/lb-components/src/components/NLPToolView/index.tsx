@@ -120,6 +120,7 @@ const NLPToolView: React.FC<IProps> = (props) => {
 
   const updateSidebar = () => {
     toolInstanceRef.current.emit('changeAttributeSidebar');
+    toolInstanceRef.current.emit('changeIndicatorDetermine');
   };
   const setDefaultAttribute = (attribute: string) => {
     toolInstanceRef.current.defaultAttribute = attribute;
