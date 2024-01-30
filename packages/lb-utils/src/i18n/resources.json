@@ -285,6 +285,7 @@
     "PreviousInterval": "Previous interval",
     "NextInterval": "Next interval",
     "DeleteComment": "Delete Comments",
+    "DeleteCommentConfirm": "Are you sure you want to delete this annotation?",
     "PreviousComment": "Previous comment",
     "NextComment": "Next comment",
     "ClipSelect": "Select",
@@ -349,7 +350,8 @@
     "Triangle": "Triangle",
     "Statistics": "Statistics",
     "Sequence": "Sequence",
-    "Physics": "Physics"
+    "Physics": "Physics",
+    "IndicatorJudgment": "Indicator judgment"
   },
   "cn": {
     "TextInput": "文本输入",
@@ -637,6 +639,7 @@
     "PreviousInterval": "上一区间",
     "NextInterval": "下一区间",
     "DeleteComment": "删除批注",
+    "DeleteCommentConfirm": "确定删除该条批注吗",
     "PreviousComment": "上一条批注",
     "NextComment": "下一条批注",
     "ClipSelect": "截取选中",
@@ -701,6 +704,7 @@
     "Triangle": "三角",
     "Statistics": "统计",
     "Sequence": "数列",
-    "Physics": "物理"
+    "Physics": "物理",
+    "IndicatorJudgment":"指标判断"
   }
 }

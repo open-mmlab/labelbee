@@ -2,6 +2,7 @@ import { AppProps } from '@/App';
 import AnnotationView from '@/components/AnnotationView';
 import PointCloudAnnotationView from '@/components/AnnotationView/pointCloudAnnotationView';
 import QuestionView from '@/components/LLMToolView/questionView';
+import TextContent from '@/components/NLPToolView/textContent';
 import { i18n } from '@labelbee/lb-utils';
 import React, { useImperativeHandle, useState } from 'react';
 import { I18nextProvider } from 'react-i18next';
@@ -67,6 +68,7 @@ export {
   AnnotationView,
   PointCloudAnnotationView,
   QuestionView,
+  TextContent,
   LLMToolView,
   i18n,
   VideoTagTool,

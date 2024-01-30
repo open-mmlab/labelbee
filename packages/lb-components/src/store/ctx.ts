@@ -10,6 +10,10 @@ interface ILLMContext {
   setModelAPIResponse: React.Dispatch<React.SetStateAction<IModelAPIAnswer[]>>;
   setNewAnswerList: (value: IAnswerList[]) => void;
 }
+interface INLPContext {
+  highlightKey: string;
+  setHighlightKey: (value: string) => void;
+}
 export const LabelBeeContext = React.createContext(undefined) as any;
 export const useDispatch = createDispatchHook(LabelBeeContext) as () => Dispatch<AnyAction | any>; // TODO, Any need to be updated.
 export const useSelector = createSelectorHook(LabelBeeContext);
@@ -20,4 +24,9 @@ export const LLMContext = React.createContext<ILLMContext>({
   modelAPIResponse: [],
   setModelAPIResponse: () => {},
   setNewAnswerList: () => {},
+});
+
+export const NLPContext = React.createContext<INLPContext>({
+  highlightKey: '',
+  setHighlightKey: () => {},
 });
