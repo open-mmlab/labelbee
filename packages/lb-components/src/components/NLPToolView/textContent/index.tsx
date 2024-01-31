@@ -17,7 +17,7 @@ import {
   IRemarkInterval,
   IRemarkAnnotation,
 } from '../types';
-import { prefix } from '@/constant';
+import { prefix, TOOL_PANEL_KEY } from '@/constant';
 import { useTextSelection } from 'ahooks';
 import _ from 'lodash';
 import { CommonToolUtils, uuid } from '@labelbee/lb-annotation';
@@ -38,6 +38,7 @@ interface IProps {
   remarkLayer?: (values: IRemarkLayer) => void;
   remark?: any;
   isSourceView?: boolean;
+  activeToolPanel?: string;
 }
 
 const NLPViewCls = `${prefix}-NLPView`;
@@ -77,8 +78,11 @@ const TextContent: React.FC<IProps> = (props) => {
     onSelectionChange,
     textAnnotation,
     remark,
+    activeToolPanel,
   } = props;
   const { enableRemark, displayRemarkList } = remark || {};
+
+  const hideRemark = activeToolPanel ? activeToolPanel !== TOOL_PANEL_KEY.Remark : false;
 
   const { t } = useTranslation();
   const contentRef = useRef<HTMLDivElement>(null);
@@ -118,9 +122,9 @@ const TextContent: React.FC<IProps> = (props) => {
   }, []);
 
   useEffect(() => {
-    if (enableRemark) {
+    if (enableRemark && !hideRemark) {
       onSelectionRemark(selection.text);
-    } else {
+    } else if (activeToolPanel && activeToolPanel === TOOL_PANEL_KEY.Tool) {
       onSelectionChange?.(selection.text);
     }
   }, [selection.text]);
@@ -218,14 +222,14 @@ const TextContent: React.FC<IProps> = (props) => {
           {displayRemarkList?.length > 0 && (
             <RemarkMask remarkSplitIntervals={remarkSplitIntervals} remark={remark} />
           )}
-
-          {renderRemarkModal({
-            remarkLayer: props?.remarkLayer,
-            setRemarkStyle,
-            remarkStyle,
-            remarkResut,
-            setRemarkResut,
-          })}
+          {!hideRemark &&
+            renderRemarkModal({
+              remarkLayer: props?.remarkLayer,
+              setRemarkStyle,
+              remarkStyle,
+              remarkResut,
+              setRemarkResut,
+            })}
 
           <div className={`${NLPViewCls}-question-content-mask`} ref={contentRef}>
             {content}
