@@ -15,6 +15,7 @@ import { CloseOutlined } from '@ant-design/icons';
 interface IProps {
   toolInstance: ICustomToolInstance;
   stepInfo: IStepInfo;
+  checkMode?: boolean;
 }
 
 export const sidebarCls = `${prefix}-sidebar`;
@@ -22,7 +23,7 @@ export const sidebarCls = `${prefix}-sidebar`;
 const NLPAnnotatedList: React.FC<IProps> = (props) => {
   const [_, forceRender] = useState(0);
   const listRef = useRef<HTMLElement>(null);
-  const { toolInstance } = props;
+  const { toolInstance, checkMode } = props;
   const { t } = useTranslation();
 
   const [highlight, setHighlight] = useState<string>('');
@@ -70,7 +71,8 @@ const NLPAnnotatedList: React.FC<IProps> = (props) => {
                 v.attribute || t('NoAttribute')
               }，${t('textTool')}：${v.text}`}</span>
             </Tooltip>
-            {active && (
+
+            {!checkMode && (
               <Popconfirm
                 title={t('DeleteCommentConfirm')}
                 placement='topRight'
@@ -81,7 +83,12 @@ const NLPAnnotatedList: React.FC<IProps> = (props) => {
                 onConfirm={() => onDeleteTextAnnotation(v)}
                 overlayClassName={`${prefix}-pop-confirm`}
               >
-                <CloseOutlined style={{ margin: '0px 16px' }} onClick={(e)=>{e.stopPropagation()}}/>
+                <CloseOutlined
+                  className={`${sidebarCls}-pop-remove`}
+                  onClick={(e) => {
+                    e.stopPropagation();
+                  }}
+                />
               </Popconfirm>
             )}
           </div>

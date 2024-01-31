@@ -24,6 +24,7 @@ import { CommonToolUtils, uuid } from '@labelbee/lb-annotation';
 import styleString from '@/constant/styleString';
 import { getIntervals } from '../utils';
 import { classnames } from '@/utils';
+import RemarkMask from './remarkMask';
 
 interface IProps {
   highlightKey?: string;
@@ -41,6 +42,31 @@ interface IProps {
 
 const NLPViewCls = `${prefix}-NLPView`;
 
+const renderRemarkModal = ({
+  remarkLayer,
+  remarkStyle,
+  setRemarkStyle,
+  setRemarkResut,
+  remarkResut,
+}: {
+  setRemarkStyle: (value?: React.CSSProperties) => void;
+  remarkLayer?: (values: IRemarkLayer) => void;
+  remarkStyle: React.CSSProperties | undefined;
+  setRemarkResut: (value: ISelectText) => void;
+  remarkResut: ISelectText;
+}) => {
+  if (remarkLayer) {
+    return remarkLayer({
+      style: remarkStyle,
+      onClose: () => {
+        setRemarkStyle(undefined);
+        setRemarkResut({});
+        window.getSelection()?.empty();
+      },
+      submitData: remarkResut,
+    });
+  }
+};
 const TextContent: React.FC<IProps> = (props) => {
   const {
     highlightKey,
@@ -51,7 +77,6 @@ const TextContent: React.FC<IProps> = (props) => {
     onSelectionChange,
     textAnnotation,
     remark,
-    isSourceView,
   } = props;
   const { enableRemark, displayRemarkList } = remark || {};
 
@@ -154,99 +179,6 @@ const TextContent: React.FC<IProps> = (props) => {
     }
   };
 
-  const randerRemark = () => {
-    if (props?.remarkLayer) {
-      return props.remarkLayer({
-        style: remarkStyle,
-        onClose: () => {
-          setRemarkStyle(undefined);
-          setRemarkResut({});
-          window.getSelection()?.empty();
-        },
-        submitData: remarkResut,
-      });
-    }
-    return null;
-  };
-
-  const renderRemarkMask = () => {
-    return (
-      <div
-        style={{
-          position: 'absolute',
-          top: 0,
-          left: 0,
-          backgroundColor: 'transparent',
-          color: 'transparent',
-        }}
-      >
-        {remarkSplitIntervals.map((interval: IRemarkInterval, index: number) => {
-          const remarkAnnotation = _.last(interval.remarkAnnotations);
-          const highlight = interval?.remarkAnnotations?.find(
-            (i) => i?.auditID === remark.hoverAuditID,
-          );
-          const color = highlight ? '#ffc60a' : '#fcdf7e';
-          if (remarkAnnotation) {
-            return (
-              <span
-                style={{
-                  borderBottom: `2px solid ${color}`,
-                  padding: '2px 0px',
-                }}
-                id={remarkAnnotation?.id}
-                key={index}
-              >
-                {interval.text}
-              </span>
-            );
-          }
-          return <span key={index}>{interval.text}</span>;
-        })}
-      </div>
-    );
-  };
-
-  const renderContent = () => {
-    return (
-      <div style={{ position: 'relative' }}>
-        {splitIntervals.map((interval: INLPInterval, index: number) => {
-          const annotation = _.last(interval.annotations);
-          if (annotation) {
-            const color = getColor(annotation.attribute);
-            const highlight = interval?.annotations?.find(
-              (v: INLPTextAnnotation) => v.id === highlightKey,
-            );
-            return (
-              <span
-                style={{
-                  backgroundColor: color.valid.stroke,
-                  color: highlight ? 'white' : undefined,
-                  padding: '2px 0px',
-                }}
-                key={index}
-              >
-                {interval.text}
-              </span>
-            );
-          } else {
-            return <span key={index}>{interval.text}</span>;
-          }
-        })}
-        {displayRemarkList?.length > 0 && renderRemarkMask()}
-        {renderMask()}
-        {randerRemark()}
-      </div>
-    );
-  };
-
-  const renderMask = () => {
-    return (
-      <div className={`${NLPViewCls}-question-content-mask`} ref={contentRef}>
-        {content}
-      </div>
-    );
-  };
-
   return (
     <div>
       <div className={`${NLPViewCls}-question-title`}>{t('textTool')}</div>
@@ -259,7 +191,46 @@ const TextContent: React.FC<IProps> = (props) => {
           e.preventDefault();
         }}
       >
-        {renderContent()}
+        <div style={{ position: 'relative' }}>
+          {splitIntervals.map((interval: INLPInterval, index: number) => {
+            const annotation = _.last(interval.annotations);
+            if (annotation) {
+              const color = getColor(annotation.attribute);
+              const highlight = interval?.annotations?.find(
+                (v: INLPTextAnnotation) => v.id === highlightKey,
+              );
+              return (
+                <span
+                  style={{
+                    backgroundColor: color.valid.stroke,
+                    color: highlight ? 'white' : undefined,
+                    padding: '2px 0px',
+                  }}
+                  key={index}
+                >
+                  {interval.text}
+                </span>
+              );
+            } else {
+              return <span key={index}>{interval.text}</span>;
+            }
+          })}
+          {displayRemarkList?.length > 0 && (
+            <RemarkMask remarkSplitIntervals={remarkSplitIntervals} remark={remark} />
+          )}
+
+          {renderRemarkModal({
+            remarkLayer: props?.remarkLayer,
+            setRemarkStyle,
+            remarkStyle,
+            remarkResut,
+            setRemarkResut,
+          })}
+
+          <div className={`${NLPViewCls}-question-content-mask`} ref={contentRef}>
+            {content}
+          </div>
+        </div>
       </div>
     </div>
   );

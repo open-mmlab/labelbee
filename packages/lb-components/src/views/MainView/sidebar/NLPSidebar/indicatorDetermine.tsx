@@ -52,7 +52,7 @@ const IndicatorDetermineList = (props: IProps) => {
   if (indicatorDetermine?.length > 0) {
     const displayList = indicatorDetermine.filter((i: IndicatorDetermine) => i?.label);
     return (
-      <div style={{ padding: '12px', marginBottom: '24px' }}>
+      <div style={{ padding: '12px', marginBottom: '12px' }}>
         <div style={{ fontSize: '16px', fontWeight: 500, lineHeight: '46px' }}>
           {t('IndicatorJudgment')}
         </div>

@@ -84,8 +84,8 @@ const ViewportProviderLayout = (props: AppProps & IProps & { children: any }) =>
   const { t } = useTranslation();
   const { stepList, step } = props;
   const currentToolName = getStepConfig(stepList, step)?.tool;
-  const hasLangNode = ![EToolName.LLM].includes(currentToolName);
-  const hasHeaderOption = ![EToolName.LLM].includes(currentToolName);
+  const hasLangNode = ![EToolName.LLM, EToolName.NLP].includes(currentToolName);
+  const hasHeaderOption = ![EToolName.LLM, EToolName.NLP].includes(currentToolName);
   const hasPredictTrackingIcon = [EPointCloudName.PointCloud].includes(currentToolName);
   return (
     <ViewportProvider>
