@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect, useRef, useMemo } from 'react';
 import { connect } from 'react-redux';
 import { AppState } from 'src/store';
 import StepUtils from '@/utils/StepUtils';
@@ -7,23 +7,37 @@ import { useTranslation } from 'react-i18next';
 import { LabelBeeContext } from '@/store/ctx';
 import { ICustomToolInstance } from '@/hooks/annotation';
 import { jsonParser } from '@/utils';
-import { IndicatorDetermine } from '@/components/NLPToolView/types';
+import { IndicatorDetermine, INLPResult } from '@/components/NLPToolView/types';
 import DetermineGroup from '@/components/LLMToolView/sidebar/components/determineGroup';
+import { getCurrentResultFromResultList } from '@/components/LLMToolView/utils/data';
+import { IFileItem } from '@/types/data';
 
 interface IProps {
   toolInstance: ICustomToolInstance;
   stepInfo: IStepInfo;
   imgIndex: number;
   checkMode?: boolean;
+  imgList: IFileItem[];
 }
 
 const IndicatorDetermineList = (props: IProps) => {
-  const { toolInstance, stepInfo, checkMode, imgIndex } = props;
+  const { toolInstance, stepInfo, checkMode, imgIndex, imgList } = props;
+
   const [result] = toolInstance.exportData();
-  const currentResult = result?.[0];
+  const [currentResult, setCurrentResult] = useState(result?.[0]);
+
   const { t } = useTranslation();
 
   const [_, forceRender] = useState(0);
+
+  useEffect(() => {
+    if (!imgList[imgIndex]) {
+      return;
+    }
+    const currentData = imgList[imgIndex] ?? {};
+    const result = getCurrentResultFromResultList(currentData?.result || '');
+    setCurrentResult(result);
+  }, [imgIndex, imgList]);
 
   useEffect(() => {
     if (toolInstance) {
@@ -34,7 +48,7 @@ const IndicatorDetermineList = (props: IProps) => {
     return () => {
       toolInstance?.unbindAll('changeIndicatorDetermine');
     };
-  }, [toolInstance, imgIndex]);
+  }, [toolInstance]);
 
   const config = jsonParser(stepInfo.config);
   const { indicatorDetermine } = config;
@@ -45,7 +59,7 @@ const IndicatorDetermineList = (props: IProps) => {
       const selected = { [key]: value };
       const originData = currentResult?.indicatorDetermine ?? {};
       const newResult = { ...currentResult, indicatorDetermine: { ...originData, ...selected } };
-      toolInstance.setResult(newResult);
+      toolInstance.updateResult(newResult);
     }
   };
 
@@ -83,11 +97,11 @@ const IndicatorDetermineList = (props: IProps) => {
 };
 const mapStateToProps = (state: AppState) => {
   const stepInfo = StepUtils.getCurrentStepInfo(state.annotation?.step, state.annotation?.stepList);
-
   return {
     toolInstance: state.annotation.toolInstance,
     stepInfo,
     imgIndex: state.annotation.imgIndex,
+    imgList: state.annotation.imgList,
   };
 };
 

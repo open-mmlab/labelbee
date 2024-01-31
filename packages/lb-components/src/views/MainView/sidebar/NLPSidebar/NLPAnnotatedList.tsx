@@ -7,30 +7,42 @@ import { useTranslation } from 'react-i18next';
 import { LabelBeeContext } from '@/store/ctx';
 import { ICustomToolInstance } from '@/hooks/annotation';
 import { prefix } from '@/constant';
-import { classnames } from '@/utils';
-import { INLPTextAnnotation } from '@/components/NLPToolView/types';
+import { classnames, jsonParser } from '@/utils';
+import { INLPTextAnnotation, INLPToolConfig } from '@/components/NLPToolView/types';
 import { Popconfirm, Tooltip } from 'antd';
 import { CloseOutlined } from '@ant-design/icons';
-
 interface IProps {
   toolInstance: ICustomToolInstance;
   stepInfo: IStepInfo;
   checkMode?: boolean;
 }
 
+interface INLPTextAnnotationList extends INLPTextAnnotation {
+  label: string;
+}
+
 export const sidebarCls = `${prefix}-sidebar`;
+
+const getAnnotatedList = (config: INLPToolConfig, textAnnotation: INLPTextAnnotation[]) => {
+  const attributeList = config?.attributeList || [];
+  return textAnnotation.map((i) => {
+    const label = attributeList.filter((item) => item.value === i.attribute)?.[0]?.key || '';
+    return { ...i, label };
+  });
+};
 
 const NLPAnnotatedList: React.FC<IProps> = (props) => {
   const [_, forceRender] = useState(0);
   const listRef = useRef<HTMLElement>(null);
-  const { toolInstance, checkMode } = props;
+  const { toolInstance, checkMode, stepInfo } = props;
   const { t } = useTranslation();
+  const config = jsonParser(stepInfo.config);
 
   const [highlight, setHighlight] = useState<string>('');
 
   useEffect(() => {
     if (toolInstance) {
-      toolInstance.singleOn('changeAttributeSidebar', (index: number) => {
+      toolInstance.on('changeAttributeSidebar', (index: number) => {
         forceRender((s) => s + 1);
       });
     }
@@ -40,7 +52,8 @@ const NLPAnnotatedList: React.FC<IProps> = (props) => {
   }, [toolInstance, listRef]);
 
   const [result] = toolInstance.exportData();
-  const annotatedList = result?.[0]?.textAnnotation ?? [];
+  const list = result?.[0]?.textAnnotation ?? [];
+  const annotatedList = getAnnotatedList(config, list);
 
   const setHighlightKey = (key: string) => {
     let chooseKey = key === highlight ? '' : key;
@@ -55,7 +68,7 @@ const NLPAnnotatedList: React.FC<IProps> = (props) => {
   if (annotatedList?.length === 0) return null;
   return (
     <div className={`${sidebarCls}__content__NLPList`}>
-      {annotatedList.map((v: INLPTextAnnotation, k: number) => {
+      {annotatedList.map((v: INLPTextAnnotationList, k: number) => {
         const active = highlight === v.id;
         return (
           <div
@@ -66,11 +79,11 @@ const NLPAnnotatedList: React.FC<IProps> = (props) => {
             })}
             onClick={() => setHighlightKey(v.id)}
           >
-            <Tooltip title={v.text}>
-              <span className={`${sidebarCls}__content__NLPList__item__text`}>{`${
-                v.attribute || t('NoAttribute')
-              }，${t('textTool')}：${v.text}`}</span>
-            </Tooltip>
+            <span className={`${sidebarCls}__content__NLPList__item__text`}>
+              <Tooltip title={v.text} overlayInnerStyle={{ maxHeight: '400px', overflow: 'auto' }}>
+                <span>{`${v.label || t('NoAttribute')}，${t('textTool')}：${v.text}`}</span>
+              </Tooltip>
+            </span>
 
             {!checkMode && (
               <Popconfirm
