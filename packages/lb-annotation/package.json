@@ -1,6 +1,6 @@
 {
   "name": "@labelbee/lb-annotation",
-  "version": "1.26.0-beta.2",
+  "version": "1.26.0-beta.3",
   "description": "Annotation tool collection",
   "keywords": [
     "annotation",
@@ -94,7 +94,7 @@
     "typescript": "^4.2.3"
   },
   "dependencies": {
-    "@labelbee/lb-utils": "1.18.0-beta.1",
+    "@labelbee/lb-utils": "1.18.0-beta.2",
     "@turf/turf": "5.1.6",
     "color-rgba": "^2.3.0",
     "lodash": "^4.17.20",
