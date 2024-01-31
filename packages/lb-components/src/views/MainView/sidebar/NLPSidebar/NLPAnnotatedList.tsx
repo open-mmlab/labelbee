@@ -15,6 +15,7 @@ import { CloseOutlined } from '@ant-design/icons';
 interface IProps {
   toolInstance: ICustomToolInstance;
   stepInfo: IStepInfo;
+  checkMode?: boolean;
 }
 
 export const sidebarCls = `${prefix}-sidebar`;
@@ -22,7 +23,7 @@ export const sidebarCls = `${prefix}-sidebar`;
 const NLPAnnotatedList: React.FC<IProps> = (props) => {
   const [_, forceRender] = useState(0);
   const listRef = useRef<HTMLElement>(null);
-  const { toolInstance } = props;
+  const { toolInstance, checkMode } = props;
   const { t } = useTranslation();
 
   const [highlight, setHighlight] = useState<string>('');
@@ -71,23 +72,25 @@ const NLPAnnotatedList: React.FC<IProps> = (props) => {
               }，${t('textTool')}：${v.text}`}</span>
             </Tooltip>
 
-            <Popconfirm
-              title={t('DeleteCommentConfirm')}
-              placement='topRight'
-              okText={t('Confirm')}
-              cancelText={t('Cancel')}
-              // @ts-ignore
-              getPopupContainer={(trigger) => trigger.parentElement}
-              onConfirm={() => onDeleteTextAnnotation(v)}
-              overlayClassName={`${prefix}-pop-confirm`}
-            >
-              <CloseOutlined
-                className={`${sidebarCls}-pop-remove`}
-                onClick={(e) => {
-                  e.stopPropagation();
-                }}
-              />
-            </Popconfirm>
+            {!checkMode && (
+              <Popconfirm
+                title={t('DeleteCommentConfirm')}
+                placement='topRight'
+                okText={t('Confirm')}
+                cancelText={t('Cancel')}
+                // @ts-ignore
+                getPopupContainer={(trigger) => trigger.parentElement}
+                onConfirm={() => onDeleteTextAnnotation(v)}
+                overlayClassName={`${prefix}-pop-confirm`}
+              >
+                <CloseOutlined
+                  className={`${sidebarCls}-pop-remove`}
+                  onClick={(e) => {
+                    e.stopPropagation();
+                  }}
+                />
+              </Popconfirm>
+            )}
           </div>
         );
       })}
