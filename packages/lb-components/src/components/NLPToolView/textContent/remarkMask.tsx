@@ -31,11 +31,15 @@ export default ({
           (i) => i?.auditID === remark.hoverAuditID,
         );
         const color = highlight ? '#ffc60a' : '#fcdf7e';
+        let borderStyle = `2px solid ${color}`;
+        if (!remark?.isShowRemark) {
+          borderStyle = '';
+        }
         if (remarkAnnotation) {
           return (
             <span
               style={{
-                borderBottom: `2px solid ${color}`,
+                borderBottom: borderStyle,
                 padding: '2px 0px',
               }}
               id={remarkAnnotation?.id}
