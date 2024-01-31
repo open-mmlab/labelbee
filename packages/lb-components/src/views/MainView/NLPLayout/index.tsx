@@ -15,6 +15,7 @@ interface IProps {
   loading: boolean;
   remarkLayer?: any;
   remark?: any;
+  activeToolPanel?: string;
 }
 
 const { Sider, Content } = Layout;
@@ -46,6 +47,7 @@ const NLPLayout: React.FC<AppProps & IProps> = (props) => {
             tips={props.tips}
             remarkLayer={props?.remarkLayer}
             remark={props?.remark}
+            activeToolPanel={props?.activeToolPanel}
           />
           <ToolFooter style={props.style?.footer} mode={props.mode} footer={props?.footer} />
         </Content>

@@ -12,12 +12,7 @@ import { message } from 'antd';
 import { prefix } from '@/constant';
 import TextContent from './textContent';
 import { useTranslation } from 'react-i18next';
-import {
-  ITextData,
-  INLPTextAnnotation,
-  INLPResult,
-  IRemarkLayer,
-} from './types';
+import { ITextData, INLPTextAnnotation, INLPResult, IRemarkLayer } from './types';
 import AnnotationTips from '@/views/MainView/annotationTips';
 import { getStepConfig } from '@/store/annotation/reducer';
 import { jsonParser } from '@/utils';
@@ -26,6 +21,7 @@ import { useCustomToolInstance } from '@/hooks/annotation';
 import { uuid } from '@labelbee/lb-annotation';
 
 interface IProps {
+  activeToolPanel?: string;
   checkMode?: boolean;
   annotation?: any;
   showTips?: boolean;
@@ -35,7 +31,7 @@ interface IProps {
 }
 const NLPViewCls = `${prefix}-NLPView`;
 const NLPToolView: React.FC<IProps> = (props) => {
-  const { annotation, checkMode, tips, showTips, remarkLayer, remark } = props;
+  const { annotation, checkMode, tips, showTips, remarkLayer, remark, activeToolPanel } = props;
 
   const { imgIndex, imgList, stepList, step } = annotation;
   const { highlightKey, setHighlightKey } = useContext(NLPContext);
@@ -193,6 +189,7 @@ const NLPToolView: React.FC<IProps> = (props) => {
           onSelectionChange={onSelectionChange}
           remarkLayer={remarkLayer}
           remark={remark}
+          activeToolPanel={activeToolPanel}
         />
       </div>
     </div>
