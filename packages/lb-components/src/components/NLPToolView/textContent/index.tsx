@@ -56,7 +56,7 @@ const renderRemarkModal = ({
   remarkResut: ISelectText;
 }) => {
   if (remarkLayer) {
-    remarkLayer({
+    return remarkLayer({
       style: remarkStyle,
       onClose: () => {
         setRemarkStyle(undefined);
@@ -218,9 +218,10 @@ const TextContent: React.FC<IProps> = (props) => {
           {displayRemarkList?.length > 0 && (
             <RemarkMask remarkSplitIntervals={remarkSplitIntervals} remark={remark} />
           )}
+
           {renderRemarkModal({
-            setRemarkStyle,
             remarkLayer: props?.remarkLayer,
+            setRemarkStyle,
             remarkStyle,
             remarkResut,
             setRemarkResut,
