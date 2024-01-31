@@ -1,7 +1,6 @@
-import { CommonToolUtils } from '@labelbee/lb-annotation';
+import { CommonToolUtils, EToolName } from '@labelbee/lb-annotation';
 import { IStepInfo } from '@/types/step';
 import { jsonParser } from '@/utils';
-import { EToolName } from '@labelbee/lb-annotation';
 
 /**
  * 获取当前步骤下的依赖情况，用于依赖框体的展示
@@ -18,13 +17,16 @@ import { EToolName } from '@labelbee/lb-annotation';
  */
 export function getBasicResult(
   currentStep: number,
-  dataSourceStep: number,
+  dataSourceStepParam: number,
   stepList: IStepInfo[],
-  result: any,
-  filterNeeded: boolean = true,
-  preResult: string = '{}',
-  forbidFilter: boolean = false,
+  resultParam: any,
+  filterNeeded = true,
+  preResult = '{}',
+  forbidFilter = false,
 ) {
+  let result = resultParam;
+  let dataSourceStep = dataSourceStepParam;
+
   const currentStepInfo = CommonToolUtils.getCurrentStepInfo(currentStep, stepList);
   let dataSourceStepInfo = CommonToolUtils.getCurrentStepInfo(dataSourceStep, stepList);
 
@@ -259,10 +261,11 @@ export function useConfigFilterData(
   currentStep: number,
   stepList: IStepInfo[],
   basicData: any[],
-  forbidFilter: boolean = false,
+  forbidFilter = false,
 ) {
   const currentStepInfo = CommonToolUtils.getStepInfo(currentStep, stepList);
   const dataSourceStepInfo = CommonToolUtils.getCurrentStepInfo(currentStepInfo.dataSourceStep, stepList);
+  let res = basicData;
   if (currentStepInfo.config) {
     const config = jsonParser(currentStepInfo.config);
     if (config.filterData) {
@@ -270,7 +273,7 @@ export function useConfigFilterData(
 
       const filterDataObject = transformFilterDataToObject(filterData);
 
-      basicData = basicData.filter((v) => {
+      res = basicData.filter((v) => {
         if (forbidFilter === true) {
           return true;
         }
@@ -302,7 +305,7 @@ export function useConfigFilterData(
       });
     }
   }
-  return basicData;
+  return res;
 }
 
 /**
@@ -320,7 +323,7 @@ export function getSourceData(
   stepList: IStepInfo[],
   result: any,
   sourceIDList: any[],
-  preResult: string = '{}',
+  preResult = '{}',
 ): any {
   const currentStepInfo = CommonToolUtils.getCurrentStepInfo(currentStep, stepList);
 

@@ -7,16 +7,18 @@
 import { getConfig, styleDefaultConfig } from '@/constant/defaultConfig';
 import { EToolName, THybridToolName } from '@/constant/tool';
 import { getCurrentOperation } from '@/utils/tool/EnhanceCommonToolUtils';
+import { CoordinateUtils } from '@/utils/tool/AxisUtils';
+import BasicLayer from '@/core/basicLayer';
+import { IPolygonData } from '@/types/tool/polygon';
 import { RectOperation } from './toolOperation/rectOperation';
 import PolygonOperation from './toolOperation/polygonOperation';
 import { BasicToolOperation } from './toolOperation/basicToolOperation';
 import SegmentByRect from './toolOperation/segmentByRect';
-import { ICommonProps } from './index'
-import { CoordinateUtils } from '@/utils/tool/AxisUtils';
+import { ICommonProps } from './index';
 
 interface IToolSchedulerOperation {}
 
-interface IToolSchedulerProps extends ICommonProps{
+interface IToolSchedulerProps extends ICommonProps {
   container: HTMLElement;
   size: ISize;
   toolName: THybridToolName;
@@ -113,27 +115,45 @@ export class ToolScheduler implements IToolSchedulerOperation {
     });
   }
 
-  public setZoom(zoom: number){
+  public setZoom(zoom: number) {
     this.toolOperationList.forEach((toolInstance) => {
-      toolInstance.setZoom(zoom)
+      toolInstance.setZoom(zoom);
     });
   }
 
   public setCurrentPos(currentPos: ICoordinate) {
     this.toolOperationList.forEach((toolInstance) => {
-      toolInstance.setCurrentPos(currentPos)
+      toolInstance.setCurrentPos(currentPos);
     });
   }
 
   public setBasicImgInfo(basicImgInfo: any) {
     this.toolOperationList.forEach((toolInstance) => {
-      toolInstance.setBasicImgInfo(basicImgInfo)
+      toolInstance.setBasicImgInfo(basicImgInfo);
     });
   }
 
   public setImgAttribute(imgAttribute: IImageAttribute) {
     this.toolOperationList.forEach((toolInstance) => {
       toolInstance.setImgAttribute(imgAttribute);
+    });
+  }
+
+  public setBasicInstance(basicInstance: BasicLayer) {
+    this.toolOperationList.forEach((toolInstance) => {
+      toolInstance.setBasicInstance(basicInstance);
+    });
+  }
+
+  public setDependName(dependToolName?: EToolName) {
+    this.toolOperationList.forEach((toolInstance) => {
+      toolInstance.setDependName(dependToolName);
+    });
+  }
+
+  public setBasicResult(basicResult?: IRect | IPolygonData) {
+    this.toolOperationList.forEach((toolInstance) => {
+      toolInstance.setBasicResult(basicResult);
     });
   }
 

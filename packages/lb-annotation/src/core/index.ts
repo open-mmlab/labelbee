@@ -6,10 +6,9 @@ import { ELang } from '@/constant/annotation';
 import { getConfig, styleDefaultConfig } from '@/constant/defaultConfig';
 import { EToolName, THybridToolName } from '@/constant/tool';
 import { IPolygonData } from '@/types/tool/polygon';
-import { HybridToolUtils, ToolScheduler } from './scheduler';
-import CanvasUtils from '@/utils/tool/CanvasUtils';
 import BasicLayer from '@/core/basicLayer';
 import { CoordinateUtils } from '@/utils/tool/AxisUtils';
+import { HybridToolUtils, ToolScheduler } from './scheduler';
 
 interface IProps {
   container: HTMLElement;
@@ -26,6 +25,7 @@ export interface ICommonProps {
   coordUtils?: CoordinateUtils;
   basicImgInfo?: any;
   imgAttribute?: IImageAttribute;
+  imgInfo?: ISize;
 }
 
 const loadImage = (imgSrc: string) => {
@@ -58,6 +58,8 @@ export default class AnnotationEngine {
 
   public basicImgInfo: any; // 用于存储当前图片的信息
 
+  public imgInfo?: ISize;
+
   private container: HTMLElement; // 当前结构绑定 container
 
   private size: ISize;
@@ -86,7 +88,7 @@ export default class AnnotationEngine {
     this.currentPos = {
       x: 0,
       y: 0,
-    }
+    };
     this.basicImgInfo = {
       width: props.imgNode?.width ?? 0,
       height: props.imgNode?.height ?? 0,
@@ -99,7 +101,6 @@ export default class AnnotationEngine {
     this.style = props.style ?? styleDefaultConfig; // 设置默认操作
     this.toolScheduler = new ToolScheduler({ ...props, ...this.commonProps });
     this.basicInstance = new BasicLayer({ ...props, ...this.commonProps });
-    console.log(this.basicInstance)
     this.i18nLanguage = 'cn'; // 默认为中文（跟 basicOperation 内同步）
     this._initToolOperation();
     this._initBasicLayer();
@@ -111,8 +112,9 @@ export default class AnnotationEngine {
       currentPos: this.currentPos,
       basicImgInfo: this.basicImgInfo,
       coordUtils: this.coordUtils,
-    }
+    };
   }
+
   /**
    * 同步各种基础类型信息
    * 1. imgNode
@@ -121,28 +123,29 @@ export default class AnnotationEngine {
    * 4. style
    */
 
-  public syncZoom(zoom: number){
-    this.toolScheduler.setZoom(zoom)
-    this.basicInstance.setZoom(zoom)
+  public syncZoom(zoom: number) {
+    this.toolScheduler.setZoom(zoom);
+    this.basicInstance.setZoom(zoom);
     this.coordUtils.setZoomAndCurrentPos(this.zoom, this.currentPos);
   }
 
   public syncCurrentPos(currentPos: ICoordinate) {
-    this.toolScheduler.setCurrentPos(currentPos)
-    this.basicInstance.setCurrentPos(currentPos)
+    this.toolScheduler.setCurrentPos(currentPos);
+    this.basicInstance.setCurrentPos(currentPos);
     this.coordUtils.setZoomAndCurrentPos(this.zoom, this.currentPos);
   }
 
   public syncBasicImgInfo(basicImgInfo: any) {
-    this.toolScheduler.setBasicImgInfo(basicImgInfo)
-    this.basicInstance.setBasicImgInfo(basicImgInfo)
+    this.toolScheduler.setBasicImgInfo(basicImgInfo);
+    this.basicInstance.setBasicImgInfo(basicImgInfo);
     this.coordUtils.setBasicImgInfo(basicImgInfo);
   }
 
-  public setImgAttribute(imgAttribute: IImageAttribute) {
+  public syncImgAttribute(imgAttribute: IImageAttribute) {
     this.toolScheduler.setImgAttribute(imgAttribute);
-    this.basicInstance.setImgAttribute(imgAttribute)
+    this.basicInstance.setImgAttribute(imgAttribute);
   }
+
   /**
    * 设置当前工具类型
    * @param toolName
@@ -172,6 +175,7 @@ export default class AnnotationEngine {
     }>,
   ) {
     this.toolScheduler.setImgNode(imgNode, basicImgInfo);
+    this.basicInstance.setImgNode(imgNode, basicImgInfo);
     this.imgNode = imgNode;
   }
 
@@ -216,6 +220,7 @@ export default class AnnotationEngine {
       }
     });
 
+    this.toolScheduler.setBasicInstance(this.basicInstance);
     // 实时同步语言
     this.setLang(this.i18nLanguage);
   }
@@ -224,7 +229,7 @@ export default class AnnotationEngine {
    * 初始化依赖渲染层
    */
   private _initBasicLayer() {
-    this.basicInstance.renderBasicCanvas()
+    this.basicInstance.renderBasicCanvas();
   }
 
   /**
@@ -236,9 +241,11 @@ export default class AnnotationEngine {
     this.dependToolName = dependToolName;
     this.basicResult = basicResult;
 
-    this.toolInstance.setDependName(dependToolName);
-    this.toolInstance.setBasicResult(basicResult);
-    this.toolInstance.renderBasicCanvas();
+    this.toolScheduler.setDependName(dependToolName);
+    this.toolScheduler.setBasicResult(basicResult);
+    this.basicInstance.setBasicResult(basicResult);
+    this.basicInstance.setDependName(dependToolName);
+    this.basicInstance.renderBasicCanvas();
   }
 
   /**

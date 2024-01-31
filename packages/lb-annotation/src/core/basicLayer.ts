@@ -8,7 +8,9 @@ import CanvasUtils from '@/utils/tool/CanvasUtils';
 import DrawUtils from '@/utils/tool/DrawUtils';
 import AxisUtils, { CoordinateUtils } from '@/utils/tool/AxisUtils';
 import { HybridToolUtils } from '@/core/scheduler';
-import { ICommonProps } from './index'
+import EventListener from '@/core/toolOperation/eventListener';
+import { IPolygonConfig } from '@/types/tool/polygon';
+import { ICommonProps } from './index';
 
 interface IBasicLayerProps extends ICommonProps {
   container: HTMLElement;
@@ -20,13 +22,14 @@ interface IBasicLayerProps extends ICommonProps {
   forbidBasicResultRender?: boolean;
 }
 
-export default class BasicLayer {
+export default class BasicLayer extends EventListener {
   public container: HTMLElement; // 当前结构绑定 container
+
   public size: ISize;
 
   public imgNode?: HTMLImageElement;
 
-  public basicCanvas!: HTMLCanvasElement;  // dom for basic layer
+  public basicCanvas!: HTMLCanvasElement; // dom for basic layer
 
   public basicResult?: any; // data of depended tool
 
@@ -38,19 +41,25 @@ export default class BasicLayer {
 
   public currentPos: ICoordinate; // 存储实时偏移的位置
 
+  public coordUtils?: CoordinateUtils;
+
   public basicImgInfo: any; // 用于存储当前图片的信息
 
-  public coordUtils?: CoordinateUtils;
+  public imgInfo?: ISize;
 
   private hiddenImg: boolean;
 
   private _imgAttribute?: any;
 
+  private currentPosStorage?: ICoordinate; // 存储当前点击的平移位置
+
   constructor(props: IBasicLayerProps) {
+    super();
     this.container = props.container;
+
     this.size = props.size;
     this.zoom = props.zoom ?? 1;
-    this.currentPos = props.currentPos ?? { x: 0, y: 0};
+    this.currentPos = props.currentPos ?? { x: 0, y: 0 };
     this.basicImgInfo = props.basicImgInfo;
     this.coordUtils = props.coordUtils;
     this._imgAttribute = props.imgAttribute ?? {};
@@ -59,7 +68,8 @@ export default class BasicLayer {
     this.hiddenImg = !HybridToolUtils.isSingleTool(props.toolName) || false;
     this.forbidBasicResultRender = props.forbidBasicResultRender ?? false;
 
-    this.createBasicCanvas(props.size)
+    this.destroyBasicCanvas();
+    this.createBasicCanvas(props.size);
   }
 
   // getters
@@ -82,6 +92,7 @@ export default class BasicLayer {
 
   public setCurrentPos(currentPos: ICoordinate) {
     this.currentPos = currentPos;
+    this.currentPosStorage = currentPos;
   }
 
   public setBasicImgInfo(basicImgInfo: any) {
@@ -90,7 +101,31 @@ export default class BasicLayer {
 
   public setImgAttribute(imgAttribute: IImageAttribute) {
     this._imgAttribute = imgAttribute;
-    this.renderBasicCanvas()
+    this.renderBasicCanvas();
+  }
+
+  public setImgInfo(size?: ISize) {
+    this.imgInfo = size;
+  }
+
+  public setDependName(dependToolName?: EToolName, dependToolConfig?: IRectConfig | IPolygonConfig) {
+    this.dependToolName = dependToolName;
+    this.coordUtils?.setDependInfo(dependToolName, dependToolConfig);
+  }
+
+  public setBasicResult(basicResult: any) {
+    this.basicResult = basicResult;
+    this.coordUtils?.setBasicResult(basicResult);
+  }
+
+  /**
+   * 同步currentPos, zoom等common信息
+   */
+  public syncCommonInfo(info: ICommonProps) {
+    this.setZoom(info?.zoom ?? this.zoom);
+    this.setCurrentPos(info?.currentPos ?? this.currentPos);
+    this.setBasicImgInfo(info?.basicImgInfo ?? this.basicImgInfo);
+    this.setImgInfo(info?.imgInfo ?? this.imgInfo);
   }
 
   /**
@@ -99,25 +134,43 @@ export default class BasicLayer {
    */
   public setSize(size: ISize) {
     this.size = size;
-    console.log(size)
     if (this.container.contains(this.basicCanvas)) {
       this.destroyBasicCanvas();
       this.createBasicCanvas(size);
-      this.renderBasicCanvas()
+      this.renderBasicCanvas();
     }
+  }
+
+  /**
+   * Notice. It needs to set the default imgInfo. Because it will needs to create info when it doesn't have
+   * @param imgNode
+   * @param basicImgInfo
+   */
+  public setImgNode(imgNode: HTMLImageElement, basicImgInfo: Partial<{ valid: boolean; rotate: number }> = {}) {
+    this.imgNode = imgNode;
+
+    this.setBasicImgInfo({
+      width: imgNode.width,
+      height: imgNode.height,
+      valid: true,
+      rotate: 0,
+      ...basicImgInfo,
+    });
+
+    this.renderBasicCanvas();
   }
 
   public createBasicCanvas(size: ISize) {
     const basicCanvas = document.createElement('canvas');
-    basicCanvas.className = 'bee-basic-layer'
+    basicCanvas.className = 'bee-basic-layer';
     this.updateCanvasBasicStyle(basicCanvas, size, 0);
-    this.basicCanvas = basicCanvas
+    this.basicCanvas = basicCanvas;
     if (this.container.hasChildNodes()) {
       this.container.insertBefore(basicCanvas, this.container.childNodes[0]);
     } else {
-      this.container.appendChild(basicCanvas)
+      this.container.appendChild(basicCanvas);
     }
-    this.basicCtx?.scale(this.pixelRatio, this.pixelRatio)
+    this.basicCtx?.scale(this.pixelRatio, this.pixelRatio);
   }
 
   public updateCanvasBasicStyle(canvas: HTMLCanvasElement, size: ISize, zIndex: number) {
@@ -135,9 +188,6 @@ export default class BasicLayer {
   public drawImg = () => {
     if (!this.imgNode || this.hiddenImg === true) return;
 
-    console.log('drawimg')
-    console.log(this.zoom)
-
     DrawUtils.drawImg(this.basicCanvas, this.imgNode, {
       zoom: this.zoom,
       currentPos: this.currentPos,
@@ -151,6 +201,7 @@ export default class BasicLayer {
       this.container.removeChild(this.basicCanvas);
     }
   }
+
   public clearBasicCanvas() {
     this.basicCtx?.clearRect(0, 0, this.size.width, this.size.height);
   }
@@ -217,5 +268,4 @@ export default class BasicLayer {
       }
     }
   }
-
 }
