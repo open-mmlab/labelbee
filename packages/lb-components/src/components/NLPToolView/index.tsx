@@ -140,6 +140,9 @@ const NLPToolView: React.FC<IProps> = (props) => {
       // ignore the order of selection
       let start = Math.min(anchorOffset, focusOffset);
       let end = Math.max(anchorOffset, focusOffset);
+      if (checkSameByOneAttribute(start, end, selectedAttribute, result?.textAnnotation)) {
+        return;
+      }
       setResult({
         ...result,
         textAnnotation: [
@@ -156,6 +159,17 @@ const NLPToolView: React.FC<IProps> = (props) => {
 
       window.getSelection()?.empty();
     }
+  };
+
+  const checkSameByOneAttribute = (
+    start: number,
+    end: number,
+    selectedAttribute: string,
+    textAnnotation: INLPTextAnnotation[],
+  ) => {
+    return textAnnotation?.some(
+      (i) => i?.start === start && i?.end === end && i?.attribute === selectedAttribute,
+    );
   };
 
   return (
