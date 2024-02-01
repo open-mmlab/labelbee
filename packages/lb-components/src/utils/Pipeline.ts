@@ -3,14 +3,14 @@ import { IStepInfo } from '@/types/step';
 import { jsonParser } from '@/utils';
 
 /**
- * 获取当前步骤下的依赖情况，用于依赖框体的展示
+ * Retrieve the dependencies for the current step to be used in displaying the dependency framework
  *
  *
  * @export
- * @param {number} currentStep 正常标注的步骤！（如果是质检则需要转换成正常标注步骤）
- * @param {number} dataSourceStep 正常标注依赖的步骤
- * @param {IStepInfo[]} stepList 步骤信息
- * @param {*} result 当前图片的所有结果
+ * @param {number} currentStep current annotation step（needs to be converted into normal annotation steps if in quality inspection case）
+ * @param {number} dataSourceStep step of datasource
+ * @param {IStepInfo[]} stepList
+ * @param {*} result all results for the current image
  * @param {boolean} [filterNeeded=true]
  * @param {boolean} [forbidFilter=false]
  * @returns
@@ -54,14 +54,14 @@ export function getBasicResult(
   }
   try {
     const currentStepInfoConfig = jsonParser(currentStepInfo.config);
-    // 如果为非框型工具就需要递归下去
+    // Recursion is needed if it is a non-box tool
     const filterData = filterDataAdaptor(currentStepInfoConfig.filterData, dataSourceStepInfo);
     if (!filterData && filterNeeded) {
       return [];
     }
 
     if (dataSourceStepInfo.tool === EToolName.Tag) {
-      // 过滤标签工具的数据
+      // Filtering the data from the tagging tool
       if (
         dataSourceStepInfo.dataSourceStep === 0 &&
         (!dataSourceStepInfo?.preDataSourceStep || dataSourceStepInfo?.preDataSourceStep === 0)
@@ -69,7 +69,7 @@ export function getBasicResult(
         return [];
       }
 
-      // 过滤出当前符合标准的标签数据
+      // Filter out the current tags data that meets the criteria
       const newData = filterTagResult(sourceData, filterData, forbidFilter);
       const sourceIDList = newData.map((v) => ({ id: v.id, sourceID: v.sourceID }));
       return getSourceData(
@@ -91,14 +91,14 @@ export function getBasicResult(
     ) {
       return useConfigFilterData(currentStep, stepList, sourceData, forbidFilter);
     } else if (dataSourceStepInfo.tool === EToolName.Filter) {
-      // 过滤筛选工具的数据
+      // Filtering the data from the selection tool
       if (
         dataSourceStepInfo.dataSourceStep === 0 &&
         (!dataSourceStepInfo?.preDataSourceStep || dataSourceStepInfo?.preDataSourceStep === 0)
       ) {
         return [];
       }
-      // 过滤出当前符合标准的标签数据
+      // Filter out the current tags data that meets the criteria
       const newData = sourceData.filter(
         (v: any) => filterData.indexOf(v.filterLabel) > -1 || forbidFilter,
       );
@@ -120,11 +120,11 @@ export function getBasicResult(
 export const DEFAULT_LINK = '@@';
 const DEFAULT_TOOL_ATTRIBUTE = ['valid', 'invalid'];
 /**
- * 将旧版的 filterData 转换为新版的 filterData
+ * turn filterData into new filterData
  *
  * @export
  * @param {*} oldFilterData
- * @param {IStepInfo} dataSourceStepInfo 注意这个是依赖项的 stepInfo
+ * @param {IStepInfo} dataSourceStepInfo attention: this is stepInfo of data source
  * @returns
  */
 export function filterDataAdaptor(
@@ -134,14 +134,14 @@ export function filterDataAdaptor(
   const config = jsonParser(dataSourceStepInfo?.config);
 
   if (oldFilterData?.constructor === Object) {
-    // 说明为旧数据
+    // means old data
     const keyList = Object.keys(oldFilterData).reduce((acc: any[], cur: string) => {
       if (Array.isArray(oldFilterData[cur])) {
-        // 在旧格式中仅为 标签工具
+        // In the old format, it only consists of the tagging tool
         return [...acc, ...oldFilterData[cur].map((v: any) => `${cur}${DEFAULT_LINK}${v}`)];
       }
 
-      // 对之前旧的图形工具的适配
+      // Adaptation for the previous old image tools
       if (
         DEFAULT_TOOL_ATTRIBUTE.includes(cur) &&
         oldFilterData[cur] === true &&
@@ -149,7 +149,7 @@ export function filterDataAdaptor(
       ) {
         return [
           ...acc,
-          `${cur}${DEFAULT_LINK}`, // 无属性
+          `${cur}${DEFAULT_LINK}`, // no attribute
           ...config.attributeList.reduce((a: any, v: any) => {
             return [...a, `${cur}${DEFAULT_LINK}${v?.value}`];
           }, []),
@@ -166,7 +166,7 @@ export function filterDataAdaptor(
 }
 
 /**
- * 判断是否是按属性进行标注
+ * Determine whether the annotation is based on attributes
  *
  * @export
  * @param {*} config
@@ -179,7 +179,7 @@ export function judgeIsAttribute(config: any) {
 }
 
 /**
- * 过滤标签结果
+ * Filtering tag results
  * @param sourceData
  * @param filterData
  * @param forbidFilter
@@ -197,7 +197,7 @@ export function filterTagResult(
     }
 
     for (const i of Object.keys(data.result)) {
-      // 注意，标签工具的结果是 是一个对象
+      // Note that the result of the tagging tool is an object
 
       if (tagInputList.hasOwnProperty(i)) {
         const dataList = data.result[i].split(';');
@@ -213,7 +213,7 @@ export function filterTagResult(
 }
 
 /**
- * 将 filterData 转换为 Object 形式，便于判断
+ * turn filterData into Object format，making it easy to determine
  *
  * @export
  * @param {FilterDataState} filterData
@@ -225,7 +225,7 @@ export function transformFilterDataToObject(filterData: string[]): any {
     const [key, value] = cur.split(DEFAULT_LINK);
 
     if (typeof value === 'undefined') {
-      // 表示为空，例如： ['valid', 'invalid']
+      // means empty, like： ['valid', 'invalid']
       return {
         ...acc,
         [key]: [],
@@ -247,9 +247,9 @@ export function transformFilterDataToObject(filterData: string[]): any {
 }
 
 /**
- * 根据 config 过滤当前数据
+ * Filtering current data by config
  *
- * 注意： 该函数目前仅适用于图形类的步骤进行过滤
+ * Note: This function is currently only applicable for filtering steps related to graphical elements.
  *
  * @export
  * @param {number} currentStep
@@ -279,20 +279,20 @@ export function useConfigFilterData(
         }
 
         if (filterData.some((v) => v === 'valid') || filterData.some((v) => v === 'invalid')) {
-          // 说明为图形统一管理
+          // This means centralized management of graphical elements
           if (filterData.some((v) => v === 'valid') && v?.valid === true) {
-            // 说明是原始的图形的过滤
+            // This indicates filtering based on original graphical elements
             return true;
           }
 
           if (filterData.some((v) => v === 'invalid') && v?.valid === false) {
-            // 说明是原始的图形的过滤
+            // This indicates filtering based on original graphical elements
             return true;
           }
 
           return false;
         }
-        // 含有属性的数据过滤
+        // Filtering data containing attributes
         if (judgeIsAttribute(jsonParser(dataSourceStepInfo.config))) {
           if (v?.valid === true) {
             return filterDataObject?.valid?.includes(v?.attribute ?? '');
@@ -309,7 +309,7 @@ export function useConfigFilterData(
 }
 
 /**
- * 过滤出指定步骤中的指定依赖框出来
+ * Filter out specified dependency boxes in a specific step
  * @param currentStep
  * @param dataSourceStep
  * @param stepList
@@ -328,7 +328,7 @@ export function getSourceData(
   const currentStepInfo = CommonToolUtils.getCurrentStepInfo(currentStep, stepList);
 
   if (currentStepInfo?.preDataSourceStep > 0) {
-    // 说明该步骤依赖的是预标注数据
+    // This indicates that the step relies on pre-annotated data
     const stepName = `step_${currentStepInfo?.preDataSourceStep}`;
     const result = jsonParser(preResult)[stepName]?.result;
 
@@ -366,13 +366,13 @@ export function getSourceData(
   });
 
   if (dataSourceStepInfo.tool === EToolName.Tag || dataSourceStepInfo.tool === EToolName.Filter) {
-    // 如果 dataSource 工具还是为标签的话，就继续递归，找到为止
+    // If the dataSource tool is still tag tool, continue the recursion
     return getSourceData(
       dataSourceStepInfo.step,
       dataSourceStepInfo.dataSourceStep,
       stepList,
       result,
-      sourceIDList, // 注意： 其实比较怀疑这边是否能正确使用，表示怀疑 - 后续需要关注 todo
+      sourceIDList, // Note: There is some doubt about whether this part can be used correctly. It indicates skepticism - further attention is needed todo
       preResult,
     );
   } else if (

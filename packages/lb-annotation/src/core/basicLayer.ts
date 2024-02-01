@@ -16,14 +16,14 @@ interface IBasicLayerProps extends ICommonProps {
   container: HTMLElement;
   size: ISize;
   toolName: THybridToolName;
-  imgNode?: HTMLImageElement; // 展示图片的内容
-  config?: string; // 任务配置
+  imgNode?: HTMLImageElement; // dom node of image
+  config?: string; // config of annotation task
   style?: any;
   forbidBasicResultRender?: boolean;
 }
 
 export default class BasicLayer extends EventListener {
-  public container: HTMLElement; // 当前结构绑定 container
+  public container: HTMLElement; // external dom node
 
   public size: ISize;
 
@@ -35,15 +35,15 @@ export default class BasicLayer extends EventListener {
 
   public dependToolName?: EToolName;
 
-  public forbidBasicResultRender: boolean; // 禁止渲染基础依赖图形
+  public forbidBasicResultRender: boolean; // disable rendering of basic result
 
   public zoom: number;
 
-  public currentPos: ICoordinate; // 存储实时偏移的位置
+  public currentPos: ICoordinate; // store real-time offset position
 
   public coordUtils?: CoordinateUtils;
 
-  public basicImgInfo: any; // 用于存储当前图片的信息
+  public basicImgInfo: any; // store info of current image
 
   public imgInfo?: ISize;
 
@@ -51,7 +51,7 @@ export default class BasicLayer extends EventListener {
 
   private _imgAttribute?: any;
 
-  private currentPosStorage?: ICoordinate; // 存储当前点击的平移位置
+  private currentPosStorage?: ICoordinate; // store the current clicked translation position
 
   constructor(props: IBasicLayerProps) {
     super();
@@ -119,7 +119,7 @@ export default class BasicLayer extends EventListener {
   }
 
   /**
-   * 同步currentPos, zoom等common信息
+   * Synchronize common information such as currentPos, zoom, etc
    */
   public syncCommonInfo(info: ICommonProps) {
     this.setZoom(info?.zoom ?? this.zoom);
@@ -129,7 +129,7 @@ export default class BasicLayer extends EventListener {
   }
 
   /**
-   * 更改当前 canvas 整体的大小，需要重新初始化
+   * Resize the current canvas and reinitialize
    * @param size
    */
   public setSize(size: ISize) {

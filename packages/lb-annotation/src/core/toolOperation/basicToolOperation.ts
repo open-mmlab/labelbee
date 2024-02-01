@@ -30,24 +30,24 @@ const LANGUAGE_MAP = {
 interface IBasicToolOperationProps extends ICommonProps {
   container: HTMLElement;
   size: ISize;
-  imgNode?: HTMLImageElement; // 展示图片的内容
-  staticMode?: boolean; // 是否为静态模式
-  style?: any; // 后期一定要补上!!
+  imgNode?: HTMLImageElement; // dom for image
+  staticMode?: boolean; // whether it is static mode
+  style?: any; // need to be done!!
 
   rotate?: number;
-  imgAttribute?: any; // 占个坑，用于全局的一些配置，是否展示原图比例
+  imgAttribute?: any; // Used for some global configurations, such as whether to display the original image ratio
   forbidOperation?: boolean;
 
-  config?: string; // 任务配置
+  config?: string; // config of annotation task
 
   defaultAttribute?: string;
   forbidCursorLine?: boolean;
-  showDefaultCursor?: boolean; // 默认会展示为 none
+  showDefaultCursor?: boolean; // default value: none
 
   forbidBasicResultRender?: boolean;
 
-  isAppend?: boolean; // 用于 canvas 层次的关闭
-  hiddenImg?: boolean; // 隐藏图片渲染
+  isAppend?: boolean; // Used for closing the canvas hierarchy
+  hiddenImg?: boolean; // Whether to hide image
 
   zoomInfo?: {
     min: number;
@@ -59,7 +59,7 @@ interface IBasicToolOperationProps extends ICommonProps {
 }
 
 /**
- * 参考显示数据
+ * Reference display data
  */
 interface IReferenceData {
   toolName: EToolName.Polygon | EToolName.Line | EToolName.LineMarker;
@@ -67,7 +67,7 @@ interface IReferenceData {
   config: any;
 }
 
-// zoom 的限制
+// limit of zoom
 const DEFAULT_ZOOM_INFO = {
   min: 0.2,
   max: 1000,
