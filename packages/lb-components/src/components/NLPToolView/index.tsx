@@ -12,7 +12,7 @@ import { message } from 'antd';
 import { prefix } from '@/constant';
 import TextContent from './textContent';
 import { useTranslation } from 'react-i18next';
-import { INLPToolConfig, ITextData, INLPTextAnnotation, INLPResult, IRemarkLayer } from './types';
+import { ITextData, INLPTextAnnotation, INLPResult, IRemarkLayer } from './types';
 import AnnotationTips from '@/views/MainView/annotationTips';
 import { getStepConfig } from '@/store/annotation/reducer';
 import { jsonParser } from '@/utils';
@@ -21,6 +21,7 @@ import { useCustomToolInstance } from '@/hooks/annotation';
 import { uuid } from '@labelbee/lb-annotation';
 
 interface IProps {
+  activeToolPanel?: string;
   checkMode?: boolean;
   annotation?: any;
   showTips?: boolean;
@@ -30,7 +31,7 @@ interface IProps {
 }
 const NLPViewCls = `${prefix}-NLPView`;
 const NLPToolView: React.FC<IProps> = (props) => {
-  const { annotation, checkMode, tips, showTips, remarkLayer, remark } = props;
+  const { annotation, checkMode, tips, showTips, remarkLayer, remark, activeToolPanel } = props;
 
   const { imgIndex, imgList, stepList, step } = annotation;
   const { highlightKey, setHighlightKey } = useContext(NLPContext);
@@ -91,7 +92,10 @@ const NLPToolView: React.FC<IProps> = (props) => {
       return [[result], {}];
     };
 
-    toolInstanceRef.current.setResult = (value) => setResult(value);
+    toolInstanceRef.current.setResult = () => {};
+    toolInstanceRef.current.updateResult = (value: INLPResult) => {
+      setResult(value);
+    };
     toolInstanceRef.current.clearResult = clearResult;
     toolInstanceRef.current.setDefaultAttribute = setDefaultAttribute;
     toolInstanceRef.current.setHighlightKey = setHighlightKey;
@@ -140,6 +144,9 @@ const NLPToolView: React.FC<IProps> = (props) => {
       // ignore the order of selection
       let start = Math.min(anchorOffset, focusOffset);
       let end = Math.max(anchorOffset, focusOffset);
+      if (checkSameByOneAttribute(start, end, selectedAttribute, result?.textAnnotation)) {
+        return;
+      }
       setResult({
         ...result,
         textAnnotation: [
@@ -158,6 +165,17 @@ const NLPToolView: React.FC<IProps> = (props) => {
     }
   };
 
+  const checkSameByOneAttribute = (
+    start: number,
+    end: number,
+    selectedAttribute: string,
+    textAnnotation: INLPTextAnnotation[],
+  ) => {
+    return textAnnotation?.some(
+      (i) => i?.start === start && i?.end === end && i?.attribute === selectedAttribute,
+    );
+  };
+
   return (
     <div className={NLPViewCls}>
       <div className={`${NLPViewCls}-question`}>
@@ -171,6 +189,7 @@ const NLPToolView: React.FC<IProps> = (props) => {
           onSelectionChange={onSelectionChange}
           remarkLayer={remarkLayer}
           remark={remark}
+          activeToolPanel={activeToolPanel}
         />
       </div>
     </div>

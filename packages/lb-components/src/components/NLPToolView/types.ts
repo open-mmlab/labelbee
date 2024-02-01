@@ -75,12 +75,11 @@ export interface IRemarkInterval {
   id?: string;
 }
 
-
-export interface IRemarkAnnotation{
-  auditID: number,
-  text: string,
-  id: string,
-  start: number,
-  end: number,
-  uuid: string,
+export interface IRemarkAnnotation {
+  auditID: number;
+  text: string;
+  id: string;
+  start: number;
+  end: number;
+  uuid: string;
 }
