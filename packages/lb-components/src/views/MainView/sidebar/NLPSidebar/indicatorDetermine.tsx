@@ -42,6 +42,8 @@ const IndicatorDetermineList = (props: IProps) => {
   useEffect(() => {
     if (toolInstance) {
       toolInstance.on('changeIndicatorDetermine', (index: number) => {
+        const [result] = toolInstance.exportData();
+        setCurrentResult(result?.[0])
         forceRender((s) => s + 1);
       });
     }
