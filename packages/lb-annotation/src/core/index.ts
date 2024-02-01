@@ -123,19 +123,8 @@ export default class AnnotationEngine {
    * 4. style
    */
 
-  public syncZoom(zoom: number) {
-    this.toolScheduler.setZoom(zoom);
-    this.basicInstance.setZoom(zoom);
-    this.coordUtils.setZoomAndCurrentPos(this.zoom, this.currentPos);
-  }
-
-  public syncCurrentPos(currentPos: ICoordinate) {
-    this.toolScheduler.setCurrentPos(currentPos);
-    this.basicInstance.setCurrentPos(currentPos);
-    this.coordUtils.setZoomAndCurrentPos(this.zoom, this.currentPos);
-  }
-
   public syncBasicImgInfo(basicImgInfo: any) {
+    this.basicImgInfo = basicImgInfo;
     this.toolScheduler.setBasicImgInfo(basicImgInfo);
     this.basicInstance.setBasicImgInfo(basicImgInfo);
     this.coordUtils.setBasicImgInfo(basicImgInfo);
@@ -144,6 +133,16 @@ export default class AnnotationEngine {
   public syncImgAttribute(imgAttribute: IImageAttribute) {
     this.toolScheduler.setImgAttribute(imgAttribute);
     this.basicInstance.setImgAttribute(imgAttribute);
+  }
+
+  public syncZoomAndCurrentPos(zoom: number, currentPos: ICoordinate) {
+    this.zoom = zoom
+    this.currentPos = currentPos
+    this.toolScheduler.setZoom(zoom);
+    this.basicInstance.setZoom(zoom);
+    this.toolScheduler.setCurrentPos(currentPos);
+    this.basicInstance.setCurrentPos(currentPos);
+    this.coordUtils.setZoomAndCurrentPos(zoom, currentPos);
   }
 
   /**

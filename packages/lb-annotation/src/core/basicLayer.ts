@@ -1,6 +1,7 @@
 /**
- * @author wanghaiqing wanghaiqing@sensetime.com
- * @date 1/30/24
+ * @file render layer of basic results, should be initialized in annotationEngine
+ * @Author wanghaiqing wanghaiqing@sensetime.com
+ * @Date 2024-01-31
  */
 
 import { EToolName, THybridToolName } from '@/constant/tool';
