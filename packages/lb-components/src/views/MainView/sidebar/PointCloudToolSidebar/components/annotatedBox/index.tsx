@@ -1,9 +1,9 @@
-import React, { useContext, useState, useEffect } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Checkbox, Popover, Tag } from 'antd';
-import { PointCloudUtils } from '@labelbee/lb-utils';
-import { PointCloudContext } from '@/components/pointCloudView/PointCloudContext';
+import { PointCloudUtils, i18n } from '@labelbee/lb-utils';
+import { IPointCloudContext } from '@/components/pointCloudView/PointCloudContext';
 import { IFileItem } from '@/types/data';
-import { useTranslation } from 'react-i18next';
+import { useTranslation, I18nextProvider } from 'react-i18next';
 import styles from './index.module.scss';
 import classNames from 'classnames';
 
@@ -12,6 +12,8 @@ import HighlightActiveSvg from '@/assets/annotation/pointCloudTool/highlight_a.s
 import { QuestionCircleOutlined } from '@ant-design/icons';
 import { isDoubleClick } from '@/utils/audio';
 
+import useAnnotatedBoxStore from './store';
+
 interface ITrackIDItem {
   id: string;
   trackID?: number;
@@ -19,29 +21,76 @@ interface ITrackIDItem {
   selected: boolean;
   isHighlight: boolean;
 }
+interface IAnnotatedBoxProps {
+  imgList: IFileItem[];
+  imgIndex: number;
+}
 
-const AnnotatedBox = ({ imgList, imgIndex }: { imgList: IFileItem[]; imgIndex: number }) => {
+const AnnotatedBox = (props: IAnnotatedBoxProps) => {
+  const state = useAnnotatedBoxStore();
+  const ptCtx = state.ptCtx as IPointCloudContext;
+
+  const addHighlightID = (item: ITrackIDItem) => {
+    ptCtx?.addHighlightID?.(item.trackID as number);
+  };
+
+  const addSelectedID = (item: ITrackIDItem) => {
+    ptCtx?.addSelectedID?.(item.id);
+  };
+
+  const setSelectedIDs = (ids: string[]) => {
+    ptCtx?.setSelectedIDs?.(ids);
+  };
+
+  const annotatedBoxProps = {
+    ...props,
+    pointCloudBoxList: state.pointCloudBoxList,
+    highlightIDs: state.highlightIDs,
+    selectedIDs: state.selectedIDs,
+    addHighlightID,
+    addSelectedID,
+    setSelectedIDs,
+  };
+
+  return (
+    <I18nextProvider i18n={i18n}>
+      <AnnotatedBoxIDs {...annotatedBoxProps} />
+    </I18nextProvider>
+  );
+};
+
+interface IAnnotatedBoxIDsProps {
+  imgList: IFileItem[];
+  imgIndex: number;
+  highlightIDs: number[];
+  selectedIDs: string[];
+  pointCloudBoxList: any[];
+  addHighlightID: (item: ITrackIDItem) => void;
+  addSelectedID: (item: ITrackIDItem) => void;
+  setSelectedIDs: (ids: string[]) => void;
+}
+
+const AnnotatedBoxIDs = (props: IAnnotatedBoxIDsProps) => {
+  const {
+    imgList,
+    imgIndex,
+    highlightIDs,
+    selectedIDs,
+    pointCloudBoxList,
+    addHighlightID,
+    addSelectedID,
+    setSelectedIDs,
+  } = props;
   const { t } = useTranslation();
-
-  const ptCtx = useContext(PointCloudContext);
-  const { pointCloudBoxList } = ptCtx;
 
   const [showIDs, setShowIds] = useState<ITrackIDItem[]>([]);
   const [onlyShowCurrentIndex, setOnlyShowCurrentIndex] = useState<boolean>(false);
 
-  const highlightHandler = (item: ITrackIDItem) => {
-    ptCtx.addHighlightID(item.trackID as number);
-  };
-
-  const selectHandler = (item: ITrackIDItem) => {
-    ptCtx.addSelectedID(item.id);
-  };
-
   useEffect(() => {
     const newImgList = imgList as Array<{ result: string }>;
     let trackMap = new Map();
-    const selectedTrackIDs = ptCtx.selectedIDs.map(
-      (v) => ptCtx.pointCloudBoxList.find((box) => box.id === v)?.trackID,
+    const selectedTrackIDs = selectedIDs.map(
+      (v) => pointCloudBoxList.find((box) => box.id === v)?.trackID,
     );
     setShowIds(
       PointCloudUtils.getAllPointCloudResult({
@@ -67,34 +116,34 @@ const AnnotatedBox = ({ imgList, imgIndex }: { imgList: IFileItem[]; imgIndex: n
           return aTrackID - bTrackID;
         })
         .map((v) => {
-          const box = ptCtx.pointCloudBoxList.find((box) => box.trackID === v.trackID);
+          const box = pointCloudBoxList.find((box) => box.trackID === v.trackID);
           return {
             id: box?.id ?? v.id,
             trackID: v.trackID,
             disabled: !box,
             selected: selectedTrackIDs.includes(v.trackID),
-            isHighlight: v?.trackID ? ptCtx.highlightIDs.includes(v.trackID) : false,
+            isHighlight: v?.trackID ? highlightIDs.includes(v.trackID) : false,
           };
         }),
     );
-  }, [ptCtx.pointCloudBoxList, imgList, ptCtx.selectedIDs, ptCtx.highlightIDs, imgIndex]);
+  }, [pointCloudBoxList, imgList, selectedIDs, highlightIDs, imgIndex]);
 
   useEffect(() => {
-    const highlightBoxes = ptCtx.pointCloudBoxList.filter(
-      (box) => box.trackID && ptCtx.highlightIDs.includes(box.trackID),
+    const highlightBoxes = pointCloudBoxList.filter(
+      (box) => box.trackID && highlightIDs.includes(box.trackID),
     );
 
     if (highlightBoxes?.length) {
-      const needSetSelectedIDs = highlightBoxes.every((box) => !ptCtx.selectedIDs.includes(box.id));
+      const needSetSelectedIDs = highlightBoxes.every((box) => !selectedIDs.includes(box.id));
       if (needSetSelectedIDs) {
-        const needHighlightSelectedIDs = [...ptCtx.selectedIDs, ...highlightBoxes.map((v) => v.id)];
-        ptCtx.setSelectedIDs(needHighlightSelectedIDs);
+        const needHighlightSelectedIDs = [...selectedIDs, ...highlightBoxes.map((v) => v.id)];
+        setSelectedIDs(needHighlightSelectedIDs);
       }
     }
-  }, [imgIndex, ptCtx.highlightIDs, ptCtx.selectedIDs]);
+  }, [imgIndex, highlightIDs, selectedIDs]);
 
   return (
-    <div style={{ padding: 24, borderBottom: '1px solid #eee' }}>
+    <div className={styles.annotatedBox}>
       <div style={{ marginBottom: 16 }}>
         {t('AllTrackIDs')}
         <Popover
@@ -146,13 +195,13 @@ const AnnotatedBox = ({ imgList, imgIndex }: { imgList: IFileItem[]; imgIndex: n
                 e.preventDefault();
                 e.stopPropagation();
                 if (isDoubleClick(e as any)) {
-                  highlightHandler(item);
+                  addHighlightID(item);
                   return;
                 }
                 if (item.disabled) {
                   return;
                 }
-                selectHandler(item);
+                addSelectedID(item);
               }}
             >
               {item.isHighlight && (
