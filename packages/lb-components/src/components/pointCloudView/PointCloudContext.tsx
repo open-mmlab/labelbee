@@ -19,6 +19,7 @@ import {
 } from '@labelbee/lb-annotation';
 import { useDispatch } from '@/store/ctx';
 import { ChangeSave } from '@/store/annotation/actionCreators';
+import useAnnotatedBoxStore from '@/views/MainView/sidebar/PointCloudToolSidebar/components/annotatedBox/store';
 
 interface IPointCloudContextInstances {
   topViewInstance?: PointCloudAnnotation;
@@ -216,6 +217,7 @@ export const PointCloudProvider: React.FC<{}> = ({ children }) => {
   const [ptSegmentInstance, setPtSegmentInstance] = useState<PointCloud | undefined>(undefined);
   const [segmentation, setSegmentation] = useState<IPointCloudSegmentation[]>([]);
   const [highlight2DDataList, setHighlight2DDataList] = useState<IHighlight2DData[]>([]);
+  const state = useAnnotatedBoxStore();
 
   const [imageSizes, setImageSizes] = useState<{
     [key: string]: ISize;
@@ -491,6 +493,16 @@ export const PointCloudProvider: React.FC<{}> = ({ children }) => {
     imageSizes,
     highlightIDs,
   ]);
+
+  useEffect(() => {
+    state?.setPointCloudBoxList?.(pointCloudBoxList);
+    state?.setHighlightIDs?.(highlightIDs);
+    state?.setSelectedIDs?.(selectedIDs);
+  }, [pointCloudBoxList, selectedIDs, highlightIDs]);
+
+  useEffect(() => {
+    state?.setPtCtx?.(ptCtx);
+  }, []);
 
   const updateSelectedIDsAndRenderAfterHide = () => {
     const pointCloudForFilteredList = pointCloudBoxList.filter((i) =>

@@ -1,12 +1,14 @@
 import React, { useState, useEffect } from 'react';
 import styles from './index.module.scss';
 import { Input, message } from 'antd';
-import { useTranslation } from 'react-i18next';
-import { PointCloudUtils } from '@labelbee/lb-utils';
+import { Provider } from 'react-redux';
+import { I18nextProvider, useTranslation } from 'react-i18next';
+import { PointCloudUtils, i18n } from '@labelbee/lb-utils';
 import { IFileItem } from '@/types/data';
 import classNames from 'classnames';
-import { useDispatch } from '@/store/ctx';
+import { LabelBeeContext, useDispatch } from '@/store/ctx';
 import { PageJump } from '@/store/annotation/actionCreators';
+import { store } from '@/index';
 
 interface IProps {
   imgList: IFileItem[];
@@ -24,6 +26,7 @@ const FindTrackIDIndex = (props: IProps) => {
   const onPressEnter = (e: any) => {
     const inputValue = e.target.value;
     const newTrackID = parseInt(inputValue, 10);
+
     if (!(newTrackID > 0)) {
       message.error(t('PositiveIntegerCheck'));
       return;
@@ -124,6 +127,16 @@ const FindTrackIDIndex = (props: IProps) => {
         </div>
       </div>
     </div>
+  );
+};
+
+export const FindTrackIDIndexWithProvider = (props: any) => {
+  return (
+    <Provider store={store} context={LabelBeeContext}>
+      <I18nextProvider i18n={i18n}>
+        <FindTrackIDIndex {...props} />
+      </I18nextProvider>
+    </Provider>
   );
 };
 
