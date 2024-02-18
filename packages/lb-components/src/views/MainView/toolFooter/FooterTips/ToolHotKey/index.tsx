@@ -18,6 +18,7 @@ import pointCloudShortCutTable, {
 import scribbleShortCutTable from './scribble';
 import cuboidShortCutTable from './cuboid';
 import LLMShortCutTable from './LLM';
+import NLPShortCutTable from './NLP';
 import audioTextShortCutTable from './audioText'
 
 import { footerCls } from '../../index';
@@ -62,6 +63,7 @@ export const shortCutTable: { [a: string]: IShortCutInfo[] } = {
   [EToolName.ScribbleTool]: scribbleShortCutTable,
   [EToolName.Cuboid]: cuboidShortCutTable,
   [EToolName.LLM]: LLMShortCutTable,
+  [EToolName.NLP]: NLPShortCutTable,
   [EAudioToolName.AudioTextTool]: audioTextShortCutTable,
 };
 

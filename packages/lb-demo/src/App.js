@@ -24,6 +24,7 @@ import { getDependStepList, getStepList } from './mock/taskConfig';
 import car1 from './mock/cuboidImages/1.png';
 import { EToolName } from '@labelbee/lb-annotation';
 import { LLMToolQa, LLMToolResult } from './mock/LLMTool';
+import { textData, NLPToolResult } from './mock/NLPTool';
 
 const App = () => {
   const tool = qs.parse(window.location.search, {
@@ -70,6 +71,16 @@ const App = () => {
             answer: i + 1 + list.answer,
           })),
         },
+      }));
+    }
+
+    if (EToolName.NLP === tool) {
+      return srcList.map((url, i) => ({
+        ...extraData,
+        id: i + 1,
+        url,
+        result: JSON.stringify(NLPToolResult.step_1.result),
+        textData,
       }));
     }
 

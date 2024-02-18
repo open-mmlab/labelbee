@@ -1,0 +1,22 @@
+.textContain {
+  padding: 26px 32px;
+  flex: 1;
+  display: flex;
+  flex-flow: column;
+  background-color: #fff;
+}
+
+.Header {
+  margin-bottom: 24px;
+  height: 32px;
+  font-size: 18px;
+  font-weight: 500;
+}
+
+.text {
+  background-color: #f5f5f5;
+  padding: 12px;
+  font-size: 14px;
+  line-height: 22px;
+  flex: 1;
+}

@@ -2176,6 +2176,85 @@ $ptToolHeight: 40px;
   }
 }
 
+/** NLP style */
+
+.#{$prefix}-NLPLayout {
+  overflow: hidden;
+}
+.#{$prefix}-NLPView {
+  height: 100%;
+  background-color: #ffffff;
+  overflow-y: auto;
+  flex: auto;
+  padding: 26px 32px;
+  line-height: 26px;
+}
+
+.#{$prefix}-NLPView-question {
+  flex: 1;
+  overflow: hidden;
+  &-title{
+    font-weight: 500;
+    font-size: 18px;
+    margin-bottom: 24px;
+  }
+  &-content{
+    font-size: 14px;
+    font-weight: 400;
+    background-color: #f5f5f5;
+    border-radius: 4px;
+    padding: 8px;
+    &-mask{
+      position: absolute;
+      left: 0px;
+      top: 0px;
+      background-color: transparent;
+      color: transparent;
+      z-index: 10;
+      opacity: 1;
+    }
+  }
+}
+
+.#{$prefix}-sidebar__content__NLPList{
+  display:flex;
+  flex-direction:column;
+  &__item{
+    display: flex;
+    align-items: center;
+    cursor:pointer;
+
+    .#{$prefix}-sidebar-pop-remove{
+      margin: 0px 16px;
+      display: none;
+    }
+
+    &:hover{
+      .#{$prefix}-sidebar-pop-remove{
+        display: block;
+      }
+    }
+
+    &__text{
+      flex: 1 1;
+      padding: 16px;
+      font-weight: 400;
+      font-size: 12px;
+      line-height: 20px;
+      color: #666666;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+    &__active{
+      background-color: #eeefff;
+      &__text{
+        color: #666fff;
+      }
+    }
+  }
+}
+
 /** longText style */
 .#{$prefix}-longText {
   display: flex;
