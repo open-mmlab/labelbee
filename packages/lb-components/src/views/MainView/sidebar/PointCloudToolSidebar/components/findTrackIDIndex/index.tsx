@@ -1,3 +1,10 @@
+/*
+ * @file Provides the ability to find the corresponding frame containing the trackId
+ *       Click on the forward and backward arrows to jump to the previous/next page containing the trackId.
+ * @author lihuaqi <lihuaqi@sensetime.com>
+ * @date 2024年2月18日
+ */
+
 import React, { useState, useEffect } from 'react';
 import styles from './index.module.scss';
 import { Input, message } from 'antd';
@@ -5,11 +12,10 @@ import { Provider } from 'react-redux';
 import { I18nextProvider, useTranslation } from 'react-i18next';
 import { PointCloudUtils, i18n } from '@labelbee/lb-utils';
 import { IFileItem } from '@/types/data';
-import classNames from 'classnames';
 import { LabelBeeContext, useDispatch } from '@/store/ctx';
 import { PageJump } from '@/store/annotation/actionCreators';
 import { store } from '@/index';
-
+import ArrowComponent from './arrow';
 interface IProps {
   imgList: IFileItem[];
   imgIndex: number;
@@ -87,52 +93,12 @@ const FindTrackIDIndex = (props: IProps) => {
               {t('Frame')}: {currentIndex + 1}
             </span>
           )}
-          <li
-            className={classNames({
-              'ant-pagination-disabled': currentIndex <= 0,
-              'ant-pagination-prev': true,
-            })}
-            onClick={onPrev}
-          >
-            <button className='ant-pagination-item-link' type='button'>
-              <span role='img' aria-label='left' className='anticon anticon-left'>
-                <svg
-                  viewBox='64 64 896 896'
-                  focusable='false'
-                  data-icon='left'
-                  width='1em'
-                  height='1em'
-                  fill='currentColor'
-                  aria-hidden='true'
-                >
-                  <path d='M724 218.3V141c0-6.7-7.7-10.4-12.9-6.3L260.3 486.8a31.86 31.86 0 000 50.3l450.8 352.1c5.3 4.1 12.9.4 12.9-6.3v-77.3c0-4.9-2.3-9.6-6.1-12.6l-360-281 360-281.1c3.8-3 6.1-7.7 6.1-12.6z' />
-                </svg>
-              </span>
-            </button>
-          </li>
-          <li
-            className={classNames({
-              'ant-pagination-disabled': currentIndex === -1 || currentIndex === list.length - 1,
-              'ant-pagination-next': true,
-            })}
+          <ArrowComponent disabled={currentIndex <= 0} onClick={onPrev} type={'left'} />
+          <ArrowComponent
+            disabled={currentIndex === -1 || currentIndex === list.length - 1}
             onClick={onNext}
-          >
-            <button className='ant-pagination-item-link' type='button'>
-              <span role='img' className='anticon anticon-right'>
-                <svg
-                  viewBox='64 64 896 896'
-                  focusable='false'
-                  data-icon='right'
-                  width='1em'
-                  height='1em'
-                  fill='currentColor'
-                  aria-hidden='true'
-                >
-                  <path d='M765.7 486.8L314.9 134.7A7.97 7.97 0 00302 141v77.3c0 4.9 2.3 9.6 6.1 12.6l360 281.1-360 281.1c-3.9 3-6.1 7.7-6.1 12.6V883c0 6.7 7.7 10.4 12.9 6.3l450.8-352.1a31.96 31.96 0 000-50.4z' />
-                </svg>
-              </span>
-            </button>
-          </li>
+            type={'right'}
+          />
         </div>
       </div>
     </div>
