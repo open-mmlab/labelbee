@@ -9,13 +9,15 @@ import { getClassName } from '@/utils/dom';
 import { classnames } from '@/utils';
 import { NLPContext } from '@/store/ctx';
 import NLPToolView from '@/components/NLPToolView';
+import { IRemarkLayer, ISelectText } from '@/components/NLPToolView/types';
 
 interface IProps {
   path: string;
   loading: boolean;
-  remarkLayer?: any;
   remark?: any;
-  activeToolPanel?: string;
+  remarkLayer?: (value: IRemarkLayer) => void;
+  onChangeAnnotation?: (v:ISelectText)=>void;
+  remarkData?: ISelectText;
 }
 
 const { Sider, Content } = Layout;
@@ -47,7 +49,8 @@ const NLPLayout: React.FC<AppProps & IProps> = (props) => {
             tips={props.tips}
             remarkLayer={props?.remarkLayer}
             remark={props?.remark}
-            activeToolPanel={props?.activeToolPanel}
+            onChangeAnnotation={props?.onChangeAnnotation}
+            remarkData={props?.remarkData}
           />
           <ToolFooter style={props.style?.footer} mode={props.mode} footer={props?.footer} />
         </Content>

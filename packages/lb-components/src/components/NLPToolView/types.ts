@@ -58,6 +58,7 @@ export interface ISelectText {
   start?: number;
   end?: number;
   text?: string;
+  endPosition?: React.CSSProperties;
 }
 
 export interface IRemarkLayer {

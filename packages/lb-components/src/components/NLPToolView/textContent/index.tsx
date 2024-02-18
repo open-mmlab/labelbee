@@ -4,7 +4,7 @@
  * @Date: 2024-01-24
  */
 
-import React, { useEffect, useState, useRef, useMemo } from 'react';
+import React, { useEffect, useState, useRef, useMemo, RefObject } from 'react';
 import { useTranslation, I18nextProvider } from 'react-i18next';
 import { i18n, toolStyleConverter } from '@labelbee/lb-utils';
 import {
@@ -17,10 +17,10 @@ import {
   IRemarkInterval,
   IRemarkAnnotation,
 } from '../types';
-import { prefix, TOOL_PANEL_KEY } from '@/constant';
+import { prefix } from '@/constant';
 import { useTextSelection } from 'ahooks';
 import _ from 'lodash';
-import { CommonToolUtils, uuid } from '@labelbee/lb-annotation';
+import { CommonToolUtils } from '@labelbee/lb-annotation';
 import styleString from '@/constant/styleString';
 import { getIntervals } from '../utils';
 import { classnames } from '@/utils';
@@ -31,14 +31,12 @@ interface IProps {
   textData: ITextData[];
   textAnnotation: INLPTextAnnotation[];
   lang?: string;
-  checkMode?: boolean;
   NLPConfig?: INLPToolConfig;
   answerHeaderSlot?: React.ReactDOM | string;
-  onSelectionChange?: (text: string) => void;
+  onSelectionChange?: (contentRef: RefObject<HTMLDivElement>, text: string) => void;
   remarkLayer?: (values: IRemarkLayer) => void;
   remark?: any;
-  isSourceView?: boolean;
-  activeToolPanel?: string;
+  remarkData?:ISelectText;
 }
 
 const NLPViewCls = `${prefix}-NLPView`;
@@ -50,13 +48,13 @@ const renderRemarkModal = ({
   setRemarkResut,
   remarkResut,
 }: {
-  setRemarkStyle: (value?: React.CSSProperties) => void;
+  setRemarkStyle?: (value?: React.CSSProperties) => void;
   remarkLayer?: (values: IRemarkLayer) => void;
-  remarkStyle: React.CSSProperties | undefined;
-  setRemarkResut: (value: ISelectText) => void;
-  remarkResut: ISelectText;
+  remarkStyle?: React.CSSProperties | undefined;
+  setRemarkResut?: (value: ISelectText) => void;
+  remarkResut?: ISelectText;
 }) => {
-  if (remarkLayer) {
+  if (typeof remarkLayer === 'function' && setRemarkStyle && setRemarkResut && remarkResut) {
     return remarkLayer({
       style: remarkStyle,
       onClose: () => {
@@ -73,16 +71,13 @@ const TextContent: React.FC<IProps> = (props) => {
     highlightKey,
     textData,
     lang,
-    checkMode = true,
     NLPConfig,
     onSelectionChange,
     textAnnotation,
     remark,
-    activeToolPanel,
+    remarkData,
   } = props;
-  const { enableRemark, displayRemarkList } = remark || {};
-
-  const hideRemark = activeToolPanel ? activeToolPanel !== TOOL_PANEL_KEY.Remark : false;
+  const { displayRemarkList } = remark || {};
 
   const { t } = useTranslation();
   const contentRef = useRef<HTMLDivElement>(null);
@@ -110,6 +105,14 @@ const TextContent: React.FC<IProps> = (props) => {
     [textAnnotation, content],
   );
 
+  useEffect(() => {
+    if (remarkData) {
+      const { id, start, end, text, endPosition } = remarkData;
+      setRemarkResut({ id, start, end, text });
+      setRemarkStyle(endPosition);
+    }
+  }, [remarkData]);
+
   const getColor = (attribute = '') => {
     const style = CommonToolUtils.jsonParser(styleString);
     return toolStyleConverter.getColorByConfig({ attribute, config: NLPConfig, style });
@@ -122,11 +125,7 @@ const TextContent: React.FC<IProps> = (props) => {
   }, []);
 
   useEffect(() => {
-    if (enableRemark && !hideRemark) {
-      onSelectionRemark(selection.text);
-    } else if (activeToolPanel && activeToolPanel === TOOL_PANEL_KEY.Tool) {
-      onSelectionChange?.(selection.text);
-    }
+    onSelectionChange?.(contentRef, selection.text);
   }, [selection.text]);
 
   // When replying to comments, the pop-up window expands to the corresponding position.
@@ -144,44 +143,11 @@ const TextContent: React.FC<IProps> = (props) => {
       const parentRect = contentRef.current.getBoundingClientRect();
       const relativeLeft = elementRect.right - parentRect.left;
       const relativeTop = elementRect.bottom - parentRect.top - element.offsetHeight;
-      if (relativeLeft && relativeTop) {
+      if (relativeLeft && relativeTop && setRemarkStyle) {
         setRemarkStyle({ left: relativeLeft, top: relativeTop });
       }
     }
   }, [remark?.editAuditID]);
-
-  const onSelectionRemark = (text: string) => {
-    if (text === '') return;
-    let curSelection = window.getSelection();
-
-    const { anchorOffset = 0, focusOffset = 0, anchorNode, focusNode } = curSelection || {};
-
-    if (anchorNode === focusNode) {
-      // ignore the order of selection
-      let start = Math.min(anchorOffset, focusOffset);
-      let end = Math.max(anchorOffset, focusOffset);
-
-      if (selection && contentRef?.current && curSelection) {
-        const contentRect = contentRef.current?.getBoundingClientRect();
-        const range = curSelection.getRangeAt(0);
-        const rangeRect = range.getBoundingClientRect();
-        const endPosition = {
-          left: rangeRect.right - contentRect.left,
-          top: rangeRect.top - contentRect.top,
-        };
-        if (endPosition.left && endPosition.left) {
-          setRemarkStyle(endPosition);
-        }
-      }
-      const value = {
-        id: uuid(8, 62),
-        start,
-        end,
-        text,
-      };
-      setRemarkResut(value);
-    }
-  };
 
   return (
     <div>
@@ -222,14 +188,13 @@ const TextContent: React.FC<IProps> = (props) => {
           {displayRemarkList?.length > 0 && (
             <RemarkMask remarkSplitIntervals={remarkSplitIntervals} remark={remark} />
           )}
-          {!hideRemark &&
-            renderRemarkModal({
-              remarkLayer: props?.remarkLayer,
-              setRemarkStyle,
-              remarkStyle,
-              remarkResut,
-              setRemarkResut,
-            })}
+          {renderRemarkModal({
+            remarkLayer: props?.remarkLayer,
+            setRemarkStyle,
+            remarkStyle,
+            remarkResut,
+            setRemarkResut,
+          })}
 
           <div className={`${NLPViewCls}-question-content-mask`} ref={contentRef}>
             {content}
