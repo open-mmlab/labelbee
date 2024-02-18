@@ -68,7 +68,7 @@ const FindTrackIDIndex = (props: IProps) => {
 
   return (
     <div className={styles.container}>
-      <div>查找标注框ID对应帧</div>
+      <div>{t('FindTheFrameCorrespondingToTheLabeledFrameId')}</div>
       <div className={styles.content}>
         <Input
           size='small'
@@ -84,7 +84,7 @@ const FindTrackIDIndex = (props: IProps) => {
                 marginRight: 4,
               }}
             >
-              帧: {currentIndex + 1}
+              {t('Frame')}: {currentIndex + 1}
             </span>
           )}
           <li
