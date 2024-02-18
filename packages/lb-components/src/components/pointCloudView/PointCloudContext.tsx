@@ -19,6 +19,7 @@ import {
 } from '@labelbee/lb-annotation';
 import { useDispatch } from '@/store/ctx';
 import { ChangeSave } from '@/store/annotation/actionCreators';
+import useAnnotatedBoxStore from '@/store/annotatedBox';
 
 interface IPointCloudContextInstances {
   topViewInstance?: PointCloudAnnotation;
@@ -65,8 +66,11 @@ export interface IPointCloudContext
   selectedPointCloudBox?: IPointCloudBox;
   setPointCloudValid: (valid?: boolean) => void;
   addSelectedID: (selectedID: string) => void;
+  addHighlightID: (highlightID: number) => void;
   selectedAllBoxes: () => void;
   selectedID: string;
+  highlightIDs: number[];
+  setHighlightIDs: (ids: number[]) => void;
   addPointCloudBox: (boxParams: IPointCloudBox) => IPointCloudBox[];
   addPointCloudSphere: (sphereParams: IPointCloudSphere) => IPointCloudSphere[];
 
@@ -129,6 +133,8 @@ export const PointCloudContext = React.createContext<IPointCloudContext>({
   lineList: [],
   selectedID: '',
   selectedIDs: [],
+  highlightIDs: [],
+  setHighlightIDs: () => {},
   valid: true,
   setSelectedIDs: () => {},
   setPointCloudResult: () => {},
@@ -139,6 +145,7 @@ export const PointCloudContext = React.createContext<IPointCloudContext>({
   setBackViewInstance: () => {},
   setMainViewInstance: () => {},
   addSelectedID: () => {},
+  addHighlightID: () => {},
   selectedAllBoxes: () => {},
   addPointCloudBox: () => {
     return [];
@@ -191,6 +198,7 @@ export const PointCloudProvider: React.FC<{}> = ({ children }) => {
   const [polygonList, setPolygonList] = useState<IPolygonData[]>([]);
   const [lineList, setLineList] = useState<ILine[]>([]);
   const [selectedIDs, setSelectedIDsState] = useState<string[]>([]);
+  const [highlightIDs, setHighlightIDs] = useState<number[]>([]);
   const [valid, setValid] = useState<boolean>(true);
   const [cuboidBoxIn2DView, setCuboidBoxIn2DView] = useState<boolean>(true);
   const [zoom, setZoom] = useState<number>(1);
@@ -209,6 +217,7 @@ export const PointCloudProvider: React.FC<{}> = ({ children }) => {
   const [ptSegmentInstance, setPtSegmentInstance] = useState<PointCloud | undefined>(undefined);
   const [segmentation, setSegmentation] = useState<IPointCloudSegmentation[]>([]);
   const [highlight2DDataList, setHighlight2DDataList] = useState<IHighlight2DData[]>([]);
+  const state = useAnnotatedBoxStore();
 
   const [imageSizes, setImageSizes] = useState<{
     [key: string]: ISize;
@@ -278,6 +287,14 @@ export const PointCloudProvider: React.FC<{}> = ({ children }) => {
         setSelectedIDs(selectedIDs.filter((i) => i !== selectedID));
       } else {
         setSelectedIDs([...selectedIDs, selectedID]);
+      }
+    };
+
+    const addHighlightID = (highlightID: number) => {
+      if (highlightIDs.includes(highlightID)) {
+        setHighlightIDs([]);
+      } else {
+        setHighlightIDs([highlightID]);
       }
     };
 
@@ -406,6 +423,7 @@ export const PointCloudProvider: React.FC<{}> = ({ children }) => {
       selectedPointCloudBox,
       setPointCloudValid,
       addSelectedID,
+      addHighlightID,
       selectedAllBoxes,
       topViewInstance,
       setTopViewInstance,
@@ -448,6 +466,8 @@ export const PointCloudProvider: React.FC<{}> = ({ children }) => {
       setCuboidBoxIn2DView,
       imageSizes,
       cacheImageNodeSize,
+      highlightIDs,
+      setHighlightIDs,
     };
   }, [
     valid,
@@ -471,7 +491,18 @@ export const PointCloudProvider: React.FC<{}> = ({ children }) => {
     highlight2DDataList,
     cuboidBoxIn2DView,
     imageSizes,
+    highlightIDs,
   ]);
+
+  useEffect(() => {
+    state?.setPointCloudBoxList?.(pointCloudBoxList);
+    state?.setHighlightIDs?.(highlightIDs);
+    state?.setSelectedIDs?.(selectedIDs);
+  }, [pointCloudBoxList, selectedIDs, highlightIDs]);
+
+  useEffect(() => {
+    state?.setPtCtx?.(ptCtx);
+  }, []);
 
   const updateSelectedIDsAndRenderAfterHide = () => {
     const pointCloudForFilteredList = pointCloudBoxList.filter((i) =>

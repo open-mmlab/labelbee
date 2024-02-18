@@ -349,7 +349,13 @@
     "Triangle": "Triangle",
     "Statistics": "Statistics",
     "Sequence": "Sequence",
-    "Physics": "Physics"
+    "Physics": "Physics",
+    "IndicatorJudgment": "Indicator judgment",
+    "OnlyCurrentFrame": "Only current frame",
+    "ClickOnTheIdToHighlightTheMarkupBox": "Click on the ID to highlight the markup box",
+    "DoubleClickOnTheIdToContinuouslyHighlightBoxesAcrossFrames": "Double-click on the ID to continuously highlight boxes across frames",
+    "Frame": "Frame",
+    "FindTheFrameCorrespondingToTheLabeledFrameId": "Find the frame corresponding to the labeled frame ID"
   },
   "cn": {
     "TextInput": "文本输入",
@@ -701,6 +707,12 @@
     "Triangle": "三角",
     "Statistics": "统计",
     "Sequence": "数列",
-    "Physics": "物理"
+    "Physics": "物理",
+    "IndicatorJudgment":"指标判断",
+    "OnlyCurrentFrame": "只看当前帧",
+    "ClickOnTheIdToHighlightTheMarkupBox": "点击ID可以高亮标注框",
+    "DoubleClickOnTheIdToContinuouslyHighlightBoxesAcrossFrames": "双击ID可以跨帧连续高亮标注框",
+    "Frame": "帧",
+    "FindTheFrameCorrespondingToTheLabeledFrameId": "查找标注框ID对应帧"
   }
 }

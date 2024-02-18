@@ -6,20 +6,14 @@ import { message as SenseMessage } from 'antd';
 import { cStyle, cTool } from '@labelbee/lb-annotation';
 import _ from 'lodash';
 import { IInputList } from '@/types/main';
-import Decimal from 'decimal.js'
+import Decimal from 'decimal.js';
 import moment from 'moment';
-import { ITextConfigItem } from '@labelbee/lb-utils'
+import { ITextConfigItem } from '@labelbee/lb-utils';
 
-const {
-  COLORS_ARRAY,
-  ICON_ARRAY,
-  INVALID_ICON,
-  NULL_COLOR,
-  NULL_ICON,
-  WHITE_FONT_COLOR_ARRAY,
-} = cStyle
+const { COLORS_ARRAY, ICON_ARRAY, INVALID_ICON, NULL_COLOR, NULL_ICON, WHITE_FONT_COLOR_ARRAY } =
+  cStyle;
 
-const { ETextType } = cTool
+const { ETextType } = cTool;
 
 export const ATTRIBUTE_COLORS = [NULL_COLOR].concat(COLORS_ARRAY);
 
@@ -42,11 +36,7 @@ export const DEFAULT_TEXT_CONFIG_ITEM: ITextConfigItem = {
  * @param attribute
  * @param attributeList
  */
-export const getAttributeIcon = (
-  attribute: string,
-  attributeList: IInputList[],
-  valid = true,
-) => {
+export const getAttributeIcon = (attribute: string, attributeList: IInputList[], valid = true) => {
   const attributeIndex = attributeList.findIndex((i: any) => i.value === attribute);
   let src = ICON_ARRAY[attributeIndex % ICON_ARRAY.length] ?? NULL_ICON;
   if (!valid) {
@@ -322,8 +312,8 @@ const generateIsDoubleClick = (interval: number) => {
   };
   return fn;
 };
-// 间隔300ms点击同一元素视为双击
-export const isDoubleClick = generateIsDoubleClick(300);
+// 间隔500ms点击同一元素视为双击
+export const isDoubleClick = generateIsDoubleClick(500);
 
 export const formatTime = (time: number) => {
   const milliseconds = Math.floor(time * 1000);
