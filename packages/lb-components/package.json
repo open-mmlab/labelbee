@@ -83,6 +83,8 @@
     "@rollup/plugin-eslint": "^8.0.1",
     "@rollup/plugin-image": "^2.0.6",
     "@rollup/plugin-node-resolve": "^11.2.1",
+    "@svgr/core": "^8.1.0",
+    "@svgr/rollup": "^8.1.0",
     "@types/diff-match-patch": "^1.0.36",
     "@types/lodash": "^4.14.168",
     "@types/react": "^16.13.1",

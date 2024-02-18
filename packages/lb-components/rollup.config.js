@@ -3,6 +3,7 @@ import image from '@rollup/plugin-image';
 import alias from '@rollup/plugin-alias';
 import resolve from '@rollup/plugin-node-resolve';
 import postcss from 'rollup-plugin-postcss';
+import svgr from '@svgr/rollup';
 import sass from 'sass';
 import url from 'postcss-url';
 import webWorkerLoader from 'rollup-plugin-web-worker-loader';
@@ -61,6 +62,7 @@ export default {
       customResolver,
     }),
     image(),
+    svgr(),
     esbuild({
       // All options are optional
       include: /\.[jt]s?x?$/, // default, inferred from `loaders` option
