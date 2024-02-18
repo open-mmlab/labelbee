@@ -19,7 +19,7 @@ import {
 } from '@labelbee/lb-annotation';
 import { useDispatch } from '@/store/ctx';
 import { ChangeSave } from '@/store/annotation/actionCreators';
-import useAnnotatedBoxStore from '@/views/MainView/sidebar/PointCloudToolSidebar/components/annotatedBox/store';
+import useAnnotatedBoxStore from '@/store/annotatedBox';
 
 interface IPointCloudContextInstances {
   topViewInstance?: PointCloudAnnotation;

@@ -1,3 +1,10 @@
+/*
+ * @file Use zustand share annotatedBoxes store without provider
+ * Note used differently than react context
+ * @author lihuaqi <lihuaqi@sensetime.com>
+ * @date 2024年2月18日
+ */
+
 import { create } from 'zustand';
 import { IPointCloudBoxList } from '@labelbee/lb-utils';
 import { IPointCloudContext } from '@/components/pointCloudView/PointCloudContext';

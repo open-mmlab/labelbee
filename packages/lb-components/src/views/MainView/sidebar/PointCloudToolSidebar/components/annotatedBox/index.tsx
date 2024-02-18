@@ -1,3 +1,11 @@
+/*
+ * @file Show all trackIDs in current frame
+ * Selected effects page flip will clear
+ * Highlighted effect page will not clear
+ * @author lihuaqi <lihuaqi@sensetime.com>
+ * @date 2024年2月18日
+ */
+
 import React, { useState, useEffect } from 'react';
 import { Checkbox, Popover, Tag } from 'antd';
 import { PointCloudUtils, i18n } from '@labelbee/lb-utils';
@@ -12,7 +20,7 @@ import HighlightActiveSvg from '@/assets/annotation/pointCloudTool/highlight_a.s
 import { QuestionCircleOutlined } from '@ant-design/icons';
 import { isDoubleClick } from '@/utils/audio';
 
-import useAnnotatedBoxStore from './store';
+import useAnnotatedBoxStore from '@/store/annotatedBox';
 
 interface ITrackIDItem {
   id: string;
