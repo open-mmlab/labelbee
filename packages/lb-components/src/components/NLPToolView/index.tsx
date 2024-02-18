@@ -8,11 +8,9 @@ import React, { useContext, useEffect, useState, useMemo, RefObject } from 'reac
 import { AppState } from '@/store';
 import { connect } from 'react-redux';
 import { LabelBeeContext, NLPContext } from '@/store/ctx';
-import { message } from 'antd';
 import { prefix } from '@/constant';
 import TextContent from './textContent';
-import { useTranslation } from 'react-i18next';
-import { ITextData, INLPTextAnnotation, INLPResult, IRemarkLayer, ISelectText } from './types';
+import { ITextData, INLPTextAnnotation, INLPResult, IExtraLayer, ISelectText, IExtraData } from './types';
 import AnnotationTips from '@/views/MainView/annotationTips';
 import { getStepConfig } from '@/store/annotation/reducer';
 import { jsonParser } from '@/utils';
@@ -25,10 +23,10 @@ interface IProps {
   annotation?: any;
   showTips?: boolean;
   tips?: string;
-  remarkLayer?: (value: IRemarkLayer) => void;
-  remark: any;
+  extraLayer?: (value: IExtraLayer) => void;
+  extraData?: IExtraData;
   onChangeAnnotation?: (v: ISelectText) => void;
-  remarkData?: ISelectText;
+  customAnnotationData?: ISelectText;
 }
 const NLPViewCls = `${prefix}-NLPView`;
 const NLPToolView: React.FC<IProps> = (props) => {
@@ -37,10 +35,10 @@ const NLPToolView: React.FC<IProps> = (props) => {
     checkMode,
     tips,
     showTips,
-    remarkLayer,
-    remark,
+    extraLayer,
+    extraData,
     onChangeAnnotation,
-    remarkData,
+    customAnnotationData,
   } = props;
 
   const { imgIndex, imgList, stepList, step } = annotation;
@@ -48,7 +46,7 @@ const NLPToolView: React.FC<IProps> = (props) => {
   const { toolInstanceRef } = useCustomToolInstance();
   const [selectedAttribute, setSelectedAttribute] = useState<string>('');
   const [lockList, setLockList] = useState<string[]>([]);
-  // When undifind, the value of visibleAnnotation is not set
+  // When undefined, the value of visibleAnnotation is not set
   const [visibleAnnotation, setVisibleAnnotation] = useState<INLPTextAnnotation[] | undefined>(
     undefined,
   );
@@ -78,7 +76,6 @@ const NLPToolView: React.FC<IProps> = (props) => {
     });
   }, [result, lockList, visibleAnnotation]);
 
-  const { t } = useTranslation();
   const NLPConfig = useMemo(() => {
     if (stepList && step) {
       const NLPStepConfig = getStepConfig(stepList, step)?.config;
@@ -241,9 +238,9 @@ const NLPToolView: React.FC<IProps> = (props) => {
           NLPConfig={NLPConfig}
           textAnnotation={displayAnnotation}
           onSelectionChange={onSelectionChange}
-          remarkLayer={remarkLayer}
-          remark={remark}
-          remarkData={remarkData}
+          extraLayer={extraLayer}
+          extraData={extraData}
+          customAnnotationData={customAnnotationData}
         />
       </div>
     </div>

@@ -35,9 +35,3 @@ export enum ELLMDataType {
   Text = 'text',
   None = 'none',
 }
-
-// 侧边栏工具面板
-export const TOOL_PANEL_KEY = {
-  Tool: 'tool',
-  Remark: 'remark',
-};

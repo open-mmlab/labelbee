@@ -1,19 +1,19 @@
 /**
- * @file remark mask
+ * @file extra mask
  * @author lixinghua <lixinghua_vendor@sensetime.com>
  * @date 2024.01.30
  */
 
 import _ from 'lodash';
 import React from 'react';
-import { IRemarkInterval } from '../types';
+import { IExtraData, IExtraInterval } from '../types';
 
 export default ({
-  remarkSplitIntervals,
-  remark,
+  splitIntervals,
+  extraData,
 }: {
-  remarkSplitIntervals: IRemarkInterval[];
-  remark?: any;
+  splitIntervals: IExtraInterval[];
+  extraData?: IExtraData;
 }) => {
   return (
     <div
@@ -25,14 +25,14 @@ export default ({
         color: 'transparent',
       }}
     >
-      {remarkSplitIntervals.map((interval: IRemarkInterval, index: number) => {
-        const remarkAnnotation = _.last(interval.remarkAnnotations);
-        const highlight = interval?.remarkAnnotations?.find(
-          (i) => i?.auditID === remark.hoverAuditID,
+      {splitIntervals.map((interval: IExtraInterval, index: number) => {
+        const remarkAnnotation = _.last(interval.extraAnnotations);
+        const highlight = interval?.extraAnnotations?.find(
+          (i) => i?.auditID === extraData?.hoverAuditID,
         );
         const color = highlight ? '#ffc60a' : '#fcdf7e';
         let borderStyle = `2px solid ${color}`;
-        if (!remark?.isShowRemark) {
+        if (!extraData?.isShowRemark) {
           borderStyle = '';
         }
         if (remarkAnnotation) {

@@ -13,9 +13,10 @@ import {
   INLPTextAnnotation,
   INLPInterval,
   ISelectText,
-  IRemarkLayer,
-  IRemarkInterval,
-  IRemarkAnnotation,
+  IExtraLayer,
+  IExtraInterval,
+  IExtraInAnnotation,
+  IExtraData,
 } from '../types';
 import { prefix } from '@/constant';
 import { useTextSelection } from 'ahooks';
@@ -24,7 +25,7 @@ import { CommonToolUtils } from '@labelbee/lb-annotation';
 import styleString from '@/constant/styleString';
 import { getIntervals } from '../utils';
 import { classnames } from '@/utils';
-import RemarkMask from './remarkMask';
+import ExtraMask from './extraMask';
 
 interface IProps {
   highlightKey?: string;
@@ -34,35 +35,35 @@ interface IProps {
   NLPConfig?: INLPToolConfig;
   answerHeaderSlot?: React.ReactDOM | string;
   onSelectionChange?: (contentRef: RefObject<HTMLDivElement>, text: string) => void;
-  remarkLayer?: (values: IRemarkLayer) => void;
-  remark?: any;
-  remarkData?:ISelectText;
+  extraLayer?: (values: IExtraLayer) => void;
+  extraData?: IExtraData;
+  customAnnotationData?: ISelectText;
 }
 
 const NLPViewCls = `${prefix}-NLPView`;
 
-const renderRemarkModal = ({
-  remarkLayer,
-  remarkStyle,
-  setRemarkStyle,
-  setRemarkResut,
-  remarkResut,
+const renderExtraModal = ({
+  extraLayer,
+  extraStyle,
+  setExtraStyle,
+  setExtraResut,
+  extraResut,
 }: {
-  setRemarkStyle?: (value?: React.CSSProperties) => void;
-  remarkLayer?: (values: IRemarkLayer) => void;
-  remarkStyle?: React.CSSProperties | undefined;
-  setRemarkResut?: (value: ISelectText) => void;
-  remarkResut?: ISelectText;
+  setExtraStyle?: (value?: React.CSSProperties) => void;
+  extraLayer?: (values: IExtraLayer) => void;
+  extraStyle?: React.CSSProperties | undefined;
+  setExtraResut?: (value: ISelectText | undefined) => void;
+  extraResut?: ISelectText;
 }) => {
-  if (typeof remarkLayer === 'function' && setRemarkStyle && setRemarkResut && remarkResut) {
-    return remarkLayer({
-      style: remarkStyle,
+  if (typeof extraLayer === 'function' && setExtraStyle && setExtraResut) {
+    return extraLayer({
+      style: extraStyle,
       onClose: () => {
-        setRemarkStyle(undefined);
-        setRemarkResut({});
+        setExtraStyle(undefined);
+        setExtraResut(undefined);
         window.getSelection()?.empty();
       },
-      submitData: remarkResut,
+      submitData: extraResut,
     });
   }
 };
@@ -74,30 +75,28 @@ const TextContent: React.FC<IProps> = (props) => {
     NLPConfig,
     onSelectionChange,
     textAnnotation,
-    remark,
-    remarkData,
+    extraData,
+    customAnnotationData,
   } = props;
-  const { displayRemarkList } = remark || {};
-
+  const { displayRemarkList = [] } = extraData || {};
   const { t } = useTranslation();
   const contentRef = useRef<HTMLDivElement>(null);
   const selection = useTextSelection(contentRef);
-  const [remarkResut, setRemarkResut] = useState<ISelectText>({});
-  const [remarkStyle, setRemarkStyle] = useState<React.CSSProperties | undefined>(undefined);
+  const [extraResut, setExtraResut] = useState<ISelectText>();
+  const [extraStyle, setExtraStyle] = useState<React.CSSProperties | undefined>(undefined);
 
   const content = useMemo(() => {
     return textData?.[0]?.content;
   }, [textData]);
 
-  // remark split intervals
-  const remarkSplitIntervals: IRemarkInterval[] = useMemo(() => {
-    const remarkAnnotation = _.clone(displayRemarkList);
-    if (remarkResut?.start) {
-      remarkAnnotation.push(remarkResut);
+  // extraData split intervals
+  const extraSplitIntervals: IExtraInterval[] = useMemo(() => {
+    const extraAnnotation = _.clone(displayRemarkList);
+    if (extraResut?.start) {
+      extraAnnotation.push(extraResut);
     }
-
-    return getIntervals(content, remarkAnnotation ?? [], 'remarkAnnotations');
-  }, [displayRemarkList, remarkResut, content]);
+    return getIntervals(content, extraAnnotation ?? [], 'extraAnnotations');
+  }, [displayRemarkList, extraResut, content]);
 
   // annotation split intervals
   const splitIntervals: INLPInterval[] = useMemo(
@@ -106,12 +105,12 @@ const TextContent: React.FC<IProps> = (props) => {
   );
 
   useEffect(() => {
-    if (remarkData) {
-      const { id, start, end, text, endPosition } = remarkData;
-      setRemarkResut({ id, start, end, text });
-      setRemarkStyle(endPosition);
+    if (customAnnotationData) {
+      const { id, start, end, text, endPosition } = customAnnotationData;
+      setExtraResut({ id, start, end, text });
+      setExtraStyle(endPosition);
     }
-  }, [remarkData]);
+  }, [customAnnotationData]);
 
   const getColor = (attribute = '') => {
     const style = CommonToolUtils.jsonParser(styleString);
@@ -130,24 +129,24 @@ const TextContent: React.FC<IProps> = (props) => {
 
   // When replying to comments, the pop-up window expands to the corresponding position.
   useEffect(() => {
-    if (!remark?.editAuditID) {
+    if (!extraData?.editAuditID) {
       return;
     }
-    const remarkItem = displayRemarkList.filter(
-      (item: IRemarkAnnotation) => item.auditID === remark.editAuditID,
+    const extraItem = displayRemarkList.filter(
+      (item: IExtraInAnnotation) => item?.auditID === extraData.editAuditID,
     )[0];
-    const id = remarkItem?.id;
+    const id = extraItem?.id ?? '';
     const element = document.getElementById(id);
     if (element && contentRef.current) {
       const elementRect = element.getBoundingClientRect();
       const parentRect = contentRef.current.getBoundingClientRect();
       const relativeLeft = elementRect.right - parentRect.left;
       const relativeTop = elementRect.bottom - parentRect.top - element.offsetHeight;
-      if (relativeLeft && relativeTop && setRemarkStyle) {
-        setRemarkStyle({ left: relativeLeft, top: relativeTop });
+      if (relativeLeft && relativeTop && setExtraStyle) {
+        setExtraStyle({ left: relativeLeft, top: relativeTop });
       }
     }
-  }, [remark?.editAuditID]);
+  }, [extraData?.editAuditID]);
 
   return (
     <div>
@@ -186,14 +185,14 @@ const TextContent: React.FC<IProps> = (props) => {
             }
           })}
           {displayRemarkList?.length > 0 && (
-            <RemarkMask remarkSplitIntervals={remarkSplitIntervals} remark={remark} />
+            <ExtraMask splitIntervals={extraSplitIntervals} extraData={extraData} />
           )}
-          {renderRemarkModal({
-            remarkLayer: props?.remarkLayer,
-            setRemarkStyle,
-            remarkStyle,
-            remarkResut,
-            setRemarkResut,
+          {renderExtraModal({
+            extraLayer: props?.extraLayer,
+            setExtraStyle,
+            extraStyle,
+            extraResut,
+            setExtraResut,
           })}
 
           <div className={`${NLPViewCls}-question-content-mask`} ref={contentRef}>
