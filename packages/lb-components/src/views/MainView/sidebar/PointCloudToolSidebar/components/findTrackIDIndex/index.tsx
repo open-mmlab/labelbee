@@ -13,10 +13,11 @@ import { store } from '@/index';
 interface IProps {
   imgList: IFileItem[];
   imgIndex: number;
+  pageJump?: (page: number) => void;
 }
 
 const FindTrackIDIndex = (props: IProps) => {
-  const { imgList, imgIndex } = props;
+  const { imgList, imgIndex, pageJump } = props;
   const { t } = useTranslation();
   const dispatch = useDispatch();
   const [trackID, setTrackID] = useState(0);
@@ -34,6 +35,14 @@ const FindTrackIDIndex = (props: IProps) => {
     setTrackID(newTrackID);
   };
 
+  const jump = (page: number) => {
+    if (pageJump) {
+      pageJump(page);
+      return;
+    }
+    dispatch(PageJump(page));
+  };
+
   useEffect(() => {
     if (trackID) {
       const list = PointCloudUtils.getIndexByTrackID(trackID, imgList);
@@ -47,14 +56,14 @@ const FindTrackIDIndex = (props: IProps) => {
     if (currentIndex < 0) {
       return;
     }
-    dispatch(PageJump(list[currentIndex - 1]));
+    jump(list[currentIndex - 1]);
   };
 
   const onNext = () => {
     if (currentIndex === list.length - 1) {
       return;
     }
-    dispatch(PageJump(list[currentIndex + 1]));
+    jump(list[currentIndex + 1]);
   };
 
   return (
@@ -130,7 +139,7 @@ const FindTrackIDIndex = (props: IProps) => {
   );
 };
 
-export const FindTrackIDIndexWithProvider = (props: any) => {
+export const FindTrackIDIndexInCheckMode = (props: any) => {
   return (
     <Provider store={store} context={LabelBeeContext}>
       <I18nextProvider i18n={i18n}>
