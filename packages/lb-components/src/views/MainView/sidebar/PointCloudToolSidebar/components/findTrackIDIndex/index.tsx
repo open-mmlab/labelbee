@@ -84,15 +84,6 @@ const FindTrackIDIndex = (props: IProps) => {
           }}
         />
         <div>
-          {currentIndex > -1 && (
-            <span
-              style={{
-                marginRight: 4,
-              }}
-            >
-              {t('Frame')}: {currentIndex + 1}
-            </span>
-          )}
           <ArrowComponent disabled={currentIndex <= 0} onClick={onPrev} type={'left'} />
           <ArrowComponent
             disabled={currentIndex === -1 || currentIndex === list.length - 1}
