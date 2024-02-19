@@ -1,3 +1,9 @@
+/*
+ * @file NLP tool Layout
+ * @Author: lixinghua lixinghua@sensetime.com
+ * @Date: 2024-01-24
+ */
+
 import { AppProps } from '@/App';
 import { prefix } from '@/constant';
 import { Layout } from 'antd/es';
@@ -9,13 +15,15 @@ import { getClassName } from '@/utils/dom';
 import { classnames } from '@/utils';
 import { NLPContext } from '@/store/ctx';
 import NLPToolView from '@/components/NLPToolView';
+import { IExtraData, IExtraLayer, ISelectText } from '@/components/NLPToolView/types';
 
 interface IProps {
   path: string;
   loading: boolean;
-  remarkLayer?: any;
-  remark?: any;
-  activeToolPanel?: string;
+  extraData?: IExtraData; // Data passed in from outside is used to render extra mask
+  extraLayer?: (value: IExtraLayer) => void; // Supports external custom methods, here is a modal
+  onChangeAnnotation?: (v:ISelectText)=>void; // Support external modification of rendering results
+  customAnnotationData?: ISelectText; // Custom rendering results
 }
 
 const { Sider, Content } = Layout;
@@ -45,9 +53,10 @@ const NLPLayout: React.FC<AppProps & IProps> = (props) => {
             checkMode={props.checkMode}
             showTips={props.showTips}
             tips={props.tips}
-            remarkLayer={props?.remarkLayer}
-            remark={props?.remark}
-            activeToolPanel={props?.activeToolPanel}
+            extraLayer={props?.extraLayer}
+            extraData={props?.extraData}
+            onChangeAnnotation={props?.onChangeAnnotation}
+            customAnnotationData={props?.customAnnotationData}
           />
           <ToolFooter style={props.style?.footer} mode={props.mode} footer={props?.footer} />
         </Content>

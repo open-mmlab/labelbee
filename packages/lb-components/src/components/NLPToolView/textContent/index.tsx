@@ -4,7 +4,7 @@
  * @Date: 2024-01-24
  */
 
-import React, { useEffect, useState, useRef, useMemo } from 'react';
+import React, { useEffect, useState, useRef, useMemo, RefObject } from 'react';
 import { useTranslation, I18nextProvider } from 'react-i18next';
 import { i18n, toolStyleConverter } from '@labelbee/lb-utils';
 import {
@@ -13,58 +13,57 @@ import {
   INLPTextAnnotation,
   INLPInterval,
   ISelectText,
-  IRemarkLayer,
-  IRemarkInterval,
-  IRemarkAnnotation,
+  IExtraLayer,
+  IExtraInterval,
+  IExtraInAnnotation,
+  IExtraData,
 } from '../types';
-import { prefix, TOOL_PANEL_KEY } from '@/constant';
+import { prefix } from '@/constant';
 import { useTextSelection } from 'ahooks';
 import _ from 'lodash';
-import { CommonToolUtils, uuid } from '@labelbee/lb-annotation';
+import { CommonToolUtils } from '@labelbee/lb-annotation';
 import styleString from '@/constant/styleString';
 import { getIntervals } from '../utils';
 import { classnames } from '@/utils';
-import RemarkMask from './remarkMask';
+import ExtraMask from './extraMask';
 
 interface IProps {
   highlightKey?: string;
   textData: ITextData[];
   textAnnotation: INLPTextAnnotation[];
   lang?: string;
-  checkMode?: boolean;
   NLPConfig?: INLPToolConfig;
   answerHeaderSlot?: React.ReactDOM | string;
-  onSelectionChange?: (text: string) => void;
-  remarkLayer?: (values: IRemarkLayer) => void;
-  remark?: any;
-  isSourceView?: boolean;
-  activeToolPanel?: string;
+  onSelectionChange?: (contentRef: RefObject<HTMLDivElement>, text: string) => void;
+  extraLayer?: (values: IExtraLayer) => void;
+  extraData?: IExtraData;
+  customAnnotationData?: ISelectText;
 }
 
 const NLPViewCls = `${prefix}-NLPView`;
 
-const renderRemarkModal = ({
-  remarkLayer,
-  remarkStyle,
-  setRemarkStyle,
-  setRemarkResut,
-  remarkResut,
+const renderExtraModal = ({
+  extraLayer,
+  extraStyle,
+  setExtraStyle,
+  setExtraResut,
+  extraResut,
 }: {
-  setRemarkStyle: (value?: React.CSSProperties) => void;
-  remarkLayer?: (values: IRemarkLayer) => void;
-  remarkStyle: React.CSSProperties | undefined;
-  setRemarkResut: (value: ISelectText) => void;
-  remarkResut: ISelectText;
+  setExtraStyle?: (value?: React.CSSProperties) => void;
+  extraLayer?: (values: IExtraLayer) => void;
+  extraStyle?: React.CSSProperties | undefined;
+  setExtraResut?: (value: ISelectText | undefined) => void;
+  extraResut?: ISelectText;
 }) => {
-  if (remarkLayer) {
-    return remarkLayer({
-      style: remarkStyle,
+  if (typeof extraLayer === 'function' && setExtraStyle && setExtraResut) {
+    return extraLayer({
+      style: extraStyle,
       onClose: () => {
-        setRemarkStyle(undefined);
-        setRemarkResut({});
+        setExtraStyle(undefined);
+        setExtraResut(undefined);
         window.getSelection()?.empty();
       },
-      submitData: remarkResut,
+      submitData: extraResut,
     });
   }
 };
@@ -73,42 +72,45 @@ const TextContent: React.FC<IProps> = (props) => {
     highlightKey,
     textData,
     lang,
-    checkMode = true,
     NLPConfig,
     onSelectionChange,
     textAnnotation,
-    remark,
-    activeToolPanel,
+    extraData,
+    customAnnotationData,
   } = props;
-  const { enableRemark, displayRemarkList } = remark || {};
-
-  const hideRemark = activeToolPanel ? activeToolPanel !== TOOL_PANEL_KEY.Remark : false;
-
+  const { displayRemarkList = [] } = extraData || {};
   const { t } = useTranslation();
   const contentRef = useRef<HTMLDivElement>(null);
   const selection = useTextSelection(contentRef);
-  const [remarkResut, setRemarkResut] = useState<ISelectText>({});
-  const [remarkStyle, setRemarkStyle] = useState<React.CSSProperties | undefined>(undefined);
+  const [extraResut, setExtraResut] = useState<ISelectText>();
+  const [extraStyle, setExtraStyle] = useState<React.CSSProperties | undefined>(undefined);
 
   const content = useMemo(() => {
     return textData?.[0]?.content;
   }, [textData]);
 
-  // remark split intervals
-  const remarkSplitIntervals: IRemarkInterval[] = useMemo(() => {
-    const remarkAnnotation = _.clone(displayRemarkList);
-    if (remarkResut?.start) {
-      remarkAnnotation.push(remarkResut);
+  // extraData split intervals
+  const extraSplitIntervals: IExtraInterval[] = useMemo(() => {
+    const extraAnnotation = _.clone(displayRemarkList);
+    if (extraResut?.start) {
+      extraAnnotation.push(extraResut);
     }
-
-    return getIntervals(content, remarkAnnotation ?? [], 'remarkAnnotations');
-  }, [displayRemarkList, remarkResut, content]);
+    return getIntervals(content, extraAnnotation ?? [], 'extraAnnotations');
+  }, [displayRemarkList, extraResut, content]);
 
   // annotation split intervals
   const splitIntervals: INLPInterval[] = useMemo(
     () => getIntervals(content, textAnnotation ?? [], 'annotations'),
     [textAnnotation, content],
   );
+
+  useEffect(() => {
+    if (customAnnotationData) {
+      const { id, start, end, text, endPosition } = customAnnotationData;
+      setExtraResut({ id, start, end, text });
+      setExtraStyle(endPosition);
+    }
+  }, [customAnnotationData]);
 
   const getColor = (attribute = '') => {
     const style = CommonToolUtils.jsonParser(styleString);
@@ -122,66 +124,29 @@ const TextContent: React.FC<IProps> = (props) => {
   }, []);
 
   useEffect(() => {
-    if (enableRemark && !hideRemark) {
-      onSelectionRemark(selection.text);
-    } else if (activeToolPanel && activeToolPanel === TOOL_PANEL_KEY.Tool) {
-      onSelectionChange?.(selection.text);
-    }
+    onSelectionChange?.(contentRef, selection.text);
   }, [selection.text]);
 
   // When replying to comments, the pop-up window expands to the corresponding position.
   useEffect(() => {
-    if (!remark?.editAuditID) {
+    if (!extraData?.editAuditID) {
       return;
     }
-    const remarkItem = displayRemarkList.filter(
-      (item: IRemarkAnnotation) => item.auditID === remark.editAuditID,
+    const extraItem = displayRemarkList.filter(
+      (item: IExtraInAnnotation) => item?.auditID === extraData.editAuditID,
     )[0];
-    const id = remarkItem?.id;
+    const id = extraItem?.id ?? '';
     const element = document.getElementById(id);
     if (element && contentRef.current) {
       const elementRect = element.getBoundingClientRect();
       const parentRect = contentRef.current.getBoundingClientRect();
       const relativeLeft = elementRect.right - parentRect.left;
       const relativeTop = elementRect.bottom - parentRect.top - element.offsetHeight;
-      if (relativeLeft && relativeTop) {
-        setRemarkStyle({ left: relativeLeft, top: relativeTop });
+      if (relativeLeft && relativeTop && setExtraStyle) {
+        setExtraStyle({ left: relativeLeft, top: relativeTop });
       }
     }
-  }, [remark?.editAuditID]);
-
-  const onSelectionRemark = (text: string) => {
-    if (text === '') return;
-    let curSelection = window.getSelection();
-
-    const { anchorOffset = 0, focusOffset = 0, anchorNode, focusNode } = curSelection || {};
-
-    if (anchorNode === focusNode) {
-      // ignore the order of selection
-      let start = Math.min(anchorOffset, focusOffset);
-      let end = Math.max(anchorOffset, focusOffset);
-
-      if (selection && contentRef?.current && curSelection) {
-        const contentRect = contentRef.current?.getBoundingClientRect();
-        const range = curSelection.getRangeAt(0);
-        const rangeRect = range.getBoundingClientRect();
-        const endPosition = {
-          left: rangeRect.right - contentRect.left,
-          top: rangeRect.top - contentRect.top,
-        };
-        if (endPosition.left && endPosition.left) {
-          setRemarkStyle(endPosition);
-        }
-      }
-      const value = {
-        id: uuid(8, 62),
-        start,
-        end,
-        text,
-      };
-      setRemarkResut(value);
-    }
-  };
+  }, [extraData?.editAuditID]);
 
   return (
     <div>
@@ -220,16 +185,15 @@ const TextContent: React.FC<IProps> = (props) => {
             }
           })}
           {displayRemarkList?.length > 0 && (
-            <RemarkMask remarkSplitIntervals={remarkSplitIntervals} remark={remark} />
+            <ExtraMask splitIntervals={extraSplitIntervals} extraData={extraData} />
           )}
-          {!hideRemark &&
-            renderRemarkModal({
-              remarkLayer: props?.remarkLayer,
-              setRemarkStyle,
-              remarkStyle,
-              remarkResut,
-              setRemarkResut,
-            })}
+          {renderExtraModal({
+            extraLayer: props?.extraLayer,
+            setExtraStyle,
+            extraStyle,
+            extraResut,
+            setExtraResut,
+          })}
 
           <div className={`${NLPViewCls}-question-content-mask`} ref={contentRef}>
             {content}
