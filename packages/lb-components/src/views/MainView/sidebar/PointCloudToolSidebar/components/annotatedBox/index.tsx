@@ -32,6 +32,7 @@ interface ITrackIDItem {
 interface IAnnotatedBoxProps {
   imgList: IFileItem[];
   imgIndex: number;
+  isPreResult?: boolean;
 }
 
 const AnnotatedBox = (props: IAnnotatedBoxProps) => {
@@ -70,6 +71,7 @@ const AnnotatedBox = (props: IAnnotatedBoxProps) => {
 interface IAnnotatedBoxIDsProps {
   imgList: IFileItem[];
   imgIndex: number;
+  isPreResult?: boolean;
   highlightIDs: number[];
   selectedIDs: string[];
   pointCloudBoxList: any[];
@@ -82,6 +84,7 @@ const AnnotatedBoxIDs = (props: IAnnotatedBoxIDsProps) => {
   const {
     imgList,
     imgIndex,
+    isPreResult = false,
     highlightIDs,
     selectedIDs,
     pointCloudBoxList,
@@ -105,6 +108,7 @@ const AnnotatedBoxIDs = (props: IAnnotatedBoxIDsProps) => {
         imgList: newImgList,
         extraBoxList: pointCloudBoxList,
         ignoreIndexList: [imgIndex],
+        isPreResult,
       })
         .filter((v) => {
           if (!v.trackID) {
@@ -182,7 +186,11 @@ const AnnotatedBoxIDs = (props: IAnnotatedBoxIDsProps) => {
         </Checkbox>
       </div>
 
-      <div>
+      <div
+        style={{
+          userSelect: 'none',
+        }}
+      >
         {showIDs.map((item) => {
           if (item.disabled && onlyShowCurrentIndex) {
             return null;
@@ -202,11 +210,11 @@ const AnnotatedBoxIDs = (props: IAnnotatedBoxIDsProps) => {
               onClick={(e) => {
                 e.preventDefault();
                 e.stopPropagation();
-                if (isDoubleClick(e as any)) {
-                  addHighlightID(item);
+                if (item.disabled) {
                   return;
                 }
-                if (item.disabled) {
+                if (isDoubleClick(e as any)) {
+                  addHighlightID(item);
                   return;
                 }
                 addSelectedID(item);
