@@ -404,16 +404,18 @@ class PointCloudUtils {
     extraBoxList,
     extraSphereList = [],
     ignoreIndexList = [],
+    isPreResult = false,
   }: {
-    imgList: Array<{ result: string }>;
+    imgList: Array<{ result: string; preResult?: string }>;
     step?: number;
     extraBoxList: IPointCloudBox[];
     extraSphereList?: IPointCloudSphere[];
     ignoreIndexList?: number[];
+    isPreResult?: boolean;
   }) {
     const resultList = imgList
       .filter((_, i) => !ignoreIndexList?.includes(i))
-      .map((v) => this.jsonParser(v.result));
+      .map((v) => this.jsonParser(v?.[isPreResult ? 'preResult' : 'result'] ?? ''));
     const DEFAULT_STEP_NAME = `step_${step}`;
 
     let boxList: Array<IPointCloudBox | IPointCloudSphere> = [];
@@ -435,10 +437,16 @@ class PointCloudUtils {
     return boxList;
   }
 
-  public static getIndexByTrackID(id: number, imgList: Array<{ result?: string }>) {
+  public static getIndexByTrackID(
+    id: number,
+    imgList: Array<{ result?: string }>,
+    isPreResult: boolean,
+  ) {
     const arr: number[] = [];
     // 解析字符串
-    const resultList = imgList.map((v: any) => this.jsonParser(v?.result ?? ''));
+    const resultList = imgList.map((v: any) =>
+      this.jsonParser(v?.[isPreResult ? 'preResult' : 'result'] ?? ''),
+    );
 
     const DEFAULT_STEP_NAME = `step_1`;
 

@@ -20,10 +20,11 @@ interface IProps {
   imgList: IFileItem[];
   imgIndex: number;
   pageJump?: (page: number) => void;
+  isPreResult: boolean;
 }
 
 const FindTrackIDIndex = (props: IProps) => {
-  const { imgList, imgIndex, pageJump } = props;
+  const { imgList, imgIndex, pageJump, isPreResult } = props;
   const { t } = useTranslation();
   const dispatch = useDispatch();
   const [trackID, setTrackID] = useState(0);
@@ -32,6 +33,10 @@ const FindTrackIDIndex = (props: IProps) => {
 
   const onPressEnter = (e: any) => {
     const inputValue = e.target.value;
+    if (inputValue === '') {
+      setTrackID(0);
+      return;
+    }
     const newTrackID = parseInt(inputValue, 10);
 
     if (!(newTrackID > 0)) {
@@ -51,12 +56,20 @@ const FindTrackIDIndex = (props: IProps) => {
 
   useEffect(() => {
     if (trackID) {
-      const list = PointCloudUtils.getIndexByTrackID(trackID, imgList);
+      const list = PointCloudUtils.getIndexByTrackID(trackID, imgList, isPreResult);
       if (list?.length) {
         setList(list);
       }
+      return;
     }
-  }, [trackID, imgIndex]);
+    setList([]);
+  }, [trackID]);
+
+  useEffect(() => {
+    if (list?.length) {
+      jump(list[0]);
+    }
+  }, [list]);
 
   const onPrev = () => {
     if (currentIndex < 0) {
@@ -82,6 +95,7 @@ const FindTrackIDIndex = (props: IProps) => {
           style={{
             width: 50,
           }}
+          allowClear={true}
         />
         <div>
           <ArrowComponent disabled={currentIndex <= 0} onClick={onPrev} type={'left'} />
