@@ -186,7 +186,11 @@ const AnnotatedBoxIDs = (props: IAnnotatedBoxIDsProps) => {
         </Checkbox>
       </div>
 
-      <div>
+      <div
+        style={{
+          userSelect: 'none',
+        }}
+      >
         {showIDs.map((item) => {
           if (item.disabled && onlyShowCurrentIndex) {
             return null;
