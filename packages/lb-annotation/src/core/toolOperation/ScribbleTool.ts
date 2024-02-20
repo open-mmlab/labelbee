@@ -1,5 +1,4 @@
 import { ImgConversionUtils } from '@labelbee/lb-utils';
-import { isEqual } from 'lodash';
 import AxisUtils from '@/utils/tool/AxisUtils';
 import DrawUtils from '@/utils/tool/DrawUtils';
 import { EScribblePattern, EToolName } from '@/constant/tool';
@@ -298,17 +297,13 @@ class ScribbleTool extends BasicToolOperation {
     const originCoordinate = this.getOriginCoordinate(e);
     this.cacheContext.moveTo(originCoordinate.x, originCoordinate.y);
     this.startPoint = originCoordinate;
-
-    if (this.lineActive && e.buttons === 1) {
-      this.scribbleOnImgByLine(originCoordinate);
-    }
   }
 
   // Draw lines on the image
   public scribbleOnImgByLine(endPoint: ICoordinate) {
     const ctx = this.cacheContext;
-    const samePoint = isEqual(this.pointList[this.pointList?.length - 1], endPoint);
-    if (!ctx || samePoint) {
+
+    if (!ctx) {
       return;
     }
     this.pointList = this.pointList.slice(0, this.curIndexOnLine + 1);
@@ -327,7 +322,6 @@ class ScribbleTool extends BasicToolOperation {
           ctx.restore();
         }
       });
-      this.pushUrlForHistory();
     }
   }
 
@@ -347,17 +341,21 @@ class ScribbleTool extends BasicToolOperation {
   }
 
   public onScribbleEnd(e?: MouseEvent) {
-    if (!e) {
+    if (!e || e?.button === 2) {
       return;
     }
     const originCoordinate = this.getOriginCoordinate(e);
-    const samePoint = isEqual(this.startPoint, originCoordinate);
-    if (!samePoint && !this.lineActive) {
-      this.pushUrlForHistory();
+    if (this.lineActive) {
+      this.scribbleOnImgByLine(originCoordinate);
+    } else if (this.cacheContext) {
+      this.cacheContext.lineTo(originCoordinate.x, originCoordinate.y);
+      this.cacheContext.stroke();
     }
+    this.saveUrlIntoHistory();
   }
 
-  public pushUrlForHistory() {
+  // Save the url of the canvas image into History
+  public saveUrlIntoHistory() {
     this.cacheContext?.closePath();
     this.cacheContext?.restore();
     this.startPoint = undefined;
