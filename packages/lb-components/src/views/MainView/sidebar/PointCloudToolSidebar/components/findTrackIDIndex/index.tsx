@@ -20,11 +20,11 @@ interface IProps {
   imgList: IFileItem[];
   imgIndex: number;
   pageJump?: (page: number) => void;
-  isPreResult: boolean;
+  isPreResult?: boolean;
 }
 
 const FindTrackIDIndex = (props: IProps) => {
-  const { imgList, imgIndex, pageJump, isPreResult } = props;
+  const { imgList, imgIndex, pageJump, isPreResult = false } = props;
   const { t } = useTranslation();
   const dispatch = useDispatch();
   const [trackID, setTrackID] = useState(0);

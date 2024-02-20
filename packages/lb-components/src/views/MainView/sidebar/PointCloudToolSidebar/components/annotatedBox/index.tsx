@@ -32,7 +32,7 @@ interface ITrackIDItem {
 interface IAnnotatedBoxProps {
   imgList: IFileItem[];
   imgIndex: number;
-  isPreResult: boolean;
+  isPreResult?: boolean;
 }
 
 const AnnotatedBox = (props: IAnnotatedBoxProps) => {
@@ -71,7 +71,7 @@ const AnnotatedBox = (props: IAnnotatedBoxProps) => {
 interface IAnnotatedBoxIDsProps {
   imgList: IFileItem[];
   imgIndex: number;
-  isPreResult: boolean;
+  isPreResult?: boolean;
   highlightIDs: number[];
   selectedIDs: string[];
   pointCloudBoxList: any[];
@@ -84,7 +84,7 @@ const AnnotatedBoxIDs = (props: IAnnotatedBoxIDsProps) => {
   const {
     imgList,
     imgIndex,
-    isPreResult,
+    isPreResult = false,
     highlightIDs,
     selectedIDs,
     pointCloudBoxList,
