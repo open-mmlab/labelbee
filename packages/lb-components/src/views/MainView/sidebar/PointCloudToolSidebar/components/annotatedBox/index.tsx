@@ -210,11 +210,11 @@ const AnnotatedBoxIDs = (props: IAnnotatedBoxIDsProps) => {
               onClick={(e) => {
                 e.preventDefault();
                 e.stopPropagation();
-                if (isDoubleClick(e as any)) {
-                  addHighlightID(item);
+                if (item.disabled) {
                   return;
                 }
-                if (item.disabled) {
+                if (isDoubleClick(e as any)) {
+                  addHighlightID(item);
                   return;
                 }
                 addSelectedID(item);

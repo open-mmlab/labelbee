@@ -502,7 +502,7 @@ export const PointCloudProvider: React.FC<{}> = ({ children }) => {
 
   useEffect(() => {
     state?.setPtCtx?.(ptCtx);
-  }, []);
+  }, [ptCtx]);
 
   const updateSelectedIDsAndRenderAfterHide = () => {
     const pointCloudForFilteredList = pointCloudBoxList.filter((i) =>
