@@ -24,7 +24,12 @@ const ArrowComponent = (props: IArrowProps) => {
         'ant-pagination-disabled': disabled,
         [`ant-pagination-${type === 'left' ? 'prev' : 'next'}`]: true,
       })}
-      onClick={onClick}
+      onClick={() => {
+        if (disabled) {
+          return;
+        }
+        onClick();
+      }}
     >
       <button className='ant-pagination-item-link' type='button'>
         <span role='img' className={`anticon anticon-${type}`}>
