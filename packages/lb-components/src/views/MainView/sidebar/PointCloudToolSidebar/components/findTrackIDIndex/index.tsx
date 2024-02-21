@@ -16,7 +16,6 @@ import { LabelBeeContext, useDispatch } from '@/store/ctx';
 import { PageJump } from '@/store/annotation/actionCreators';
 import { store } from '@/index';
 import ArrowComponent from './arrow';
-import { useDebounceFn } from 'ahooks';
 interface IProps {
   imgList: IFileItem[];
   imgIndex: number;
@@ -43,7 +42,7 @@ const FindTrackIDIndex = (props: IProps) => {
       message.error(t('PositiveIntegerCheck'));
       return;
     }
-    debounceGetIndexList(newTrackID);
+    getIndexList(newTrackID);
   };
 
   const jump = (page: number) => {
@@ -62,8 +61,6 @@ const FindTrackIDIndex = (props: IProps) => {
     }
     setList([]);
   };
-
-  const { run: debounceGetIndexList } = useDebounceFn(getIndexList, { wait: 100 });
 
   useEffect(() => {
     if (list?.length) {
