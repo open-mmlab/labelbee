@@ -6,7 +6,7 @@
  * @date 2024年2月18日
  */
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { Checkbox, Popover, Tag } from 'antd';
 import { PointCloudUtils, i18n } from '@labelbee/lb-utils';
 import { IPointCloudContext } from '@/components/pointCloudView/PointCloudContext';
@@ -96,6 +96,7 @@ const AnnotatedBoxIDs = (props: IAnnotatedBoxIDsProps) => {
 
   const [showIDs, setShowIds] = useState<ITrackIDItem[]>([]);
   const [onlyShowCurrentIndex, setOnlyShowCurrentIndex] = useState<boolean>(false);
+  const checkboxRef = useRef<any>(null);
 
   useEffect(() => {
     const newImgList = imgList as Array<{ result: string }>;
@@ -179,8 +180,13 @@ const AnnotatedBoxIDs = (props: IAnnotatedBoxIDsProps) => {
         }}
       >
         <Checkbox
+          ref={checkboxRef}
           checked={onlyShowCurrentIndex}
           onChange={(e) => setOnlyShowCurrentIndex(e.target.checked)}
+          // @ts-ignore
+          onFocus={() => {
+            checkboxRef?.current?.blur();
+          }}
         >
           {t('OnlyCurrentFrame')}
         </Checkbox>
