@@ -3,7 +3,7 @@
  * @Author: lixinghua lixinghua@sensetime.com
  * @Date: 2023-04-10
  */
-import React, { useContext } from 'react';
+import React, { useContext, useMemo } from 'react';
 import { prefix } from '@/constant';
 import { Tag, Collapse, Popover } from 'antd';
 import { useTranslation } from 'react-i18next';
@@ -19,24 +19,18 @@ import {
   ILLMToolConfig,
   IAnswerList,
   ITextList,
+  IConfigUpdate,
 } from '@/components/LLMToolView/types';
 import { isBoolean } from 'lodash';
 import LongText from '@/components/longText';
 import TextEditor from '../textEditor';
+import TagList from '../tagList';
 
 interface IProps {
   list?: IAnswerList[];
   checkMode?: boolean;
   LLMConfig?: ILLMToolConfig;
-  updateValue: ({
-    order,
-    value,
-    key,
-  }: {
-    order: number;
-    value: number | string | { key: string; value: number | boolean };
-    key?: string;
-  }) => void;
+  updateValue: (value: IConfigUpdate) => void;
 }
 
 enum ETagType {
@@ -146,7 +140,7 @@ const AnswerList = (props: IProps) => {
       defaultActiveKey={
         list.length > 0 ? list.map((i: IAnswerList, index: number) => index) : undefined
       }
-      style={{ margin: '16px 0px', background: '#fff' }}
+      style={{ marginBottom: '16px', background: '#fff' }}
     >
       {list.map((i: IAnswerList, index: number) => {
         const {
@@ -154,7 +148,9 @@ const AnswerList = (props: IProps) => {
           indicatorDetermine = [],
           textEdit = [],
           isTextEdit = false,
+          inputList = [],
         } = LLMConfig || {};
+        const localInputList = inputList.filter((i) => !i?.isWhole) || [];
         const { backgroundColor, fontColor, tagText, tagStatus } = getTagStyle(i);
         const textEditObject = getAnswerTextEditConfig(i, textEdit) || {};
 
@@ -196,6 +192,18 @@ const AnswerList = (props: IProps) => {
               [`${LLMSidebarCls}-errorPanel`]: tagStatus === ETagType.UnFinish,
             })}
           >
+            {/* attribute tag */}
+            {localInputList?.length > 0 && (
+              <TagList
+                inputList={localInputList}
+                selectedTags={i?.tagList || {}}
+                updateValue={(changeValue) => {
+                  updateValue({ order: i.order, value: changeValue, key: 'tagList' });
+                }}
+                checkMode={checkMode}
+              />
+            )}
+
             {/* Indicator score  */}
             {indicatorScore?.length > 0 &&
               indicatorScore.map((item: IndicatorScore, index: number) => {

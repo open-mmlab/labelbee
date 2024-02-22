@@ -21,6 +21,7 @@ export interface IAnswerList {
   };
   newAnswer?: string;
   url?: string; // used to display picture
+  tagList?: ISelectedTags;
 }
 
 export interface IModelAPIAnswer {
@@ -57,6 +58,7 @@ export interface ILLMToolConfig {
   };
   isTextEdit: boolean;
   textEdit: ITextList[];
+  inputList?: IInputList[];
 }
 
 // LLM文本
@@ -101,4 +103,25 @@ export interface ILLMBoxResult {
   id: number;
   sort?: number[][];
   textAttribute?: ITextList[];
+}
+
+export interface IInputList {
+  key: string;
+  value: string;
+  isMulti: boolean;
+  isWhole: boolean;
+  subSelected: Array<{
+    key: string;
+    value: string;
+    isDefault: boolean;
+  }>;
+}
+
+export interface ISelectedTags {
+  [key: string]: string[];
+}
+export interface IConfigUpdate {
+  order: number;
+  value: number | string | { key: string; value?: number | boolean | string[] };
+  key?: string;
 }
