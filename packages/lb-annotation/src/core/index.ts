@@ -6,7 +6,7 @@ import { ELang } from '@/constant/annotation';
 import { getConfig, styleDefaultConfig } from '@/constant/defaultConfig';
 import { EToolName, THybridToolName } from '@/constant/tool';
 import { IPolygonData } from '@/types/tool/polygon';
-import BasicLayer from '@/core/basicLayer';
+import BasicLayer, { IReferenceInfoProps } from '@/core/basicLayer';
 import { CoordinateUtils } from '@/utils/tool/AxisUtils';
 import { HybridToolUtils, ToolScheduler } from './scheduler';
 
@@ -136,8 +136,8 @@ export default class AnnotationEngine {
   }
 
   public syncZoomAndCurrentPos(zoom: number, currentPos: ICoordinate) {
-    this.zoom = zoom
-    this.currentPos = currentPos
+    this.zoom = zoom;
+    this.currentPos = currentPos;
     this.toolScheduler.setZoom(zoom);
     this.basicInstance.setZoom(zoom);
     this.toolScheduler.setCurrentPos(currentPos);
@@ -244,6 +244,16 @@ export default class AnnotationEngine {
     this.toolScheduler.setBasicResult(basicResult);
     this.basicInstance.setBasicResult(basicResult);
     this.basicInstance.setDependName(dependToolName);
+    this.basicInstance.renderBasicCanvas();
+  }
+
+  /**
+   * 设置参考显示的信息
+   * @param referenceInfo
+   */
+
+  public setReferenceInfo(referenceInfo: IReferenceInfoProps) {
+    this.basicInstance.setReferenceInfo(referenceInfo);
     this.basicInstance.renderBasicCanvas();
   }
 

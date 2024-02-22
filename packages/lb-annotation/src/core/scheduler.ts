@@ -422,7 +422,8 @@ export class ToolScheduler implements IToolSchedulerOperation {
 
   public destroyAllLayer() {
     this.toolOperationList.forEach((toolInstance) => {
-      toolInstance.destroyCanvas();
+      // use destroy instead of destroyCanvas to delete textAttribute layer
+      toolInstance.destroy();
       this.init();
     });
   }

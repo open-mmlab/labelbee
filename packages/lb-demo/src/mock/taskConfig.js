@@ -510,9 +510,13 @@ const getStepConfig = (tool, step, sourceStep) => {
 
   return {
     step: step ?? 1,
-    dataSourceStep: sourceStep || 0,
+    dataSourceStep: 0,
     tool: toolList,
-    config: JSON.stringify(getConfig(toolName)),
+    config: JSON.stringify({
+      ...getConfig(toolName),
+      referenceStep: sourceStep || 0,
+      referenceFilterData: ['valid', 'invalid'],
+    }),
   };
 };
 

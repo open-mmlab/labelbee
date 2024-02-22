@@ -7,7 +7,7 @@ import { IStepInfo } from '@/types/step';
 import { jsonParser } from '@/utils';
 import AnnotationDataUtils from '@/utils/AnnotationDataUtils';
 import { ConfigUtils } from '@/utils/ConfigUtils';
-import { getBasicResult } from '@/utils/Pipeline'
+import { getBasicResult, getReferenceConfig, getReferenceInfo} from '@/utils/Pipeline'
 import { composeResult, composeResultWithBasicImgInfo } from '@/utils/data';
 import StepUtils from '@/utils/StepUtils';
 import ToolUtils from '@/utils/ToolUtils';
@@ -492,6 +492,11 @@ export const annotationReducer = (
         preResult,
       );
 
+      const referenceInfo = getReferenceInfo(step, stepList, {
+        result: imgList[nextIndex].result,
+        preResult,
+      })
+
       const result = AnnotationDataUtils.getInitialResultList(
         stepResult?.result,
         toolInstance,
@@ -501,6 +506,10 @@ export const annotationReducer = (
       );
 
       annotationEngine?.launchOperation();
+
+      if (referenceInfo && referenceInfo.referenceToolName) {
+        annotationEngine.setReferenceInfo(referenceInfo)
+      }
 
       if (hasDataSourceStep) {
         if (stepBasicResultList?.length > 0) {

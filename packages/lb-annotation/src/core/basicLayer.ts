@@ -4,14 +4,28 @@
  * @Date 2024-01-31
  */
 
-import { EToolName, THybridToolName } from '@/constant/tool';
+import { EToolName, THybridToolName, ToolName } from '@/constant/tool';
 import CanvasUtils from '@/utils/tool/CanvasUtils';
 import DrawUtils from '@/utils/tool/DrawUtils';
 import AxisUtils, { CoordinateUtils } from '@/utils/tool/AxisUtils';
 import { HybridToolUtils } from '@/core/scheduler';
 import EventListener from '@/core/toolOperation/eventListener';
 import { IPolygonConfig } from '@/types/tool/polygon';
+import { ILineConfig } from '@/types/tool/lineTool';
+import { IPointToolConfig } from '@/types/tool/pointTool';
 import { ICommonProps } from './index';
+import { toolStyleConverter } from '@labelbee/lb-utils';
+import CommonToolUtils from '@/utils/tool/CommonToolUtils';
+import { styleString } from '@/constant/style';
+import StyleUtils from '@/utils/tool/StyleUtils';
+
+type IReferenceConfig = IRectConfig | IPolygonConfig | ILineConfig | IPointToolConfig;
+
+export interface IReferenceInfoProps {
+  referenceConfig: IReferenceConfig;
+  referenceResult: any;
+  referenceToolName: ToolName;
+}
 
 interface IBasicLayerProps extends ICommonProps {
   container: HTMLElement;
@@ -26,6 +40,10 @@ interface IBasicLayerProps extends ICommonProps {
 export default class BasicLayer extends EventListener {
   public container: HTMLElement; // external dom node
 
+  public config: any;
+
+  public style: any;
+
   public size: ISize;
 
   public imgNode?: HTMLImageElement;
@@ -33,6 +51,8 @@ export default class BasicLayer extends EventListener {
   public basicCanvas!: HTMLCanvasElement; // dom for basic layer
 
   public basicResult?: any; // data of depended tool
+
+  public referenceInfo?: IReferenceInfoProps;
 
   public dependToolName?: EToolName;
 
@@ -57,6 +77,8 @@ export default class BasicLayer extends EventListener {
   constructor(props: IBasicLayerProps) {
     super();
     this.container = props.container;
+    this.config = CommonToolUtils.jsonParser(props.config);
+    this.style = props.style ?? CommonToolUtils.jsonParser(styleString);
 
     this.size = props.size;
     this.zoom = props.zoom ?? 1;
@@ -119,6 +141,9 @@ export default class BasicLayer extends EventListener {
     this.coordUtils?.setBasicResult(basicResult);
   }
 
+  public setReferenceInfo(referenceInfo: IReferenceInfoProps) {
+    this.referenceInfo = referenceInfo;
+  }
   /**
    * Synchronize common information such as currentPos, zoom, etc
    */
@@ -140,6 +165,11 @@ export default class BasicLayer extends EventListener {
       this.createBasicCanvas(size);
       this.renderBasicCanvas();
     }
+  }
+
+  /** Get the current property color */
+  public getColor(attribute = '', config = this.config) {
+    return toolStyleConverter.getColorByConfig({ attribute, config, style: this.style });
   }
 
   /**
@@ -215,13 +245,9 @@ export default class BasicLayer extends EventListener {
     this.clearBasicCanvas();
     this.drawImg();
 
-    const thickness = 3;
+    const thickness = 2;
 
-    if (this.forbidBasicResultRender) {
-      return;
-    }
-
-    if (this.basicResult && this.dependToolName) {
+    if (this.basicResult && this.dependToolName && !this.forbidBasicResultRender) {
       switch (this.dependToolName) {
         case EToolName.Rect: {
           DrawUtils.drawRect(
@@ -268,5 +294,95 @@ export default class BasicLayer extends EventListener {
         }
       }
     }
+
+    this.renderReference()
+  }
+
+  public renderReference(){
+    const thickness = 2;
+
+    if (this.referenceInfo) {
+      const { referenceResult, referenceConfig, referenceToolName } = this.referenceInfo
+      switch (referenceToolName) {
+        case EToolName.RectTrack:
+        case EToolName.Rect: {
+          let rectList = referenceResult;
+          rectList.map((rect) => {
+            const toolColor = this.getColor(rect.attribute);
+            const toolData = StyleUtils.getStrokeAndFill(toolColor, rect.valid);
+            DrawUtils.drawRect(
+              this.basicCanvas,
+              AxisUtils.changeRectByZoom(rect, this.zoom, this.currentPos),
+              {
+                color: toolData.stroke,
+                thickness,
+                lineDash: [24],
+              },
+            );
+          })
+          break;
+        }
+
+        case EToolName.Point: {
+          let pointList = referenceResult;
+          pointList.map((point) => {
+            const toolColor = this.getColor(point.attribute);
+            const toolData = StyleUtils.getStrokeAndFill(toolColor, point.valid);
+            DrawUtils.drawCircle(
+              this.basicCanvas,
+              AxisUtils.changePointByZoom(point, this.zoom, this.currentPos), 5, {
+                color: toolData.stroke,
+                fill: toolData.fill,
+            });
+          })
+          break;
+        }
+
+        case EToolName.Polygon: {
+          let polygonList = referenceResult;
+          polygonList.map((polygon) => {
+            const toolColor = this.getColor(polygon.attribute);
+            const toolData = StyleUtils.getStrokeAndFill(toolColor, polygon.valid);
+
+            DrawUtils.drawPolygonWithFillAndLine(
+              this.basicCanvas,
+              AxisUtils.changePointListByZoom(polygon.pointList, this.zoom, this.currentPos),
+              {
+                fillColor: toolData.fill,
+                strokeColor: toolData.stroke,
+                isClose: true,
+                thickness,
+              },
+            );
+          })
+
+          break;
+        }
+
+        case EToolName.Line: {
+          let lineList = referenceResult;
+          lineList.map((line) => {
+            const toolColor = this.getColor(line.attribute);
+            const toolData = StyleUtils.getStrokeAndFill(toolColor, line.valid)
+
+            DrawUtils.drawLineWithPointList(
+              this.basicCanvas,
+              AxisUtils.changePointListByZoom(line.pointList, this.zoom, this.currentPos),
+              {
+                color: toolData.stroke,
+                thickness,
+              },
+            );
+          })
+
+          break;
+        }
+
+        default: {
+          //
+        }
+      }
+    }
+
   }
 }

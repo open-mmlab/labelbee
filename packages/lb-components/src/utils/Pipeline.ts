@@ -383,3 +383,166 @@ export function getSourceData(
 
   return resultList;
 }
+
+
+/**
+ * 查找当前依赖步骤的配置信息
+ * @param dataSourceStep
+ * @param stepList
+ */
+export function getBasicConfig(dataSourceStep: number, stepList: IStepInfo[]) {
+  const dataSourceStepInfo = CommonToolUtils.getCurrentStepInfo(dataSourceStep, stepList);
+  if (!dataSourceStepInfo) {
+    return {};
+  }
+  if (
+    [
+      EToolName.Rect,
+      EToolName.RectTrack,
+      EToolName.Polygon,
+      EToolName.Point,
+      EToolName.Line,
+    ].includes(dataSourceStepInfo.tool)
+  ) {
+    return jsonParser(dataSourceStepInfo?.config);
+  }
+
+  return getBasicConfig(dataSourceStepInfo.dataSourceStep, stepList);
+}
+
+/**
+ * 获取当前依赖下的工具名
+ * @param dataSourceStep
+ * @param stepList
+ * @param preData
+ */
+export function getBasicToolName(
+  dataSourceStep: number,
+  stepList: IStepInfo[],
+  preData?: { preDataSourceStep: number; preResult?: string },
+): any {
+  if (preData && preData.preDataSourceStep > 0 && preData.preResult) {
+    const preResult = jsonParser(preData.preResult);
+    const stepResult = preResult[`step_${preData.preDataSourceStep}`];
+    return stepResult?.toolName;
+  }
+
+  const dataSourceStepInfo = CommonToolUtils.getCurrentStepInfo(dataSourceStep, stepList);
+  if (!dataSourceStepInfo) {
+    return EToolName.Empty;
+  }
+  if (
+    [
+      EToolName.Rect,
+      EToolName.RectTrack,
+      EToolName.Polygon,
+      EToolName.Point,
+      EToolName.Line,
+    ].includes(dataSourceStepInfo.tool)
+  ) {
+    return dataSourceStepInfo.tool;
+  }
+
+  if (preData && preData.preResult && dataSourceStepInfo.preDataSourceStep > 0) {
+    const preResult = jsonParser(preData.preResult);
+    // 依赖预标注
+    return preResult[`step_${dataSourceStepInfo.preDataSourceStep}`]?.toolName ?? EToolName.Empty;
+  }
+
+  let newPreData;
+  if (preData) {
+    newPreData = {
+      ...preData,
+      preDataSourceStep: dataSourceStepInfo.preDataSourceStep,
+    };
+  }
+
+  return getBasicToolName(dataSourceStepInfo.dataSourceStep, stepList, newPreData);
+}
+
+/**
+ * 获取参考显示的配置、结果、工具名
+ * @param stepList
+ * @param step
+ * @param result
+ * @param preResult
+ */
+export const getReferenceConfig = (
+  stepList: IStepInfo[],
+  step: number,
+  result: any,
+  preResult: any,
+) => {
+  if (stepList.length === 0) {
+    return {};
+  }
+
+  let referenceResult;
+  let referenceConfig;
+  let referenceToolName;
+
+  const stepInfo = CommonToolUtils.getCurrentStepInfo(step, stepList);
+  const stepConfig = jsonParser(stepInfo.config);
+
+  const { referenceStep, referenceFilterData, preReferenceStep } = stepConfig;
+
+  const hasReferenceStep = referenceStep > 0 || preReferenceStep > 0;
+
+  if (hasReferenceStep && referenceFilterData) {
+    const referenceStepList = stepList.map((v) => {
+      if (v.step === stepInfo.step) {
+        return {
+          ...v,
+          preDataSourceStep: preReferenceStep ?? 0,
+          dataSourceStep: referenceStep,
+          config: JSON.stringify({
+            ...jsonParser(v?.config ?? '{}'),
+            filterData: referenceFilterData,
+          }),
+        };
+      }
+      return v;
+    });
+
+    referenceResult = getBasicResult(
+      stepInfo.step,
+      referenceStep,
+      referenceStepList,
+      jsonParser(result),
+      true,
+      preResult,
+    );
+    referenceConfig = getBasicConfig(referenceStep, stepList);
+    referenceToolName = getBasicToolName(referenceStep, stepList, {
+      preDataSourceStep: preReferenceStep,
+      preResult,
+    });
+  }
+
+  return { referenceResult, referenceConfig, referenceToolName };
+};
+
+export const getReferenceInfo = (
+  step: number,
+  stepList: IStepInfo[],
+  fileData: { preResult: any; result: any } = { preResult: '', result: '' },
+) => {
+  if (!stepList?.length || !step) {
+    return;
+  }
+
+  const { result, preResult } = fileData;
+
+  const { referenceResult, referenceConfig, referenceToolName } = getReferenceConfig(
+    stepList,
+    step,
+    result,
+    preResult,
+  );
+
+  return {
+    referenceResult,
+    referenceConfig,
+    referenceToolName,
+  };
+};
