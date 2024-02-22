@@ -27,14 +27,13 @@ const FindTrackIDIndex = (props: IProps) => {
   const { imgList, imgIndex, pageJump, isPreResult = false } = props;
   const { t } = useTranslation();
   const dispatch = useDispatch();
-  const [trackID, setTrackID] = useState(0);
   const [list, setList] = useState<number[]>([]);
   const currentIndex = list.findIndex((item) => item === imgIndex);
 
   const onPressEnter = (e: any) => {
     const inputValue = e.target.value;
     if (inputValue === '') {
-      setTrackID(0);
+      setList([]);
       return;
     }
     const newTrackID = parseInt(inputValue, 10);
@@ -43,7 +42,7 @@ const FindTrackIDIndex = (props: IProps) => {
       message.error(t('PositiveIntegerCheck'));
       return;
     }
-    setTrackID(newTrackID);
+    getIndexList(newTrackID);
   };
 
   const jump = (page: number) => {
@@ -54,20 +53,21 @@ const FindTrackIDIndex = (props: IProps) => {
     dispatch(PageJump(page));
   };
 
-  useEffect(() => {
+  const getIndexList = (trackID: number) => {
     if (trackID) {
       const list = PointCloudUtils.getIndexByTrackID(trackID, imgList, isPreResult);
-      if (list?.length) {
-        setList(list);
-      }
+      setList(list);
       return;
     }
     setList([]);
-  }, [trackID]);
+  };
 
   useEffect(() => {
     if (list?.length) {
-      jump(list[0]);
+      const nextIndex = list[0];
+      if (nextIndex !== imgIndex) {
+        jump(nextIndex);
+      }
     }
   }, [list]);
 
