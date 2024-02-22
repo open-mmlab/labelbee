@@ -4,27 +4,25 @@
  * @Date 2024-01-31
  */
 
-import { EToolName, THybridToolName, ToolName } from '@/constant/tool';
+import { EToolName, THybridToolName } from '@/constant/tool';
 import CanvasUtils from '@/utils/tool/CanvasUtils';
 import DrawUtils from '@/utils/tool/DrawUtils';
 import AxisUtils, { CoordinateUtils } from '@/utils/tool/AxisUtils';
 import { HybridToolUtils } from '@/core/scheduler';
 import EventListener from '@/core/toolOperation/eventListener';
 import { IPolygonConfig } from '@/types/tool/polygon';
-import { ILineConfig } from '@/types/tool/lineTool';
-import { IPointToolConfig } from '@/types/tool/pointTool';
-import { ICommonProps } from './index';
-import { toolStyleConverter } from '@labelbee/lb-utils';
+import { IPolygonData, toolStyleConverter } from '@labelbee/lb-utils';
 import CommonToolUtils from '@/utils/tool/CommonToolUtils';
 import { styleString } from '@/constant/style';
 import StyleUtils from '@/utils/tool/StyleUtils';
+import { ICommonProps } from './index';
 
 type IReferenceConfig = IRectConfig | IPolygonConfig | ILineConfig | IPointToolConfig;
 
 export interface IReferenceInfoProps {
   referenceConfig: IReferenceConfig;
   referenceResult: any;
-  referenceToolName: ToolName;
+  referenceToolName: EToolName;
 }
 
 interface IBasicLayerProps extends ICommonProps {
@@ -144,6 +142,7 @@ export default class BasicLayer extends EventListener {
   public setReferenceInfo(referenceInfo: IReferenceInfoProps) {
     this.referenceInfo = referenceInfo;
   }
+
   /**
    * Synchronize common information such as currentPos, zoom, etc
    */
@@ -295,52 +294,46 @@ export default class BasicLayer extends EventListener {
       }
     }
 
-    this.renderReference()
+    this.renderReference();
   }
 
-  public renderReference(){
+  public renderReference() {
     const thickness = 2;
 
     if (this.referenceInfo) {
-      const { referenceResult, referenceConfig, referenceToolName } = this.referenceInfo
+      const { referenceResult, referenceToolName } = this.referenceInfo;
       switch (referenceToolName) {
         case EToolName.RectTrack:
         case EToolName.Rect: {
-          let rectList = referenceResult;
-          rectList.map((rect) => {
+          const rectList = referenceResult;
+          rectList.forEach((rect: IRect) => {
             const toolColor = this.getColor(rect.attribute);
             const toolData = StyleUtils.getStrokeAndFill(toolColor, rect.valid);
-            DrawUtils.drawRect(
-              this.basicCanvas,
-              AxisUtils.changeRectByZoom(rect, this.zoom, this.currentPos),
-              {
-                color: toolData.stroke,
-                thickness,
-                lineDash: [24],
-              },
-            );
-          })
+            DrawUtils.drawRect(this.basicCanvas, AxisUtils.changeRectByZoom(rect, this.zoom, this.currentPos), {
+              color: toolData.stroke,
+              thickness,
+              lineDash: [24],
+            });
+          });
           break;
         }
 
         case EToolName.Point: {
-          let pointList = referenceResult;
-          pointList.map((point) => {
+          const pointList = referenceResult;
+          pointList.forEach((point: IPointUnit) => {
             const toolColor = this.getColor(point.attribute);
             const toolData = StyleUtils.getStrokeAndFill(toolColor, point.valid);
-            DrawUtils.drawCircle(
-              this.basicCanvas,
-              AxisUtils.changePointByZoom(point, this.zoom, this.currentPos), 5, {
-                color: toolData.stroke,
-                fill: toolData.fill,
+            DrawUtils.drawCircle(this.basicCanvas, AxisUtils.changePointByZoom(point, this.zoom, this.currentPos), 5, {
+              color: toolData.stroke,
+              fill: toolData.fill,
             });
-          })
+          });
           break;
         }
 
         case EToolName.Polygon: {
-          let polygonList = referenceResult;
-          polygonList.map((polygon) => {
+          const polygonList = referenceResult;
+          polygonList.forEach((polygon: IPolygonData) => {
             const toolColor = this.getColor(polygon.attribute);
             const toolData = StyleUtils.getStrokeAndFill(toolColor, polygon.valid);
 
@@ -354,16 +347,17 @@ export default class BasicLayer extends EventListener {
                 thickness,
               },
             );
-          })
+          });
 
           break;
         }
 
+        case EToolName.LineMarker:
         case EToolName.Line: {
-          let lineList = referenceResult;
-          lineList.map((line) => {
+          const lineList = referenceResult;
+          lineList.forEach((line: any) => {
             const toolColor = this.getColor(line.attribute);
-            const toolData = StyleUtils.getStrokeAndFill(toolColor, line.valid)
+            const toolData = StyleUtils.getStrokeAndFill(toolColor, line.valid);
 
             DrawUtils.drawLineWithPointList(
               this.basicCanvas,
@@ -373,7 +367,7 @@ export default class BasicLayer extends EventListener {
                 thickness,
               },
             );
-          })
+          });
 
           break;
         }
@@ -383,6 +377,5 @@ export default class BasicLayer extends EventListener {
         }
       }
     }
-
   }
 }

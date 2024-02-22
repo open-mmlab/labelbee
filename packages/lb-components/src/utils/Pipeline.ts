@@ -390,7 +390,7 @@ export function getSourceData(
  * @param dataSourceStep
  * @param stepList
  */
-export function getBasicConfig(dataSourceStep: number, stepList: IStepInfo[]) {
+export function getBasicConfig(dataSourceStep: number, stepList: IStepInfo[]) : any{
   const dataSourceStepInfo = CommonToolUtils.getCurrentStepInfo(dataSourceStep, stepList);
   if (!dataSourceStepInfo) {
     return {};
@@ -443,7 +443,7 @@ export function getBasicToolName(
     return dataSourceStepInfo.tool;
   }
 
-  if (preData && preData.preResult && dataSourceStepInfo.preDataSourceStep > 0) {
+  if (preData?.preResult && dataSourceStepInfo.preDataSourceStep > 0) {
     const preResult = jsonParser(preData.preResult);
     // 依赖预标注
     return preResult[`step_${dataSourceStepInfo.preDataSourceStep}`]?.toolName ?? EToolName.Empty;

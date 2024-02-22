@@ -63,6 +63,6 @@ export default class StyleUtils {
     return color
       .split(' ')
       .join('')
-      .replace(/,[0-9]+([.]{1}[0-9]+){0,1}\)/, `,${opacity.toFixed(2)})`);
+      .replace(/,\d+(\.\d+){0,1}\)/, `,${opacity.toFixed(2)})`);
   }
 }
