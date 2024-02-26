@@ -58,11 +58,4 @@ export default class StyleUtils {
     });
     return el;
   }
-
-  public static colorSplit(color: string, opacity: number) {
-    return color
-      .split(' ')
-      .join('')
-      .replace(/,\d+(\.\d+){0,1}\)/, `,${opacity.toFixed(2)})`);
-  }
 }

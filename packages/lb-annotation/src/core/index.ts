@@ -248,7 +248,7 @@ export default class AnnotationEngine {
   }
 
   /**
-   * 设置参考显示的信息
+   * set reference info
    * @param referenceInfo
    */
 

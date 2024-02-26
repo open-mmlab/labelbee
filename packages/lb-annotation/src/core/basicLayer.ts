@@ -301,13 +301,13 @@ export default class BasicLayer extends EventListener {
     const thickness = 2;
 
     if (this.referenceInfo) {
-      const { referenceResult, referenceToolName } = this.referenceInfo;
+      const { referenceResult, referenceToolName, referenceConfig } = this.referenceInfo;
       switch (referenceToolName) {
         case EToolName.RectTrack:
         case EToolName.Rect: {
           const rectList = referenceResult;
           rectList.forEach((rect: IRect) => {
-            const toolColor = this.getColor(rect.attribute);
+            const toolColor = this.getColor(rect.attribute, referenceConfig);
             const toolData = StyleUtils.getStrokeAndFill(toolColor, rect.valid);
             DrawUtils.drawRect(this.basicCanvas, AxisUtils.changeRectByZoom(rect, this.zoom, this.currentPos), {
               color: toolData.stroke,
@@ -321,7 +321,7 @@ export default class BasicLayer extends EventListener {
         case EToolName.Point: {
           const pointList = referenceResult;
           pointList.forEach((point: IPointUnit) => {
-            const toolColor = this.getColor(point.attribute);
+            const toolColor = this.getColor(point.attribute, referenceConfig);
             const toolData = StyleUtils.getStrokeAndFill(toolColor, point.valid);
             DrawUtils.drawCircle(this.basicCanvas, AxisUtils.changePointByZoom(point, this.zoom, this.currentPos), 5, {
               color: toolData.stroke,
@@ -334,7 +334,7 @@ export default class BasicLayer extends EventListener {
         case EToolName.Polygon: {
           const polygonList = referenceResult;
           polygonList.forEach((polygon: IPolygonData) => {
-            const toolColor = this.getColor(polygon.attribute);
+            const toolColor = this.getColor(polygon.attribute, referenceConfig);
             const toolData = StyleUtils.getStrokeAndFill(toolColor, polygon.valid);
 
             DrawUtils.drawPolygonWithFillAndLine(
@@ -356,7 +356,7 @@ export default class BasicLayer extends EventListener {
         case EToolName.Line: {
           const lineList = referenceResult;
           lineList.forEach((line: any) => {
-            const toolColor = this.getColor(line.attribute);
+            const toolColor = this.getColor(line.attribute, referenceConfig);
             const toolData = StyleUtils.getStrokeAndFill(toolColor, line.valid);
 
             DrawUtils.drawLineWithPointList(
