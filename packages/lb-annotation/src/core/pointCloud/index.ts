@@ -1061,13 +1061,12 @@ export class PointCloud extends EventListener {
    * @returns
    */
   public async highlightOriginPointCloud(pointCloudBoxList?: IPointCloudBox[], highlightIndex: number[] = []) {
+    const oldPointCloud = this.scene.getObjectByName(this.pointCloudObjectName) as THREE.Points;
+    if (!oldPointCloud) {
+      return;
+    }
+    this.highlightPCDSrc = this.currentPCDSrc;
     return new Promise<BufferAttribute[] | undefined>((resolve, reject) => {
-      const oldPointCloud = this.scene.getObjectByName(this.pointCloudObjectName) as THREE.Points;
-      if (!oldPointCloud) {
-        return;
-      }
-      this.highlightPCDSrc = this.currentPCDSrc;
-
       if (window.Worker) {
         const newPointCloudBoxList = pointCloudBoxList ? [...pointCloudBoxList] : [];
 
