@@ -141,6 +141,8 @@ export class PointCloud extends EventListener {
 
   private checkMode = false;
 
+  private workerLoading = false;
+
   constructor({
     container,
     noAppend,
@@ -1033,19 +1035,39 @@ export class PointCloud extends EventListener {
     });
   };
 
+  public async handleWebworker(params: any) {
+    return new Promise((resolve, reject) => {
+      if (this.workerLoading) {
+        reject(new Error('workerLoading'));
+        return;
+      }
+      this.workerLoading = true;
+      highlightWorker.postMessage(params);
+
+      highlightWorker.onmessage = (e: any) => {
+        resolve(e.data);
+        this.workerLoading = false;
+      };
+      highlightWorker.onerror = (e: any) => {
+        reject(e);
+        this.workerLoading = false;
+      };
+    });
+  }
+
   /**
    * It needs to be updated after load PointCloud's data.
    * @param boxParams
    * @returns
    */
-  public highlightOriginPointCloud(pointCloudBoxList?: IPointCloudBox[], highlightIndex: number[] = []) {
-    const oldPointCloud = this.scene.getObjectByName(this.pointCloudObjectName) as THREE.Points;
-    if (!oldPointCloud) {
-      return;
-    }
-    this.highlightPCDSrc = this.currentPCDSrc;
-
+  public async highlightOriginPointCloud(pointCloudBoxList?: IPointCloudBox[], highlightIndex: number[] = []) {
     return new Promise<BufferAttribute[] | undefined>((resolve, reject) => {
+      const oldPointCloud = this.scene.getObjectByName(this.pointCloudObjectName) as THREE.Points;
+      if (!oldPointCloud) {
+        return;
+      }
+      this.highlightPCDSrc = this.currentPCDSrc;
+
       if (window.Worker) {
         const newPointCloudBoxList = pointCloudBoxList ? [...pointCloudBoxList] : [];
 
@@ -1059,40 +1081,42 @@ export class PointCloud extends EventListener {
           highlightIndex,
         };
 
-        highlightWorker.postMessage(params);
-        highlightWorker.onmessage = (e: any) => {
-          const { color } = e.data;
-          const colorAttribute = new THREE.BufferAttribute(color, 3);
+        this.handleWebworker(params)
+          .then((res: any) => {
+            const { color } = res;
+            const colorAttribute = new THREE.BufferAttribute(color, 3);
+            /**
+             * Need to return;
+             *
+             * 1. Not exist highlightPCDSrc
+             * 2. HighlightPCDSrc is not same with currentPCDSrc.
+             * 3. If the calculate color is not same with origin Points length.
+             */
+            if (
+              !this.highlightPCDSrc ||
+              this.highlightPCDSrc !== this.currentPCDSrc ||
+              oldPointCloud.geometry.attributes.position.array.length !== color.length
+            ) {
+              reject(new Error('Error Path'));
+              return;
+            }
 
-          /**
-           * Need to return;
-           *
-           * 1. Not exist highlightPCDSrc
-           * 2. HighlightPCDSrc is not same with currentPCDSrc.
-           * 3. If the calculate color is not same with origin Points length.
-           */
-          if (
-            !this.highlightPCDSrc ||
-            this.highlightPCDSrc !== this.currentPCDSrc ||
-            oldPointCloud.geometry.attributes.position.array.length !== color.length
-          ) {
-            reject(new Error('Error Path'));
-            return;
-          }
+            // Save the new highlight color.
+            this.cacheInstance.updateColor(this.highlightPCDSrc, color);
 
-          // Save the new highlight color.
-          this.cacheInstance.updateColor(this.highlightPCDSrc, color);
+            // Clear
+            this.highlightPCDSrc = undefined;
 
-          // Clear
-          this.highlightPCDSrc = undefined;
+            colorAttribute.needsUpdate = true;
 
-          colorAttribute.needsUpdate = true;
-
-          oldPointCloud.geometry.setAttribute('dimensions', colorAttribute);
-          oldPointCloud.geometry.attributes.dimensions.needsUpdate = true;
-          resolve(color);
-          this.render();
-        };
+            oldPointCloud.geometry.setAttribute('dimensions', colorAttribute);
+            oldPointCloud.geometry.attributes.dimensions.needsUpdate = true;
+            resolve(color);
+            this.render();
+          })
+          .catch((e) => {
+            reject(e);
+          });
       }
     });
   }
