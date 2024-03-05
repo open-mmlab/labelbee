@@ -1,6 +1,7 @@
 import React, { useContext, useState, useEffect } from 'react';
 import { EditFilled } from '@ant-design/icons';
 import { ToolIcons } from '../ToolIcons';
+import { EToolName } from '@/data/enums/ToolType';
 import { cTool } from '@labelbee/lb-annotation';
 import { PointCloudContext } from '@/components/pointCloudView/PointCloudContext';
 import { Select, message, Input, Divider } from 'antd';
@@ -499,7 +500,7 @@ const PointCloudToolSidebar: React.FC<IProps> = ({
         stepInfo={stepInfo}
         enableColorPicker={enableColorPicker}
       />
-      {config?.trackConfigurable === true && (
+      {config?.trackConfigurable === true && pointCloudPattern === EToolName.Rect && (
         <>
           <BoxTrackIDInput />
           <Divider style={{ margin: 0 }} />
