@@ -1,6 +1,7 @@
 import React, { useContext, useState, useEffect } from 'react';
 import { EditFilled } from '@ant-design/icons';
 import { ToolIcons } from '../ToolIcons';
+import { EToolName } from '@/data/enums/ToolType';
 import { cTool } from '@labelbee/lb-annotation';
 import { PointCloudContext } from '@/components/pointCloudView/PointCloudContext';
 import { Select, message, Input, Divider } from 'antd';
@@ -124,6 +125,7 @@ const BoxTrackIDInput = () => {
           display: 'flex',
           justifyContent: 'space-between',
           alignItems: 'center',
+          lineHeight: '12px',
         }}
       >
         {isEdit && selectedBoxTrackID ? (
@@ -306,7 +308,13 @@ const AttributeUpdater = ({
   const forbidShowLimitPopover = isPointCloudSegmentationPattern;
 
   return (
-    <div>
+    <div
+      style={{
+        flex: 1,
+        overflowX: 'hidden',
+        overflowY: 'auto',
+      }}
+    >
       <div style={titleStyle}>{t('Attribute')}</div>
       <AttributeList
         list={list}
@@ -499,14 +507,20 @@ const PointCloudToolSidebar: React.FC<IProps> = ({
         stepInfo={stepInfo}
         enableColorPicker={enableColorPicker}
       />
-      {config?.trackConfigurable === true && (
-        <>
+      {config?.trackConfigurable === true && pointCloudPattern === EToolName.Rect && (
+        <div
+          style={{
+            flexShrink: 0,
+            height: 280,
+            overflow: 'auto',
+          }}
+        >
           <BoxTrackIDInput />
           <Divider style={{ margin: 0 }} />
           <AnnotatedBox imgList={imgList} imgIndex={imgIndex} />
           <Divider style={{ margin: 0 }} />
           <FindTrackIDIndex imgList={imgList} imgIndex={imgIndex} />
-        </>
+        </div>
       )}
     </>
   );
