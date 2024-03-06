@@ -8,6 +8,7 @@ import { ViewOperation, ImgUtils } from '@labelbee/lb-annotation';
 import { Spin } from 'antd/es';
 import useRefCache from '@/hooks/useRefCache';
 import { TAnnotationViewData } from '@labelbee/lb-utils';
+import MeasureCanvas from '../measureCanvas';
 
 export type TAfterImgOnLoad = (img: HTMLImageElement) => void;
 
@@ -37,6 +38,7 @@ interface IProps {
     ratio: number;
   };
   staticMode?: boolean;
+  measureVisible?: boolean;
 }
 
 const DEFAULT_SIZE = {
@@ -81,6 +83,7 @@ const AnnotationView = (props: IProps, ref: any) => {
     showLoading = false,
     globalStyle,
     afterImgOnLoad,
+    measureVisible,
   } = props;
   const size = sizeInitialized(props.size);
   const [loading, setLoading] = useState(false);
@@ -126,7 +129,7 @@ const AnnotationView = (props: IProps, ref: any) => {
     return () => {
       viewOperation.current?.destroy();
     };
-  }, []);
+  }, [measureVisible]);
 
   useEffect(() => {
     if (viewOperation.current) {
@@ -148,7 +151,7 @@ const AnnotationView = (props: IProps, ref: any) => {
           setLoading(false);
         });
     }
-  }, [src]);
+  }, [src, measureVisible]);
 
   /**
    * 基础数据绘制监听
@@ -217,10 +220,14 @@ const AnnotationView = (props: IProps, ref: any) => {
   const mainRender = (
     <div ref={annotationRef} style={{ position: 'relative', ...size, ...backgroundStyle }} />
   );
-
+  const { imgNode, zoom, currentPos } = viewOperation.current || {};
   return (
     <Spin spinning={showLoading || loading} delay={300} style={globalStyle}>
-      {mainRender}
+      {measureVisible && imgNode ? (
+        <MeasureCanvas size={size} imgNode={imgNode} zoom={zoom} currentPos={currentPos} />
+      ) : (
+        mainRender
+      )}
     </Spin>
   );
 
