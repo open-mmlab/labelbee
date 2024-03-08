@@ -5,19 +5,12 @@
  */
 import React from 'react';
 import { Col, Row, Tag, Radio } from 'antd';
-import { IInputList, ISelectedTags } from '@/components/LLMToolView/types';
+import { IInputList, ISelectedTags, ITagListProps } from './types';
 import styles from './index.module.scss';
 import LongText from '@/components/longText';
 import classNames from 'classnames';
 
 const { CheckableTag } = Tag;
-
-interface IProps {
-  updateValue: (value: { key: string; value: string[] }) => void;
-  inputList?: IInputList[];
-  selectedTags: ISelectedTags;
-  checkMode?: boolean;
-}
 
 interface IChangeValue {
   key: string;
@@ -44,7 +37,7 @@ const CheckBoxList = ({ tagItem, selectedTags, handleChange, checkMode }: ICheck
           <CheckableTag
             key={tag?.value}
             checked={selectedTags[subSelectKey]?.includes(tag?.value)}
-            onChange={(checked) => {
+            onChange={(checked: boolean) => {
               if (disabled) {
                 return;
               }
@@ -87,8 +80,8 @@ const CheckBoxList = ({ tagItem, selectedTags, handleChange, checkMode }: ICheck
   );
 };
 
-const TagList = (props: IProps) => {
-  const { inputList = [], selectedTags, updateValue, checkMode } = props;
+const TagList = (props: ITagListProps) => {
+  const { selectedTags, updateValue, checkMode, inputList = [] } = props;
 
   const handleChange = (changeValue: IChangeValue) => {
     const { key, checked, tag, isRadio } = changeValue;
@@ -112,27 +105,30 @@ const TagList = (props: IProps) => {
     updateValue(value);
   };
 
-  return (
-    <div className={styles.tagList}>
-      {inputList?.map((i, index) => {
-        return (
-          <Row key={index} className={styles.content}>
-            <Col span={4} className={styles.left}>
-              {i?.key}
-            </Col>
+  if (inputList?.length > 0) {
+    return (
+      <div className={styles.tagList}>
+        {inputList.map((i, index) => {
+          return (
+            <Row key={index} className={styles.content}>
+              <Col span={4} className={styles.left}>
+                {i?.key}
+              </Col>
 
-            <Col span={20} className={styles.right}>
-              <CheckBoxList
-                selectedTags={selectedTags}
-                handleChange={handleChange}
-                tagItem={i}
-                checkMode={checkMode}
-              />
-            </Col>
-          </Row>
-        );
-      })}
-    </div>
-  );
+              <Col span={20} className={styles.right}>
+                <CheckBoxList
+                  selectedTags={selectedTags}
+                  handleChange={handleChange}
+                  tagItem={i}
+                  checkMode={checkMode}
+                />
+              </Col>
+            </Row>
+          );
+        })}
+      </div>
+    );
+  }
+  return null;
 };
 export default TagList;

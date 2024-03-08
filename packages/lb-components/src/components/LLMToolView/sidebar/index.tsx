@@ -29,7 +29,7 @@ import { useTranslation } from 'react-i18next';
 import { formatSort, getCurrentResultFromResultList, getTagResult } from '../utils/data';
 import emptySvg from '@/assets/annotation/LLMTool/empty.svg';
 import TextInputBox from './components/textInputBox';
-import TagList from './components/tagList';
+import OverallTagList from '@/components/tagList/components/overall';
 
 interface IProps {
   annotation?: any;
@@ -59,10 +59,6 @@ const LLMToolSidebar = (props: IProps) => {
   const { setNewAnswerList } = useContext(LLMContext);
   const [annotationResult, setAnnotationResult] = useState<IAnnotationResult>({});
 
-  const overallInputList = useMemo(() => {
-    return LLMConfig?.inputList?.filter((i: IInputList) => i?.isOverall) || [];
-  }, [LLMConfig]);
-
   useEffect(() => {
     if (stepList && step) {
       const LLMStepConfig = getStepConfig(stepList, step)?.config;
@@ -86,7 +82,7 @@ const LLMToolSidebar = (props: IProps) => {
       newSort = getWaitSortList(qaData.answerList).newSort;
       waitSorts = getWaitSortList(qaData.answerList).waitSorts;
     }
-    const overallInputList = LLMConfig?.inputList?.filter((i:IInputList) => i?.isOverall) || [];
+    const overallInputList = LLMConfig?.inputList?.filter((i: IInputList) => i?.isOverall) || [];
 
     tagList = getTagResult(overallInputList, qaData?.tagList);
 
@@ -141,7 +137,7 @@ const LLMToolSidebar = (props: IProps) => {
     // tag attribute
     if (inputList.length > 0) {
       return initValue.map((i) => {
-        const localInputList = inputList.filter((i:IInputList) => !i?.isOverall) || [];
+        const localInputList = inputList.filter((i: IInputList) => !i?.isOverall) || [];
         const tagList = getTagResult(localInputList, i?.tagList);
         return { ...i, tagList };
       });
@@ -150,7 +146,8 @@ const LLMToolSidebar = (props: IProps) => {
     // Text edit
     if (isTextEdit) {
       return initValue.map((i) => {
-        const isFillAnswer = textEdit.filter((v:ITextList) => v.title === i.order)[0]?.isFillAnswer;
+        const isFillAnswer = textEdit.filter((v: ITextList) => v.title === i.order)[0]
+          ?.isFillAnswer;
         return isFillAnswer ? { ...i, newAnswer: i?.newAnswer ?? i.answer } : i;
       });
     }
@@ -267,7 +264,13 @@ const LLMToolSidebar = (props: IProps) => {
       </div>
     );
   }
-  const { indicatorScore = [], indicatorDetermine = [], enableSort, isTextEdit } = LLMConfig || {};
+  const {
+    indicatorScore = [],
+    indicatorDetermine = [],
+    enableSort,
+    isTextEdit,
+    inputList = [],
+  } = LLMConfig || {};
   const answerList = annotationResult?.answerList || [];
   const showAnwerList =
     answerList.length > 0 &&
@@ -289,9 +292,9 @@ const LLMToolSidebar = (props: IProps) => {
           />
         )}
 
-        {overallInputList?.length > 0 && (
-          <TagList
-            inputList={overallInputList}
+        {inputList.length && (
+          <OverallTagList
+            inputList={inputList}
             selectedTags={annotationResult?.tagList || {}}
             updateValue={(changeValue) => {
               const { key, value } = changeValue;
