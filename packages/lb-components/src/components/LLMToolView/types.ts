@@ -109,7 +109,7 @@ export interface IInputList {
   key: string;
   value: string;
   isMulti: boolean;
-  isWhole: boolean;
+  isOverall: boolean;
   subSelected: Array<{
     key: string;
     value: string;

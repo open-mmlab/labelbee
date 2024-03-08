@@ -67,7 +67,7 @@ const renderExtraModal = ({
     });
   }
 };
-const TextContent: React.FC<IProps> = (props) => {
+const TextContent = (props: IProps) => {
   const {
     highlightKey,
     textData,

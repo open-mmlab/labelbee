@@ -1,10 +1,10 @@
 /*
- * @file tag
+ * @file Used for tools to add label selections (Single selection or multiple selection)
  * @Author: lixinghua lixinghua@sensetime.com
  * @Date: 2024-02-22
  */
 import React from 'react';
-import { Col, Row, Tag, Radio, Button } from 'antd';
+import { Col, Row, Tag, Radio } from 'antd';
 import { IInputList, ISelectedTags } from '@/components/LLMToolView/types';
 import styles from './index.module.scss';
 import LongText from '@/components/longText';

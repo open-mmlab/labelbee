@@ -20,6 +20,7 @@ import {
   IAnswerList,
   ITextList,
   IConfigUpdate,
+  IInputList,
 } from '@/components/LLMToolView/types';
 import { isBoolean } from 'lodash';
 import LongText from '@/components/longText';
@@ -150,7 +151,7 @@ const AnswerList = (props: IProps) => {
           isTextEdit = false,
           inputList = [],
         } = LLMConfig || {};
-        const localInputList = inputList.filter((i) => !i?.isWhole) || [];
+        const localInputList = inputList.filter((i: IInputList) => !i?.isOverall) || [];
         const { backgroundColor, fontColor, tagText, tagStatus } = getTagStyle(i);
         const textEditObject = getAnswerTextEditConfig(i, textEdit) || {};
 

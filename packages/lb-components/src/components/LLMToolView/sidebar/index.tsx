@@ -47,7 +47,7 @@ interface IAnnotationResult {
 const EKeyCode = cKeyCode.default;
 const sidebarCls = `${prefix}-sidebar`;
 
-const LLMToolSidebar: React.FC<IProps> = (props) => {
+const LLMToolSidebar = (props: IProps) => {
   const { annotation, dispatch, checkMode } = props;
   const { imgIndex, imgList, stepList, step, skipBeforePageTurning } = annotation;
   const { modelAPIResponse } = useContext(LLMContext);
@@ -59,8 +59,8 @@ const LLMToolSidebar: React.FC<IProps> = (props) => {
   const { setNewAnswerList } = useContext(LLMContext);
   const [annotationResult, setAnnotationResult] = useState<IAnnotationResult>({});
 
-  const wholeInputList = useMemo(() => {
-    return LLMConfig?.inputList?.filter((i) => i?.isWhole) || [];
+  const overallInputList = useMemo(() => {
+    return LLMConfig?.inputList?.filter((i: IInputList) => i?.isOverall) || [];
   }, [LLMConfig]);
 
   useEffect(() => {
@@ -86,9 +86,9 @@ const LLMToolSidebar: React.FC<IProps> = (props) => {
       newSort = getWaitSortList(qaData.answerList).newSort;
       waitSorts = getWaitSortList(qaData.answerList).waitSorts;
     }
-    const wholeInputList = LLMConfig?.inputList?.filter((i) => i?.isWhole) || [];
+    const overallInputList = LLMConfig?.inputList?.filter((i:IInputList) => i?.isOverall) || [];
 
-    tagList = getTagResult(wholeInputList, qaData?.tagList);
+    tagList = getTagResult(overallInputList, qaData?.tagList);
 
     setAnnotationResult({
       newSort,
@@ -141,7 +141,7 @@ const LLMToolSidebar: React.FC<IProps> = (props) => {
     // tag attribute
     if (inputList.length > 0) {
       return initValue.map((i) => {
-        const localInputList = inputList.filter((i) => !i?.isWhole) || [];
+        const localInputList = inputList.filter((i:IInputList) => !i?.isOverall) || [];
         const tagList = getTagResult(localInputList, i?.tagList);
         return { ...i, tagList };
       });
@@ -150,7 +150,7 @@ const LLMToolSidebar: React.FC<IProps> = (props) => {
     // Text edit
     if (isTextEdit) {
       return initValue.map((i) => {
-        const isFillAnswer = textEdit.filter((v) => v.title === i.order)[0]?.isFillAnswer;
+        const isFillAnswer = textEdit.filter((v:ITextList) => v.title === i.order)[0]?.isFillAnswer;
         return isFillAnswer ? { ...i, newAnswer: i?.newAnswer ?? i.answer } : i;
       });
     }
@@ -289,9 +289,9 @@ const LLMToolSidebar: React.FC<IProps> = (props) => {
           />
         )}
 
-        {wholeInputList?.length > 0 && (
+        {overallInputList?.length > 0 && (
           <TagList
-            inputList={wholeInputList}
+            inputList={overallInputList}
             selectedTags={annotationResult?.tagList || {}}
             updateValue={(changeValue) => {
               const { key, value } = changeValue;
