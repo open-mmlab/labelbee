@@ -1262,8 +1262,11 @@ class BasicToolOperation extends EventListener {
     this.coordUtils.setDependInfo(dependToolName, dependToolConfig);
   }
 
+  public filterCacheContext() {}
+
   public setAttributeLockList(attributeLockList: string[]) {
     this.attributeLockList = attributeLockList;
+    this.filterCacheContext();
     this.render();
   }
 

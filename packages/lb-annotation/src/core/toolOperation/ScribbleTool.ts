@@ -1,4 +1,4 @@
-import { ImgConversionUtils } from '@labelbee/lb-utils';
+import { ImgConversionUtils, ToolStyleUtils } from '@labelbee/lb-utils';
 import AxisUtils from '@/utils/tool/AxisUtils';
 import DrawUtils from '@/utils/tool/DrawUtils';
 import { EScribblePattern, EToolName } from '@/constant/tool';
@@ -26,6 +26,12 @@ class ScribbleTool extends BasicToolOperation {
   private cacheCanvas?: HTMLCanvasElement;
 
   private cacheContext?: CanvasRenderingContext2D;
+
+  private preCacheCanvas?: HTMLCanvasElement; // view
+
+  private preCacheContext?: CanvasRenderingContext2D; // view
+
+  private renderCacheContext?: CanvasRenderingContext2D; // view
 
   private penSize;
 
@@ -98,6 +104,12 @@ class ScribbleTool extends BasicToolOperation {
     const { canvas, ctx } = ImgConversionUtils.createCanvas(imgNode);
     this.cacheCanvas = canvas;
     this.cacheContext = ctx;
+    const { canvas: preCanvas, ctx: preCtx } = ImgConversionUtils.createCanvas(imgNode);
+    this.preCacheCanvas = preCanvas;
+    this.preCacheContext = preCtx;
+
+    const { ctx: renderCtx } = ImgConversionUtils.createCanvas(imgNode);
+    this.renderCacheContext = renderCtx;
   }
 
   public updateCacheCanvasSize(imgNode: HTMLImageElement) {
@@ -117,8 +129,9 @@ class ScribbleTool extends BasicToolOperation {
         this.clearCacheCanvas();
         this.cacheContext.drawImage(img, 0, 0, img.width, img.height);
         this.cacheContext.restore();
-        this.render();
       }
+      this.filterCacheContext();
+      this.render();
     });
   }
 
@@ -263,7 +276,6 @@ class ScribbleTool extends BasicToolOperation {
 
   public setDefaultAttribute(attributeValue: string) {
     const attributeInfo = this.config.attributeList.find((v) => v.value === attributeValue);
-
     if (attributeInfo) {
       this.defaultAttribute = attributeInfo.value;
       this.defaultAttributeInfo = attributeInfo;
@@ -287,23 +299,54 @@ class ScribbleTool extends BasicToolOperation {
     if (!this.cacheContext) {
       return;
     }
+    [this.cacheContext, this.preCacheContext, this.renderCacheContext].forEach((ctx) => {
+      if (ctx) {
+        this.drawStartPoint(ctx, e);
+      }
+    });
+  }
 
-    this.cacheContext.save();
-    this.cacheContext.beginPath();
-    this.cacheContext.strokeStyle = this.color;
-    this.cacheContext.lineWidth = this.penSizeWithZoom;
-    this.cacheContext.lineCap = 'round';
-    this.cacheContext.lineJoin = 'round';
-    const originCoordinate = this.getOriginCoordinate(e);
-    this.cacheContext.moveTo(originCoordinate.x, originCoordinate.y);
-    this.startPoint = originCoordinate;
+  public syncDrawCanvas({ list, operation, params }: any) {
+    list.forEach((ctx: CanvasRenderingContext2D) => {
+      if (ctx) {
+        operation({ ctx, ...params });
+      }
+    });
+  }
+
+  public drawStartPoint(ctx: CanvasRenderingContext2D, e: MouseEvent) {
+    ctx.save();
+    ctx.beginPath();
+    ctx.strokeStyle = this.color;
+    ctx.lineWidth = this.penSizeWithZoom;
+    ctx.lineCap = 'round';
+    ctx.lineJoin = 'round';
+    const copyOriginCoordinate = this.getOriginCoordinate(e);
+    ctx.moveTo(copyOriginCoordinate.x, copyOriginCoordinate.y);
+    this.startPoint = copyOriginCoordinate;
+  }
+
+  public drawLine({ ctx, prePoint, point }: any) {
+    ctx.beginPath();
+    ctx.save();
+    ctx.moveTo(prePoint.x, prePoint.y);
+    ctx.lineTo(point.x, point.y);
+    ctx.stroke();
+    ctx.restore();
+  }
+
+  public drawLineTo({ ctx, point }: any) {
+    ctx.lineTo(point.x, point.y);
+    ctx.stroke();
   }
 
   // Draw lines on the image
   public scribbleOnImgByLine(endPoint: ICoordinate) {
     const ctx = this.cacheContext;
+    const preCtx = this.preCacheContext;
+    const renderCtx = this.renderCacheContext;
 
-    if (!ctx) {
+    if (!ctx || !renderCtx || !preCtx) {
       return;
     }
     this.pointList = this.pointList.slice(0, this.curIndexOnLine + 1);
@@ -312,14 +355,13 @@ class ScribbleTool extends BasicToolOperation {
     if (this.pointList.length > 1) {
       this.curIndexOnLine = this.pointList.length - 1;
       this.pointList.forEach((point, index) => {
-        ctx.beginPath();
         if (index > 0) {
           const prePoint = this.pointList[index - 1];
-          ctx.save();
-          ctx.moveTo(prePoint.x, prePoint.y);
-          ctx.lineTo(point.x, point.y);
-          ctx.stroke();
-          ctx.restore();
+          this.syncDrawCanvas({
+            list: [ctx, preCtx, renderCtx],
+            operation: this.drawLine,
+            params: { prePoint, point },
+          });
         }
       });
     }
@@ -334,8 +376,11 @@ class ScribbleTool extends BasicToolOperation {
 
     if (e.buttons === 1 && this.cacheContext && this.startPoint) {
       // this.cacheContext.lineTo(e.offsetX, e.offsetY);
-      this.cacheContext.lineTo(originCoordinate.x, originCoordinate.y);
-      this.cacheContext.stroke();
+      this.syncDrawCanvas({
+        list: [this.cacheContext, this.preCacheContext, this.renderCacheContext],
+        operation: this.drawLineTo,
+        params: { point: originCoordinate },
+      });
       // this.prevAxis = { x: e.offsetX, y: e.offsetY };
     }
   }
@@ -347,9 +392,12 @@ class ScribbleTool extends BasicToolOperation {
     const originCoordinate = this.getOriginCoordinate(e);
     if (this.lineActive) {
       this.scribbleOnImgByLine(originCoordinate);
-    } else if (this.cacheContext) {
-      this.cacheContext.lineTo(originCoordinate.x, originCoordinate.y);
-      this.cacheContext.stroke();
+    } else if (this.cacheContext && this.renderCacheContext) {
+      this.syncDrawCanvas({
+        list: [this.cacheContext, this.renderCacheContext],
+        operation: this.drawLineTo,
+        params: { point: originCoordinate },
+      });
     }
     this.saveUrlIntoHistory();
   }
@@ -359,7 +407,68 @@ class ScribbleTool extends BasicToolOperation {
     this.cacheContext?.closePath();
     this.cacheContext?.restore();
     this.startPoint = undefined;
+    this.fillPixelSawtooth();
     this.history.pushHistory(this.cacheCanvasToDataUrl);
+    this.filterCacheContext();
+  }
+
+  public fillPixelSawtooth() {
+    if (this.cacheContext && this.renderCacheContext && this.renderCacheContext) {
+      const canvasW = this.cacheContext.canvas.width;
+      const canvasH = this.cacheContext.canvas.height;
+      const imgData = this.renderCacheContext?.getImageData(0, 0, canvasW, canvasH);
+      const colorArr = ToolStyleUtils.toRGBAArr(this.color || '') || [];
+      const colorR = ~~colorArr[0];
+      const colorG = ~~colorArr[1];
+      const colorB = ~~colorArr[2];
+      for (let y = 0; y < imgData.height; y++) {
+        for (let x = 0; x < imgData.width; x++) {
+          const index = (y * imgData.width + x) * 4;
+          const r = imgData.data[index];
+          const g = imgData.data[index + 1];
+          const b = imgData.data[index + 2];
+          if (r !== 0 || g !== 0 || b !== 0) {
+            // 使用fillRect方法在目标画布中注入像素点
+            this.cacheContext.fillStyle = `rgba(${colorR},${colorG},${colorB},${255})`;
+            this.cacheContext.fillRect(x, y, 1, 1);
+          }
+        }
+      }
+      this.renderCacheContext.clearRect(0, 0, this.cacheContext.canvas.width, this.cacheContext.canvas.height);
+    }
+  }
+
+  public filterCacheContext() {
+    if (this.attributeLockList?.length > 0 && this.cacheContext && this.preCacheContext) {
+      const canvasW = this.cacheContext.canvas.width;
+      const canvasH = this.cacheContext.canvas.height;
+      const imgData = this.cacheContext?.getImageData(0, 0, canvasW, canvasH);
+
+      const attribute = this.config.attributeList.filter((t) => !this.attributeLockList.includes(t.value));
+      const attributes = attribute.map((t) => ToolStyleUtils.toRGBAArr(t?.color || '') || []);
+
+      if (imgData) {
+        for (let j = 0; j < attributes.length; j++) {
+          for (let i = 0; i < imgData.data.length / 4; i++) {
+            const index = i * 4;
+            const r = imgData.data[index];
+            const g = imgData.data[index + 1];
+            const b = imgData.data[index + 2];
+            // If it is originBackgroundRGBA. It needs to update to backgroundRGBA
+            const colorArr = attributes[j] || [];
+            const isSame = ~~colorArr[0] === r && ~~colorArr[1] === g && ~~colorArr[2] === b;
+            if (isSame) {
+              imgData.data[index] = 0;
+              imgData.data[index + 1] = 0;
+              imgData.data[index + 2] = 0;
+              imgData.data[index + 3] = 0;
+            }
+          }
+        }
+
+        this.preCacheContext?.putImageData(imgData, 0, 0);
+      }
+    }
   }
 
   public eraseArc(e: MouseEvent) {
@@ -399,6 +508,13 @@ class ScribbleTool extends BasicToolOperation {
 
   public clearCacheCanvas() {
     this.cacheContext?.clearRect(0, 0, this.cacheContext.canvas.width, this.cacheContext.canvas.height);
+    this.preCacheContext?.clearRect(0, 0, this.preCacheContext.canvas.width, this.preCacheContext.canvas.height);
+    this.renderCacheContext?.clearRect(
+      0,
+      0,
+      this.renderCacheContext.canvas.width,
+      this.renderCacheContext.canvas.height,
+    );
     this.render();
   }
 
@@ -453,7 +569,11 @@ class ScribbleTool extends BasicToolOperation {
     }
     this.ctx.save();
     this.ctx.globalAlpha = 0.5;
-    DrawUtils.drawImg(this.canvas, this.cacheCanvas, {
+    let viewNode = this.cacheCanvas;
+    if (this.attributeLockList?.length > 0 && this.preCacheCanvas) {
+      viewNode = this.preCacheCanvas;
+    }
+    DrawUtils.drawImg(this.canvas, viewNode, {
       zoom: this.zoom,
       currentPos: this.currentPos,
       rotate: this.rotate,
