@@ -74,7 +74,6 @@ const SwitchAttributeList: React.FC<IProps> = (props) => {
         attributeChanged={attributeChanged}
         selectedAttribute={toolInstance?.defaultAttribute ?? ''}
         ref={listRef}
-        forbidDefault={isScribbleTool}
         attributeLockChange={attributeLockChange}
       />
     );
