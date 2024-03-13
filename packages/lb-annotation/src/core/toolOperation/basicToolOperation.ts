@@ -36,7 +36,7 @@ interface IBasicToolOperationProps {
   imgAttribute?: any; // 占个坑，用于全局的一些配置，是否展示原图比例
   forbidOperation?: boolean;
 
-  config: string; // 任务配置
+  config?: string; // 任务配置
 
   defaultAttribute?: string;
   forbidCursorLine?: boolean;

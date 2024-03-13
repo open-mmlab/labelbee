@@ -218,7 +218,7 @@ class LineToolOperation extends BasicToolOperation {
     this.isMousedown = false;
     this.lineDragging = false;
     this.isLineValid = true;
-    this.setConfig(props.config);
+    this.setConfig(props.config || '');
     this.prevAxis = {
       x: 0,
       y: 0,

@@ -18,12 +18,14 @@ const PointCloud2DSingleView = ({
   currentData,
   showEnlarge,
   checkMode = false,
+  measureVisible,
 }: {
   view2dData: IAnnotationData2dView;
   setSelectedID: (value: string | number) => void;
   currentData: IFileItem;
   showEnlarge: boolean;
   checkMode?: boolean;
+  measureVisible?: boolean;
 }) => {
   const ref = useRef(null);
   const viewRef = useRef<{ toolInstance: ViewOperation }>();
@@ -95,6 +97,7 @@ const PointCloud2DSingleView = ({
             max: 1000,
             ratio: 0.4,
           }}
+          measureVisible={measureVisible}
         />
       ) : (
         <PointCloud2DRectOperationView
