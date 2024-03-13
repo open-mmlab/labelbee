@@ -54,7 +54,7 @@ const Content = ({
 
   if (isImg) {
     const url = isObject(question) ? question?.url : '';
-    return <Image src={url || ImgFail} width={400} fallback={ImgFail} />;
+    return <Image src={url || ImgFail} fallback={ImgFail} />;
   }
   return (
     <div style={{ whiteSpace: 'pre-wrap' }}>
