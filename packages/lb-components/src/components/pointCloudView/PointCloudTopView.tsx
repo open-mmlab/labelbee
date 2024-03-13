@@ -421,6 +421,7 @@ const PointCloudTopView: React.FC<IProps> = ({
 
   useEffect(() => {
     pointCloudViews.topViewSelectedChanged({});
+    ptCtx.topViewInstance?.toolInstance?.selection?.hardSetSelectedIDs?.(ptCtx.selectedIDs);
   }, [ptCtx.selectedIDs]);
 
   useEffect(() => {
