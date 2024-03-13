@@ -1,4 +1,5 @@
 import { jsonParser } from '../../../utils';
+import { IInputList, ISelectedTags } from '../types';
 
 export const getCurrentResultFromResultList = (result: string) => {
   const data = jsonParser(result);
@@ -19,4 +20,25 @@ export const formatSort = (sortList: any) => {
     return [...list, tagColumn];
   }, []);
   return newList;
+};
+
+// get tag data by config or result
+export const getTagResult = (inputList: IInputList[], result?: ISelectedTags) => {
+  let selected = {};
+  inputList.forEach((i) => {
+    let list: Array<string> = [];
+    if (result && result[i?.value]) {
+      list = result[i.value];
+    } else if (i?.subSelected?.length > 0) {
+      i.subSelected.forEach((s) => {
+        if (s?.isDefault && s?.value) {
+          list.push(s.value);
+        }
+      });
+    }
+    if (list.length > 0) {
+      selected = { ...selected, [i.value]: list };
+    }
+  });
+  return selected;
 };

@@ -55,31 +55,38 @@ export interface INLPInterval {
 
 export interface ISelectText {
   id?: string;
-  start?: number;
-  end?: number;
-  text?: string;
-}
-
-export interface IRemarkLayer {
-  style: React.CSSProperties | undefined;
-  onClose: () => void;
-  submitData: ISelectText;
-}
-
-export interface IRemarkInterval {
   start: number;
   end: number;
-  remarkAnnotations?: IRemarkAnnotation[];
+  text: string;
+  endPosition?: React.CSSProperties;
+}
+
+export interface IExtraLayer {
+  style: React.CSSProperties | undefined;
+  onClose: () => void;
+  submitData?: ISelectText;
+}
+
+export interface IExtraInterval {
+  start: number;
+  end: number;
+  extraAnnotations?: IExtraInAnnotation[];
   text: string;
   attribute?: string;
   id?: string;
 }
 
-export interface IRemarkAnnotation {
-  auditID: number;
+export interface IExtraInAnnotation {
+  auditID?: number;
   text: string;
-  id: string;
+  id?: string;
   start: number;
   end: number;
-  uuid: string;
+  uuid?: string;
+}
+export interface IExtraData {
+  isShowRemark?: boolean;
+  hoverAuditID?: number;
+  editAuditID?: number;
+  displayRemarkList: IExtraInAnnotation[];
 }

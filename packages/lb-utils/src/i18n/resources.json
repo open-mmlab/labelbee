@@ -358,7 +358,9 @@
     "FindTheFrameCorrespondingToTheLabeledFrameId": "Find the frame corresponding to the labeled frame ID",
     "ShowHighlightRect": "View Highlighted Rects",
     "ShowHighlightRectTip": "Rects with this label need special attention",
-    "HideTextInfo": "Hide graphical information"
+    "HideTextInfo": "Hide graphical information",
+    "GlobalAnnotation": "Global annotation",
+    "QualifiedAnnotation": "Qualified annotation"
   },
   "cn": {
     "TextInput": "文本输入",
@@ -719,6 +721,8 @@
     "FindTheFrameCorrespondingToTheLabeledFrameId": "查找标注框ID对应帧",
     "ShowHighlightRect": "查看高亮框",
     "ShowHighlightRectTip": "带有该标识的框需要重点关注",
-    "HideTextInfo": "不看图形信息"
+    "HideTextInfo": "不看图形信息",
+    "GlobalAnnotation":"全局标注",
+    "QualifiedAnnotation":"限定标注"
   }
 }
