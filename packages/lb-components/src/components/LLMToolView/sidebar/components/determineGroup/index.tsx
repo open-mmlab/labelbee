@@ -12,12 +12,12 @@ import LongText from '@/components/longText';
 interface IProps {
   title: string;
   selectValue?: boolean;
-  isDisableAll?: boolean;
+  disabeledAll?: boolean;
   updateValue: (changeValue: boolean) => void;
 }
 
 const DetermineGroup = (props: IProps) => {
-  const { title, selectValue, isDisableAll, updateValue } = props;
+  const { title, selectValue, disabeledAll, updateValue } = props;
 
   const { t } = useTranslation();
   return (
@@ -28,7 +28,7 @@ const DetermineGroup = (props: IProps) => {
       <Radio.Group
         value={selectValue}
         onChange={(e) => updateValue(e.target.value)}
-        disabled={isDisableAll}
+        disabled={disabeledAll}
       >
         <Radio value={true} key={1}>
           {t('Yes')}

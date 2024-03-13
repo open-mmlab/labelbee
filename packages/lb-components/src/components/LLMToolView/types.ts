@@ -101,4 +101,5 @@ export interface ILLMBoxResult {
   id: number;
   sort?: number[][];
   textAttribute?: ITextList[];
+  valid:boolean
 }
