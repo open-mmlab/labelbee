@@ -33,7 +33,7 @@ const NLPSidebar: React.FC<IProps> = ({ toolInstance, checkMode }) => {
   return (
     <div className={`${sidebarCls}`}>
       <div className={`${sidebarCls}__content`}>
-        <IndicatorDetermineList checkMode={checkMode} />
+        <IndicatorDetermineList disabeledAll={checkMode} />
         <NlpAttributeList checkMode={checkMode} />
         <NLPAnnotatedList checkMode={checkMode} />
       </div>

@@ -16,12 +16,12 @@ interface IProps {
   newAnswer?: string;
   textEditObject: ITextList;
   updateValue: (changeValue: string) => void;
-  checkMode?: boolean;
+  disabeledAll?: boolean;
   answerIndex: number;
 }
 
 const TextEditor = (props: IProps) => {
-  const { checkMode, newAnswer, textEditObject, updateValue, answerIndex } = props;
+  const { disabeledAll, newAnswer, textEditObject, updateValue, answerIndex } = props;
 
   const { max, min, isLaText } = textEditObject;
   const { TextArea } = Input;
@@ -38,7 +38,7 @@ const TextEditor = (props: IProps) => {
      * and answers that have been edited will be filled in with the last edited answer.
      */
     form.setFieldsValue({ value: newAnswer });
-    if (!checkMode) {
+    if (!disabeledAll) {
       form.validateFields();
     }
   }, [newAnswer]);
@@ -101,7 +101,7 @@ const TextEditor = (props: IProps) => {
         required={!!min}
       />
 
-      {isLaText && <LatexEditor onSelectLatex={insertText} disabled={checkMode} />}
+      {isLaText && <LatexEditor onSelectLatex={insertText} disabled={disabeledAll} />}
       <Form.Item
         name='value'
         style={{
@@ -122,7 +122,7 @@ const TextEditor = (props: IProps) => {
           maxLength={max}
           autoSize={{ minRows: 4, maxRows: 10 }}
           allowClear={true}
-          disabled={checkMode}
+          disabled={disabeledAll}
           showCount={max ? true : false}
           style={{ width: '100%' }}
           id={`inputTextarea_${answerIndex}`}

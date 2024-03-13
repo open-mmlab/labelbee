@@ -357,7 +357,8 @@
     "DoubleClickOnTheIdToContinuouslyHighlightBoxesAcrossFrames": "Double-click on the ID to continuously highlight boxes across frames",
     "FindTheFrameCorrespondingToTheLabeledFrameId": "Find the frame corresponding to the labeled frame ID",
     "GlobalAnnotation": "Global annotation",
-    "QualifiedAnnotation": "Qualified annotation"
+    "QualifiedAnnotation": "Qualified annotation",
+    "InvalidQuestionAndSkip": "Invalid question, please skip this question"
   },
   "cn": {
     "TextInput": "文本输入",
@@ -717,6 +718,7 @@
     "DoubleClickOnTheIdToContinuouslyHighlightBoxesAcrossFrames": "双击ID可以跨帧连续高亮标注框",
     "FindTheFrameCorrespondingToTheLabeledFrameId": "查找标注框ID对应帧",
     "GlobalAnnotation":"全局标注",
-    "QualifiedAnnotation":"限定标注"
+    "QualifiedAnnotation":"限定标注",
+    "InvalidQuestionAndSkip": "无效题目，请跳过此题"
   }
 }

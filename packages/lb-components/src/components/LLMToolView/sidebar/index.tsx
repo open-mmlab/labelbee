@@ -4,7 +4,7 @@ import { Button, Empty } from 'antd';
 import AnswerSort from './components/answerSort';
 import { AppState } from '@/store';
 import { connect } from 'react-redux';
-import { isNumber, isObject, isString } from 'lodash';
+import { isBoolean, isNumber, isObject, isString } from 'lodash';
 import AnswerList from './components/answerList';
 import { LabelBeeContext, LLMContext } from '@/store/ctx';
 import { jsonParser } from '@/utils';
@@ -26,7 +26,7 @@ import {
   IConfigUpdate,
 } from '@/components/LLMToolView/types';
 import { useTranslation } from 'react-i18next';
-import { formatSort, getCurrentResultFromResultList, getTagResult } from '../utils/data';
+import { formatSort, getCurrentResultFromResultList, getRenderDataByResult } from '../utils/data';
 import emptySvg from '@/assets/annotation/LLMTool/empty.svg';
 import TextInputBox from './components/textInputBox';
 import OverallTagList from '@/components/tagList/components/overall';
@@ -50,14 +50,18 @@ const sidebarCls = `${prefix}-sidebar`;
 const LLMToolSidebar = (props: IProps) => {
   const { annotation, dispatch, checkMode } = props;
   const { imgIndex, imgList, stepList, step, skipBeforePageTurning } = annotation;
-  const { modelAPIResponse } = useContext(LLMContext);
+  const { modelAPIResponse, setModelAPIResponse } = useContext(LLMContext);
   const { t } = useTranslation();
   const currentData = imgList[imgIndex] ?? {};
   const basicInfo = jsonParser(currentData?.result);
   const { toolInstanceRef } = useCustomToolInstance({ basicInfo });
   const [LLMConfig, setLLMConfig] = useState<ILLMToolConfig>();
+  const [, forceRender] = useState(0);
+
   const { setNewAnswerList } = useContext(LLMContext);
   const [annotationResult, setAnnotationResult] = useState<IAnnotationResult>({});
+
+  const disabeledAll = !toolInstanceRef.current.valid || checkMode;
 
   useEffect(() => {
     if (stepList && step) {
@@ -70,88 +74,94 @@ const LLMToolSidebar = (props: IProps) => {
     if (!currentData || imgIndex === -1) {
       return;
     }
-
-    const result: ILLMBoxResult = getCurrentResultFromResultList(currentData?.result);
-    let qaData = result?.answerList ? result : currentData?.questionList;
-    let answerList: IAnswerList[] = [];
-    let newSort: IAnswerSort[][] = [];
-    let waitSorts: IWaitAnswerSort[] = [];
-    let tagList: ISelectedTags = {};
-    if (qaData?.answerList) {
-      answerList = initAnswerList(qaData.answerList) || [];
-      newSort = getWaitSortList(qaData.answerList).newSort;
-      waitSorts = getWaitSortList(qaData.answerList).waitSorts;
-    }
-    const overallInputList = LLMConfig?.inputList?.filter((i: IInputList) => i?.isOverall) || [];
-
-    tagList = getTagResult(overallInputList, qaData?.tagList);
-
-    setAnnotationResult({
-      newSort,
-      waitSorts,
-      tagList,
-      answerList,
-      textAttribute: result?.textAttribute,
-    });
+    toolInstanceRef.current.setValid = onSetValid;
+    toolInstanceRef.current.clearResult = clearResult;
+    initResult();
   }, [imgIndex, LLMConfig]);
+
+  const clearResult = () => {
+    initResult(currentData?.questionList);
+  };
+
+  const onSetValid = (valid?: boolean) => {
+    if (isBoolean(valid)) {
+      toolInstanceRef.current.valid = valid;
+      toolInstanceRef.current?.emit('validUpdated');
+      forceRender((s) => s + 1);
+    }
+  };
+
+  const initResult = (initData?: ILLMBoxResult) => {
+    const result: ILLMBoxResult = getCurrentResultFromResultList(currentData?.result);
+
+    let sourceData = currentData?.questionList;
+    if (result?.answerList && toolInstanceRef.current.valid) {
+      sourceData = result;
+    }
+    if (initData) {
+      sourceData = initData;
+      result.sort = [];
+      result.valid = toolInstanceRef.current.valid ?? true;
+    }
+    onSetValid(result.valid);
+
+    const annotations = getRenderDataByResult(LLMConfig, sourceData);
+    setAnnotationResult({ ...annotations });
+    setModelAPIResponse([]);
+  };
 
   useEffect(() => {
     const { newSort, answerList, textAttribute, tagList } = annotationResult;
-    toolInstanceRef.current.exportData = () => {
-      const sort = formatSort(newSort || []);
-      const result = [
-        {
-          answerList,
-          sort,
-          tagList,
-          textAttribute,
-          id: currentData?.id,
-          modelAPIResponse,
-        },
-      ];
-      return [result, {}];
-    };
     const sort = formatSort(newSort || []);
     const result = {
       answerList,
       sort,
+      tagList,
       textAttribute,
       id: currentData?.id,
-      toolName: EToolName.LLM,
       modelAPIResponse,
+      valid: toolInstanceRef.current.valid,
     };
 
-    toolInstanceRef.current.currentPageResult = result;
+    toolInstanceRef.current.exportData = () => {
+      return [[result], { valid: toolInstanceRef.current.valid }];
+    };
+
+    toolInstanceRef.current.currentPageResult = { ...result, toolName: EToolName.LLM };
     setNewAnswerList(answerList || []);
   }, [annotationResult, modelAPIResponse]);
 
   useEffect(() => {
     window.addEventListener('keydown', onKeyDown);
+    initToolInstance();
     return () => {
       window.removeEventListener('keydown', onKeyDown);
     };
   }, []);
 
-  const initAnswerList = (initValue: IAnswerList[]) => {
-    const { isTextEdit, textEdit = [], inputList = [], tagInputListConfigurable } = LLMConfig || {};
-    // tag attribute
-    if (tagInputListConfigurable && inputList.length > 0) {
-      return initValue.map((i) => {
-        const localInputList = inputList.filter((i: IInputList) => !i?.isOverall) || [];
-        const tagList = getTagResult(localInputList, i?.tagList);
-        return { ...i, tagList };
-      });
-    }
+  const initToolInstance = () => {
+    toolInstanceRef.current.emit = (event: string) => {
+      const listener = toolInstanceRef.current.fns.get(event);
+      if (listener) {
+        listener.forEach((fn: any) => {
+          if (fn) {
+            fn?.();
+          }
+        });
+      }
+    };
+    toolInstanceRef.current.fns = new Map();
+    toolInstanceRef.current.singleOn = (event: string, func: () => void) => {
+      toolInstanceRef.current.fns.set(event, [func]);
+    };
 
-    // Text edit
-    if (isTextEdit) {
-      return initValue.map((i) => {
-        const isFillAnswer = textEdit.filter((v: ITextList) => v.title === i.order)[0]
-          ?.isFillAnswer;
-        return isFillAnswer ? { ...i, newAnswer: i?.newAnswer ?? i.answer } : i;
-      });
-    }
-    return initValue;
+    toolInstanceRef.current.on = (event: string, func: () => void) => {
+      toolInstanceRef.current.singleOn(event, func);
+    };
+
+    toolInstanceRef.current.unbindAll = (eventName: string) => {
+      toolInstanceRef.current.fns.delete(eventName);
+    };
   };
 
   const onKeyDown = (e: KeyboardEvent) => {
@@ -162,39 +172,6 @@ const LLMToolSidebar = (props: IProps) => {
       }
       dispatch(PageForward());
     }
-  };
-
-  const getWaitSortList = (answerList: IAnswerList[]) => {
-    let waitSorts: IWaitAnswerSort[] = [];
-    let newSort: IAnswerSort[][] = [];
-    if (answerList?.length > 0) {
-      // 将[[1],[2,3]]格式转成[[{ title: 1, id: 1 }],[{...},{...}]]
-      const result = getCurrentResultFromResultList(currentData?.result);
-      const currentResult = result?.length > 0 ? result[0] : result;
-      if (currentResult?.sort?.length > 0) {
-        newSort = currentResult.sort.reduce((i: IWaitAnswerSort[][], key: number[]) => {
-          let tagColumn = [{ title: key[0], id: key[0] }];
-          if (key.length > 1) {
-            tagColumn = key.map((item: number) => ({ title: item, id: item }));
-          }
-          return [...i, tagColumn];
-        }, []);
-      }
-      // 待排序容器需要过滤已排序容器存在的答案
-      answerList.forEach((i: IAnswerList) => {
-        const existed = newSort.some((sortItem: IAnswerSort[]) => {
-          if (sortItem.length > 1) {
-            return sortItem.some((v: IAnswerSort) => v.id === i.order);
-          }
-          return sortItem[0].id === i.order;
-        });
-        if (existed) {
-          return;
-        }
-        waitSorts.push({ title: i.order, id: i.order });
-      });
-    }
-    return { newSort, waitSorts };
   };
 
   const updateValue = ({ order, value, key }: IConfigUpdate) => {
@@ -289,7 +266,7 @@ const LLMToolSidebar = (props: IProps) => {
             setSortList={(value) => {
               setAnnotationResult({ ...annotationResult, newSort: value });
             }}
-            checkMode={checkMode}
+            disabeledAll={disabeledAll}
           />
         )}
 
@@ -306,7 +283,7 @@ const LLMToolSidebar = (props: IProps) => {
                 tagList: { ...originData, [key]: value },
               });
             }}
-            checkMode={checkMode}
+            disabeledAll={disabeledAll}
           />
         )}
         {LLMConfig?.text && (
@@ -315,7 +292,7 @@ const LLMToolSidebar = (props: IProps) => {
               textAttribute={annotationResult?.textAttribute || []}
               LLMConfig={LLMConfig}
               setText={(v) => setAnnotationResult({ ...annotationResult, textAttribute: v })}
-              checkMode={checkMode}
+              disabeledAll={disabeledAll}
             />
           </div>
         )}
@@ -329,7 +306,7 @@ const LLMToolSidebar = (props: IProps) => {
               list={annotationResult?.answerList || []}
               LLMConfig={LLMConfig}
               updateValue={updateValue}
-              checkMode={checkMode}
+              disabeledAll={disabeledAll}
             />
           )}
         </div>
@@ -346,7 +323,7 @@ const LLMToolSidebar = (props: IProps) => {
               }
               dispatch(PageForward());
             }}
-            disabled={checkMode}
+            disabled={disabeledAll}
           >
             {t('Save')}
           </Button>
