@@ -133,9 +133,9 @@ const LLMToolSidebar = (props: IProps) => {
   }, []);
 
   const initAnswerList = (initValue: IAnswerList[]) => {
-    const { isTextEdit, textEdit = [], inputList = [] } = LLMConfig || {};
+    const { isTextEdit, textEdit = [], inputList = [], tagInputListConfigurable } = LLMConfig || {};
     // tag attribute
-    if (inputList.length > 0) {
+    if (tagInputListConfigurable && inputList.length > 0) {
       return initValue.map((i) => {
         const localInputList = inputList.filter((i: IInputList) => !i?.isOverall) || [];
         const tagList = getTagResult(localInputList, i?.tagList);
@@ -270,6 +270,7 @@ const LLMToolSidebar = (props: IProps) => {
     enableSort,
     isTextEdit,
     inputList = [],
+    tagInputListConfigurable,
   } = LLMConfig || {};
   const answerList = annotationResult?.answerList || [];
   const showAnwerList =
@@ -292,7 +293,7 @@ const LLMToolSidebar = (props: IProps) => {
           />
         )}
 
-        {inputList.length && (
+        {tagInputListConfigurable && inputList.length && (
           <OverallTagList
             inputList={inputList}
             selectedTags={annotationResult?.tagList || {}}

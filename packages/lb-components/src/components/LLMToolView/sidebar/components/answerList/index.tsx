@@ -149,6 +149,7 @@ const AnswerList = (props: IProps) => {
           textEdit = [],
           isTextEdit = false,
           inputList = [],
+          tagInputListConfigurable,
         } = LLMConfig || {};
         const { backgroundColor, fontColor, tagText, tagStatus } = getTagStyle(i);
         const textEditObject = getAnswerTextEditConfig(i, textEdit) || {};
@@ -192,7 +193,7 @@ const AnswerList = (props: IProps) => {
             })}
           >
             {/* attribute tag */}
-            {inputList?.length > 0 && (
+            {tagInputListConfigurable && inputList?.length > 0 && (
               <PortionTagList
                 inputList={inputList}
                 selectedTags={i?.tagList || {}}

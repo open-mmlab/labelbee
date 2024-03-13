@@ -58,6 +58,7 @@ export interface ILLMToolConfig {
   };
   isTextEdit: boolean;
   textEdit: ITextList[];
+  tagInputListConfigurable: boolean;
   inputList?: IInputList[];
 }
 
