@@ -13,14 +13,17 @@ import { LabelBeeContext } from '@/store/ctx';
 interface IProps {
   toolInstance?: GraphToolInstance;
   stepInfo?: IStepInfo;
-  attributeLockChange?: (list: string[]) => void;
 }
 
 const SwitchAttributeList: React.FC<IProps> = (props) => {
   const [_, forceRender] = useState(0);
   const listRef = useRef<HTMLElement>(null);
-  const { toolInstance, attributeLockChange } = props;
+  const { toolInstance } = props;
   const { t } = useTranslation();
+
+  const setAttributeLockList = (list: string[]) => {
+    toolInstance?.setAttributeLockList(list);
+  };
 
   useEffect(() => {
     if (toolInstance) {
@@ -74,7 +77,7 @@ const SwitchAttributeList: React.FC<IProps> = (props) => {
         attributeChanged={attributeChanged}
         selectedAttribute={toolInstance?.defaultAttribute ?? ''}
         ref={listRef}
-        attributeLockChange={attributeLockChange}
+        attributeLockChange={setAttributeLockList}
       />
     );
   }
