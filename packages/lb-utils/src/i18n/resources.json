@@ -355,7 +355,10 @@
     "OnlyCurrentFrame": "Only current frame",
     "ClickOnTheIdToHighlightTheMarkupBox": "Click on the ID to highlight the markup box",
     "DoubleClickOnTheIdToContinuouslyHighlightBoxesAcrossFrames": "Double-click on the ID to continuously highlight boxes across frames",
-    "FindTheFrameCorrespondingToTheLabeledFrameId": "Find the frame corresponding to the labeled frame ID"
+    "FindTheFrameCorrespondingToTheLabeledFrameId": "Find the frame corresponding to the labeled frame ID",
+    "ShowHighlightRect": "View Highlighted Rects",
+    "ShowHighlightRectTip": "Rects with this label need special attention",
+    "HideTextInfo": "Hide graphical information"
   },
   "cn": {
     "TextInput": "文本输入",
@@ -713,6 +716,9 @@
     "OnlyCurrentFrame": "只看当前帧",
     "ClickOnTheIdToHighlightTheMarkupBox": "点击ID可以高亮标注框",
     "DoubleClickOnTheIdToContinuouslyHighlightBoxesAcrossFrames": "双击ID可以跨帧连续高亮标注框",
-    "FindTheFrameCorrespondingToTheLabeledFrameId": "查找标注框ID对应帧"
+    "FindTheFrameCorrespondingToTheLabeledFrameId": "查找标注框ID对应帧",
+    "ShowHighlightRect": "查看高亮框",
+    "ShowHighlightRectTip": "带有该标识的框需要重点关注",
+    "HideTextInfo": "不看图形信息"
   }
 }

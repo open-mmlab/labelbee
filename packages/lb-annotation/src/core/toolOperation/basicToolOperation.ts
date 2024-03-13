@@ -545,6 +545,9 @@ class BasicToolOperation extends EventListener {
 
   public setBasicImgInfo(basicImgInfo: any) {
     this.basicImgInfo = basicImgInfo;
+    this.basicInstance?.syncCommonInfo({
+      basicImgInfo,
+    });
     this.coordUtils.setBasicImgInfo(basicImgInfo);
   }
 
@@ -1232,6 +1235,9 @@ class BasicToolOperation extends EventListener {
 
   public setValid(valid: boolean) {
     this.basicImgInfo.valid = valid;
+    this.basicInstance?.syncCommonInfo({
+      basicImgInfo: this.basicImgInfo,
+    });
     if (valid === false) {
       this.renderInvalidPage();
       this.clearResult(false);
@@ -1242,6 +1248,9 @@ class BasicToolOperation extends EventListener {
 
   public setRotate(rotate: number) {
     this.basicImgInfo.rotate = rotate;
+    this.basicInstance?.syncCommonInfo({
+      basicImgInfo: this.basicImgInfo,
+    });
   }
 
   public setBasicResult(basicResult: any) {
@@ -1259,6 +1268,7 @@ class BasicToolOperation extends EventListener {
   public setAttributeLockList(attributeLockList: string[]) {
     this.attributeLockList = attributeLockList;
     this.render();
+    this.emit('attributeLockChanged', attributeLockList);
   }
 
   public setConfig(config: string) {
@@ -1299,6 +1309,9 @@ class BasicToolOperation extends EventListener {
     // 更改当前图片的旋转方式
     const rotate = MathUtils.getRotate(this.basicImgInfo.rotate);
     this.basicImgInfo.rotate = rotate;
+    this.basicInstance?.syncCommonInfo({
+      basicImgInfo: this.basicImgInfo,
+    });
     this.initImgPos();
 
     // 触发外层 result 的更改

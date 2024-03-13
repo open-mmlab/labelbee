@@ -5,7 +5,7 @@ type Source = string | React.ReactElement;
 
 const Icon = ({ source }: { source: Source }) => {
   if (typeof source === 'string') {
-    return <img src={source} width={14} height={14} style={{ marginRight: 4 }} />;
+    return <img src={source} width={16} height={16} style={{ marginRight: 4 }} />;
   }
 
   return source;

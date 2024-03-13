@@ -1,0 +1,16 @@
+.hiddenTextSwitch {
+  display: flex;
+  align-items: center;
+  margin-right: 10px;
+  color: #fff;
+  font-size: 12px;
+  :global {
+    .ant-switch {
+      margin-left: 5px;
+      background-color: #a3a3a3;
+    }
+    .ant-switch-checked {
+      background-color: #666fff;
+    }
+  }
+}
