@@ -10,13 +10,13 @@ import MarkdownView from '@/components/markdownView';
 
 interface IProps {
   textAttribute: ITextList[];
-  checkMode?: boolean;
+  disabeledAll?: boolean;
   LLMConfig?: ILLMToolConfig;
   setText: (value: ITextList[]) => void;
 }
 
 const TextInputBox = (props: IProps) => {
-  const { checkMode, LLMConfig, textAttribute, setText } = props;
+  const { disabeledAll, LLMConfig, textAttribute, setText } = props;
   const textConfig = LLMConfig?.text && isArray(LLMConfig.text) ? LLMConfig?.text : [];
   const { TextArea } = Input;
   const [form] = Form.useForm();
@@ -115,11 +115,11 @@ const TextInputBox = (props: IProps) => {
                           <span
                             className={classnames({
                               [`clearText`]: true,
-                              [`clearText__disabled`]: checkMode,
+                              [`clearText__disabled`]: disabeledAll,
                             })}
                             style={{ verticalAlign: 'initial' }}
                             onClick={() => {
-                              if (checkMode) {
+                              if (disabeledAll) {
                                 return;
                               }
                               form.setFields([
@@ -141,7 +141,7 @@ const TextInputBox = (props: IProps) => {
                         onSelectLatex={(value) =>
                           insertText({ newText: value, fieldName: field.name, max })
                         }
-                        disabled={checkMode}
+                        disabled={disabeledAll}
                       />
                     )}
                     {showTextInput && (
@@ -164,7 +164,7 @@ const TextInputBox = (props: IProps) => {
                       >
                         <TextArea
                           maxLength={max}
-                          disabled={checkMode}
+                          disabled={disabeledAll}
                           showCount={max ? true : false}
                           autoSize={{ minRows: 4, maxRows: 10 }}
                           style={{ width: '100%' }}

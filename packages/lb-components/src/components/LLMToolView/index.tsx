@@ -18,23 +18,26 @@ import AnnotationTips from '@/views/MainView/annotationTips';
 import { getCurrentResultFromResultList } from './utils/data';
 import { getStepConfig } from '@/store/annotation/reducer';
 import { jsonParser } from '@/utils';
+import { DrawLayerSlot } from '@/types/main';
+import MessageMaskLayer from '../messageMaskLayer';
 
 interface IProps {
   checkMode?: boolean;
   annotation?: any;
   showTips?: boolean;
   tips?: string;
+  drawLayerSlot?: DrawLayerSlot;
 }
 const LLMViewCls = `${prefix}-LLMView`;
 const LLMToolView: React.FC<IProps> = (props) => {
-  const { annotation, checkMode = true, tips, showTips } = props;
-  const { imgIndex, imgList, stepList, step } = annotation;
+  const { annotation, checkMode = true, tips, showTips, drawLayerSlot } = props;
+  const { imgIndex, imgList, stepList, step, toolInstance } = annotation;
   const { hoverKey, modelAPIResponse, setModelAPIResponse, newAnswerList } = useContext(LLMContext);
   const [answerList, setAnswerList] = useState<IAnswerList[]>([]);
   const [question, setQuestion] = useState<string>('');
   const [LLMConfig, setLLMConfig] = useState<ILLMToolConfig>();
-
   const { t } = useTranslation();
+  const [, forceRender] = useState(0);
 
   useEffect(() => {
     let interval: undefined | ReturnType<typeof setInterval>;
@@ -51,6 +54,17 @@ const LLMToolView: React.FC<IProps> = (props) => {
       };
     }
   }, []);
+
+  useEffect(() => {
+    if (toolInstance) {
+      toolInstance.on('validUpdated', () => {
+        forceRender((s) => s + 1);
+      });
+      return () => {
+        toolInstance.unbindAll('validUpdated');
+      };
+    }
+  }, [toolInstance]);
 
   useEffect(() => {
     if (!imgList[imgIndex]) {
@@ -98,6 +112,8 @@ const LLMToolView: React.FC<IProps> = (props) => {
 
   return (
     <Layout className={LLMViewCls}>
+      {!toolInstance?.valid && <MessageMaskLayer message={t('InvalidQuestionAndSkip')} />}
+      {drawLayerSlot?.({})}
       <div className={`${LLMViewCls}-question`}>
         {showTips === true && <AnnotationTips tips={tips} />}
         <QuestionView

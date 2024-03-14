@@ -16,12 +16,12 @@ interface IProps {
   toolInstance: ICustomToolInstance;
   stepInfo: IStepInfo;
   imgIndex: number;
-  checkMode?: boolean;
+  disabeledAll?: boolean;
   imgList: IFileItem[];
 }
 
 const IndicatorDetermineList = (props: IProps) => {
-  const { toolInstance, stepInfo, checkMode, imgIndex, imgList } = props;
+  const { toolInstance, stepInfo, disabeledAll, imgIndex, imgList } = props;
 
   const [result] = toolInstance.exportData();
   const [currentResult, setCurrentResult] = useState(result?.[0]);
@@ -87,7 +87,7 @@ const IndicatorDetermineList = (props: IProps) => {
                   updateIndicatorDetermine(values);
                 }}
                 key={index}
-                isDisableAll={checkMode}
+                disabeledAll={disabeledAll}
               />
             );
           })}

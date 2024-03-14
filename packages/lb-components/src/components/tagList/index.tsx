@@ -23,11 +23,11 @@ interface ICheckBoxList {
   selectedTags: ISelectedTags;
   handleChange: (value: IChangeValue) => void;
   tagItem: IInputList;
-  checkMode?: boolean;
+  disabeledAll?: boolean;
 }
 
-const CheckBoxList = ({ tagItem, selectedTags, handleChange, checkMode }: ICheckBoxList) => {
-  const disabled = checkMode;
+const CheckBoxList = ({ tagItem, selectedTags, handleChange, disabeledAll }: ICheckBoxList) => {
+  const disabled = disabeledAll;
   const { isMulti, subSelected = [], value } = tagItem;
   const subSelectKey = value;
   if (isMulti) {
@@ -81,7 +81,7 @@ const CheckBoxList = ({ tagItem, selectedTags, handleChange, checkMode }: ICheck
 };
 
 const TagList = (props: ITagListProps) => {
-  const { selectedTags, updateValue, checkMode, inputList = [] } = props;
+  const { selectedTags, updateValue, disabeledAll, inputList = [] } = props;
 
   const handleChange = (changeValue: IChangeValue) => {
     const { key, checked, tag, isRadio } = changeValue;
@@ -120,7 +120,7 @@ const TagList = (props: ITagListProps) => {
                   selectedTags={selectedTags}
                   handleChange={handleChange}
                   tagItem={i}
-                  checkMode={checkMode}
+                  disabeledAll={disabeledAll}
                 />
               </Col>
             </Row>

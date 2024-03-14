@@ -104,6 +104,8 @@ export interface ILLMBoxResult {
   id: number;
   sort?: number[][];
   textAttribute?: ITextList[];
+  valid:boolean;
+  tagList?:ISelectedTags
 }
 
 export interface IInputList {

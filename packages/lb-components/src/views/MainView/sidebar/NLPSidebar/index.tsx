@@ -20,31 +20,21 @@ interface IProps {
  * @param param0
  * @returns
  */
-const NlpAttributeList = ({
-  setAttributeLockList,
-  checkMode,
-}: {
-  setAttributeLockList: (list: string[]) => void;
-  checkMode?: boolean;
-}) => {
+const NlpAttributeList = ({ checkMode }: { checkMode?: boolean }) => {
   if (checkMode) {
     return null;
   }
 
-  return <SwitchAttributeList attributeLockChange={setAttributeLockList} />;
+  return <SwitchAttributeList />;
 };
 
 export const sidebarCls = `${prefix}-sidebar`;
 const NLPSidebar: React.FC<IProps> = ({ toolInstance, checkMode }) => {
-  const setAttributeLockList = (list: string[]) => {
-    toolInstance?.setAttributeLockList(list);
-  };
-
   return (
     <div className={`${sidebarCls}`}>
       <div className={`${sidebarCls}__content`}>
-        <IndicatorDetermineList checkMode={checkMode} />
-        <NlpAttributeList setAttributeLockList={setAttributeLockList} checkMode={checkMode} />
+        <IndicatorDetermineList disabeledAll={checkMode} />
+        <NlpAttributeList checkMode={checkMode} />
         <NLPAnnotatedList checkMode={checkMode} />
       </div>
       {!checkMode && <GeneralOperation hideValidity={true} />}

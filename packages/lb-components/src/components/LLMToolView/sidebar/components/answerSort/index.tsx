@@ -18,7 +18,7 @@ interface IProps {
   setSortList: (value: IAnswerSort[][]) => void;
   sortList: IAnswerSort[][];
   waitSortList: IWaitAnswerSort[];
-  checkMode?: boolean;
+  disabeledAll?: boolean;
 }
 enum EDirection {
   Top = 'Top',
@@ -57,9 +57,8 @@ const Navigation = () => {
 
 const AnswerSort = (props: IProps) => {
   const [, forceUpdate] = useReducer((x) => x + 1, 0);
-  const { sortList, setSortList, waitSortList, checkMode } = props;
+  const { sortList, setSortList, waitSortList, disabeledAll } = props;
   const { setHoverKey } = useContext(LLMContext);
-  const isDisableAll = checkMode;
   const [activateDirection, setActivateDirection] = useState<EDirection | undefined>(undefined);
   const [targetTagKey, setTargetTagKey] = useState<number | undefined>(undefined);
   const [answers, setAnswers] = useState<IWaitAnswerSort[]>([]);
@@ -92,7 +91,7 @@ const AnswerSort = (props: IProps) => {
           [`${contentBoxCls}__answerTag`]: true,
         })}
         style={targetTagKey === item?.id && activateDirection ? borderStyle : undefined}
-        draggable={isDisableAll || !item?.id ? '' : 'true'}
+        draggable={disabeledAll || !item?.id ? '' : 'true'}
         onMouseMove={() => {
           setHoverKey(item.id);
         }}

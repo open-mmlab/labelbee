@@ -18,5 +18,5 @@ export interface ITagListProps {
   updateValue: (value: { key: string; value: string[] }) => void;
   inputList?: IInputList[];
   selectedTags: ISelectedTags;
-  checkMode?: boolean;
+  disabeledAll?: boolean;
 }
