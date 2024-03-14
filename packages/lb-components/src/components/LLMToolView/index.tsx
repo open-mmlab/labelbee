@@ -57,7 +57,7 @@ const LLMToolView: React.FC<IProps> = (props) => {
 
   useEffect(() => {
     if (toolInstance) {
-      toolInstance.singleOn('validUpdated', () => {
+      toolInstance.on('validUpdated', () => {
         forceRender((s) => s + 1);
       });
       return () => {

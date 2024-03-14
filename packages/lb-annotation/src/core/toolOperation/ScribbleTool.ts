@@ -413,7 +413,7 @@ class ScribbleTool extends BasicToolOperation {
   }
 
   public fillPixelSawtooth() {
-    if (this.cacheContext && this.renderCacheContext && this.renderCacheContext) {
+    if (this.cacheContext && this.renderCacheContext) {
       const canvasW = this.cacheContext.canvas.width;
       const canvasH = this.cacheContext.canvas.height;
       const imgData = this.renderCacheContext?.getImageData(0, 0, canvasW, canvasH);
