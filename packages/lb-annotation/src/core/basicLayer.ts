@@ -28,7 +28,7 @@ export interface IReferenceInfoProps {
 interface IBasicLayerProps extends ICommonProps {
   container: HTMLElement;
   size: ISize;
-  toolName: THybridToolName;
+  toolName?: THybridToolName;
   imgNode?: HTMLImageElement; // dom node of image
   config?: string; // config of annotation task
   style?: any;
@@ -86,7 +86,7 @@ export default class BasicLayer extends EventListener {
     this._imgAttribute = props.imgAttribute ?? {};
 
     this.imgNode = props.imgNode;
-    this.hiddenImg = !HybridToolUtils.isSingleTool(props.toolName) || false;
+    this.hiddenImg = props.toolName ? !HybridToolUtils.isSingleTool(props.toolName) : false;
     this.forbidBasicResultRender = props.forbidBasicResultRender ?? false;
 
     this.destroyBasicCanvas();
