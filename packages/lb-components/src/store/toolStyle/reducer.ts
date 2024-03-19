@@ -12,6 +12,7 @@ const initialState: ToolStyleState = {
   attributeColor: ToolStyleUtils.getAttributeColors(),
   lineColor: ToolStyleUtils.getDefaultToolLineColors(),
   attributeLineColor: [NULL_COLOR].concat(COLORS_ARRAY),
+  hiddenText: false,
 };
 
 export function toolStyleReducer(

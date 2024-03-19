@@ -6,6 +6,8 @@ import { ELang } from '@/constant/annotation';
 import { getConfig, styleDefaultConfig } from '@/constant/defaultConfig';
 import { EToolName, THybridToolName } from '@/constant/tool';
 import { IPolygonData } from '@/types/tool/polygon';
+import BasicLayer, { IReferenceInfoProps } from '@/core/basicLayer';
+import { CoordinateUtils } from '@/utils/tool/AxisUtils';
 import { HybridToolUtils, ToolScheduler } from './scheduler';
 
 interface IProps {
@@ -15,6 +17,15 @@ interface IProps {
   imgNode?: HTMLImageElement; // 展示图片的内容
   config?: string; // 任务配置
   style?: any;
+}
+
+export interface ICommonProps {
+  zoom?: number;
+  currentPos?: ICoordinate;
+  coordUtils?: CoordinateUtils;
+  basicImgInfo?: any;
+  imgAttribute?: IImageAttribute;
+  imgInfo?: ISize;
 }
 
 const loadImage = (imgSrc: string) => {
@@ -39,6 +50,16 @@ export default class AnnotationEngine {
 
   public i18nLanguage: 'en' | 'cn'; // 存储当前 i18n 初始化数据
 
+  public zoom: number;
+
+  public currentPos: ICoordinate; // 存储实时偏移的位置
+
+  public coordUtils: CoordinateUtils;
+
+  public basicImgInfo: any; // 用于存储当前图片的信息
+
+  public imgInfo?: ISize;
+
   private container: HTMLElement; // 当前结构绑定 container
 
   private size: ISize;
@@ -56,18 +77,42 @@ export default class AnnotationEngine {
 
   private toolScheduler: ToolScheduler; // For multi-level management of tools
 
+  private basicInstance: BasicLayer;
+
   constructor(props: IProps) {
     this.container = props.container;
     this.size = props.size;
     this.toolName = props.toolName;
     this.imgNode = props.imgNode;
+    this.zoom = 1;
+    this.currentPos = {
+      x: 0,
+      y: 0,
+    };
+    this.basicImgInfo = {
+      width: props.imgNode?.width ?? 0,
+      height: props.imgNode?.height ?? 0,
+      valid: true,
+      rotate: 0,
+    };
+    this.coordUtils = new CoordinateUtils(this);
 
     this.config = props.config ?? JSON.stringify(getConfig(HybridToolUtils.getTopToolName(props.toolName))); // 设置默认操作
     this.style = props.style ?? styleDefaultConfig; // 设置默认操作
-    this.toolScheduler = new ToolScheduler(props);
-
+    this.toolScheduler = new ToolScheduler({ ...props, ...this.commonProps });
+    this.basicInstance = new BasicLayer({ ...props, ...this.commonProps });
     this.i18nLanguage = 'cn'; // 默认为中文（跟 basicOperation 内同步）
     this._initToolOperation();
+    this._initBasicLayer();
+  }
+
+  get commonProps() {
+    return {
+      zoom: this.zoom,
+      currentPos: this.currentPos,
+      basicImgInfo: this.basicImgInfo,
+      coordUtils: this.coordUtils,
+    };
   }
 
   /**
@@ -77,6 +122,28 @@ export default class AnnotationEngine {
    * 3. config
    * 4. style
    */
+
+  public syncBasicImgInfo(basicImgInfo: any) {
+    this.basicImgInfo = basicImgInfo;
+    this.toolScheduler.setBasicImgInfo(basicImgInfo);
+    this.basicInstance.setBasicImgInfo(basicImgInfo);
+    this.coordUtils.setBasicImgInfo(basicImgInfo);
+  }
+
+  public syncImgAttribute(imgAttribute: IImageAttribute) {
+    this.toolScheduler.setImgAttribute(imgAttribute);
+    this.basicInstance.setImgAttribute(imgAttribute);
+  }
+
+  public syncZoomAndCurrentPos(zoom: number, currentPos: ICoordinate) {
+    this.zoom = zoom;
+    this.currentPos = currentPos;
+    this.toolScheduler.setZoom(zoom);
+    this.basicInstance.setZoom(zoom);
+    this.toolScheduler.setCurrentPos(currentPos);
+    this.basicInstance.setCurrentPos(currentPos);
+    this.coordUtils.setZoomAndCurrentPos(zoom, currentPos);
+  }
 
   /**
    * 设置当前工具类型
@@ -107,16 +174,14 @@ export default class AnnotationEngine {
     }>,
   ) {
     this.toolScheduler.setImgNode(imgNode, basicImgInfo);
+    this.basicInstance.setImgNode(imgNode, basicImgInfo);
     this.imgNode = imgNode;
-  }
-
-  public setImgAttribute(imgAttribute: IImageAttribute) {
-    this.toolScheduler.setImgAttribute(imgAttribute);
   }
 
   public setSize(size: ISize) {
     this.size = size;
     this.toolScheduler.setSize(size);
+    this.basicInstance.setSize(size);
   }
 
   public setStyle(style: any) {
@@ -154,8 +219,16 @@ export default class AnnotationEngine {
       }
     });
 
+    this.toolScheduler.setBasicInstance(this.basicInstance);
     // 实时同步语言
     this.setLang(this.i18nLanguage);
+  }
+
+  /**
+   * 初始化依赖渲染层
+   */
+  private _initBasicLayer() {
+    this.basicInstance.renderBasicCanvas();
   }
 
   /**
@@ -167,9 +240,21 @@ export default class AnnotationEngine {
     this.dependToolName = dependToolName;
     this.basicResult = basicResult;
 
-    this.toolInstance.setDependName(dependToolName);
-    this.toolInstance.setBasicResult(basicResult);
-    this.toolInstance.renderBasicCanvas();
+    this.toolScheduler.setDependName(dependToolName);
+    this.toolScheduler.setBasicResult(basicResult);
+    this.basicInstance.setBasicResult(basicResult);
+    this.basicInstance.setDependName(dependToolName);
+    this.basicInstance.renderBasicCanvas();
+  }
+
+  /**
+   * set reference info
+   * @param referenceInfo
+   */
+
+  public setReferenceInfo(referenceInfo: IReferenceInfoProps) {
+    this.basicInstance.setReferenceInfo(referenceInfo);
+    this.basicInstance.renderBasicCanvas();
   }
 
   /**

@@ -18,6 +18,7 @@ import ScribbleTool from './core/toolOperation/ScribbleTool';
 import PointCloud2dOperation from './core/toolOperation/pointCloud2dOperation';
 import SegmentByRect from './core/toolOperation/segmentByRect';
 import SegmentBySAM from './core/toolOperation/segmentBySAM';
+import BasicLayer from './core/basicLayer';
 
 // Constant
 import * as cAnnotation from './constant/annotation';
@@ -69,6 +70,7 @@ export {
   SegmentByRect,
   SegmentBySAM,
   CursorTextClass,
+  BasicLayer,
   // 固定操作
   cAnnotation,
   cAnnotationTask,

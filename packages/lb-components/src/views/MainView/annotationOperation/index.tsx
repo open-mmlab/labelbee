@@ -109,8 +109,8 @@ const AnnotationOperation: React.FC<IProps> = (props: IProps) => {
   }, [toolInstance]);
 
   useEffect(() => {
-    if (annotationEngine?.setImgAttribute) {
-      annotationEngine.setImgAttribute(imgAttribute);
+    if (annotationEngine?.syncImgAttribute) {
+      annotationEngine.syncImgAttribute(imgAttribute);
     } else {
       // Old version.
       toolInstance?.setImgAttribute?.(imgAttribute);

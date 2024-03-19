@@ -12,6 +12,7 @@ import { ILimit, IDefaultSize } from '@labelbee/lb-utils';
 import LimitPopover from './components/limitPopover';
 import _ from 'lodash';
 import { CommonToolUtils, MathUtils } from '@labelbee/lb-annotation';
+import { GraphToolInstance } from '@/store/annotation/types';
 
 export const ATTRIBUTE_COLORS = [NULL_COLOR].concat(COLORS_ARRAY);
 
@@ -34,18 +35,33 @@ interface IProps {
   updateSize?: (size: IDefaultSize) => void;
   attributeLockChange?: (list: string[]) => void;
   forbidShowLimitPopover?: boolean;
+  toolInstance?: GraphToolInstance;
 }
 
 const AttributeList = React.forwardRef((props: IProps, ref) => {
   const radioRef = React.useRef<any>();
   const { t } = useTranslation();
   const list = props.list || [];
+  const { toolInstance } = props
 
   const [paletteVisible, setPaletteVisible] = useState<boolean>(false);
   const [editConfigIndex, setEditConfigIndex] = useState<number | undefined>(undefined);
   const [attributeLockList, setAttributeLockList] = useState<any[]>([]);
 
   let NEW_ATTRIBUTE_COLORS = [...ATTRIBUTE_COLORS];
+
+  useEffect(() => {
+    if (toolInstance) {
+      toolInstance.on('attributeLockChanged', onAttributeLockChanged)
+    }
+    return () => {
+      toolInstance?.unbind('attributeLockChanged', onAttributeLockChanged);
+    };
+  }, [toolInstance])
+
+  const onAttributeLockChanged = (list: string[]) => {
+    setAttributeLockList(list)
+  }
 
   // 去除默认的颜色
   if (props.forbidDefault === true) {

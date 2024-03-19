@@ -18,6 +18,7 @@ import { PointCloudProvider } from './components/pointCloudView/PointCloudContex
 import { AppState } from './store';
 import { LabelBeeContext } from '@/store/ctx';
 import PredictTracking from '@/components/predictTracking';
+import HighlightBadge from '@/components/highlightBadge';
 import LLMToolView from '@/components/LLMToolView';
 import SwitchCuboidBoxIn2DView from '@/views/MainView/toolFooter/SwitchCuboidBoxIn2DView';
 import MeasureCanvas from './components/measureCanvas';
@@ -79,6 +80,7 @@ export {
   MeasureCanvas,
   AnnotatedBox,
   FindTrackIDIndex,
+  HighlightBadge
 };
 
 export * from './constant';

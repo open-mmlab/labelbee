@@ -28,6 +28,26 @@
   -webkit-user-select: none;
   -ms-user-select: none;
   user-select: none;
+  :global {
+    .ant-collapse-borderless > .ant-collapse-item > .ant-collapse-content > .ant-collapse-content-box {
+      padding-top: 4px;
+    }
+
+    .ant-collapse-content > .ant-collapse-content-box {
+      padding: 0;
+    }
+
+    .ant-collapse-icon-position-right > .ant-collapse-item > .ant-collapse-header {
+      padding-right: 40px;
+    }
+
+    .ant-collapse-borderless > .ant-collapse-item {
+      border-bottom: 0px;
+      .ant-collapse-header {
+        padding: 16px;
+      }
+    }
+  }
 }
 
 .main::-webkit-scrollbar {
@@ -84,27 +104,6 @@
 
 .singleBar {
   padding: 0 3px 0 8px;
-}
-
-:global {
-  .ant-collapse-borderless > .ant-collapse-item > .ant-collapse-content > .ant-collapse-content-box {
-    padding-top: 4px;
-  }
-
-  .ant-collapse-content > .ant-collapse-content-box {
-    padding: 0;
-  }
-
-  .ant-collapse-icon-position-right > .ant-collapse-item > .ant-collapse-header {
-    padding-right: 40px;
-  }
-
-  .ant-collapse-borderless > .ant-collapse-item {
-    border-bottom: 0px;
-    .ant-collapse-header {
-      padding: 16px;
-    }
-  }
 }
 
 .filterContainer {

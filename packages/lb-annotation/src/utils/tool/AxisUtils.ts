@@ -530,7 +530,7 @@ export class CoordinateUtils {
     }
   }
 
-  public setDependInfo(dependToolName: EToolName | '', dependToolConfig?: IRectConfig | IPolygonConfig) {
+  public setDependInfo(dependToolName?: EToolName | '', dependToolConfig?: IRectConfig | IPolygonConfig) {
     this.dependToolName = dependToolName ?? '';
     this.dependToolConfig = dependToolName ? dependToolConfig : undefined;
   }

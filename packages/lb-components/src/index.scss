@@ -793,7 +793,7 @@ $hotkey-container-padding: 7px;
   width: 100%;
   display: flex;
   flex-direction: column;
-
+  overflow-x: hidden;
   .styleSlider {
     .title {
       min-width: 60px;
@@ -2067,7 +2067,7 @@ $ptToolHeight: 40px;
 
   &__footer {
     display: flex;
-    justify-content: end;
+    justify-content: flex-end;
     span {
       display: inline-flex;
       align-items: center;

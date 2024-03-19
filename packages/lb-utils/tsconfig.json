@@ -17,6 +17,10 @@
     },
     "resolveJsonModule": true
   },
-  "include": ["src", "lib/index.d.ts"],
+  "include": [
+    "src",
+    "lib/index.d.ts",
+    "../lb-annotation/src/types/tool/common.d.ts"
+  ],
   "exclude": ["node_modules", "**/__tests__/*", "node_modules/**/*.d.ts"]
 }

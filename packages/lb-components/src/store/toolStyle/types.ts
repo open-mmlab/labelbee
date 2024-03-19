@@ -12,6 +12,7 @@ export interface ToolStyleState {
   attributeColor: any[];
   lineColor: string;
   attributeLineColor: string[];
+  hiddenText: boolean;
 }
 
 interface UpdateToolStyleConfig {
