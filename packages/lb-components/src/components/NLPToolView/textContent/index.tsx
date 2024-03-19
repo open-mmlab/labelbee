@@ -164,10 +164,14 @@ const TextContent = (props: IProps) => {
           {splitIntervals.map((interval: INLPInterval, index: number) => {
             const annotation = _.last(interval.annotations);
             if (annotation) {
-              const color = getColor(annotation.attribute);
+              let color = getColor(annotation.attribute);
               const highlight = interval?.annotations?.find(
                 (v: INLPTextAnnotation) => v.id === highlightKey,
-              );
+                );
+                if(highlight){
+                  const attribute = interval?.annotations?.filter(i=>i.id===highlightKey)?.[0]?.attribute
+                  color = getColor(attribute)
+                }
               return (
                 <span
                   style={{
