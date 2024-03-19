@@ -55,6 +55,7 @@ const LLMLayout: React.FC<AppProps & IProps> = (props) => {
         </Content>
         <Sider className={`${layoutCls}__side`} width={600} style={{ position: 'relative' }}>
           <Sidebar sider={props?.sider} checkMode={props?.checkMode} />
+          {props.drawLayerSlot?.({})}
         </Sider>
       </LLMContext.Provider>
     </Layout>
