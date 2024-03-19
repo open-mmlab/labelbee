@@ -31,7 +31,7 @@ class ScribbleTool extends BasicToolOperation {
 
   private preCacheContext?: CanvasRenderingContext2D; // view
 
-  private renderCacheContext?: CanvasRenderingContext2D; // view
+  private renderCacheContext?: CanvasRenderingContext2D; // Temporary canvas for handling jagged fills
 
   private penSize;
 
@@ -412,7 +412,7 @@ class ScribbleTool extends BasicToolOperation {
     this.filterCacheContext();
   }
 
-  public fillPixelSawtooth() {
+  public fillPixelSawtooth(isErase?: boolean) {
     if (this.cacheContext && this.renderCacheContext) {
       const canvasW = this.cacheContext.canvas.width;
       const canvasH = this.cacheContext.canvas.height;
@@ -428,9 +428,13 @@ class ScribbleTool extends BasicToolOperation {
           const g = imgData.data[index + 1];
           const b = imgData.data[index + 2];
           if (r !== 0 || g !== 0 || b !== 0) {
-            // 使用fillRect方法在目标画布中注入像素点
-            this.cacheContext.fillStyle = `rgba(${colorR},${colorG},${colorB},${255})`;
-            this.cacheContext.fillRect(x, y, 1, 1);
+            if (isErase) {
+              this.cacheContext.clearRect(x, y, 1, 1);
+            } else {
+              // Use the fillRect method to inject pixels into the target canvas
+              this.cacheContext.fillStyle = `rgba(${colorR},${colorG},${colorB},${255})`;
+              this.cacheContext.fillRect(x, y, 1, 1);
+            }
           }
         }
       }
@@ -480,12 +484,31 @@ class ScribbleTool extends BasicToolOperation {
       this.cacheContext.clip();
       this.cacheContext.clearRect(0, 0, this.cacheContext.canvas.width, this.cacheContext.canvas.height);
       this.cacheContext?.restore();
+
+      if (this.preCacheContext) {
+        this.preCacheContext.save();
+        this.preCacheContext.beginPath();
+        this.preCacheContext.arc(
+          originCoordinate.x,
+          originCoordinate.y,
+          this.penSizeWithZoom / 2,
+          0,
+          Math.PI * 2,
+          false,
+        );
+        this.preCacheContext.clip();
+        this.preCacheContext.clearRect(0, 0, this.preCacheContext.canvas.width, this.preCacheContext.canvas.height);
+        this.preCacheContext?.restore();
+      }
     }
   }
 
   public onEraseStart(e: MouseEvent) {
     if (!this.cacheContext || e.buttons !== 1 || this.isHidden) {
       return;
+    }
+    if (this.renderCacheContext) {
+      this.drawStartPoint(this.renderCacheContext, e);
     }
     this.eraseArc(e);
   }
@@ -494,11 +517,26 @@ class ScribbleTool extends BasicToolOperation {
     if (!this.cacheContext || e.buttons !== 1 || this.isHidden) {
       return;
     }
+    if (this.renderCacheContext) {
+      const point = this.getOriginCoordinate(e);
 
+      this.drawLineTo({ ctx: this.renderCacheContext, point });
+    }
     this.eraseArc(e);
   }
 
-  public onEraseEnd() {}
+  public onEraseEnd() {
+    this.renderCacheContext?.clearRect(
+      0,
+      0,
+      this.renderCacheContext.canvas.width,
+      this.renderCacheContext.canvas.height,
+    );
+    this.startPoint = undefined;
+
+    this.fillPixelSawtooth(true);
+    this.filterCacheContext();
+  }
 
   public exportData() {
     const imgBase64 = this.cacheCanvasToDataUrl;
