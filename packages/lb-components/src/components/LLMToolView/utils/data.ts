@@ -86,16 +86,15 @@ export const getWaitSortList = (answerList: IAnswerList[], result?: ILLMBoxResul
 
 export const initAnswerList = (initValue: IAnswerList[], LLMConfig?: ILLMToolConfig) => {
   const { isTextEdit, textEdit = [], inputList = [] } = LLMConfig || {};
-  if (!isTextEdit) {
-    return initValue;
-  }
+
   const data = initValue.map((i) => {
     const localInputList = inputList.filter((i: IInputList) => !i?.isOverall) || [];
     const tagList = getTagResult(localInputList, i?.tagList);
-
-    const isFillAnswer = textEdit.filter((v) => v.title === i.order)[0]?.isFillAnswer;
-    if (isFillAnswer) {
-      return { ...i, newAnswer: i?.newAnswer ?? i.answer, tagList };
+    if (isTextEdit) {
+      const isFillAnswer = textEdit.filter((v) => v.title === i.order)[0]?.isFillAnswer;
+      if (isFillAnswer) {
+        return { ...i, newAnswer: i?.newAnswer ?? i.answer, tagList };
+      }
     }
     return { ...i, tagList };
   });

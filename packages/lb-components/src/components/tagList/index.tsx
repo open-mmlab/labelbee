@@ -112,7 +112,7 @@ const TagList = (props: ITagListProps) => {
           return (
             <Row key={index} className={styles.content}>
               <Col span={4} className={styles.left}>
-                {i?.key}
+                <LongText text={i?.key} openByText={true} />
               </Col>
 
               <Col span={20} className={styles.right}>
