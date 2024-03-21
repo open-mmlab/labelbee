@@ -10,7 +10,14 @@ import { connect } from 'react-redux';
 import { LabelBeeContext, NLPContext } from '@/store/ctx';
 import { prefix } from '@/constant';
 import TextContent from './textContent';
-import { ITextData, INLPTextAnnotation, INLPResult, IExtraLayer, ISelectText, IExtraData } from './types';
+import {
+  ITextData,
+  INLPTextAnnotation,
+  INLPResult,
+  IExtraLayer,
+  ISelectText,
+  IExtraData,
+} from './types';
 import AnnotationTips from '@/views/MainView/annotationTips';
 import { getStepConfig } from '@/store/annotation/reducer';
 import { jsonParser } from '@/utils';
@@ -90,6 +97,9 @@ const NLPToolView: React.FC<IProps> = (props) => {
     }
     const textData = imgList[imgIndex]?.textData;
     setTextData(textData);
+    if (!NLPConfig?.attributeConfigurable) {
+      setVisibleResult([]);
+    }
   }, [imgIndex, NLPConfig]);
 
   useEffect(() => {

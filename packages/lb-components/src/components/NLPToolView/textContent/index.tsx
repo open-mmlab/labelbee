@@ -113,8 +113,10 @@ const TextContent = (props: IProps) => {
   }, [customAnnotationData]);
 
   const getColor = (attribute = '') => {
-    const style = CommonToolUtils.jsonParser(styleString);
-    return toolStyleConverter.getColorByConfig({ attribute, config: NLPConfig, style });
+    if (NLPConfig?.attributeConfigurable) {
+      const style = CommonToolUtils.jsonParser(styleString);
+      return toolStyleConverter.getColorByConfig({ attribute, config: NLPConfig, style });
+    }
   };
 
   useEffect(() => {
@@ -167,11 +169,12 @@ const TextContent = (props: IProps) => {
               let color = getColor(annotation.attribute);
               const highlight = interval?.annotations?.find(
                 (v: INLPTextAnnotation) => v.id === highlightKey,
-                );
-                if(highlight){
-                  const attribute = interval?.annotations?.filter(i=>i.id===highlightKey)?.[0]?.attribute
-                  color = getColor(attribute)
-                }
+              );
+              if (highlight) {
+                const attribute = interval?.annotations?.filter((i) => i.id === highlightKey)?.[0]
+                  ?.attribute;
+                color = getColor(attribute);
+              }
               return (
                 <span
                   style={{
