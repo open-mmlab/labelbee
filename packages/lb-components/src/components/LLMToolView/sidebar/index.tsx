@@ -178,6 +178,7 @@ const LLMToolSidebar = (props: IProps) => {
       text = [],
       enableSort,
       isTextEdit,
+      tagInputListConfigurable,
     } = LLMConfig || {};
 
     const hasIndicatorScore =
@@ -191,7 +192,8 @@ const LLMToolSidebar = (props: IProps) => {
       hasIndicatorDetermine ||
       hasText ||
       enableSort ||
-      isTextEdit
+      isTextEdit ||
+      tagInputListConfigurable
     );
     return noConfig;
   };
@@ -223,10 +225,10 @@ const LLMToolSidebar = (props: IProps) => {
     inputList = [],
     tagInputListConfigurable,
   } = LLMConfig || {};
-  const answerList = annotationResult?.answerList || [];
+
+  const hasTagList = tagInputListConfigurable && inputList.filter((i) => !i.isOverall)?.length > 0;
   const showAnwerList =
-    answerList.length > 0 &&
-    (indicatorDetermine?.length > 0 || indicatorScore?.length > 0 || isTextEdit);
+    indicatorDetermine?.length > 0 || indicatorScore?.length > 0 || isTextEdit || hasTagList;
   return (
     <div className={`${sidebarCls}`}>
       <div className={`${sidebarCls}__content`}>
