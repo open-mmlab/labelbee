@@ -239,7 +239,7 @@ const NLPToolView: React.FC<IProps> = (props) => {
   };
 
   return (
-    <div className={NLPViewCls}>
+    <div className={NLPViewCls} id='NLPView'>
       <div className={`${NLPViewCls}-question`}>
         {showTips === true && <AnnotationTips tips={tips} />}
         <TextContent

@@ -134,17 +134,27 @@ const TextContent = (props: IProps) => {
     if (!extraData?.editAuditID) {
       return;
     }
+    const container = document.getElementById('NLPView');
     const extraItem = displayRemarkList.filter(
       (item: IExtraInAnnotation) => item?.auditID === extraData.editAuditID,
     )[0];
+
     const id = extraItem?.id ?? '';
     const element = document.getElementById(id);
     if (element && contentRef.current) {
       const elementRect = element.getBoundingClientRect();
       const parentRect = contentRef.current.getBoundingClientRect();
       const relativeLeft = elementRect.right - parentRect.left;
-      const relativeTop = elementRect.bottom - parentRect.top - element.offsetHeight;
+      const relativeTop = element.offsetTop;
+
       if (relativeLeft && relativeTop && setExtraStyle) {
+        if (container) {
+          // behavior:'auto': Since the pop-up window is displayed based on the position, the position is accurate only after the scrolling effect is completed
+          container.scrollTo({
+            top: relativeTop,
+            behavior: 'auto',
+          });
+        }
         setExtraStyle({ left: relativeLeft, top: relativeTop });
       }
     }
@@ -157,7 +167,7 @@ const TextContent = (props: IProps) => {
         className={classnames({
           [`${NLPViewCls}-question-content`]: true,
         })}
-        style={{ position: 'relative' }}
+        style={{ position: 'relative', whiteSpace: 'pre-wrap' }}
         onDoubleClick={(e) => {
           e.preventDefault();
         }}
