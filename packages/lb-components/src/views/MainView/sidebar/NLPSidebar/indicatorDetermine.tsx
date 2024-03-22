@@ -43,7 +43,7 @@ const IndicatorDetermineList = (props: IProps) => {
     if (toolInstance) {
       toolInstance.on('changeIndicatorDetermine', (index: number) => {
         const [result] = toolInstance.exportData();
-        setCurrentResult(result?.[0])
+        setCurrentResult(result?.[0]);
         forceRender((s) => s + 1);
       });
     }
@@ -69,29 +69,33 @@ const IndicatorDetermineList = (props: IProps) => {
     const displayList = indicatorDetermine.filter((i: IndicatorDetermine) => i?.label);
     return (
       <div style={{ padding: '12px', marginBottom: '12px' }}>
-        <div style={{ fontSize: '16px', fontWeight: 500, lineHeight: '46px' }}>
-          {t('IndicatorJudgment')}
-        </div>
-        <div style={{ maxHeight: '400px', overflow: 'auto' }}>
-          {displayList.map((item: IndicatorDetermine, index: number) => {
-            const { label, value } = item;
-            return (
-              <DetermineGroup
-                selectValue={currentResult?.indicatorDetermine?.[value]}
-                title={label}
-                updateValue={(changeValue) => {
-                  const values = {
-                    key: value,
-                    value: changeValue,
-                  };
-                  updateIndicatorDetermine(values);
-                }}
-                key={index}
-                disabeledAll={disabeledAll}
-              />
-            );
-          })}
-        </div>
+        {displayList?.length > 0 && (
+          <div>
+            <div style={{ fontSize: '16px', fontWeight: 500, lineHeight: '46px' }}>
+              {t('IndicatorJudgment')}
+            </div>
+            <div style={{ maxHeight: '400px', overflow: 'auto' }}>
+              {displayList.map((item: IndicatorDetermine, index: number) => {
+                const { label, value } = item;
+                return (
+                  <DetermineGroup
+                    selectValue={currentResult?.indicatorDetermine?.[value]}
+                    title={label}
+                    updateValue={(changeValue) => {
+                      const values = {
+                        key: value,
+                        value: changeValue,
+                      };
+                      updateIndicatorDetermine(values);
+                    }}
+                    key={index}
+                    disabeledAll={disabeledAll}
+                  />
+                );
+              })}
+            </div>
+          </div>
+        )}
       </div>
     );
   }
