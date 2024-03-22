@@ -526,12 +526,8 @@ class ScribbleTool extends BasicToolOperation {
   }
 
   public onEraseEnd() {
-    this.renderCacheContext?.clearRect(
-      0,
-      0,
-      this.renderCacheContext.canvas.width,
-      this.renderCacheContext.canvas.height,
-    );
+    this.renderCacheContext?.closePath();
+    this.renderCacheContext?.restore();
     this.startPoint = undefined;
 
     this.fillPixelSawtooth(true);
