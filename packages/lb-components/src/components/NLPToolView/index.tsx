@@ -211,17 +211,18 @@ const NLPToolView: React.FC<IProps> = (props) => {
       ) {
         return;
       }
-
-      const list = result?.textAnnotation || [];
-      list.push({
-        ...value,
-        attribute: selectedAttribute,
-      });
-      const data = {
-        ...result,
-        textAnnotation: list,
-      };
-      setResult(data);
+      if (NLPConfig?.attributeConfigurable) {
+        const list = result?.textAnnotation || [];
+        list.push({
+          ...value,
+          attribute: selectedAttribute,
+        });
+        const data = {
+          ...result,
+          textAnnotation: list,
+        };
+        setResult(data);
+      }
       window.getSelection()?.empty();
     }
   };
