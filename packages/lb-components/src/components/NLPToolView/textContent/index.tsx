@@ -185,10 +185,11 @@ const TextContent = (props: IProps) => {
                   ?.attribute;
                 color = getColor(attribute);
               }
+
               return (
                 <span
                   style={{
-                    backgroundColor: color.valid.stroke,
+                    backgroundColor: color?.valid?.stroke,
                     color: highlight ? 'white' : undefined,
                     padding: '2px 0px',
                   }}
