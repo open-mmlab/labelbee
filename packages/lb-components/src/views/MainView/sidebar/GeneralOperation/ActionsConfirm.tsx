@@ -71,7 +71,7 @@ const ActionsConfirm: React.FC<{ allOperation: IOperationConfig[] }> = ({ allOpe
   return (
     <div className='generalOperation' ref={ref}>
       {allOperation.map((info, index) => (
-        <Col span={annotationLength} key={index}>
+        <Col span={annotationLength} key={index} className='generalOperation-col'>
           <div
             key={info.key}
             className='item'

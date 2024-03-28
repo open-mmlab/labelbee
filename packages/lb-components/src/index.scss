@@ -827,11 +827,15 @@ $hotkey-container-padding: 7px;
   -ms-user-select: none;
   user-select: none;
 
+  .generalOperation-col{
+    display: flex;
+    justify-content: center;
+  }
+
   .item {
     text-align: center;
-    flex: 1;
     box-sizing: border-box;
-    width: 100%;
+    width: 100px;
     height: 100%;
     display: flex;
     flex-direction: column;
