@@ -129,6 +129,11 @@ const LLMToolSidebar = (props: IProps) => {
 
     toolInstanceRef.current.currentPageResult = { ...result, toolName: EToolName.LLM };
     setNewAnswerList(answerList || []);
+/**
+ * TODO: Under normal circumstances, it is impossible to monitor the change of toolInstanceRef.current.valid value. When onSetValid is triggered,
+ * forceRender((s) => s + 1) is executed for subsequent optimization.
+ */
+
   }, [annotationResult, modelAPIResponse, toolInstanceRef.current.valid]);
 
   useEffect(() => {
