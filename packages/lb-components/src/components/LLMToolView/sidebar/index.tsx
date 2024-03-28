@@ -129,7 +129,7 @@ const LLMToolSidebar = (props: IProps) => {
 
     toolInstanceRef.current.currentPageResult = { ...result, toolName: EToolName.LLM };
     setNewAnswerList(answerList || []);
-  }, [annotationResult, modelAPIResponse]);
+  }, [annotationResult, modelAPIResponse, toolInstanceRef.current.valid]);
 
   useEffect(() => {
     window.addEventListener('keydown', onKeyDown);
