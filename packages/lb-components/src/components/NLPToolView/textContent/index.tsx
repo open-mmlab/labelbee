@@ -86,6 +86,7 @@ const TextContent = (props: IProps) => {
   const [extraStyle, setExtraStyle] = useState<React.CSSProperties | undefined>(undefined);
 
   const content = useMemo(() => {
+    setExtraStyle(undefined);
     return textData?.[0]?.content;
   }, [textData]);
 
