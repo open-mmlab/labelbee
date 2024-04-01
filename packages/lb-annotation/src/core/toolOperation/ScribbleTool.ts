@@ -525,7 +525,12 @@ class ScribbleTool extends BasicToolOperation {
     this.eraseArc(e);
   }
 
-  public onEraseEnd() {
+  public onEraseEnd(e: MouseEvent) {
+    if (this.renderCacheContext) {
+      const point = this.getOriginCoordinate(e);
+      this.drawLineTo({ ctx: this.renderCacheContext, point });
+    }
+
     this.renderCacheContext?.closePath();
     this.renderCacheContext?.restore();
     this.startPoint = undefined;
