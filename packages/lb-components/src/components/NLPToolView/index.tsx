@@ -154,6 +154,7 @@ const NLPToolView: React.FC<IProps> = (props) => {
       indicatorDetermine: {},
       textAnnotation: [],
     });
+    setVisibleResult([]);
     updateSidebar();
   };
 
