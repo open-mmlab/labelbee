@@ -159,10 +159,11 @@ const NLPToolView: React.FC<IProps> = (props) => {
   };
 
   const deleteTextAnnotation = (key: string) => {
-    setResult((origin: INLPResult) => ({
-      ...origin,
-      textAnnotation: origin.textAnnotation.filter((item: INLPTextAnnotation) => item.id !== key),
-    }));
+    const textAnnotation = result.textAnnotation.filter(
+      (item: INLPTextAnnotation) => item.id !== key,
+    );
+    setResult({ ...result, textAnnotation });
+    setVisibleResult(textAnnotation);
   };
 
   const onSelectionChange = (contentRef: RefObject<HTMLDivElement>, text: string) => {
