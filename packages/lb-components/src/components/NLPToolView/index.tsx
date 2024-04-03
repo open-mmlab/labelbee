@@ -109,6 +109,7 @@ const NLPToolView: React.FC<IProps> = (props) => {
     const currentData = imgList[imgIndex] ?? {};
     const result = getCurrentResultFromResultList(currentData?.result);
     setResult(result);
+    setVisibleResult(result.textAnnotation);
   }, [imgIndex]);
 
   useEffect(() => {
