@@ -142,6 +142,8 @@ const NLPToolView: React.FC<IProps> = (props) => {
 
   const setAttributeLockList = (list: string[]) => {
     setLockList(list);
+    toolInstanceRef.current.attributeLockList = list;
+    toolInstanceRef.current.emit('changeAttributeSidebar');
   };
 
   const setVisibleResult = (list: INLPTextAnnotation[]) => {

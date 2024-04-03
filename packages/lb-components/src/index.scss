@@ -2240,15 +2240,12 @@ $ptToolHeight: 40px;
     }
 
     &__text{
-      flex: 1 1;
-      padding: 16px;
       font-weight: 400;
       font-size: 12px;
       line-height: 20px;
       color: #666666;
-      overflow: hidden;
-      text-overflow: ellipsis;
-      white-space: nowrap;
+      padding: 16px;
+      width: 100%;
     }
     &__active{
       background-color: #eeefff;
