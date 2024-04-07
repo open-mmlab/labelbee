@@ -109,6 +109,7 @@ const NLPToolView: React.FC<IProps> = (props) => {
     const currentData = imgList[imgIndex] ?? {};
     const result = getCurrentResultFromResultList(currentData?.result);
     setResult(result);
+    setVisibleResult(result.textAnnotation);
   }, [imgIndex]);
 
   useEffect(() => {
@@ -141,6 +142,8 @@ const NLPToolView: React.FC<IProps> = (props) => {
 
   const setAttributeLockList = (list: string[]) => {
     setLockList(list);
+    toolInstanceRef.current.attributeLockList = list;
+    toolInstanceRef.current.emit('changeAttributeSidebar');
   };
 
   const setVisibleResult = (list: INLPTextAnnotation[]) => {
