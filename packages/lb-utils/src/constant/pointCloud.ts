@@ -55,4 +55,6 @@ export enum ECameraType {
   OmniCamera,
   // KannalaBrandt Camera
   KannalaBrandt,
+  // Ocam-行泊一体11V
+  OmniCamera11V,
 }
