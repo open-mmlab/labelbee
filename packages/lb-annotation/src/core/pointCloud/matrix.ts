@@ -18,6 +18,7 @@ import {
   ECameraType,
 } from '@labelbee/lb-utils';
 import uuid from '@/utils/uuid';
+import { transformPointCloudToImage } from './omniCamera';
 
 export function createThreeMatrix4(matrix4: TMatrix4Tuple) {
   return new THREE.Matrix4().set(...matrix4);
@@ -150,6 +151,20 @@ export const oCamFisheyeTransfer = (point: I3DSpaceCoord, calib: ICalib): THREE.
   return lastCoord;
 };
 
+export const omniCamera11VTransfer = (point: I3DSpaceCoord, calib: ICalib): THREE.Vector4 | undefined => {
+  if (isFisheyeCalibValid(calib) === false) {
+    console.error('Error Calib, it need fisheye calib');
+    return;
+  }
+
+  const { P, fisheyeDistortion, T } = calib;
+
+  const resultArray = transformPointCloudToImage([[point.x, point.y, point.z]], T, P, fisheyeDistortion);
+
+  const result = new THREE.Vector4(resultArray[0][0], resultArray[0][1], 1);
+  return result;
+};
+
 /**
  * For kbCamFisheyeTransfer
  * @param fisheyeDistortion
@@ -229,6 +244,10 @@ export const lidar2FisheyeImage = (point: I3DSpaceCoord, calib: ICalib) => {
 
   if (calib?.cameraType === ECameraType.KannalaBrandt) {
     return kbCamFisheyeTransfer(point, calib);
+  }
+
+  if (calib?.cameraType === ECameraType.OmniCamera11V) {
+    return omniCamera11VTransfer(point, calib);
   }
 };
 
