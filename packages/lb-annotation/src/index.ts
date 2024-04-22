@@ -49,6 +49,8 @@ import AnnotationEngine from './core';
 import UnitUtils from './utils/tool/UnitUtils';
 import StyleUtils from './utils/tool/StyleUtils';
 import CursorTextClass from './core/toolOperation/cursorTextClass';
+import { EMessage } from './locales/constants';
+import MESSAGE_CN from './locales/zh_CN/message';
 
 const CommonToolUtils = EnhanceCommonToolUtils;
 const toolUtils = EnhanceCommonToolUtils; // Compatible with the old version of the definition
@@ -96,6 +98,8 @@ export {
   // 其他特殊基础功能
   ActionsHistory,
   EventBus,
+  EMessage,
+  MESSAGE_CN,
 };
 
 export * from './newCore';
