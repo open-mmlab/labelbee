@@ -98,7 +98,7 @@ const LLMToolView: React.FC<IProps> = (props) => {
       return;
     }
     const currentData = imgList[imgIndex] ?? {};
-    const result = getCurrentResultFromResultList(currentData?.result);
+    const result = getCurrentResultFromResultList(currentData?.result, step);
     const currentResult = result?.length > 0 ? result[0] : result;
     setModelAPIResponse(currentResult?.modelAPIResponse || []);
   }, [imgIndex]);
