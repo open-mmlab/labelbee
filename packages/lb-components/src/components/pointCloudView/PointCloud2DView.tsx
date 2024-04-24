@@ -7,7 +7,13 @@ import { connect } from 'react-redux';
 import { pointCloudLidar2image, cKeyCode, pointListLidar2Img } from '@labelbee/lb-annotation';
 import { LabelBeeContext } from '@/store/ctx';
 import { a2MapStateToProps, IA2MapStateProps } from '@/store/annotation/map';
-import { ICalib, IPointCloudBox, IPolygonPoint, toolStyleConverter } from '@labelbee/lb-utils';
+import {
+  ICalib,
+  IPointCloudBox,
+  IPolygonPoint,
+  toolStyleConverter,
+  ICoordinate,
+} from '@labelbee/lb-utils';
 import PointCloud2DSingleView from './PointCloud2DSingleView';
 import TitleButton from './components/TitleButton';
 import { LeftOutlined } from '@ant-design/icons';
@@ -17,6 +23,7 @@ import LeftSquareOutlined from '@/assets/annotation/common/icon_left_squareOutli
 import RightSquareOutlined from '@/assets/annotation/common/icon_right_squareOutlined.svg';
 import { IMappingImg } from '@/types/data';
 import { isNumber } from 'lodash';
+import { getBoundingRect, isBoundingRectInImage } from '@/utils';
 
 // TODO, It will be deleted when the exported type of lb-annotation is work.
 export interface IAnnotationDataTemporarily {
@@ -120,7 +127,7 @@ const PointCloud2DView = ({
   highlightAttribute,
   loadPCDFileLoading,
   checkMode,
-  measureVisible
+  measureVisible,
 }: IProps) => {
   const [annotations2d, setAnnotations2d] = useState<IAnnotationData2dView[]>([]);
   const { topViewInstance, displayPointCloudList, polygonList, imageSizes, selectedIDs } =
@@ -158,6 +165,24 @@ const PointCloud2DView = ({
 
             if (!viewDataPointList || !viewRangePointList) {
               return [];
+            }
+
+            const tmpPoints = viewDataPointList.reduce((acc: ICoordinate[], v) => {
+              if (v.type === 'line') {
+                return [...acc, ...v.pointList];
+              }
+              return acc;
+            }, []);
+
+            const boundingRect = {
+              ...getBoundingRect(tmpPoints),
+              imageName: mappingData.path,
+            };
+
+            const isRectInImage = isBoundingRectInImage(boundingRect, mappingData.path, imageSizes);
+
+            if (!isRectInImage) {
+              return acc;
             }
 
             const stroke = toolStyleConverter.getColorFromConfig(
