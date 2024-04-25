@@ -1625,7 +1625,12 @@ class RectOperation extends BasicToolOperation {
         DrawUtils.drawRectWithFill(this.canvas, transformRect, { color: fillColor });
       }
 
-      DrawUtils.drawRect(this.canvas, transformRect, { color: strokeColor, thickness: lineWidth, hiddenText: true });
+      DrawUtils.drawRect(this.canvas, transformRect, {
+        color: strokeColor,
+        thickness: lineWidth,
+        hiddenText: true,
+        lineDash: rect.lineDash,
+      });
       ctx.restore();
 
       // 框大小数值显示

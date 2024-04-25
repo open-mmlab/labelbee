@@ -13,6 +13,7 @@ declare interface IRect {
   isHighlight?: boolean; // 是否为高亮框
 
   label?: string; // 列表标签
+  lineDash?: number[];
 }
 
 declare interface RectStyle {

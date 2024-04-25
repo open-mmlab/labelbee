@@ -48,6 +48,15 @@ class PointCloud2DRectOperation extends RectOperation {
     }
     super.setSelectedRectID(newID);
   }
+
+  public renderDrawingRect(rect: IRect, zoom = this.zoom, isZoom = false) {
+    // @ts-ignore
+    if (!rect?.boxID) {
+      Object.assign(rect, { lineDash: [3] });
+    }
+
+    super.renderDrawingRect(rect, zoom, isZoom);
+  }
 }
 
 export default PointCloud2DRectOperation;
