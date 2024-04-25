@@ -22,7 +22,6 @@ import {
   IndicatorDetermine,
   ITextList,
   ISelectedTags,
-  IInputList,
   IConfigUpdate,
 } from '@/components/LLMToolView/types';
 import { useTranslation } from 'react-i18next';
@@ -30,6 +29,7 @@ import { formatSort, getCurrentResultFromResultList, getRenderDataByResult } fro
 import emptySvg from '@/assets/annotation/LLMTool/empty.svg';
 import TextInputBox from './components/textInputBox';
 import OverallTagList from '@/components/tagList/components/overall';
+import { getAnnotationStepByStepList } from '@/utils/data';
 
 interface IProps {
   annotation?: any;
@@ -92,7 +92,11 @@ const LLMToolSidebar = (props: IProps) => {
   };
 
   const initResult = (initData?: ILLMBoxResult) => {
-    const result: ILLMBoxResult = getCurrentResultFromResultList(currentData?.result);
+    const annotationStep = getAnnotationStepByStepList(stepList, step);
+    const result: ILLMBoxResult = getCurrentResultFromResultList(
+      currentData?.result,
+      annotationStep,
+    );
 
     let sourceData = currentData?.questionList;
     if (result?.answerList && toolInstanceRef.current.valid) {
@@ -101,9 +105,8 @@ const LLMToolSidebar = (props: IProps) => {
     if (initData) {
       sourceData = initData;
       result.sort = [];
-      result.valid = toolInstanceRef.current.valid ?? true;
     }
-    onSetValid(result.valid);
+    onSetValid(basicInfo.valid);
 
     const annotations = getRenderDataByResult(LLMConfig, sourceData);
     setAnnotationResult({ ...annotations });
@@ -120,7 +123,6 @@ const LLMToolSidebar = (props: IProps) => {
       textAttribute,
       id: currentData?.id,
       modelAPIResponse,
-      valid: toolInstanceRef.current.valid,
     };
 
     toolInstanceRef.current.exportData = () => {

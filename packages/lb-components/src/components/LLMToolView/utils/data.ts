@@ -10,12 +10,12 @@ import {
   ISelectedTags,
 } from '../types';
 
-export const getCurrentResultFromResultList = (result: string) => {
+export const getCurrentResultFromResultList = (result: string, step = 1) => {
   const data = jsonParser(result);
-  const DEFAULT_STEP = `step_1`;
+  const DEFAULT_STEP = `step_${step}`;
   // LLM results are single labeled results
   const dataList = data?.[DEFAULT_STEP]?.result[0] ?? {};
-  return { ...dataList, valid: dataList?.valid ?? true };
+  return dataList;
 };
 
 export const formatSort = (sortList: any) => {

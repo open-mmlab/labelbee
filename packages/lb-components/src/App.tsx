@@ -206,6 +206,15 @@ const App: React.FC<AppProps> = (props) => {
     setToolInstance?.(toolInstance);
   }, [toolInstance]);
 
+  useEffect(() => {
+    store.dispatch({
+      type: ANNOTATION_ACTIONS.SET_STEP,
+      payload: {
+        toStep: step,
+      },
+    });
+  }, [step]);
+
   // 初始化imgList 优先以loadFileList方式加载数据
   const initImgList = () => {
     if (loadFileList) {

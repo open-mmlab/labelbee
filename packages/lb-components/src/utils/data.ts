@@ -1,3 +1,5 @@
+import { EStepType } from '@/constant';
+import { IStepInfo } from '@/types/step';
 import { jsonParser } from '.';
 import StepUtils from './StepUtils';
 
@@ -78,4 +80,15 @@ export const composeResult = (
   } catch (e) {
     return result;
   }
+};
+
+export const getAnnotationStepByStepList = (stepList: IStepInfo[], step: number) => {
+  const qualitySourceStep = stepList.find(
+    (i) => EStepType.QUALITY_INSPECTION === i.type && i.step === step,
+  )?.dataSourceStep;
+
+  if (qualitySourceStep) {
+    return qualitySourceStep;
+  }
+  return step;
 };
