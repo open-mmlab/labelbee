@@ -15,7 +15,7 @@ class PointCloud2DRectOperation extends RectOperation {
     this.checkMode = props.checkMode;
   }
 
-  // Disable creating new rectangles
+  // Disable creating new rect in checkMode
   public createNewDrawingRect(e: MouseEvent, basicSourceID: string) {
     if (this.checkMode) {
       return;
@@ -23,7 +23,7 @@ class PointCloud2DRectOperation extends RectOperation {
     super.createNewDrawingRect(e, basicSourceID);
   }
 
-  // Disable delete rect
+  // Disable delete rect in checkMode
   public deleteSelectedRect() {
     if (this.checkMode) {
       return;
@@ -42,12 +42,11 @@ class PointCloud2DRectOperation extends RectOperation {
     this.emit('afterAddingDrawingRect', { ...this.selectedRect });
   }
 
-  // Disable mouse actions in check mode
-  public onMouseMove(e: MouseEvent): undefined {
+  public setSelectedRectID(newID?: string) {
     if (this.checkMode) {
       return;
     }
-    super.onMouseMove(e);
+    super.setSelectedRectID(newID);
   }
 }
 
