@@ -5,6 +5,7 @@
  */
 
 import { RectOperation } from './rectOperation';
+import { IPointCloud2DRectOperationViewRect } from '@/components/pointCloud2DRectOperationView';
 
 class PointCloud2DRectOperation extends RectOperation {
   // Whether it is in check mode
@@ -28,9 +29,7 @@ class PointCloud2DRectOperation extends RectOperation {
     if (this.checkMode) {
       return;
     }
-    this.selectedRects.forEach((rect) => {
-      this.emit('deleteSelectedRect', rect);
-    });
+    this.emit('deleteSelectedRect', this.selectedRects);
   }
 
   public setSelectedIdAfterAddingDrawingRect() {
@@ -49,8 +48,7 @@ class PointCloud2DRectOperation extends RectOperation {
     super.setSelectedRectID(newID);
   }
 
-  public renderDrawingRect(rect: IRect, zoom = this.zoom, isZoom = false) {
-    // @ts-ignore
+  public renderDrawingRect(rect: IPointCloud2DRectOperationViewRect, zoom = this.zoom, isZoom = false) {
     if (!rect?.boxID) {
       Object.assign(rect, { lineDash: [3] });
     }

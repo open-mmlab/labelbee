@@ -82,7 +82,7 @@ export interface IPointCloudContext
   setPolygonList: (polygonList: IPolygonData[]) => void;
   setRectList: (rectList: IPointCloudBoxRect[]) => void;
   addRectIn2DView: (rect: IPointCloud2DRectOperationViewRect) => void;
-  removeRectIn2DView: (id: string) => void;
+  removeRectIn2DView: (rects: IPointCloud2DRectOperationViewRect[]) => void;
   updateRectIn2DView: (rect: IPointCloud2DRectOperationViewRect) => void;
   lineList: ILine[];
   setLineList: (lineList: ILine[]) => void;
@@ -326,9 +326,9 @@ export const PointCloudProvider: React.FC<{}> = ({ children }) => {
       });
     };
 
-    const removeRectIn2DView = (id: string) => {
+    const removeRectIn2DView = (rects: IPointCloud2DRectOperationViewRect[]) => {
       setRectList((prev: IPointCloudBoxRect[]) => {
-        return prev.filter((i) => i.id !== id);
+        return prev.filter((i) => !rects.find((rect) => rect.id === i.id));
       });
     };
 

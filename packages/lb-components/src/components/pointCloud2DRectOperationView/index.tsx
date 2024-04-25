@@ -71,16 +71,13 @@ const PointCloud2DRectOperationView = (props: IPointCloud2DRectOperationViewProp
   };
 
   const handleAddRect = (rect: IPointCloud2DRectOperationViewRect) => {
-    addRectIn2DView({ ...rect, imageName: mappingDataPath.current as string });
+    if (mappingDataPath.current) {
+      addRectIn2DView({ ...rect, imageName: mappingDataPath.current });
+    }
   };
 
-  const handleRemoveRect = (rect: IPointCloud2DRectOperationViewRect) => {
-    const { boxID } = rect;
-    if (boxID) {
-      // 投射框不允许删除
-      return;
-    }
-    removeRectIn2DView(rect.id);
+  const handleRemoveRect = (rectList: IPointCloud2DRectOperationViewRect[]) => {
+    removeRectIn2DView(rectList);
   };
 
   const getRectListByBoxList = useCallback(() => {
