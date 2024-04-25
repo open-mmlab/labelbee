@@ -9,7 +9,7 @@ import { a2MapStateToProps } from '@/store/annotation/map';
 import { LabelBeeContext } from '@/store/ctx';
 import { IMappingImg } from '@/types/data';
 import { ImgUtils, PointCloud2DRectOperation } from '@labelbee/lb-annotation';
-import { IBasicRect, IPointCloudBoxRect } from '@labelbee/lb-utils';
+import { IPointCloudBoxRect, IPointCloud2DRectOperationViewRect } from '@labelbee/lb-utils';
 
 import { TAfterImgOnLoad } from '../AnnotationView';
 import _ from 'lodash';
@@ -23,14 +23,6 @@ interface IPointCloud2DRectOperationViewProps {
   config: any;
   checkMode?: boolean;
   afterImgOnLoad: TAfterImgOnLoad;
-}
-
-export interface IPointCloud2DRectOperationViewRect extends IBasicRect {
-  boxID: string;
-  id: string;
-  attribute: any;
-  order?: number;
-  imageName: string;
 }
 
 const PointCloud2DRectOperationView = (props: IPointCloud2DRectOperationViewProps) => {

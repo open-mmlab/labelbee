@@ -10,6 +10,7 @@ import {
   ICalib,
   ISize,
   IPointCloudBoxRect,
+  IPointCloud2DRectOperationViewRect,
 } from '@labelbee/lb-utils';
 import React, { useEffect, useMemo, useRef, useState } from 'react';
 import {
@@ -22,7 +23,6 @@ import { useDispatch } from '@/store/ctx';
 import { ChangeSave } from '@/store/annotation/actionCreators';
 import useAnnotatedBoxStore from '@/store/annotatedBox';
 import _ from 'lodash';
-import { IPointCloud2DRectOperationViewRect } from '../pointCloud2DRectOperationView';
 
 interface IPointCloudContextInstances {
   topViewInstance?: PointCloudAnnotation;

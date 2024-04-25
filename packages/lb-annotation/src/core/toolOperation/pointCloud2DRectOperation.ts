@@ -5,7 +5,7 @@
  */
 
 import { RectOperation } from './rectOperation';
-import { IPointCloud2DRectOperationViewRect } from '@/components/pointCloud2DRectOperationView';
+import { IPointCloud2DRectOperationViewRect } from '@labelbee/lb-utils';
 
 class PointCloud2DRectOperation extends RectOperation {
   // Whether it is in check mode

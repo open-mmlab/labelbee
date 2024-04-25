@@ -80,6 +80,14 @@ export interface IPointCloudBoxRect extends IBasicRect {
   imageName: string;
 }
 
+export interface IPointCloud2DRectOperationViewRect extends IBasicRect {
+  boxID: string;
+  id: string;
+  attribute: any;
+  order?: number;
+  imageName: string;
+}
+
 export interface IPointCloudBox extends IVolume {
   attribute: string;
   center: I3DSpaceCoord;
