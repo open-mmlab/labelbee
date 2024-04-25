@@ -48,7 +48,7 @@ class PointCloud2DRectOperation extends RectOperation {
     super.setSelectedRectID(newID);
   }
 
-  public renderDrawingRect(rect: IPointCloud2DRectOperationViewRect, zoom = this.zoom, isZoom = false) {
+  public renderDrawingRect(rect: IPointCloud2DRectOperationViewRect & IRect, zoom = this.zoom, isZoom = false) {
     if (!rect?.boxID) {
       Object.assign(rect, { lineDash: [3] });
     }
