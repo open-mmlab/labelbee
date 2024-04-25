@@ -9,7 +9,7 @@ import { a2MapStateToProps } from '@/store/annotation/map';
 import { LabelBeeContext } from '@/store/ctx';
 import { IMappingImg } from '@/types/data';
 import { ImgUtils, PointCloud2DRectOperation } from '@labelbee/lb-annotation';
-import { IBasicRect } from '@labelbee/lb-utils';
+import { IBasicRect, IPointCloudBoxRect } from '@labelbee/lb-utils';
 
 import { TAfterImgOnLoad } from '../AnnotationView';
 import _ from 'lodash';
@@ -25,11 +25,12 @@ interface IPointCloud2DRectOperationViewProps {
   afterImgOnLoad: TAfterImgOnLoad;
 }
 
-interface IPointCloud2DRectOperationViewRect extends IBasicRect {
+export interface IPointCloud2DRectOperationViewRect extends IBasicRect {
   boxID: string;
   id: string;
   attribute: any;
   order?: number;
+  imageName: string;
 }
 
 const PointCloud2DRectOperationView = (props: IPointCloud2DRectOperationViewProps) => {
@@ -53,8 +54,10 @@ const PointCloud2DRectOperationView = (props: IPointCloud2DRectOperationViewProp
 
   const [loading, setLoading] = useState(true);
 
-  const rectListInImage = rectList?.filter((item) => item.imageName === mappingData?.path);
-  const mappingDataPath = useLatest<any>(mappingData?.path);
+  const rectListInImage = rectList?.filter(
+    (item: IPointCloudBoxRect) => item.imageName === mappingData?.path,
+  );
+  const mappingDataPath = useLatest(mappingData?.path);
 
   const handleUpdateDragResult = (rect: IPointCloud2DRectOperationViewRect) => {
     const { boxID } = rect;
@@ -68,7 +71,7 @@ const PointCloud2DRectOperationView = (props: IPointCloud2DRectOperationViewProp
   };
 
   const handleAddRect = (rect: IPointCloud2DRectOperationViewRect) => {
-    addRectIn2DView({ ...rect, imageName: mappingDataPath.current });
+    addRectIn2DView({ ...rect, imageName: mappingDataPath.current as string });
   };
 
   const handleRemoveRect = (rect: IPointCloud2DRectOperationViewRect) => {

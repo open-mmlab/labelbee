@@ -9,6 +9,7 @@ import {
   IPointCloudSegmentation,
   ICalib,
   ISize,
+  IPointCloudBoxRect,
 } from '@labelbee/lb-utils';
 import React, { useEffect, useMemo, useRef, useState } from 'react';
 import {
@@ -21,6 +22,7 @@ import { useDispatch } from '@/store/ctx';
 import { ChangeSave } from '@/store/annotation/actionCreators';
 import useAnnotatedBoxStore from '@/store/annotatedBox';
 import _ from 'lodash';
+import { IPointCloud2DRectOperationViewRect } from '../pointCloud2DRectOperationView';
 
 interface IPointCloudContextInstances {
   topViewInstance?: PointCloudAnnotation;
@@ -55,7 +57,7 @@ export interface IPointCloudContext
     IPointCloudStatus,
     IPointCloudSegment {
   pointCloudBoxList: IPointCloudBoxList;
-  rectList: any;
+  rectList: IPointCloudBoxRect[];
   pointCloudSphereList: IPointCloudSphereList;
   displayPointCloudList: IPointCloudBoxList;
   displaySphereList: IPointCloudSphereList;
@@ -78,10 +80,10 @@ export interface IPointCloudContext
 
   polygonList: IPolygonData[];
   setPolygonList: (polygonList: IPolygonData[]) => void;
-  setRectList: (rectList: any[]) => void;
-  addRectIn2DView: (rect: any) => void;
+  setRectList: (rectList: IPointCloudBoxRect[]) => void;
+  addRectIn2DView: (rect: IPointCloud2DRectOperationViewRect) => void;
   removeRectIn2DView: (id: string) => void;
-  updateRectIn2DView: (rect: any) => void;
+  updateRectIn2DView: (rect: IPointCloud2DRectOperationViewRect) => void;
   lineList: ILine[];
   setLineList: (lineList: ILine[]) => void;
 
@@ -127,6 +129,10 @@ export interface IPointCloudContext
   };
   cacheImageNodeSize: (params: { imgNode: HTMLImageElement; path: string }) => void;
 }
+
+const pickRectObject = (rect: IPointCloud2DRectOperationViewRect) => {
+  return _.pick(rect, ['id', 'attribute', 'width', 'height', 'x', 'y', 'imageName']);
+};
 
 export const PointCloudContext = React.createContext<IPointCloudContext>({
   rectList: [],
@@ -206,7 +212,7 @@ export const PointCloudProvider: React.FC<{}> = ({ children }) => {
   const [pointCloudBoxList, setPointCloudResult] = useState<IPointCloudBoxList>([]);
   const [pointCloudSphereList, setPointCloudSphereList] = useState<IPointCloudSphereList>([]);
   const [polygonList, setPolygonList] = useState<IPolygonData[]>([]);
-  const [rectList, setRectList] = useState<any[]>([]);
+  const [rectList, setRectList] = useState<IPointCloudBoxRect[]>([]);
   const [lineList, setLineList] = useState<ILine[]>([]);
   const [selectedIDs, setSelectedIDsState] = useState<string[]>([]);
   const [highlightIDs, setHighlightIDs] = useState<number[]>([]);
@@ -301,16 +307,16 @@ export const PointCloudProvider: React.FC<{}> = ({ children }) => {
       }
     };
 
-    const addRectIn2DView = (rect: any) => {
-      const newRect = _.pick(rect, ['id', 'attribute', 'width', 'height', 'x', 'y', 'imageName']);
-      setRectList((prev) => {
+    const addRectIn2DView = (rect: IPointCloud2DRectOperationViewRect) => {
+      const newRect = pickRectObject(rect);
+      setRectList((prev: IPointCloudBoxRect[]) => {
         return [...prev, newRect];
       });
     };
 
-    const updateRectIn2DView = (rect: any) => {
-      const newRect = _.pick(rect, ['id', 'attribute', 'width', 'height', 'x', 'y', 'imageName']);
-      setRectList((prev) => {
+    const updateRectIn2DView = (rect: IPointCloud2DRectOperationViewRect) => {
+      const newRect = pickRectObject(rect);
+      setRectList((prev: IPointCloudBoxRect[]) => {
         return prev.map((i) => {
           if (i.id === rect.id) {
             return newRect;
@@ -321,7 +327,7 @@ export const PointCloudProvider: React.FC<{}> = ({ children }) => {
     };
 
     const removeRectIn2DView = (id: string) => {
-      setRectList((prev) => {
+      setRectList((prev: IPointCloudBoxRect[]) => {
         return prev.filter((i) => i.id !== id);
       });
     };

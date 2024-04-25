@@ -166,7 +166,7 @@ const PointCloud2DView = ({
             if (!viewDataPointList || !viewRangePointList) {
               return [];
             }
-
+            // eslint-disable-next-line max-nested-callbacks
             const tmpPoints = viewDataPointList.reduce((acc: ICoordinate[], v) => {
               if (v.type === 'line') {
                 return [...acc, ...v.pointList];
