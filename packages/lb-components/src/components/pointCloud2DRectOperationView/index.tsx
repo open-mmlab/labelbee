@@ -1,6 +1,6 @@
 import { useLatest } from 'ahooks';
 import { Spin } from 'antd/es';
-import React, { useContext, useEffect, useRef, useState } from 'react';
+import React, { useCallback, useContext, useEffect, useRef, useState } from 'react';
 import { connect } from 'react-redux';
 
 import { usePointCloudViews } from '@/components/pointCloudView/hooks/usePointCloudViews';
@@ -12,6 +12,7 @@ import { ImgUtils, PointCloud2DRectOperation } from '@labelbee/lb-annotation';
 import { IBasicRect } from '@labelbee/lb-utils';
 
 import { TAfterImgOnLoad } from '../AnnotationView';
+import _ from 'lodash';
 
 interface IPointCloud2DRectOperationViewProps {
   mappingData?: IMappingImg;
@@ -34,7 +35,15 @@ interface IPointCloud2DRectOperationViewRect extends IBasicRect {
 const PointCloud2DRectOperationView = (props: IPointCloud2DRectOperationViewProps) => {
   const { mappingData, size, config, checkMode, afterImgOnLoad } = props;
   const url = mappingData?.url ?? '';
-  const { pointCloudBoxList, setPointCloudResult } = useContext(PointCloudContext);
+  const {
+    pointCloudBoxList,
+    setPointCloudResult,
+    defaultAttribute,
+    rectList,
+    addRectIn2DView,
+    updateRectIn2DView,
+    removeRectIn2DView,
+  } = useContext(PointCloudContext);
 
   const { update2DViewRect } = usePointCloudViews();
   const ref = React.useRef(null);
@@ -44,23 +53,53 @@ const PointCloud2DRectOperationView = (props: IPointCloud2DRectOperationViewProp
 
   const [loading, setLoading] = useState(true);
 
+  const rectListInImage = rectList?.filter((item) => item.imageName === mappingData?.path);
+  const mappingDataPath = useLatest<any>(mappingData?.path);
+
   const handleUpdateDragResult = (rect: IPointCloud2DRectOperationViewRect) => {
-    const result = update2DViewRectFn.current?.(rect);
-    newPointCloudResult.current = result;
-    setPointCloudResult(result);
+    const { boxID } = rect;
+    if (boxID) {
+      const result = update2DViewRectFn.current?.(rect);
+      newPointCloudResult.current = result;
+      setPointCloudResult(result);
+      return;
+    }
+    updateRectIn2DView(rect);
   };
 
-  const setRects = () => {
+  const handleAddRect = (rect: IPointCloud2DRectOperationViewRect) => {
+    addRectIn2DView({ ...rect, imageName: mappingDataPath.current });
+  };
+
+  const handleRemoveRect = (rect: IPointCloud2DRectOperationViewRect) => {
+    const { boxID } = rect;
+    if (boxID) {
+      // 投射框不允许删除
+      return;
+    }
+    removeRectIn2DView(rect.id);
+  };
+
+  const getRectListByBoxList = useCallback(() => {
     let allRects: IPointCloud2DRectOperationViewRect[] = [];
     pointCloudBoxList.forEach((pointCloudBox) => {
       const { rects = [], id, attribute, trackID } = pointCloudBox;
-      const rect = rects.find((rect) => rect.imageName === mappingData?.path);
-      const rectID = id + '_' + mappingData?.path;
+      const rect = rects.find((rect) => rect.imageName === mappingDataPath.current);
+      const rectID = id + '_' + mappingDataPath.current;
       if (rect) {
         allRects = [...allRects, { ...rect, boxID: id, id: rectID, attribute, order: trackID }];
       }
     });
-    operation.current?.setResult(allRects);
+    return allRects;
+  }, [pointCloudBoxList]);
+
+  const updateRectList = () => {
+    const rectListByBoxList = getRectListByBoxList();
+    const selectedRectID = operation.current?.selectedRectID;
+    operation.current?.setResult([...rectListByBoxList, ...rectListInImage]);
+    if (selectedRectID) {
+      operation.current?.setSelectedRectID(selectedRectID);
+    }
   };
 
   useEffect(() => {
@@ -75,15 +114,20 @@ const PointCloud2DRectOperationView = (props: IPointCloud2DRectOperationViewProp
       operation.current = toolInstance;
       operation.current.init();
       operation.current.on('updateDragResult', handleUpdateDragResult);
+      operation.current.on('afterAddingDrawingRect', handleAddRect);
+      operation.current.on('deleteSelectedRect', handleRemoveRect);
 
       return () => {
         operation.current?.unbind('updateDragResult', handleUpdateDragResult);
+        operation.current?.unbind('afterAddingDrawingRect', handleAddRect);
+        operation.current?.unbind('deleteSelectedRect', handleRemoveRect);
         operation.current?.destroy();
       };
     }
   }, []);
 
   useEffect(() => {
+    setLoading(true);
     if (operation.current && url) {
       ImgUtils.load(url).then((imgNode: HTMLImageElement) => {
         operation.current.setImgNode(imgNode);
@@ -100,9 +144,17 @@ const PointCloud2DRectOperationView = (props: IPointCloud2DRectOperationViewProp
   useEffect(() => {
     // Avoid repeated rendering
     if (pointCloudBoxList !== newPointCloudResult.current) {
-      setRects();
+      updateRectList();
     }
-  }, [pointCloudBoxList, url]);
+  }, [pointCloudBoxList]);
+
+  useEffect(() => {
+    operation.current?.setDefaultAttribute?.(defaultAttribute);
+  }, [defaultAttribute]);
+
+  useEffect(() => {
+    updateRectList();
+  }, [rectListInImage]);
 
   return (
     <Spin spinning={loading}>

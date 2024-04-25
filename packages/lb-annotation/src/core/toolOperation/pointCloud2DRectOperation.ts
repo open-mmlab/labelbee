@@ -16,10 +16,31 @@ class PointCloud2DRectOperation extends RectOperation {
   }
 
   // Disable creating new rectangles
-  public createNewDrawingRect() {}
+  public createNewDrawingRect(e: MouseEvent, basicSourceID: string) {
+    if (this.checkMode) {
+      return;
+    }
+    super.createNewDrawingRect(e, basicSourceID);
+  }
 
   // Disable delete rect
-  public deleteSelectedRect() {}
+  public deleteSelectedRect() {
+    if (this.checkMode) {
+      return;
+    }
+    this.selectedRects.forEach((rect) => {
+      this.emit('deleteSelectedRect', rect);
+    });
+  }
+
+  public setSelectedIdAfterAddingDrawingRect() {
+    if (!this.drawingRect) {
+      return;
+    }
+
+    this.setSelectedRectID(this.drawingRect.id);
+    this.emit('afterAddingDrawingRect', { ...this.selectedRect });
+  }
 
   // Disable mouse actions in check mode
   public onMouseMove(e: MouseEvent): undefined {

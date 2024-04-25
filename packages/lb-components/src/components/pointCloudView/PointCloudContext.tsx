@@ -20,6 +20,7 @@ import {
 import { useDispatch } from '@/store/ctx';
 import { ChangeSave } from '@/store/annotation/actionCreators';
 import useAnnotatedBoxStore from '@/store/annotatedBox';
+import _ from 'lodash';
 
 interface IPointCloudContextInstances {
   topViewInstance?: PointCloudAnnotation;
@@ -54,6 +55,7 @@ export interface IPointCloudContext
     IPointCloudStatus,
     IPointCloudSegment {
   pointCloudBoxList: IPointCloudBoxList;
+  rectList: any;
   pointCloudSphereList: IPointCloudSphereList;
   displayPointCloudList: IPointCloudBoxList;
   displaySphereList: IPointCloudSphereList;
@@ -76,7 +78,10 @@ export interface IPointCloudContext
 
   polygonList: IPolygonData[];
   setPolygonList: (polygonList: IPolygonData[]) => void;
-
+  setRectList: (rectList: any[]) => void;
+  addRectIn2DView: (rect: any) => void;
+  removeRectIn2DView: (id: string) => void;
+  updateRectIn2DView: (rect: any) => void;
   lineList: ILine[];
   setLineList: (lineList: ILine[]) => void;
 
@@ -124,6 +129,7 @@ export interface IPointCloudContext
 }
 
 export const PointCloudContext = React.createContext<IPointCloudContext>({
+  rectList: [],
   pointCloudBoxList: [],
   pointCloudSphereList: [],
   displayPointCloudList: [],
@@ -154,6 +160,10 @@ export const PointCloudContext = React.createContext<IPointCloudContext>({
     return [];
   },
   setPolygonList: () => {},
+  setRectList: () => {},
+  addRectIn2DView: () => {},
+  removeRectIn2DView: () => {},
+  updateRectIn2DView: () => {},
   setLineList: () => {},
 
   zoom: 1,
@@ -196,6 +206,7 @@ export const PointCloudProvider: React.FC<{}> = ({ children }) => {
   const [pointCloudBoxList, setPointCloudResult] = useState<IPointCloudBoxList>([]);
   const [pointCloudSphereList, setPointCloudSphereList] = useState<IPointCloudSphereList>([]);
   const [polygonList, setPolygonList] = useState<IPolygonData[]>([]);
+  const [rectList, setRectList] = useState<any[]>([]);
   const [lineList, setLineList] = useState<ILine[]>([]);
   const [selectedIDs, setSelectedIDsState] = useState<string[]>([]);
   const [highlightIDs, setHighlightIDs] = useState<number[]>([]);
@@ -288,6 +299,31 @@ export const PointCloudProvider: React.FC<{}> = ({ children }) => {
       } else {
         setSelectedIDs([...selectedIDs, selectedID]);
       }
+    };
+
+    const addRectIn2DView = (rect: any) => {
+      const newRect = _.pick(rect, ['id', 'attribute', 'width', 'height', 'x', 'y', 'imageName']);
+      setRectList((prev) => {
+        return [...prev, newRect];
+      });
+    };
+
+    const updateRectIn2DView = (rect: any) => {
+      const newRect = _.pick(rect, ['id', 'attribute', 'width', 'height', 'x', 'y', 'imageName']);
+      setRectList((prev) => {
+        return prev.map((i) => {
+          if (i.id === rect.id) {
+            return newRect;
+          }
+          return i;
+        });
+      });
+    };
+
+    const removeRectIn2DView = (id: string) => {
+      setRectList((prev) => {
+        return prev.filter((i) => i.id !== id);
+      });
     };
 
     const addHighlightID = (highlightID: number) => {
@@ -435,6 +471,11 @@ export const PointCloudProvider: React.FC<{}> = ({ children }) => {
       setMainViewInstance,
       polygonList,
       setPolygonList,
+      rectList,
+      setRectList,
+      addRectIn2DView,
+      removeRectIn2DView,
+      updateRectIn2DView,
       lineList,
       setLineList,
       zoom,
@@ -476,6 +517,7 @@ export const PointCloudProvider: React.FC<{}> = ({ children }) => {
     pointCloudSphereList,
     polygonList,
     lineList,
+    rectList,
     topViewInstance,
     sideViewInstance,
     backViewInstance,
