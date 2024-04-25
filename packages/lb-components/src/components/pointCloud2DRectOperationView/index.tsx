@@ -45,10 +45,8 @@ const PointCloud2DRectOperationView = (props: IPointCloud2DRectOperationViewProp
   const newPointCloudResult = useRef(null);
 
   const [loading, setLoading] = useState(true);
+  const [rectListInImage, setRectListInImage] = useState<IPointCloudBoxRect[]>([]);
 
-  const rectListInImage = rectList?.filter(
-    (item: IPointCloudBoxRect) => item.imageName === mappingData?.path,
-  );
   const mappingDataPath = useLatest(mappingData?.path);
 
   const handleUpdateDragResult = (rect: IPointCloud2DRectOperationViewRect) => {
@@ -143,6 +141,12 @@ const PointCloud2DRectOperationView = (props: IPointCloud2DRectOperationViewProp
   useEffect(() => {
     operation.current?.setDefaultAttribute?.(defaultAttribute);
   }, [defaultAttribute]);
+
+  useEffect(() => {
+    setRectListInImage(
+      rectList?.filter((item: IPointCloudBoxRect) => item.imageName === mappingData?.path),
+    );
+  }, [mappingData?.path, rectList]);
 
   useEffect(() => {
     updateRectList();
