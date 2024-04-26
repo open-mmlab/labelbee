@@ -1,6 +1,6 @@
 import { useLatest } from 'ahooks';
 import { Spin } from 'antd/es';
-import React, { useCallback, useContext, useEffect, useRef, useState } from 'react';
+import React, { useCallback, useContext, useEffect, useMemo, useRef, useState } from 'react';
 import { connect } from 'react-redux';
 
 import { usePointCloudViews } from '@/components/pointCloudView/hooks/usePointCloudViews';
@@ -45,7 +45,11 @@ const PointCloud2DRectOperationView = (props: IPointCloud2DRectOperationViewProp
   const newPointCloudResult = useRef(null);
 
   const [loading, setLoading] = useState(true);
-  const [rectListInImage, setRectListInImage] = useState<IPointCloudBoxRect[]>([]);
+
+  const rectListInImage = useMemo(
+    () => rectList?.filter((item: IPointCloudBoxRect) => item.imageName === mappingData?.path),
+    [mappingData?.path, rectList],
+  );
 
   const mappingDataPath = useLatest(mappingData?.path);
 
@@ -141,12 +145,6 @@ const PointCloud2DRectOperationView = (props: IPointCloud2DRectOperationViewProp
   useEffect(() => {
     operation.current?.setDefaultAttribute?.(defaultAttribute);
   }, [defaultAttribute]);
-
-  useEffect(() => {
-    setRectListInImage(
-      rectList?.filter((item: IPointCloudBoxRect) => item.imageName === mappingData?.path),
-    );
-  }, [mappingData?.path, rectList]);
 
   useEffect(() => {
     updateRectList();
