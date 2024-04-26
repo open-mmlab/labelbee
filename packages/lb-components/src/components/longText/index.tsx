@@ -4,7 +4,7 @@
  * @date 2023-04-10
  */
 
-import React, { useRef, ReactElement, CSSProperties } from 'react';
+import React, { useRef, ReactElement, CSSProperties, useMemo, forwardRef, LegacyRef } from 'react';
 import { Popover, Tooltip } from 'antd';
 import { useSize } from 'ahooks';
 import { TooltipPlacement } from 'antd/es/tooltip';
@@ -23,6 +23,49 @@ interface IProps {
 }
 
 const longTextCls = `${prefix}-longText`;
+
+const TextDom = forwardRef(
+  (
+    {
+      text,
+      overflowMaxLines,
+      style,
+      ...rest
+    }: {
+      text: string;
+      overflowMaxLines: number;
+      style?: CSSProperties;
+    },
+    ref: LegacyRef<HTMLDivElement> | undefined,
+  ) => {
+    const singleLineStyle = {
+      whiteSpace: 'nowrap',
+      overflow: 'hidden',
+      textOverflow: 'ellipsis',
+    };
+    const linesStyle = {
+      display: '-webkit-box',
+      WebkitLineClamp: overflowMaxLines,
+      WebkitBoxOrient: 'vertical' as 'vertical',
+      overflow: 'hidden',
+    };
+
+    const initStyle = overflowMaxLines > 1 ? linesStyle : singleLineStyle;
+    return (
+      <div
+        style={{
+          ...initStyle,
+          ...style,
+        }}
+        ref={ref}
+        {...rest}
+      >
+        {text}
+      </div>
+    );
+  },
+);
+
 const LongText = (props: IProps) => {
   const {
     text,
@@ -31,54 +74,18 @@ const LongText = (props: IProps) => {
     openByText,
     style,
     isToolTips,
-    wordCount,
-    overflowMaxLines,
+    overflowMaxLines = 1,
   } = props;
 
   const el = useRef<null | HTMLDivElement>(null);
-  useSize(el);
-  const isOverflow = el.current && el.current?.clientWidth < el.current?.scrollWidth;
+  const size = useSize(el);
 
-  if (wordCount || overflowMaxLines) {
-    const clampStyles = overflowMaxLines
-      ? {
-          display: '-webkit-box',
-          WebkitLineClamp: overflowMaxLines,
-          WebkitBoxOrient: 'vertical' as 'vertical',
-          overflow: 'hidden',
-        }
-      : {};
-    const TextDom = (
-      <div
-        style={{
-          whiteSpace: 'pre-wrap',
-          ...clampStyles,
-          ...style,
-        }}
-        ref={el}
-      >
-        {text}
-      </div>
-    );
-
-    const isOverflowByWordCount = wordCount && text?.length > wordCount;
-    const isOverflowByHeight = el.current && el.current?.clientHeight < el.current?.scrollHeight;
-
-    let showText = text;
-    if (isOverflowByWordCount) {
-      showText = text.slice(0, wordCount);
+  const isOverflow = useMemo(() => {
+    if (overflowMaxLines > 1) {
+      return el.current && el.current?.clientHeight < el.current?.scrollHeight;
     }
-    if (isOverflowByHeight || isOverflowByWordCount) {
-      return (
-        <Popover placement={placement} overlayClassName={`${longTextCls}-popover`} content={text}>
-          <span style={{ cursor: 'pointer', whiteSpace: 'pre-wrap', ...clampStyles }}>
-            {showText}
-          </span>
-        </Popover>
-      );
-    }
-    return TextDom;
-  }
+    return el.current && el.current?.clientWidth < el.current?.scrollWidth;
+  }, [size]);
 
   if (openByText) {
     let tipsProps = {
@@ -91,30 +98,25 @@ const LongText = (props: IProps) => {
     if (!isOverflow) {
       Object.assign(tipsProps, { open: false });
     }
-
-    const TextDom = (
-      <div className={`${longTextCls}-text`} style={style} ref={el}>
-        {text}
-      </div>
-    );
-
     // 是否转换为 ToolTips 模式
     if (isToolTips) {
       return (
         <Tooltip {...tipsProps} title={text}>
-          {TextDom}
+          <TextDom overflowMaxLines={overflowMaxLines} style={style} ref={el} text={text} />
         </Tooltip>
       );
     }
 
-    return <Popover {...tipsProps}>{TextDom}</Popover>;
+    return (
+      <Popover {...tipsProps}>
+        <TextDom overflowMaxLines={overflowMaxLines} style={style} ref={el} text={text} />
+      </Popover>
+    );
   }
 
   return (
     <div className={longTextCls} style={style}>
-      <div className={`${longTextCls}-text`} ref={el}>
-        {text}
-      </div>
+      <TextDom overflowMaxLines={overflowMaxLines} style={style} ref={el} text={text} />
 
       {isOverflow && (
         <Popover placement={placement} overlayClassName={`${longTextCls}-popover`} content={text}>

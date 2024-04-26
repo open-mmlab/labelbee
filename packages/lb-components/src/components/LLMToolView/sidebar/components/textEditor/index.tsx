@@ -102,7 +102,7 @@ const TextEditor = (props: IProps) => {
         required={!!min}
       />
       <div className={styles.tip}>
-        <LongText text={tip ?? ''} overflowMaxLines={3} />
+        <LongText text={tip ?? ''} overflowMaxLines={3} openByText={true} />
       </div>
       {isLaText && <LatexEditor onSelectLatex={insertText} disabled={disabeledAll} />}
       <Form.Item

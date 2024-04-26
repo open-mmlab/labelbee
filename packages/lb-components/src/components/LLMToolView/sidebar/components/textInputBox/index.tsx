@@ -105,7 +105,7 @@ const TextInputBox = (props: IProps) => {
                     {showTextInput && (
                       <Form.Item
                         name={[field.name, 'title']}
-                        extra={<LongText text={tip ?? ''} overflowMaxLines={3} />}
+                        extra={<LongText text={tip ?? ''} overflowMaxLines={3} openByText={true} />}
                         className={styles.textTitle}
                         required={!!min}
                         label={' '}
