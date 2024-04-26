@@ -106,7 +106,7 @@ const LLMToolSidebar = (props: IProps) => {
       sourceData = initData;
       result.sort = [];
     }
-    onSetValid(basicInfo.valid);
+    onSetValid(toolInstanceRef.current.valid ?? basicInfo.valid);
 
     const annotations = getRenderDataByResult(LLMConfig, sourceData);
     setAnnotationResult({ ...annotations });
@@ -129,7 +129,11 @@ const LLMToolSidebar = (props: IProps) => {
       return [[result], { valid: toolInstanceRef.current.valid }];
     };
 
-    toolInstanceRef.current.currentPageResult = { ...result, toolName: EToolName.LLM };
+    toolInstanceRef.current.currentPageResult = {
+      ...result,
+      toolName: EToolName.LLM,
+      valid: toolInstanceRef.current.valid,
+    };
     setNewAnswerList(answerList || []);
     /**
      * TODO: Under normal circumstances, it is impossible to monitor the change of toolInstanceRef.current.valid value. When onSetValid is triggered,
