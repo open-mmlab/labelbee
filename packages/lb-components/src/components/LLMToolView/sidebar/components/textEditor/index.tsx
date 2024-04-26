@@ -11,6 +11,7 @@ import { InfoCircleOutlined } from '@ant-design/icons';
 import MarkdownView from '@/components/markdownView';
 import LatexEditor from '@/components/latexEditor';
 import styles from './index.module.scss';
+import LongText from '@/components/longText';
 
 interface IProps {
   newAnswer?: string;
@@ -100,7 +101,9 @@ const TextEditor = (props: IProps) => {
         colon={false}
         required={!!min}
       />
-      <div className={styles.tip}>{tip ?? ''}</div>
+      <div className={styles.tip}>
+        <LongText text={tip ?? ''} overflowMaxLines={3} />
+      </div>
       {isLaText && <LatexEditor onSelectLatex={insertText} disabled={disabeledAll} />}
       <Form.Item
         name='value'

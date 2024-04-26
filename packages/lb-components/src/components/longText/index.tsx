@@ -19,6 +19,7 @@ interface IProps {
   style?: CSSProperties;
   isToolTips?: boolean;
   wordCount?: number;
+  overflowMaxLines?: number;
 }
 
 const longTextCls = `${prefix}-longText`;
@@ -31,23 +32,52 @@ const LongText = (props: IProps) => {
     style,
     isToolTips,
     wordCount,
+    overflowMaxLines,
   } = props;
 
   const el = useRef<null | HTMLDivElement>(null);
   useSize(el);
   const isOverflow = el.current && el.current?.clientWidth < el.current?.scrollWidth;
 
-  if (wordCount) {
-    if (text?.length > wordCount) {
-      const showText = text.slice(0, wordCount);
+  if (wordCount || overflowMaxLines) {
+    const clampStyles = overflowMaxLines
+      ? {
+          display: '-webkit-box',
+          WebkitLineClamp: overflowMaxLines,
+          WebkitBoxOrient: 'vertical' as 'vertical',
+          overflow: 'hidden',
+        }
+      : {};
+    const TextDom = (
+      <div
+        style={{
+          whiteSpace: 'pre-wrap',
+          ...clampStyles,
+          ...style,
+        }}
+        ref={el}
+      >
+        {text}
+      </div>
+    );
+
+    const isOverflowByWordCount = wordCount && text?.length > wordCount;
+    const isOverflowByHeight = el.current && el.current?.clientHeight < el.current?.scrollHeight;
+
+    let showText = text;
+    if (isOverflowByWordCount) {
+      showText = text.slice(0, wordCount);
+    }
+    if (isOverflowByHeight || isOverflowByWordCount) {
       return (
         <Popover placement={placement} overlayClassName={`${longTextCls}-popover`} content={text}>
-          <span style={{ cursor: 'pointer', whiteSpace: 'pre-wrap' }}>{showText}...</span>
+          <span style={{ cursor: 'pointer', whiteSpace: 'pre-wrap', ...clampStyles }}>
+            {showText}
+          </span>
         </Popover>
       );
-    } else {
-      return <div style={{ whiteSpace: 'pre-wrap' }}> {text}</div>;
     }
+    return TextDom;
   }
 
   if (openByText) {
@@ -61,6 +91,7 @@ const LongText = (props: IProps) => {
     if (!isOverflow) {
       Object.assign(tipsProps, { open: false });
     }
+
     const TextDom = (
       <div className={`${longTextCls}-text`} style={style} ref={el}>
         {text}
