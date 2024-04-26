@@ -21,6 +21,7 @@ export const useStatus = () => {
     setPointCloudResult,
     setPointCloudSphereList,
     setPolygonList,
+    setRectList,
     pointCloudPattern,
     setPointCloudPattern,
     syncAllViewPointCloudColor,
@@ -39,6 +40,7 @@ export const useStatus = () => {
     setPolygonList([]);
     setPointCloudSphereList([]);
     setLineList([]);
+    setRectList([]);
 
     topViewInstance?.toolScheduler.clearStatusAndResult();
 

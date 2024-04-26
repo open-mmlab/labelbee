@@ -56,8 +56,8 @@ const PointCloudView: React.FC<IProps> = (props) => {
     intelligentFit,
     imgIndex,
     config,
-    measureVisible
-  } = props
+    measureVisible,
+  } = props;
   const ptCtx = useContext(PointCloudContext);
   const { globalPattern, setGlobalPattern, selectedIDs } = ptCtx;
   const dispatch = useDispatch();
@@ -89,12 +89,13 @@ const PointCloudView: React.FC<IProps> = (props) => {
   useEffect(() => {
     SetLoadPCDFileLoading(dispatch, true);
     if (currentData) {
-      const { boxParamsList, polygonList, lineList, sphereParamsList, segmentation } =
+      const { boxParamsList, polygonList, lineList, sphereParamsList, segmentation, rectList } =
         PointCloudUtils.parsePointCloudCurrentResult(currentData?.result ?? '');
       ptCtx.setPointCloudResult(boxParamsList);
       ptCtx.setPolygonList(polygonList);
       ptCtx.setLineList(lineList);
       ptCtx.setPointCloudSphereList(sphereParamsList);
+      ptCtx.setRectList(rectList);
       ptCtx.setSegmentation(segmentation);
     }
   }, [imgIndex]);
@@ -109,11 +110,13 @@ const PointCloudView: React.FC<IProps> = (props) => {
         resultPolygon: ptCtx.polygonList ?? [],
         resultLine: ptCtx.lineList ?? [],
         resultPoint: ptCtx.pointCloudSphereList ?? [],
+        resultRect: ptCtx.rectList ?? [],
         segmentation: ptCtx.segmentation ?? [],
       };
     };
   }, [
     ptCtx.pointCloudBoxList,
+    ptCtx.rectList,
     ptCtx.valid,
     ptCtx.polygonList,
     ptCtx.lineList,

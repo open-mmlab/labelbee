@@ -4,6 +4,7 @@
  * @date 2023年7月27日
  */
 
+import { IPointCloud2DRectOperationViewRect } from '@labelbee/lb-utils';
 import { RectOperation } from './rectOperation';
 
 class PointCloud2DRectOperation extends RectOperation {
@@ -15,18 +16,44 @@ class PointCloud2DRectOperation extends RectOperation {
     this.checkMode = props.checkMode;
   }
 
-  // Disable creating new rectangles
-  public createNewDrawingRect() {}
-
-  // Disable delete rect
-  public deleteSelectedRect() {}
-
-  // Disable mouse actions in check mode
-  public onMouseMove(e: MouseEvent): undefined {
+  // Disable creating new rect in checkMode
+  public createNewDrawingRect(e: MouseEvent, basicSourceID: string) {
     if (this.checkMode) {
       return;
     }
-    super.onMouseMove(e);
+    super.createNewDrawingRect(e, basicSourceID);
+  }
+
+  // Disable delete rect in checkMode
+  public deleteSelectedRect() {
+    if (this.checkMode) {
+      return;
+    }
+    this.emit('deleteSelectedRects', this.selectedRects);
+  }
+
+  public setSelectedIdAfterAddingDrawingRect() {
+    if (!this.drawingRect) {
+      return;
+    }
+
+    this.setSelectedRectID(this.drawingRect.id);
+    this.emit('afterAddingDrawingRect', { ...this.selectedRect });
+  }
+
+  public setSelectedRectID(newID?: string) {
+    if (this.checkMode) {
+      return;
+    }
+    super.setSelectedRectID(newID);
+  }
+
+  public renderDrawingRect(rect: IPointCloud2DRectOperationViewRect & IRect, zoom = this.zoom, isZoom = false) {
+    if (!rect?.boxID) {
+      Object.assign(rect, { lineDash: [3] });
+    }
+
+    super.renderDrawingRect(rect, zoom, isZoom);
   }
 }
 

@@ -61,6 +61,7 @@ class PointCloudUtils {
     const lineList = ptResult?.resultLine ?? [];
     const sphereParamsList = ptResult?.resultPoint ?? [];
     const segmentation = ptResult?.segmentation ?? [];
+    const rectList = ptResult?.resultRect ?? [];
 
     return {
       boxParamsList,
@@ -68,6 +69,7 @@ class PointCloudUtils {
       lineList,
       sphereParamsList,
       segmentation,
+      rectList,
     };
   }
 

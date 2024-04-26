@@ -59,7 +59,7 @@ export const getBoundingRect = (points: ICoordinate[]) => {
   };
 };
 
-const isBoundingRectInImage = (() => {
+export const isBoundingRectInImage = (() => {
   type IRect = Omit<IBasicRect, 'id'>;
 
   const getIntersection = (rect1: IRect, rect2: IRect) => {
