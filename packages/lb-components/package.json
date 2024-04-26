@@ -1,6 +1,6 @@
 {
   "name": "@labelbee/lb-components",
-  "version": "1.23.0-alpha.13",
+  "version": "1.23.0-alpha.14",
   "description": "Provide a complete library of annotation components",
   "main": "./dist/index.js",
   "es": "./es/index.js",
@@ -43,8 +43,8 @@
   },
   "dependencies": {
     "@ant-design/icons": "^4.6.2",
-    "@labelbee/lb-annotation": "1.27.0-alpha.6",
-    "@labelbee/lb-utils": "1.19.0-alpha.2",
+    "@labelbee/lb-annotation": "1.27.0-alpha.7",
+    "@labelbee/lb-utils": "1.19.0-alpha.3",
     "@labelbee/wavesurfer": "1.0.0",
     "@types/react-dom": "^18.2.7",
     "@types/react-transition-group": "^4.4.9",
