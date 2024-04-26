@@ -109,12 +109,12 @@ const PointCloud2DRectOperationView = (props: IPointCloud2DRectOperationViewProp
       operation.current.init();
       operation.current.on('updateDragResult', handleUpdateDragResult);
       operation.current.on('afterAddingDrawingRect', handleAddRect);
-      operation.current.on('deleteSelectedRect', handleRemoveRect);
+      operation.current.on('deleteSelectedRects', handleRemoveRect);
 
       return () => {
         operation.current?.unbind('updateDragResult', handleUpdateDragResult);
         operation.current?.unbind('afterAddingDrawingRect', handleAddRect);
-        operation.current?.unbind('deleteSelectedRect', handleRemoveRect);
+        operation.current?.unbind('deleteSelectedRects', handleRemoveRect);
         operation.current?.destroy();
       };
     }

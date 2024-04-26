@@ -4,8 +4,8 @@
  * @date 2023年7月27日
  */
 
-import { RectOperation } from './rectOperation';
 import { IPointCloud2DRectOperationViewRect } from '@labelbee/lb-utils';
+import { RectOperation } from './rectOperation';
 
 class PointCloud2DRectOperation extends RectOperation {
   // Whether it is in check mode
@@ -29,7 +29,7 @@ class PointCloud2DRectOperation extends RectOperation {
     if (this.checkMode) {
       return;
     }
-    this.emit('deleteSelectedRect', this.selectedRects);
+    this.emit('deleteSelectedRects', this.selectedRects);
   }
 
   public setSelectedIdAfterAddingDrawingRect() {
