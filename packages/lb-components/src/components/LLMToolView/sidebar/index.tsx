@@ -29,7 +29,7 @@ import { formatSort, getCurrentResultFromResultList, getRenderDataByResult } fro
 import emptySvg from '@/assets/annotation/LLMTool/empty.svg';
 import TextInputBox from './components/textInputBox';
 import OverallTagList from '@/components/tagList/components/overall';
-import { getAnnotationStepByStepList } from '@/utils/data';
+import StepUtils from '@/utils/StepUtils';
 
 interface IProps {
   annotation?: any;
@@ -56,7 +56,7 @@ const LLMToolSidebar = (props: IProps) => {
   const basicInfo = jsonParser(currentData?.result);
   const { toolInstanceRef } = useCustomToolInstance({ basicInfo });
   const [LLMConfig, setLLMConfig] = useState<ILLMToolConfig>();
-  const [, forceRender] = useState(0);
+  const [valid, setValid] = useState(true);
 
   const { setNewAnswerList } = useContext(LLMContext);
   const [annotationResult, setAnnotationResult] = useState<IAnnotationResult>({});
@@ -76,6 +76,7 @@ const LLMToolSidebar = (props: IProps) => {
     }
     toolInstanceRef.current.setValid = onSetValid;
     toolInstanceRef.current.clearResult = clearResult;
+    onSetValid();
     initResult();
   }, [imgIndex, LLMConfig]);
 
@@ -83,19 +84,20 @@ const LLMToolSidebar = (props: IProps) => {
     initResult(currentData?.questionList);
   };
 
-  const onSetValid = (valid?: boolean) => {
+  const onSetValid = (newValid?: boolean) => {
+    const valid = newValid ?? basicInfo.valid;
     if (isBoolean(valid)) {
+      setValid(valid);
       toolInstanceRef.current.valid = valid;
       toolInstanceRef.current?.emit('validUpdated');
-      forceRender((s) => s + 1);
     }
   };
 
   const initResult = (initData?: ILLMBoxResult) => {
-    const annotationStep = getAnnotationStepByStepList(stepList, step);
+    const currentStepInfo = StepUtils.getCurrentStepInfo(step, stepList);
     const result: ILLMBoxResult = getCurrentResultFromResultList(
       currentData?.result,
-      annotationStep,
+      currentStepInfo.step,
     );
 
     let sourceData = currentData?.questionList;
@@ -106,7 +108,6 @@ const LLMToolSidebar = (props: IProps) => {
       sourceData = initData;
       result.sort = [];
     }
-    onSetValid(toolInstanceRef.current.valid ?? basicInfo.valid);
 
     const annotations = getRenderDataByResult(LLMConfig, sourceData);
     setAnnotationResult({ ...annotations });
@@ -114,6 +115,18 @@ const LLMToolSidebar = (props: IProps) => {
   };
 
   useEffect(() => {
+    setExportData();
+    setNewAnswerList(annotationResult?.answerList || []);
+  }, [annotationResult, modelAPIResponse, valid]);
+
+  useEffect(() => {
+    window.addEventListener('keydown', onKeyDown);
+    return () => {
+      window.removeEventListener('keydown', onKeyDown);
+    };
+  }, []);
+
+  const setExportData = () => {
     const { newSort, answerList, textAttribute, tagList } = annotationResult;
     const sort = formatSort(newSort || []);
     const result = {
@@ -124,29 +137,16 @@ const LLMToolSidebar = (props: IProps) => {
       id: currentData?.id,
       modelAPIResponse,
     };
-
     toolInstanceRef.current.exportData = () => {
-      return [[result], { valid: toolInstanceRef.current.valid }];
+      return [[result], { valid }];
     };
 
     toolInstanceRef.current.currentPageResult = {
       ...result,
       toolName: EToolName.LLM,
-      valid: toolInstanceRef.current.valid,
+      valid,
     };
-    setNewAnswerList(answerList || []);
-    /**
-     * TODO: Under normal circumstances, it is impossible to monitor the change of toolInstanceRef.current.valid value. When onSetValid is triggered,
-     * forceRender((s) => s + 1) is executed for subsequent optimization.
-     */
-  }, [annotationResult, modelAPIResponse, toolInstanceRef.current.valid]);
-
-  useEffect(() => {
-    window.addEventListener('keydown', onKeyDown);
-    return () => {
-      window.removeEventListener('keydown', onKeyDown);
-    };
-  }, []);
+  };
 
   const onKeyDown = (e: KeyboardEvent) => {
     if (e.ctrlKey && e.keyCode === EKeyCode.Enter) {
