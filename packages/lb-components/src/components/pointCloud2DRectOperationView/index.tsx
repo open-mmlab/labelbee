@@ -1,8 +1,8 @@
 import { useLatest } from 'ahooks';
-import { Spin } from 'antd/es';
+import { Spin, message } from 'antd/es';
 import React, { useCallback, useContext, useEffect, useMemo, useRef, useState } from 'react';
 import { connect } from 'react-redux';
-
+import { useTranslation } from 'react-i18next';
 import { usePointCloudViews } from '@/components/pointCloudView/hooks/usePointCloudViews';
 import { PointCloudContext } from '@/components/pointCloudView/PointCloudContext';
 import { a2MapStateToProps } from '@/store/annotation/map';
@@ -28,6 +28,9 @@ interface IPointCloud2DRectOperationViewProps {
 const PointCloud2DRectOperationView = (props: IPointCloud2DRectOperationViewProps) => {
   const { mappingData, size, config, checkMode, afterImgOnLoad } = props;
   const url = mappingData?.url ?? '';
+
+  const { t } = useTranslation();
+
   const {
     pointCloudBoxList,
     setPointCloudResult,
@@ -71,6 +74,10 @@ const PointCloud2DRectOperationView = (props: IPointCloud2DRectOperationViewProp
   };
 
   const handleRemoveRect = (rectList: IPointCloud2DRectOperationViewRect[]) => {
+    const hasUnRemovableRect = rectList.some((rect) => rect.boxID);
+    if (hasUnRemovableRect) {
+      message.warning(t('ProjectionFrameCannotBeDeleted'));
+    }
     removeRectIn2DView(rectList);
   };
 
@@ -143,7 +150,12 @@ const PointCloud2DRectOperationView = (props: IPointCloud2DRectOperationViewProp
   }, [pointCloudBoxList]);
 
   useEffect(() => {
+    const rect = rectListInImage.find((i) => i.id === operation.current.selectedRectID);
     operation.current?.setDefaultAttribute?.(defaultAttribute);
+    if (rect) {
+      updateRectIn2DView({ ...operation.current?.selectedRect, attribute: defaultAttribute });
+    }
+    updateRectList();
   }, [defaultAttribute]);
 
   useEffect(() => {
