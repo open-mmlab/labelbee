@@ -143,7 +143,12 @@ const PointCloud2DRectOperationView = (props: IPointCloud2DRectOperationViewProp
   }, [pointCloudBoxList]);
 
   useEffect(() => {
+    const rect = rectListInImage.find((i) => i.id === operation.current.selectedRectID);
     operation.current?.setDefaultAttribute?.(defaultAttribute);
+    if (rect) {
+      updateRectIn2DView({ ...operation.current?.selectedRect, attribute: defaultAttribute });
+    }
+    updateRectList();
   }, [defaultAttribute]);
 
   useEffect(() => {
