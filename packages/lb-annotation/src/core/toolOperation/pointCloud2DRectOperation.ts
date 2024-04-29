@@ -5,6 +5,7 @@
  */
 
 import { IPointCloud2DRectOperationViewRect } from '@labelbee/lb-utils';
+import EKeyCode from '@/constant/keyCode';
 import { RectOperation } from './rectOperation';
 
 class PointCloud2DRectOperation extends RectOperation {
@@ -46,6 +47,14 @@ class PointCloud2DRectOperation extends RectOperation {
       return;
     }
     super.setSelectedRectID(newID);
+  }
+
+  public onKeyDown(e: KeyboardEvent) {
+    if (this.checkMode || e.keyCode !== EKeyCode.Delete) {
+      return;
+    }
+    super.onKeyDown(e);
+    return true;
   }
 
   public renderDrawingRect(rect: IPointCloud2DRectOperationViewRect & IRect, zoom = this.zoom, isZoom = false) {
