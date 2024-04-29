@@ -162,6 +162,13 @@ const PointCloud2DRectOperationView = (props: IPointCloud2DRectOperationViewProp
     updateRectList();
   }, [rectListInImage]);
 
+  useEffect(() => {
+    const preConfig = operation.current?.config ?? {};
+    operation.current?.setConfig(
+      JSON.stringify({ ...preConfig, attributeList: config.attributeList ?? [] }),
+    );
+  }, [config.attributeList]);
+
   return (
     <Spin spinning={loading}>
       <div ref={ref} style={{ position: 'relative', ...size }} />
