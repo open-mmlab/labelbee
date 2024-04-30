@@ -510,7 +510,7 @@ const getStepConfig = (tool, step, sourceStep) => {
 
   return {
     step: step ?? 1,
-    dataSourceStep: 0,
+    dataSourceStep: sourceStep || 0,
     tool: toolList,
     config: JSON.stringify({
       ...getConfig(toolName),
