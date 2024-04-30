@@ -170,8 +170,9 @@ const HeaderOption: React.FC<IProps> = (props) => {
               className='item'
               onMouseEnter={() => setToolHover(info.toolName)}
               onMouseLeave={() => setToolHover('')}
+              onClick={info.click}
             >
-              <a className='item' onClick={info.click}>
+              <a className='item'>
                 <img
                   className='singleTool'
                   src={toolHover === info.toolName ? info.selectedSvg : info.commonSvg}

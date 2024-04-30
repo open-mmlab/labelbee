@@ -163,6 +163,7 @@ const polygonConfig = {
     { key: '纸巾', value: 'tissue' },
     { key: '水壶', value: 'kettle' },
   ],
+  filterData: ['valid', 'invalid'],
   textConfigurable: true,
   textCheckType: 0,
   customFormat: '',
@@ -511,7 +512,11 @@ const getStepConfig = (tool, step, sourceStep) => {
     step: step ?? 1,
     dataSourceStep: sourceStep || 0,
     tool: toolList,
-    config: JSON.stringify(getConfig(toolName)),
+    config: JSON.stringify({
+      ...getConfig(toolName),
+      referenceStep: sourceStep || 0,
+      referenceFilterData: ['valid', 'invalid'],
+    }),
   };
 };
 

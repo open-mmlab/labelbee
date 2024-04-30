@@ -29,6 +29,7 @@ import { ConfigProvider } from 'antd/es';
 import zhCN from 'antd/es/locale/zh_CN';
 import enUS from 'antd/es/locale/en_US';
 import { EPointCloudName } from '@labelbee/lb-annotation';
+import { useError } from '@/components/errorBoundary';
 
 interface IAnnotationStyle {
   strokeColor: string;
@@ -132,6 +133,8 @@ const App: React.FC<AppProps> = (props) => {
     preDataProcess,
   } = props;
 
+  const { onError } = useError()
+
   useEffect(() => {
     store.dispatch(
       InitTaskData({
@@ -208,6 +211,7 @@ const App: React.FC<AppProps> = (props) => {
 
   // 初始化imgList 优先以loadFileList方式加载数据
   const initImgList = () => {
+    onError?.('test error provider')
     if (loadFileList) {
       loadImgList(store.dispatch, store.getState, initialIndex, true).then((isSuccess) => {
         if (isSuccess) {

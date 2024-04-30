@@ -18,6 +18,7 @@ import { Pagination } from './Pagination';
 import { AnnotatedAttributesIcon } from './AnnotatedAttributes';
 import { cTool } from '@labelbee/lb-annotation';
 import { shortCutTable, ToolHotKeyCom } from './FooterTips/ToolHotKey';
+import HiddenTextSwitch from './HiddenTextSwitch';
 
 const { EPointCloudName } = cTool;
 
@@ -56,6 +57,7 @@ const renderFooter: RenderFooter = ({
   curItems,
   footerDivider,
   annotateAttrList,
+  hiddenTextSwitch,
 }) => {
   return (
     <>
@@ -63,6 +65,7 @@ const renderFooter: RenderFooter = ({
       {annotateAttrList}
       <div style={{ flex: 1 }} />
       {hiddenTips}
+      {hiddenTextSwitch}
       {pageNumber}
       {pagination}
       {curItems}
@@ -125,6 +128,8 @@ const ToolFooter: React.FC<IProps> = (props: IProps) => {
     />
   );
 
+  const hiddenTextSwitch = <HiddenTextSwitch toolName={stepInfo.tool}/>
+
   const curItems =
     hasSourceStep && basicResultList.length > 0 ? (
       <span>{t('curItems', { current: basicIndex + 1, total: basicResultList.length })}</span>
@@ -156,6 +161,7 @@ const ToolFooter: React.FC<IProps> = (props: IProps) => {
           footerDivider: <FooterDivider />,
           shortCutTable,
           ToolHotKeyCom,
+          hiddenTextSwitch,
         })}
       </div>
     );

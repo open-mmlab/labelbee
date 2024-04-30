@@ -4,7 +4,7 @@
  */
 
 import React, { useEffect, useRef, useImperativeHandle, useState } from 'react';
-import { ViewOperation, ImgUtils } from '@labelbee/lb-annotation';
+import { ViewOperation, ImgUtils, BasicLayer } from '@labelbee/lb-annotation';
 import { Spin } from 'antd/es';
 import useRefCache from '@/hooks/useRefCache';
 import { TAnnotationViewData } from '@labelbee/lb-utils';
@@ -89,6 +89,7 @@ const AnnotationView = (props: IProps, ref: any) => {
   const [loading, setLoading] = useState(false);
   const annotationRef = useRef<HTMLDivElement>(null);
   const viewOperation = useRef<ViewOperation>();
+  const basicInstance = useRef<BasicLayer>();
   const afterImgOnLoadRef = useRefCache<TAfterImgOnLoad | undefined>(afterImgOnLoad);
   const annotationListCacheRef = useRef<TAnnotationViewData[][]>([]);
   const canUpdateRef = useRef(true); // Judge if rending is Possible.
@@ -124,6 +125,13 @@ const AnnotationView = (props: IProps, ref: any) => {
       });
 
       viewOperation.current.init();
+      basicInstance.current = new BasicLayer({
+        container: annotationRef.current,
+        size,
+        style,
+        config: '{}',
+      })
+      viewOperation.current?.setBasicInstance(basicInstance.current)
     }
 
     return () => {
@@ -141,6 +149,7 @@ const AnnotationView = (props: IProps, ref: any) => {
           setLoading(false);
 
           viewOperation.current?.setImgNode(imgNode);
+          basicInstance.current?.setImgNode(imgNode);
 
           if (afterImgOnLoadRef.current) {
             afterImgOnLoadRef.current(imgNode);

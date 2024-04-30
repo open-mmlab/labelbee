@@ -1,0 +1,33 @@
+.highlightBadge {
+  cursor: pointer;
+  padding: 2px 4px;
+  gap: 2px;
+  border-radius: 2px;
+  font-size: 12px;
+  color: rgb(153, 153, 153);
+  path {
+    fill: #999;
+  }
+  &.active,
+  &.active:hover {
+    color: #666fff;
+    path {
+      fill: #666fff;
+    }
+  }
+  &:hover {
+    color: #8c9aff;
+    background-color: #eeefff;
+    path {
+      fill: #8c9aff;
+    }
+  }
+
+  .flag {
+    display: flex;
+    justify-content: center;
+  }
+  .text {
+    margin-top: 8px;
+  }
+}

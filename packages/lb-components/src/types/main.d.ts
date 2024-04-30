@@ -84,6 +84,8 @@ interface IFooter {
   shortCutTable: {
     [a: string]: any;
   };
+  /** hide text info */
+  hiddenTextSwitch: React.ReactNode;
 }
 
 export type RenderFooter = ({
@@ -96,6 +98,7 @@ export type RenderFooter = ({
   footerDivider,
   ToolHotKeyCom,
   shortCutTable,
+  hiddenTextSwitch,
 }: IFooter) => React.ReactNode;
 
 export type Header = ({

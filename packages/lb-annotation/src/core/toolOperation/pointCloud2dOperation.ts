@@ -409,7 +409,9 @@ class PointCloud2dOperation extends PolygonOperation {
     this.setImgInfo(size);
 
     // Update canvas size.
-    this.updateCanvasBasicStyle(this.basicCanvas, size, 0);
+    if (this.basicCanvas) {
+      this.updateCanvasBasicStyle(this.basicCanvas, size, 0);
+    }
     this.updateCanvasBasicStyle(this.canvas, size, 10);
     this.ctx?.scale(pixel, pixel);
     this.basicCtx?.scale(pixel, pixel);
