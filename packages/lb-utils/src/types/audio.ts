@@ -32,7 +32,7 @@ export interface IAudioTextToolConfig extends IToolConfig {
   clipConfigurable: boolean;
   clipAttributeConfigurable: boolean;
   clipAttributeList: IInputList[];
-  secondaryAttributeConfigurable: boolean;
-  subAttributeList: IInputList[];
+  secondaryAttributeConfigurable?: boolean;
+  subAttributeList?: IInputList[];
   clipTextConfigurable: boolean;
 }

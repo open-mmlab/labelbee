@@ -3,18 +3,12 @@
  * @author lihuaqi <lihuaqi@sensetime.com>
  * @createdate 2024-4-30
  */
-import React, { useContext, useState, useEffect } from 'react';
-import { Select, message, Input, Divider } from 'antd';
+import React from 'react';
+import { Select, Divider } from 'antd';
 import { useTranslation } from 'react-i18next';
 import AttributeList from '@/components/attributeList';
 
-import {
-  IInputList,
-  IDefaultSize,
-  EPointCloudSegmentStatus,
-  IPointCloudSegmentation,
-  EPointCloudPattern,
-} from '@labelbee/lb-utils';
+import { IInputList } from '@labelbee/lb-utils';
 
 interface IProps {
   subAttributeList: IInputList[];

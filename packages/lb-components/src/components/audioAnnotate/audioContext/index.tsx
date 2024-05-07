@@ -16,9 +16,9 @@ interface IAudioContextProps {
     content: string;
     title: string;
     type: keyof typeof EContextType;
-  }
+  };
 }
-const AudioContext = (props: IAudioContextProps ) => {
+const AudioContext = (props: IAudioContextProps) => {
   const { audioContext: context } = props;
   if (!context || !context.visible) {
     return null;
@@ -80,7 +80,12 @@ export interface ISelectedRegion {
 }
 type IAudioClipConfig = Pick<
   IAudioTextToolConfig,
-  'clipConfigurable' | 'clipAttributeConfigurable' | 'clipAttributeList' | 'clipTextConfigurable'
+  | 'clipConfigurable'
+  | 'clipAttributeConfigurable'
+  | 'clipAttributeList'
+  | 'clipTextConfigurable'
+  | 'secondaryAttributeConfigurable'
+  | 'subAttributeList'
 >;
 interface IAudioClipState extends IAudioClipConfig {
   /** 选中的截取属性，新建截取片段的默认属性 */
@@ -125,7 +130,7 @@ export const AudioClipProvider: React.FC = ({ children }) => {
     return {
       audioClipState: state,
       setAudioClipState: setState,
-    }
+    };
   }, [state, setState]);
 
   return <AudioClipContext.Provider value={value}>{children}</AudioClipContext.Provider>;

@@ -1,6 +1,6 @@
-import React from 'react';
+import React, { useMemo } from 'react';
 import AttributeList from '@/components/attributeList';
-import { IAudioTimeSlice } from '@labelbee/lb-utils'
+import { IAudioTimeSlice } from '@labelbee/lb-utils';
 import { EventBus } from '@labelbee/lb-annotation';
 import ClipIcon from '@/assets/annotation/audio/clipSmall.svg';
 import ClipActiveIcon from '@/assets/annotation/audio/clipASmall.svg';
@@ -12,6 +12,7 @@ import { classnames } from '@/utils';
 
 import styles from './index.module.scss';
 import { useTranslation } from 'react-i18next';
+import SubAttributeList from '@/components/subAttributeList';
 
 interface IClipSidebarProps {
   /** 截取片段数组 */
@@ -31,13 +32,18 @@ const ClipSidebar = (props: IClipSidebarProps) => {
     clipTextConfigurable,
     clipAttributeList,
     clipAttributeConfigurable,
+    secondaryAttributeConfigurable,
+    subAttributeList,
   } = audioClipState;
 
   const { id: selectedId } = selectedRegion;
 
+  const currentRegion = useMemo(() => {
+    return regions.find((item) => item.id === selectedId);
+  }, [regions, selectedId]);
+
   const attributeChanged = (attr: string) => {
     if (regions.length && selectedId) {
-      const currentRegion = regions.find((item) => item.id === selectedId);
       updateRegion({
         ...(currentRegion as IAudioTimeSlice),
         attribute: attr,
@@ -47,6 +53,16 @@ const ClipSidebar = (props: IClipSidebarProps) => {
     setAudioClipState({
       selectedAttribute: attr,
     });
+  };
+
+  const setSubAttribute = (key: string, value: string) => {
+    if (regions.length && selectedId) {
+      const currentSubAttribute = currentRegion?.subAttribute ?? {};
+      updateRegion({
+        ...(currentRegion as IAudioTimeSlice),
+        subAttribute: { ...currentSubAttribute, [key]: value },
+      });
+    }
   };
 
   const list = [
@@ -120,6 +136,15 @@ const ClipSidebar = (props: IClipSidebarProps) => {
               });
             }}
           />
+          {selectedId && secondaryAttributeConfigurable && (
+            <SubAttributeList
+              subAttributeList={subAttributeList}
+              setSubAttribute={setSubAttribute}
+              getValue={(subAttribute) => {
+                return currentRegion?.subAttribute?.[subAttribute.value];
+              }}
+            />
+          )}
         </div>
       )}
     </div>
