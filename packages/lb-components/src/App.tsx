@@ -16,6 +16,7 @@ import { LoadFileAndFileData } from './store/annotation/reducer';
 import { ToolInstance } from './store/annotation/types';
 import {
   GetFileData,
+  GetImgIndexByExternal,
   IFileItem,
   LoadFileList,
   OnPageChange,
@@ -105,6 +106,7 @@ export interface AppProps {
   onLoad?: ({ toolInstance }: { toolInstance: ToolInstance }) => void;
   preDataProcess?: (params: IPreDataProcessParams) => IPointCloudBox[];
   auditContext?: any;
+  getImgIndexByExternal: GetImgIndexByExternal;
 }
 
 const App: React.FC<AppProps> = (props) => {
@@ -130,6 +132,7 @@ const App: React.FC<AppProps> = (props) => {
     intelligentFit = true,
     highlightAttribute = '',
     preDataProcess,
+    getImgIndexByExternal,
   } = props;
 
   useEffect(() => {
@@ -149,6 +152,7 @@ const App: React.FC<AppProps> = (props) => {
         checkMode,
         highlightAttribute,
         preDataProcess,
+        getImgIndexByExternal,
       }),
     );
 

@@ -36,3 +36,4 @@ export type LoadFileList = (
   page: number,
   pageSize: number,
 ) => Promise<{ fileList: IFileItem[]; total: number }>;
+export type GetImgIndexByExternal = (currentIndex: number, submitType: number) => void;
