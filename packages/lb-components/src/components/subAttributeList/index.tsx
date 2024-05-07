@@ -17,9 +17,9 @@ import {
 } from '@labelbee/lb-utils';
 
 interface IProps {
-  subAttributeList: any;
+  subAttributeList: IInputList[];
   setSubAttribute: (value: string, subAttribute: string) => void;
-  getValue: (subAttribute: { [key: string]: string }) => undefined | string;
+  getValue: (subAttribute: IInputList) => undefined | string;
 }
 
 const subTitleStyle = {

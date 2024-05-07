@@ -324,7 +324,7 @@ const AttributeUpdater = ({
         <SubAttributeList
           subAttributeList={subAttributeList}
           setSubAttribute={setSubAttribute}
-          getValue={(subAttribute: { [key: string]: string }) => {
+          getValue={(subAttribute) => {
             return (
               ptx.selectedPointCloudBox?.subAttribute?.[subAttribute.value] ||
               segmentData.cacheSegData?.subAttribute?.[subAttribute.value]
