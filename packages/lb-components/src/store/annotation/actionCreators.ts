@@ -8,6 +8,7 @@ import {
   OnSave,
   OnStepChange,
   OnSubmit,
+  GetImgIndexByExternal,
 } from '@/types/data';
 import { AnnotationActionTypes, ToolInstance } from './types';
 import { LoadFileAndFileData, getStepConfig } from './reducer';
@@ -44,7 +45,7 @@ const getSubmitByPageOperation = (pageTurningOperation: EPageTurningOperation) =
 const getBasicIndex = (annotationStore: any, basicIndex: number) => {
   const { imgList, imgIndex } = annotationStore;
   const { dataSourceStep } = getStepConfig(annotationStore.stepList, annotationStore.step);
-  let backwardResult = jsonParser(imgList[imgIndex - 1].result);
+  let backwardResult = jsonParser(imgList[imgIndex - 1]?.result);
   const index = backwardResult[`step_${dataSourceStep}`]?.result?.length - 1;
   return index || basicIndex;
 };
@@ -211,6 +212,17 @@ export function CopyBackWordResult(): AnnotationActionTypes {
   };
 }
 
+export function UpdateImgIndexByExternal(
+  getImgIndexByExternal: GetImgIndexByExternal,
+): AnnotationActionTypes {
+  return {
+    type: ANNOTATION_ACTIONS.UPDATE_IMG_INDEX_BY_EXTERNAL,
+    payload: {
+      getImgIndexByExternal,
+    },
+  };
+}
+
 export function BatchUpdateTrackID({
   id,
   newID,
@@ -292,6 +304,7 @@ export function InitTaskData({
   checkMode,
   highlightAttribute,
   preDataProcess,
+  getImgIndexByExternal,
 }: any): any {
   const tasks: any[] = [];
 
@@ -335,6 +348,10 @@ export function InitTaskData({
 
   if (typeof checkMode === 'boolean') {
     tasks.push(UpdateCheckMode(checkMode));
+  }
+
+  if (getImgIndexByExternal) {
+    tasks.push(UpdateImgIndexByExternal(getImgIndexByExternal));
   }
 
   tasks.push(UpdateHighlightAttribute(highlightAttribute));
@@ -589,10 +606,19 @@ export const DispatcherTurning = async (
   toIndex?: number,
 ) => {
   const annotationStore = getState().annotation;
-  const { fileIndexChanged, fileIndex, basicIndexChanged, basicIndex } =
-    PageOperator.getNextPageInfo(pageTurningOperation, annotationStore, toIndex);
-
   const submitType: ESubmitType = getSubmitByPageOperation(pageTurningOperation);
+
+  let { fileIndexChanged, fileIndex, basicIndexChanged, basicIndex } = PageOperator.getNextPageInfo(
+    pageTurningOperation,
+    annotationStore,
+    toIndex,
+  );
+
+  const newIndex = annotationStore?.getImgIndexByExternal?.(annotationStore.imgIndex, submitType);
+  if (newIndex !== undefined) {
+    fileIndexChanged = true;
+    fileIndex = newIndex;
+  }
 
   ChangeTriggerEventAfterIndexChanged(dispatch, triggerEventAfterIndexChanged);
 
@@ -615,6 +641,7 @@ export const DispatcherTurning = async (
       submitType === ESubmitType.Backward
         ? getBasicIndex(getState().annotation, basicIndex)
         : basicIndex;
+
     return SubmitAndChangeFileIndex(dispatch, fileIndex, submitType, index);
   }
 

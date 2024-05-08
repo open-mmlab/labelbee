@@ -662,6 +662,13 @@ export const annotationReducer = (
       };
     }
 
+    case ANNOTATION_ACTIONS.UPDATE_IMG_INDEX_BY_EXTERNAL: {
+      return {
+        ...state,
+        getImgIndexByExternal: action.payload.getImgIndexByExternal,
+      };
+    }
+
     case ANNOTATION_ACTIONS.SKIP_BEFORE_PAGE_TURNING: {
       return {
         ...state,
