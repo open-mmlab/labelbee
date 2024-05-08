@@ -3,7 +3,7 @@ import { getWebPcm2WavBase64 } from '@/components/audioAnnotate/utils/getWebPcm2
 import _, { debounce, sortBy } from 'lodash';
 import { PauseOutlined, CaretRightOutlined } from '@ant-design/icons';
 import { cKeyCode, cTool, EventBus } from '@labelbee/lb-annotation';
-import { IAudioTimeSlice } from '@labelbee/lb-utils'
+import { IAudioTimeSlice } from '@labelbee/lb-utils';
 import { Button } from 'antd';
 import InvalidPage from '@/components/invalidPage';
 import ImageError from '@/components/imageError';
@@ -19,7 +19,15 @@ import { ISelectedRegion, useAudioClipStore } from '@/components/audioAnnotate/a
 import { useDeepCompareEffect, useLatest, useThrottleFn, useUpdate } from 'ahooks';
 import useAudioScroll from './useAudioScroll';
 import styles from './index.module.scss';
-import { getAttributeColor, precisionMinus, isDoubleClick, timeFormat, formatTime, getCanMoveRange, dispatchResizeEvent } from '@/utils/audio';
+import {
+  getAttributeColor,
+  precisionMinus,
+  isDoubleClick,
+  timeFormat,
+  formatTime,
+  getCanMoveRange,
+  dispatchResizeEvent,
+} from '@/utils/audio';
 import ProgressDot from './progressDot';
 import ClipTip from './clipTip';
 import useSwitchHotkey from './useSwitchHotkey';
@@ -29,10 +37,10 @@ import CombineTip from './combineTip';
 import SegmentTip from './segmentTip';
 import ToolFooter from '@/views/MainView/toolFooter';
 import { IInputList, RenderFooter } from '@/types/main';
-import { decimalReserved } from '@/components/videoPlayer/utils'
+import { decimalReserved } from '@/components/videoPlayer/utils';
 
-const { EToolName } = cTool
-const EKeyCode = cKeyCode.default
+const { EToolName } = cTool;
+const EKeyCode = cKeyCode.default;
 
 /** 快进/快退时间 */
 const PER_PROGRESS = 0.1;
@@ -72,6 +80,8 @@ export const AudioPlayer = ({
   clipTextConfigurable,
   clipAttributeList,
   clipAttributeConfigurable,
+  secondaryAttributeConfigurable,
+  subAttributeList,
   isCheck,
   hoverRegionId,
   footer,
@@ -95,13 +105,15 @@ export const AudioPlayer = ({
   clipConfigurable: boolean;
   clipTextConfigurable: boolean;
   clipAttributeConfigurable: boolean;
+  secondaryAttributeConfigurable: boolean;
+  subAttributeList: IInputList[];
   clipAttributeList: IInputList[];
   /** 是否是查看模式：查看模式需要禁用截取的新建、调整功能 */
   isCheck?: boolean;
   /** 查看模式用到的hoverId */
   hoverRegionId?: string;
   footer?: RenderFooter;
-  drawLayerSlot?: any,
+  drawLayerSlot?: any;
 }) => {
   const { url, path } = fileData;
   const [isPlaying, setIsPlaying] = useState<boolean>(false);
@@ -229,6 +241,8 @@ export const AudioPlayer = ({
     clipAttributeList,
     clipAttributeConfigurable,
     clipConfigurable,
+    secondaryAttributeConfigurable,
+    subAttributeList,
   };
 
   useEffect(() => {
@@ -395,7 +409,9 @@ export const AudioPlayer = ({
       setSelectedRegion({ id });
     }
 
-    const instance = getRegionInstanceById((id ?? audioClipStateRef.current.selectedRegion?.id) || '');
+    const instance = getRegionInstanceById(
+      (id ?? audioClipStateRef.current.selectedRegion?.id) || '',
+    );
     // 属性对应的time;
     const sameAttributeTimes: number[] = [];
     const otherRegions =
@@ -441,7 +457,7 @@ export const AudioPlayer = ({
       id,
       start: decimalReserved(start, 3),
       end: decimalReserved(end, 3),
-    }
+    };
     updateRegion?.(regionParam as IAudioTimeSlice);
     update();
   };
@@ -836,9 +852,7 @@ export const AudioPlayer = ({
             </div>
             <ProgressDot playPercentage={playPercentage} />
           </div>
-          {
-            showRemark && drawLayerSlot?.({ currentTime, remainingTime, audioPlayer: getWaveRef() })
-          }
+          {showRemark && drawLayerSlot?.({ currentTime, remainingTime, audioPlayer: getWaveRef() })}
         </div>
       </div>
 
@@ -872,7 +886,7 @@ export const AudioPlayer = ({
           }}
           zoom={zoom}
         />
-        <LabelDisplayToggle EventBus={EventBus}/>
+        <LabelDisplayToggle EventBus={EventBus} />
       </div>
     </div>
   );
