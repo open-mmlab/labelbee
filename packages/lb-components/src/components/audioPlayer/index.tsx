@@ -2,7 +2,7 @@ import React, { useState, useRef, useEffect } from 'react';
 import { getWebPcm2WavBase64 } from '@/components/audioAnnotate/utils/getWebPcm2Wac';
 import _, { debounce, sortBy } from 'lodash';
 import { PauseOutlined, CaretRightOutlined } from '@ant-design/icons';
-import { cKeyCode, cTool, EventBus } from '@labelbee/lb-annotation';
+import { cKeyCode, cTool, EventBus, TagUtils } from '@labelbee/lb-annotation';
 import { IAudioTimeSlice } from '@labelbee/lb-utils';
 import { Button } from 'antd';
 import InvalidPage from '@/components/invalidPage';
@@ -543,13 +543,20 @@ export const AudioPlayer = ({
       if (regionsRef.current.find((item) => item.id === id)) {
         return;
       }
-      const regionItem = {
+      const regionItem: IAudioTimeSlice = {
         id,
         start: decimalReserved(start, 3),
         end: decimalReserved(end, 3),
         attribute: audioClipStateRef.current.selectedAttribute,
         text: '',
       };
+
+      if (audioClipStateRef.current.secondaryAttributeConfigurable) {
+        const defaultSubAttribute = TagUtils.getDefaultResultByConfig(
+          audioClipStateRef.current.subAttributeList ?? [],
+        );
+        regionItem.subAttribute = defaultSubAttribute ?? {};
+      }
 
       updateRegion?.(regionItem);
     });
