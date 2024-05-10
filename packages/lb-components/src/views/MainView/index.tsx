@@ -74,7 +74,13 @@ const AnnotatedArea: React.FC<AppProps & IProps> = (props) => {
   }
 
   if (isVideoTool) {
-    return <VideoAnnotate drawLayerSlot={props.drawLayerSlot} footer={props.footer} />;
+    return (
+      <VideoAnnotate
+        drawLayerSlot={props.drawLayerSlot}
+        footer={props.footer}
+        annotationBefore={props?.annotationBefore}
+      />
+    );
   }
 
   return <ImageAnnotate {...props} />;
