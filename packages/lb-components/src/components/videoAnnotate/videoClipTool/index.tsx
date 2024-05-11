@@ -1,14 +1,12 @@
 import { AttributeUtils, MathUtils, CommonToolUtils, uuid } from '@labelbee/lb-annotation';
 import { jsonParser } from '@/utils';
-import { precisionAdd, precisionMinus, isImageValue } from '@/utils/audio'
+import { precisionAdd, precisionMinus, isImageValue } from '@/utils/audio';
 import { message } from 'antd';
 import _ from 'lodash';
 import React from 'react';
 import styles from './index.module.scss';
 import { IVideoTimeSlice } from '@labelbee/lb-utils';
-import {
-  VideoClipToolContextProvider,
-} from './VideoClipToolContext';
+import { VideoClipToolContextProvider } from './VideoClipToolContext';
 import {
   EClipStatus,
   EDirection,
@@ -16,11 +14,11 @@ import {
   PER_SLICE_CHANGE,
   SLICE_MIN_TIME,
 } from './constant';
-import VideoPlayer  from '@/components/videoPlayer';
+import VideoPlayer from '@/components/videoPlayer';
 import VideoTimeSlicesOverVideo from './components/videoTimeSlicesOverVideo';
 import { IVideoAnnotateProps } from '@/components/videoAnnotate';
-import ClipIconSvg from '@/assets/annotation/video/icon_videoCutting.svg'
-import { decimalReserved } from '@/components/videoPlayer/utils'
+import ClipIconSvg from '@/assets/annotation/video/icon_videoCutting.svg';
+import { decimalReserved } from '@/components/videoPlayer/utils';
 
 interface IVideoClipProps extends IVideoAnnotateProps {
   pageForward: () => void;
@@ -69,10 +67,7 @@ class VideoClipTool extends React.Component<IVideoClipProps, IState> {
   }
 
   public get loading() {
-    return (
-      this.state.loading ||
-      this.state.configLoading
-    );
+    return this.state.loading || this.state.configLoading;
   }
 
   public get defaultTextAttribute() {
@@ -80,7 +75,7 @@ class VideoClipTool extends React.Component<IVideoClipProps, IState> {
   }
 
   public get defaultAttribute() {
-    return this.state.selectedAttribute
+    return this.state.selectedAttribute;
   }
 
   public get selectedID() {
@@ -101,7 +96,7 @@ class VideoClipTool extends React.Component<IVideoClipProps, IState> {
       onSelectedTimeSlice: this.onSelectedTimeSlice,
       removeTimeSlice: this.removeTimeSlice,
       updateSelectedSliceTimeProperty: this.updateSelectedSliceTimeProperty,
-    }
+    };
   }
   public fns: Map<string, any[]> = new Map();
   public videoPlayer?: any;
@@ -156,7 +151,7 @@ class VideoClipTool extends React.Component<IVideoClipProps, IState> {
     this.setState({
       loading: false,
     });
-    this.setResult(false)
+    this.setResult(false);
     this.props.onMounted(this);
     window.addEventListener('keydown', this.keyDownEvents);
   }
@@ -165,7 +160,6 @@ class VideoClipTool extends React.Component<IVideoClipProps, IState> {
     this.props.onUnmounted();
     window.removeEventListener('keydown', this.keyDownEvents);
   }
-
 
   public shouldComponentUpdate(newProps: any, newState: IState) {
     const indexChanges = newProps.imgIndex - this.props.imgIndex;
@@ -207,10 +201,10 @@ class VideoClipTool extends React.Component<IVideoClipProps, IState> {
   }
 
   public setValid = (valid: boolean) => {
-    this.setState({ valid })
+    this.setState({ valid });
     if (valid === false) {
-      this.clearResult()
-      this.updateSidebar()
+      this.clearResult();
+      this.updateSidebar();
     }
   };
 
@@ -218,16 +212,13 @@ class VideoClipTool extends React.Component<IVideoClipProps, IState> {
     this.emitEvent('changeClipSidebar');
     this.emitEvent('updateTextAttribute');
     this.emitEvent('changeAttributeSidebar');
-  }
+  };
 
   public exportData = () => {
     const duration = this.videoRef?.duration ?? 0;
 
-    return [
-      this.state.result.filter((i) => i.end !== null),
-      { valid: this.state.valid, duration }
-    ];
-  }
+    return [this.state.result.filter((i) => i.end !== null), { valid: this.state.valid, duration }];
+  };
   /**
    * 微调选中截取片段的开始时间（start）
    * @param changeTime
@@ -286,7 +277,7 @@ class VideoClipTool extends React.Component<IVideoClipProps, IState> {
       this.setState({
         result: _.cloneDeep(result),
       });
-      this.updateSidebar()
+      this.updateSidebar();
     }
   };
 
@@ -343,7 +334,7 @@ class VideoClipTool extends React.Component<IVideoClipProps, IState> {
       selectedID: '',
       textValue: '',
     });
-    this.updateSidebar()
+    this.updateSidebar();
   };
 
   /** 取消截取 */
@@ -360,7 +351,7 @@ class VideoClipTool extends React.Component<IVideoClipProps, IState> {
         selectedID: '',
         clipStatus: EClipStatus.Stop,
       });
-      this.updateSidebar()
+      this.updateSidebar();
     }
   };
 
@@ -370,6 +361,14 @@ class VideoClipTool extends React.Component<IVideoClipProps, IState> {
    * @returns
    */
   public toggleClipStatus = (curTime?: number) => {
+    if (typeof this.props?.annotationBefore === 'function') {
+      this.props?.annotationBefore(() => this.setClipResult(curTime));
+      return;
+    }
+    this.setClipResult(curTime);
+  };
+
+  public setClipResult = (curTime?: number) => {
     if (this.disabled) {
       return;
     }
@@ -423,15 +422,13 @@ class VideoClipTool extends React.Component<IVideoClipProps, IState> {
       }
     }
 
-    this.setState(
-      {
-        clipStatus,
-        result: newResult,
-        selectedID,
-        textValue,
-      }
-    );
-    this.updateSidebar()
+    this.setState({
+      clipStatus,
+      result: newResult,
+      selectedID,
+      textValue,
+    });
+    this.updateSidebar();
   };
 
   /** 添加时间点 */
@@ -470,7 +467,7 @@ class VideoClipTool extends React.Component<IVideoClipProps, IState> {
       this.videoPlayer?.pause();
     }
     this.setState(newState);
-    this.updateSidebar()
+    this.updateSidebar();
   };
 
   /** 更新当前时间 */
@@ -478,8 +475,8 @@ class VideoClipTool extends React.Component<IVideoClipProps, IState> {
   public updateCurrentTime = (time: number) => {
     this.setState({
       currentTime: time,
-    })
-  }
+    });
+  };
 
   /**
    * 视频右键操作
@@ -491,7 +488,7 @@ class VideoClipTool extends React.Component<IVideoClipProps, IState> {
       this.setState({
         selectedID: '',
       });
-      this.updateSidebar()
+      this.updateSidebar();
     }
   };
 
@@ -520,7 +517,7 @@ class VideoClipTool extends React.Component<IVideoClipProps, IState> {
     this.setState({
       result: [...result],
     });
-    this.updateSidebar()
+    this.updateSidebar();
   };
 
   /**
@@ -530,12 +527,7 @@ class VideoClipTool extends React.Component<IVideoClipProps, IState> {
   public renderMediaContent = () => {
     const { pageForward, pageJump, pageBackward } = this.props;
 
-    const {
-      result,
-      videoError,
-      valid,
-      currentTime
-    } = this.state;
+    const { result, videoError, valid, currentTime } = this.state;
 
     return (
       <div className={styles.clipContainer}>
@@ -565,7 +557,9 @@ class VideoClipTool extends React.Component<IVideoClipProps, IState> {
           attributeList={this.props.config.attributeList}
           extraStyle={{ top: this.props.drawLayerSlot ? 40 : 0 }}
         />
-        {this.isClipping && <i className={styles.clipping} style={{ backgroundImage: ClipIconSvg }}/>}
+        {this.isClipping && (
+          <i className={styles.clipping} style={{ backgroundImage: ClipIconSvg }} />
+        )}
       </div>
     );
   };
@@ -586,7 +580,7 @@ class VideoClipTool extends React.Component<IVideoClipProps, IState> {
       textValue: i.textAttribute,
       currentTime: i.start,
     });
-    this.updateSidebar()
+    this.updateSidebar();
     this.videoPlayer?.pause();
     this.videoPlayer.currentTime = i.start;
   };
@@ -602,7 +596,7 @@ class VideoClipTool extends React.Component<IVideoClipProps, IState> {
         result: [...result],
         selectedID,
       });
-      this.updateSidebar()
+      this.updateSidebar();
     }
   };
 
@@ -616,7 +610,7 @@ class VideoClipTool extends React.Component<IVideoClipProps, IState> {
       const resultRecord = jsonParser(imgList[imgIndex].result);
       const stepResult = resultRecord[`step_${this.stepInfo().step}`];
       const result = stepResult?.result || [];
-      const valid = isImageValue(imgList[imgIndex].result || '[]')
+      const valid = isImageValue(imgList[imgIndex].result || '[]');
       this.setState(
         {
           result,
@@ -628,7 +622,7 @@ class VideoClipTool extends React.Component<IVideoClipProps, IState> {
           valid,
         },
         () => {
-          this.updateSidebar()
+          this.updateSidebar();
           if (!valid) {
             message.info('无效视频，请跳过');
           }
@@ -636,16 +630,19 @@ class VideoClipTool extends React.Component<IVideoClipProps, IState> {
       );
     } catch (e) {
       console.error('数据解析失败');
-      this.setState({
-        result: [],
-        loading: false,
-        selectedID: '',
-        textValue: '',
-        selectedAttribute: '',
-        valid: true,
-      }, () => {
-        this.updateSidebar()
-      });
+      this.setState(
+        {
+          result: [],
+          loading: false,
+          selectedID: '',
+          textValue: '',
+          selectedAttribute: '',
+          valid: true,
+        },
+        () => {
+          this.updateSidebar();
+        },
+      );
     }
   };
 
@@ -663,7 +660,7 @@ class VideoClipTool extends React.Component<IVideoClipProps, IState> {
       selectedAttribute: attribute,
       result: [...result],
     });
-    this.updateSidebar()
+    this.updateSidebar();
   };
 
   /**
@@ -683,7 +680,7 @@ class VideoClipTool extends React.Component<IVideoClipProps, IState> {
         this.setState({
           result: [...result],
         });
-        this.updateSidebar()
+        this.updateSidebar();
       }
     }
   };
@@ -709,4 +706,4 @@ class VideoClipTool extends React.Component<IVideoClipProps, IState> {
   }
 }
 
-export default VideoClipTool
+export default VideoClipTool;

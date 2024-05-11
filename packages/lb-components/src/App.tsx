@@ -107,6 +107,7 @@ export interface AppProps {
   preDataProcess?: (params: IPreDataProcessParams) => IPointCloudBox[];
   auditContext?: any;
   getImgIndexByExternal: GetImgIndexByExternal;
+  annotationBefore?: (setAnnotationData:Function)=>void;
 }
 
 const App: React.FC<AppProps> = (props) => {
@@ -133,6 +134,7 @@ const App: React.FC<AppProps> = (props) => {
     highlightAttribute = '',
     preDataProcess,
     getImgIndexByExternal,
+    annotationBefore,
   } = props;
 
   useEffect(() => {
@@ -153,6 +155,7 @@ const App: React.FC<AppProps> = (props) => {
         highlightAttribute,
         preDataProcess,
         getImgIndexByExternal,
+        annotationBefore,
       }),
     );
 
