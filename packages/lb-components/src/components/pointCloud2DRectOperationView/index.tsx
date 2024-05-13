@@ -38,10 +38,11 @@ const PointCloud2DRectOperationView = (props: IPointCloud2DRectOperationViewProp
     removeRectIn2DView,
   } = useContext(PointCloudContext);
 
-  const { update2DViewRect } = usePointCloudViews();
+  const { update2DViewRect, remove2DViewRect } = usePointCloudViews();
   const ref = React.useRef(null);
   const operation = useRef<any>(null);
-  const update2DViewRectFn = useLatest<any>(update2DViewRect);
+  const update2DViewRectFn = useMemoizedFn<any>(update2DViewRect);
+  const remove2DViewRectFn = useMemoizedFn<any>(remove2DViewRect);
   const newPointCloudResult = useRef(null);
 
   const [loading, setLoading] = useState(true);
@@ -56,7 +57,7 @@ const PointCloud2DRectOperationView = (props: IPointCloud2DRectOperationViewProp
   const handleUpdateDragResult = (rect: IPointCloud2DRectOperationViewRect) => {
     const { boxID } = rect;
     if (boxID) {
-      const result = update2DViewRectFn.current?.(rect);
+      const result = update2DViewRectFn?.(rect);
       newPointCloudResult.current = result;
       setPointCloudResult(result);
       return;
@@ -73,7 +74,7 @@ const PointCloud2DRectOperationView = (props: IPointCloud2DRectOperationViewProp
   const handleRemoveRect = (rectList: IPointCloud2DRectOperationViewRect[]) => {
     const hasBoxIDRect = rectList.find((rect) => rect.boxID);
     if (hasBoxIDRect) {
-      const result = update2DViewRectFn.current?.(hasBoxIDRect, 'remove');
+      const result = remove2DViewRectFn?.(hasBoxIDRect);
       newPointCloudResult.current = result;
       setPointCloudResult(result);
       updateRectList();
@@ -82,7 +83,7 @@ const PointCloud2DRectOperationView = (props: IPointCloud2DRectOperationViewProp
     removeRectIn2DView(rectList);
   };
 
-  const getRectListByBoxList = useCallback(() => {
+  const getRectListByBoxList = useMemoizedFn(() => {
     let allRects: IPointCloud2DRectOperationViewRect[] = [];
     pointCloudBoxList.forEach((pointCloudBox) => {
       const { rects = [], id, attribute, trackID } = pointCloudBox;
@@ -93,7 +94,7 @@ const PointCloud2DRectOperationView = (props: IPointCloud2DRectOperationViewProp
       }
     });
     return allRects;
-  }, [pointCloudBoxList]);
+  });
 
   const updateRectList = useMemoizedFn(() => {
     const rectListByBoxList = getRectListByBoxList();

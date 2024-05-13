@@ -809,7 +809,6 @@ export const usePointCloudViews = () => {
       boxID: string;
       imageName: string;
     },
-    action: 'remove' | 'update' = 'update',
   ) => {
     const { boxID, imageName, width, height, x, y } = params;
     const currentBox = pointCloudBoxList.find((v) => v.id === boxID);
@@ -817,21 +816,32 @@ export const usePointCloudViews = () => {
       return;
     }
 
-    let updatedRects;
-    if (action === 'remove') {
-      // 移除与 imageName 匹配的矩形
-      updatedRects = currentBox.rects.filter((rect) => rect.imageName !== imageName);
-    } else {
-      // 更新矩形的逻辑
-      const currentRect = currentBox.rects.find((v) => v.imageName === imageName);
-      if (!currentRect) {
-        return;
-      }
-      updatedRects = currentBox.rects.map((rect) =>
-        rect.imageName === imageName ? { ...rect, width, height, x, y } : rect,
-      );
+    const currentRect = currentBox.rects.find((v) => v.imageName === imageName);
+    if (!currentRect) {
+      return;
     }
 
+    const updatedRects = currentBox.rects.map((rect) =>
+      rect.imageName === imageName ? { ...rect, width, height, x, y } : rect,
+    );
+
+    const updatedBox = { ...currentBox, rects: updatedRects };
+    const updatedPointCloudBoxList = pointCloudBoxList.map((box) =>
+      box.id === boxID ? updatedBox : box,
+    );
+
+    topViewInstance?.updatePolygonList(updatedPointCloudBoxList ?? []);
+    return updatedPointCloudBoxList;
+  };
+
+  const remove2DViewRect = (params: { boxID: string; imageName: string }) => {
+    const { boxID, imageName } = params;
+    const currentBox = pointCloudBoxList.find((v) => v.id === boxID);
+    if (!currentBox?.rects) {
+      return;
+    }
+
+    const updatedRects = currentBox.rects.filter((rect) => rect.imageName !== imageName);
     const updatedBox = { ...currentBox, rects: updatedRects };
     const updatedPointCloudBoxList = pointCloudBoxList.map((box) =>
       box.id === boxID ? updatedBox : box,
@@ -1357,5 +1367,6 @@ export const usePointCloudViews = () => {
     updateViewsByDefaultSize,
     generateRects,
     update2DViewRect,
+    remove2DViewRect,
   };
 };
