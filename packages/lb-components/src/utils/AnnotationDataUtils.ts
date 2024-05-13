@@ -4,6 +4,41 @@ import { EToolName } from '@/data/enums/ToolType';
 import _ from 'lodash';
 import StepUtils from './StepUtils';
 import { IStepInfo } from '@/types/step';
+import { IMappingImg } from '@/types/data';
+import { IPointCloudBox, IPointCloudBoxRect } from '@labelbee/lb-utils';
+
+interface ICopyResultChangeParams {
+  copyResult: string;
+  step: number;
+  currentResult: string;
+  mappingImgList: IMappingImg[];
+  preMappingImgList: IMappingImg[];
+}
+
+interface IGetNextPath {
+  prePath: string;
+  preMappingImgList: IMappingImg[];
+  nextMappingImgList: IMappingImg[];
+}
+
+/**
+ * Calculates the next path based on the provided parameters.
+ *
+ * @param {IGetNextPath} params - The object containing necessary information.
+ * @param {string} params.prePath - The current path.
+ * @param {IImgList} params.preMappingImgList - The list of current mapping images.
+ * @param {IImgList} params.nextMappingImgList - The list of next mapping images.
+ * @returns {string} The next path, returns an empty string if not found.
+ */
+const getNextPath = (params: IGetNextPath) => {
+  const { prePath, preMappingImgList, nextMappingImgList } = params;
+
+  const calName = preMappingImgList?.find((item) => item.path === prePath)?.calib?.calName;
+
+  const nextPath = nextMappingImgList.find((img) => img.calib?.calName === calName)?.path;
+
+  return nextPath ?? '';
+};
 
 export default class AnnotationDataUtils {
   /**
@@ -13,7 +48,8 @@ export default class AnnotationDataUtils {
    * @param currentResult 当前的步骤
    * @returns
    */
-  public static copyResultChange(copyResult: string, step: number, currentResult: string) {
+  public static copyResultChange(params: ICopyResultChangeParams) {
+    const { copyResult, step, currentResult, mappingImgList, preMappingImgList } = params;
     // 其实其限定的范围一般都在单图的情况
     try {
       const copyData = jsonParser(copyResult);
@@ -29,6 +65,37 @@ export default class AnnotationDataUtils {
             id: uuid(8, 62),
           }));
           currentData[stepName] = info;
+
+          if (mappingImgList?.length > 0 && preMappingImgList?.length > 0) {
+            info.result.forEach((item: IPointCloudBox) => {
+              if (item?.rects && item?.rects?.length > 0) {
+                item.rects = item?.rects?.map((rect) => {
+                  rect.imageName = getNextPath({
+                    prePath: rect.imageName,
+                    preMappingImgList,
+                    nextMappingImgList: mappingImgList,
+                  });
+                  return rect;
+                });
+              }
+              return item;
+            });
+
+            if (info.resultRect?.length > 0) {
+              info.resultRect = info.resultRect.map((rect: IPointCloudBoxRect) => {
+                return {
+                  ...rect,
+                  id: uuid(8, 62),
+                  imageName: getNextPath({
+                    prePath: rect.imageName,
+                    preMappingImgList,
+                    nextMappingImgList: mappingImgList,
+                  }),
+                };
+              });
+            }
+          }
+
           return JSON.stringify(currentData);
         }
       }

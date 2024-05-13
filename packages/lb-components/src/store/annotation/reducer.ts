@@ -727,11 +727,14 @@ export const annotationReducer = (
         return state;
       }
 
-      const newResult = AnnotationDataUtils.copyResultChange(
-        backwardResult,
+      const newResult = AnnotationDataUtils.copyResultChange({
+        copyResult: backwardResult,
         step,
-        imgList[imgIndex].result ?? '',
-      );
+        currentResult: imgList[imgIndex].result ?? '',
+        preMappingImgList: imgList[imgIndex - 1].mappingImgList ?? [],
+        mappingImgList: imgList[imgIndex].mappingImgList ?? [],
+      });
+
       imgList[imgIndex] = {
         ...imgList[imgIndex],
         result: newResult,
