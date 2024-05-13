@@ -11,9 +11,10 @@ import LoopIcon from '@/assets/annotation/audio/loop.svg';
 import { Typography } from 'antd';
 import { useClickAway } from 'ahooks';
 import { classnames } from '@/utils';
-import { IAudioTimeSlice } from '@labelbee/lb-utils'
+import { IAudioTimeSlice, ITextConfigItem } from '@labelbee/lb-utils';
 
 import styles from './index.module.scss';
+import { useTranslation } from 'react-i18next';
 
 interface IProps {
   /** 挂载到目标元素 */
@@ -36,12 +37,14 @@ interface IProps {
 const { Paragraph } = Typography;
 /** 展示在音频图上的截取片段 */
 const ClipRegion = (props: IProps) => {
+  const { t } = useTranslation();
   const { audioClipState, setAudioClipState } = useAudioClipStore();
   const {
     clipAttributeList,
     clipAttributeConfigurable,
     clipTextConfigurable,
     selectedRegion,
+    clipTextList,
   } = audioClipState;
 
   const ref = useRef(null);
@@ -116,11 +119,12 @@ const ClipRegion = (props: IProps) => {
         </div>
       )}
 
-      {clipTextConfigurable && (
-        <Paragraph ellipsis={{ rows: 2 }} className={styles.text} style={textStyle}>
-          文本:{text}
-        </Paragraph>
-      )}
+      {clipTextConfigurable &&
+        clipTextList?.map((i: ITextConfigItem, index: number) => (
+          <Paragraph ellipsis={{ rows: 2 }} className={styles.text} style={textStyle} key={index}>
+            {i?.label ?? t('textTool')}:{region[i?.key] ?? ''}
+          </Paragraph>
+        ))}
     </div>
   );
 

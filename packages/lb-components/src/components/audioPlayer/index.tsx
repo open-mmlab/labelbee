@@ -3,7 +3,7 @@ import { getWebPcm2WavBase64 } from '@/components/audioAnnotate/utils/getWebPcm2
 import _, { debounce, sortBy } from 'lodash';
 import { PauseOutlined, CaretRightOutlined } from '@ant-design/icons';
 import { cKeyCode, cTool, EventBus, TagUtils } from '@labelbee/lb-annotation';
-import { IAudioTimeSlice } from '@labelbee/lb-utils';
+import { IAudioTimeSlice,ITextConfigItem } from '@labelbee/lb-utils';
 import { Button } from 'antd';
 import InvalidPage from '@/components/invalidPage';
 import ImageError from '@/components/imageError';
@@ -86,6 +86,7 @@ export const AudioPlayer = ({
   hoverRegionId,
   footer,
   drawLayerSlot,
+  clipTextList,
 }: {
   fileData: any;
   height?: number;
@@ -114,6 +115,7 @@ export const AudioPlayer = ({
   hoverRegionId?: string;
   footer?: RenderFooter;
   drawLayerSlot?: any;
+  clipTextList: ITextConfigItem[];
 }) => {
   const { url, path } = fileData;
   const [isPlaying, setIsPlaying] = useState<boolean>(false);
@@ -243,6 +245,7 @@ export const AudioPlayer = ({
     clipConfigurable,
     secondaryAttributeConfigurable,
     subAttributeList,
+    clipTextList
   };
 
   useEffect(() => {
@@ -558,6 +561,15 @@ export const AudioPlayer = ({
         regionItem.subAttribute = defaultSubAttribute ?? {};
       }
 
+      if (clipTextConfigurable) {
+        clipTextList.forEach((i, index) => {
+          if (index === 0) {
+            Object.assign(regionItem, { text: i?.default });
+          } else {
+            Object.assign(regionItem, { [i.key]: i?.default });
+          }
+        });
+      }
       updateRegion?.(regionItem);
     });
 

@@ -14,6 +14,7 @@ export interface IAudioTimeSlice {
   subAttribute?: {
     [key: string]: string;
   };
+  [key: string]: any;
 }
 
 export interface ITextConfigItem {

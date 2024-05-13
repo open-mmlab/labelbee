@@ -16,7 +16,11 @@ import {
 } from '@labelbee/lb-annotation';
 import styles from './index.module.scss';
 import TagResultShow from '@/components/audioAnnotate/tagResultShow';
-import { AudioClipProvider, useAudioClipStore } from './audioContext';
+import {
+  AudioClipProvider,
+  DEFAULT_CLIP_TEXT_CONFIG_ITEM,
+  useAudioClipStore,
+} from './audioContext';
 import TextInput from './textInput';
 import { connect } from 'react-redux';
 import { a2MapStateToProps, IA2MapStateProps } from '@/store/annotation/map';
@@ -101,6 +105,7 @@ const AudioTextToolTextarea = ({
   textConfigurable,
   updateRegion,
   clipAttributeList,
+  clipTextList,
 }: any) => {
   return (
     <div className={styles.textareaContainer}>
@@ -120,6 +125,7 @@ const AudioTextToolTextarea = ({
           textConfigurable={textConfigurable}
           updateRegion={updateRegion}
           clipAttributeList={clipAttributeList}
+          clipTextList={clipTextList}
         />
       </div>
     </div>
@@ -411,6 +417,7 @@ const AudioAnnotate: React.FC<AppProps & IProps> = (props) => {
     secondaryAttributeConfigurable = false,
     inputList = [],
     configList = [],
+    clipTextList = DEFAULT_CLIP_TEXT_CONFIG_ITEM,
   } = useMemo(() => {
     if (annotationStepInfo) {
       return CommonToolUtils.jsonParser(annotationStepInfo?.config);
@@ -424,6 +431,7 @@ const AudioAnnotate: React.FC<AppProps & IProps> = (props) => {
     clipTextConfigurable,
     subAttributeList,
     secondaryAttributeConfigurable,
+    clipTextList,
   };
 
   const valid = audioContext ? audioContext?.valid : true;
@@ -603,6 +611,7 @@ const AudioAnnotate: React.FC<AppProps & IProps> = (props) => {
                   clipTextConfigurable={clipTextConfigurable}
                   clipAttributeList={clipAttributeList}
                   clipAttributeConfigurable={clipAttributeConfigurable}
+                  clipTextList={clipTextList}
                 />
               )}
             </div>

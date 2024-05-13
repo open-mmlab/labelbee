@@ -3,12 +3,22 @@ import React, { useState, useEffect, useContext, useMemo } from 'react';
 import { Input } from 'antd';
 import { useSetState } from 'ahooks';
 import { SetState } from 'ahooks/lib/useSetState';
-import { IAudioTextToolConfig } from '@labelbee/lb-utils';
+import { IAudioTextToolConfig, ITextConfigItem } from '@labelbee/lb-utils';
 import styles from './index.module.scss';
 export enum EContextType {
   before = '前文',
   after = '后文',
 }
+
+export const DEFAULT_CLIP_TEXT_CONFIG_ITEM = [
+  {
+    label: '文本',
+    key: 'text',
+    required: false,
+    default: '',
+    maxLength: 3000,
+  },
+];
 
 interface IAudioContextProps {
   audioContext: {
@@ -98,6 +108,7 @@ interface IAudioClipState extends IAudioClipConfig {
   combined: boolean;
   /** 是否按下分割键 */
   segment: boolean;
+  clipTextList: ITextConfigItem[];
 }
 interface IAudioClipContext {
   audioClipState: IAudioClipState;
@@ -114,6 +125,7 @@ const DEFAULT_AUDIO_CLIP = {
   clipTextConfigurable: false,
   combined: false,
   segment: false,
+  clipTextList: DEFAULT_CLIP_TEXT_CONFIG_ITEM,
 };
 
 const AudioClipContext = React.createContext<IAudioClipContext>({
