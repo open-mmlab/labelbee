@@ -1,8 +1,7 @@
-import { useLatest } from 'ahooks';
-import { Spin, message } from 'antd/es';
+import { useLatest, useMemoizedFn } from 'ahooks';
+import { Spin } from 'antd/es';
 import React, { useCallback, useContext, useEffect, useMemo, useRef, useState } from 'react';
 import { connect } from 'react-redux';
-import { useTranslation } from 'react-i18next';
 import { usePointCloudViews } from '@/components/pointCloudView/hooks/usePointCloudViews';
 import { PointCloudContext } from '@/components/pointCloudView/PointCloudContext';
 import { a2MapStateToProps } from '@/store/annotation/map';
@@ -28,8 +27,6 @@ interface IPointCloud2DRectOperationViewProps {
 const PointCloud2DRectOperationView = (props: IPointCloud2DRectOperationViewProps) => {
   const { mappingData, size, config, checkMode, afterImgOnLoad } = props;
   const url = mappingData?.url ?? '';
-
-  const { t } = useTranslation();
 
   const {
     pointCloudBoxList,
@@ -74,9 +71,13 @@ const PointCloud2DRectOperationView = (props: IPointCloud2DRectOperationViewProp
   };
 
   const handleRemoveRect = (rectList: IPointCloud2DRectOperationViewRect[]) => {
-    const hasUnRemovableRect = rectList.some((rect) => rect.boxID);
-    if (hasUnRemovableRect) {
-      message.warning(t('ProjectionFrameCannotBeDeleted'));
+    const hasBoxIDRect = rectList.find((rect) => rect.boxID);
+    if (hasBoxIDRect) {
+      const result = update2DViewRectFn.current?.(hasBoxIDRect, 'remove');
+      newPointCloudResult.current = result;
+      setPointCloudResult(result);
+      updateRectList();
+      return;
     }
     removeRectIn2DView(rectList);
   };
@@ -94,14 +95,14 @@ const PointCloud2DRectOperationView = (props: IPointCloud2DRectOperationViewProp
     return allRects;
   }, [pointCloudBoxList]);
 
-  const updateRectList = () => {
+  const updateRectList = useMemoizedFn(() => {
     const rectListByBoxList = getRectListByBoxList();
     const selectedRectID = operation.current?.selectedRectID;
     operation.current?.setResult([...rectListByBoxList, ...rectListInImage]);
     if (selectedRectID) {
       operation.current?.setSelectedRectID(selectedRectID);
     }
-  };
+  });
 
   useEffect(() => {
     if (ref.current) {

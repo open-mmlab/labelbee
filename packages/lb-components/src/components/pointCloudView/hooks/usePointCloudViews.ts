@@ -809,27 +809,36 @@ export const usePointCloudViews = () => {
       boxID: string;
       imageName: string;
     },
+    action: 'remove' | 'update' = 'update',
   ) => {
     const { boxID, imageName, width, height, x, y } = params;
     const currentBox = pointCloudBoxList.find((v) => v.id === boxID);
-    if (currentBox?.rects) {
-      const { rects = [] } = currentBox;
-      const currentRect = rects.find((v) => v.imageName === imageName);
-      if (currentRect) {
-        let newRects = rects as IPointCloudBox['rects'];
-
-        const newRect = { ...currentRect, width, height, x, y };
-        newRects = rects.map((v) => (v === currentRect ? newRect : v));
-
-        const newBox = { ...currentBox, rects: newRects };
-
-        const newPointCloudBoxList = pointCloudBoxList.map((v) => (v === currentBox ? newBox : v));
-
-        topViewInstance?.updatePolygonList(newPointCloudBoxList ?? []);
-
-        return newPointCloudBoxList;
-      }
+    if (!currentBox?.rects) {
+      return;
     }
+
+    let updatedRects;
+    if (action === 'remove') {
+      // 移除与 imageName 匹配的矩形
+      updatedRects = currentBox.rects.filter((rect) => rect.imageName !== imageName);
+    } else {
+      // 更新矩形的逻辑
+      const currentRect = currentBox.rects.find((v) => v.imageName === imageName);
+      if (!currentRect) {
+        return;
+      }
+      updatedRects = currentBox.rects.map((rect) =>
+        rect.imageName === imageName ? { ...rect, width, height, x, y } : rect,
+      );
+    }
+
+    const updatedBox = { ...currentBox, rects: updatedRects };
+    const updatedPointCloudBoxList = pointCloudBoxList.map((box) =>
+      box.id === boxID ? updatedBox : box,
+    );
+
+    topViewInstance?.updatePolygonList(updatedPointCloudBoxList ?? []);
+    return updatedPointCloudBoxList;
   };
 
   /** Top-view selected changed and render to other view */
