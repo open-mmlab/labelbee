@@ -2,17 +2,24 @@ import React, { FocusEvent, useEffect, useRef, useState } from 'react';
 import { Radio, Switch, Tooltip } from 'antd';
 import { QuestionCircleOutlined } from '@ant-design/icons';
 import { TextareaWithFooter } from '@/views/MainView/sidebar/TextToolSidebar';
-import { DEFAULT_TEXT_CONFIG_ITEM, timeFormat, getAttributeColor, getAttributeFontColor, getAttributeShowText, updateColorOpacity } from '@/utils/audio';
-import { cKeyCode } from '@labelbee/lb-annotation'
+import {
+  DEFAULT_TEXT_CONFIG_ITEM,
+  timeFormat,
+  getAttributeColor,
+  getAttributeFontColor,
+  getAttributeShowText,
+  updateColorOpacity,
+} from '@/utils/audio';
+import { cKeyCode } from '@labelbee/lb-annotation';
 import { IAudioTimeSlice, ITextConfigItem } from '@labelbee/lb-utils';
 import classnames from 'classnames';
-import AudioContext, { useAudioClipStore } from '../audioContext';
+import AudioContext, { DEFAULT_CLIP_TEXT_CONFIG_ITEM, useAudioClipStore } from '../audioContext';
 import styles from './index.module.scss';
 import { IInputList } from '@/types/main';
 import { useTranslation } from 'react-i18next';
 // import { AlgorithmButtonForText } from '../icons/algorithmButton';
 
-const EKeyCode = cKeyCode.default
+const EKeyCode = cKeyCode.default;
 
 interface IClearIcon {
   onClick: () => void;
@@ -72,6 +79,7 @@ interface IProps {
   /** 更新截取片段数据 */
   updateRegion?: (region: IAudioTimeSlice) => void;
   isEdit?: boolean;
+  clipTextList: ITextConfigItem[];
 }
 
 export const SingleTextInput = (props: any) => {
@@ -96,6 +104,7 @@ export const SingleTextInput = (props: any) => {
     onFocusStyle = {},
     // 右侧输入框上方展示元素
     extra,
+    errorText,
   } = props;
   const { maxLength } = config;
 
@@ -237,6 +246,7 @@ export const SingleTextInput = (props: any) => {
       >
         <TextareaWithFooter footer={TextareaFooter} textareaProps={textareaProps} />
       </div>
+      {errorText && <span style={{ color: '#ff4d4f', lineHeight: '22px' }}>{errorText}</span>}
     </div>
   );
 };
@@ -262,6 +272,7 @@ const TextInput = (props: IProps) => {
     clipAttributeConfigurable,
     updateRegion,
     clipAttributeList = [],
+    clipTextList = DEFAULT_CLIP_TEXT_CONFIG_ITEM,
   } = props;
 
   const { t } = useTranslation();
@@ -273,14 +284,12 @@ const TextInput = (props: IProps) => {
   const configList = dataList || [{ ...DEFAULT_TEXT_CONFIG_ITEM }];
   let regionsList = regions;
 
-
   if (clipTextConfigurable && !isCheck) {
     const selectedId = audioClipState.selectedRegion.id;
     regionsList = regionsList.filter((item) => {
       return item.id === selectedId;
     });
   }
-
 
   const textareaFocus = (index: number) => {
     setTimeout(() => {
@@ -353,14 +362,7 @@ const TextInput = (props: IProps) => {
     });
   }
 
-  let clipIdMapText: { [key: string]: string } = {};
-  if (clipTextConfigurable && regionsList) {
-    regionsList.forEach((item) => {
-      const { id, text } = item;
-      clipIdMapText[id] = text;
-    });
-  }
-
+  const clipTextResult = regionsList[0];
   return (
     <>
       {config?.enablePlaceholderHotkey && (
@@ -430,13 +432,21 @@ const TextInput = (props: IProps) => {
             />
           ))}
         {clipTextConfigurable &&
-          regionsList.map((item, index) => {
-            const { id, start, end, attribute } = item;
+          regionsList.length > 0 &&
+          clipTextList.map((item, index) => {
+            const { id, start, end, attribute } = clipTextResult;
+            const { maxLength = 3000, label, key, required } = item;
+            const text = clipTextResult?.[key];
+            const clipIdMapText = { [clipTextResult.id]: text };
+
             // 兼容SingleTextInput的props
             const config = {
-              label: `${t('textTool')}（${timeFormat(start, 'ss.SSS')} - ${timeFormat(end, 'ss.SSS')}）`,
+              label: `${label ?? t('textTool')}（${timeFormat(start, 'ss.SSS')} - ${timeFormat(
+                end,
+                'ss.SSS',
+              )}）`,
               key: id,
-              maxLength: 3000,
+              maxLength,
             };
             // 处理按tab无法正常切换问题
             const regionIndex = _configList.length + index;
@@ -447,6 +457,10 @@ const TextInput = (props: IProps) => {
               color: getAttributeFontColor(attribute, clipAttributeList),
               backgroundColor: attributeColor,
             };
+            const errorTips = t('LeastCharacterError', {
+              num: 1,
+            });
+            const errorText = required && text.length < 1 ? errorTips : undefined;
 
             return (
               <SingleTextInput
@@ -457,8 +471,8 @@ const TextInput = (props: IProps) => {
                 result={clipIdMapText}
                 updateText={(text: string) => {
                   updateRegion?.({
-                    ...item,
-                    text,
+                    ...clipTextResult,
+                    [key]: text,
                   });
                 }}
                 switchToNextTextarea={() => {
@@ -484,6 +498,7 @@ const TextInput = (props: IProps) => {
                     </div>
                   ) : null
                 }
+                errorText={errorText}
               />
             );
           })}

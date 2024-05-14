@@ -1,6 +1,6 @@
 import React, { useMemo } from 'react';
 import AttributeList from '@/components/attributeList';
-import { IAudioTimeSlice } from '@labelbee/lb-utils';
+import { IAudioTimeSlice, ITextConfigItem } from '@labelbee/lb-utils';
 import { EventBus } from '@labelbee/lb-annotation';
 import ClipIcon from '@/assets/annotation/audio/clipSmall.svg';
 import ClipActiveIcon from '@/assets/annotation/audio/clipASmall.svg';
@@ -34,6 +34,7 @@ const ClipSidebar = (props: IClipSidebarProps) => {
     clipAttributeConfigurable,
     secondaryAttributeConfigurable,
     subAttributeList,
+    clipTextList,
   } = audioClipState;
 
   const { id: selectedId } = selectedRegion;
@@ -72,6 +73,17 @@ const ClipSidebar = (props: IClipSidebarProps) => {
     }),
   ];
 
+  const showClipText = (region: IAudioTimeSlice) => {
+    let clipShowText = '';
+    if (clipTextConfigurable && clipTextList?.length > 0) {
+      clipTextList.forEach((i: ITextConfigItem, index: number) => {
+        const segmentSymbol = !clipAttributeConfigurable && index === 0 ? '' : '，';
+        clipShowText = clipShowText + `${segmentSymbol}${i.label}：${region[i.key]}`;
+      });
+    }
+    return clipShowText;
+  };
+
   return (
     <div className={styles.clipSidebar}>
       <div className={styles.clipResults}>
@@ -84,9 +96,7 @@ const ClipSidebar = (props: IClipSidebarProps) => {
 
               const showText = `${
                 clipAttributeConfigurable ? getAttributeShowText(attribute, list) : ''
-              }${clipAttributeConfigurable && clipTextConfigurable ? '，' : ''}${
-                clipTextConfigurable ? `${t('textTool')}：${text}` : ''
-              }`;
+              }${showClipText(item)}`;
               return (
                 <div
                   className={classnames({
