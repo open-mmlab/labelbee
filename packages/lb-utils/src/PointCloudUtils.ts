@@ -4,7 +4,12 @@
  * @author Ron <ron.f.luo@gmail.com>
  */
 
-import { IPointCloudBox, IPointCloudConfig, IPointCloudSphere } from './types/pointCloud';
+import {
+  IPointCloudBox,
+  IPointCloudConfig,
+  IPointCloudSphere,
+  IPointCloudBoxRect,
+} from './types/pointCloud';
 import { ICoordinate, ISize } from './types/common';
 import { IBasicBox3d } from './types';
 
@@ -77,6 +82,14 @@ class PointCloudUtils {
     const data = this.jsonParser(result);
 
     const pointCloudDataList = data?.[POINT_CLOUD_DEFAULT_STEP]?.result ?? [];
+
+    return pointCloudDataList;
+  }
+
+  public static getRectParamsFromResultList(result: string): IPointCloudBoxRect[] {
+    const data = this.jsonParser(result);
+
+    const pointCloudDataList = data?.[POINT_CLOUD_DEFAULT_STEP]?.resultRect ?? [];
 
     return pointCloudDataList;
   }

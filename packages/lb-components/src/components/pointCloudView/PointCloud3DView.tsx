@@ -207,6 +207,8 @@ const PointCloud3D: React.FC<IA2MapStateProps> = ({ currentData, config, highlig
         });
         pointCloud.render();
         ptCtx.setPointCloudResult(boxParamsList);
+        const rectParamsList = PointCloudUtils.getRectParamsFromResultList(currentData.result);
+        ptCtx.setRectList(rectParamsList);
         ptCtx.setPointCloudValid(jsonParser(currentData.result)?.valid);
       }
     }
