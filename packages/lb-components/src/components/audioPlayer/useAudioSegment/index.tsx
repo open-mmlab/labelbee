@@ -10,9 +10,9 @@ import { cKeyCode } from '@labelbee/lb-annotation';
 import { useAudioClipStore } from '@/components/audioAnnotate/audioContext';
 import { useEventListener, useMemoizedFn } from 'ahooks';
 import { ISetSelectedRegionParams } from '..';
-import { IAudioTimeSlice } from '@labelbee/lb-utils'
-
-const EKeyCode = cKeyCode.default
+import { IAudioTimeSlice } from '@labelbee/lb-utils';
+import DataTransform from '@/components/audioAnnotate/utils/dataTransform';
+const EKeyCode = cKeyCode.default;
 
 interface IProps {
   /** WaveSurfer */
@@ -32,17 +32,11 @@ interface IProps {
 
 /** 音频区间分割功能 */
 const useAudioSegment = (props: IProps) => {
-  const {
-    waveRef,
-    regionMap,
-    updateRegion,
-    removeRegion,
-    generateRegions,
-    setSelectedRegion,
-  } = props;
+  const { waveRef, regionMap, updateRegion, removeRegion, generateRegions, setSelectedRegion } =
+    props;
 
   const { audioClipState, setAudioClipState } = useAudioClipStore();
-  const { selectedRegion, clipConfigurable, segment } = audioClipState;
+  const { selectedRegion, clipConfigurable, segment, clipTextList } = audioClipState;
   const { id } = selectedRegion;
   const segmentTimeTip = useRef<null | number>(null);
   const mouseEvent = useRef<null | MouseEvent>(null);
@@ -68,21 +62,17 @@ const useAudioSegment = (props: IProps) => {
       return;
     }
     const current = regionMap[id];
-
+    const newData = DataTransform.getClipTextByConfig(current, clipTextList);
     const targetLeft = {
+      ...newData,
       id: waveRef.current?.util.getId('segment_'),
-      start: current.start,
       end: time,
-      attribute: current.attribute,
-      text: current.text,
     };
-
+    const clearText = DataTransform.getClipTextByConfig(current, clipTextList, true);
     const targetRight = {
+      ...clearText,
       id: waveRef.current?.util.getId('segment_'),
       start: time,
-      end: current.end,
-      attribute: current.attribute,
-      text: '',
     };
 
     updateRegion?.(targetLeft);
