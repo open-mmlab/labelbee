@@ -713,7 +713,7 @@ export const annotationReducer = (
     }
 
     case ANNOTATION_ACTIONS.COPY_BACKWARD_RESULT: {
-      const { toolInstance, imgIndex, imgList, step } = state;
+      const { toolInstance, imgIndex, imgList, step, stepList } = state;
       if (!toolInstance) {
         return state;
       }
@@ -727,9 +727,12 @@ export const annotationReducer = (
         return state;
       }
 
+      const currentStepInfo = StepUtils.getCurrentStepInfo(step, stepList);
+      const copyStep = currentStepInfo?.step ?? step;
+
       const newResult = AnnotationDataUtils.copyResultChange({
         copyResult: backwardResult,
-        step,
+        step: copyStep,
         currentResult: imgList[imgIndex].result ?? '',
         preMappingImgList: imgList[imgIndex - 1].mappingImgList ?? [],
         mappingImgList: imgList[imgIndex].mappingImgList ?? [],
