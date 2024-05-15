@@ -3,7 +3,7 @@ import { getWebPcm2WavBase64 } from '@/components/audioAnnotate/utils/getWebPcm2
 import _, { debounce, sortBy } from 'lodash';
 import { PauseOutlined, CaretRightOutlined } from '@ant-design/icons';
 import { cKeyCode, cTool, EventBus, TagUtils } from '@labelbee/lb-annotation';
-import { IAudioTimeSlice,ITextConfigItem } from '@labelbee/lb-utils';
+import { IAudioTimeSlice, ITextConfigItem } from '@labelbee/lb-utils';
 import { Button } from 'antd';
 import InvalidPage from '@/components/invalidPage';
 import ImageError from '@/components/imageError';
@@ -245,7 +245,7 @@ export const AudioPlayer = ({
     clipConfigurable,
     secondaryAttributeConfigurable,
     subAttributeList,
-    clipTextList
+    clipTextList,
   };
 
   useEffect(() => {
