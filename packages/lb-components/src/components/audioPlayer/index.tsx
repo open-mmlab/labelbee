@@ -562,6 +562,7 @@ export const AudioPlayer = ({
       }
 
       if (clipTextConfigurable) {
+       const clipTextList =  audioClipStateRef.current.clipTextList
         clipTextList.forEach((i, index) => {
           if (index === 0) {
             Object.assign(regionItem, { text: i?.default });
