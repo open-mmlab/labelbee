@@ -12,15 +12,16 @@ export default class DataTransform {
   public static getClipTextByConfig = (
     region: IAudioTimeSlice,
     clipTextList: ITextConfigItem[],
-    isClear = false,
+    isDefault = false,
   ) => {
     const newRegion = _.cloneDeep(region);
     clipTextList.forEach((i, index) => {
       // index === 0: Compatible with old data
+      const defaultValue = i?.default ?? ''
       if (index === 0) {
-        Object.assign(newRegion, { text: isClear ? '' : region[i.key] });
+        Object.assign(newRegion, { text: isDefault ? defaultValue : region[i.key] });
       } else {
-        Object.assign(newRegion, { [i.key]: isClear ? '' : region[i.key] });
+        Object.assign(newRegion, { [i.key]: isDefault ? defaultValue : region[i.key] });
       }
     });
     return newRegion;
