@@ -58,7 +58,7 @@ const SubAttributeList = (props: IProps) => {
                 subAttribute?.isMulti ? (
                   <Checkbox.Group
                     style={{
-                      padding: `0px 21px 17px 16px`,
+                      padding: `0px 20px 16px 16px`,
                     }}
                     options={subAttribute.subSelected.map((v: IInputList) => ({
                       label: v.key,
@@ -85,7 +85,7 @@ const SubAttributeList = (props: IProps) => {
                 )
               ) : (
                 <Select
-                  style={{ margin: '0px 21px 17px 16px', width: '87%' }}
+                  style={{ margin: '0px 20px 16px 16px', width: '87%' }}
                   mode={subAttribute?.isMulti ? 'multiple' : undefined}
                   value={getInputValue(subAttribute)}
                   placeholder={t('PleaseSelect')}
