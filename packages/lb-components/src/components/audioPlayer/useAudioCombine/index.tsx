@@ -44,7 +44,8 @@ const useAudioCombine = (props: IProps) => {
     setSelectedRegion,
   } = props;
   const { audioClipState, setAudioClipState } = useAudioClipStore();
-  const { selectedRegion, clipConfigurable, combined, clipTextList } = audioClipState;
+  const { selectedRegion, clipConfigurable, combined, clipTextList } =
+    audioClipState;
   const { id } = selectedRegion;
 
   const combineTextByConfig = (
@@ -101,7 +102,7 @@ ${targetText}`;
     const start = Math.min(...times);
     const end = Math.max(...times);
 
-    const region = {
+    const region: IAudioTimeSlice = {
       id: waveRef.current?.util.getId('combined_'),
       start,
       end,
@@ -111,6 +112,7 @@ ${targetText}`;
         ? `${current.text}${target.text}`
         : `${current.text}
         ${target.text}`,
+      subAttribute: target.subAttribute ?? {},
     };
     const newRegion = combineTextByConfig(region, current, target);
 
