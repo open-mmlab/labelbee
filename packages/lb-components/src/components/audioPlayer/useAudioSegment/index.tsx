@@ -6,7 +6,7 @@
 
 import { useEffect, useRef } from 'react';
 import { message as SenseMessage } from 'antd';
-import { cKeyCode } from '@labelbee/lb-annotation';
+import { TagUtils, cKeyCode } from '@labelbee/lb-annotation';
 import { useAudioClipStore } from '@/components/audioAnnotate/audioContext';
 import { useEventListener, useMemoizedFn } from 'ahooks';
 import { ISetSelectedRegionParams } from '..';
@@ -36,7 +36,8 @@ const useAudioSegment = (props: IProps) => {
     props;
 
   const { audioClipState, setAudioClipState } = useAudioClipStore();
-  const { selectedRegion, clipConfigurable, segment, clipTextList } = audioClipState;
+  const { selectedRegion, clipConfigurable, segment, clipTextList, subAttributeList } =
+    audioClipState;
   const { id } = selectedRegion;
   const segmentTimeTip = useRef<null | number>(null);
   const mouseEvent = useRef<null | MouseEvent>(null);
@@ -67,12 +68,14 @@ const useAudioSegment = (props: IProps) => {
       ...newData,
       id: waveRef.current?.util.getId('segment_'),
       end: time,
+      subAttribute: current.subAttribute ?? {},
     };
     const clearText = DataTransform.getClipTextByConfig(current, clipTextList, true);
     const targetRight = {
       ...clearText,
       id: waveRef.current?.util.getId('segment_'),
       start: time,
+      subAttribute: TagUtils.getDefaultResultByConfig(subAttributeList ?? []),
     };
 
     updateRegion?.(targetLeft);
