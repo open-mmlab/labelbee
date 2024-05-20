@@ -784,7 +784,9 @@ export const usePointCloudViews = () => {
     const newPointCloudList = addPointCloudBox(boxParams);
     const polygonList = ptCtx?.polygonList ?? [];
 
-    boxParams.subAttribute = TagUtils.getDefaultResultByConfig(config?.inputList ?? []);
+    boxParams.subAttribute = TagUtils.getDefaultResultByConfig(
+      config?.secondaryAttributeConfigurable ? config?.inputList ?? [] : [],
+    );
 
     topViewInstance?.updatePolygonList(newPointCloudList ?? [], polygonList);
     /** If new box is hidden will not active target point box */
