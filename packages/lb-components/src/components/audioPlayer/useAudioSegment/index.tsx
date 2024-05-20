@@ -36,8 +36,14 @@ const useAudioSegment = (props: IProps) => {
     props;
 
   const { audioClipState, setAudioClipState } = useAudioClipStore();
-  const { selectedRegion, clipConfigurable, segment, clipTextList, subAttributeList } =
-    audioClipState;
+  const {
+    selectedRegion,
+    clipConfigurable,
+    segment,
+    clipTextList,
+    subAttributeList,
+    secondaryAttributeConfigurable = false,
+  } = audioClipState;
   const { id } = selectedRegion;
   const segmentTimeTip = useRef<null | number>(null);
   const mouseEvent = useRef<null | MouseEvent>(null);
@@ -75,7 +81,9 @@ const useAudioSegment = (props: IProps) => {
       ...clearText,
       id: waveRef.current?.util.getId('segment_'),
       start: time,
-      subAttribute: TagUtils.getDefaultResultByConfig(subAttributeList ?? []),
+      subAttribute: TagUtils.getDefaultResultByConfig(
+        secondaryAttributeConfigurable ? subAttributeList ?? [] : [],
+      ),
     };
 
     updateRegion?.(targetLeft);

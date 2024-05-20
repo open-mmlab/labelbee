@@ -9,6 +9,7 @@ import {
   MathUtils,
   getCuboidFromPointCloudBox,
   EPointCloudName,
+  TagUtils,
 } from '@labelbee/lb-annotation';
 import {
   IPointCloudBox,
@@ -782,6 +783,11 @@ export const usePointCloudViews = () => {
     generateRects(boxParams);
     const newPointCloudList = addPointCloudBox(boxParams);
     const polygonList = ptCtx?.polygonList ?? [];
+
+    boxParams.subAttribute = TagUtils.getDefaultResultByConfig(
+      config?.secondaryAttributeConfigurable ? config?.inputList ?? [] : [],
+    );
+
     topViewInstance?.updatePolygonList(newPointCloudList ?? [], polygonList);
     /** If new box is hidden will not active target point box */
     if (isBoxHidden) {
