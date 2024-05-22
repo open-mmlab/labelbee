@@ -371,7 +371,17 @@ const TextInput = (props: IProps) => {
     });
   }
 
-  const clipTextResult = regionsList[0];
+  const regionsListFormat: any[] = [];
+  clipTextList.forEach((i) => {
+    regionsList.forEach((j) => {
+      if (j) {
+        regionsListFormat.push({
+          ...i,
+          clipTextResult: j,
+        });
+      }
+    });
+  });
   return (
     <>
       {config?.enablePlaceholderHotkey && (
@@ -442,7 +452,8 @@ const TextInput = (props: IProps) => {
           ))}
         {clipTextConfigurable &&
           regionsList.length > 0 &&
-          clipTextList.map((item, index) => {
+          regionsListFormat.map((item, index) => {
+            const { clipTextResult } = item;
             const { id, start, end, attribute } = clipTextResult;
             const { maxLength = 3000, label, key, required } = item;
             const text = clipTextResult?.[key];

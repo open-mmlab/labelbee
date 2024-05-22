@@ -3,7 +3,7 @@ import { getWebPcm2WavBase64 } from '@/components/audioAnnotate/utils/getWebPcm2
 import _, { debounce, sortBy } from 'lodash';
 import { PauseOutlined, CaretRightOutlined } from '@ant-design/icons';
 import { cKeyCode, cTool, EventBus, TagUtils } from '@labelbee/lb-annotation';
-import { IAudioTimeSlice, ITextConfigItem } from '@labelbee/lb-utils';
+import { i18n, IAudioTimeSlice, ITextConfigItem } from '@labelbee/lb-utils';
 import { Button } from 'antd';
 import InvalidPage from '@/components/invalidPage';
 import ImageError from '@/components/imageError';
@@ -38,6 +38,7 @@ import SegmentTip from './segmentTip';
 import ToolFooter from '@/views/MainView/toolFooter';
 import { IInputList, RenderFooter } from '@/types/main';
 import { decimalReserved } from '@/components/videoPlayer/utils';
+import { I18nextProvider } from 'react-i18next';
 
 const { EToolName } = cTool;
 const EKeyCode = cKeyCode.default;
@@ -48,6 +49,7 @@ const PER_PROGRESS = 0.1;
 export interface ISetSelectedRegionParams extends ISelectedRegion {
   /** 是否立即播放截取片段 */
   playImmediately?: boolean;
+  isLoopStatus?: boolean;
 }
 
 interface IAudioPlayerContext {
@@ -55,6 +57,38 @@ interface IAudioPlayerContext {
   isEdit: boolean;
   toolName: string;
   imgIndex: number;
+}
+
+interface IProps {
+  fileData: any;
+  height?: number;
+  invalid: boolean;
+  onLoaded?: any;
+  onError?: () => void;
+  context?: IAudioPlayerContext;
+  hideError?: boolean;
+  /** 截取片段数据:regions变化不会触发更新 */
+  regions?: IAudioTimeSlice[];
+  /** 更新截取片段，如果传入的id不存在，会新建一个数据 */
+  updateRegion?: (region: IAudioTimeSlice) => void;
+  /** 根据id删除截取数据 */
+  removeRegion?: (id: string) => void;
+  /** 当前使用的工具panel，用于判断是否展示批注层 */
+  activeToolPanel?: string;
+  clipConfigurable: boolean;
+  clipTextConfigurable: boolean;
+  clipAttributeConfigurable: boolean;
+  secondaryAttributeConfigurable: boolean;
+  subAttributeList: IInputList[];
+  clipAttributeList: IInputList[];
+  /** 是否是查看模式：查看模式需要禁用截取的新建、调整功能 */
+  isCheck?: boolean;
+  /** 查看模式用到的hoverId */
+  hoverRegionId?: string;
+  footer?: RenderFooter;
+  drawLayerSlot?: any;
+  clipTextList: ITextConfigItem[];
+  lang?: string;
 }
 
 export const AudioPlayerContext = React.createContext<IAudioPlayerContext>({
@@ -87,36 +121,8 @@ export const AudioPlayer = ({
   footer,
   drawLayerSlot,
   clipTextList,
-}: {
-  fileData: any;
-  height?: number;
-  invalid: boolean;
-  onLoaded?: any;
-  onError?: () => void;
-  context?: IAudioPlayerContext;
-  hideError?: boolean;
-  /** 截取片段数据:regions变化不会触发更新 */
-  regions?: IAudioTimeSlice[];
-  /** 更新截取片段，如果传入的id不存在，会新建一个数据 */
-  updateRegion?: (region: IAudioTimeSlice) => void;
-  /** 根据id删除截取数据 */
-  removeRegion?: (id: string) => void;
-  /** 当前使用的工具panel，用于判断是否展示批注层 */
-  activeToolPanel?: string;
-  clipConfigurable: boolean;
-  clipTextConfigurable: boolean;
-  clipAttributeConfigurable: boolean;
-  secondaryAttributeConfigurable: boolean;
-  subAttributeList: IInputList[];
-  clipAttributeList: IInputList[];
-  /** 是否是查看模式：查看模式需要禁用截取的新建、调整功能 */
-  isCheck?: boolean;
-  /** 查看模式用到的hoverId */
-  hoverRegionId?: string;
-  footer?: RenderFooter;
-  drawLayerSlot?: any;
-  clipTextList: ITextConfigItem[];
-}) => {
+  lang,
+}: IProps) => {
   const { url, path } = fileData;
   const [isPlaying, setIsPlaying] = useState<boolean>(false);
   const [loading, setLoading] = useState<boolean>(false);
@@ -191,8 +197,9 @@ export const AudioPlayer = ({
    * @param {ISetSelectedRegionParams}
    */
   const setSelectedRegion = (select: ISetSelectedRegionParams) => {
-    const { id, loop = true, playImmediately = false } = select;
+    const { id, loop = true, playImmediately = false, isLoopStatus } = select;
 
+    const loopStatus = isLoopStatus ? isPlayingRef.current : loop;
     if (id) {
       const regionListMap = waveRef.current?.regions?.list ?? {};
       Object.entries(regionListMap).forEach(([, value]: [any, any]) => {
@@ -205,11 +212,11 @@ export const AudioPlayer = ({
       });
 
       setAudioClipState({
-        selectedRegion: { id, loop },
+        selectedRegion: { id, loop: loopStatus },
         selectedAttribute: regionsRef.current?.find((item) => item.id === id)?.attribute ?? '',
       });
 
-      if (loop && playImmediately) {
+      if (loopStatus && playImmediately) {
         getRegionInstanceById(id)?.playLoop();
       }
     } else {
@@ -247,6 +254,12 @@ export const AudioPlayer = ({
     subAttributeList,
     clipTextList,
   };
+
+  useEffect(() => {
+    if (lang) {
+      i18n?.changeLanguage(lang);
+    }
+  }, []);
 
   useEffect(() => {
     setAudioClipState({
@@ -562,7 +575,7 @@ export const AudioPlayer = ({
       }
 
       if (clipTextConfigurable) {
-       const clipTextList =  audioClipStateRef.current.clipTextList
+        const clipTextList = audioClipStateRef.current.clipTextList;
         clipTextList.forEach((i, index) => {
           if (index === 0) {
             Object.assign(regionItem, { text: i?.default });
@@ -936,4 +949,12 @@ export const AudioPlayer = ({
     );
   }
   return audioPlayer;
+};
+
+export const WrapAudioPlayer = (props: IProps) => {
+  return (
+    <I18nextProvider i18n={i18n}>
+      <AudioPlayer {...props} />
+    </I18nextProvider>
+  );
 };
