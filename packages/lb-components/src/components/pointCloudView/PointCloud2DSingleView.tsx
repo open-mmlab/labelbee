@@ -1,5 +1,5 @@
 import { getClassName } from '@/utils/dom';
-import React, { useCallback, useContext, useEffect, useRef, useState } from 'react';
+import React, { useCallback, useContext, useEffect, useMemo, useRef, useState } from 'react';
 import AnnotationView from '@/components/AnnotationView';
 import useSize from '@/hooks/useSize';
 import { useSingleBox } from './hooks/useSingleBox';
@@ -9,6 +9,7 @@ import { useHighlight } from './hooks/useHighlight';
 import HighlightVisible from './components/HighlightVisible';
 import { IFileItem } from '@/types/data';
 import { PointCloudContext } from './PointCloudContext';
+import useDataLinkSwitch from './hooks/useDataLinkSwitch';
 
 import PointCloud2DRectOperationView from '@/components/pointCloud2DRectOperationView';
 
@@ -36,6 +37,19 @@ const PointCloud2DSingleView = ({
   const [loading, setLoading] = useState(false);
   const { cuboidBoxIn2DView, cacheImageNodeSize } = useContext(PointCloudContext);
   const hiddenData = !view2dData;
+
+  const dataLinkSwitchOpts = useMemo(() => {
+    return {
+      zIndex: showEnlarge ? -1 : 101,
+      is2DView: !cuboidBoxIn2DView,
+      imageName: view2dData.path,
+    };
+  }, [showEnlarge, cuboidBoxIn2DView, view2dData.path]);
+
+  const {
+    rendered: dataLinkRendered,
+    isLinking: isLinkToPointCloudDataOrNot,
+  } = useDataLinkSwitch(dataLinkSwitchOpts);
 
   const afterImgOnLoad = (imgNode: HTMLImageElement) => {
     focusSelectBox();
@@ -100,14 +114,17 @@ const PointCloud2DSingleView = ({
           measureVisible={measureVisible}
         />
       ) : (
-        <PointCloud2DRectOperationView
-          mappingData={view2dData}
-          size={size}
-          checkMode={checkMode}
-          afterImgOnLoad={afterImgOnLoad}
-        />
+        <>
+          <PointCloud2DRectOperationView
+            shouldExcludePointCloudBoxListUpdate={!isLinkToPointCloudDataOrNot}
+            mappingData={view2dData}
+            size={size}
+            checkMode={checkMode}
+            afterImgOnLoad={afterImgOnLoad}
+          />
+          {dataLinkRendered}
+        </>
       )}
-
       {calib && (
         <HighlightVisible
           visible={isHighlightVisible(url)}

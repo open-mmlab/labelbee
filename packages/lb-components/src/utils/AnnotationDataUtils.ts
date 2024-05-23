@@ -89,6 +89,10 @@ export default class AnnotationDataUtils {
    */
   public static copyResultItemHandler(params: ICopyResultItemHandlerParams) {
     const { item, key, parent, mappingImgList, preMappingImgList } = params;
+
+    // Get the pre-processing value
+    const oldValue = key ===  undefined ? undefined : parent[key]
+
     if (key === 'id') {
       parent.id = uuid(8, 62);
     }
@@ -98,6 +102,14 @@ export default class AnnotationDataUtils {
         preMappingImgList,
         nextMappingImgList: mappingImgList,
       });
+    }
+
+    // Get the pos-processing value
+    const value = key ===  undefined ? undefined : parent[key]
+
+    return {
+      value,
+      oldValue
     }
   }
 
@@ -121,19 +133,58 @@ export default class AnnotationDataUtils {
         // need copy fields
         const fields = ['result', 'resultRect'];
 
+        // 新老id的映射
+        const resultIdMapping = new Map<string, string>()
+        const enqueueResultIdMapping = (newValue?: string, oldValue?: string) => {
+          // Ignore the invalid value
+          if (newValue === undefined || oldValue === undefined) {
+            console.warn('invalid id')
+            return
+          }
+
+          resultIdMapping.set(oldValue, newValue)
+        }
+
+        // 数据处理
         fields.forEach((field) => {
           if (info[field]) {
             this.traverseDF(info[field], (item: any, key?: string | number, parent?: any) => {
-              this.copyResultItemHandler({
+              const { value: newValue, oldValue } = this.copyResultItemHandler({
                 item,
                 key,
                 parent,
                 mappingImgList,
                 preMappingImgList,
               });
+
+              // FIXME 目前result是一维简单对象数组，后续复杂对象数组项需要考虑先辈key
+              if (field === 'result' && key === 'id') {
+                if (newValue !== undefined && oldValue !== undefined) {
+                  resultIdMapping.set(oldValue, newValue)
+                }
+              }
             });
           }
         });
+
+        /**
+         * 更新resultRect里面的 extId 值，以便同步前面result的数据处理
+         *
+         * @description extId用于识别来源哪个result项
+         */
+        if (resultIdMapping.size) {
+          const resultRect = info['resultRect']
+          if (Array.isArray(resultRect)) {
+            resultRect.forEach(item => {
+              const extId = item.extId
+              const newExtId = resultIdMapping.get(extId)
+              if (extId !== undefined && newExtId !== undefined) {
+                item.extId = newExtId
+              }
+            })
+          }
+        }
+
         currentData[stepName] = info;
         return JSON.stringify(currentData);
       }

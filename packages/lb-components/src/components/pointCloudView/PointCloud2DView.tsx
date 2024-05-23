@@ -419,6 +419,7 @@ const PointCloud2DView = ({
             >
               {item?.annotations && item?.url && (
                 <PointCloud2DSingleView
+                  key={item.url}
                   currentData={currentData}
                   view2dData={item}
                   setSelectedID={setSelectedID}
