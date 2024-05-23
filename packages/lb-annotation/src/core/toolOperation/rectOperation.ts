@@ -38,6 +38,8 @@ class RectOperation extends BasicToolOperation {
   // 具体操作
   public hoverRectID?: string; // 当前是否hover rect
 
+  public selectedRectTextAttribute: string; // 当前选中的文本
+
   public hoverRectPointIndex: number; //  当前 hoverIndex, 依次为左上角、右上角、右下角、左下角
 
   public hoverRectEdgeIndex: number; //  当前 hover 的边
@@ -73,6 +75,7 @@ class RectOperation extends BasicToolOperation {
     this.config = CommonToolUtils.jsonParser(props.config);
     this.hoverRectEdgeIndex = -1;
     this.hoverRectPointIndex = -1;
+    this.selectedRectTextAttribute = '';
     this.markerIndex = 0;
     this.createNewDrawingRect = this.createNewDrawingRect.bind(this);
     this.getDrawingRectWithRectList = this.getDrawingRectWithRectList.bind(this);
@@ -332,6 +335,17 @@ class RectOperation extends BasicToolOperation {
       }
     }
 
+    return '';
+  };
+
+  /**
+   * 获取当前选中rect的文本
+   */
+  public getSelectedRectTextAttribute = (hoverRectID: string) => {
+    if (hoverRectID) {
+      const hoverRect = this.rectList.find((v) => v.id === hoverRectID);
+      return hoverRect?.textAttribute || '';
+    }
     return '';
   };
 
@@ -1167,7 +1181,7 @@ class RectOperation extends BasicToolOperation {
     const hoverRectID = this.getHoverRectID(e);
 
     const hoverRect = this.rectList.find((v) => v.id === hoverRectID);
-
+    this.selectedRectTextAttribute = '';
     if (this.drawingRect) {
       // 取消绘制
       this.drawingRect = undefined;
@@ -1186,10 +1200,14 @@ class RectOperation extends BasicToolOperation {
       }
 
       this.setSelectedRectID(hoverRectID, e.ctrlKey);
+
       // Only executed when one is selected
       if (hoverRect && this.selectedIDs?.length === 1) {
+        // 缓存选中 rect 的文本值
+        this.selectedRectTextAttribute = this.getSelectedRectTextAttribute(hoverRectID);
         this.setDefaultAttribute(hoverRect.attribute);
       }
+
       this.hoverRectID = '';
 
       if (hoverRect?.label && this.hasMarkerConfig) {
@@ -1621,7 +1639,13 @@ class RectOperation extends BasicToolOperation {
 
       const lineWidth = this.style?.width ?? 2;
 
-      if (rect.id === this.hoverRectID || rect.id === this.selectedRectID || this.isMultiMoveMode) {
+      if (
+        rect.id === this.hoverRectID ||
+        // 高亮同textAttribute 的其他框
+        (this.selectedRectTextAttribute !== '' && rect.textAttribute === this.selectedRectTextAttribute) ||
+        rect.id === this.selectedRectID ||
+        this.isMultiMoveMode
+      ) {
         DrawUtils.drawRectWithFill(this.canvas, transformRect, { color: fillColor });
       }
 
