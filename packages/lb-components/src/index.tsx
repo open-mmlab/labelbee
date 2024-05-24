@@ -24,6 +24,7 @@ import MeasureCanvas from './components/measureCanvas';
 import AnnotatedBox from './views/MainView/sidebar/PointCloudToolSidebar/components/annotatedBox';
 import { FindTrackIDIndexInCheckMode as FindTrackIDIndex } from './views/MainView/sidebar/PointCloudToolSidebar/components/findTrackIDIndex';
 import { WrapAudioPlayer as AudioPlayer } from './components/audioPlayer';
+import { getPointCloudBoxRects } from './utils';
 
 export const store = configureStore();
 
@@ -81,6 +82,7 @@ export {
   AnnotatedBox,
   FindTrackIDIndex,
   AudioPlayer,
+  getPointCloudBoxRects,
 };
 
 export * from './constant';

@@ -34,7 +34,7 @@ import _ from 'lodash';
 import { useDispatch, useSelector } from '@/store/ctx';
 import { AppState } from '@/store';
 import StepUtils from '@/utils/StepUtils';
-import { jsonParser, getRectPointCloudBox } from '@/utils';
+import { jsonParser, getRectPointCloudBox, getPointCloudBoxRects } from '@/utils';
 import {
   PreDataProcess,
   SetPointCloudLoading,
@@ -637,18 +637,14 @@ export const usePointCloudViews = () => {
   const cuboidBoxIn2DViewLatest = useLatest(cuboidBoxIn2DView);
 
   const generateRects = (boxParams: IPointCloudBox) => {
-    if (!cuboidBoxIn2DViewLatest.current) {
+    const { enableAutoMap2DRect = false } = config;
+    if (!cuboidBoxIn2DViewLatest.current || enableAutoMap2DRect) {
       const { mappingImgList = [] } = currentData;
-      const rects: Array<ReturnType<typeof getRectPointCloudBox>> = mappingImgList.map(
-        (v: IMappingImg) =>
-          getRectPointCloudBox({
-            pointCloudBox: boxParams,
-            mappingData: v,
-            imageSizes,
-          }),
-      );
-
-      Object.assign(boxParams, { rects: rects.filter((rect) => rect !== undefined) });
+      getPointCloudBoxRects({
+        pointCloudBox: boxParams,
+        mappingImgList,
+        imageSizes,
+      });
     }
   };
   const { selectedBox, updateSelectedBox, updateSelectedBoxes, getPointCloudByID } = useSingleBox({
