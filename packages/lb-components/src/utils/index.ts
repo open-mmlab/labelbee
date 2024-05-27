@@ -138,7 +138,7 @@ export const getRectPointCloudBox = (params: IGetRectPointCloudBoxParams) => {
  * It filters out undefined rectangles and updates the point cloud box with the valid rectangles. Note that this function
  * modifies the `pointCloudBox` parameter by adding a `rects` property.
  */
-export const getPointCloudBoxRects = (params: {
+export const generatePointCloudBoxRects = (params: {
   pointCloudBox: IPointCloudBox;
   mappingImgList: IMappingImg[];
   imageSizes: {
