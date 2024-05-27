@@ -124,3 +124,40 @@ export const getRectPointCloudBox = (params: IGetRectPointCloudBoxParams) => {
 
   if (isRectInImage) return boundingRect;
 };
+/**
+ * Updates the given point cloud box with rectangles derived from the mapping image list and image sizes.
+ *
+ * @param {Object} params - The parameters for the function.
+ * @param {IPointCloudBox} params.pointCloudBox - The point cloud box object to be updated.
+ * @param {IMappingImg[]} params.mappingImgList - The list of mapping images to process.
+ * @param {Object.<string, ISize>} params.imageSizes - An object containing image sizes keyed by image paths.
+ *
+ * @returns {void}
+ *
+ * @description This function processes a list of mapping images to generate rectangles for the provided point cloud box.
+ * It filters out undefined rectangles and updates the point cloud box with the valid rectangles. Note that this function
+ * modifies the `pointCloudBox` parameter by adding a `rects` property.
+ */
+export const generatePointCloudBoxRects = (params: {
+  pointCloudBox: IPointCloudBox;
+  mappingImgList: IMappingImg[];
+  imageSizes: {
+    [key: string]: ISize;
+  };
+}) => {
+  const { pointCloudBox, mappingImgList, imageSizes } = params;
+  const rects: Array<ReturnType<typeof getRectPointCloudBox>> = mappingImgList.map(
+    (v: IMappingImg) =>
+      getRectPointCloudBox({
+        pointCloudBox,
+        mappingData: v,
+        imageSizes,
+      }),
+  );
+
+  const filteredRects = rects.filter((rect) => rect !== undefined);
+
+  if (filteredRects.length > 0) {
+    Object.assign(pointCloudBox, { rects: filteredRects });
+  }
+};
