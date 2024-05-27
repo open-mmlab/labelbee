@@ -1,4 +1,4 @@
-import React, { FocusEvent, useEffect, useRef, useState } from 'react';
+import React, { FocusEvent, useEffect, useMemo, useRef, useState } from 'react';
 import { Radio, Switch, Tooltip } from 'antd';
 import { QuestionCircleOutlined } from '@ant-design/icons';
 import { TextareaWithFooter } from '@/views/MainView/sidebar/TextToolSidebar';
@@ -371,7 +371,23 @@ const TextInput = (props: IProps) => {
     });
   }
 
-  const clipTextResult = regionsList[0];
+  const regionsListFormat = useMemo(() => {
+    return clipTextList.reduce(
+      (acc: Array<ITextConfigItem & { clipTextResult: IAudioTimeSlice }>, i) => {
+        regionsList.forEach((j: IAudioTimeSlice) => {
+          if (j) {
+            acc.push({
+              ...i,
+              clipTextResult: j,
+            });
+          }
+        });
+        return acc;
+      },
+      [],
+    );
+  }, [clipTextList, regionsList]);
+
   return (
     <>
       {config?.enablePlaceholderHotkey && (
@@ -442,7 +458,8 @@ const TextInput = (props: IProps) => {
           ))}
         {clipTextConfigurable &&
           regionsList.length > 0 &&
-          clipTextList.map((item, index) => {
+          regionsListFormat.map((item, index) => {
+            const { clipTextResult } = item;
             const { id, start, end, attribute } = clipTextResult;
             const { maxLength = 3000, label, key, required } = item;
             const text = clipTextResult?.[key];

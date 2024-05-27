@@ -341,6 +341,7 @@ const AudioAnnotate: React.FC<AppProps & IProps> = (props) => {
     currentData,
     config,
     stepInfo,
+    checkMode,
   } = props;
   const annotationStepInfo = CommonToolUtils.getCurrentStepToolAndConfig(step, stepList);
 
@@ -374,7 +375,12 @@ const AudioAnnotate: React.FC<AppProps & IProps> = (props) => {
     toolInstanceRef.current.clearResult = clearResult;
     toolInstanceRef.current.currentPageResult = result?.regions;
     toolInstanceRef.current.emit('updatePageNumber');
+    toolInstanceRef.current.setSelectedRegion = setSelectedRegion;
   }, [result]);
+
+  const setSelectedRegion = (id: number | string) => {
+    EventBus.emit('setSelectedRegion', { id, isLoopStatus: true, playImmediately: true });
+  };
 
   const initToolInstance = () => {
     toolInstanceRef.current.emit = (event: string) => {
@@ -438,7 +444,7 @@ const AudioAnnotate: React.FC<AppProps & IProps> = (props) => {
   const count = CommonToolUtils.jsonParser(currentData.result)?.duration ?? 0;
   const totalText = valid ? count : 0;
   const inputDisabled =
-    !valid || loading || ![textConfigurable, clipTextConfigurable].includes(true);
+    !valid || loading || ![textConfigurable, clipTextConfigurable].includes(true) || checkMode;
   let preContext: { [key: string]: any } = {};
   if (imgIndex !== -1 && imgList?.length) {
     const preResult = imgList[imgIndex]?.preResult;
@@ -494,6 +500,9 @@ const AudioAnnotate: React.FC<AppProps & IProps> = (props) => {
   };
 
   const onLoaded = ({ duration, hasError }: any) => {
+    if (audioContext?.onLoaded) {
+      audioContext?.onLoaded();
+    }
     setLoading(false);
     setDuration(duration);
   };
@@ -595,6 +604,7 @@ const AudioAnnotate: React.FC<AppProps & IProps> = (props) => {
                   regions={result?.regions}
                   activeToolPanel={audioContext?.activeToolPanel}
                   footer={props.footer}
+                  isCheck={checkMode}
                   {...clipConfig}
                 />
               </div>
@@ -612,6 +622,7 @@ const AudioAnnotate: React.FC<AppProps & IProps> = (props) => {
                   clipAttributeList={clipAttributeList}
                   clipAttributeConfigurable={clipAttributeConfigurable}
                   clipTextList={clipTextList}
+                  isCheck={checkMode}
                 />
               )}
             </div>
