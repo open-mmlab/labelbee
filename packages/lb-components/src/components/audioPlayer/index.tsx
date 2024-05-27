@@ -67,13 +67,13 @@ interface IProps {
   onError?: () => void;
   context?: IAudioPlayerContext;
   hideError?: boolean;
-  /** 截取片段数据:regions变化不会触发更新 */
+  /** Intercepting fragment data: area changes do not trigger updates */
   regions?: IAudioTimeSlice[];
-  /** 更新截取片段，如果传入的id不存在，会新建一个数据 */
+  /** Update the intercepted fragment. If the passed id does not exist, a new data will be created. */
   updateRegion?: (region: IAudioTimeSlice) => void;
-  /** 根据id删除截取数据 */
+  /** Delete intercepted data based on ID */
   removeRegion?: (id: string) => void;
-  /** 当前使用的工具panel，用于判断是否展示批注层 */
+  /** The currently used tool panel is used to determine whether to display the annotation layer */
   activeToolPanel?: string;
   clipConfigurable: boolean;
   clipTextConfigurable: boolean;
@@ -81,9 +81,9 @@ interface IProps {
   secondaryAttributeConfigurable: boolean;
   subAttributeList: IInputList[];
   clipAttributeList: IInputList[];
-  /** 是否是查看模式：查看模式需要禁用截取的新建、调整功能 */
+  /** Whether it is in view mode: In view mode, the new and adjustment functions of interception need to be disabled */
   isCheck?: boolean;
-  /** 查看模式用到的hoverId */
+  /** View the hoverId used in the pattern */
   hoverRegionId?: string;
   footer?: RenderFooter;
   drawLayerSlot?: any;
