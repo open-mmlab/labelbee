@@ -130,6 +130,7 @@ export interface IPointCloudConfig {
 
   lowerLimitPointsNumInBox: number;
   trackConfigurable: boolean;
+  enableAutoMap2DRect?: boolean;
 }
 
 interface ICalib {
