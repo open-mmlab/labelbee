@@ -1639,10 +1639,16 @@ class RectOperation extends BasicToolOperation {
 
       const lineWidth = this.style?.width ?? 2;
 
+      const isSameTextAttribute =
+        this.config.textConfigurable &&
+        this.config.isHighlightSameTextAttribute &&
+        this.selectedRectTextAttribute !== '' &&
+        rect.textAttribute === this.selectedRectTextAttribute;
+
       if (
         rect.id === this.hoverRectID ||
         // 高亮同textAttribute 的其他框
-        (this.selectedRectTextAttribute !== '' && rect.textAttribute === this.selectedRectTextAttribute) ||
+        isSameTextAttribute ||
         rect.id === this.selectedRectID ||
         this.isMultiMoveMode
       ) {
