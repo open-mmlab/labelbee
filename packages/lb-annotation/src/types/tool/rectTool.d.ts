@@ -27,6 +27,7 @@ declare interface IRectConfig extends IToolConfig {
   attributeConfigurable: boolean;
   drawOutsideTarget: boolean;
   textConfigurable: boolean;
+  isHighlightSameTextAttribute: boolean;
   copyBackwardResult: boolean;
   minWidth: number;
   minHeight: number;
