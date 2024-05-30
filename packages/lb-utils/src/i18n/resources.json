@@ -359,7 +359,8 @@
     "GlobalAnnotation": "Global annotation",
     "QualifiedAnnotation": "Qualified annotation",
     "InvalidQuestionAndSkip": "Invalid question, please skip this question",
-    "ProjectionFrameCannotBeDeleted": "Projection frame cannot be deleted"
+    "ProjectionFrameCannotBeDeleted": "Projection frame cannot be deleted",
+    "FailedToCopyResults": "Failed to copy results"
   },
   "cn": {
     "TextInput": "文本输入",
@@ -721,6 +722,7 @@
     "GlobalAnnotation": "全局标注",
     "QualifiedAnnotation": "限定标注",
     "InvalidQuestionAndSkip": "无效题目，请跳过此题",
-    "ProjectionFrameCannotBeDeleted": "投射框无法删除"
+    "ProjectionFrameCannotBeDeleted": "投射框无法删除",
+    "FailedToCopyResults": "复制结果失败"
   }
 }

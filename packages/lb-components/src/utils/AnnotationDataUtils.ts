@@ -5,6 +5,8 @@ import _ from 'lodash';
 import StepUtils from './StepUtils';
 import { IStepInfo } from '@/types/step';
 import { IMappingImg } from '@/types/data';
+import { message } from 'antd';
+import { i18n } from '@labelbee/lb-utils';
 
 interface ICopyResultChangeParams {
   copyResult: string;
@@ -74,7 +76,11 @@ export default class AnnotationDataUtils {
 
     const nextPath = nextMappingImgList.find((img) => img.calib?.calName === calName)?.path;
 
-    return nextPath ?? '';
+    if (!nextPath) {
+      throw Error(`nextPath error`);
+    }
+
+    return nextPath;
   }
   /**
    * Handles the processing of individual items during the traversal of results or resultRect.
@@ -139,7 +145,11 @@ export default class AnnotationDataUtils {
       }
       return copyResult;
     } catch {
-      return copyResult;
+      /**
+       * Note: This function should not return `copyResult`, as this will cause duplicate ID issues with the previous image.
+       * Additionally, `imageName` will also cause errors because it is based on the previous image's address and cannot be correctly displayed on the current page.
+       */
+      message.info(i18n.t('FailedToCopyResults'));
     }
   }
 
