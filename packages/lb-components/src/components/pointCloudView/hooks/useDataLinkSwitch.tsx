@@ -13,6 +13,8 @@ import { useLatest } from 'ahooks';
 import { PointCloudContext } from '../PointCloudContext';
 import LinkIcon from '@/assets/annotation/icon_link.svg';
 import UnlinkIcon from '@/assets/annotation/icon_unlink.svg';
+import { BatchSwitchConnectionEventBusEvent } from '@/views/MainView/toolFooter/BatchSwitchConnectIn2DView';
+import { EventBus } from '@labelbee/lb-annotation';
 
 const iconSize = { width: 16, height: 16 };
 
@@ -43,15 +45,19 @@ const useDataLinkSwitch = (opts: UseDataLinkSwitchOptions) => {
   const imageNameRef = useRef(opts.imageName);
   imageNameRef.current = opts.imageName;
 
-  const { unlinkImageItems, addRectFromPointCloudBoxByImageName, removeRectByPointCloudBoxId } =
-    useContext(PointCloudContext);
+  const {
+    unlinkImageItems,
+    addRectFromPointCloudBoxByImageName,
+    removeRectByPointCloudBoxId,
+    imageNamePointCloudBoxMap,
+  } = useContext(PointCloudContext);
 
   const addRect = useLatest(addRectFromPointCloudBoxByImageName);
   const removeRect = useLatest(removeRectByPointCloudBoxId);
 
   const fireSwitch = useCallback((isLinking: boolean) => {
     const imageName = imageNameRef.current;
-    // Should has the image name
+    // Check image name
     if (!imageName) {
       console.warn('invalid image name');
       return;
@@ -70,6 +76,16 @@ const useDataLinkSwitch = (opts: UseDataLinkSwitchOptions) => {
     fireSwitch(!isLinking);
   }, [fireSwitch, isLinking]);
 
+  const hasImageNameInPointCloudBox = useMemo(() => {
+    if (!opts.imageName) {
+      console.error('Missing image name');
+      return false;
+    }
+
+    return imageNamePointCloudBoxMap.has(opts.imageName);
+  }, [opts.imageName, imageNamePointCloudBoxMap]);
+
+  /** Connect/disconnect button render */
   const rendered = useMemo(() => {
     // Hide the switch temporarily
     if (!opts.is2DView || opts.is2DView) {
@@ -77,6 +93,11 @@ const useDataLinkSwitch = (opts: UseDataLinkSwitchOptions) => {
     }
 
     if (!opts.is2DView) {
+      return null;
+    }
+
+    /** No pointCloudBox match is meaning no connect relative */
+    if (!hasImageNameInPointCloudBox) {
       return null;
     }
 
@@ -104,7 +125,7 @@ const useDataLinkSwitch = (opts: UseDataLinkSwitchOptions) => {
         {!isLinking && <img src={UnlinkIcon} style={iconSize} />}
       </div>
     );
-  }, [isLinking, opts.is2DView, opts.zIndex, handleSwitch]);
+  }, [isLinking, opts.is2DView, opts.zIndex, handleSwitch, hasImageNameInPointCloudBox]);
 
   const syncIsLinking = useCallback(() => {
     if (!opts.is2DView) return;
@@ -119,20 +140,29 @@ const useDataLinkSwitch = (opts: UseDataLinkSwitchOptions) => {
     const initIsLinking = set.has(imageName) === false;
 
     fireSwitch(initIsLinking);
-  }, [opts.is2DView, unlinkImageItems, fireSwitch])
+  }, [opts.is2DView, unlinkImageItems, fireSwitch]);
 
   // const syncIsLinkingRef = useLatest(syncIsLinking)
 
-  // 读取内部`isLinking`
+  // Read the latest `isLinking`
   useEffect(() => {
-    syncIsLinking()
+    syncIsLinking();
   }, [syncIsLinking]);
+
+  useEffect(() => {
+    const fn = (isConnect: boolean) => {
+      fireSwitch(isConnect);
+    };
+
+    EventBus.on(BatchSwitchConnectionEventBusEvent.switchConnect, fn);
+    return () => EventBus.unbind(BatchSwitchConnectionEventBusEvent.switchConnect, fn);
+  }, [fireSwitch]);
 
   return {
     rendered,
     isLinking,
     swapSwitch: fireSwitch,
-    syncIsLinking
+    syncIsLinking,
   };
 };
 

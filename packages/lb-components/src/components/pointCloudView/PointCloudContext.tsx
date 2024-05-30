@@ -13,8 +13,7 @@ import {
   IPointCloud2DRectOperationViewRect,
 } from '@labelbee/lb-utils';
 import React, {
-  Dispatch,
-  SetStateAction,
+  PropsWithChildren,
   useCallback,
   useEffect,
   useMemo,
@@ -153,6 +152,8 @@ export interface IPointCloudContext
   removeRectByPointCloudBoxId: (imageName: string) => boolean;
   rectRotateSensitivity: number; // Rect Rotate Sensitivity
   setRectRotateSensitivity: (sensitivity: number) => void;
+
+  imageNamePointCloudBoxMap: Map<string, IPointCloudBox[]>
 }
 
 const pickRectObject = (rect: IPointCloud2DRectOperationViewRect) => {
@@ -240,9 +241,11 @@ export const PointCloudContext = React.createContext<IPointCloudContext>({
   removeRectByPointCloudBoxId: (imageName: string) => false,
   rectRotateSensitivity: 2,
   setRectRotateSensitivity: () => {},
+
+  imageNamePointCloudBoxMap: new Map()
 });
 
-export const PointCloudProvider: React.FC<{}> = ({ children }) => {
+export const PointCloudProvider: React.FC<PropsWithChildren<{}>> = ({ children }) => {
   const [pointCloudBoxList, setPointCloudResult] = useState<IPointCloudBoxList>([]);
   const [pointCloudSphereList, setPointCloudSphereList] = useState<IPointCloudSphereList>([]);
   const [polygonList, setPolygonList] = useState<IPolygonData[]>([]);
@@ -386,6 +389,36 @@ export const PointCloudProvider: React.FC<{}> = ({ children }) => {
     },
     [pointCloudBoxList],
   );
+
+  /** Map Shape: imageName -> [pointCloudBox, ...] */
+  const imageNamePointCloudBoxMap = useMemo(() => {
+    const filterRectsItems = pointCloudBoxList.filter(item => Array.isArray(item.rects) && item.rects.length > 0)
+
+    return filterRectsItems.reduce((r, item) => {
+      item.rects?.forEach(rect => {
+        const { imageName } = rect
+        if (!imageName) {
+          console.warn('Missing image name')
+          console.trace(item)
+
+          return
+        }
+
+        let prev: IPointCloudBox[] | undefined = r.get(imageName)
+        // Use the array shape
+        if (!prev) {
+          prev  = []
+        }
+
+        // Enqueue the latest item
+        prev.push(item)
+
+        r.set(imageName, prev)
+      })
+
+      return r
+    }, new Map<string, IPointCloudBox[]>())
+  }, [pointCloudBoxList])
 
   const ptCtx = useMemo(() => {
     const selectedPointCloudBox = pointCloudBoxList.find((v) => v.id === selectedID);
@@ -658,6 +691,8 @@ export const PointCloudProvider: React.FC<{}> = ({ children }) => {
       addRectFromPointCloudBoxByImageName,
       rectRotateSensitivity,
       setRectRotateSensitivity,
+
+      imageNamePointCloudBoxMap,
     };
   }, [
     valid,
@@ -686,7 +721,8 @@ export const PointCloudProvider: React.FC<{}> = ({ children }) => {
     removeRectByPointCloudBoxId,
     removeRectBySpecifyId,
     addRectFromPointCloudBoxByImageName,
-    rectRotateSensitivity
+    rectRotateSensitivity,
+    imageNamePointCloudBoxMap
   ]);
 
   useEffect(() => {
