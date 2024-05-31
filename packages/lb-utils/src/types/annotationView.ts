@@ -14,6 +14,10 @@ export interface IBasicStyle {
   thickness?: number; // 当前图形宽度
 }
 
+export interface IBasicStyleExt {
+  lineDash?: number[]; // 边框虚线配置
+}
+
 export interface IRenderEnhanceParams {
   ctx: CanvasRenderingContext2D | null;
   canvas: HTMLCanvasElement | null;

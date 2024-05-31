@@ -763,6 +763,7 @@ export const annotationReducer = (
        */
       // @ts-ignore
       toolInstance?.asyncData?.(imgList[imgIndex]);
+
       return {
         ...state,
         imgList: [...imgList],
