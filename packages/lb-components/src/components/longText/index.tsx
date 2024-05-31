@@ -51,15 +51,15 @@ const TextDom = forwardRef(
     };
 
     const initStyle = overflowMaxLines > 1 ? linesStyle : singleLineStyle;
+
+    // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
+    const divStyle = {
+      ...initStyle,
+      ...(style ?? {}),
+    } as CSSProperties;
+
     return (
-      <div
-        style={{
-          ...initStyle,
-          ...style,
-        }}
-        ref={ref}
-        {...rest}
-      >
+      <div style={divStyle} ref={ref} {...rest}>
         {text}
       </div>
     );

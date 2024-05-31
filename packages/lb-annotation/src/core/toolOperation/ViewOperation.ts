@@ -813,11 +813,16 @@ export default class ViewOperation extends BasicToolOperation {
               lineHeight = 25,
               font = DEFAULT_FONT,
               position,
+              offset,
             } = textAnnotation;
             const paddingTB = 10;
             const paddingLR = 10;
 
             const renderPoint = AxisUtils.changePointByZoom({ x, y }, this.zoom, this.currentPos);
+            if (offset) {
+              renderPoint.x += offset.x ?? 0;
+              renderPoint.y += offset.y ?? 0;
+            }
 
             const {
               width,
