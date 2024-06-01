@@ -89,13 +89,11 @@ const TopViewToolbar = ({ currentData }: IAnnotationStateProps) => {
 
   const currentToolName = ptCtx?.topViewInstance?.toolScheduler?.getCurrentToolName();
 
-  const ratio = 2;
-
   const clockwiseRotate = () => {
-    updateRotate(-ratio);
+    updateRotate(-Number(ptCtx.rectRotateSensitivity));
   };
   const anticlockwiseRotate = () => {
-    updateRotate(ratio);
+    updateRotate(ptCtx.rectRotateSensitivity);
   };
 
   const reverseRotate = () => {
