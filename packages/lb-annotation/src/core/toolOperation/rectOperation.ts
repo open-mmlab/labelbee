@@ -68,6 +68,9 @@ class RectOperation extends BasicToolOperation {
 
   private highlightVisible = false;
 
+  /** Whether or not add rect */
+  private enableAddRect = true;
+
   constructor(props: IRectOperationProps) {
     super(props);
     this._drawOutSideTarget = props.drawOutSideTarget || false;
@@ -890,7 +893,7 @@ class RectOperation extends BasicToolOperation {
       this.render();
     }
 
-    if (this.drawingRect && this.firstClickCoord) {
+    if (this.enableAddRect && this.drawingRect && this.firstClickCoord) {
       let { x, y } = this.firstClickCoord;
       let { width, height } = this.drawingRect;
 
@@ -1120,10 +1123,7 @@ class RectOperation extends BasicToolOperation {
     if (Math.round(width) < this.config.minWidth || Math.round(height) < this.config.minHeight) {
       this.emit('messageInfo', locale.getMessagesByLocale(EMessage.RectErrorSizeNotice, this.lang));
 
-      this.drawingRect = undefined;
-      this.firstClickCoord = undefined;
-      this.dragInfo = undefined;
-      this.dragStatus = EDragStatus.Wait;
+      this.clearDrawingStatus();
       this.render();
       return;
     }
@@ -1134,10 +1134,7 @@ class RectOperation extends BasicToolOperation {
     this.history.pushHistory(this.rectList);
     this.setSelectedIdAfterAddingDrawingRect();
 
-    this.firstClickCoord = undefined;
-    this.drawingRect = undefined;
-    this.dragInfo = undefined;
-    this.dragStatus = EDragStatus.Wait;
+    this.clearDrawingStatus();
   }
 
   public setSelectedIdAfterAddingDrawingRect() {
@@ -1234,6 +1231,11 @@ class RectOperation extends BasicToolOperation {
     this.emit('updateDragResult', { ...this.selectedRect });
   }
 
+  /** Allow/Disallow to add rect to rectList */
+  public setEnableAddRect(isEnableAddRect: boolean) {
+    this.enableAddRect = isEnableAddRect;
+  }
+
   public onMouseUp(e: MouseEvent) {
     if (super.onMouseUp(e) || this.forbidMouseOperation || !this.imgInfo) {
       return true;
@@ -1265,8 +1267,15 @@ class RectOperation extends BasicToolOperation {
 
     const basicSourceID = CommonToolUtils.getSourceID(this.basicResult);
     if (this.drawingRect) {
-      // 结束框的绘制
-      this.addDrawingRectToRectList();
+      if (this.enableAddRect) {
+        // 结束框的绘制
+        this.addDrawingRectToRectList();
+      } else {
+        // Clear the drawing
+        this.clearDrawingStatus();
+        this.render();
+      }
+
       return;
     }
 
@@ -1276,9 +1285,11 @@ class RectOperation extends BasicToolOperation {
       return;
     }
 
-    // 创建框
-    this.createNewDrawingRect(e, basicSourceID);
-    this.render();
+    if (this.enableAddRect) {
+      // 创建框
+      this.createNewDrawingRect(e, basicSourceID);
+      this.render();
+    }
 
     return undefined;
   }
@@ -1858,14 +1869,18 @@ class RectOperation extends BasicToolOperation {
     this.emit('updateResult');
   }
 
-  /**
-   *  清楚所有的中间状态
-   */
-  public clearActiveStatus() {
+  private clearDrawingStatus() {
     this.drawingRect = undefined;
     this.firstClickCoord = undefined;
     this.dragInfo = undefined;
     this.dragStatus = EDragStatus.Wait;
+  }
+
+  /**
+   *  清楚所有的中间状态
+   */
+  public clearActiveStatus() {
+    this.clearDrawingStatus();
     this.setSelectedRectID(undefined);
     this.setOperationMode(EOperationMode.General);
   }
