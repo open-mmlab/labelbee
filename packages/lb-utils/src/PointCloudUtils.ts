@@ -95,11 +95,9 @@ class PointCloudUtils {
       }
 
       for (const key in o) {
-        if (o.hasOwnProperty(key)) {
-          const value = o[key];
-          if (isErrorValue(value) || (typeof value === 'object' && checkObject(value))) {
-            return true;
-          }
+        const value = o[key];
+        if (isErrorValue(value) || (typeof value === 'object' && checkObject(value))) {
+          return true;
         }
       }
 
