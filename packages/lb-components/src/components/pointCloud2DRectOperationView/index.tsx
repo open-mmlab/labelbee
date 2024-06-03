@@ -16,7 +16,13 @@ import { a2MapStateToProps } from '@/store/annotation/map';
 import { LabelBeeContext } from '@/store/ctx';
 import { IMappingImg } from '@/types/data';
 import { ImgUtils, PointCloud2DRectOperation, uuid } from '@labelbee/lb-annotation';
-import { IPointCloudBoxRect, IPointCloud2DRectOperationViewRect } from '@labelbee/lb-utils';
+import {
+  IPointCloudBoxRect,
+  IPointCloud2DRectOperationViewRect,
+  IPointCloudBox,
+} from '@labelbee/lb-utils';
+import { selectSpecifiedRectsFromTopViewSelectedIds } from './util';
+import { useUpdateRectList } from './useUpdateRectList';
 
 import { TAfterImgOnLoad } from '../AnnotationView';
 import _ from 'lodash';
@@ -56,7 +62,11 @@ const PointCloud2DRectOperationView = (props: IPointCloud2DRectOperationViewProp
     updateRectIn2DView,
     removeRectIn2DView,
     updateRectListByReducer,
+    selectedIDs,
+    setSelectedIDs,
   } = useContext(PointCloudContext);
+
+  const lastSelectedIds = useLatest(selectedIDs);
 
   const { update2DViewRect, remove2DViewRect } = usePointCloudViews();
   const ref = React.useRef(null);
@@ -74,14 +84,51 @@ const PointCloud2DRectOperationView = (props: IPointCloud2DRectOperationViewProp
 
   const mappingDataPath = useLatest(mappingData?.path);
 
+  const recoverSelectedIds = useCallback(
+    async (fn: (() => IPointCloudBox[] | null) | (() => Promise<IPointCloudBox[] | null>)) => {
+      try {
+        const cloned = lastSelectedIds.current.slice(0);
+
+        const result = await Promise.resolve(fn());
+
+        if (!result || result.length === 0) {
+          return result;
+        }
+
+        if (cloned.length) {
+          const set = new Set(cloned);
+          const newSelectedIDs = (result as IPointCloudBox[])
+            .filter((item) => set.has(item.id))
+            .map((item) => item.id);
+
+          setSelectedIDs(newSelectedIDs);
+        }
+
+        return result;
+      } catch (err) {}
+    },
+    [setSelectedIDs],
+  );
+
   const handleUpdateDragResult = (rect: IPointCloud2DRectOperationViewRect) => {
     const { boxID } = rect;
 
     if (!shouldExcludePointCloudBoxListUpdate) {
       if (boxID) {
-        const result = update2DViewRectFn?.(rect);
-        newPointCloudResult.current = result;
-        setPointCloudResult(result || []);
+        recoverSelectedIds(() => {
+          // NOTE maybe change selectIds
+          const result = update2DViewRectFn?.(rect);
+          newPointCloudResult.current = result;
+
+          if (result) {
+            setPointCloudResult(result);
+
+            return result as IPointCloudBox[];
+          }
+
+          return null;
+        });
+
         return;
       }
     }
@@ -105,8 +152,14 @@ const PointCloud2DRectOperationView = (props: IPointCloud2DRectOperationViewProp
       if (hasBoxIDRect) {
         const result = remove2DViewRectFn?.(hasBoxIDRect);
         newPointCloudResult.current = result;
-        setPointCloudResult(result || []);
-        updateRectList();
+
+        if (result) {
+          setPointCloudResult(result);
+          updateRectList();
+
+          return result;
+        }
+
         return;
       }
     }
@@ -140,11 +193,23 @@ const PointCloud2DRectOperationView = (props: IPointCloud2DRectOperationViewProp
     return allRects;
   });
 
-  const updateRectList = useMemoizedFn(() => {
+  const updateRectList = useUpdateRectList(() => {
     const rectListByBoxList = shouldExcludePointCloudBoxListUpdate ? [] : getRectListByBoxList();
     const selectedRectID = operation.current?.selectedRectID;
 
-    operation.current?.setResult([...rectListByBoxList, ...rectListInImage]);
+    // Case 1: Show all ids
+    // const img2dResult = [...rectListByBoxList, ...rectListInImage]
+
+    // Case 2: Only show the selected ids
+    const clonedSelectedIDs = selectedIDs.slice(0);
+    const img2dResult = selectSpecifiedRectsFromTopViewSelectedIds(
+      clonedSelectedIDs,
+      rectListByBoxList,
+      rectListInImage,
+    );
+
+    operation.current?.setResult(img2dResult);
+
     if (selectedRectID) {
       operation.current?.setSelectedRectID(selectedRectID);
     }
@@ -259,16 +324,20 @@ const PointCloud2DRectOperationView = (props: IPointCloud2DRectOperationViewProp
 
   useEffect(() => {
     updateRectList();
-  }, [shouldExcludePointCloudBoxListUpdate])
+  }, [shouldExcludePointCloudBoxListUpdate]);
 
   useEffect(() => {
     const preConfig = operation.current?.config ?? {};
-    const newConfig = { ...preConfig, attributeList: config.attributeList ?? [] }
+    const newConfig = { ...preConfig, attributeList: config.attributeList ?? [] };
 
-    operation.current?.setConfig(
-      JSON.stringify(newConfig),
-    );
+    operation.current?.setConfig(JSON.stringify(newConfig));
   }, [config.attributeList]);
+
+  useEffect(() => {
+    // Only enable add rect when no selected item
+    operation.current?.setEnableAddRect(selectedIDs.length === 0);
+    updateRectList();
+  }, [selectedIDs]);
 
   return (
     <Spin spinning={loading}>
