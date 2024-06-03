@@ -69,7 +69,7 @@ class PointCloudUtils {
     const rectList = ptResult?.resultRect ?? [];
 
     return {
-      boxParamsList,
+      boxParamsList: boxParamsList.filter((box: IPointCloudBox) => !this.hasErrorValueObj(box)),
       polygonList,
       lineList,
       sphereParamsList,
@@ -77,13 +77,39 @@ class PointCloudUtils {
       rectList,
     };
   }
+  /**
+   * Checks if an object contains error values (null, undefined, or NaN).
+   * @param {Object} obj - The object to check.
+   * @returns {boolean} True if the object contains error values, false otherwise.
+   */
+  public static hasErrorValueObj(obj: Object) {
+    // Helper function to check for error values
+    function isErrorValue(value: any) {
+      return value === null || value === undefined || Number.isNaN(value);
+    }
+
+    // Recursive function to check an object for error values
+    function checkObject(o: any) {
+      if (typeof o !== 'object' || o === null) {
+        return isErrorValue(o);
+      }
+
+      for (const key in o) {
+        const value = o[key];
+        if (isErrorValue(value) || (typeof value === 'object' && checkObject(value))) {
+          return true;
+        }
+      }
+
+      return false;
+    }
+
+    return checkObject(obj);
+  }
 
   public static getBoxParamsFromResultList(result: string): IPointCloudBox[] {
-    const data = this.jsonParser(result);
-
-    const pointCloudDataList = data?.[POINT_CLOUD_DEFAULT_STEP]?.result ?? [];
-
-    return pointCloudDataList;
+    const { boxParamsList } = this.parsePointCloudCurrentResult(result);
+    return boxParamsList;
   }
 
   public static getRectParamsFromResultList(result: string): IPointCloudBoxRect[] {
