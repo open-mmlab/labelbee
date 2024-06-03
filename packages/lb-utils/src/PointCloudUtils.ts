@@ -69,7 +69,7 @@ class PointCloudUtils {
     const rectList = ptResult?.resultRect ?? [];
 
     return {
-      boxParamsList,
+      boxParamsList: boxParamsList.map((box: IPointCloudBox) => this.fixPointCloudBox(box)),
       polygonList,
       lineList,
       sphereParamsList,
@@ -78,12 +78,24 @@ class PointCloudUtils {
     };
   }
 
+  public static fixPointCloudBox(box: IPointCloudBox) {
+    return {
+      ...box,
+      center: {
+        x: box?.center?.x ?? 0,
+        y: box?.center?.y ?? 0,
+        z: box?.center?.z ?? 0,
+      },
+      width: box?.width ?? 0,
+      height: box?.height ?? 0,
+      depth: box?.depth ?? 0,
+      rotation: box?.rotation ?? 0,
+    };
+  }
+
   public static getBoxParamsFromResultList(result: string): IPointCloudBox[] {
-    const data = this.jsonParser(result);
-
-    const pointCloudDataList = data?.[POINT_CLOUD_DEFAULT_STEP]?.result ?? [];
-
-    return pointCloudDataList;
+    const { boxParamsList } = this.parsePointCloudCurrentResult(result);
+    return boxParamsList;
   }
 
   public static getRectParamsFromResultList(result: string): IPointCloudBoxRect[] {
