@@ -226,14 +226,9 @@
   height: 14px;
   margin-left: 4px;
   vertical-align: text-top;
-  background-image: url(~@/assets/tool_Icon/icon_clearSmall.svg);
   background-repeat: no-repeat;
   background-position: center;
   cursor: pointer;
-
-  &:not(.disabled):hover {
-    background-image: url(~@/assets/tool_Icon/icon_clearSmall_a.svg);
-  }
 
   &.disabled {
     cursor: not-allowed;

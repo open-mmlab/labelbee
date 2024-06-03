@@ -18,7 +18,8 @@ import styles from './index.module.scss';
 import { IInputList } from '@/types/main';
 import { useTranslation } from 'react-i18next';
 import LongText from '@/components/longText';
-// import { AlgorithmButtonForText } from '../icons/algorithmButton';
+import IconClearSmallA from '@/assets/annotation/common/icon_clearSmall_a.svg';
+import IconClearSmall from '@/assets/annotation/common/icon_clearSmall.svg';
 
 const EKeyCode = cKeyCode.default;
 
@@ -29,13 +30,22 @@ interface IClearIcon {
 }
 
 export const ClearIcon = ({ onClick, title, disabled }: IClearIcon) => {
+  const [hoverDelete, setHoverDelete] = useState<boolean>(false);
   return (
     <Tooltip placement='bottom' title={title}>
-      <span
+      <img
+        onMouseEnter={() => {
+          if (disabled) {
+            return;
+          }
+          setHoverDelete(true);
+        }}
+        onMouseLeave={() => setHoverDelete(false)}
         className={classnames({
           [styles.clearIcon]: true,
           [styles.disabled]: disabled,
         })}
+        src={hoverDelete ? IconClearSmallA : IconClearSmall}
         onClick={onClick}
       />
     </Tooltip>

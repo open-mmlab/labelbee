@@ -25,6 +25,7 @@ import AnnotatedBox from './views/MainView/sidebar/PointCloudToolSidebar/compone
 import { FindTrackIDIndexInCheckMode as FindTrackIDIndex } from './views/MainView/sidebar/PointCloudToolSidebar/components/findTrackIDIndex';
 import { WrapAudioPlayer as AudioPlayer } from './components/audioPlayer';
 import { generatePointCloudBoxRects } from './utils';
+import SubAttributeList from './components/subAttributeList';
 
 export const store = configureStore();
 
@@ -83,6 +84,7 @@ export {
   FindTrackIDIndex,
   AudioPlayer,
   generatePointCloudBoxRects,
+  SubAttributeList,
 };
 
 export * from './constant';

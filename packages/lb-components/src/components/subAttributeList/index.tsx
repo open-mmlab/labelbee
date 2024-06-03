@@ -3,17 +3,17 @@
  * @author lihuaqi <lihuaqi@sensetime.com>
  * @createdate 2024-4-30
  */
-import React from 'react';
+import React, { useEffect } from 'react';
 import { Select, Divider, Checkbox } from 'antd';
-import { useTranslation } from 'react-i18next';
+import { useTranslation, I18nextProvider } from 'react-i18next';
 import AttributeList from '@/components/attributeList';
-
-import { IInputList } from '@labelbee/lb-utils';
+import { IInputList, i18n } from '@labelbee/lb-utils';
 
 interface IProps {
   subAttributeList: IInputList[];
   setSubAttribute: (value: string, subAttribute: string) => void;
   getValue: (subAttribute: IInputList) => undefined | string;
+  lang?: string;
 }
 
 const subTitleStyle = {
@@ -24,9 +24,14 @@ const subTitleStyle = {
 };
 
 const SubAttributeList = (props: IProps) => {
-  const { subAttributeList, setSubAttribute, getValue } = props;
+  const { subAttributeList, setSubAttribute, getValue, lang } = props;
   const { t } = useTranslation();
 
+  useEffect(() => {
+    if (lang) {
+      i18n?.changeLanguage(lang);
+    }
+  }, []);
   const setSubAttributeValue = (value: string, subAttribute: string | string[]) => {
     if (Array.isArray(subAttribute)) {
       setSubAttribute(value, subAttribute.join(';'));
@@ -107,4 +112,12 @@ const SubAttributeList = (props: IProps) => {
   );
 };
 
-export default SubAttributeList;
+const WrapSubAttributeList = (props: IProps) => {
+  return (
+    <I18nextProvider i18n={i18n}>
+      <SubAttributeList {...props} />
+    </I18nextProvider>
+  );
+};
+
+export default WrapSubAttributeList;
