@@ -150,15 +150,19 @@ const PointCloud2DRectOperationView = (props: IPointCloud2DRectOperationViewProp
     if (!shouldExcludePointCloudBoxListUpdate) {
       const hasBoxIDRect = rectList.find((rect) => rect.boxID);
       if (hasBoxIDRect) {
-        const result = remove2DViewRectFn?.(hasBoxIDRect);
-        newPointCloudResult.current = result;
+        recoverSelectedIds(() => {
+          const result = remove2DViewRectFn?.(hasBoxIDRect);
+          newPointCloudResult.current = result;
 
-        if (result) {
-          setPointCloudResult(result);
-          updateRectList();
+          if (result) {
+            setPointCloudResult(result);
+            updateRectList();
 
-          return result;
-        }
+            return result;
+          }
+
+          return null
+        });
 
         return;
       }
