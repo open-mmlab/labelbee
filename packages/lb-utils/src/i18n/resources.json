@@ -360,7 +360,8 @@
     "QualifiedAnnotation": "Qualified annotation",
     "InvalidQuestionAndSkip": "Invalid question, please skip this question",
     "ProjectionFrameCannotBeDeleted": "Projection frame cannot be deleted",
-    "FailedToCopyResults": "Failed to copy results"
+    "FailedToCopyResults": "Failed to copy results",
+    "PartialResultsReplicationFailure": "Partial results replication failure"
   },
   "cn": {
     "TextInput": "文本输入",
@@ -723,6 +724,7 @@
     "QualifiedAnnotation": "限定标注",
     "InvalidQuestionAndSkip": "无效题目，请跳过此题",
     "ProjectionFrameCannotBeDeleted": "投射框无法删除",
-    "FailedToCopyResults": "复制结果失败"
+    "FailedToCopyResults": "复制结果失败",
+    "PartialResultsReplicationFailure": "部分结果复制失败"
   }
 }
