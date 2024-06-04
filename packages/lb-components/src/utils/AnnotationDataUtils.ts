@@ -76,10 +76,6 @@ export default class AnnotationDataUtils {
 
     const nextPath = nextMappingImgList.find((img) => img.calib?.calName === calName)?.path;
 
-    if (!nextPath) {
-      throw Error(`nextPath error`);
-    }
-
     return nextPath;
   }
   /**
@@ -189,6 +185,29 @@ export default class AnnotationDataUtils {
               }
             })
           }
+        }
+        
+        const needFilterFields = ['resultRect', 'rects'];
+
+        const errorValues: any[] = [];
+
+        this.traverseDF(info, (item: any, key?: string | number, parent?: any) => {
+          if (_.isString(key) && needFilterFields.includes(key) && Array.isArray(item)) {
+            parent[key] = item.filter((i: any) => {
+              if (i.imageName) {
+                return true;
+              }
+
+              errorValues.push(i);
+
+              return false;
+            });
+          }
+        });
+
+        if (errorValues.length) {
+          console.warn(errorValues);
+          message.info(i18n.t('PartialResultsReplicationFailure'));
         }
 
         currentData[stepName] = info;
