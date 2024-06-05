@@ -49,6 +49,7 @@ interface ITransferViewData {
 export interface IAnnotationData2dView {
   annotations: IAnnotationDataTemporarily[];
   url: string;
+  fallbackUrl?: string;
   calName?: string;
   calib?: ICalib;
   path: string;
@@ -261,6 +262,7 @@ const PointCloud2DView = ({
         newAnnotations2dList.push({
           annotations: newAnnotations2d,
           url: mappingData?.url,
+          fallbackUrl: mappingData?.fallbackUrl ?? '',
           calName: mappingData?.calib?.calName,
           calib: mappingData?.calib,
           path: mappingData?.path,
