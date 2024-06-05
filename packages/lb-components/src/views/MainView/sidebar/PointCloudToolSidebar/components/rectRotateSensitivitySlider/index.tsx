@@ -1,7 +1,13 @@
+/*
+ * @file Provides a slider component for adjusting the rotation angle sensitivity in a point cloud context.
+ *       The slider allows values between 1 and 5, with marks at 0.5, 1, 2, 3, and 4.
+ *       The current sensitivity value is managed via the PointCloudContext.
+ * @author Vincent He <hexing@senseauto.com>
+ * @date 2024-06-05
+ */
 import React from 'react';
 import { Slider } from 'antd';
-import { IPointCloudContext } from '@/components/pointCloudView/PointCloudContext';
-import useAnnotatedBoxStore from '@/store/annotatedBox';
+import { PointCloudContext } from '@/components/pointCloudView/PointCloudContext';
 import { i18n } from '@labelbee/lb-utils';
 import styles from './index.module.scss';
 
@@ -14,11 +20,10 @@ const marks = {
 };
 
 const RectRotateSensitivitySlider = () => {
-  const state = useAnnotatedBoxStore();
-  const ptCtx = state.ptCtx as IPointCloudContext;
+  const ptCtx = React.useContext(PointCloudContext);
 
   const handleSliderChange = (value: number) => {
-    ptCtx.setRectRotateSensitivity(value); // 假设setRectRotateSensitivity是用于更新旋转灵敏度的方法
+    ptCtx.setRectRotateSensitivity(value);
   };
 
   return (
@@ -27,9 +32,9 @@ const RectRotateSensitivitySlider = () => {
       <div className='toolStyle'>
         <div id='style-rectRotateSensitivity'>
           <Slider
-            min={1}
-            max={5}
-            step={1}
+            min={0.5}
+            max={4}
+            step={null}
             value={ptCtx.rectRotateSensitivity}
             onChange={handleSliderChange}
             marks={marks}
