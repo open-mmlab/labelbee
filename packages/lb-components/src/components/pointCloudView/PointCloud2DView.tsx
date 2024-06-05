@@ -1,10 +1,10 @@
 import { getClassName } from '@/utils/dom';
-import React, { useContext, useEffect, useState } from 'react';
+import React, { useCallback, useContext, useEffect, useState } from 'react';
 import { PointCloudContainer } from './PointCloudLayout';
 import { PointCloudContext } from './PointCloudContext';
 import { connect } from 'react-redux';
 
-import { pointCloudLidar2image, cKeyCode, pointListLidar2Img } from '@labelbee/lb-annotation';
+import { pointCloudLidar2image, cKeyCode, pointListLidar2Img, EventBus } from '@labelbee/lb-annotation';
 import { LabelBeeContext } from '@/store/ctx';
 import { a2MapStateToProps, IA2MapStateProps } from '@/store/annotation/map';
 import {
@@ -24,6 +24,7 @@ import RightSquareOutlined from '@/assets/annotation/common/icon_right_squareOut
 import { IMappingImg } from '@/types/data';
 import { isNumber } from 'lodash';
 import { getBoundingRect, isBoundingRectInImage } from '@/utils';
+import { useLatest } from 'ahooks';
 
 // TODO, It will be deleted when the exported type of lb-annotation is work.
 export interface IAnnotationDataTemporarily {
@@ -131,11 +132,53 @@ const PointCloud2DView = ({
   measureVisible,
 }: IProps) => {
   const [annotations2d, setAnnotations2d] = useState<IAnnotationData2dView[]>([]);
-  const { topViewInstance, displayPointCloudList, polygonList, imageSizes, selectedIDs } =
-    useContext(PointCloudContext);
+  const {
+    topViewInstance,
+    displayPointCloudList,
+    polygonList,
+    imageSizes,
+    selectedIDs,
+    windowKeydownListenerHook,
+  } = useContext(PointCloudContext);
   const [selectedID, setSelectedID] = useState<number | string>('');
-  const [isEnlarge, setIsEnlarge] = useState<boolean>(false);
+  const [isEnlarge, setIsEnlarge_] = useState<boolean>(false);
   const [curIndex, setCurIndex] = useState<number | undefined>(undefined);
+
+  const setIsEnlarge = useCallback((isEnlarge: boolean) => {
+    setIsEnlarge_(isEnlarge)
+    EventBus.emit('2d-image:enlarge', isEnlarge)
+  }, [])
+
+  const formatViewDataPointList = ({
+    viewDataPointList,
+    pointCloudBox,
+    defaultViewStyle,
+    stroke,
+  }: {
+    viewDataPointList: ITransferViewData[];
+    pointCloudBox: IPointCloudBox;
+    defaultViewStyle: {
+      fill: string;
+      color: string;
+    };
+    stroke: string;
+  }) => {
+    if (!viewDataPointList) {
+      return [];
+    }
+
+    return viewDataPointList.map((v: ITransferViewData) => {
+      return {
+        type: v.type,
+        annotation: {
+          id: pointCloudBox.id,
+          pointList: v.pointList,
+          ...defaultViewStyle,
+          stroke,
+        },
+      };
+    });
+  };
 
   const annotations2dHandler = () => {
     if (
@@ -180,11 +223,7 @@ const PointCloud2DView = ({
               imageName: mappingData.path,
             };
 
-            const isRectInImage = isBoundingRectInImage(
-              boundingRect,
-              mappingData.path,
-              imageSizes,
-            );
+            const isRectInImage = isBoundingRectInImage(boundingRect, mappingData.path, imageSizes);
 
             if (!isRectInImage) {
               return acc;
@@ -293,30 +332,41 @@ const PointCloud2DView = ({
     selectedIDs,
   ]);
 
-  useEffect(() => {
-    window.addEventListener('keydown', onKeyDown);
-    return () => {
-      window.removeEventListener('keydown', onKeyDown);
-    };
-  }, [curIndex]);
 
-  const onKeyDown = (event: KeyboardEvent) => {
-    const { keyCode } = event;
-    switch (keyCode) {
-      case EKeyCode.Esc:
-        if (isEnlarge) {
-          setIsEnlarge(false);
-        }
-        break;
-      case EKeyCode.Left:
-        lastPage();
-        break;
-
-      case EKeyCode.Right:
-        nextPage();
-        break;
+  /** Keydown events only for `isEnlarge: true` scene  */
+  const onKeyDown = useLatest((event: KeyboardEvent) => {
+    if (!isEnlarge) {
+      return;
     }
-  };
+
+    // Abort the sibling and the ancestor events propagation
+    const abortSiblingAndAncestorPropagation = () => {
+      event.stopImmediatePropagation();
+    }
+
+    switch (event.keyCode) {
+      case EKeyCode.Esc: {
+        setIsEnlarge(false);
+
+        abortSiblingAndAncestorPropagation();
+        break;
+      }
+
+      case EKeyCode.Left: {
+        lastPage();
+
+        abortSiblingAndAncestorPropagation();
+        break;
+      }
+
+      case EKeyCode.Right: {
+        nextPage();
+
+        abortSiblingAndAncestorPropagation();
+        break;
+      }
+    }
+  });
 
   const lastPage = () => {
     if (curIndex === undefined || !isEnlarge) {
@@ -336,35 +386,12 @@ const PointCloud2DView = ({
     }
   };
 
-  const formatViewDataPointList = ({
-    viewDataPointList,
-    pointCloudBox,
-    defaultViewStyle,
-    stroke,
-  }: {
-    viewDataPointList: ITransferViewData[];
-    pointCloudBox: IPointCloudBox;
-    defaultViewStyle: {
-      fill: string;
-      color: string;
-    };
-    stroke: string;
-  }) => {
-    if (!viewDataPointList) {
-      return [];
-    }
-    return viewDataPointList.map((v: ITransferViewData) => {
-      return {
-        type: v.type,
-        annotation: {
-          id: pointCloudBox.id,
-          pointList: v.pointList,
-          ...defaultViewStyle,
-          stroke,
-        },
-      };
-    });
-  };
+  useEffect(() => {
+    const listener = (event: KeyboardEvent) => onKeyDown.current(event);
+    const dispose = windowKeydownListenerHook.preappendEventListener(listener);
+    return dispose;
+  }, [windowKeydownListenerHook, windowKeydownListenerHook.preappendEventListener]);
+
   const hiddenData =
     !currentData || !currentData?.mappingImgList || !(currentData?.mappingImgList?.length > 0);
 

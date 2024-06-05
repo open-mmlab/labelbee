@@ -33,6 +33,7 @@ import type { MapIndirectWeakSet } from './utils/map';
 import { addMapIndirectWeakSetItem } from './utils/map';
 
 import useTimeoutFunc from './hooks/useTimeoutFunc'
+import useWindowKeydownListener, { getEmptyUseWindowKeydownListener, WindowKeydownListenerHooker } from './hooks/useWindowKeydownListener'
 
 interface IPointCloudContextInstances {
   topViewInstance?: PointCloudAnnotation;
@@ -171,6 +172,7 @@ export interface IPointCloudContext
   linkageImageNameRectMap: MapIndirectWeakSet<IPointCloudBoxRect>;
 
   updateRectListByReducer: UpdateRectListByReducer;
+  windowKeydownListenerHook: WindowKeydownListenerHooker;
 }
 
 const pickRectObject = (rect: IPointCloud2DRectOperationViewRect) => {
@@ -263,6 +265,7 @@ export const PointCloudContext = React.createContext<IPointCloudContext>({
   linkageImageNameRectMap: new Map(),
 
   updateRectListByReducer: () => {},
+  windowKeydownListenerHook: getEmptyUseWindowKeydownListener(),
 });
 
 export const PointCloudProvider: React.FC<PropsWithChildren<{}>> = ({ children }) => {
@@ -319,6 +322,8 @@ export const PointCloudProvider: React.FC<PropsWithChildren<{}>> = ({ children }
   const selectedID = useMemo(() => {
     return selectedIDs.length === 1 ? selectedIDs[0] : '';
   }, [selectedIDs]);
+
+  const windowKeydownListenerHook = useWindowKeydownListener()
 
   const removeRectBySpecifyId = useCallback(
     (imageName: string, ids: string[], idField: keyof IPointCloudBoxRect = 'extId') => {
@@ -854,6 +859,7 @@ export const PointCloudProvider: React.FC<PropsWithChildren<{}>> = ({ children }
       linkageImageNameRectMap,
 
       updateRectListByReducer,
+      windowKeydownListenerHook
     };
   }, [
     valid,
@@ -887,6 +893,7 @@ export const PointCloudProvider: React.FC<PropsWithChildren<{}>> = ({ children }
     linkageImageNameRectMap,
 
     updateRectListByReducer,
+    windowKeydownListenerHook
   ]);
 
   useEffect(() => {
