@@ -206,7 +206,7 @@ export default class AnnotationDataUtils {
         });
 
         if (errorValues.length) {
-          console.warn(errorValues);
+          console.log(errorValues);
           message.info(i18n.t('PartialResultsReplicationFailure'));
         }
 
