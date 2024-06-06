@@ -17,6 +17,7 @@ import { useTranslation } from 'react-i18next';
 import { LabelBeeContext, useDispatch } from '@/store/ctx';
 import BatchUpdateModal from './components/batchUpdateModal';
 import AnnotatedBox from './components/annotatedBox';
+import RectRotateSensitivitySlider from './components/rectRotateSensitivitySlider';
 import FindTrackIDIndex from './components/findTrackIDIndex';
 import { IFileItem } from '@/types/data';
 import {
@@ -476,6 +477,8 @@ const PointCloudToolSidebar: React.FC<IProps> = ({
           <AnnotatedBox imgList={imgList} imgIndex={imgIndex} />
           <Divider style={{ margin: 0 }} />
           <FindTrackIDIndex imgList={imgList} imgIndex={imgIndex} />
+          <Divider style={{ margin: 0 }} />
+          <RectRotateSensitivitySlider />
         </div>
       )}
     </>

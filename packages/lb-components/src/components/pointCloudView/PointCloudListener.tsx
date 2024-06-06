@@ -90,14 +90,13 @@ const PointCloudListener: React.FC<IProps> = ({
     switch (lowerCaseKey) {
       case 'q': {
         // Q - anticlockwise
-        updateRotate(2);
+        updateRotate(ptCtx.rectRotateSensitivity);
         break;
       }
 
       case 'e':
-        // E - closewise
-        updateRotate(-2);
-
+        // E - clockwise
+        updateRotate(-Number(ptCtx.rectRotateSensitivity));
         break;
 
       case 'g':
