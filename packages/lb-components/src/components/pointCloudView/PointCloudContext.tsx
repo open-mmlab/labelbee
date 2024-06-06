@@ -150,8 +150,6 @@ export interface IPointCloudContext
     idField?: keyof IPointCloudBoxRect,
   ) => boolean;
   removeRectByPointCloudBoxId: (imageName: string) => boolean;
-  rectRotateSensitivity: number; // Rect Rotate Sensitivity
-  setRectRotateSensitivity: (sensitivity: number) => void;
 }
 
 const pickRectObject = (rect: IPointCloud2DRectOperationViewRect) => {
@@ -237,8 +235,6 @@ export const PointCloudContext = React.createContext<IPointCloudContext>({
   removeRectBySpecifyId: (imageName: string, ids: string[], idField?: keyof IPointCloudBoxRect) =>
     false,
   removeRectByPointCloudBoxId: (imageName: string) => false,
-  rectRotateSensitivity: 2,
-  setRectRotateSensitivity: () => {},
 });
 
 export const PointCloudProvider: React.FC<{}> = ({ children }) => {
@@ -250,7 +246,6 @@ export const PointCloudProvider: React.FC<{}> = ({ children }) => {
   const [selectedIDs, setSelectedIDsState] = useState<string[]>([]);
   const [highlightIDs, setHighlightIDs] = useState<number[]>([]);
   const [valid, setValid] = useState<boolean>(true);
-  const [rectRotateSensitivity, setRectRotateSensitivity] = useState<number>(2);
   const [cuboidBoxIn2DView, setCuboidBoxIn2DView] = useState<boolean>(true);
   const [zoom, setZoom] = useState<number>(1);
   const [topViewInstance, setTopViewInstance] = useState<PointCloudAnnotation>();
@@ -655,8 +650,6 @@ export const PointCloudProvider: React.FC<{}> = ({ children }) => {
       removeRectByPointCloudBoxId,
       removeRectBySpecifyId,
       addRectFromPointCloudBoxByImageName,
-      rectRotateSensitivity,
-      setRectRotateSensitivity,
     };
   }, [
     valid,
@@ -685,7 +678,6 @@ export const PointCloudProvider: React.FC<{}> = ({ children }) => {
     removeRectByPointCloudBoxId,
     removeRectBySpecifyId,
     addRectFromPointCloudBoxByImageName,
-    rectRotateSensitivity
   ]);
 
   useEffect(() => {

@@ -22,7 +22,6 @@ import LLMToolView from '@/components/LLMToolView';
 import SwitchCuboidBoxIn2DView from '@/views/MainView/toolFooter/SwitchCuboidBoxIn2DView';
 import MeasureCanvas from './components/measureCanvas';
 import AnnotatedBox from './views/MainView/sidebar/PointCloudToolSidebar/components/annotatedBox';
-import RectRotateSensitivitySlider from './views/MainView/sidebar/PointCloudToolSidebar/components/rectRotateSensitivitySlider';
 import { FindTrackIDIndexInCheckMode as FindTrackIDIndex } from './views/MainView/sidebar/PointCloudToolSidebar/components/findTrackIDIndex';
 import { WrapAudioPlayer as AudioPlayer } from './components/audioPlayer';
 import { generatePointCloudBoxRects } from './utils';
@@ -82,7 +81,6 @@ export {
   SwitchCuboidBoxIn2DView,
   MeasureCanvas,
   AnnotatedBox,
-  RectRotateSensitivitySlider,
   FindTrackIDIndex,
   AudioPlayer,
   generatePointCloudBoxRects,
