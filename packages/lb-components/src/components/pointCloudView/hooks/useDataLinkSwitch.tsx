@@ -71,11 +71,6 @@ const useDataLinkSwitch = (opts: UseDataLinkSwitchOptions) => {
   }, [fireSwitch, isLinking]);
 
   const rendered = useMemo(() => {
-    // Hide the switch temporarily
-    if (!opts.is2DView || opts.is2DView) {
-      return null
-    }
-
     if (!opts.is2DView) {
       return null;
     }
