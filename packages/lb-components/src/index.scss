@@ -390,6 +390,7 @@ $prefix: bee;
   #style-width,
   #style-color,
   #style-fillOpacity,
+  #style-rectRotateSensitivity,
   #style-borderOpacity {
     .ant-slider {
       .ant-slider-track {
@@ -463,7 +464,8 @@ $prefix: bee;
   }
 
   #style-radius,
-  #style-width {
+  #style-width,
+  #style-rectRotateSensitivity {
     .ant-slider-step {
       .ant-slider-dot {
         height: 12px;
