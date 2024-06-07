@@ -134,9 +134,15 @@ const AnnotationView = (props: IProps, ref: any) => {
   }, [measureVisible]);
 
   const loadAndSetImage = useCallback(async (imageSrc: string) => {
-    const imgNode = await ImgUtils.load(imageSrc);
-    viewOperation.current?.setImgNode(imgNode);
-    afterImgOnLoadRef.current?.(imgNode);
+    try {
+      const imgNode = await ImgUtils.load(imageSrc);
+      viewOperation.current?.setImgNode(imgNode);
+      afterImgOnLoadRef.current?.(imgNode);
+      return null;
+    } catch (error) {
+      console.error('Error loading image:', error);
+      return error;
+    }
   }, []);
 
   const loadImage = useCallback(
@@ -144,22 +150,18 @@ const AnnotationView = (props: IProps, ref: any) => {
       setLoading(true);
       viewOperation.current?.setLoading(true);
 
-      try {
-        await loadAndSetImage(imageSrc);
-      } catch (error) {
-        if (fallbackSrc) {
-          try {
-            await loadAndSetImage(fallbackSrc);
-          } catch (fallbackError) {
-            console.log('error when loading fallbackSrc', fallbackError);
-          }
+      const error = await loadAndSetImage(imageSrc);
+      if (error && fallbackSrc) {
+        const fallbackError = await loadAndSetImage(fallbackSrc);
+        if (fallbackError) {
+          console.error('Error loading fallback image:', fallbackError);
         }
-      } finally {
-        viewOperation.current?.setLoading(false);
-        setLoading(false);
       }
+
+      viewOperation.current?.setLoading(false);
+      setLoading(false);
     },
-    [loadAndSetImage, fallbackSrc],
+    [loadAndSetImage, fallbackSrc]
   );
 
   useEffect(() => {
