@@ -95,6 +95,10 @@ const PointCloud2DRectOperationView = (props: IPointCloud2DRectOperationViewProp
   };
 
   const handleRemoveRect = (rectList: IPointCloud2DRectOperationViewRect[]) => {
+    if (rectList.length === 0) {
+      return
+    }
+
     if (!shouldExcludePointCloudBoxListUpdate) {
       const hasBoxIDRect = rectList.find((rect) => rect.boxID);
       if (hasBoxIDRect) {
@@ -105,6 +109,18 @@ const PointCloud2DRectOperationView = (props: IPointCloud2DRectOperationViewProp
         return;
       }
     }
+
+    // Remove the matching item from the point cloud result(list)
+    // @ts-ignore
+    const matchedExtIdIDRect = rectList.find((rect) => rect.extId);
+    if (matchedExtIdIDRect) {
+      // @ts-ignore
+      const { imageName, extId: boxID } = matchedExtIdIDRect
+      const result = remove2DViewRectFn?.({ boxID, imageName });
+      newPointCloudResult.current = result;
+      setPointCloudResult(result);
+    }
+
     removeRectIn2DView(rectList);
   };
 
