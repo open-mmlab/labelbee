@@ -1287,11 +1287,12 @@ class RectOperation extends BasicToolOperation {
 
     // 删除选中
     if (this.selection.isIdSelected(hoverRectID)) {
-      this.deleteSelectedRect();
+      this.deleteSelectedRect(e);
     }
   }
 
-  public deleteSelectedRect() {
+  // eslint-disable-next-line no-unused-vars
+  public deleteSelectedRect(e: UIEvent) {
     this.selectedRects.forEach((rect) => {
       this.deleteRect(rect.id);
     });
@@ -1336,7 +1337,7 @@ class RectOperation extends BasicToolOperation {
         break;
 
       case EKeyCode.Delete:
-        this.deleteSelectedRect();
+        this.deleteSelectedRect(e);
         break;
 
       case EKeyCode.Tab: {
