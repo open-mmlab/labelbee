@@ -31,6 +31,9 @@ import { useDispatch } from '@/store/ctx';
 import { ChangeSave } from '@/store/annotation/actionCreators';
 import useAnnotatedBoxStore from '@/store/annotatedBox';
 import _ from 'lodash';
+import type { MapIndirectWeakSet } from './utils/map';
+import { addMapIndirectWeakSetItem } from './utils/map';
+
 
 interface IPointCloudContextInstances {
   topViewInstance?: PointCloudAnnotation;
@@ -52,8 +55,6 @@ interface IPointCloudSegment {
   ptSegmentInstance?: PointCloud;
   setPtSegmentInstance: (instance?: PointCloud) => void;
 }
-
-type UnlinkImageItem = string;
 
 type AttrPanelLayout = '' | 'left' | 'right';
 
@@ -140,9 +141,6 @@ export interface IPointCloudContext
   };
   cacheImageNodeSize: (params: { imgNode: HTMLImageElement; path: string }) => void;
 
-  /** 未关联(联动）项列表 */
-  unlinkImageItems: UnlinkImageItem[];
-
   addRectFromPointCloudBoxByImageName: (imageName: string) => boolean;
   removeRectBySpecifyId: (
     imageName: string,
@@ -153,7 +151,10 @@ export interface IPointCloudContext
   rectRotateSensitivity: number; // Rect Rotate Sensitivity
   setRectRotateSensitivity: (sensitivity: number) => void;
 
-  imageNamePointCloudBoxMap: Map<string, IPointCloudBox[]>
+  /** imageName -> pointCloudBox.id -> [pointCloudBox, ...] */
+  imageNamePointCloudBoxMap: MapIndirectWeakSet<IPointCloudBox>;
+  /** imageName -> pointCloudBox.id -> [rect, ...] */
+  linkageImageNameRectMap: MapIndirectWeakSet<IPointCloudBoxRect>;
 }
 
 const pickRectObject = (rect: IPointCloud2DRectOperationViewRect) => {
@@ -233,8 +234,6 @@ export const PointCloudContext = React.createContext<IPointCloudContext>({
   imageSizes: {},
   cacheImageNodeSize: () => {},
 
-  unlinkImageItems: [],
-
   addRectFromPointCloudBoxByImageName: (imageName: string) => false,
   removeRectBySpecifyId: (imageName: string, ids: string[], idField?: keyof IPointCloudBoxRect) =>
     false,
@@ -242,7 +241,8 @@ export const PointCloudContext = React.createContext<IPointCloudContext>({
   rectRotateSensitivity: 2,
   setRectRotateSensitivity: () => {},
 
-  imageNamePointCloudBoxMap: new Map()
+  imageNamePointCloudBoxMap: new Map(),
+  linkageImageNameRectMap: new Map(),
 });
 
 export const PointCloudProvider: React.FC<PropsWithChildren<{}>> = ({ children }) => {
@@ -304,22 +304,22 @@ export const PointCloudProvider: React.FC<PropsWithChildren<{}>> = ({ children }
       const idField_ = idField || 'id';
       const set = new Set(ids);
       setRectList((prev: IPointCloudBoxRect[]) => {
-        let hasFilterd = false
+        let hasFilterd = false;
         const newRectList = prev.filter((i) => {
           const val = i[idField_];
           const r = set.has(val) ? i.imageName !== imageName : true;
           if (!r) {
-            hasFilterd = true
+            hasFilterd = true;
           }
 
-          return r
+          return r;
         });
 
         if (!hasFilterd) {
-          return prev
+          return prev;
         }
 
-        return newRectList
+        return newRectList;
       });
 
       return true;
@@ -390,35 +390,56 @@ export const PointCloudProvider: React.FC<PropsWithChildren<{}>> = ({ children }
     [pointCloudBoxList],
   );
 
-  /** Map Shape: imageName -> [pointCloudBox, ...] */
+  /** Map Shape: imageName -> id -> Set<[...pointCloudBoxList]> */
   const imageNamePointCloudBoxMap = useMemo(() => {
-    const filterRectsItems = pointCloudBoxList.filter(item => Array.isArray(item.rects) && item.rects.length > 0)
+    // Strip the invalid items
+    const filterRectsItems = pointCloudBoxList.filter(
+      (item) => Array.isArray(item.rects) && item.rects.length > 0,
+    );
 
     return filterRectsItems.reduce((r, item) => {
-      item.rects?.forEach(rect => {
-        const { imageName } = rect
+      item.rects?.forEach((rect) => {
+        const { imageName } = rect;
         if (!imageName) {
-          console.warn('Missing image name')
-          console.trace(item)
+          console.warn('Missing image name');
+          console.trace(rect, item);
 
-          return
+          return;
         }
 
-        let prev: IPointCloudBox[] | undefined = r.get(imageName)
-        // Use the array shape
-        if (!prev) {
-          prev  = []
-        }
+        addMapIndirectWeakSetItem(r, imageName, item.id, item);
+      });
 
-        // Enqueue the latest item
-        prev.push(item)
+      return r;
+    }, new Map<string, Map<string, WeakSet<IPointCloudBox>>>());
+  }, [pointCloudBoxList]);
 
-        r.set(imageName, prev)
-      })
+  /**
+   * Map Shape: imageName(with extId) -> id -> Set<[...rectList]>
+   */
+  const linkageImageNameRectMap = useMemo(() => {
+    return (
+      rectList
+        // Strip the invalid items
+        .filter(
+          (item): item is IPointCloudBoxRect & Required<Pick<IPointCloudBoxRect, 'extId' | 'id'>> =>
+            item.extId !== undefined && item.id !== undefined,
+        )
+        .reduce((r, item) => {
+          const imageName = item.imageName;
+          if (!imageName) {
+            console.warn('missing image name');
+            console.log(item, rectList);
 
-      return r
-    }, new Map<string, IPointCloudBox[]>())
-  }, [pointCloudBoxList])
+            return r;
+          }
+
+          addMapIndirectWeakSetItem(r, imageName, item.extId, item);
+
+          return r;
+        }, new Map<string, Map<string, WeakSet<IPointCloudBoxRect>>>())
+    );
+  }, [rectList]);
 
   const ptCtx = useMemo(() => {
     const selectedPointCloudBox = pointCloudBoxList.find((v) => v.id === selectedID);
@@ -531,15 +552,6 @@ export const PointCloudProvider: React.FC<PropsWithChildren<{}>> = ({ children }
         setHideAttributes(updatedHideAttributes);
       }
     };
-
-    const unlinkImageItems = (() => {
-      const pcbIds = displayPointCloudList.map((item) => item.id);
-      const set = new Set(pcbIds);
-
-      return rectList
-        .filter((item) => item.extId && set.has(item.extId))
-        .map<UnlinkImageItem>((item) => item.imageName);
-    })();
 
     const reRender = (
       _displayPointCloudList: IPointCloudBoxList = displayPointCloudList,
@@ -684,8 +696,6 @@ export const PointCloudProvider: React.FC<PropsWithChildren<{}>> = ({ children }
       highlightIDs,
       setHighlightIDs,
 
-      unlinkImageItems,
-
       removeRectByPointCloudBoxId,
       removeRectBySpecifyId,
       addRectFromPointCloudBoxByImageName,
@@ -693,6 +703,7 @@ export const PointCloudProvider: React.FC<PropsWithChildren<{}>> = ({ children }
       setRectRotateSensitivity,
 
       imageNamePointCloudBoxMap,
+      linkageImageNameRectMap,
     };
   }, [
     valid,
@@ -722,7 +733,8 @@ export const PointCloudProvider: React.FC<PropsWithChildren<{}>> = ({ children }
     removeRectBySpecifyId,
     addRectFromPointCloudBoxByImageName,
     rectRotateSensitivity,
-    imageNamePointCloudBoxMap
+    imageNamePointCloudBoxMap,
+    linkageImageNameRectMap,
   ]);
 
   useEffect(() => {

@@ -42,20 +42,35 @@ const useDataLinkSwitch = (opts: UseDataLinkSwitchOptions) => {
   /** 连接 或 断开连接 */
   const [isLinking, setIsLinking] = useState(true);
 
-  const imageNameRef = useRef(opts.imageName);
-  imageNameRef.current = opts.imageName;
+  const imageNameRef = useLatest(opts.imageName);
 
   const {
-    unlinkImageItems,
     addRectFromPointCloudBoxByImageName,
     removeRectByPointCloudBoxId,
     imageNamePointCloudBoxMap,
+    linkageImageNameRectMap,
   } = useContext(PointCloudContext);
+
+  const hasImageNameInPointCloudBox = useMemo(() => {
+    if (!opts.imageName) {
+      console.error('Missing image name');
+      return false;
+    }
+
+    return imageNamePointCloudBoxMap.has(opts.imageName);
+  }, [opts.imageName, imageNamePointCloudBoxMap]);
+
+  const hasImageNameInPointCloudBoxRef = useLatest(hasImageNameInPointCloudBox);
 
   const addRect = useLatest(addRectFromPointCloudBoxByImageName);
   const removeRect = useLatest(removeRectByPointCloudBoxId);
 
   const fireSwitch = useCallback((isLinking: boolean) => {
+    // Just ignore in no image-name condition when flush the state in that moment
+    if (!hasImageNameInPointCloudBoxRef.current) {
+      return;
+    }
+
     const imageName = imageNameRef.current;
     // Check image name
     if (!imageName) {
@@ -75,15 +90,6 @@ const useDataLinkSwitch = (opts: UseDataLinkSwitchOptions) => {
   const handleSwitch = useCallback(() => {
     fireSwitch(!isLinking);
   }, [fireSwitch, isLinking]);
-
-  const hasImageNameInPointCloudBox = useMemo(() => {
-    if (!opts.imageName) {
-      console.error('Missing image name');
-      return false;
-    }
-
-    return imageNamePointCloudBoxMap.has(opts.imageName);
-  }, [opts.imageName, imageNamePointCloudBoxMap]);
 
   /** Connect/disconnect button render */
   const rendered = useMemo(() => {
@@ -136,11 +142,21 @@ const useDataLinkSwitch = (opts: UseDataLinkSwitchOptions) => {
       return;
     }
 
-    const set = new Set(unlinkImageItems);
-    const initIsLinking = set.has(imageName) === false;
+    // All matched's imageName pointCloudBox ids
+    const imageNameMatchedPcdIdSet = new Set([
+      ...(imageNamePointCloudBoxMap.get(imageName)?.keys() ?? []),
+    ]);
+    // All matched's imageName `extId`s
+    const imageNameMatchedExtIds = [...(linkageImageNameRectMap.get(imageName)?.keys() ?? [])];
+
+    let initIsLinking = true;
+    if (imageNameMatchedExtIds.length) {
+      initIsLinking =
+        Boolean(imageNameMatchedExtIds.find((id) => imageNameMatchedPcdIdSet.has(id))) === false;
+    }
 
     fireSwitch(initIsLinking);
-  }, [opts.is2DView, unlinkImageItems, fireSwitch]);
+  }, [opts.is2DView, linkageImageNameRectMap, imageNamePointCloudBoxMap, fireSwitch]);
 
   // const syncIsLinkingRef = useLatest(syncIsLinking)
 
