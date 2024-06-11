@@ -3,7 +3,7 @@
  * @author laoluo
  */
 
-import React, { useEffect, useRef, useImperativeHandle, useState } from 'react';
+import React, { useEffect, useCallback, useRef, useImperativeHandle, useState } from 'react';
 import { ViewOperation, ImgUtils } from '@labelbee/lb-annotation';
 import { Spin } from 'antd/es';
 import useRefCache from '@/hooks/useRefCache';
@@ -14,6 +14,7 @@ export type TAfterImgOnLoad = (img: HTMLImageElement) => void;
 
 interface IProps {
   src: string; // 图片路径
+  fallbackSrc?: string; // alternate pictures when picture loading fails
   size?: {
     width?: number;
     height?: number;
@@ -72,6 +73,7 @@ const sizeInitialized = (size?: { width?: number; height?: number }) => {
 const AnnotationView = (props: IProps, ref: any) => {
   const {
     src,
+    fallbackSrc,
     annotations = [],
     style = {
       stroke: 'blue',
@@ -131,27 +133,42 @@ const AnnotationView = (props: IProps, ref: any) => {
     };
   }, [measureVisible]);
 
-  useEffect(() => {
-    if (viewOperation.current) {
+  const loadAndSetImage = useCallback(async (imageSrc: string) => {
+    try {
+      const imgNode = await ImgUtils.load(imageSrc);
+      viewOperation.current?.setImgNode(imgNode);
+      afterImgOnLoadRef.current?.(imgNode);
+      return null;
+    } catch (error) {
+      console.error('Error loading image:', error);
+      return error;
+    }
+  }, []);
+
+  const loadImage = useCallback(
+    async (imageSrc: string) => {
       setLoading(true);
       viewOperation.current?.setLoading(true);
-      ImgUtils.load(src)
-        .then((imgNode: HTMLImageElement) => {
-          viewOperation.current?.setLoading(false);
-          setLoading(false);
 
-          viewOperation.current?.setImgNode(imgNode);
+      const error = await loadAndSetImage(imageSrc);
+      if (error && fallbackSrc) {
+        const fallbackError = await loadAndSetImage(fallbackSrc);
+        if (fallbackError) {
+          console.error('Error loading fallback image:', fallbackError);
+        }
+      }
 
-          if (afterImgOnLoadRef.current) {
-            afterImgOnLoadRef.current(imgNode);
-          }
-        })
-        .catch(() => {
-          viewOperation.current?.setLoading(false);
-          setLoading(false);
-        });
+      viewOperation.current?.setLoading(false);
+      setLoading(false);
+    },
+    [loadAndSetImage, fallbackSrc]
+  );
+
+  useEffect(() => {
+    if (viewOperation.current) {
+      loadImage(src);
     }
-  }, [src, measureVisible]);
+  }, [src, measureVisible, fallbackSrc, loadImage]);
 
   /**
    * 基础数据绘制监听

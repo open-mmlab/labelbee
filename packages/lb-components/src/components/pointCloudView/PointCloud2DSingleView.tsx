@@ -99,6 +99,7 @@ const PointCloud2DSingleView = ({
       {cuboidBoxIn2DView ? (
         <AnnotationView
           src={view2dData?.url ?? ''}
+          fallbackSrc={view2dData?.fallbackUrl ?? ''}
           annotations={view2dData.annotations}
           size={size}
           ref={viewRef}
