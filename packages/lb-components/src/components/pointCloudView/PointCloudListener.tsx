@@ -1,5 +1,6 @@
 import { PointCloudContext } from './PointCloudContext';
 import { useRotate } from './hooks/useRotate';
+import { useRotateEdge } from './hooks/useRotateEdge';
 import { useBoxes } from './hooks/useBoxes';
 import { useSingleBox } from './hooks/useSingleBox';
 import { useSphere } from './hooks/useSphere';
@@ -56,6 +57,7 @@ const PointCloudListener: React.FC<IProps> = ({
   const { clearAllResult, updatePointCloudPattern } = useStatus();
   const { copySelectedBoxes, pasteSelectedBoxes, copiedBoxes } = useBoxes({ config });
   const { updateRotate } = useRotate({ currentData });
+  const { updateRotateEdge } = useRotateEdge({ currentData });
   const { updatePointCloudData, topViewSelectedChanged } = usePointCloudViews();
   const {
     redo,
@@ -100,8 +102,8 @@ const PointCloudListener: React.FC<IProps> = ({
         break;
 
       case 'g':
-        // G ， overturn 180
-        updateRotate(180);
+        // G ， overturn 90
+        updateRotateEdge(-90);
 
         break;
 

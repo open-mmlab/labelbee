@@ -290,6 +290,21 @@ class PolygonOperation extends BasicToolOperation {
     this.render();
   }
 
+  public rotatePolygonEdge(pointList: IPolygonPoint[], selectedID = this.selectedID) {
+    if (!selectedID) {
+      return;
+    }
+
+    const selectedPolygon = PolygonUtils.getPolygonByID(this.polygonList, selectedID);
+
+    if (!selectedPolygon) {
+      return;
+    }
+
+    this.setPolygonList(this.setPolygonDataByID({ pointList }, selectedID));
+    this.render();
+  }
+
   public addPointInDrawing(e: MouseEvent) {
     if (!this.imgInfo) {
       return;

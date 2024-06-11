@@ -24,6 +24,7 @@ import {
 import React, { useEffect, useLayoutEffect, useRef, useState } from 'react';
 import { PointCloudContext } from './PointCloudContext';
 import { useRotate } from './hooks/useRotate';
+import { useRotateEdge } from './hooks/useRotateEdge';
 import { useSingleBox } from './hooks/useSingleBox';
 import { PointCloudContainer } from './PointCloudLayout';
 import { BoxInfos, PointCloudValidity } from './PointCloudInfos';
@@ -84,6 +85,7 @@ const TopViewToolbar = ({ currentData }: IAnnotationStateProps) => {
   const { selectNextBox, selectPrevBox } = useSingleBox();
   const { switchToNextSphere } = useSphere();
   const { updateRotate } = useRotate({ currentData });
+  const { updateRotateEdge } = useRotateEdge({ currentData });
   const ptCtx = React.useContext(PointCloudContext);
   const { topViewInstance } = ptCtx;
 
@@ -97,7 +99,7 @@ const TopViewToolbar = ({ currentData }: IAnnotationStateProps) => {
   };
 
   const reverseRotate = () => {
-    updateRotate(180);
+    updateRotateEdge(-90);
   };
 
   return (
@@ -112,7 +114,7 @@ const TopViewToolbar = ({ currentData }: IAnnotationStateProps) => {
         className={getClassName('point-cloud', 'rotate-reserve')}
       />
       <span onClick={clockwiseRotate} className={getClassName('point-cloud', 'rotate')} />
-      <span onClick={reverseRotate} className={getClassName('point-cloud', 'rotate-180')} />
+      <span onClick={reverseRotate} className={getClassName('point-cloud', 'rotate-90')} />
       <FooterDivider />
       <UpSquareOutlined
         onClick={() => {
