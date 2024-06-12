@@ -23,12 +23,14 @@ interface IProps extends IA2MapStateProps {
 const PointCloudSegment2DSingleView = ({
   path,
   url,
+  fallbackUrl,
   calib,
   pcdUrl,
   highlightAttribute,
 }: {
   path: string;
   url: string;
+  fallbackUrl: string;
   calib: ICalib;
   pcdUrl?: string;
   highlightAttribute?: string;
@@ -196,6 +198,7 @@ const PointCloudSegment2DSingleView = ({
           }}
           key={path}
           src={url}
+          fallbackSrc={fallbackUrl}
           annotations={annotations}
           afterImgOnLoad={afterImgOnLoad}
         />
@@ -230,6 +233,7 @@ const PointCloudSegment2DView = ({ currentData, highlightAttribute }: IProps) =>
                 key={data.path + i}
                 path={data.path}
                 url={data.url}
+                fallbackUrl={data.fallbackUrl ?? ''}
                 calib={data.calib}
                 pcdUrl={currentData.url}
                 highlightAttribute={highlightAttribute}
