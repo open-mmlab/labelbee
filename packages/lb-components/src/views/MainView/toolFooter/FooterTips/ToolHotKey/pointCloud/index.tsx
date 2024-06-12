@@ -8,7 +8,7 @@ import copy from '@/assets/annotation/pointCloudTool/copy.svg';
 import nextBox from '@/assets/annotation/pointCloudTool/nextBox.svg';
 import paste from '@/assets/annotation/pointCloudTool/patse.svg';
 import prevBox from '@/assets/annotation/pointCloudTool/prevBox.svg';
-import rotate180_black from '@/assets/annotation/pointCloudTool/rotate180_black.svg';
+import rotate90_black from '@/assets/annotation/pointCloudTool/rotate90_black.svg';
 import selectAll from '@/assets/annotation/pointCloudTool/selectAll.svg';
 import selectMultiple from '@/assets/annotation/pointCloudTool/selectMultiple.svg';
 import TabChangeSelectedSvg from '@/assets/annotation/toolHotKeyIcon/icon_tab_kj.svg';
@@ -111,9 +111,9 @@ const NextBox = {
   shortCut: ['Tab'],
 };
 
-const Rotate180 = {
-  name: 'Rotate180',
-  icon: rotate180_black,
+const Rotate90 = {
+  name: 'Rotate90',
+  icon: rotate90_black,
   shortCut: ['G'],
   noticeInfo: 'SelectedStatus',
 };
@@ -210,7 +210,7 @@ const pointCloudShortCutTable: IShortcut[] = [
   RightRotate,
   PrevBox,
   NextBox,
-  Rotate180,
+  Rotate90,
   CopyPrevPage,
   ChangeBoxInvalid,
   deleteBox,
