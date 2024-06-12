@@ -32,7 +32,7 @@ const PointCloud2DSingleView = ({
   const viewRef = useRef<{ toolInstance: ViewOperation }>();
   const { selectedBox } = useSingleBox();
   const size = useSize(ref);
-  const { url, calib, path } = view2dData;
+  const { url, fallbackUrl, calib, path } = view2dData;
   const { toggle2dVisible, isHighlightVisible } = useHighlight({ currentData });
   const [loading, setLoading] = useState(false);
   const { cuboidBoxIn2DView, cacheImageNodeSize } = useContext(PointCloudContext);
@@ -90,7 +90,7 @@ const PointCloud2DSingleView = ({
 
   const highlightOnClick = async () => {
     setLoading(true);
-    await toggle2dVisible(url, calib);
+    await toggle2dVisible(url, fallbackUrl ?? '', calib);
     setLoading(false);
   };
 

@@ -988,14 +988,38 @@ export class PointCloud extends EventListener {
     mappingImgList,
     points,
   }: {
-    mappingImgList: Array<{ url: string; calib?: ICalib }>;
+    mappingImgList: Array<{ url: string; fallbackUrl: string; calib?: ICalib }>;
     points: ArrayLike<number>;
   }) => {
     /**
      * The img is loaded, so it can use cache in browser.
      */
+    const loadImage = async (url: string) => {
+      try {
+        const imgNode = await ImgUtils.load(url);
+        return imgNode;
+      } catch (error) {
+        console.error('Error loading image:', error);
+        return null;
+      }
+    };
     const imgNodeList =
-      mappingImgList.length === 0 ? [] : await Promise.all(mappingImgList.map((v) => ImgUtils.load(v.url)));
+      mappingImgList.length === 0
+        ? []
+        : ((
+            await Promise.all(
+              mappingImgList.map(async (v) => {
+                let imgNode = await loadImage(v.url);
+
+                if (!imgNode && v.fallbackUrl) {
+                  // If the primary URL fails and an alternate URL exists, try loading the alternate URL
+                  imgNode = await loadImage(v.fallbackUrl);
+                }
+                return imgNode;
+              }),
+            )
+          ).filter((v) => v !== null) as unknown as HTMLImageElement[]);
+
     const highlightIndexList = mappingImgList.map((v, i) => {
       if (this.cacheInstance.cache2DHighlightIndex.has(v.url)) {
         return this.cacheInstance.cache2DHighlightIndex.get(v.url) ?? [];
