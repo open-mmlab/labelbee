@@ -43,7 +43,9 @@ const PointCloud2DRectOperationView = (props: IPointCloud2DRectOperationViewProp
     afterImgOnLoad,
     shouldExcludePointCloudBoxListUpdate,
   } = props;
-  const url = mappingData?.url ?? '';
+
+  const imageUrl = mappingData?.url ?? '';
+  const fallbackUrl = mappingData?.fallbackUrl ?? '';
 
   const {
     pointCloudBoxList,
@@ -153,16 +155,39 @@ const PointCloud2DRectOperationView = (props: IPointCloud2DRectOperationViewProp
     }
   }, []);
 
+
   useEffect(() => {
-    setLoading(true);
-    if (operation.current && url) {
-      ImgUtils.load(url).then((imgNode: HTMLImageElement) => {
-        operation.current.setImgNode(imgNode);
+    const loadImage = async (url: string) => {
+      try {
+        const imgNode = await ImgUtils.load(url);
+        return imgNode;
+      } catch (error) {
+        console.error('Error loading image:', error);
+        return null;
+      }
+    };
+
+    const handleImageLoad = async () => {
+      setLoading(true);
+      let imgNode = await loadImage(imageUrl);
+
+      if (!imgNode && fallbackUrl) {
+        // If the primary URL fails and an alternate URL exists, try loading the alternate URL
+        imgNode = await loadImage(fallbackUrl);
+      }
+
+      if (imgNode) {
+        operation.current?.setImgNode(imgNode);
         afterImgOnLoad(imgNode);
-        setLoading(false);
-      });
+      }
+
+      setLoading(false);
+    };
+
+    if (operation.current && (imageUrl || fallbackUrl)) {
+      handleImageLoad();
     }
-  }, [url]);
+  }, [imageUrl, fallbackUrl]);
 
   useEffect(() => {
     operation.current?.setSize(size);

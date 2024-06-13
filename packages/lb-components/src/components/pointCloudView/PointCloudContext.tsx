@@ -60,6 +60,7 @@ type AttrPanelLayout = '' | 'left' | 'right';
 
 interface IHighlight2DData {
   url: string;
+  fallbackUrl: string;
   calib?: ICalib;
 }
 
