@@ -1338,8 +1338,10 @@ export const usePointCloudViews = () => {
       /**
        * Use [] to replace the default highlight2DDataList.
        * Need to await syncAllViewPointCloudColor before setLoading(false).
+       * @Hexing update 2024-06-14
+       * remote await to avoid blocking the page loading when turning pages.
        */
-      await ptCtx.syncAllViewPointCloudColor(boxParamsList, []);
+      ptCtx.syncAllViewPointCloudColor(boxParamsList, []);
     }
 
     initHistory({

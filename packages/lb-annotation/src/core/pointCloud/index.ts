@@ -75,7 +75,7 @@ export interface IPointCloudDelegate extends IEventBus {
 }
 
 const DEFAULT_DISTANCE = 30;
-const highlightWorker = new HighlightWorker({ type: 'module' });
+let highlightWorker = new HighlightWorker({ type: 'module' });
 
 export class PointCloud extends EventListener {
   public renderer: THREE.WebGLRenderer;
@@ -1062,8 +1062,14 @@ export class PointCloud extends EventListener {
   public async handleWebworker(params: any) {
     return new Promise((resolve, reject) => {
       if (this.workerLoading) {
-        reject(new Error('workerLoading'));
-        return;
+        /**
+         * reject(new Error('workerLoading'));
+         * return;
+         * Previous logic: If a web worker is triggered again while working, an error is thrown.
+         * Current logic: If a web worker is triggered again while working, the previous worker is terminated, and a new one is created.
+         */
+        highlightWorker.terminate();
+        highlightWorker = new HighlightWorker({ type: 'module' });
       }
       this.workerLoading = true;
       highlightWorker.postMessage(params);
