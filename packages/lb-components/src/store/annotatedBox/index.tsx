@@ -17,8 +17,6 @@ interface Store {
   setHighlightIDs: (highlightIDs: number[]) => void;
   selectedIDs: string[];
   setSelectedIDs: (selectedIDs: string[]) => void;
-  rectRotateSensitivity: number;
-  setRectRotateSensitivity: (sensitivity: number) => void;
   setPtCtx: (ptCtx: IPointCloudContext) => void;
 }
 
@@ -33,9 +31,6 @@ const useAnnotatedBoxStore = create<Store>((set) => ({
     set((state) => {
       return { selectedIDs };
     }),
-  rectRotateSensitivity: 2,
-  setRectRotateSensitivity: (sensitivity) =>
-    set((state) => ({ rectRotateSensitivity: sensitivity })),
   setPtCtx: (ptCtx) => set((state) => ({ ptCtx })),
 }));
 

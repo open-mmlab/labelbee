@@ -153,6 +153,12 @@ export interface IPointCloudContext
   removeRectByPointCloudBoxId: (imageName: string) => boolean;
   rectRotateSensitivity: number; // Rect Rotate Sensitivity
   setRectRotateSensitivity: (sensitivity: number) => void;
+  isDynamicHighlightPointCloudEnabled: boolean; // Whether the dynamic highlight rendering feature is enabled
+  setIsDynamicHighlightPointCloudEnabled: (enable: boolean) => void; // Set the dynamic highlight rendering feature state
+  isPointCloudColorHighlight: boolean; // Whether the point cloud has been highlighted
+  setIsPointCloudColorHighlight: (bool: boolean) => void; // Set the point cloud highlight state
+  isDynamicHighlightLoading: boolean; // Whether it is currently rendering highlights
+  setIsDynamicHighlightLoading: (bool: boolean) => void; // Set the highlight rendering state
 }
 
 const pickRectObject = (rect: IPointCloud2DRectOperationViewRect) => {
@@ -240,8 +246,15 @@ export const PointCloudContext = React.createContext<IPointCloudContext>({
   removeRectByPointCloudBoxId: (imageName: string) => false,
   rectRotateSensitivity: 2,
   setRectRotateSensitivity: () => {},
+  isDynamicHighlightPointCloudEnabled: true,
+  setIsDynamicHighlightPointCloudEnabled: () => {},
+  isPointCloudColorHighlight: false,
+  setIsPointCloudColorHighlight: () => {},
+  isDynamicHighlightLoading: false,
+  setIsDynamicHighlightLoading: () => {},
 });
 
+// @ts-ignore
 export const PointCloudProvider: React.FC<{}> = ({ children }) => {
   const [pointCloudBoxList, setPointCloudResult] = useState<IPointCloudBoxList>([]);
   const [pointCloudSphereList, setPointCloudSphereList] = useState<IPointCloudSphereList>([]);
@@ -252,6 +265,10 @@ export const PointCloudProvider: React.FC<{}> = ({ children }) => {
   const [highlightIDs, setHighlightIDs] = useState<number[]>([]);
   const [valid, setValid] = useState<boolean>(true);
   const [rectRotateSensitivity, setRectRotateSensitivity] = useState<number>(2);
+  const [isDynamicHighlightPointCloudEnabled, setIsDynamicHighlightPointCloudEnabled] =
+    useState<boolean>(true);
+  const [isPointCloudColorHighlight, setIsPointCloudColorHighlight] = useState<boolean>(false);
+  const [isDynamicHighlightLoading, setIsDynamicHighlightLoading] = useState<boolean>(false);
   const [cuboidBoxIn2DView, setCuboidBoxIn2DView] = useState<boolean>(true);
   const [zoom, setZoom] = useState<number>(1);
   const [topViewInstance, setTopViewInstance] = useState<PointCloudAnnotation>();
@@ -301,22 +318,22 @@ export const PointCloudProvider: React.FC<{}> = ({ children }) => {
       const idField_ = idField || 'id';
       const set = new Set(ids);
       setRectList((prev: IPointCloudBoxRect[]) => {
-        let hasFilterd = false
+        let hasFilterd = false;
         const newRectList = prev.filter((i) => {
           const val = i[idField_];
           const r = set.has(val) ? i.imageName !== imageName : true;
           if (!r) {
-            hasFilterd = true
+            hasFilterd = true;
           }
 
-          return r
+          return r;
         });
 
         if (!hasFilterd) {
-          return prev
+          return prev;
         }
 
-        return newRectList
+        return newRectList;
       });
 
       return true;
@@ -543,17 +560,27 @@ export const PointCloudProvider: React.FC<{}> = ({ children }) => {
       pointCloudList?: IPointCloudBox[],
       newHighlight2DDataList?: IHighlight2DData[],
     ) => {
-      if (!mainViewInstance) {
-        return;
-      }
-
-      const points = mainViewInstance.pointCloudObject;
-
-      if (!points) {
-        return;
-      }
-
       try {
+        setIsDynamicHighlightLoading(true);
+        if (!mainViewInstance) {
+          return;
+        }
+
+        const points = mainViewInstance.pointCloudObject;
+
+        if (!points) {
+          return;
+        }
+
+        if (!isDynamicHighlightPointCloudEnabled && !isPointCloudColorHighlight) {
+          // Normally, if the feature toggle is off, it would simply return without action.
+          // However, there's an exception: if it's already in a highlighted state,
+          // a reset operation is still required to remove the highlighting.
+          // Therefore, the condition checks first if the toggle is off,
+          // and then if it's not in a highlighted state, before returning.
+          return;
+        }
+
         const highlightIndex = await mainViewInstance.getHighlightIndexByMappingImgList({
           mappingImgList: newHighlight2DDataList ?? highlight2DDataList, // MappingImgList can be defined by through external param.
           points: points.geometry.attributes.position.array,
@@ -564,10 +591,19 @@ export const PointCloudProvider: React.FC<{}> = ({ children }) => {
           highlightIndex,
         );
 
+        if (isDynamicHighlightPointCloudEnabled) {
+          // If the highlight switch is on, it means this rendering is for coloring rather than resetting,
+          // so the highlight state needs to be set to true
+          setIsPointCloudColorHighlight(true);
+        }
+
         color && topViewInstance?.pointCloudInstance?.updateColor(color);
+
         return color;
       } catch (error) {
         console.error(error);
+      } finally {
+        setIsDynamicHighlightLoading(false);
       }
     };
 
@@ -658,6 +694,11 @@ export const PointCloudProvider: React.FC<{}> = ({ children }) => {
       addRectFromPointCloudBoxByImageName,
       rectRotateSensitivity,
       setRectRotateSensitivity,
+      isDynamicHighlightPointCloudEnabled,
+      setIsDynamicHighlightPointCloudEnabled,
+      isPointCloudColorHighlight,
+      setIsPointCloudColorHighlight,
+      isDynamicHighlightLoading,
     };
   }, [
     valid,
@@ -686,7 +727,10 @@ export const PointCloudProvider: React.FC<{}> = ({ children }) => {
     removeRectByPointCloudBoxId,
     removeRectBySpecifyId,
     addRectFromPointCloudBoxByImageName,
-    rectRotateSensitivity
+    rectRotateSensitivity,
+    isDynamicHighlightPointCloudEnabled,
+    isPointCloudColorHighlight,
+    isDynamicHighlightLoading,
   ]);
 
   useEffect(() => {
@@ -696,8 +740,27 @@ export const PointCloudProvider: React.FC<{}> = ({ children }) => {
   }, [pointCloudBoxList, selectedIDs, highlightIDs]);
 
   useEffect(() => {
+    // @ts-ignore
     state?.setPtCtx?.(ptCtx);
   }, [ptCtx]);
+
+  useEffect(() => {
+    if (!isDynamicHighlightPointCloudEnabled && isPointCloudColorHighlight) {
+      // If the dynamic highlight feature is turned off,
+      // and the point cloud is currently highlighted,
+      // it needs to be reset to the original color automatically.
+      // Then set the highlight state to false.
+      ptCtx.syncAllViewPointCloudColor([]).finally(() => {
+        setIsPointCloudColorHighlight(false);
+      });
+    }
+    if (isDynamicHighlightPointCloudEnabled && !isPointCloudColorHighlight) {
+      // If the dynamic highlight feature is turned on,
+      // and the point cloud is not highlighted,
+      // it needs to be highlighted automatically.
+      ptCtx.syncAllViewPointCloudColor(ptCtx.displayPointCloudList);
+    }
+  }, [isDynamicHighlightPointCloudEnabled, isPointCloudColorHighlight]);
 
   const updateSelectedIDsAndRenderAfterHide = () => {
     const pointCloudForFilteredList = pointCloudBoxList.filter((i) =>
@@ -721,5 +784,6 @@ export const PointCloudProvider: React.FC<{}> = ({ children }) => {
     ptSegmentInstance?.store?.setHiddenAttributes?.(hideAttributes);
   }, [hideAttributes]);
 
+  // @ts-ignore
   return <PointCloudContext.Provider value={ptCtx}>{children}</PointCloudContext.Provider>;
 };

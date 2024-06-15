@@ -1610,6 +1610,15 @@ $headerHeight: 40px;
       }
     }
 
+    &__switch-container {
+      &__label {
+        margin-right: 8px;
+      }
+      &__switch {
+        margin-right: 16px;
+      }
+    }
+
     &__header-title-box {
       position: absolute;
       top: 16px;

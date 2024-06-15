@@ -362,7 +362,8 @@
     "ProjectionFrameCannotBeDeleted": "Projection frame cannot be deleted",
     "FailedToCopyResults": "Failed to copy results",
     "PartialResultsReplicationFailure": "Partial results replication failure",
-    "RotationAngleSensitivity": "Rotation angle sensitivity"
+    "RotationAngleSensitivity": "Rotation angle sensitivity",
+    "HighlightedInsideRect": "Highlighted inside rect"
   },
   "cn": {
     "TextInput": "文本输入",
@@ -727,6 +728,7 @@
     "ProjectionFrameCannotBeDeleted": "投射框无法删除",
     "FailedToCopyResults": "复制结果失败",
     "PartialResultsReplicationFailure": "部分结果复制失败",
-    "RotationAngleSensitivity": "旋转微调角度"
+    "RotationAngleSensitivity": "旋转微调角度",
+    "HighlightedInsideRect": "高亮框中"
   }
 }

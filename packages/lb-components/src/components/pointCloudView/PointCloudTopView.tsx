@@ -43,6 +43,7 @@ import { DrawLayerSlot } from '@/types/main';
 import ToolUtils from '@/utils/ToolUtils';
 import _ from 'lodash';
 import PointCloudSizeSlider from './components/PointCloudSizeSlider';
+import PointCloudDynamicHighlightSwitch from './components/PointCloudDynamicHighlightSwitch';
 import { useHistory } from './hooks/useHistory';
 import TitleButton from './components/TitleButton';
 
@@ -87,23 +88,40 @@ const TopViewToolbar = ({ currentData }: IAnnotationStateProps) => {
   const { updateRotate } = useRotate({ currentData });
   const { updateRotateEdge } = useRotateEdge({ currentData });
   const ptCtx = React.useContext(PointCloudContext);
-  const { topViewInstance } = ptCtx;
+  const {
+    topViewInstance,
+    rectRotateSensitivity,
+    isDynamicHighlightPointCloudEnabled,
+    setIsDynamicHighlightPointCloudEnabled,
+    isDynamicHighlightLoading,
+  } = ptCtx;
 
   const currentToolName = ptCtx?.topViewInstance?.toolScheduler?.getCurrentToolName();
 
   const clockwiseRotate = () => {
-    updateRotate(-Number(ptCtx.rectRotateSensitivity));
+    updateRotate(-Number(rectRotateSensitivity));
   };
   const anticlockwiseRotate = () => {
-    updateRotate(ptCtx.rectRotateSensitivity);
+    updateRotate(rectRotateSensitivity);
   };
 
   const reverseRotate = () => {
     updateRotateEdge(-90);
   };
 
+  const handleHighlightSwitch = (enable: boolean) => {
+    setIsDynamicHighlightPointCloudEnabled(enable);
+  };
+
   return (
     <>
+      <PointCloudDynamicHighlightSwitch
+        onChange={(enable: boolean) => {
+          handleHighlightSwitch(enable);
+        }}
+        defaultChecked={isDynamicHighlightPointCloudEnabled}
+        loading={isDynamicHighlightLoading}
+      />
       <PointCloudSizeSlider
         onChange={(v: number) => {
           topViewInstance?.pointCloudInstance?.updatePointSize({ customSize: v });

@@ -82,7 +82,7 @@ const PointCloudListener: React.FC<IProps> = ({
   };
 
   const keydownEvents = (lowerCaseKey: string, e: KeyboardEvent) => {
-    const { topViewInstance, mainViewInstance } = ptCtx;
+    const { topViewInstance, mainViewInstance, rectRotateSensitivity } = ptCtx;
     if (!topViewInstance) {
       return;
     }
@@ -92,13 +92,13 @@ const PointCloudListener: React.FC<IProps> = ({
     switch (lowerCaseKey) {
       case 'q': {
         // Q - anticlockwise
-        updateRotate(ptCtx.rectRotateSensitivity);
+        updateRotate(rectRotateSensitivity);
         break;
       }
 
       case 'e':
         // E - clockwise
-        updateRotate(-Number(ptCtx.rectRotateSensitivity));
+        updateRotate(-Number(rectRotateSensitivity));
         break;
 
       case 'g':
