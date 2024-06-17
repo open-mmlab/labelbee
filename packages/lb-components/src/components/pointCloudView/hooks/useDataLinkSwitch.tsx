@@ -117,11 +117,14 @@ const useDataLinkSwitch = (opts: UseDataLinkSwitchOptions) => {
       justifyContent: 'center',
       width: 28,
       height: 28,
-      cursor: 'pointer',
+     // cursor: 'pointer',
     };
 
     return (
-      <div style={style} onClick={handleSwitch}>
+      <div
+       style={style}
+      //  onClick={handleSwitch}
+      >
         {isLinking && <img src={LinkIcon} style={iconSize} />}
         {!isLinking && <img src={UnlinkIcon} style={iconSize} />}
       </div>
