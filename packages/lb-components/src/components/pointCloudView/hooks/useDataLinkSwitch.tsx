@@ -93,11 +93,6 @@ const useDataLinkSwitch = (opts: UseDataLinkSwitchOptions) => {
 
   /** Connect/disconnect button render */
   const rendered = useMemo(() => {
-    // Hide the switch temporarily
-    if (!opts.is2DView || opts.is2DView) {
-      return null
-    }
-
     if (!opts.is2DView) {
       return null;
     }
