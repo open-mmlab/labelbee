@@ -1478,6 +1478,13 @@ class PolygonOperation extends BasicToolOperation {
       return;
     }
 
+    if (this.dragInfo && this.dragStatus === EDragStatus.Start) {
+      // 拖拽停止
+      this.dragInfo = undefined;
+      this.dragStatus = EDragStatus.Wait;
+      return;
+    }
+
     switch (e.button) {
       case 0: {
         this.leftMouseUp(e);
