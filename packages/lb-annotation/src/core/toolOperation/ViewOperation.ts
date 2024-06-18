@@ -27,6 +27,7 @@ import ImgUtils, { cropAndEnlarge } from '@/utils/ImgUtils';
 import CanvasUtils from '@/utils/tool/CanvasUtils';
 import { BasicToolOperation, IBasicToolOperationProps } from './basicToolOperation';
 import { pointCloudLidar2image } from '../pointCloud/matrix';
+import TagUtils from '@/utils/tool/TagUtils';
 
 const newScope = 3;
 const DEFAULT_RADIUS = 3;
@@ -265,6 +266,10 @@ export default class ViewOperation extends BasicToolOperation {
     }
   }
 
+  public setConfig(config: { [a: string]: any } | string) {
+    this.config = config;
+  }
+
   /**
    * 获取当前结果的标注类型
    * @param obj
@@ -346,6 +351,15 @@ export default class ViewOperation extends BasicToolOperation {
 
     if (result?.textAttribute) {
       bottomText = result?.textAttribute;
+    }
+
+    // show subAttributeList
+    const { secondaryAttributeConfigurable, subAttributeList } = this.config;
+    if (result?.subAttribute && secondaryAttributeConfigurable && subAttributeList) {
+      const list = TagUtils.getTagNameList(result?.subAttribute, subAttributeList);
+      list.forEach((i) => {
+        headerText += `\n${i.keyName}: ${i.value.join(`、`)}`;
+      });
     }
     return { headerText, bottomText };
   }
