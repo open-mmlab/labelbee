@@ -1381,6 +1381,11 @@ class RectOperation extends BasicToolOperation {
         break;
       }
 
+      case EKeyCode.R: {
+        this.resizeRect();
+        break;
+      }
+
       default: {
         if (this.config.attributeConfigurable) {
           const keyCode2Attribute = AttributeUtils.getAttributeByKeycode(keyCode, this.config.attributeList);
@@ -1409,11 +1414,6 @@ class RectOperation extends BasicToolOperation {
           this.render();
         }
         break;
-
-      case EKeyCode.R: {
-        this.resizeRect();
-        break;
-      }
 
       default: {
         break;
@@ -1944,6 +1944,8 @@ class RectOperation extends BasicToolOperation {
     if (!this.imgNode) return;
     // Return if no rectangles are selected
     if (!this.selectedRects?.length) return;
+    // Verify if resizeWidth and resizeHeight are valid
+    if (resizeWidth <= 0 || resizeHeight <= 0) return;
 
     const { width, height } = this.basicImgInfo;
     const targetRect = {

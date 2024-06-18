@@ -18,6 +18,7 @@ import RectSvg from '@/assets/annotation/rectTool/icon_rect.svg';
 import CirCleSelectorSvg from '@/assets/annotation/pointCloudTool/circleSelector.svg';
 import AddSvg from '@/assets/annotation/pointCloudTool/addSvg.svg';
 import ClearSvg from '@/assets/annotation/pointCloudTool/clearSvg.svg';
+import Image2DBoxScaleSvg from '@/assets/annotation/pointCloudTool/Image2DBoxScale.svg';
 
 import { IShortcut } from '@/types/tool';
 import React from 'react';
@@ -193,6 +194,13 @@ const DeletePoint = {
   shortCut: ['I'],
 };
 
+const Image2DBoxScale = {
+  name: 'Image2DBoxScale',
+  icon: Image2DBoxScaleSvg,
+  shortCut: ['R'],
+  noticeInfo: 'SelectedRect',
+};
+
 const pointCloudShortCutTable: IShortcut[] = [
   { name: 'GeneralOperation' },
   backward,
@@ -217,6 +225,7 @@ const pointCloudShortCutTable: IShortcut[] = [
   SelectMulti,
   SelectAll,
   fullScreen,
+  Image2DBoxScale,
 ];
 
 const pointCloudShortCutTable_POLYGON: IShortcut[] = [
