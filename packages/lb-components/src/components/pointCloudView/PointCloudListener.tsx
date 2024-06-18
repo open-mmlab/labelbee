@@ -29,6 +29,7 @@ import { useTranslation } from 'react-i18next';
 import { IFileItem } from '@/types/data';
 import { PreDataProcess } from '@/store/annotation/actionCreators';
 import { IPointCloudBox } from '@labelbee/lb-utils';
+import { useLatest } from 'ahooks';
 
 const { EPolygonPattern } = cTool;
 
@@ -72,6 +73,9 @@ const PointCloudListener: React.FC<IProps> = ({
   const { selectedPolygon } = usePolygon();
   const { selectedLine } = useLine();
   const { t } = useTranslation();
+
+  // For event calling or etc to avoid react hook re-bind
+  const currentDataRef = useLatest(currentData)
 
   const updatePolygonOffset = (offset: Partial<ICoordinate>) => {
     const { topViewInstance } = ptCtx;
@@ -174,7 +178,7 @@ const PointCloudListener: React.FC<IProps> = ({
         break;
 
       case 'delete':
-        deleteSelectedPointCloudBoxAndPolygon();
+        deleteSelectedPointCloudBoxAndPolygon(currentDataRef.current);
         break;
 
       default: {

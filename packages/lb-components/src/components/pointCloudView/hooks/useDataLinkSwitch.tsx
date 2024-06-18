@@ -13,6 +13,8 @@ import { useLatest } from 'ahooks';
 import { PointCloudContext } from '../PointCloudContext';
 import LinkIcon from '@/assets/annotation/icon_link.svg';
 import UnlinkIcon from '@/assets/annotation/icon_unlink.svg';
+import { BatchSwitchConnectionEventBusEvent } from '@/views/MainView/toolFooter/BatchSwitchConnectIn2DView';
+import { EventBus } from '@labelbee/lb-annotation';
 
 const iconSize = { width: 16, height: 16 };
 
@@ -40,18 +42,37 @@ const useDataLinkSwitch = (opts: UseDataLinkSwitchOptions) => {
   /** 连接 或 断开连接 */
   const [isLinking, setIsLinking] = useState(true);
 
-  const imageNameRef = useRef(opts.imageName);
-  imageNameRef.current = opts.imageName;
+  const imageNameRef = useLatest(opts.imageName);
 
-  const { unlinkImageItems, addRectFromPointCloudBoxByImageName, removeRectByPointCloudBoxId } =
-    useContext(PointCloudContext);
+  const {
+    addRectFromPointCloudBoxByImageName,
+    removeRectByPointCloudBoxId,
+    imageNamePointCloudBoxMap,
+    linkageImageNameRectMap,
+  } = useContext(PointCloudContext);
+
+  const hasImageNameInPointCloudBox = useMemo(() => {
+    if (!opts.imageName) {
+      console.error('Missing image name');
+      return false;
+    }
+
+    return imageNamePointCloudBoxMap.has(opts.imageName);
+  }, [opts.imageName, imageNamePointCloudBoxMap]);
+
+  const hasImageNameInPointCloudBoxRef = useLatest(hasImageNameInPointCloudBox);
 
   const addRect = useLatest(addRectFromPointCloudBoxByImageName);
   const removeRect = useLatest(removeRectByPointCloudBoxId);
 
   const fireSwitch = useCallback((isLinking: boolean) => {
+    // Just ignore in no image-name condition when flush the state in that moment
+    if (!hasImageNameInPointCloudBoxRef.current) {
+      return;
+    }
+
     const imageName = imageNameRef.current;
-    // Should has the image name
+    // Check image name
     if (!imageName) {
       console.warn('invalid image name');
       return;
@@ -70,13 +91,14 @@ const useDataLinkSwitch = (opts: UseDataLinkSwitchOptions) => {
     fireSwitch(!isLinking);
   }, [fireSwitch, isLinking]);
 
+  /** Connect/disconnect button render */
   const rendered = useMemo(() => {
-    // Hide the switch temporarily
-    if (!opts.is2DView || opts.is2DView) {
-      return null
+    if (!opts.is2DView) {
+      return null;
     }
 
-    if (!opts.is2DView) {
+    /** No pointCloudBox match is meaning no connect relative */
+    if (!hasImageNameInPointCloudBox) {
       return null;
     }
 
@@ -95,16 +117,19 @@ const useDataLinkSwitch = (opts: UseDataLinkSwitchOptions) => {
       justifyContent: 'center',
       width: 28,
       height: 28,
-      cursor: 'pointer',
+     // cursor: 'pointer',
     };
 
     return (
-      <div style={style} onClick={handleSwitch}>
+      <div
+       style={style}
+      //  onClick={handleSwitch}
+      >
         {isLinking && <img src={LinkIcon} style={iconSize} />}
         {!isLinking && <img src={UnlinkIcon} style={iconSize} />}
       </div>
     );
-  }, [isLinking, opts.is2DView, opts.zIndex, handleSwitch]);
+  }, [isLinking, opts.is2DView, opts.zIndex, handleSwitch, hasImageNameInPointCloudBox]);
 
   const syncIsLinking = useCallback(() => {
     if (!opts.is2DView) return;
@@ -115,24 +140,43 @@ const useDataLinkSwitch = (opts: UseDataLinkSwitchOptions) => {
       return;
     }
 
-    const set = new Set(unlinkImageItems);
-    const initIsLinking = set.has(imageName) === false;
+    // All matched's imageName pointCloudBox ids
+    const imageNameMatchedPcdIdSet = new Set([
+      ...(imageNamePointCloudBoxMap.get(imageName)?.keys() ?? []),
+    ]);
+    // All matched's imageName `extId`s
+    const imageNameMatchedExtIds = [...(linkageImageNameRectMap.get(imageName)?.keys() ?? [])];
+
+    let initIsLinking = true;
+    if (imageNameMatchedExtIds.length) {
+      initIsLinking =
+        Boolean(imageNameMatchedExtIds.find((id) => imageNameMatchedPcdIdSet.has(id))) === false;
+    }
 
     fireSwitch(initIsLinking);
-  }, [opts.is2DView, unlinkImageItems, fireSwitch])
+  }, [opts.is2DView, linkageImageNameRectMap, imageNamePointCloudBoxMap, fireSwitch]);
 
   // const syncIsLinkingRef = useLatest(syncIsLinking)
 
-  // 读取内部`isLinking`
+  // Read the latest `isLinking`
   useEffect(() => {
-    syncIsLinking()
+    syncIsLinking();
   }, [syncIsLinking]);
+
+  useEffect(() => {
+    const fn = (isConnect: boolean) => {
+      fireSwitch(isConnect);
+    };
+
+    EventBus.on(BatchSwitchConnectionEventBusEvent.switchConnect, fn);
+    return () => EventBus.unbind(BatchSwitchConnectionEventBusEvent.switchConnect, fn);
+  }, [fireSwitch]);
 
   return {
     rendered,
     isLinking,
     swapSwitch: fireSwitch,
-    syncIsLinking
+    syncIsLinking,
   };
 };
 

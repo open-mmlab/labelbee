@@ -362,7 +362,12 @@
     "ProjectionFrameCannotBeDeleted": "Projection frame cannot be deleted",
     "FailedToCopyResults": "Failed to copy results",
     "PartialResultsReplicationFailure": "Partial results replication failure",
-    "RotationAngleSensitivity": "Rotation angle sensitivity"
+    "RotationAngleSensitivity": "Rotation angle sensitivity",
+    "2DImageBatch": "2D Image Batch",
+    "ConfirmToBatchConnect": "Confirm batch connection?",
+    "ConfirmToBatchDisconnect": "Confirm batch disconnection?",
+    "Connect": "Connect",
+    "Disconnect": "disconnect"
   },
   "cn": {
     "TextInput": "文本输入",
@@ -727,6 +732,11 @@
     "ProjectionFrameCannotBeDeleted": "投射框无法删除",
     "FailedToCopyResults": "复制结果失败",
     "PartialResultsReplicationFailure": "部分结果复制失败",
-    "RotationAngleSensitivity": "旋转微调角度"
+    "RotationAngleSensitivity": "旋转微调角度",
+    "2DImageBatch": "2D图片批量",
+    "ConfirmToBatchConnect": "确认批量连接？",
+    "ConfirmToBatchDisconnect": "确认批量断开？",
+    "Connect": "连接",
+    "Disconnect": "断开"
   }
 }

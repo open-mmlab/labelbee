@@ -1,10 +1,15 @@
-import { IPointCloudBox, PartialIPointCloudBoxList } from '@labelbee/lb-utils';
+import {
+  IPointCloud2DRectOperationViewRect,
+  IPointCloudBox,
+  PartialIPointCloudBoxList,
+} from '@labelbee/lb-utils';
 import { useCallback, useContext, useMemo } from 'react';
 import _ from 'lodash';
 import { PointCloudContext } from '../PointCloudContext';
 import { EToolName, cAnnotation } from '@labelbee/lb-annotation';
 import { useHistory } from './useHistory';
 import { usePolygon } from './usePolygon';
+import { IFileItem } from '@/types/data';
 
 const { ESortDirection } = cAnnotation;
 
@@ -27,6 +32,10 @@ export const useSingleBox = (props?: IUseSingleBoxParams) => {
     syncAllViewPointCloudColor,
     polygonList,
     pointCloudPattern,
+    rectList,
+
+    removeRectIn2DView,
+    addRectIn2DView,
   } = useContext(PointCloudContext);
   const { selectedPolygon, updateSelectedPolygon, updatePolygonValidByID, deletePolygon } =
     usePolygon();
@@ -171,12 +180,72 @@ export const useSingleBox = (props?: IUseSingleBoxParams) => {
   };
 
   /**
+   * Convert the deleted pointCloudBox's matching rects to the normal rects
+   */
+  const updateExtIdMatchingRects = useCallback(
+    (deletedPointCloudBoxList: IPointCloudBox[], currentData: IFileItem) => {
+      const currentImageNameSet = new Set(
+        currentData.mappingImgList?.map((item) => item.path) ?? [],
+      );
+
+      /** Map: imageName -> Set(extId) */
+      const imageNameAndExtIdSetMap = new Map<string, Set<string>>();
+
+      deletedPointCloudBoxList.forEach((pcBox) => {
+        const extId = pcBox.id;
+
+        ;(pcBox.rects || []).forEach((item) => {
+          const { imageName } = item;
+          if (currentImageNameSet.has(imageName)) {
+            let set = imageNameAndExtIdSetMap.get(imageName);
+            if (!set) {
+              set = new Set<string>();
+              imageNameAndExtIdSetMap.set(imageName, set);
+            }
+
+            set.add(extId);
+          }
+        });
+      });
+
+      const deletedHasExtIdRectList = rectList.filter(
+        (item): item is IPointCloud2DRectOperationViewRect => {
+          const extId = item.extId;
+          const imageName = item.imageName;
+
+          if (imageName !== undefined && extId !== undefined) {
+            const set = imageNameAndExtIdSetMap.get(imageName);
+            return set?.has(extId) ?? false;
+          }
+
+          return false;
+        },
+      );
+
+      /**
+       * How to implement the transform(refer the aboving function description)?
+       *  1. remove the self
+       *  2. add the transformed(in the normal shape) self
+       */
+      // Firstly, remove the old item(with boxID)
+      removeRectIn2DView(deletedHasExtIdRectList);
+      // Then, add the normal rect item
+      deletedHasExtIdRectList.forEach((item) => {
+        addRectIn2DView(item);
+      });
+    },
+    [rectList, removeRectIn2DView, addRectIn2DView],
+  );
+
+  /**
    * Delete all polygon by hotkey.
    */
-  const deleteSelectedPointCloudBoxAndPolygon = () => {
+  const deleteSelectedPointCloudBoxAndPolygon = (currentData: IFileItem) => {
     if (selectedBox) {
       deletePointCloudBox(selectedBox.info.id);
       topViewInstance?.pointCloud2dOperation.deletePolygon(selectedBox.info.id);
+
+      updateExtIdMatchingRects([selectedBox.info], currentData);
     }
 
     if (selectedPolygon) {

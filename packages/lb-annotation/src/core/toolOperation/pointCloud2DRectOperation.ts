@@ -26,11 +26,19 @@ class PointCloud2DRectOperation extends RectOperation {
   }
 
   // Disable delete rect in checkMode
-  public deleteSelectedRect() {
+  public deleteSelectedRect(e: UIEvent) {
     if (this.checkMode) {
       return;
     }
-    this.emit('deleteSelectedRects', this.selectedRects);
+
+    const { selectedRects } = this;
+
+    // Stop keydown bubble when be regarded as the keydown fired only in 2d area
+    if (selectedRects.length) {
+      e.stopPropagation();
+    }
+
+    this.emit('deleteSelectedRects', selectedRects);
   }
 
   public setSelectedIdAfterAddingDrawingRect() {
@@ -53,6 +61,7 @@ class PointCloud2DRectOperation extends RectOperation {
     if (this.checkMode || e.keyCode !== EKeyCode.Delete) {
       return;
     }
+
     super.onKeyDown(e);
     return true;
   }
