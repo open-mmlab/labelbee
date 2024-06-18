@@ -1,3 +1,7 @@
+/**
+ * The component which provides the batch operation for connection/disconnection
+ */
+
 import React, { FC, useCallback, useContext } from 'react';
 import { Button, Popconfirm } from 'antd';
 import type { PopconfirmProps } from 'antd';
@@ -22,10 +26,6 @@ const BatchSwitchConnectIn2DView: FC = () => {
     EventBus.emit(EventBusEvent.switchConnect, isConnect);
   }, []);
 
-  const cancel = useCallback((e: Parameters<Confirm>[0], isConnect: boolean) => {
-    // window.console.log('cancel: ', e, isConnect);
-  }, []);
-
   const conncectConfirm: Confirm = useCallback(
     (e) => {
       confirm(e, true);
@@ -33,23 +33,9 @@ const BatchSwitchConnectIn2DView: FC = () => {
     [confirm],
   );
 
-  const conncectCancel: Cancel = useCallback(
-    (e) => {
-      cancel(e, true);
-    },
-    [confirm],
-  );
-
   const disconnectConfirm: Confirm = useCallback(
     (e) => {
       confirm(e, false);
-    },
-    [confirm],
-  );
-
-  const disconnectCancel: Cancel = useCallback(
-    (e) => {
-      cancel(e, false);
     },
     [confirm],
   );
@@ -65,7 +51,6 @@ const BatchSwitchConnectIn2DView: FC = () => {
       <Popconfirm
         title={t('ConfirmToBatchConnect')}
         onConfirm={conncectConfirm}
-        onCancel={conncectCancel}
         okText={t('Confirm')}
         cancelText={t('Cancel')}
       >
@@ -75,7 +60,6 @@ const BatchSwitchConnectIn2DView: FC = () => {
       <Popconfirm
         title={t('ConfirmToBatchDisconnect')}
         onConfirm={disconnectConfirm}
-        onCancel={disconnectCancel}
         okText={t('Confirm')}
         cancelText={t('Cancel')}
       >
