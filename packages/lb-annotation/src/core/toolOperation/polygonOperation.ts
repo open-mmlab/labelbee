@@ -402,8 +402,7 @@ class PolygonOperation extends BasicToolOperation {
    */
   public clearPolygonDrag() {
     this.drawingPointList = [];
-    this.dragInfo = undefined;
-    this.dragStatus = EDragStatus.Wait;
+    this.stopDrag();
     this.hoverEdgeIndex = -1;
     this.hoverPointIndex = -1;
     this.hoverID = '';
@@ -1433,6 +1432,11 @@ class PolygonOperation extends BasicToolOperation {
     return false;
   }
 
+  public stopDrag() {
+    this.dragInfo = undefined;
+    this.dragStatus = EDragStatus.Wait;
+  }
+
   public leftMouseUp(e: MouseEvent) {
     const isCtrl = this.leftMouseUpdateValid(e);
 
@@ -1470,18 +1474,14 @@ class PolygonOperation extends BasicToolOperation {
       // Emit polygon.
       this.emitUpdatePolygonByDrag();
 
-      // 拖拽停止
-      this.dragInfo = undefined;
-      this.dragStatus = EDragStatus.Wait;
+      this.stopDrag();
       this.history.pushHistory(this.polygonList);
 
       return;
     }
 
     if (this.dragInfo && this.dragStatus === EDragStatus.Start) {
-      // 拖拽停止
-      this.dragInfo = undefined;
-      this.dragStatus = EDragStatus.Wait;
+      this.stopDrag();
       return;
     }
 
@@ -1506,8 +1506,7 @@ class PolygonOperation extends BasicToolOperation {
 
   public dragMouseUp() {
     if (this.dragStatus === EDragStatus.Start) {
-      this.dragInfo = undefined;
-      this.dragStatus = EDragStatus.Wait;
+      this.stopDrag();
     }
   }
 
