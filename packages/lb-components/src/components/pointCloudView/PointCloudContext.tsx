@@ -12,14 +12,7 @@ import {
   IPointCloudBoxRect,
   IPointCloud2DRectOperationViewRect,
 } from '@labelbee/lb-utils';
-import React, {
-  PropsWithChildren,
-  useCallback,
-  useEffect,
-  useMemo,
-  useRef,
-  useState,
-} from 'react';
+import React, { PropsWithChildren, useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import {
   PointCloud,
   PointCloudAnnotation,
@@ -33,7 +26,6 @@ import useAnnotatedBoxStore from '@/store/annotatedBox';
 import _ from 'lodash';
 import type { MapIndirectWeakSet } from './utils/map';
 import { addMapIndirectWeakSetItem } from './utils/map';
-
 
 interface IPointCloudContextInstances {
   topViewInstance?: PointCloudAnnotation;
@@ -63,6 +55,12 @@ interface IHighlight2DData {
   fallbackUrl: string;
   calib?: ICalib;
 }
+
+type PickRectObjct = Pick<IPointCloud2DRectOperationViewRect, 'id'|'attribute'|'width'|'height'|'x'|'y'|'imageName'>
+
+type UpdateRectListByReducer = (
+  reducer: (prevRectList: IPointCloudBoxRect[], pickRectObject: (item: IPointCloud2DRectOperationViewRect) => PickRectObjct) => IPointCloudBoxRect[],
+) => void;
 
 export interface IPointCloudContext
   extends IPointCloudContextInstances,
@@ -155,6 +153,8 @@ export interface IPointCloudContext
   imageNamePointCloudBoxMap: MapIndirectWeakSet<IPointCloudBox>;
   /** imageName -> pointCloudBox.id -> [rect, ...] */
   linkageImageNameRectMap: MapIndirectWeakSet<IPointCloudBoxRect>;
+
+  updateRectListByReducer: UpdateRectListByReducer;
 }
 
 const pickRectObject = (rect: IPointCloud2DRectOperationViewRect) => {
@@ -243,6 +243,8 @@ export const PointCloudContext = React.createContext<IPointCloudContext>({
 
   imageNamePointCloudBoxMap: new Map(),
   linkageImageNameRectMap: new Map(),
+
+  updateRectListByReducer: () => {},
 });
 
 export const PointCloudProvider: React.FC<PropsWithChildren<{}>> = ({ children }) => {
@@ -413,6 +415,13 @@ export const PointCloudProvider: React.FC<PropsWithChildren<{}>> = ({ children }
       return r;
     }, new Map<string, Map<string, WeakSet<IPointCloudBox>>>());
   }, [pointCloudBoxList]);
+
+
+  const updateRectListByReducer = useCallback<UpdateRectListByReducer>((reducer) => {
+    setRectList((rectList) => {
+      return reducer(rectList, pickRectObject);
+    });
+  }, [pickRectObject]);
 
   /**
    * Map Shape: imageName(with extId) -> id -> Set<[...rectList]>
@@ -704,6 +713,8 @@ export const PointCloudProvider: React.FC<PropsWithChildren<{}>> = ({ children }
 
       imageNamePointCloudBoxMap,
       linkageImageNameRectMap,
+
+      updateRectListByReducer,
     };
   }, [
     valid,
@@ -735,6 +746,8 @@ export const PointCloudProvider: React.FC<PropsWithChildren<{}>> = ({ children }
     rectRotateSensitivity,
     imageNamePointCloudBoxMap,
     linkageImageNameRectMap,
+
+    updateRectListByReducer,
   ]);
 
   useEffect(() => {

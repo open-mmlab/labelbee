@@ -36,6 +36,7 @@ export const useSingleBox = (props?: IUseSingleBoxParams) => {
     updateRectIn2DView,
     removeRectIn2DView,
     addRectIn2DView,
+    updateRectListByReducer,
   } = useContext(PointCloudContext);
   const { selectedPolygon, updateSelectedPolygon, updatePolygonValidByID, deletePolygon } =
     usePolygon();
@@ -178,22 +179,29 @@ export const useSingleBox = (props?: IUseSingleBoxParams) => {
     mainViewInstance?.render();
     syncAllViewPointCloudColor(newPointCloudList);
 
-    transformMatchedToNormalRect(id)
+    transformMatchedToNormalRect(id);
+  };
+
+  const getUpdateRectListByReducerFn = (
+    set: Set<string>,
+  ): Parameters<typeof updateRectListByReducer>[0] => {
+    return (prevRectList, pickRectObject) => {
+      return prevRectList.map((item) => {
+        if (set.has(item.id)) {
+          return pickRectObject(item as IPointCloud2DRectOperationViewRect);
+        }
+
+        return item;
+      });
+    };
   };
 
   const transformMatchedToNormalRect = (extId: string) => {
-    const matchedRects = rectList.filter(r => r.extId === extId)
-    matchedRects.forEach(rect => {
-      // FIXME should narrow the first param type of `updateRectIn2DView`.
-      //
-      //  In current, the smallest required fields:
-      //     'id', 'attribute', 'width', 'height', 'x', 'y', 'imageName'
-      //  But using `IPointCloud2DRectOperationViewRect`
-      //
-      // Here, use `as any` for current code
-      updateRectIn2DView(rect as any)
-    })
-  }
+    const matchedRects = rectList.filter((r) => r.extId === extId);
+
+    const set = new Set(matchedRects.map((item) => item.id));
+    updateRectListByReducer(getUpdateRectListByReducerFn(set));
+  };
 
   /**
    * Convert the deleted pointCloudBox's matching rects to the normal rects
@@ -210,7 +218,7 @@ export const useSingleBox = (props?: IUseSingleBoxParams) => {
       deletedPointCloudBoxList.forEach((pcBox) => {
         const extId = pcBox.id;
 
-        ;(pcBox.rects || []).forEach((item) => {
+        (pcBox.rects || []).forEach((item) => {
           const { imageName } = item;
           if (currentImageNameSet.has(imageName)) {
             let set = imageNameAndExtIdSetMap.get(imageName);
@@ -238,17 +246,8 @@ export const useSingleBox = (props?: IUseSingleBoxParams) => {
         },
       );
 
-      /**
-       * How to implement the transform(refer the aboving function description)?
-       *  1. remove the self
-       *  2. add the transformed(in the normal shape) self
-       */
-      // Firstly, remove the old item(with boxID)
-      removeRectIn2DView(deletedHasExtIdRectList);
-      // Then, add the normal rect item
-      deletedHasExtIdRectList.forEach((item) => {
-        addRectIn2DView(item);
-      });
+      const set = new Set(deletedHasExtIdRectList.map((item) => item.id));
+      updateRectListByReducer(getUpdateRectListByReducerFn(set));
     },
     [rectList, removeRectIn2DView, addRectIn2DView],
   );
