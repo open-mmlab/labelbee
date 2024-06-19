@@ -1946,6 +1946,8 @@ class RectOperation extends BasicToolOperation {
     if (!this.selectedRects?.length) return;
     // Verify if resizeWidth and resizeHeight are valid
     if (resizeWidth <= 0 || resizeHeight <= 0) return;
+    // Origin Size less than resizeWidth or resizeHeight , remains unchanged
+    if (this.selectedRects[0].width <= resizeWidth || this.selectedRects[0].height <= resizeHeight) return;
 
     const { width, height } = this.basicImgInfo;
     const targetRect = {
