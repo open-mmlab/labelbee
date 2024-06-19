@@ -33,7 +33,7 @@ export const useSingleBox = (props?: IUseSingleBoxParams) => {
     polygonList,
     pointCloudPattern,
     rectList,
-
+    updateRectIn2DView,
     removeRectIn2DView,
     addRectIn2DView,
   } = useContext(PointCloudContext);
@@ -177,7 +177,23 @@ export const useSingleBox = (props?: IUseSingleBoxParams) => {
     mainViewInstance?.removeObjectByName(id, 'box');
     mainViewInstance?.render();
     syncAllViewPointCloudColor(newPointCloudList);
+
+    transformMatchedToNormalRect(id)
   };
+
+  const transformMatchedToNormalRect = (extId: string) => {
+    const matchedRects = rectList.filter(r => r.extId === extId)
+    matchedRects.forEach(rect => {
+      // FIXME should narrow the first param type of `updateRectIn2DView`.
+      //
+      //  In current, the smallest required fields:
+      //     'id', 'attribute', 'width', 'height', 'x', 'y', 'imageName'
+      //  But using `IPointCloud2DRectOperationViewRect`
+      //
+      // Here, use `as any` for current code
+      updateRectIn2DView(rect as any)
+    })
+  }
 
   /**
    * Convert the deleted pointCloudBox's matching rects to the normal rects
