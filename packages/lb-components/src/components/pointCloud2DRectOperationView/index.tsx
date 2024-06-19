@@ -80,7 +80,7 @@ const PointCloud2DRectOperationView = (props: IPointCloud2DRectOperationViewProp
       if (boxID) {
         const result = update2DViewRectFn?.(rect);
         newPointCloudResult.current = result;
-        setPointCloudResult(result);
+        setPointCloudResult(result || []);
         return;
       }
     }
@@ -104,7 +104,7 @@ const PointCloud2DRectOperationView = (props: IPointCloud2DRectOperationViewProp
       if (hasBoxIDRect) {
         const result = remove2DViewRectFn?.(hasBoxIDRect);
         newPointCloudResult.current = result;
-        setPointCloudResult(result);
+        setPointCloudResult(result || []);
         updateRectList();
         return;
       }
@@ -118,7 +118,7 @@ const PointCloud2DRectOperationView = (props: IPointCloud2DRectOperationViewProp
       const { imageName, extId: boxID } = matchedExtIdIDRect
       const result = remove2DViewRectFn?.({ boxID, imageName });
       newPointCloudResult.current = result;
-      setPointCloudResult(result);
+      setPointCloudResult(result || []);
     }
 
     removeRectIn2DView(rectList);
