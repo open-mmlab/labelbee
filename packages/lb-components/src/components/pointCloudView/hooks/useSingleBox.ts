@@ -172,7 +172,7 @@ export const useSingleBox = (props?: IUseSingleBoxParams) => {
     switchToNext(ESortDirection.ascend, manual);
   };
 
-  const deletePointCloudBox = (id: string) => {
+  const deletePointCloudBox = (id: string, shouldUpdateMatchingRectList = true) => {
     const newPointCloudList = pointCloudBoxList.filter((v) => v.id !== id);
     setPointCloudResult(newPointCloudList);
     mainViewInstance?.removeObjectByName(id, 'box');
@@ -180,22 +180,32 @@ export const useSingleBox = (props?: IUseSingleBoxParams) => {
     syncAllViewPointCloudColor(newPointCloudList);
 
     // Transform to the normal shape
-    const matchedRects = rectList.filter((r) => r.extId === id);
-    const set = new Set(matchedRects.map((item) => item.id));
-    updateRectListByReducer(getUpdateRectListByReducerFn(set));
+    if (shouldUpdateMatchingRectList) {
+      const matchedRects = rectList.filter((r) => r.extId === id);
+      const set = new Set(matchedRects.map((item) => item.id));
+      updateRectListByReducer(getUpdateRectListByReducerFn(set));
+    }
   };
 
   const getUpdateRectListByReducerFn = (
     set: Set<string>,
   ): Parameters<typeof updateRectListByReducer>[0] => {
     return (prevRectList, pickRectObject) => {
-      return prevRectList.map((item) => {
+      let hasUpdated = false;
+      const newList = prevRectList.map((item) => {
         if (set.has(item.id)) {
+          hasUpdated = true
           return pickRectObject(item as IPointCloud2DRectOperationViewRect);
         }
 
         return item;
       });
+
+      if (hasUpdated) {
+        return newList;
+      }
+
+      return prevRectList;
     };
   };
 
@@ -253,7 +263,7 @@ export const useSingleBox = (props?: IUseSingleBoxParams) => {
    */
   const deleteSelectedPointCloudBoxAndPolygon = (currentData: IFileItem) => {
     if (selectedBox) {
-      deletePointCloudBox(selectedBox.info.id);
+      deletePointCloudBox(selectedBox.info.id, false);
       topViewInstance?.pointCloud2dOperation.deletePolygon(selectedBox.info.id);
 
       updateExtIdMatchingRects([selectedBox.info], currentData);
