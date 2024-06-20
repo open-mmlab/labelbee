@@ -55,6 +55,7 @@ const PointCloud2DRectOperationView = (props: IPointCloud2DRectOperationViewProp
     addRectIn2DView,
     updateRectIn2DView,
     removeRectIn2DView,
+    updateRectListByReducer,
   } = useContext(PointCloudContext);
 
   const { update2DViewRect, remove2DViewRect } = usePointCloudViews();
@@ -80,7 +81,7 @@ const PointCloud2DRectOperationView = (props: IPointCloud2DRectOperationViewProp
       if (boxID) {
         const result = update2DViewRectFn?.(rect);
         newPointCloudResult.current = result;
-        setPointCloudResult(result);
+        setPointCloudResult(result || []);
         return;
       }
     }
@@ -104,7 +105,7 @@ const PointCloud2DRectOperationView = (props: IPointCloud2DRectOperationViewProp
       if (hasBoxIDRect) {
         const result = remove2DViewRectFn?.(hasBoxIDRect);
         newPointCloudResult.current = result;
-        setPointCloudResult(result);
+        setPointCloudResult(result || []);
         updateRectList();
         return;
       }
@@ -118,7 +119,7 @@ const PointCloud2DRectOperationView = (props: IPointCloud2DRectOperationViewProp
       const { imageName, extId: boxID } = matchedExtIdIDRect
       const result = remove2DViewRectFn?.({ boxID, imageName });
       newPointCloudResult.current = result;
-      setPointCloudResult(result);
+      setPointCloudResult(result || []);
     }
 
     removeRectIn2DView(rectList);
@@ -219,8 +220,33 @@ const PointCloud2DRectOperationView = (props: IPointCloud2DRectOperationViewProp
   useEffect(() => {
     const rect = rectListInImage.find((i) => i.id === operation.current.selectedRectID);
     operation.current?.setDefaultAttribute?.(defaultAttribute);
+
     if (rect) {
-      updateRectIn2DView({ ...operation.current?.selectedRect, attribute: defaultAttribute });
+      // updateRectIn2DView({ ...operation.current?.selectedRect, attribute: defaultAttribute });
+      updateRectListByReducer((preRectList) => {
+        const filtered: IPointCloudBoxRect[] = [];
+        let matched: any = null;
+
+        preRectList.forEach((item: IPointCloudBoxRect) => {
+          if (item.id !== operation.current.selectedRectID) {
+            filtered.push(item);
+          } else {
+            matched = item;
+          }
+        });
+
+        if (rect.extId === undefined) {
+          matched = operation.current?.selectedRect;
+        }
+
+        return [
+          ...filtered,
+          {
+            ...(matched || {}),
+            attribute: defaultAttribute,
+          },
+        ];
+      });
     }
     updateRectList();
   }, [defaultAttribute]);
