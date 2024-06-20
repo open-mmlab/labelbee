@@ -179,7 +179,10 @@ export const useSingleBox = (props?: IUseSingleBoxParams) => {
     mainViewInstance?.render();
     syncAllViewPointCloudColor(newPointCloudList);
 
-    transformMatchedToNormalRect(id);
+    // Transform to the normal shape
+    const matchedRects = rectList.filter((r) => r.extId === id);
+    const set = new Set(matchedRects.map((item) => item.id));
+    updateRectListByReducer(getUpdateRectListByReducerFn(set));
   };
 
   const getUpdateRectListByReducerFn = (
@@ -194,13 +197,6 @@ export const useSingleBox = (props?: IUseSingleBoxParams) => {
         return item;
       });
     };
-  };
-
-  const transformMatchedToNormalRect = (extId: string) => {
-    const matchedRects = rectList.filter((r) => r.extId === extId);
-
-    const set = new Set(matchedRects.map((item) => item.id));
-    updateRectListByReducer(getUpdateRectListByReducerFn(set));
   };
 
   /**
