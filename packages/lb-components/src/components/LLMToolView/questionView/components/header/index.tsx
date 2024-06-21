@@ -85,28 +85,26 @@ const Header = (props: IProps) => {
         }}
       >
         {t('Title')}
-        {!isImg && (
-          <span style={{ display: 'flex' }}>
-            <Radio.Group
-              value={dataFormatType}
-              onChange={(e) => {
-                setDataFormatType(e.target.value);
-              }}
+        <span style={{ display: 'flex' }}>
+          <Radio.Group
+            value={dataFormatType}
+            onChange={(e) => {
+              setDataFormatType(e.target.value);
+            }}
+          >
+            <Radio.Button
+              value={EDataFormatType.Default}
+              style={{ textAlign: 'center', width: '52px' }}
+            >{`</>`}</Radio.Button>
+            <Radio.Button
+              value={EDataFormatType.Markdown}
+              style={{ textAlign: 'center', width: '52px' }}
             >
-              <Radio.Button
-                value={EDataFormatType.Default}
-                style={{ textAlign: 'center', width: '52px' }}
-              >{`</>`}</Radio.Button>
-              <Radio.Button
-                value={EDataFormatType.Markdown}
-                style={{ textAlign: 'center', width: '52px' }}
-              >
-                <FileTextOutlined />
-              </Radio.Button>
-            </Radio.Group>
-            <span style={{ marginLeft: '8px', width: '4px', background: '#1890ff' }} />
-          </span>
-        )}
+              <FileTextOutlined />
+            </Radio.Button>
+          </Radio.Group>
+          <span style={{ marginLeft: '8px', width: '4px', background: '#1890ff' }} />
+        </span>
       </div>
       <div className={`${LLMViewCls}__headerContent`}>
         <Content question={question} dataFormatType={dataFormatType} isImg={isImg} />
