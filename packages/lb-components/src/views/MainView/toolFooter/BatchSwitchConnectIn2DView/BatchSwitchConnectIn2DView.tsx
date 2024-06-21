@@ -2,7 +2,7 @@
  * The component which provides the batch operation for connection/disconnection
  */
 
-import React, { FC, useCallback, useContext } from 'react';
+import React, { FC, useCallback, useContext, useEffect, useState } from 'react';
 import { Button, Popconfirm } from 'antd';
 import type { PopconfirmProps } from 'antd';
 import { useTranslation } from 'react-i18next';
@@ -18,6 +18,7 @@ export enum EventBusEvent {
 }
 
 const BatchSwitchConnectIn2DView: FC = () => {
+  const [is2dImageEnlarge, setIs2dImageEnlarge] = useState(false);
   const { cuboidBoxIn2DView } = useContext(PointCloudContext);
   const { t } = useTranslation();
 
@@ -40,8 +41,26 @@ const BatchSwitchConnectIn2DView: FC = () => {
     [confirm],
   );
 
+  useEffect(() => {
+    const fn = (isEnlarge: boolean) => {
+      setIs2dImageEnlarge(isEnlarge);
+    };
+
+    const eventName_2dImageEnlarge = '2d-image:enlarge';
+
+    EventBus.on(eventName_2dImageEnlarge, fn);
+    return () => {
+      EventBus.unbind(eventName_2dImageEnlarge, fn);
+    };
+  }, []);
+
   // NOTE only support the `SwitchCuboidBoxIn2DView` is switched to "2D Rect"
   if (cuboidBoxIn2DView) {
+    return null;
+  }
+
+  // Hide when the 2d-image frame is large
+  if (is2dImageEnlarge) {
     return null;
   }
 
