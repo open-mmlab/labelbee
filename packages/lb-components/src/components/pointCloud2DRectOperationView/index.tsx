@@ -90,7 +90,6 @@ const PointCloud2DRectOperationView = (props: IPointCloud2DRectOperationViewProp
         const cloned = lastSelectedIds.current.slice(0);
 
         const result = await Promise.resolve(fn());
-
         if (!result || result.length === 0) {
           return result;
         }
@@ -118,9 +117,9 @@ const PointCloud2DRectOperationView = (props: IPointCloud2DRectOperationViewProp
         recoverSelectedIds(() => {
           // NOTE maybe change selectIds
           const result = update2DViewRectFn?.(rect);
-          newPointCloudResult.current = result;
 
           if (result) {
+            newPointCloudResult.current = result;
             setPointCloudResult(result);
 
             return result as IPointCloudBox[];
@@ -151,10 +150,11 @@ const PointCloud2DRectOperationView = (props: IPointCloud2DRectOperationViewProp
       const hasBoxIDRect = rectList.find((rect) => rect.boxID);
       if (hasBoxIDRect) {
         recoverSelectedIds(() => {
+          // NOTE maybe change selectIds
           const result = remove2DViewRectFn?.(hasBoxIDRect);
-          newPointCloudResult.current = result;
 
           if (result) {
+            newPointCloudResult.current = result;
             setPointCloudResult(result);
             updateRectList();
 
@@ -172,13 +172,20 @@ const PointCloud2DRectOperationView = (props: IPointCloud2DRectOperationViewProp
     // @ts-ignore
     const matchedExtIdIDRect = rectList.find((rect) => rect.extId);
     if (matchedExtIdIDRect) {
-      // @ts-ignore
-      const { imageName, extId: boxID } = matchedExtIdIDRect
-      const result = remove2DViewRectFn?.({ boxID, imageName });
-      if (result) {
-        newPointCloudResult.current = result;
-        setPointCloudResult(result);
-      }
+      recoverSelectedIds(() => {
+        // @ts-ignore
+        const { imageName, extId: boxID } = matchedExtIdIDRect
+        // NOTE maybe change selectIds
+        const result = remove2DViewRectFn?.({ boxID, imageName });
+
+        if (result) {
+          newPointCloudResult.current = result;
+          setPointCloudResult(result);
+          return result;
+        }
+
+        return null
+      });
     }
 
     removeRectIn2DView(rectList);
