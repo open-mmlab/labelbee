@@ -4,6 +4,20 @@
  * @param {*} z
  * @returns
  */
+
+/**
+ *  Refactored by hexing@senseauto.com
+ *  Date: 2024-06-23
+ *  !!! break change !!!
+ *  1. color retained from the last rendering, and there is external processing logic
+ *  2. Narrow the rendering range by modifiedBoxIds and resetAreas
+ *  3. Refactor highlightIndex highlight logic
+ *  4. resetAreas currently only supports one area, TODO supports multiple areas, personally feel the priority is not high
+ */
+const REMAINED_COLOR_FLAG = [-1, -1, -1];
+
+let isLastRender2DToggleOn = false;
+
 function getIndex(z) {
   const minZ = -7;
   const maxZ = 3;
@@ -123,9 +137,36 @@ function getNewColorByBox({ zMin, zMax, polygonPointList, attribute, x, y, z, co
   }
 }
 
+/**
+ * Update the color of points based on z-value
+ * @param {number} z - z-coordinate value of a point
+ */
+function getPointColorByZ(z) {
+  const index = getIndex(z);
+  const newColor = COLOR_MAP_JET[index];
+  const [r, g, b] = newColor;
+  return [r / 255, g / 255, b / 255];
+}
+
 onmessage = function onmessage(e) {
   const { position: points, color, cuboidList, colorList, highlightIndex } = e.data;
+  let { modifiedBoxIds = [], resetAreas = [] } = e.data;
+
   let num = 0;
+  function updateNum() {
+    num += 1;
+  }
+  if (!points) {
+    return;
+  }
+  // If there is 2D highlighting, skip the modifiedBoxIds and resetAreas related logic
+  const is2DToggleOn = !!highlightIndex?.length;
+
+  if (is2DToggleOn || isLastRender2DToggleOn) {
+    // If 2D highlight is enabled, or it was enabled last time, then reset modifiedBoxIds and resetAreas, force refresh once
+    modifiedBoxIds = [];
+    resetAreas = [];
+  }
 
   /**
    * Temporary closure of range judgment
@@ -144,55 +185,129 @@ onmessage = function onmessage(e) {
   //   }
   // }
 
+  const toRenderCuboidList = modifiedBoxIds.length
+    ? cuboidList.filter((v) => modifiedBoxIds.includes(v.id))
+    : cuboidList;
   //  Loop to determine if it is in range
   for (let i = 0; i < points.length; i += 3) {
     const x = points[i];
     const y = points[i + 1];
     const z = points[i + 2];
-
-    const newColorInfo = cuboidList
-      .map((v) => {
-        return getNewColorByBox({
-          polygonPointList: v.polygonPointList,
-          zMin: v.zMin,
-          zMax: v.zMax,
+    let newColorInfo;
+    if (resetAreas.length === 1 && !modifiedBoxIds.length) {
+      // deleting a single box
+      if (isInPolygon({ x, y }, resetAreas[0])) {
+        newColorInfo = getPointColorByZ(z);
+      } else {
+        // Preserve previous color outside delete area
+        newColorInfo = REMAINED_COLOR_FLAG;
+      }
+    } else if (resetAreas.length || modifiedBoxIds.length) {
+      // not init, Non-Single Box Delete
+      let found = false;
+      toRenderCuboidList.some((cuboid) => {
+        const insideColor = getNewColorByBox({
+          polygonPointList: cuboid.polygonPointList,
+          zMin: cuboid.zMin,
+          zMax: cuboid.zMax,
           x,
           y,
           z,
-          attribute: v.attribute,
+          attribute: cuboid.attribute,
           colorList,
-          valid: v.valid,
+          valid: cuboid.valid,
         });
-      })
-      .filter((v) => v)
-      .pop();
+        if (insideColor) {
+          updateNum();
+          newColorInfo = insideColor;
+          found = true;
+          return true; // Find color inside box, stop traversing
+        }
+        return false; // continue traversing
+      });
+
+      if (!found && resetAreas.length) {
+        found = resetAreas.some((area) => {
+          if (isInPolygon({ x, y }, area)) {
+            newColorInfo = getPointColorByZ(z);
+            return true; // Find the color in the reset area and stop iterating
+          }
+          return false; // continue traversing
+        });
+      }
+
+      if (!found && !is2DToggleOn) {
+        // First determine if not inside a box, also not inside reset zone
+        // Also 2d highlight is not on
+        if (isLastRender2DToggleOn) {
+          // 2d highlight not started has two situations, one is the next rendering after closing 2d highlight,
+          // the color of origin highlight area is reset to default color by z value
+          // This time, all points will be forced to refresh, so the color of the last time need not be considered
+          newColorInfo = getPointColorByZ(z);
+        } else {
+          // The second situation is not for the next rendering after closing,
+          // in the normal logic, the saved results of last time should be used
+          newColorInfo = REMAINED_COLOR_FLAG;
+        }
+      }
+    } else {
+      // init
+      toRenderCuboidList.some((cuboid) => {
+        const insideColor = getNewColorByBox({
+          polygonPointList: cuboid.polygonPointList,
+          zMin: cuboid.zMin,
+          zMax: cuboid.zMax,
+          x,
+          y,
+          z,
+          attribute: cuboid.attribute,
+          colorList,
+          valid: cuboid.valid,
+        });
+        if (insideColor) {
+          updateNum();
+          newColorInfo = insideColor;
+          return true;
+        }
+        return false;
+      });
+    }
+
+    const isPointHighlightBy2D = (index) => {
+      const pointIndex = Math.floor(index / 3);
+      return highlightIndex && highlightIndex[pointIndex] === 1;
+    };
 
     // Notice. Scope: [0, 1];
     if (newColorInfo) {
-      num++;
-      const [r, g, b] = newColorInfo;
-      color[i] = r;
-      color[i + 1] = g;
-      color[i + 2] = b;
-    } else {
-      const pointIndex = Math.floor(i / 3);
-
-      if (highlightIndex && highlightIndex[pointIndex] === 1) {
+      if (newColorInfo[0] === REMAINED_COLOR_FLAG[0] && isPointHighlightBy2D(i)) {
+        // Up to this point in the logic, it indicates that it is neither within the frame nor within the reset area,
+        // when both the color of last time and the 2D highlight rendering are remembered,
+        // the priority of 2D highlight rendering is higher
         color[i] = 0;
         color[i + 1] = 0;
         color[i + 2] = 0;
       } else {
-        // // DEFAULT COLOR RENDER
-        // Recover the originPoint
-        const index = getIndex(z);
-        const newColor = COLOR_MAP_JET[index];
-        const [r, g, b] = newColor;
-        color[i] = r / 255;
-        color[i + 1] = g / 255;
-        color[i + 2] = b / 255;
+        const [r, g, b] = newColorInfo;
+        color[i] = r;
+        color[i + 1] = g;
+        color[i + 2] = b;
       }
+    } else if (isPointHighlightBy2D(i)) {
+      // 2D highlighting
+      color[i] = 0;
+      color[i + 1] = 0;
+      color[i + 2] = 0;
+    } else {
+      // DEFAULT COLOR RENDER
+      // Recover the originPoint
+      const [r, g, b] = getPointColorByZ(z);
+      color[i] = r;
+      color[i + 1] = g;
+      color[i + 2] = b;
     }
   }
-
+  // Cache whether 2D highlighting, for use in the next call
+  isLastRender2DToggleOn = is2DToggleOn;
   postMessage({ points, color, num });
 };

@@ -3,6 +3,7 @@
  * @author Glenfiddish <edwinlee0927@hotmail.com>
  * @createdate 2022-08-17
  */
+
 import {
   PointCloudAnnotation,
   PointCloud,
@@ -34,6 +35,7 @@ import _ from 'lodash';
 import { useDispatch, useSelector } from '@/store/ctx';
 import { AppState } from '@/store';
 import StepUtils from '@/utils/StepUtils';
+import { EPointCloudBoxRenderTrigger } from '@/utils/ToolPointCloudBoxRenderHelper';
 import { jsonParser, getRectPointCloudBox, generatePointCloudBoxRects } from '@/utils';
 import {
   PreDataProcess,
@@ -619,6 +621,7 @@ export const usePointCloudViews = () => {
     setHighlight2DDataList,
     cuboidBoxIn2DView,
     imageSizes,
+    history,
   } = ptCtx;
   const { addHistory, initHistory, pushHistoryUnderUpdatePolygon } = useHistory();
   const { selectedPolygon } = usePolygon();
@@ -1100,7 +1103,10 @@ export const usePointCloudViews = () => {
     } else {
       const newPointCloudBoxList = updateSelectedBoxes(updatePointCloudList);
       if (newPointCloudBoxList) {
-        ptCtx.syncAllViewPointCloudColor(newPointCloudBoxList);
+        ptCtx.syncAllViewPointCloudColor(
+          EPointCloudBoxRenderTrigger.MultiMove,
+          newPointCloudBoxList,
+        );
       }
     }
   };
@@ -1216,7 +1222,10 @@ export const usePointCloudViews = () => {
      */
     if (newPointCloudBoxList) {
       // Wait for the mainPointCloudData.
-      await ptCtx.syncAllViewPointCloudColor(newPointCloudBoxList);
+      await ptCtx.syncAllViewPointCloudColor(
+        EPointCloudBoxRenderTrigger.Single,
+        newPointCloudBoxList,
+      );
     }
     const viewToBeUpdated = {
       [PointCloudView.Side]: () => {
@@ -1270,7 +1279,6 @@ export const usePointCloudViews = () => {
     if (!newData?.url || !mainViewInstance) {
       return;
     }
-
     /**
      * Init Cache Data.
      */
@@ -1339,7 +1347,7 @@ export const usePointCloudViews = () => {
        * Use [] to replace the default highlight2DDataList.
        * Need to await syncAllViewPointCloudColor before setLoading(false).
        */
-      await ptCtx.syncAllViewPointCloudColor(boxParamsList, []);
+       await ptCtx.syncAllViewPointCloudColor(EPointCloudBoxRenderTrigger.Default, boxParamsList, []);
     }
 
     initHistory({

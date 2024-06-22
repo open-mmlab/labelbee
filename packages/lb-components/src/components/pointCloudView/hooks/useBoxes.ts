@@ -5,7 +5,7 @@ import { message, Modal } from 'antd';
 import { usePointCloudViews } from './usePointCloudViews';
 import { PointCloudContext } from '../PointCloudContext';
 import { useTranslation } from 'react-i18next';
-
+import { EPointCloudBoxRenderTrigger } from '@/utils/ToolPointCloudBoxRenderHelper';
 /**
  * Actions for selected boxes
  */
@@ -57,8 +57,7 @@ export const useBoxes = ({ config }: { config: IPointCloudConfig }) => {
       setPointCloudResult(newPointCloudBoxList);
       pointCloudBoxListUpdated?.(newPointCloudBoxList);
       setCopiedBoxes([]);
-
-      syncAllViewPointCloudColor(newPointCloudBoxList);
+      syncAllViewPointCloudColor(EPointCloudBoxRenderTrigger.MultiPaste,  newPointCloudBoxList);
     };
 
     if (hasDuplicate) {

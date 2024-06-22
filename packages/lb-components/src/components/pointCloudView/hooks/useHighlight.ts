@@ -20,7 +20,9 @@ const useHighlight = ({ currentData }: Partial<IAnnotationStateProps>) => {
   const mappingImgList = currentData?.mappingImgList ?? [];
 
   const toggle2dVisible = async (url: string, fallbackUrl: string, calib?: ICalib) => {
-    let newHighlightList: Array<{ url: string; fallbackUrl:string; calib?: ICalib }> = [...highlight2DDataList];
+    let newHighlightList: Array<{ url: string; fallbackUrl: string; calib?: ICalib }> = [
+      ...highlight2DDataList,
+    ];
 
     // Update highlight Status.
     if (highlight2DDataList.find((v) => v.url === url)) {
@@ -49,12 +51,16 @@ const useHighlight = ({ currentData }: Partial<IAnnotationStateProps>) => {
       points: points.geometry.attributes.position.array,
     });
 
-    const color = await mainViewInstance.highlightOriginPointCloud(
-      pointCloudBoxList,
-      highlightIndex,
-    );
+    try {
+      const color = await mainViewInstance.highlightOriginPointCloud(
+        pointCloudBoxList,
+        highlightIndex,
+      );
 
-    color && topViewInstance?.pointCloudInstance?.updateColor(color);
+      color && topViewInstance?.pointCloudInstance?.updateColor(color);
+    } catch (error) {
+      console.error('toggle2dVisible highlightOriginPointCloud error:', error);
+    }
   };
 
   const isHighlightVisible = useCallback(
