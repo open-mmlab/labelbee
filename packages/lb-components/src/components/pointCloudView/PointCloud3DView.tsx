@@ -218,7 +218,13 @@ const PointCloud3D: React.FC<IA2MapStateProps> = ({ currentData, config, highlig
    *  Observe selectedID and reset camera to target top-view
    */
   useEffect(() => {
-    if (selectedBox) {
+    /**
+     * When the selected rectangle is switched, it is necessary to update the 3D view perspective and zoom size of the currently selected rectangle. Other rendering logic remains unchanged.
+     * Originally, the perspective was updated whenever any property changed; now it is updated only when the Id changes.
+     */
+    const selectedId = selectedBox?.info?.id;
+
+    if (selectedId !== undefined) {
       setTarget3DView(EPerspectiveView.Top);
 
       /**
@@ -227,7 +233,7 @@ const PointCloud3D: React.FC<IA2MapStateProps> = ({ currentData, config, highlig
       const zoom = ptCtx.topViewInstance?.pointCloudInstance?.camera.zoom ?? 1;
       ptCtx.mainViewInstance?.updateCameraZoom(zoom);
     }
-  }, [selectedBox]);
+  }, [selectedBox?.info?.id]);
 
   useEffect(() => {
     if (selectedSphere) {
