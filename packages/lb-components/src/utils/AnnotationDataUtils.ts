@@ -14,6 +14,7 @@ interface ICopyResultChangeParams {
   currentResult: string;
   mappingImgList: IMappingImg[];
   preMappingImgList: IMappingImg[];
+  valid: boolean;
 }
 
 interface IGetNextPath {
@@ -123,11 +124,12 @@ export default class AnnotationDataUtils {
    * @returns
    */
   public static copyResultChange(params: ICopyResultChangeParams) {
-    const { copyResult, step, currentResult, mappingImgList, preMappingImgList } = params;
+    const { copyResult, step, currentResult, mappingImgList, preMappingImgList, valid } = params;
     // 其实其限定的范围一般都在单图的情况
     try {
       const copyData = jsonParser(copyResult);
       const currentData = jsonParser(currentResult);
+      currentData.valid = valid;
       const stepName = `step_${step}`;
       if (copyData[stepName]) {
         // 这层可能还要处理 dataSource 依赖问题
