@@ -736,6 +736,7 @@ export const annotationReducer = (
 
       const currentStepInfo = StepUtils.getCurrentStepInfo(step, stepList);
       const copyStep = currentStepInfo?.step ?? step;
+      const valid = toolInstance?.valid ?? true;
 
       const newResult = AnnotationDataUtils.copyResultChange({
         copyResult: backwardResult,
@@ -743,6 +744,7 @@ export const annotationReducer = (
         currentResult: imgList[imgIndex].result ?? '',
         preMappingImgList: imgList[imgIndex - 1].mappingImgList ?? [],
         mappingImgList: imgList[imgIndex].mappingImgList ?? [],
+        valid,
       });
 
       imgList[imgIndex] = {
