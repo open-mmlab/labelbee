@@ -9,7 +9,7 @@ import { PointCloudContext } from '../PointCloudContext';
 import { cTool } from '@labelbee/lb-annotation';
 import { useHistory } from './useHistory';
 import { EPointCloudPattern } from '@labelbee/lb-utils';
-
+import { EPointCloudBoxRenderTrigger } from '@/utils/ToolPointCloudBoxRenderHelper';
 const { EToolName, EPolygonPattern } = cTool;
 
 export const useStatus = () => {
@@ -43,8 +43,7 @@ export const useStatus = () => {
     setRectList([]);
 
     topViewInstance?.toolScheduler.clearStatusAndResult();
-
-    syncAllViewPointCloudColor([]);
+    syncAllViewPointCloudColor(EPointCloudBoxRenderTrigger.ClearAll, []);
 
     // Add History
     pushHistoryWithList({ pointCloudBoxList: [], polygonList: [], pointCloudSphereList: [] });

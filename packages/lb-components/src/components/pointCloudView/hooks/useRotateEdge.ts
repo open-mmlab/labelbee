@@ -15,7 +15,7 @@ export const useRotateEdge = ({ currentData }: IAnnotationStateProps) => {
   const { selectedBox, updateSelectedBox } = useSingleBox();
   const { run: updateRotateEdge } = useThrottleFn(
     (angle: number) => {
-      const { topViewInstance, mainViewInstance, syncAllViewPointCloudColor } = ptCtx;
+      const { topViewInstance, mainViewInstance } = ptCtx;
       if (!topViewInstance || !mainViewInstance) {
         return;
       }
@@ -46,7 +46,7 @@ export const useRotateEdge = ({ currentData }: IAnnotationStateProps) => {
 
       // 更新3D视图
       mainViewInstance.generateBox(selectedPointCloudBox);
-      syncAllViewPointCloudColor(newPointCloudList);
+
       // 更新侧视图
       synchronizeSideView(
         selectedPointCloudBox,

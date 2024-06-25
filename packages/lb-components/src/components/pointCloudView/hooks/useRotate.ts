@@ -5,6 +5,7 @@ import { useSingleBox } from './useSingleBox';
 import { PointCloudContext } from '../PointCloudContext';
 import { cAnnotation } from '@labelbee/lb-annotation';
 import { PointCloudUtils } from '@labelbee/lb-utils';
+import { EPointCloudBoxRenderTrigger } from '@/utils/ToolPointCloudBoxRenderHelper';
 import { useThrottleFn } from 'ahooks';
 
 const { ERotateDirection } = cAnnotation;
@@ -41,7 +42,7 @@ export const useRotate = ({ currentData }: IAnnotationStateProps) => {
       const selectedPolygon = TopPointCloudPolygonOperation.selectedPolygon;
 
       mainViewInstance.generateBox(selectedPointCloudBox);
-      syncAllViewPointCloudColor(newPointCloudList);
+      syncAllViewPointCloudColor(EPointCloudBoxRenderTrigger.SingleRotate, newPointCloudList);
       synchronizeSideView(
         selectedPointCloudBox,
         selectedPolygon,

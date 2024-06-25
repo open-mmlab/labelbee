@@ -21,6 +21,7 @@ import {
   IPointUnit,
   ILine,
 } from '@labelbee/lb-utils';
+import { EPointCloudBoxRenderTrigger } from '@/utils/ToolPointCloudBoxRenderHelper';
 import React, { useEffect, useLayoutEffect, useRef, useState } from 'react';
 import { PointCloudContext } from './PointCloudContext';
 import { useRotate } from './hooks/useRotate';
@@ -336,7 +337,7 @@ const PointCloudTopView: React.FC<IProps> = ({
 
       // HighLight
       if (newPointCloudList) {
-        ptCtx.syncAllViewPointCloudColor(newPointCloudList);
+        ptCtx.syncAllViewPointCloudColor(EPointCloudBoxRenderTrigger.Default, newPointCloudList);
       }
       if (ptCtx.polygonList.find((v) => v.id === id)) {
         ptCtx.topViewInstance?.toolInstance.setPolygonValidAndRender(id, true);

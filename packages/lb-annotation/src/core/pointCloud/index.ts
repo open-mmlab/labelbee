@@ -1062,7 +1062,7 @@ export class PointCloud extends EventListener {
   public async handleWebworker(params: any) {
     return new Promise((resolve, reject) => {
       if (this.workerLoading) {
-        reject(new Error('workerLoading'));
+        reject(new Error('highlightWorker called repeatedly, new call discarded'));
         return;
       }
       this.workerLoading = true;
@@ -1084,30 +1084,56 @@ export class PointCloud extends EventListener {
    * @param boxParams
    * @returns
    */
-  public async highlightOriginPointCloud(pointCloudBoxList?: IPointCloudBox[], highlightIndex: number[] = []) {
+  public async highlightOriginPointCloud(
+    pointCloudBoxList?: IPointCloudBox[],
+    highlightIndex: number[] = [],
+    config: {
+      modifiedBoxIds: string[];
+      resetAreas: ICoordinate[][];
+    } = {
+      modifiedBoxIds: [],
+      resetAreas: [],
+    },
+  ) {
+    const { modifiedBoxIds, resetAreas } = config;
     const oldPointCloud = this.scene.getObjectByName(this.pointCloudObjectName) as THREE.Points;
     if (!oldPointCloud) {
       return;
     }
     this.highlightPCDSrc = this.currentPCDSrc;
+
     return new Promise<BufferAttribute[] | undefined>((resolve, reject) => {
       if (window.Worker) {
         const newPointCloudBoxList = pointCloudBoxList ? [...pointCloudBoxList] : [];
-
         const cuboidList = newPointCloudBoxList.map((v) => getCuboidFromPointCloudBox(v));
         const colorList = this.getAllAttributeColor(cuboidList);
+        const position = oldPointCloud.geometry.attributes.position.array;
+        const oldColor = oldPointCloud.geometry.attributes.dimensions.array;
+
         const params = {
           cuboidList,
-          position: oldPointCloud.geometry.attributes.position.array,
-          color: oldPointCloud.geometry.attributes.dimensions.array,
+          position,
+          color: oldColor,
           colorList,
           highlightIndex,
+          modifiedBoxIds,
+          resetAreas,
         };
-
         this.handleWebworker(params)
           .then((res: any) => {
             const { color } = res;
-            const colorAttribute = new THREE.BufferAttribute(color, 3);
+            let combinedColor = color;
+            if (modifiedBoxIds.length || resetAreas.length) {
+              combinedColor = color.map((item: any, index: number) => {
+                if (item === -1) {
+                  // A magic number is needed here to represent the color used in the last rendering
+                  // involved by packages/lb-annotation/src/core/pointCloud/highlightWorker.js REMAINED_COLOR_FLAG
+                  return oldColor[index];
+                }
+                return item;
+              });
+            }
+            const colorAttribute = new THREE.BufferAttribute(combinedColor, 3);
             /**
              * Need to return;
              *
@@ -1125,7 +1151,7 @@ export class PointCloud extends EventListener {
             }
 
             // Save the new highlight color.
-            this.cacheInstance.updateColor(this.highlightPCDSrc, color);
+            this.cacheInstance.updateColor(this.highlightPCDSrc, combinedColor);
 
             // Clear
             this.highlightPCDSrc = undefined;
@@ -1134,7 +1160,7 @@ export class PointCloud extends EventListener {
 
             oldPointCloud.geometry.setAttribute('dimensions', colorAttribute);
             oldPointCloud.geometry.attributes.dimensions.needsUpdate = true;
-            resolve(color);
+            resolve(combinedColor);
             this.render();
           })
           .catch((e) => {

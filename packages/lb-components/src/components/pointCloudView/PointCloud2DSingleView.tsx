@@ -46,10 +46,8 @@ const PointCloud2DSingleView = ({
     };
   }, [showEnlarge, cuboidBoxIn2DView, view2dData.path]);
 
-  const {
-    rendered: dataLinkRendered,
-    isLinking: isLinkToPointCloudDataOrNot,
-  } = useDataLinkSwitch(dataLinkSwitchOpts);
+  const { rendered: dataLinkRendered, isLinking: isLinkToPointCloudDataOrNot } =
+    useDataLinkSwitch(dataLinkSwitchOpts);
 
   const afterImgOnLoad = (imgNode: HTMLImageElement) => {
     focusSelectBox();
@@ -90,8 +88,13 @@ const PointCloud2DSingleView = ({
 
   const highlightOnClick = async () => {
     setLoading(true);
-    await toggle2dVisible(url, fallbackUrl ?? '', calib);
-    setLoading(false);
+    try {
+      await toggle2dVisible(url, fallbackUrl ?? '', calib);
+    } catch (error) {
+      console.error('highlightOnClick error:', error);
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (

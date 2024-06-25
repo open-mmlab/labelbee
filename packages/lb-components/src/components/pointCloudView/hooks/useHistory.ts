@@ -7,6 +7,7 @@ import {
   ILine,
   IPointCloudSegmentation,
 } from '@labelbee/lb-utils';
+import { EPointCloudBoxRenderTrigger } from '@/utils/ToolPointCloudBoxRenderHelper';
 import { useContext } from 'react';
 import { PointCloudContext } from '../PointCloudContext';
 
@@ -183,7 +184,7 @@ export const useHistory = () => {
       mainViewInstance?.generateBoxes(newPointCloudBoxList);
 
       setPointCloudResult(newPointCloudBoxList);
-      syncAllViewPointCloudColor(newPointCloudBoxList);
+      syncAllViewPointCloudColor(EPointCloudBoxRenderTrigger.UndoRedo, newPointCloudBoxList);
     }
 
     if (newPointCloudSphereList) {

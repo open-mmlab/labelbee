@@ -10,6 +10,7 @@ import { EToolName, cAnnotation } from '@labelbee/lb-annotation';
 import { useHistory } from './useHistory';
 import { usePolygon } from './usePolygon';
 import { IFileItem } from '@/types/data';
+import { EPointCloudBoxRenderTrigger } from '@/utils/ToolPointCloudBoxRenderHelper';
 
 const { ESortDirection } = cAnnotation;
 
@@ -105,7 +106,7 @@ export const useSingleBox = (props?: IUseSingleBoxParams) => {
       const newPointCloudList = updateSelectedBox({ valid: !valid });
 
       // Async
-      syncAllViewPointCloudColor(newPointCloudList);
+      syncAllViewPointCloudColor(EPointCloudBoxRenderTrigger.SingleToggleValid, newPointCloudList);
       changePolygonViewValid(id);
     }
 
@@ -177,7 +178,8 @@ export const useSingleBox = (props?: IUseSingleBoxParams) => {
     setPointCloudResult(newPointCloudList);
     mainViewInstance?.removeObjectByName(id, 'box');
     mainViewInstance?.render();
-    syncAllViewPointCloudColor(newPointCloudList);
+
+    syncAllViewPointCloudColor(EPointCloudBoxRenderTrigger.SingleDelete, newPointCloudList);
 
     // Transform to the normal shape
     if (shouldUpdateMatchingRectList) {
@@ -185,6 +187,8 @@ export const useSingleBox = (props?: IUseSingleBoxParams) => {
       const set = new Set(matchedRects.map((item) => item.id));
       updateRectListByReducer(getUpdateRectListByReducerFn(set));
     }
+
+
   };
 
   const getUpdateRectListByReducerFn = (

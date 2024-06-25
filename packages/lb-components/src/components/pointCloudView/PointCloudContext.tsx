@@ -11,8 +11,13 @@ import {
   ISize,
   IPointCloudBoxRect,
   IPointCloud2DRectOperationViewRect,
+  ICoordinate,
 } from '@labelbee/lb-utils';
 import React, { PropsWithChildren, useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import {
+  EPointCloudBoxRenderTrigger,
+  calcResetAreasAndBoxIds,
+} from '@/utils/ToolPointCloudBoxRenderHelper';
 import {
   PointCloud,
   PointCloudAnnotation,
@@ -56,10 +61,16 @@ interface IHighlight2DData {
   calib?: ICalib;
 }
 
-type PickRectObjct = Pick<IPointCloud2DRectOperationViewRect, 'id'|'attribute'|'width'|'height'|'x'|'y'|'imageName'>
+type PickRectObjct = Pick<
+  IPointCloud2DRectOperationViewRect,
+  'id' | 'attribute' | 'width' | 'height' | 'x' | 'y' | 'imageName'
+>;
 
 type UpdateRectListByReducer = (
-  reducer: (prevRectList: IPointCloudBoxRect[], pickRectObject: (item: IPointCloud2DRectOperationViewRect) => PickRectObjct) => IPointCloudBoxRect[],
+  reducer: (
+    prevRectList: IPointCloudBoxRect[],
+    pickRectObject: (item: IPointCloud2DRectOperationViewRect) => PickRectObjct,
+  ) => IPointCloudBoxRect[],
 ) => void;
 
 export interface IPointCloudContext
@@ -116,6 +127,7 @@ export interface IPointCloudContext
   setAttrPanelLayout: (layout: AttrPanelLayout) => void;
 
   syncAllViewPointCloudColor: (
+    syncByTrigger: EPointCloudBoxRenderTrigger,
     newPointCloudList?: IPointCloudBox[],
     newHighlight2DDataList?: IHighlight2DData[],
   ) => Promise<any>;
@@ -416,12 +428,14 @@ export const PointCloudProvider: React.FC<PropsWithChildren<{}>> = ({ children }
     }, new Map<string, Map<string, WeakSet<IPointCloudBox>>>());
   }, [pointCloudBoxList]);
 
-
-  const updateRectListByReducer = useCallback<UpdateRectListByReducer>((reducer) => {
-    setRectList((rectList) => {
-      return reducer(rectList, pickRectObject);
-    });
-  }, [pickRectObject]);
+  const updateRectListByReducer = useCallback<UpdateRectListByReducer>(
+    (reducer) => {
+      setRectList((rectList) => {
+        return reducer(rectList, pickRectObject);
+      });
+    },
+    [pickRectObject],
+  );
 
   /**
    * Map Shape: imageName(with extId) -> id -> Set<[...rectList]>
@@ -578,7 +592,7 @@ export const PointCloudProvider: React.FC<PropsWithChildren<{}>> = ({ children }
       mainViewInstance?.generateBoxes(_displayPointCloudList);
       mainViewInstance?.generateSpheres(_displaySphereList);
       ptSegmentInstance?.store?.updateCurrentSegment(_segmentation);
-      syncAllViewPointCloudColor(_displayPointCloudList);
+      syncAllViewPointCloudColor(EPointCloudBoxRenderTrigger.Default, _displayPointCloudList);
     };
 
     const clearAllDetectionInstance = () => {
@@ -590,10 +604,15 @@ export const PointCloudProvider: React.FC<PropsWithChildren<{}>> = ({ children }
 
     /**
      * Synchronize the highlighted pointCloud for all views.
+     * @param syncByTrigger
+     * If you are not clear about the role of syncByTrigger, please do not change it at will,
+     * just pass it directly to EPointCloudBoxRenderTrigger.Default.
+     * Will perform full rendering
      * @param pointCloudList
      */
 
     const syncAllViewPointCloudColor = async (
+      syncByTrigger: EPointCloudBoxRenderTrigger,
       pointCloudList?: IPointCloudBox[],
       newHighlight2DDataList?: IHighlight2DData[],
     ) => {
@@ -607,21 +626,58 @@ export const PointCloudProvider: React.FC<PropsWithChildren<{}>> = ({ children }
         return;
       }
 
+      let modifiedBoxIds: string[] = [];
+      let resetAreas: ICoordinate[][] = [];
+      try {
+        if (pointCloudList && history.record.length) {
+          const { record, recordIndex } = history;
+
+          let latestRecordIndex = recordIndex;
+
+          // The history of these triggers was updated before highlighting, so take the previous index
+          // 0. SingleToggleValid SingleRotate
+          // The case of Single is more special.
+          // 1. The newly added history update is after rendering, so the last subscript is taken
+          // 2. Modify is before rendering and takes the second to last subscript
+          if (
+            recordIndex > 0 &&
+            (syncByTrigger === EPointCloudBoxRenderTrigger.SingleToggleValid || // SingleToggleValid (mark 0)
+              syncByTrigger === EPointCloudBoxRenderTrigger.SingleRotate || // SingleRotate (mark 0)
+              (syncByTrigger === EPointCloudBoxRenderTrigger.Single &&
+                pointCloudList.length === record[recordIndex]?.pointCloudBoxList.length)) // Single + Modify, exclude Single + Add (mark 2)
+          ) {
+            latestRecordIndex = recordIndex - 1;
+          }
+
+          let latestRecord = record[latestRecordIndex]?.pointCloudBoxList;
+          const calcRes = calcResetAreasAndBoxIds(syncByTrigger, pointCloudList, latestRecord);
+
+          modifiedBoxIds = calcRes.modifiedBoxIds;
+          resetAreas = calcRes.resetAreas;
+        }
+      } catch (error) {
+        console.error('call calcResetAreasAndBoxIds error', error);
+      }
+
       try {
         const highlightIndex = await mainViewInstance.getHighlightIndexByMappingImgList({
           mappingImgList: newHighlight2DDataList ?? highlight2DDataList, // MappingImgList can be defined by through external param.
           points: points.geometry.attributes.position.array,
         });
 
+
         const color = await mainViewInstance?.highlightOriginPointCloud(
           pointCloudList,
           highlightIndex,
+          {
+            modifiedBoxIds,
+            resetAreas,
+          },
         );
-
         color && topViewInstance?.pointCloudInstance?.updateColor(color);
         return color;
       } catch (error) {
-        console.error(error);
+        console.error('call highlightOriginPointCloud error', error);
       }
     };
 
