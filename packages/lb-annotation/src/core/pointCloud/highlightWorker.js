@@ -1,11 +1,4 @@
 /**
- * Generate index with a fixed range.
- *
- * @param {*} z
- * @returns
- */
-
-/**
  *  Refactored by hexing@senseauto.com
  *  Date: 2024-06-23
  *  !!! break change !!!
@@ -18,6 +11,12 @@ const REMAINED_COLOR_FLAG = [-1, -1, -1];
 
 let isLastRender2DToggleOn = false;
 
+/**
+ * Generate index with a fixed range.
+ *
+ * @param {*} z
+ * @returns
+ */
 function getIndex(z) {
   const minZ = -7;
   const maxZ = 3;

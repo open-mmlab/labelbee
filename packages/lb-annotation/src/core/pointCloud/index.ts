@@ -1087,17 +1087,14 @@ export class PointCloud extends EventListener {
   public async highlightOriginPointCloud(
     pointCloudBoxList?: IPointCloudBox[],
     highlightIndex: number[] = [],
-    config?: {
+    config: {
       modifiedBoxIds: string[];
       resetAreas: ICoordinate[][];
+    } = {
+      modifiedBoxIds: [],
+      resetAreas: [],
     },
   ) {
-    if (!config) {
-      config = {
-        modifiedBoxIds: [],
-        resetAreas: [],
-      };
-    }
     const { modifiedBoxIds, resetAreas } = config;
     const oldPointCloud = this.scene.getObjectByName(this.pointCloudObjectName) as THREE.Points;
     if (!oldPointCloud) {
