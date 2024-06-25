@@ -367,7 +367,9 @@
     "ConfirmToBatchConnect": "Confirm batch connection?",
     "ConfirmToBatchDisconnect": "Confirm batch disconnection?",
     "Connect": "Connect",
-    "Disconnect": "disconnect"
+    "Disconnect": "disconnect",
+    "Image2DBoxScale": "Image 2D Box Scale",
+    "SelectedRect": "Selected Rect"
   },
   "cn": {
     "TextInput": "文本输入",
@@ -737,6 +739,8 @@
     "ConfirmToBatchConnect": "确认批量连接？",
     "ConfirmToBatchDisconnect": "确认批量断开？",
     "Connect": "连接",
-    "Disconnect": "断开"
+    "Disconnect": "断开",
+    "Image2DBoxScale": "图片2D框体缩小处理",
+    "SelectedRect": "选中框体"
   }
 }

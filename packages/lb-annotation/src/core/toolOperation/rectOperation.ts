@@ -18,6 +18,7 @@ import uuid from '../../utils/uuid';
 import { BasicToolOperation, IBasicToolOperationProps } from './basicToolOperation';
 import TextAttributeClass from './textAttributeClass';
 import Selection, { SetDataList } from './Selection';
+import reCalcRect from './utils/reCalcRect';
 
 interface IRectOperationProps extends IBasicToolOperationProps {
   drawOutSideTarget?: boolean; // 是否可以在边界外进行标注
@@ -587,6 +588,7 @@ class RectOperation extends BasicToolOperation {
     this.render();
   }
 
+  // 选中了一个盒子对盒子进行拖动或者更改大小
   public onDragMove(coordinate: ICoordinate) {
     if (!this.dragInfo) {
       return;
@@ -1379,6 +1381,11 @@ class RectOperation extends BasicToolOperation {
         break;
       }
 
+      case EKeyCode.R: {
+        this.resizeRect();
+        break;
+      }
+
       default: {
         if (this.config.attributeConfigurable) {
           const keyCode2Attribute = AttributeUtils.getAttributeByKeycode(keyCode, this.config.attributeList);
@@ -1397,7 +1404,6 @@ class RectOperation extends BasicToolOperation {
 
   public onKeyUp(e: KeyboardEvent) {
     super.onKeyUp(e);
-
     switch (e.keyCode) {
       case EKeyCode.Ctrl:
         if (this.drawingRect) {
@@ -1586,8 +1592,8 @@ class RectOperation extends BasicToolOperation {
   /**
    *  绘制当前框的
    * @param rect 当前矩形框
-   * @param zoom 是否进行缩放
-   * @param isZoom 矩形框是否为缩放后的比例
+   * @param zoom  缩放比例
+   * @param isZoom 是否进行缩放
    */
   public renderDrawingRect(rect: IRect, zoom = this.zoom, isZoom = false) {
     if (this.ctx && rect) {
@@ -1928,6 +1934,48 @@ class RectOperation extends BasicToolOperation {
       this.setRectList(rectList, true);
       this.render();
     }
+  }
+
+  /*
+    Resize the rectangular box 'rect' to specified dimensions, defaulting to 100x100 when the 'R' shortcut is used.
+   */
+  public resizeRect(resizeWidth: number = 100, resizeHeight: number = 100) {
+    // Do not execute if the image has not finished loading
+    if (!this.imgNode) return;
+    // Return if no rectangles are selected
+    if (!this.selectedRects?.length) return;
+    // Verify if resizeWidth and resizeHeight are valid
+    if (resizeWidth <= 0 || resizeHeight <= 0) return;
+    // Origin Size less than resizeWidth or resizeHeight , remains unchanged
+    if (this.selectedRects[0].width <= resizeWidth || this.selectedRects[0].height <= resizeHeight) return;
+
+    const { width, height } = this.basicImgInfo;
+    const targetRect = {
+      width,
+      height,
+      x: 0,
+      y: 0,
+    };
+
+    // Recalc the current rectangle size and position
+    const curRect = reCalcRect(this.selectedRects[0], targetRect, resizeWidth, resizeHeight);
+    // if no changes return, Optimize rendering times
+    if (curRect.noChange) return;
+
+    this.setRectList(
+      this.rectList.map((v) => {
+        if (this.selection.isIdSelected(v.id)) {
+          return {
+            ...v,
+            ...curRect,
+          };
+        }
+        return v;
+      }),
+      true,
+    );
+    this.render();
+    this.updateDragResult();
   }
 }
 
