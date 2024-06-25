@@ -26,6 +26,7 @@ import { useUpdateRectList } from './useUpdateRectList';
 
 import { TAfterImgOnLoad } from '../AnnotationView';
 import _ from 'lodash';
+import { useToolStyleContext } from '@/hooks/useToolStyle';
 
 interface IPointCloud2DRectOperationViewProps {
   mappingData?: IMappingImg;
@@ -65,6 +66,8 @@ const PointCloud2DRectOperationView = (props: IPointCloud2DRectOperationViewProp
     selectedIDs,
     setSelectedIDs,
   } = useContext(PointCloudContext);
+
+  const { value: toolStyle } = useToolStyleContext();
 
   const lastSelectedIds = useLatest(selectedIDs);
 
@@ -349,6 +352,27 @@ const PointCloud2DRectOperationView = (props: IPointCloud2DRectOperationViewProp
     operation.current?.setEnableAddRect(selectedIDs.length === 0);
     updateRectList();
   }, [selectedIDs]);
+
+  useEffect(() => {
+    const { hiddenText } = toolStyle || {};
+    if (hiddenText === undefined) {
+      return;
+    }
+
+    const instance = operation.current;
+    if (!instance) {
+      return;
+    }
+
+    // Merge with prev style
+    const newStyle = {
+      ...instance.style,
+      ...toolStyle,
+    };
+
+    // Set style and re-render `PointCloud2DRectOperation`
+    instance.setStyle(newStyle);
+  }, [toolStyle]);
 
   return (
     <Spin spinning={loading}>

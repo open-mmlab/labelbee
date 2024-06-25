@@ -30,6 +30,7 @@ import { ConfigProvider } from 'antd/es';
 import zhCN from 'antd/es/locale/zh_CN';
 import enUS from 'antd/es/locale/en_US';
 import { EPointCloudName } from '@labelbee/lb-annotation';
+import type { ToolStyle } from './types/toolStyle';
 
 interface IAnnotationStyle {
   strokeColor: string;
@@ -108,6 +109,8 @@ export interface AppProps {
   auditContext?: any;
   getImgIndexByExternal: GetImgIndexByExternal;
   annotationBefore?: (setAnnotationData:Function)=>void;
+
+  toolStyle?: ToolStyle
 }
 
 const App: React.FC<AppProps> = (props) => {

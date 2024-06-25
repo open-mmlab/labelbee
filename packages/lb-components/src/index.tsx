@@ -19,8 +19,10 @@ import { AppState } from './store';
 import { LabelBeeContext } from '@/store/ctx';
 import PredictTracking from '@/components/predictTracking';
 import LLMToolView from '@/components/LLMToolView';
-import SwitchCuboidBoxIn2DView from '@/views/MainView/toolFooter/SwitchCuboidBoxIn2DView';
-import BatchSwitchConnectIn2DView from '@/views/MainView/toolFooter/BatchSwitchConnectIn2DView'
+import SwitchCuboidBoxIn2DView, {
+  SwitchCuboidBoxIn2DViewStateMode,
+} from '@/views/MainView/toolFooter/SwitchCuboidBoxIn2DView';
+import BatchSwitchConnectIn2DView from '@/views/MainView/toolFooter/BatchSwitchConnectIn2DView';
 import MeasureCanvas from './components/measureCanvas';
 import AnnotatedBox from './views/MainView/sidebar/PointCloudToolSidebar/components/annotatedBox';
 import RectRotateSensitivitySlider from './views/MainView/sidebar/PointCloudToolSidebar/components/rectRotateSensitivitySlider';
@@ -28,6 +30,7 @@ import { FindTrackIDIndexInCheckMode as FindTrackIDIndex } from './views/MainVie
 import { WrapAudioPlayer as AudioPlayer } from './components/audioPlayer';
 import { generatePointCloudBoxRects } from './utils';
 import SubAttributeList from './components/subAttributeList';
+import { ToolStyleProvider } from './hooks/useToolStyle';
 
 export const store = configureStore();
 
@@ -55,15 +58,17 @@ const OutputApp = (props: AppProps, ref: any) => {
   return (
     <Provider store={store} context={LabelBeeContext}>
       <I18nextProvider i18n={i18n}>
-        <PointCloudProvider>
-          <App
-            {...props}
-            setToolInstance={(toolInstance) => {
-              setToolInstance(toolInstance);
-              props.onLoad?.({ toolInstance });
-            }}
-          />
-        </PointCloudProvider>
+        <ToolStyleProvider value={props.toolStyle}>
+          <PointCloudProvider>
+            <App
+              {...props}
+              setToolInstance={(toolInstance) => {
+                setToolInstance(toolInstance);
+                props.onLoad?.({ toolInstance });
+              }}
+            />
+          </PointCloudProvider>
+        </ToolStyleProvider>
       </I18nextProvider>
     </Provider>
   );
@@ -81,6 +86,7 @@ export {
   VideoTagTool,
   PredictTracking,
   SwitchCuboidBoxIn2DView,
+  SwitchCuboidBoxIn2DViewStateMode,
   BatchSwitchConnectIn2DView,
   MeasureCanvas,
   AnnotatedBox,
