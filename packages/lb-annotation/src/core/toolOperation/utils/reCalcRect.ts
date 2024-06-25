@@ -113,15 +113,15 @@ const reCalcRect = (curRect: RectInfo, targetRect: RectInfo, scaleWidth: number,
     const nearestPoints =
       inTargetRectPoints.length >= 3 ? inTargetRectPoints : findNearestPoints(inTargetRectPoints, targetRect);
 
-    // Calc the new position of rectangle B
+    // Calc the new position of rectangle curRect
     const position = nearestPoints[0].position || 0;
     const positions: {
       [key: number]: (point: PointInfo, scaleWidth: number, scaleHeight: number) => { x: number; y: number };
     } = {
       0: (point) => ({ x: point.x, y: point.y }),
       1: (point) => ({ x: point.x - scaleWidth, y: point.y }),
-      2: (point) => ({ x: point.x - scaleWidth, y: point.y - scaleHeight }),
-      3: (point) => ({ x: point.x, y: point.y - scaleHeight }),
+      2: (point) => ({ x: point.x, y: point.y - scaleHeight }),
+      3: (point) => ({ x: point.x - scaleWidth, y: point.y - scaleHeight }),
     };
     const { x, y } = positions[position](nearestPoints[0], scaleWidth, scaleHeight);
 
