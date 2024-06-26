@@ -179,6 +179,7 @@ const getModifiedBox = (
     if (oldBox && !areBoxesEqual(newBox, oldBox)) {
       // Confirm Modification Type
       let modifiedType;
+
       if (oldBox.attribute !== newBox.attribute) {
         modifiedType = EPointCloudBoxSingleModifiedType.ChangeAttribute;
       } else if (oldBox.center.x !== newBox.center.x || oldBox.center.y !== newBox.center.y) {
@@ -227,10 +228,8 @@ export const calcResetAreasAndBoxIds = (
             // Modifying attributes and depth only requires the boxId
             modifiedBoxIds.push(modifiedBox.box.id);
             if (
-              newList.length > 1 &&
-              // If there is only one box, do not enter the logic below for checking intersections
-              (modifiedBox.modifiedType === EPointCloudBoxSingleModifiedType.ChangeSize ||
-                modifiedBox.modifiedType === EPointCloudBoxSingleModifiedType.Move)
+              modifiedBox.modifiedType === EPointCloudBoxSingleModifiedType.ChangeSize ||
+              modifiedBox.modifiedType === EPointCloudBoxSingleModifiedType.Move
             ) {
               // Use the oldBox box here to calculate intersection
               const oldBox = oldList.find((item) => item.id === modifiedBox.box.id)!;
