@@ -25,30 +25,12 @@ export enum EPointCloudBoxRenderTrigger {
 }
 
 export enum EPointCloudBoxSingleModifiedType {
-  ChangeAttribute = 'ChangeAttribute',
+  ChangeAttribute = 'ChangeAttribute', // Do not calculate oldBox intersection
   Move = 'Move',
-  ChangeDepth = 'ChangeDepth',
+  ChangeDepth = 'ChangeDepth', // Do not calculate oldBox intersection
   ChangeSize = 'ChangeSize',
+  ToggleValid = 'ToggleValid', // Do not calculate oldBox intersection
 }
-
-/**
- * Coordinate background: the center is the origin of coordinates, the coordinates are x: 0, y: 0, up is x positive, and left is y positive.
- * Firstly transform the box into a square box1, the center point remains unchanged, and the length of the short side becomes the same as the length of the long side.
- * Get a circle round with the center point of box1 as the center and the center point of box1 connected to the top point of box1 as the radius.
- * Draw an externally tangent square box2 for this circle round and return the new box2.
- */
-const getExternalBox = (box: IPointCloudBox): IPointCloudBox => {
-  // Adjust the box to a square box1, the center point remains unchanged, and the length of the short side becomes the length of the long side.
-  const sideLength = Math.max(box.width, box.height);
-  // To calculate the length of the line connecting the center point of box1 to one of its vertices, which is the radius, we can use the distance formula:
-  const radius = sideLength / Math.sqrt(2); // The length of half of the diagonal of a square is equal to the length of one side of the square multiplied by the square root of 2
-  const newBox = {
-    ...box,
-    width: radius * 2,
-    height: radius * 2,
-  };
-  return newBox;
-};
 
 const checkRectanglesIntersect = (
   rect1: { x: number; y: number }[],
@@ -132,30 +114,40 @@ const getDeletedBox = (
   return oldList.find((item) => !newIds.includes(item.id));
 };
 
-const getRotationModifiedOrValidChangedBox = (
+const getValidChangedBox = (
   newList: IPointCloudBox[],
   oldList: IPointCloudBox[],
 ): IPointCloudBox | undefined => {
   const changedBox = newList.find((newBox) => {
     const oldBox = oldList.find((box) => box.id === newBox.id);
-    return oldBox && (oldBox.rotation !== newBox.rotation || oldBox.valid !== newBox.valid);
+    return oldBox && oldBox.valid !== newBox.valid;
   });
   return changedBox;
 };
 
-const getIntersectingBoxIdsOfExternalBox = (
+const getRotationChangedBox = (
+  newList: IPointCloudBox[],
+  oldList: IPointCloudBox[],
+): IPointCloudBox | undefined => {
+  const changedBox = newList.find((newBox) => {
+    const oldBox = oldList.find((box) => box.id === newBox.id);
+    return oldBox && oldBox.rotation !== newBox.rotation;
+  });
+  return changedBox;
+};
+
+const getIntersectingBoxIdsOfBox = (
   box: IPointCloudBox,
   boxList: IPointCloudBox[],
 ): { ids: string[]; rect: ICoordinate[] } => {
-  const externalBox = getExternalBox(box);
-  const externalCuboid = getCuboidFromPointCloudBox(externalBox);
+  const { polygonPointList } = getCuboidFromPointCloudBox(box);
   const intersectingBoxIds = getIntersectingBoxIds(
-    externalCuboid.polygonPointList,
+    polygonPointList,
     boxList.filter((item) => item.id !== box.id),
   );
   return {
     ids: intersectingBoxIds,
-    rect: externalCuboid.polygonPointList,
+    rect: polygonPointList,
   };
 };
 
@@ -187,6 +179,7 @@ const getModifiedBox = (
     if (oldBox && !areBoxesEqual(newBox, oldBox)) {
       // Confirm Modification Type
       let modifiedType;
+
       if (oldBox.attribute !== newBox.attribute) {
         modifiedType = EPointCloudBoxSingleModifiedType.ChangeAttribute;
       } else if (oldBox.center.x !== newBox.center.x || oldBox.center.y !== newBox.center.y) {
@@ -214,11 +207,9 @@ export const calcResetAreasAndBoxIds = (
   newList: IPointCloudBox[],
   oldList: IPointCloudBox[],
 ): {
-  resetAreas: ICoordinate[][];
   modifiedBoxIds: string[];
+  resetAreas: ICoordinate[][];
 } => {
-  const resetAreas: ICoordinate[][] = [];
-  const modifiedBoxIds: string[] = [];
   try {
     switch (trigger) {
       case EPointCloudBoxRenderTrigger.Single:
@@ -226,83 +217,87 @@ export const calcResetAreasAndBoxIds = (
           const addBoxId = getAddBoxId(newList, oldList);
           if (addBoxId) {
             // Adding a new box does not require resetting areas, only render the new box
-            modifiedBoxIds.push(addBoxId);
+            return { modifiedBoxIds: [addBoxId], resetAreas: [] };
           }
+          return { modifiedBoxIds: [], resetAreas: [] };
         } else {
+          const modifiedBoxIds: string[] = [];
+          const resetAreas: ICoordinate[][] = [];
           const modifiedBox = getModifiedBox(newList, oldList);
           if (modifiedBox) {
             // Modifying attributes and depth only requires the boxId
             modifiedBoxIds.push(modifiedBox.box.id);
             if (
-              newList.length > 1 &&
-              // If there is only one box, do not enter the logic below for checking intersections
-              (modifiedBox.modifiedType === EPointCloudBoxSingleModifiedType.ChangeSize ||
-                modifiedBox.modifiedType === EPointCloudBoxSingleModifiedType.Move)
+              modifiedBox.modifiedType === EPointCloudBoxSingleModifiedType.ChangeSize ||
+              modifiedBox.modifiedType === EPointCloudBoxSingleModifiedType.Move
             ) {
-              // Use the original box here
+              // Use the oldBox box here to calculate intersection
               const oldBox = oldList.find((item) => item.id === modifiedBox.box.id)!;
-              const oldListExceptModifiedBox = oldList.filter(
-                (item) => item.id !== modifiedBox.box.id,
+              const { ids: intersectingBoxIds, rect: resetArea } = getIntersectingBoxIdsOfBox(
+                oldBox,
+                newList,
               );
-              const { ids: intersectingBoxIds, rect: externalRect } =
-                getIntersectingBoxIdsOfExternalBox(oldBox, oldListExceptModifiedBox);
+
               modifiedBoxIds.push(...intersectingBoxIds);
-              resetAreas.push(externalRect);
+              resetAreas.push(resetArea);
             }
           }
+          return { modifiedBoxIds, resetAreas };
         }
-        break;
       case EPointCloudBoxRenderTrigger.SingleDelete:
         if (newList.length < oldList.length) {
           const deletedBox = getDeletedBox(newList, oldList);
           if (deletedBox) {
             const deletedBoxCuboid = getCuboidFromPointCloudBox(deletedBox);
             // For deletion, restoring the original box is necessary
-            resetAreas.push(deletedBoxCuboid.polygonPointList);
-            // If newList has more than one box, then check for intersecting boxes
+            const resetAreas = [deletedBoxCuboid.polygonPointList];
+            const modifiedBoxIds = [];
             if (newList.length > 1) {
-              const { ids: intersectingBoxIds } = getIntersectingBoxIdsOfExternalBox(
-                deletedBox,
-                oldList,
-              );
+              // If newList has more than one box, then check for intersecting boxes
+              const { ids: intersectingBoxIds } = getIntersectingBoxIdsOfBox(deletedBox, newList);
               intersectingBoxIds.length && modifiedBoxIds.push(...intersectingBoxIds);
             }
+            return { modifiedBoxIds, resetAreas };
           }
+          return { modifiedBoxIds: [], resetAreas: [] };
         }
-        break;
+        return { modifiedBoxIds: [], resetAreas: [] };
       case EPointCloudBoxRenderTrigger.SingleRotate:
-        if (getRotationModifiedOrValidChangedBox(newList, oldList)) {
-          const changedBox = getRotationModifiedOrValidChangedBox(newList, oldList);
-          modifiedBoxIds.push(changedBox!.id);
-          if (newList.length > 1) {
-            // If newList has more than one box, then check for intersecting boxes
-            const oldListExceptChangedBox = oldList.filter((item) => item.id !== changedBox!.id);
-            const { ids: intersectingBoxIds, rect: externalRect } =
-              getIntersectingBoxIdsOfExternalBox(changedBox!, oldListExceptChangedBox);
-            modifiedBoxIds.push(...intersectingBoxIds);
-            resetAreas.push(externalRect);
+        if (getRotationChangedBox(newList, oldList)) {
+          const changedBox = getRotationChangedBox(newList, oldList);
+          if (changedBox) {
+            const oldBox = oldList.find((item) => item.id === changedBox.id);
+            const { ids: intersectingBoxIds, rect: resetArea } = getIntersectingBoxIdsOfBox(
+              oldBox!,
+              newList,
+            );
+            return {
+              modifiedBoxIds: [changedBox.id, ...intersectingBoxIds],
+              resetAreas: [resetArea],
+            };
           }
         }
-        break;
+        return { modifiedBoxIds: [], resetAreas: [] };
       case EPointCloudBoxRenderTrigger.SingleToggleValid:
         // In both cases, only one box needs to be re-rendered
-        if (getRotationModifiedOrValidChangedBox(newList, oldList)) {
-          const changedBox = getRotationModifiedOrValidChangedBox(newList, oldList);
-          modifiedBoxIds.push(changedBox!.id);
+        if (getValidChangedBox(newList, oldList)) {
+          const changedBox = getValidChangedBox(newList, oldList);
+          if (changedBox) {
+            return { modifiedBoxIds: [changedBox.id], resetAreas: [] };
+          }
+          return { modifiedBoxIds: [], resetAreas: [] };
         }
-        break;
+        return { modifiedBoxIds: [], resetAreas: [] };
       case EPointCloudBoxRenderTrigger.MultiPaste:
       case EPointCloudBoxRenderTrigger.MultiMove:
-        break;
       case EPointCloudBoxRenderTrigger.Default:
       case EPointCloudBoxRenderTrigger.UndoRedo:
       case EPointCloudBoxRenderTrigger.ClearAll:
       default:
-        break;
+        return { modifiedBoxIds: [], resetAreas: [] };
     }
   } catch (error) {
     console.error('calcResetAreasAndBoxIds error:', error);
-    return { resetAreas, modifiedBoxIds };
+    return { modifiedBoxIds: [], resetAreas: [] };
   }
-  return { resetAreas, modifiedBoxIds };
 };
