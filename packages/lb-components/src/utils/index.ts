@@ -124,6 +124,11 @@ export const getRectPointCloudBox = (params: IGetRectPointCloudBoxParams) => {
 
   if (isRectInImage) return boundingRect;
 };
+
+export interface GeneratePointCloudBoxRectsOptions {
+  prepareRectsFn?: (rects: Array<ReturnType<typeof getRectPointCloudBox>>, pointCloudBox: IPointCloudBox) => Array<ReturnType<typeof getRectPointCloudBox>>
+}
+
 /**
  * Updates the given point cloud box with rectangles derived from the mapping image list and image sizes.
  *
@@ -131,6 +136,9 @@ export const getRectPointCloudBox = (params: IGetRectPointCloudBoxParams) => {
  * @param {IPointCloudBox} params.pointCloudBox - The point cloud box object to be updated.
  * @param {IMappingImg[]} params.mappingImgList - The list of mapping images to process.
  * @param {Object.<string, ISize>} params.imageSizes - An object containing image sizes keyed by image paths.
+ *
+ * @param {Object=} options - The options
+ * @param {Function=} options.prepareRectsFn - The prepare func for rects
  *
  * @returns {void}
  *
@@ -144,7 +152,7 @@ export const generatePointCloudBoxRects = (params: {
   imageSizes: {
     [key: string]: ISize;
   };
-}) => {
+}, options?: GeneratePointCloudBoxRectsOptions): void => {
   const { pointCloudBox, mappingImgList, imageSizes } = params;
   const rects: Array<ReturnType<typeof getRectPointCloudBox>> = mappingImgList.map(
     (v: IMappingImg) =>
@@ -158,6 +166,8 @@ export const generatePointCloudBoxRects = (params: {
   const filteredRects = rects.filter((rect) => rect !== undefined);
 
   if (filteredRects.length > 0) {
-    Object.assign(pointCloudBox, { rects: filteredRects });
+    const prepareFn = options?.prepareRectsFn ?? undefined;
+    const rects = prepareFn ? prepareFn(filteredRects, pointCloudBox) : filteredRects;
+    Object.assign(pointCloudBox, { rects });
   }
 };

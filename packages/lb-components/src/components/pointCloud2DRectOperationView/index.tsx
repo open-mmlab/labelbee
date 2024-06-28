@@ -118,8 +118,10 @@ const PointCloud2DRectOperationView = (props: IPointCloud2DRectOperationViewProp
       // @ts-ignore
       const { imageName, extId: boxID } = matchedExtIdIDRect
       const result = remove2DViewRectFn?.({ boxID, imageName });
-      newPointCloudResult.current = result;
-      setPointCloudResult(result || []);
+      if (result) {
+        newPointCloudResult.current = result;
+        setPointCloudResult(result);
+      }
     }
 
     removeRectIn2DView(rectList);

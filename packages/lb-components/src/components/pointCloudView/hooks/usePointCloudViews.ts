@@ -26,17 +26,18 @@ import {
   IBasicRect,
   POINT_CLOUD_DEFAULT_STEP,
 } from '@labelbee/lb-utils';
-import { useContext } from 'react';
+import { useCallback, useContext } from 'react';
 import { PointCloudContext } from '../PointCloudContext';
 import { useSingleBox } from './useSingleBox';
 import { useSphere } from './useSphere';
 import { ISize } from '@/types/main';
-import _ from 'lodash';
+import _, { pick } from 'lodash';
 import { useDispatch, useSelector } from '@/store/ctx';
 import { AppState } from '@/store';
 import StepUtils from '@/utils/StepUtils';
 import { EPointCloudBoxRenderTrigger } from '@/utils/ToolPointCloudBoxRenderHelper';
 import { jsonParser, getRectPointCloudBox, generatePointCloudBoxRects } from '@/utils';
+import type { GeneratePointCloudBoxRectsOptions } from '@/utils'
 import {
   PreDataProcess,
   SetPointCloudLoading,
@@ -45,7 +46,7 @@ import {
 import { useHistory } from './useHistory';
 import { usePolygon } from './usePolygon';
 import { IFileItem, IMappingImg } from '@/types/data';
-import type { ICoordinate } from '@labelbee/lb-utils';
+import type { ICoordinate, IPointCloudBoxRect } from '@labelbee/lb-utils';
 import { useLatest } from 'ahooks';
 
 const DEFAULT_SCOPE = 5;
@@ -622,6 +623,7 @@ export const usePointCloudViews = () => {
     cuboidBoxIn2DView,
     imageSizes,
     history,
+    linkageImageNameRectMap
   } = ptCtx;
   const { addHistory, initHistory, pushHistoryUnderUpdatePolygon } = useHistory();
   const { selectedPolygon } = usePolygon();
@@ -639,6 +641,14 @@ export const usePointCloudViews = () => {
 
   const cuboidBoxIn2DViewLatest = useLatest(cuboidBoxIn2DView);
 
+  const prepareRectsFn = useCallback<NonNullable<GeneratePointCloudBoxRectsOptions['prepareRectsFn']>>((rects) => {
+    const newRects = rects
+      // Should be regarded as `delete pcb-matching 2d-rect` when add pcb in disconnect mode
+      .filter(rt => rt && (linkageImageNameRectMap.get(rt.imageName)?.size ?? 0) === 0);
+
+    return newRects;
+  }, [linkageImageNameRectMap])
+
   const generateRects = (boxParams: IPointCloudBox) => {
     const { enableAutoMap2DRect = false } = config;
     if (!cuboidBoxIn2DViewLatest.current || enableAutoMap2DRect) {
@@ -647,6 +657,8 @@ export const usePointCloudViews = () => {
         pointCloudBox: boxParams,
         mappingImgList,
         imageSizes,
+      }, {
+        prepareRectsFn
       });
     }
   };
@@ -1347,7 +1359,11 @@ export const usePointCloudViews = () => {
        * Use [] to replace the default highlight2DDataList.
        * Need to await syncAllViewPointCloudColor before setLoading(false).
        */
-       await ptCtx.syncAllViewPointCloudColor(EPointCloudBoxRenderTrigger.Default, boxParamsList, []);
+      await ptCtx.syncAllViewPointCloudColor(
+        EPointCloudBoxRenderTrigger.Default,
+        boxParamsList,
+        [],
+      );
     }
 
     initHistory({
@@ -1378,5 +1394,67 @@ export const usePointCloudViews = () => {
     generateRects,
     update2DViewRect,
     remove2DViewRect,
+  };
+};
+
+type PosDim = Pick<IBasicRect, 'x' | 'y' | 'width' | 'height'>;
+
+export const useSyncRectPositionDimensionToPointCloudList = () => {
+  const { pointCloudBoxList, rectList, setPointCloudResult } = useContext(PointCloudContext);
+
+  const pointCloudBoxListRef = useLatest(pointCloudBoxList);
+  const rectListRef = useLatest(rectList);
+
+  const syncToPointCloudBoxList = useCallback(() => {
+    const pCloudBoxList = pointCloudBoxListRef.current;
+    const rects = rectListRef.current;
+
+    if (rects.length === 0) {
+      return;
+    }
+
+    const posDimMap = new Map<string, Map<string, PosDim>>();
+    const extIdSet = new Set();
+    rects
+      .filter((rect) => rect.extId !== undefined)
+      .forEach((rect) => {
+        const extId = rect.extId!;
+        const imageName = rect.imageName;
+        const posDim = pick<IPointCloudBoxRect, keyof PosDim>(rect, ['x', 'y', 'width', 'height']);
+
+        let item = posDimMap.get(extId);
+        if (!item) {
+          item = new Map();
+          posDimMap.set(extId, item);
+        }
+
+        item.set(imageName, posDim);
+        extIdSet.add(extId);
+      });
+
+    if (posDimMap.size) {
+      const newPointCloudBoxList = pCloudBoxList.map((item) => {
+        const id = item.id;
+        if (extIdSet.has(id)) {
+          const newItem = { ...item };
+
+          // Update position and dimension if found
+          newItem.rects?.forEach((rect) => {
+            const imageName = rect.imageName;
+            Object.assign(rect, posDimMap.get(id)?.get(imageName));
+          });
+
+          return newItem;
+        }
+
+        return item;
+      });
+
+      setPointCloudResult(newPointCloudBoxList);
+    }
+  }, []);
+
+  return {
+    syncToPointCloudBoxList,
   };
 };

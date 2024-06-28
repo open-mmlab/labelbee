@@ -321,7 +321,7 @@ export const PointCloudProvider: React.FC<PropsWithChildren<{}>> = ({ children }
         let hasFilterd = false;
         const newRectList = prev.filter((i) => {
           const val = i[idField_];
-          const r = set.has(val) ? i.imageName !== imageName : true;
+          const r = (val !== undefined || set.has(val)) ? i.imageName !== imageName : true;
           if (!r) {
             hasFilterd = true;
           }
