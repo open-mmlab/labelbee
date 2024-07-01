@@ -183,7 +183,7 @@ const kbCamFisheyeTransfer = (point: I3DSpaceCoord, calib: ICalib): ICoordinate 
   const x = result[0];
   const y = result[1];
   const z = result[2];
-  // Filter z coordinates less than 0.01 and valid
+  // Filter z coordinates greater than 0.01 and valid
   if (!(z >= 0.01 && isFinite(z))) return undefined;
 
   // Extract intrinsic parameters
