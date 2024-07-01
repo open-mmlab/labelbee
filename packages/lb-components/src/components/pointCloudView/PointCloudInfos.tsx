@@ -65,6 +65,7 @@ export const SizeInfoForView = ({ perspectiveView }: { perspectiveView: EPerspec
           bottom: '4%',
           left: '50%',
           transform: 'translate(-50%, 0)',
+          pointerEvents: 'none',
         }}
       >
         {infos.map((info, index) => (
