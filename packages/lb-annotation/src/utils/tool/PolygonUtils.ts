@@ -251,7 +251,7 @@ export default class PolygonUtils {
     checkPoint: ICoordinate,
     pointList: IPolygonPoint[],
     lineType: ELineTypes = ELineTypes.Line,
-    scope: number = 3,
+    scope: number = 5,
   ) {
     let points = [...pointList];
 
@@ -272,7 +272,7 @@ export default class PolygonUtils {
     let minLength = scope;
 
     for (let i = 0; i < points.length - 1; i++) {
-      const { length } = MathUtils.getFootOfPerpendicular(checkPoint, points[i], points[i + 1]);
+      const { length } = MathUtils.getFootOfPerpendicular(checkPoint, points[i], points[i + 1], true);
       if (length < minLength) {
         edgeIndex = i;
         minLength = length;
