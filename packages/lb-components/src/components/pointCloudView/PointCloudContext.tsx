@@ -464,60 +464,86 @@ export const PointCloudProvider: React.FC<PropsWithChildren<{}>> = ({ children }
     );
   }, [rectList]);
 
-  const ptCtx = useMemo(() => {
-    const selectedPointCloudBox = pointCloudBoxList.find((v) => v.id === selectedID);
+  const selectedPointCloudBox = useMemo(() => {
+    return pointCloudBoxList.find((v) => v.id === selectedID);
+  }, [pointCloudBoxList, selectedID]);
 
-    const addPointCloudBox = (box: IPointCloudBox) => {
+  const displayPointCloudList = useMemo(() => {
+    return pointCloudBoxList.filter((i) => !hideAttributes.includes(i.attribute));
+  }, [pointCloudBoxList, hideAttributes]);
+
+  const displaySphereList = useMemo(() => {
+    return pointCloudSphereList.filter((i) => !hideAttributes.includes(i.attribute));
+  }, [pointCloudSphereList, hideAttributes]);
+
+  const displayLineList = useMemo(() => {
+    return lineList.filter((i) => i.attribute && !hideAttributes.includes(i.attribute));
+  }, [lineList, hideAttributes]);
+
+  const addPointCloudBox = useCallback(
+    (box: IPointCloudBox) => {
       const newPointCloudList = pointCloudBoxList.concat(box);
       setPointCloudResult(newPointCloudList);
       return newPointCloudList;
-    };
+    },
+    [pointCloudBoxList],
+  );
 
-    const addPointCloudSphere = (sphere: IPointCloudSphere) => {
+  const addPointCloudSphere = useCallback(
+    (sphere: IPointCloudSphere) => {
       const newSphereList = pointCloudSphereList.concat(sphere);
       setPointCloudSphereList(newSphereList);
       return newSphereList;
-    };
+    },
+    [pointCloudSphereList],
+  );
 
-    const setPointCloudValid = (valid?: boolean) => {
-      setValid(valid === false ? false : true);
-    };
+  const setPointCloudValid = useCallback((valid?: boolean) => {
+    setValid(valid === false ? false : true);
+  }, []);
 
-    const setSelectedIDs = (selectedIDs?: string[] | string) => {
-      if (selectedIDs === undefined) {
-        setSelectedIDsState([]);
-      }
+  const setSelectedIDs = useCallback((selectedIDs?: string[] | string) => {
+    if (selectedIDs === undefined) {
+      setSelectedIDsState([]);
+    }
 
-      if (typeof selectedIDs === 'string') {
-        setSelectedIDsState([selectedIDs]);
-      }
+    if (typeof selectedIDs === 'string') {
+      setSelectedIDsState([selectedIDs]);
+    }
 
-      if (Array.isArray(selectedIDs)) {
-        setSelectedIDsState(Array.from(new Set(selectedIDs)));
-      }
-    };
+    if (Array.isArray(selectedIDs)) {
+      setSelectedIDsState(Array.from(new Set(selectedIDs)));
+    }
+  }, []);
 
-    /**
-     * If selectedID existed, remove selectedID from selectedIDs
-     * If selectedID not existed, add selectedID to selectedIDs
-     * @param selectedID
-     */
-    const addSelectedID = (selectedID: string) => {
+  /**
+   * If selectedID existed, remove selectedID from selectedIDs
+   * If selectedID not existed, add selectedID to selectedIDs
+   * @param selectedID
+   */
+  const addSelectedID = useCallback(
+    (selectedID: string) => {
       if (selectedIDs.includes(selectedID)) {
         setSelectedIDs(selectedIDs.filter((i) => i !== selectedID));
       } else {
         setSelectedIDs([...selectedIDs, selectedID]);
       }
-    };
+    },
+    [selectedIDs],
+  );
 
-    const addRectIn2DView = (rect: IPointCloud2DRectOperationViewRect) => {
+  const addRectIn2DView = useCallback(
+    (rect: IPointCloud2DRectOperationViewRect) => {
       const newRect = pickRectObject(rect);
       setRectList((prev: IPointCloudBoxRect[]) => {
         return [...prev, newRect];
       });
-    };
+    },
+    [rectList],
+  );
 
-    const updateRectIn2DView = (rect: IPointCloud2DRectOperationViewRect, mergeSelf = false) => {
+  const updateRectIn2DView = useCallback(
+    (rect: IPointCloud2DRectOperationViewRect, mergeSelf = false) => {
       const newRect = pickRectObject(rect);
       setRectList((prev: IPointCloudBoxRect[]) => {
         return prev.map((i) => {
@@ -527,56 +553,65 @@ export const PointCloudProvider: React.FC<PropsWithChildren<{}>> = ({ children }
           return i;
         });
       });
-    };
+    },
+    [rectList],
+  );
 
-    const removeRectIn2DView = (rects: IPointCloud2DRectOperationViewRect[]) => {
+  const removeRectIn2DView = useCallback(
+    (rects: IPointCloud2DRectOperationViewRect[]) => {
       setRectList((prev: IPointCloudBoxRect[]) => {
+        // eslint-disable-next-line max-nested-callbacks
         return prev.filter((i) => !rects.find((rect) => rect.id === i.id));
       });
-    };
+    },
+    [rectList],
+  );
 
-    const addHighlightID = (highlightID: number) => {
+  const addHighlightID = useCallback(
+    (highlightID: number) => {
       if (highlightIDs.includes(highlightID)) {
         setHighlightIDs([]);
       } else {
         setHighlightIDs([highlightID]);
       }
-    };
+    },
+    [highlightIDs],
+  );
 
-    const selectedAllBoxes = () => {
-      if (pointCloudPattern === EToolName.Rect) {
-        const ids = pointCloudBoxList.map((i) => i.id);
-        setSelectedIDs(ids);
-        topViewInstance?.pointCloud2dOperation.setSelectedIDs(ids);
-      }
-    };
+  const selectedAllBoxes = useCallback(() => {
+    if (pointCloudPattern === EToolName.Rect) {
+      const ids = pointCloudBoxList.map((i) => i.id);
+      setSelectedIDs(ids);
+      topViewInstance?.pointCloud2dOperation.setSelectedIDs(ids);
+    }
+  }, [
+    pointCloudPattern,
+    pointCloudBoxList,
+    topViewInstance,
+    topViewInstance?.pointCloud2dOperation,
+  ]);
 
-    const selectSpecAttr = (attr: string) => {
+  const selectSpecAttr = useCallback(
+    (attr: string) => {
       setSelectedIDs(pointCloudBoxList.filter((i) => i.attribute === attr).map((i) => i.id));
-    };
+    },
+    [pointCloudBoxList],
+  );
 
-    const displayPointCloudList = pointCloudBoxList.filter(
-      (i) => !hideAttributes.includes(i.attribute),
-    );
-
-    const displaySphereList = pointCloudSphereList.filter(
-      (i) => !hideAttributes.includes(i.attribute),
-    );
-
-    const displayLineList = lineList.filter(
-      (i) => i.attribute && !hideAttributes.includes(i.attribute),
-    );
-
-    const toggleAttributesVisible = (tAttribute: string) => {
+  const toggleAttributesVisible = useCallback(
+    (tAttribute: string) => {
       if (hideAttributes.includes(tAttribute)) {
         setHideAttributes(hideAttributes.filter((attribute) => attribute !== tAttribute));
       } else {
         const updatedHideAttributes = hideAttributes.concat(tAttribute);
         setHideAttributes(updatedHideAttributes);
       }
-    };
+    },
+    [hideAttributes],
+  );
 
-    const reRender = (
+  const reRender = useCallback(
+    (
       _displayPointCloudList: IPointCloudBoxList = displayPointCloudList,
       _polygonList: IPolygonData[] = polygonList,
       _displaySphereList: IPointCloudSphereList = displaySphereList,
@@ -593,25 +628,28 @@ export const PointCloudProvider: React.FC<PropsWithChildren<{}>> = ({ children }
       mainViewInstance?.generateSpheres(_displaySphereList);
       ptSegmentInstance?.store?.updateCurrentSegment(_segmentation);
       syncAllViewPointCloudColor(EPointCloudBoxRenderTrigger.Default, _displayPointCloudList);
-    };
+    },
+    [mainViewInstance, topViewInstance, ptSegmentInstance, ptSegmentInstance?.store],
+  );
 
-    const clearAllDetectionInstance = () => {
-      setTopViewInstance(undefined);
-      setSideViewInstance(undefined);
-      setBackViewInstance(undefined);
-      setMainViewInstance(undefined);
-    };
+  const clearAllDetectionInstance = useCallback(() => {
+    setTopViewInstance(undefined);
+    setSideViewInstance(undefined);
+    setBackViewInstance(undefined);
+    setMainViewInstance(undefined);
+  }, []);
 
-    /**
-     * Synchronize the highlighted pointCloud for all views.
-     * @param syncByTrigger
-     * If you are not clear about the role of syncByTrigger, please do not change it at will,
-     * just pass it directly to EPointCloudBoxRenderTrigger.Default.
-     * Will perform full rendering
-     * @param pointCloudList
-     */
+  /**
+   * Synchronize the highlighted pointCloud for all views.
+   * @param syncByTrigger
+   * If you are not clear about the role of syncByTrigger, please do not change it at will,
+   * just pass it directly to EPointCloudBoxRenderTrigger.Default.
+   * Will perform full rendering
+   * @param pointCloudList
+   */
 
-    const syncAllViewPointCloudColor = async (
+  const syncAllViewPointCloudColor = useCallback(
+    async (
       syncByTrigger: EPointCloudBoxRenderTrigger,
       pointCloudList?: IPointCloudBox[],
       newHighlight2DDataList?: IHighlight2DData[],
@@ -665,7 +703,6 @@ export const PointCloudProvider: React.FC<PropsWithChildren<{}>> = ({ children }
           points: points.geometry.attributes.position.array,
         });
 
-
         const color = await mainViewInstance?.highlightOriginPointCloud(
           pointCloudList,
           highlightIndex,
@@ -679,9 +716,12 @@ export const PointCloudProvider: React.FC<PropsWithChildren<{}>> = ({ children }
       } catch (error) {
         console.error('call highlightOriginPointCloud error', error);
       }
-    };
+    },
+    [mainViewInstance, mainViewInstance?.pointCloudObject, history],
+  );
 
-    const setGlobalPatternFuc = (pattern: EPointCloudPattern) => {
+  const setGlobalPatternFuc = useCallback(
+    (pattern: EPointCloudPattern) => {
       if (globalPattern !== pattern) {
         dispatch(ChangeSave);
         setGlobalPattern(pattern);
@@ -691,8 +731,11 @@ export const PointCloudProvider: React.FC<PropsWithChildren<{}>> = ({ children }
           setPtSegmentInstance(undefined);
         }
       }
-    };
+    },
+    [globalPattern],
+  );
 
+  const ptCtx = useMemo(() => {
     return {
       selectedID,
       pointCloudBoxList,
@@ -774,18 +817,17 @@ export const PointCloudProvider: React.FC<PropsWithChildren<{}>> = ({ children }
     };
   }, [
     valid,
-    selectedIDs,
-    pointCloudBoxList,
-    pointCloudSphereList,
+    selectedPointCloudBox,
+    displayPointCloudList,
+    displaySphereList,
+    displayLineList,
     polygonList,
-    lineList,
     rectList,
     topViewInstance,
     sideViewInstance,
     backViewInstance,
     mainViewInstance,
     zoom,
-    hideAttributes,
     attrPanelLayout,
     defaultAttribute,
     pointCloudPattern,
