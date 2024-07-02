@@ -78,8 +78,8 @@ const useDataLinkSwitch = (opts: UseDataLinkSwitchOptions) => {
   const {
     addRectFromPointCloudBoxByImageName,
     removeRectByPointCloudBoxId,
-    imageNamePointCloudBoxMap,
     linkageImageNameRectMap,
+    pointCloudBoxList,
     rectList,
   } = useContext(PointCloudContext);
 
@@ -91,10 +91,11 @@ const useDataLinkSwitch = (opts: UseDataLinkSwitchOptions) => {
   const addRect = useLatest(addRectFromPointCloudBoxByImageName);
   const removeRect = useLatest(removeRectByPointCloudBoxId);
 
-  const afterFromDisconnectToConnect = useLatest(() => {
+  /** @private */
+  const handleFromDisconnectToConnect = useLatest(() => {
     //  When switch from disconnect to connect,
     //  should merge the `rectList`(x,y,width,height) to `pointCloudBoxList` rects
-    syncToPointCloudBoxList();
+    return syncToPointCloudBoxList();
   });
 
   const fireSwitch = useCallback((isLinking: boolean) => {
@@ -120,12 +121,13 @@ const useDataLinkSwitch = (opts: UseDataLinkSwitchOptions) => {
   }, []);
 
   const handleManualSwitch = useLatest((targetSwitch: boolean) => {
-    console.log(targetSwitch);
-    fireSwitch(targetSwitch);
-
+    // DEBUG
+    // console.log(targetSwitch);
     if (targetSwitch) {
-      afterFromDisconnectToConnect.current();
+      handleFromDisconnectToConnect.current();
     }
+
+    fireSwitch(targetSwitch);
   });
 
   // const handleSwitch = useCallback(() => {
@@ -206,7 +208,7 @@ const useDataLinkSwitch = (opts: UseDataLinkSwitchOptions) => {
   // Read the latest `isLinking`
   useEffect(() => {
     syncIsLinking();
-  }, [syncIsLinking]);
+  }, [syncIsLinking, pointCloudBoxList, rectList]);
 
   useEffect(() => {
     const fn = (isConnect: boolean) => {

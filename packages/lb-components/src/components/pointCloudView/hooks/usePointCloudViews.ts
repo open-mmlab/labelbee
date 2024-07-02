@@ -37,7 +37,7 @@ import { AppState } from '@/store';
 import StepUtils from '@/utils/StepUtils';
 import { EPointCloudBoxRenderTrigger } from '@/utils/ToolPointCloudBoxRenderHelper';
 import { jsonParser, getRectPointCloudBox, generatePointCloudBoxRects } from '@/utils';
-import type { GeneratePointCloudBoxRectsOptions } from '@/utils'
+import type { GeneratePointCloudBoxRectsOptions } from '@/utils';
 import {
   PreDataProcess,
   SetPointCloudLoading,
@@ -623,7 +623,7 @@ export const usePointCloudViews = () => {
     cuboidBoxIn2DView,
     imageSizes,
     history,
-    linkageImageNameRectMap
+    linkageImageNameRectMap,
   } = ptCtx;
   const { addHistory, initHistory, pushHistoryUnderUpdatePolygon } = useHistory();
   const { selectedPolygon } = usePolygon();
@@ -640,26 +640,47 @@ export const usePointCloudViews = () => {
   const dispatch = useDispatch();
 
   const cuboidBoxIn2DViewLatest = useLatest(cuboidBoxIn2DView);
+  const linkageImageNameRectMapRef = useLatest(linkageImageNameRectMap);
 
-  const prepareRectsFn = useCallback<NonNullable<GeneratePointCloudBoxRectsOptions['prepareRectsFn']>>((rects) => {
-    const newRects = rects
-      // Should be regarded as `delete pcb-matching 2d-rect` when add pcb in disconnect mode
-      .filter(rt => rt && (linkageImageNameRectMap.get(rt.imageName)?.size ?? 0) === 0);
+  const prepareRectsFn = useCallback<
+    NonNullable<GeneratePointCloudBoxRectsOptions['prepareRectsFn']>
+  >((rects, pointCloudBox) => {
+    const linkageImageNameRectMap = linkageImageNameRectMapRef.current;
+    const extId = pointCloudBox.id;
+
+    const newRects = rects.filter((rt) => {
+      if (!rt) {
+        return false;
+      }
+
+      const map = linkageImageNameRectMap.get(rt.imageName);
+
+      // Be regarded as `connected` item
+      if (map === undefined) {
+        return true;
+      }
+
+      // Be regarded as `disconnected` item
+      return Boolean(map.get(extId));
+    });
 
     return newRects;
-  }, [linkageImageNameRectMap])
+  }, []);
 
   const generateRects = (boxParams: IPointCloudBox) => {
     const { enableAutoMap2DRect = false } = config;
     if (!cuboidBoxIn2DViewLatest.current || enableAutoMap2DRect) {
       const { mappingImgList = [] } = currentData;
-      generatePointCloudBoxRects({
-        pointCloudBox: boxParams,
-        mappingImgList,
-        imageSizes,
-      }, {
-        prepareRectsFn
-      });
+      generatePointCloudBoxRects(
+        {
+          pointCloudBox: boxParams,
+          mappingImgList,
+          imageSizes,
+        },
+        {
+          prepareRectsFn,
+        },
+      );
     }
   };
   const { selectedBox, updateSelectedBox, updateSelectedBoxes, getPointCloudByID } = useSingleBox({
@@ -1410,7 +1431,7 @@ export const useSyncRectPositionDimensionToPointCloudList = () => {
     const rects = rectListRef.current;
 
     if (rects.length === 0) {
-      return;
+      return null;
     }
 
     const posDimMap = new Map<string, Map<string, PosDim>>();
@@ -1451,7 +1472,11 @@ export const useSyncRectPositionDimensionToPointCloudList = () => {
       });
 
       setPointCloudResult(newPointCloudBoxList);
+
+      return newPointCloudBoxList;
     }
+
+    return null;
   }, []);
 
   return {

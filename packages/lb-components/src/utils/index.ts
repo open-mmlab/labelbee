@@ -168,6 +168,8 @@ export const generatePointCloudBoxRects = (params: {
   if (filteredRects.length > 0) {
     const prepareFn = options?.prepareRectsFn ?? undefined;
     const rects = prepareFn ? prepareFn(filteredRects, pointCloudBox) : filteredRects;
-    Object.assign(pointCloudBox, { rects });
+    if (rects.length > 0) {
+      Object.assign(pointCloudBox, { rects });
+    }
   }
 };
