@@ -641,7 +641,6 @@ export const usePointCloudViews = () => {
 
   const cuboidBoxIn2DViewLatest = useLatest(cuboidBoxIn2DView);
   const linkageImageNameRectMapRef = useLatest(linkageImageNameRectMap);
-  // const currentRectList
 
   const prepareRectsFn = useCallback<
     NonNullable<GeneratePointCloudBoxRectsOptions['prepareRectsFn']>
