@@ -16,6 +16,7 @@ import UnlinkIcon from '@/assets/annotation/icon_unlink.svg';
 import { BatchSwitchConnectionEventBusEvent } from '@/views/MainView/toolFooter/BatchSwitchConnectIn2DView';
 import { EventBus } from '@labelbee/lb-annotation';
 import { useSyncRectPositionDimensionToPointCloudList } from './usePointCloudViews';
+import { IPointCloud2DRectOperationViewRect, IPointCloudBoxRect } from '@labelbee/lb-utils';
 
 const useShownIcon = (imageName?: string) => {
   const { imageNamePointCloudBoxMap, linkageImageNameRectMap } = useContext(PointCloudContext);
@@ -81,6 +82,7 @@ const useDataLinkSwitch = (opts: UseDataLinkSwitchOptions) => {
     linkageImageNameRectMap,
     pointCloudBoxList,
     rectList,
+    updateRectListByReducer,
   } = useContext(PointCloudContext);
 
   const { visible: visibleLinkageIcon, visibleRef: visibleLinkageIconRef } = useShownIcon(
@@ -209,6 +211,36 @@ const useDataLinkSwitch = (opts: UseDataLinkSwitchOptions) => {
   useEffect(() => {
     syncIsLinking();
   }, [syncIsLinking, pointCloudBoxList, rectList]);
+
+
+  // Set to normal rect when has no matching-pointCloudBox owner
+  useEffect(() => {
+    const ids = pointCloudBoxList.map(item => item.id);
+    const set = new Set(ids);
+
+    updateRectListByReducer((prevRectList, pickRectObject) => {
+      const filteredUnLinkageItems: IPointCloudBoxRect[] = [];
+      const otherItems: IPointCloudBoxRect[] = [];
+
+      prevRectList.forEach((item) => {
+        const extId = item.extId;
+        if (extId !== undefined && set.has(extId) === false) {
+          filteredUnLinkageItems.push(item);
+        } else {
+          otherItems.push(item);
+        }
+      });
+
+      if (filteredUnLinkageItems.length) {
+        return [
+          ...filteredUnLinkageItems.map(item => pickRectObject(item as IPointCloud2DRectOperationViewRect)),
+          ...otherItems
+        ]
+      }
+
+      return prevRectList;
+    })
+  }, [pointCloudBoxList])
 
   useEffect(() => {
     const fn = (isConnect: boolean) => {
