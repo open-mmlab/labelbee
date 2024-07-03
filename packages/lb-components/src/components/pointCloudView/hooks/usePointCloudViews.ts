@@ -701,12 +701,6 @@ export const usePointCloudViews = () => {
 
   const { pointCloudInstance: topViewPointCloud } = topViewInstance;
 
-  const mainViewGenBox = (boxParams: IPointCloudBox) => {
-    mainViewInstance?.generateBox(boxParams);
-    mainViewInstance?.controls.update();
-    mainViewInstance?.render();
-  };
-
   const mainViewGenSphere = (sphereParams: IPointCloudSphere) => {
     mainViewInstance?.generateSphere(sphereParams);
     mainViewInstance?.controls.update();
@@ -1245,7 +1239,7 @@ export const usePointCloudViews = () => {
     newPointCloudBoxList?: IPointCloudBox[];
   }
 
-  const syncPointCloudViews = async (params: ISyncPointCloudViews) => {
+  const syncPointCloudViews = (params: ISyncPointCloudViews) => {
     const { omitView, polygon, boxParams, zoom, newPointCloudBoxList } = params;
 
     const dataUrl = currentData?.url;
@@ -1255,10 +1249,7 @@ export const usePointCloudViews = () => {
      */
     if (newPointCloudBoxList) {
       // Wait for the mainPointCloudData.
-      await ptCtx.syncAllViewPointCloudColor(
-        EPointCloudBoxRenderTrigger.Single,
-        newPointCloudBoxList,
-      );
+      ptCtx.syncAllViewPointCloudColor(EPointCloudBoxRenderTrigger.Single, newPointCloudBoxList);
     }
     const viewToBeUpdated = {
       [PointCloudView.Side]: () => {
@@ -1283,8 +1274,6 @@ export const usePointCloudViews = () => {
     if (zoom) {
       mainViewInstance?.updateCameraZoom(zoom);
     }
-
-    mainViewGenBox(boxParams);
   };
 
   const pointCloudBoxListUpdated = (newBoxes: IPointCloudBox[]) => {
