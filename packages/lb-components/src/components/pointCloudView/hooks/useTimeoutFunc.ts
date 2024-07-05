@@ -1,3 +1,7 @@
+/**
+ * Provide the `useTimeoutFunc` hook (like https://ahooks.js.org/hooks/use-timeout/),
+ * but the external `delayFunc` can be used arbitrarily.
+ */
 import { useCallback, useEffect, useRef } from 'react';
 import { useMemoizedFn } from 'ahooks';
 

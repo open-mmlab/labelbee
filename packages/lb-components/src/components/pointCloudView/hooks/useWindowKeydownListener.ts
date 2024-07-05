@@ -1,3 +1,8 @@
+/**
+ * Proivde the `useWindowKeydownListener` hook (more power except `https://github.com/alibaba/hooks/blob/master/packages/hooks/src/useEventListener/index.ts`)
+ * which will have `preappend` or `append` event in your order.
+ */
+
 import { useCallback, useEffect, useMemo, useRef } from 'react';
 import '../utils/event-polyfill'
 
