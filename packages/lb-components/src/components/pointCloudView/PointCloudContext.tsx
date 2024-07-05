@@ -146,6 +146,8 @@ export interface IPointCloudContext
 
   highlight2DDataList: IHighlight2DData[];
   setHighlight2DDataList: (urlList: IHighlight2DData[]) => void;
+  highlight2DLoading: boolean;
+  setHighlight2DLoading: (loading: boolean) => void;
   imageSizes: {
     [key: string]: ISize;
   };
@@ -241,6 +243,8 @@ export const PointCloudContext = React.createContext<IPointCloudContext>({
 
   highlight2DDataList: [],
   setHighlight2DDataList: () => {},
+  highlight2DLoading: false,
+  setHighlight2DLoading: () => {},
   cuboidBoxIn2DView: true,
   setCuboidBoxIn2DView: (bool?: boolean) => {},
   imageSizes: {},
@@ -286,6 +290,7 @@ export const PointCloudProvider: React.FC<PropsWithChildren<{}>> = ({ children }
   const [ptSegmentInstance, setPtSegmentInstance] = useState<PointCloud | undefined>(undefined);
   const [segmentation, setSegmentation] = useState<IPointCloudSegmentation[]>([]);
   const [highlight2DDataList, setHighlight2DDataList] = useState<IHighlight2DData[]>([]);
+  const [highlight2DLoading, setHighlight2DLoading] = useState<boolean>(false);
   const state = useAnnotatedBoxStore();
 
   const [imageSizes, setImageSizes] = useState<{
@@ -797,6 +802,8 @@ export const PointCloudProvider: React.FC<PropsWithChildren<{}>> = ({ children }
 
       highlight2DDataList,
       setHighlight2DDataList,
+      highlight2DLoading,
+      setHighlight2DLoading,
       cuboidBoxIn2DView,
       setCuboidBoxIn2DView,
       imageSizes,
@@ -835,6 +842,7 @@ export const PointCloudProvider: React.FC<PropsWithChildren<{}>> = ({ children }
     ptSegmentInstance,
     segmentation,
     highlight2DDataList,
+    highlight2DLoading,
     cuboidBoxIn2DView,
     imageSizes,
     highlightIDs,

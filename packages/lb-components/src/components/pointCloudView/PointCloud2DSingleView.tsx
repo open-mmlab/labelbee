@@ -35,7 +35,8 @@ const PointCloud2DSingleView = ({
   const { url, fallbackUrl, calib, path } = view2dData;
   const { toggle2dVisible, isHighlightVisible } = useHighlight({ currentData });
   const [loading, setLoading] = useState(false);
-  const { cuboidBoxIn2DView, cacheImageNodeSize } = useContext(PointCloudContext);
+  const { highlight2DLoading, setHighlight2DLoading, cuboidBoxIn2DView, cacheImageNodeSize } =
+    useContext(PointCloudContext);
   const hiddenData = !view2dData;
 
   const dataLinkSwitchOpts = useMemo(() => {
@@ -88,12 +89,14 @@ const PointCloud2DSingleView = ({
 
   const highlightOnClick = async () => {
     setLoading(true);
+    setHighlight2DLoading(true);
     try {
       await toggle2dVisible(url, fallbackUrl ?? '', calib);
     } catch (error) {
       console.error('highlightOnClick error:', error);
     } finally {
       setLoading(false);
+      setHighlight2DLoading(false);
     }
   };
 
@@ -134,6 +137,7 @@ const PointCloud2DSingleView = ({
           visible={isHighlightVisible(url)}
           onClick={highlightOnClick}
           loading={loading}
+          disabled={highlight2DLoading}
           style={{
             position: 'absolute',
             right: 16,
