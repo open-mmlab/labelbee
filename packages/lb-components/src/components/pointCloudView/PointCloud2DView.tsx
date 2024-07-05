@@ -137,7 +137,7 @@ const PointCloud2DView = ({
   const [isEnlarge, setIsEnlarge] = useState<boolean>(false);
   const [curIndex, setCurIndex] = useState<number | undefined>(undefined);
 
-  useEffect(() => {
+  const annotations2dHandler = () => {
     if (
       !loadPCDFileLoading &&
       topViewInstance &&
@@ -180,7 +180,11 @@ const PointCloud2DView = ({
               imageName: mappingData.path,
             };
 
-            const isRectInImage = isBoundingRectInImage(boundingRect, mappingData.path, imageSizes);
+            const isRectInImage = isBoundingRectInImage(
+              boundingRect,
+              mappingData.path,
+              imageSizes,
+            );
 
             if (!isRectInImage) {
               return acc;
@@ -269,6 +273,14 @@ const PointCloud2DView = ({
         });
       });
       setAnnotations2d(newAnnotations2dList);
+    }
+  }
+
+  useEffect(() => {
+    if (window.requestIdleCallback) {
+      window.requestIdleCallback(annotations2dHandler);
+    } else {
+      setTimeout(annotations2dHandler, 1);
     }
   }, [
     displayPointCloudList,
