@@ -1573,7 +1573,7 @@ $headerHeight: 40px;
           @include iconMg;
           background-image: url('./assets/annotation/pointCloudTool/rotateReserve.svg');
         }
-        
+
         &__rotate-90 {
           @include icon(24px);
           background-image: url('./assets/annotation/pointCloudTool/rotate90.svg');
@@ -1615,7 +1615,6 @@ $headerHeight: 40px;
       top: 16px;
       left: 16px;
       z-index: 1000;
-      // pointer-events: none;
     }
   }
 
