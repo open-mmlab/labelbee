@@ -1,0 +1,74 @@
+.dynamic-resizer-content {
+  width: 100%;
+  height: 100%;
+  flex-shrink: 0;
+  flex-grow: 0;
+  position: relative;
+}
+
+.divider {
+  height: 10px;
+  width: 100%;
+  position: absolute;
+  top: -5px;
+  left: 0;
+  cursor: row-resize;
+  user-select: none;
+  display: flex;
+  align-items: center;
+  flex-direction: column;
+  justify-content: center;
+}
+.divider{
+  &:hover {
+    .divider-top,.divider-bottom{
+      display: block;
+    }
+  }
+}
+
+.divider-top,
+.divider-bottom {
+  width: 20px;
+  height: 20px;
+  cursor: pointer;
+  display: none;
+  user-select: none;
+}
+
+.divider-icon {
+  width: 100%;
+  height: 20px;
+  position: relative;
+  &::after{
+    content:'';
+    display: block;
+    position: absolute;
+    top: 50%;
+    left: 0;
+    right: 0;
+    width: 90%;
+    height: 1px;
+    background: #ccc;
+    margin: 0 auto;
+  }
+}
+
+.dynamic-resizer-top {
+  width: 100%;
+  overflow-y: auto;
+}
+
+.dynamic-resizer-bottom {
+  width: 100%;
+  overflow-y: auto;
+}
+
+.hide-scrollbar * {
+  scrollbar-width: none; /* Firefox */
+  -ms-overflow-style: none; /* IE and Edge */
+}
+
+.hide-scrollbar *::-webkit-scrollbar {
+  display: none; /* Chrome, Safari, Opera */
+}

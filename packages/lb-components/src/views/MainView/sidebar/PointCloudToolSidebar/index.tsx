@@ -39,6 +39,7 @@ import { sidebarCls } from '..';
 import { SetTaskStepList } from '@/store/annotation/actionCreators';
 import { usePointCloudViews } from '@/components/pointCloudView/hooks/usePointCloudViews';
 import SubAttributeList from '@/components/subAttributeList';
+import DynamicResizer from '@/components/DynamicResizer';
 interface IProps {
   stepInfo: IStepInfo;
   toolInstance: ICustomToolInstance; // Created by useCustomToolInstance.
@@ -304,35 +305,45 @@ const AttributeUpdater = ({
   return (
     <div
       style={{
-        flex: 1,
-        overflowX: 'hidden',
-        overflowY: 'auto',
+        height: '100%',
+        overflow: 'auto',
+        display: 'flex',
+        flexDirection: 'column',
       }}
     >
       <div style={titleStyle}>{t('Attribute')}</div>
-      <AttributeList
-        list={list}
-        forbidDefault={true}
-        selectedAttribute={defaultAttribute ?? ''}
-        attributeChanged={(attribute: string) => setAttribute(attribute)}
-        updateColorConfig={updateColorConfig}
-        enableColorPicker={enableColorPicker}
-        updateSize={updateSize}
-        forbidShowLimitPopover={forbidShowLimitPopover}
-      />
-      <Divider style={{ margin: 0 }} />
-      {isSelected && (
-        <SubAttributeList
-          subAttributeList={subAttributeList}
-          setSubAttribute={setSubAttribute}
-          getValue={(subAttribute) => {
-            return (
-              ptx.selectedPointCloudBox?.subAttribute?.[subAttribute.value] ||
-              segmentData.cacheSegData?.subAttribute?.[subAttribute.value]
-            );
-          }}
+      <div
+        style={{
+          height: 0,
+          flex: 1,
+          overflowY: 'auto',
+          overflowX: 'hidden',
+        }}
+      >
+        <AttributeList
+          list={list}
+          forbidDefault={true}
+          selectedAttribute={defaultAttribute ?? ''}
+          attributeChanged={(attribute: string) => setAttribute(attribute)}
+          updateColorConfig={updateColorConfig}
+          enableColorPicker={enableColorPicker}
+          updateSize={updateSize}
+          forbidShowLimitPopover={forbidShowLimitPopover}
         />
-      )}
+        <Divider style={{ margin: 0 }} />
+        {isSelected && (
+          <SubAttributeList
+            subAttributeList={subAttributeList}
+            setSubAttribute={setSubAttribute}
+            getValue={(subAttribute) => {
+              return (
+                ptx.selectedPointCloudBox?.subAttribute?.[subAttribute.value] ||
+                segmentData.cacheSegData?.subAttribute?.[subAttribute.value]
+              );
+            }}
+          />
+        )}
+      </div>
     </div>
   );
 };
@@ -455,32 +466,55 @@ const PointCloudToolSidebar: React.FC<IProps> = ({
         selectedToolName={pointCloudPattern}
         onChange={(v) => updatePointCloudPattern?.(v)}
       />
-      <AttributeUpdater
-        toolInstance={toolInstance}
-        attributeList={attributeList}
-        subAttributeList={subAttributeList}
-        config={config}
-        stepList={stepList}
-        stepInfo={stepInfo}
-        enableColorPicker={enableColorPicker}
-      />
-      {config?.trackConfigurable === true && pointCloudPattern === EToolName.Rect && (
-        <div
-          style={{
-            flexShrink: 0,
-            height: 280,
-            overflow: 'auto',
-          }}
+      <div
+        style={{
+          flex: 1,
+          overflow: 'hidden',
+        }}
+      >
+        <DynamicResizer
+          minTopHeight={42}
+          defaultHeight={100}
+          localKey={
+            'id:' +
+            stepInfo?.id +
+            'taskID:' +
+            stepInfo?.taskID +
+            'step:' +
+            stepInfo?.step +
+            'type:' +
+            stepInfo?.type
+          }
         >
-          <BoxTrackIDInput />
-          <Divider style={{ margin: 0 }} />
-          <AnnotatedBox imgList={imgList} imgIndex={imgIndex} />
-          <Divider style={{ margin: 0 }} />
-          <FindTrackIDIndex imgList={imgList} imgIndex={imgIndex} />
-          <Divider style={{ margin: 0 }} />
-          <RectRotateSensitivitySlider />
-        </div>
-      )}
+          <AttributeUpdater
+            toolInstance={toolInstance}
+            attributeList={attributeList}
+            subAttributeList={subAttributeList}
+            config={config}
+            stepList={stepList}
+            stepInfo={stepInfo}
+            enableColorPicker={enableColorPicker}
+          />
+          {config?.trackConfigurable === true && pointCloudPattern === EToolName.Rect ? (
+            <div
+              style={{
+                height: '100%',
+                overflow: 'auto',
+              }}
+            >
+              <BoxTrackIDInput />
+              <Divider style={{ margin: 0 }} />
+              <AnnotatedBox imgList={imgList} imgIndex={imgIndex} />
+              <Divider style={{ margin: 0 }} />
+              <FindTrackIDIndex imgList={imgList} imgIndex={imgIndex} />
+              <Divider style={{ margin: 0 }} />
+              <RectRotateSensitivitySlider />
+            </div>
+          ) : (
+            <div />
+          )}
+        </DynamicResizer>
+      </div>
     </>
   );
 };

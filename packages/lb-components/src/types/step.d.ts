@@ -1,5 +1,7 @@
 /** 步骤对象 */
 export interface IStepInfo {
+  id?: number;
+  taskID?: number;
   type: number; // 1 为标注， 2 为质检
   config: string; // 配置信息
   dataSourceStep: number;
