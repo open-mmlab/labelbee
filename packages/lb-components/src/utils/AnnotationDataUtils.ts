@@ -94,7 +94,7 @@ export default class AnnotationDataUtils {
     const { item, key, parent, mappingImgList, preMappingImgList } = params;
 
     // Get the pre-processing value
-    const oldValue = key ===  undefined ? undefined : parent[key]
+    const oldValue = key === undefined ? undefined : parent[key];
 
     if (key === 'id') {
       parent.id = uuid(8, 62);
@@ -108,12 +108,12 @@ export default class AnnotationDataUtils {
     }
 
     // Get the pos-processing value
-    const value = key ===  undefined ? undefined : parent[key]
+    const value = key === undefined ? undefined : parent[key];
 
     return {
       value,
-      oldValue
-    }
+      oldValue,
+    };
   }
 
   /**
@@ -138,16 +138,7 @@ export default class AnnotationDataUtils {
         const fields = ['result', 'resultRect'];
 
         // 新老id的映射
-        const resultIdMapping = new Map<string, string>()
-        const enqueueResultIdMapping = (newValue?: string, oldValue?: string) => {
-          // Ignore the invalid value
-          if (newValue === undefined || oldValue === undefined) {
-            console.warn('invalid id')
-            return
-          }
-
-          resultIdMapping.set(oldValue, newValue)
-        }
+        const resultIdMapping = new Map<string, string>();
 
         // 数据处理
         fields.forEach((field) => {
@@ -164,7 +155,7 @@ export default class AnnotationDataUtils {
               // FIXME 目前result是一维简单对象数组，后续复杂对象数组项需要考虑先辈key
               if (field === 'result' && key === 'id') {
                 if (newValue !== undefined && oldValue !== undefined) {
-                  resultIdMapping.set(oldValue, newValue)
+                  resultIdMapping.set(oldValue, newValue);
                 }
               }
             });
@@ -177,15 +168,15 @@ export default class AnnotationDataUtils {
          * @description extId用于识别来源哪个result项
          */
         if (resultIdMapping.size) {
-          const resultRect = info['resultRect']
+          const resultRect = info['resultRect'];
           if (Array.isArray(resultRect)) {
-            resultRect.forEach(item => {
-              const extId = item.extId
-              const newExtId = resultIdMapping.get(extId)
+            resultRect.forEach((item) => {
+              const extId = item.extId;
+              const newExtId = resultIdMapping.get(extId);
               if (extId !== undefined && newExtId !== undefined) {
-                item.extId = newExtId
+                item.extId = newExtId;
               }
-            })
+            });
           }
         }
         

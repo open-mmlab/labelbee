@@ -223,7 +223,7 @@ const PointCloudListener: React.FC<IProps> = ({
     }
   };
 
-  const onKeyDown = (e: KeyboardEvent) => {
+  const onKeyDown = useLatest((e: KeyboardEvent) => {
     if (!CommonToolUtils.hotkeyFilter(e) || checkMode === true) {
       return;
     }
@@ -236,20 +236,20 @@ const PointCloudListener: React.FC<IProps> = ({
     }
 
     keydownEvents(lowerCaseKey, e);
-  };
+  });
 
   useEffect(() => {
-    const { topViewInstance } = ptCtx;
+    const topViewInstance = ptCtx.topViewInstance;
     if (!topViewInstance) {
       return;
     }
 
-    window.addEventListener('keydown', onKeyDown);
+    const { addEventListener } = ptCtx.windowKeydownListenerHook;
+    const listener = (e: KeyboardEvent) => onKeyDown.current(e);
+    const dispose = addEventListener(listener);
 
-    return () => {
-      window.removeEventListener('keydown', onKeyDown);
-    };
-  }, [ptCtx, copiedBoxes, config, ptCtx.pointCloudBoxList, ptCtx.polygonList]);
+    return dispose;
+  }, [ptCtx, ptCtx.topViewInstance, ptCtx.windowKeydownListenerHook]);
 
   useEffect(() => {
     syncAllViewsConfig(config);

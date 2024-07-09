@@ -32,6 +32,12 @@ import _ from 'lodash';
 import type { MapIndirectWeakSet } from './utils/map';
 import { addMapIndirectWeakSetItem } from './utils/map';
 
+import useTimeoutFunc from './hooks/useTimeoutFunc';
+import useWindowKeydownListener, {
+  getEmptyUseWindowKeydownListener,
+  WindowKeydownListenerHooker,
+} from './hooks/useWindowKeydownListener';
+
 interface IPointCloudContextInstances {
   topViewInstance?: PointCloudAnnotation;
   sideViewInstance?: PointCloudAnnotation;
@@ -169,6 +175,7 @@ export interface IPointCloudContext
   linkageImageNameRectMap: MapIndirectWeakSet<IPointCloudBoxRect>;
 
   updateRectListByReducer: UpdateRectListByReducer;
+  windowKeydownListenerHook: WindowKeydownListenerHooker;
 }
 
 const pickRectObject = (rect: IPointCloud2DRectOperationViewRect) => {
@@ -261,10 +268,11 @@ export const PointCloudContext = React.createContext<IPointCloudContext>({
   linkageImageNameRectMap: new Map(),
 
   updateRectListByReducer: () => {},
+  windowKeydownListenerHook: getEmptyUseWindowKeydownListener(),
 });
 
 export const PointCloudProvider: React.FC<PropsWithChildren<{}>> = ({ children }) => {
-  const [pointCloudBoxList, setPointCloudResult] = useState<IPointCloudBoxList>([]);
+  const [pointCloudBoxList, setPointCloudResult_] = useState<IPointCloudBoxList>([]);
   const [pointCloudSphereList, setPointCloudSphereList] = useState<IPointCloudSphereList>([]);
   const [polygonList, setPolygonList] = useState<IPolygonData[]>([]);
   const [rectList, setRectList] = useState<IPointCloudBoxRect[]>([]);
@@ -317,6 +325,8 @@ export const PointCloudProvider: React.FC<PropsWithChildren<{}>> = ({ children }
   const selectedID = useMemo(() => {
     return selectedIDs.length === 1 ? selectedIDs[0] : '';
   }, [selectedIDs]);
+
+  const windowKeydownListenerHook = useWindowKeydownListener();
 
   const removeRectBySpecifyId = useCallback(
     (imageName: string, ids: string[], idField: keyof IPointCloudBoxRect = 'extId') => {
@@ -469,6 +479,40 @@ export const PointCloudProvider: React.FC<PropsWithChildren<{}>> = ({ children }
     );
   }, [rectList]);
 
+  // `setPointCloudResult` is a high frequency function, which can be
+  //  avoided by using throttle in `setSelectedIDsState` case.
+  const { fn: callWhenPointCloudResultChanged } = useTimeoutFunc((pcIds: string[]) => {
+    setSelectedIDsState((ids) => {
+      const remainIds = pcIds;
+
+      const set = new Set(remainIds);
+      let hasFiltered = false;
+      const filtered = ids.filter((id) => {
+        const r = set.has(id);
+
+        if (!r) {
+          hasFiltered = true;
+        }
+
+        return r;
+      });
+
+      if (hasFiltered) {
+        return filtered;
+      }
+
+      return ids;
+    });
+  }, 200);
+
+  const setPointCloudResult = useCallback((resultList: IPointCloudBoxList) => {
+    const pcIds = resultList.map((item) => item.id);
+    setPointCloudResult_(resultList);
+
+    // Keep the selectedIDs in `pointCloudBoxList` list
+    callWhenPointCloudResultChanged(pcIds);
+  }, []);
+
   const selectedPointCloudBox = useMemo(() => {
     return pointCloudBoxList.find((v) => v.id === selectedID);
   }, [pointCloudBoxList, selectedID]);
@@ -520,7 +564,6 @@ export const PointCloudProvider: React.FC<PropsWithChildren<{}>> = ({ children }
       setSelectedIDsState(Array.from(new Set(selectedIDs)));
     }
   }, []);
-
   /**
    * If selectedID existed, remove selectedID from selectedIDs
    * If selectedID not existed, add selectedID to selectedIDs
@@ -821,6 +864,7 @@ export const PointCloudProvider: React.FC<PropsWithChildren<{}>> = ({ children }
       linkageImageNameRectMap,
 
       updateRectListByReducer,
+      windowKeydownListenerHook,
     };
   }, [
     valid,
@@ -854,6 +898,7 @@ export const PointCloudProvider: React.FC<PropsWithChildren<{}>> = ({ children }
     linkageImageNameRectMap,
 
     updateRectListByReducer,
+    windowKeydownListenerHook,
   ]);
 
   useEffect(() => {
