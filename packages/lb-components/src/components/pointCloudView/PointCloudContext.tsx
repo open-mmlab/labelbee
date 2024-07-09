@@ -765,7 +765,7 @@ export const PointCloudProvider: React.FC<PropsWithChildren<{}>> = ({ children }
         console.error('call highlightOriginPointCloud error', error);
       }
     },
-    [mainViewInstance, mainViewInstance?.pointCloudObject, history],
+    [mainViewInstance, mainViewInstance?.pointCloudObject, history, highlight2DDataList],
   );
 
   const setGlobalPatternFuc = useCallback(
