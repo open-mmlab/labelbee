@@ -479,6 +479,8 @@ export const PointCloudProvider: React.FC<PropsWithChildren<{}>> = ({ children }
     );
   }, [rectList]);
 
+  // `setPointCloudResult` is a high frequency function, which can be
+  //  avoided by using throttle in `setSelectedIDsState` case.
   const { fn: callWhenPointCloudResultChanged } = useTimeoutFunc((pcIds: string[]) => {
     setSelectedIDsState((ids) => {
       const remainIds = pcIds;
