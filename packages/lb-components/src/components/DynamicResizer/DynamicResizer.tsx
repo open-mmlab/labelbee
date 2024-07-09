@@ -16,6 +16,7 @@ const DynamicResizer: FC<DynamicResizerProps> = (props) => {
 
   const containerRef = useRef<HTMLDivElement>(null);
 
+  // Detach the universal drag and drop function to calculate the styles above and below
   const { rendered, topStyle, bottomStyle } = useDrag({
     containerRef,
     minTopHeight,

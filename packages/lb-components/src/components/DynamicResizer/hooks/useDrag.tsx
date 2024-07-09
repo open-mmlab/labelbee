@@ -1,9 +1,9 @@
 import React, { useCallback, useMemo } from 'react';
 import Draggable1 from 'react-draggable';
 import type { DraggableEventHandler } from 'react-draggable';
-import useLocalStorage from './useLocalStorage';
-import useUpdateHeight from './useUpdateHeight';
 import { DragProps } from '../types/interface';
+import { useLocalStorageState } from 'ahooks';
+import useUpdateHeight from './useUpdateHeight';
 import topToZero from '../assets/topToZero.svg';
 import bottomToZero from '../assets/bottomToZero.svg';
 
@@ -28,9 +28,9 @@ const useDrag = ({
     setTopHeightToZero,
     setBottomHeightToZero,
   } = useUpdateHeight(containerRef, minTopHeight, minBottomHeight, defaultHeight, cacheKey);
+  const [localTopHeight, setLocalTopHeight] = useLocalStorageState<number | undefined>(cacheKey);
 
-  const { setLocalTopHeight } = useLocalStorage(cacheKey);
-
+  // Hide scrollbar at the beginning of drag and drop
   const onDragStart: DraggableEventHandler = useCallback(() => {
     if (containerRef.current) {
       containerRef.current.classList.add('hide-scrollbar');
@@ -45,6 +45,7 @@ const useDrag = ({
     [updateELHeight],
   );
 
+  // Show scroll bar at the end of drag and drop
   const onDragStop: DraggableEventHandler = useCallback(
     (e) => {
       e.stopPropagation();

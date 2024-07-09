@@ -1,6 +1,3 @@
-import useLocalStorage from "./hooks/useLocalStorage";
-import DynamicResizer from "./DynamicResizer";
-
-export { useLocalStorage };
+import DynamicResizer from './DynamicResizer';
 
 export default DynamicResizer;

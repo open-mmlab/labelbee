@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState, RefObject, useCallback } from 'react';
-import useLocalStorage from './useLocalStorage';
+import { useLocalStorageState } from 'ahooks';
 
 const useUpdateHeight = (
   containerRef: RefObject<HTMLDivElement>,
@@ -12,12 +12,12 @@ const useUpdateHeight = (
   const [bottomHeight, setBottomHeight] = useState<number>(0);
   const [limitMinTopHeight, setLimitMinTopHeight] = useState<number>(0);
   const [limitMinBottomHeight, setLimitMinBottomHeight] = useState<number>(0);
+  const [localTopHeight, setLocalTopHeight] = useLocalStorageState<number | undefined>(cacheKey);
 
-  const { getLocalTopHeight, setLocalTopHeight } = useLocalStorage(cacheKey);
-
+  // init top height
   useEffect(() => {
     initPropHeight();
-    const cacheTopHeight = getLocalTopHeight();
+    const cacheTopHeight = localTopHeight;
     let newTopHeight = 0;
 
     if (cacheTopHeight !== undefined && cacheTopHeight !== null) {
@@ -30,8 +30,10 @@ const useUpdateHeight = (
     updateELHeight(newTopHeight);
   }, []);
 
+  // divider‘s position
   const position = useMemo(() => ({ x: 0, y: topHeight }), [topHeight]);
 
+  // Restrict the drag range of react-dragble
   const bounds = useMemo(
     () => ({
       top: limitMinTopHeight,
@@ -40,6 +42,7 @@ const useUpdateHeight = (
     [topHeight, containerRef],
   );
 
+  // calc style
   const topStyle = useMemo(() => {
     return {
       height: topHeight + 'px',
@@ -88,6 +91,7 @@ const useUpdateHeight = (
     [containerRef, limitMinTopHeight, limitMinBottomHeight],
   );
 
+  // set top height to 0
   const setTopHeightToZero = () => {
     if (containerRef) {
       updateELHeight(limitMinTopHeight || 0);
@@ -95,6 +99,7 @@ const useUpdateHeight = (
     }
   };
 
+  // set bottom height to 0
   const setBottomHeightToZero = () => {
     if (containerRef) {
       const containerHeight = containerRef?.current?.offsetHeight || 0;
