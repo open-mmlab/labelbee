@@ -56,12 +56,12 @@
 
 .dynamic-resizer-top {
   width: 100%;
-  overflow-y: hidden;
+  overflow-y: auto;
 }
 
 .dynamic-resizer-bottom {
   width: 100%;
-  overflow-y: hidden;
+  overflow-y: auto;
 }
 
 .hide-scrollbar * {
