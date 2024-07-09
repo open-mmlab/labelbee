@@ -5,7 +5,7 @@ import QuestionView from '@/components/LLMToolView/questionView';
 import TextContent from '@/components/NLPToolView/textContent';
 import { i18n } from '@labelbee/lb-utils';
 import React, { useImperativeHandle, useState } from 'react';
-import { I18nextProvider } from 'react-i18next';
+import { I18nextProvider, initReactI18next } from 'react-i18next';
 import { Provider } from 'react-redux';
 import { AnyAction } from 'redux';
 import App from './App';
@@ -33,6 +33,11 @@ import SubAttributeList from './components/subAttributeList';
 import { ToolStyleProvider } from './hooks/useToolStyle';
 
 export const store = configureStore();
+
+i18n.use(initReactI18next)
+i18n.options.react = {
+  useSuspense: false
+}
 
 const OutputApp = (props: AppProps, ref: any) => {
   const [toolInstance, setToolInstance] = useState<ToolInstance>();

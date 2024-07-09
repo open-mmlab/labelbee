@@ -6,7 +6,7 @@
  * @createdate 2024-4-17
  */
 
-const math = require('mathjs');
+import * as math from 'mathjs';
 
 /**
  * Converts a 1x3 or 3x1 matrix into a 1x4 or 4x1 matrix by adding a 1 as the last element.

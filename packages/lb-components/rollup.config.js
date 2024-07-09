@@ -2,6 +2,8 @@ import esbuild from 'rollup-plugin-esbuild';
 import image from '@rollup/plugin-image';
 import alias from '@rollup/plugin-alias';
 import resolve from '@rollup/plugin-node-resolve';
+import commonjs from '@rollup/plugin-commonjs';
+import { terser } from 'rollup-plugin-terser';
 import postcss from 'rollup-plugin-postcss';
 import svgr from '@svgr/rollup';
 import sass from 'sass';
@@ -53,7 +55,22 @@ export default {
     },
   ],
   plugins: [
-    webWorkerLoader(/* configuration */ { targetPlatform: 'browser' }),
+    webWorkerLoader({
+      targetPlatform: 'browser',
+      plugins: [
+        resolve(),
+        commonjs(),
+        terser({
+          compress: {
+            drop_console: true,
+            drop_debugger: true,
+          },
+          output: {
+            comments: false,
+          },
+        })
+      ]
+     }),
     alias({
       entries: [
         { find: '@', replacement: path.resolve(projectRootDir, './src') },

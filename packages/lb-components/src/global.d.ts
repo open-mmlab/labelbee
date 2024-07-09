@@ -7,3 +7,7 @@ declare module 'web-worker:./highlightSegmentWorker.js' {
   const content: any;
   export default content;
 }
+declare module 'web-worker:./2DViewWorker.ts' {
+  const content: any;
+  export default content;
+}

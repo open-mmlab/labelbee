@@ -1,18 +1,15 @@
 import { getClassName } from '@/utils/dom';
-import React, { useCallback, useContext, useEffect, useState } from 'react';
+import React, { useCallback, useContext, useEffect, useRef, useState } from 'react';
 import { PointCloudContainer } from './PointCloudLayout';
 import { PointCloudContext } from './PointCloudContext';
 import { connect } from 'react-redux';
 
-import { pointCloudLidar2image, cKeyCode, pointListLidar2Img, EventBus } from '@labelbee/lb-annotation';
+import { cKeyCode, EventBus } from '@labelbee/lb-annotation';
 import { LabelBeeContext } from '@/store/ctx';
 import { a2MapStateToProps, IA2MapStateProps } from '@/store/annotation/map';
 import {
   ICalib,
-  IPointCloudBox,
   IPolygonPoint,
-  toolStyleConverter,
-  ICoordinate,
 } from '@labelbee/lb-utils';
 import PointCloud2DSingleView from './PointCloud2DSingleView';
 import TitleButton from './components/TitleButton';
@@ -21,9 +18,7 @@ import classNames from 'classnames';
 import EscSvg from '@/assets/annotation/common/icon_esc.svg';
 import LeftSquareOutlined from '@/assets/annotation/common/icon_left_squareOutlined.svg';
 import RightSquareOutlined from '@/assets/annotation/common/icon_right_squareOutlined.svg';
-import { IMappingImg } from '@/types/data';
-import { isNumber } from 'lodash';
-import { getBoundingRect, isBoundingRectInImage } from '@/utils';
+import PointCloud2DViewWorker from 'web-worker:./2DViewWorker.ts';
 import { useLatest } from 'ahooks';
 
 // TODO, It will be deleted when the exported type of lb-annotation is work.
@@ -36,15 +31,6 @@ export interface IAnnotationDataTemporarily {
     stroke: string;
     fill: string;
   };
-}
-
-interface ITransferViewData {
-  type: string;
-  pointList: {
-    id: string;
-    x: number;
-    y: number;
-  }[];
 }
 
 export interface IAnnotationData2dView {
@@ -149,177 +135,37 @@ const PointCloud2DView = ({
     EventBus.emit('2d-image:enlarge', isEnlarge)
   }, [])
 
-  const formatViewDataPointList = ({
-    viewDataPointList,
-    pointCloudBox,
-    defaultViewStyle,
-    stroke,
-  }: {
-    viewDataPointList: ITransferViewData[];
-    pointCloudBox: IPointCloudBox;
-    defaultViewStyle: {
-      fill: string;
-      color: string;
-    };
-    stroke: string;
-  }) => {
-    if (!viewDataPointList) {
-      return [];
-    }
+  const worker = useRef<Worker>()
 
-    return viewDataPointList.map((v: ITransferViewData) => {
-      return {
-        type: v.type,
-        annotation: {
-          id: pointCloudBox.id,
-          pointList: v.pointList,
-          ...defaultViewStyle,
-          stroke,
-        },
-      };
-    });
-  };
-
-  const annotations2dHandler = () => {
+  useEffect(() => {
     if (
       !loadPCDFileLoading &&
       topViewInstance &&
       currentData?.mappingImgList &&
       currentData?.mappingImgList?.length > 0
     ) {
-      const defaultViewStyle = {
-        fill: 'transparent',
-        color: 'green',
+      if (worker.current) {
+        worker.current.terminate()
+      }
+      worker.current = new PointCloud2DViewWorker() as Worker;
+      worker.current.onmessage = (e: any) => {
+        const newAnnotations2dList = e.data;
+        setAnnotations2d(newAnnotations2dList);
+        worker.current?.terminate();
       };
-      let newAnnotations2dList: IAnnotationData2dView[] = [];
-      currentData?.mappingImgList.forEach((mappingData: IMappingImg) => {
-        const newAnnotations2d: IAnnotationDataTemporarily[] = displayPointCloudList.reduce(
-          (acc: IAnnotationDataTemporarily[], pointCloudBox: IPointCloudBox) => {
-            /**
-             * Is need to create range.
-             * 1. pointCloudBox is selected;
-             * 2. HighlightAttribute is same with pointCloudBox's attribute.
-             */
-            const createRange =
-              pointCloudBox.id === selectedID || highlightAttribute === pointCloudBox.attribute;
-            const { transferViewData: viewDataPointList, viewRangePointList } =
-              pointCloudLidar2image(pointCloudBox, mappingData.calib, {
-                createRange,
-              }) ?? {};
-
-            if (!viewDataPointList || !viewRangePointList) {
-              return [];
-            }
-            // eslint-disable-next-line max-nested-callbacks
-            const tmpPoints = viewDataPointList.reduce((acc: ICoordinate[], v) => {
-              if (v.type === 'line') {
-                return [...acc, ...v.pointList];
-              }
-              return acc;
-            }, []);
-
-            const boundingRect = {
-              ...getBoundingRect(tmpPoints),
-              imageName: mappingData.path,
-            };
-
-            const isRectInImage = isBoundingRectInImage(boundingRect, mappingData.path, imageSizes);
-
-            if (!isRectInImage) {
-              return acc;
-            }
-
-            const stroke = toolStyleConverter.getColorFromConfig(
-              { attribute: pointCloudBox.attribute },
-              {
-                ...config,
-                attributeConfigurable: true,
-              },
-              {},
-            )?.stroke;
-            const viewDataPointLists = formatViewDataPointList({
-              viewDataPointList,
-              pointCloudBox,
-              defaultViewStyle,
-              stroke,
-            });
-            const newArr = [...acc, ...viewDataPointLists];
-
-            if (viewRangePointList?.length > 0) {
-              newArr.unshift({
-                type: 'polygon',
-                annotation: {
-                  id: selectedID,
-                  pointList: viewRangePointList,
-                  ...defaultViewStyle,
-                  stroke,
-                  fill: 'rgba(255, 255, 255, 0.6)',
-                },
-              });
-            }
-
-            return newArr;
-          },
-          [],
-        );
-
-        const imageSize = imageSizes[mappingData?.path ?? ''];
-
-        if (imageSize && isNumber(mappingData?.calib?.groundHeight)) {
-          polygonList.forEach((polygon) => {
-            // eslint-disable-next-line
-            const polygonPoints = polygon.pointList.map((v) => ({
-              ...v,
-              z: mappingData?.calib?.groundHeight,
-            }));
-            // 上面用isNumber确保z的值是number，但是ts还是报错，所以这里用//@ts-ignore忽略
-            // @ts-ignore
-            const result = pointListLidar2Img(polygonPoints, mappingData?.calib, imageSize);
-
-            if (result) {
-              const polygonColor = toolStyleConverter.getColorFromConfig(
-                { attribute: polygon.attribute },
-                {
-                  ...config,
-                  attributeConfigurable: true,
-                },
-                {},
-              );
-
-              newAnnotations2d.push({
-                type: 'polygon',
-                annotation: {
-                  id: polygon.id,
-                  pointList: result,
-                  ...defaultViewStyle,
-                  stroke: polygonColor?.stroke,
-                  fill: selectedIDs.includes(polygon.id)
-                    ? polygonColor?.fill
-                    : 'rgba(255, 255, 255, 0.6)',
-                },
-              });
-            }
-          });
-        }
-
-        newAnnotations2dList.push({
-          annotations: newAnnotations2d,
-          url: mappingData?.url,
-          fallbackUrl: mappingData?.fallbackUrl ?? '',
-          calName: mappingData?.calib?.calName,
-          calib: mappingData?.calib,
-          path: mappingData?.path,
-        });
+      worker.current.postMessage({
+        currentData,
+        displayPointCloudList,
+        selectedID,
+        highlightAttribute,
+        imageSizes,
+        config,
+        polygonList,
+        selectedIDs,
       });
-      setAnnotations2d(newAnnotations2dList);
-    }
-  }
-
-  useEffect(() => {
-    if (window.requestIdleCallback) {
-      window.requestIdleCallback(annotations2dHandler);
-    } else {
-      setTimeout(annotations2dHandler, 1);
+      return () => {
+        worker.current?.terminate();
+      };
     }
   }, [
     displayPointCloudList,
