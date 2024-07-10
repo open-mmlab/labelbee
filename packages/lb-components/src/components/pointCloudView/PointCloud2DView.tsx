@@ -193,40 +193,22 @@ const PointCloud2DView = ({
     switch (event.keyCode) {
       case EKeyCode.Esc: {
         setIsEnlarge(false);
-
-        abortSiblingAndAncestorPropagation();
         break;
       }
 
       case EKeyCode.Left: {
         lastPage();
-
-        abortSiblingAndAncestorPropagation();
         break;
       }
 
       case EKeyCode.Right: {
         nextPage();
-
-        abortSiblingAndAncestorPropagation();
-        break;
-      }
-
-      case EKeyCode.Up:
-      case EKeyCode.Down:
-      case EKeyCode.Q:
-      case EKeyCode.E:
-      case EKeyCode.G:
-      case EKeyCode.F:
-      case EKeyCode.Tab: {
-        abortSiblingAndAncestorPropagation();
         break;
       }
     }
 
-    if (event.shiftKey && event.keyCode === EKeyCode.Tab) {
-      abortSiblingAndAncestorPropagation();
-    }
+    // First, do the switch, then stop sibling and ancestor elements hotkey event
+    abortSiblingAndAncestorPropagation();
   });
 
   const lastPage = () => {
