@@ -211,6 +211,21 @@ const PointCloud2DView = ({
         abortSiblingAndAncestorPropagation();
         break;
       }
+
+      case EKeyCode.Up:
+      case EKeyCode.Down:
+      case EKeyCode.Q:
+      case EKeyCode.E:
+      case EKeyCode.G:
+      case EKeyCode.F:
+      case EKeyCode.Tab: {
+        abortSiblingAndAncestorPropagation();
+        break;
+      }
+    }
+
+    if (event.shiftKey && event.keyCode === EKeyCode.Tab) {
+      abortSiblingAndAncestorPropagation();
     }
   });
 
