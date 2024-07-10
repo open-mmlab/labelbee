@@ -7,6 +7,7 @@ interface Common {
   axis?: 'x' | 'y';
   localKey?: string;
   customDivider?: ReactElement;
+  isShortcutButton?: boolean;
 }
 
 export interface DynamicResizerProps extends Common {
