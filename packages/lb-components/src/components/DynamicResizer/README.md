@@ -43,10 +43,11 @@ export default App;
 
 ## Props
 
-| Prop              | Type                         | Default                 | Description                                      |
-| ----------------- | ---------------------------- | ----------------------- | ------------------------------------------------ |
-| `minTopHeight`    | `number`                     | `0`                     | The minimum height of the top section.           |
-| `minBottomHeight` | `number`                     | `0`                     | The minimum height of the bottom section.        |
-| `defaultHeight`   | `number`                     | `50`                    | The default height                               |
-| `localKey`        | `string`                     | `dynamicResizerHeights` | The height of component cache                    |
-| `children`        | `ReactElement[]、 Element[]` |                         | Must have two child elements wrapped around it！ |
+| Prop               | Type                         | Default                 | Description                                      |
+| ------------------ | ---------------------------- | ----------------------- | ------------------------------------------------ |
+| `minTopHeight`     | `number`                     | `0`                     | The minimum height of the top section.           |
+| `minBottomHeight`  | `number`                     | `0`                     | The minimum height of the bottom section.        |
+| `defaultHeight`    | `number`                     | `50`                    | The default height                               |
+| `localKey`         | `string`                     | `dynamicResizerHeights` | The height of component cache                    |
+| `children`         | `ReactElement[]、 Element[]` |                         | Must have two child elements wrapped around it！ |
+| `isShortcutButton` | `boolean`                    | `false`                 | Is the shortcut button enabled                   |

@@ -18,22 +18,28 @@
   align-items: center;
   flex-direction: column;
   justify-content: center;
-}
-.divider{
   &:hover {
-    .divider-top,.divider-bottom{
+    .divider-top,.divider-bottom,.divider-all{
       display: block;
     }
   }
 }
 
 .divider-top,
-.divider-bottom {
+.divider-bottom,
+.divider-all {
   width: 20px;
   height: 20px;
   cursor: pointer;
   display: none;
   user-select: none;
+}
+
+.divider-all{
+  position: absolute;
+  top: -50%;
+  left: 50%;
+  transform: translate(-50%);
 }
 
 .divider-icon {

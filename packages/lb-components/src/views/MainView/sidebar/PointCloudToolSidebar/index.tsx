@@ -474,7 +474,7 @@ const PointCloudToolSidebar: React.FC<IProps> = ({
       >
         <DynamicResizer
           minTopHeight={42}
-          defaultHeight={100}
+          defaultHeight={400}
           localKey={
             'id:' +
             stepInfo?.id +

@@ -1,13 +1,12 @@
 import React, { useCallback, useMemo } from 'react';
-import Draggable1 from 'react-draggable';
+import Draggable from 'react-draggable';
 import type { DraggableEventHandler } from 'react-draggable';
 import { DragProps } from '../types/interface';
 import { useLocalStorageState } from 'ahooks';
 import useUpdateHeight from './useUpdateHeight';
-import topToZero from '../assets/topToZero.svg';
-import bottomToZero from '../assets/bottomToZero.svg';
-
-const Draggable: any = Draggable1;
+import topToZeroIcon from '../assets/topToZero.svg';
+import bottomToZeroIcon from '../assets/bottomToZero.svg';
+import dividerIcon from '../assets/divider.svg';
 
 const useDrag = ({
   containerRef,
@@ -16,6 +15,7 @@ const useDrag = ({
   defaultHeight = 50,
   axis,
   localKey,
+  isShortcutButton = false,
 }: DragProps) => {
   const cacheKey = localKey || 'dynamicResizerHeights';
   const {
@@ -57,24 +57,38 @@ const useDrag = ({
     [containerRef, setLocalTopHeight, topHeight],
   );
 
+  // render shortcut button
+  const renderContentBtn = useMemo(() => {
+    if (isShortcutButton) {
+      return (
+        <>
+          <img
+            src={topToZeroIcon}
+            className='divider-top'
+            draggable='false'
+            onClick={setTopHeightToZero}
+          />
+          <div className='divider-icon' draggable='false' />
+          <img
+            src={bottomToZeroIcon}
+            className='divider-bottom'
+            draggable='false'
+            onClick={setBottomHeightToZero}
+          />
+        </>
+      );
+    } else {
+      return (
+        <>
+          <img src={dividerIcon} className='divider-all' draggable='false' />
+          <div className='divider-icon' draggable='false' />
+        </>
+      );
+    }
+  }, [isShortcutButton, setTopHeightToZero, setBottomHeightToZero]);
+
   const rendered = useMemo(() => {
-    const divider = (
-      <div className='divider'>
-        <img
-          src={topToZero}
-          className='divider-top'
-          draggable='false'
-          onClick={setTopHeightToZero}
-        />
-        <div className='divider-icon' draggable='false' />
-        <img
-          src={bottomToZero}
-          className='divider-bottom'
-          draggable='false'
-          onClick={setBottomHeightToZero}
-        />
-      </div>
-    );
+    const divider = <div className='divider'>{renderContentBtn}</div>;
 
     return (
       <Draggable

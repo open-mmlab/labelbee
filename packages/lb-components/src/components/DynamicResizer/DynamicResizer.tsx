@@ -12,6 +12,7 @@ const DynamicResizer: FC<DynamicResizerProps> = (props) => {
     children,
     localKey = 'dynamicResizerHeights',
     customDivider,
+    isShortcutButton = false,
   } = props;
 
   const containerRef = useRef<HTMLDivElement>(null);
@@ -25,6 +26,7 @@ const DynamicResizer: FC<DynamicResizerProps> = (props) => {
     axis,
     localKey,
     customDivider,
+    isShortcutButton,
   });
 
   return (
