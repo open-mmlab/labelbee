@@ -558,8 +558,7 @@ export default class ViewOperation extends BasicToolOperation {
       DrawUtils.drawText(this.canvas, this.appendOffset(renderPolygon[0]), headerText, fontStyle);
     }
     if (bottomText) {
-      const endPoint = renderPolygon[renderPolygon.length - 1];
-
+      const endPoint = renderPolygon[renderPolygon.length - 2];
       DrawUtils.drawText(
         this.canvas,
         this.appendOffset({ x: endPoint.x + TEXT_ATTRIBUTE_OFFSET.x, y: endPoint.y + TEXT_ATTRIBUTE_OFFSET.y }),
