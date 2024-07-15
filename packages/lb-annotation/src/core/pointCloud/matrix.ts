@@ -510,7 +510,7 @@ export function pointCloudLidar2image(
     .filter((v) => v.pointList.length !== 0);
 
   // The front polygon need to highlight.
-  if (transferViewData[0] && transferViewData[0].pointList && isFisheyeCalib) {
+  if (transferViewData[0] && transferViewData[0].pointList) {
     transferViewData[0].pointList = transferViewData[0].pointList.map((v) => ({ ...v, specialEdge: true }));
   }
 
