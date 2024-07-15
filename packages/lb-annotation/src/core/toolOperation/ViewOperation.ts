@@ -25,9 +25,9 @@ import { DEFAULT_FONT, ELineTypes, SEGMENT_NUMBER } from '@/constant/tool';
 import { DEFAULT_TEXT_SHADOW, DEFAULT_TEXT_OFFSET, TEXT_ATTRIBUTE_OFFSET } from '@/constant/annotation';
 import ImgUtils, { cropAndEnlarge } from '@/utils/ImgUtils';
 import CanvasUtils from '@/utils/tool/CanvasUtils';
+import TagUtils from '@/utils/tool/TagUtils';
 import { BasicToolOperation, IBasicToolOperationProps } from './basicToolOperation';
 import { pointCloudLidar2image } from '../pointCloud/matrix';
-import TagUtils from '@/utils/tool/TagUtils';
 
 const newScope = 3;
 const DEFAULT_RADIUS = 3;
