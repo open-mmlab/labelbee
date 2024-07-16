@@ -1,7 +1,7 @@
 import React, { useMemo } from 'react';
 import AttributeList from '@/components/attributeList';
 import { IAudioTimeSlice, ITextConfigItem } from '@labelbee/lb-utils';
-import { EventBus } from '@labelbee/lb-annotation';
+import { EventBus, TagUtils } from '@labelbee/lb-annotation';
 import ClipIcon from '@/assets/annotation/audio/clipSmall.svg';
 import ClipActiveIcon from '@/assets/annotation/audio/clipASmall.svg';
 import DeleteIcon from '@/assets/annotation/audio/delete.svg';
@@ -73,12 +73,31 @@ const ClipSidebar = (props: IClipSidebarProps) => {
     }),
   ];
 
+  // Display attribute and secondary attribute text
+  const getAttributeText = (
+    attribute: string,
+    subAttribute?: {
+      [key: string]: string;
+    },
+  ) => {
+    const text = getAttributeShowText(attribute, list);
+    const subAttributes = subAttribute
+      ? TagUtils.getTagNameList(subAttribute, subAttributeList)
+      : [];
+    let subAttributeText = '';
+    const segmentSymbol = '，\n';
+    subAttributes.forEach((i) => {
+      subAttributeText += `${i.keyName}：${i.value.join(`、`)}${segmentSymbol}`;
+    });
+    return `${text}${segmentSymbol}${subAttributeText}`;
+  };
+
   const showClipText = (region: IAudioTimeSlice) => {
     let clipShowText = '';
     if (clipTextConfigurable && clipTextList?.length > 0) {
       clipTextList.forEach((i: ITextConfigItem, index: number) => {
         const segmentSymbol = !clipAttributeConfigurable && index === 0 ? '' : '，';
-        clipShowText = clipShowText + `${segmentSymbol}${i.label}：${region[i.key]}`;
+        clipShowText = clipShowText + `${i.label}：${region[i.key]}${segmentSymbol}`;
       });
     }
     return clipShowText;
@@ -91,11 +110,11 @@ const ClipSidebar = (props: IClipSidebarProps) => {
         {regions.length > 0 ? (
           <div className={styles.regions}>
             {regions.map((item) => {
-              const { id, attribute, text, start, end } = item;
+              const { id, attribute, text, start, end, subAttribute } = item;
               const showLoop = id === selectedId && selectedRegion.loop;
 
               const showText = `${
-                clipAttributeConfigurable ? getAttributeShowText(attribute, list) : ''
+                clipAttributeConfigurable ? getAttributeText(attribute, subAttribute) : ''
               }${showClipText(item)}`;
               return (
                 <div
