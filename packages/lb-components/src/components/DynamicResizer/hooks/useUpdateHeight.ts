@@ -1,5 +1,7 @@
 import { useEffect, useMemo, useState, RefObject, useCallback } from 'react';
 import { useLocalStorageState } from 'ahooks';
+// Set minimum height to avoid magic numbers
+const MINIMUM_HEIGHT = 0.00001;
 
 const useUpdateHeight = (
   containerRef: RefObject<HTMLDivElement>,
@@ -18,8 +20,6 @@ const useUpdateHeight = (
   const [localTopHeight, setLocalTopHeight] = useLocalStorageState<number | undefined>(cacheKey);
   // Flag to track first render
   const [isInitialSetupDone, setIsInitialSetupDone] = useState<boolean>(false);
-  // Set minimum height to avoid magic numbers
-  const MINIMUM_HEIGHT = 0.00001;
 
   // init top height
   useEffect(() => {
@@ -103,7 +103,7 @@ const useUpdateHeight = (
     }
     // Limit cannot be 0
     return newTopHeight || MINIMUM_HEIGHT;
-  }, [containerRef, topHeight, limitMinTopHeight, localTopHeight, defaultHeight, MINIMUM_HEIGHT]);
+  }, [containerRef, topHeight, limitMinTopHeight, localTopHeight, defaultHeight]);
 
   // Update top and bottom height
   const updateELHeight = useCallback(
