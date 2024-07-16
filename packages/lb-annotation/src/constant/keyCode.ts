@@ -20,6 +20,8 @@ enum EKeyCode {
   One = 49,
   Two = 50,
   Three = 51,
+  Four = 52,
+  NumberFour = 100,
   Delete = 46,
   F11 = 122,
   Space = 32,

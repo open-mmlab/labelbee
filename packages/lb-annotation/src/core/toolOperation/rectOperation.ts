@@ -1325,7 +1325,7 @@ class RectOperation extends BasicToolOperation {
       return;
     }
 
-    const { keyCode } = e;
+    const { keyCode, ctrlKey } = e;
     switch (keyCode) {
       case EKeyCode.Ctrl:
         if (this.drawingRect) {
@@ -1392,8 +1392,11 @@ class RectOperation extends BasicToolOperation {
         break;
       }
 
-      case EKeyCode.R: {
-        this.resizeRect();
+      case EKeyCode.Four:
+      case EKeyCode.NumberFour: {
+        if (ctrlKey) {
+          this.resizeRect();
+        }
         break;
       }
 
