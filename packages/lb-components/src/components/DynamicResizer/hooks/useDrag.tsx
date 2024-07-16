@@ -31,11 +31,15 @@ const useDrag = ({
   const [localTopHeight, setLocalTopHeight] = useLocalStorageState<number | undefined>(cacheKey);
 
   // Hide scrollbar at the beginning of drag and drop
-  const onDragStart: DraggableEventHandler = useCallback(() => {
-    if (containerRef.current) {
-      containerRef.current.classList.add('hide-scrollbar');
-    }
-  }, [containerRef]);
+  const onDragStart: DraggableEventHandler = useCallback(
+    (e) => {
+      e.stopPropagation();
+      if (containerRef.current) {
+        containerRef.current.classList.add('hide-scrollbar');
+      }
+    },
+    [containerRef],
+  );
 
   const onDrag: DraggableEventHandler = useCallback(
     (e, node) => {
