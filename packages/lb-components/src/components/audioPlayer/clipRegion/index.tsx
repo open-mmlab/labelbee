@@ -33,6 +33,7 @@ interface IProps {
   zoom: number;
   /** WaveSurfer region 实例 */
   instance?: any;
+  isCheck?: boolean;
 }
 
 const { Paragraph } = Typography;
@@ -83,7 +84,7 @@ const ClipRegion = (props: IProps) => {
   } = audioClipState;
 
   const ref = useRef(null);
-  const { el, region, edgeAdsorption, clipping, instance } = props;
+  const { el, region, edgeAdsorption, clipping, instance, isCheck } = props;
   const { attribute = '', text = '', id, start, end, subAttribute } = region;
 
   const { id: selectedId } = selectedRegion;
@@ -96,6 +97,7 @@ const ClipRegion = (props: IProps) => {
 
   const style: any = {
     border: `2px solid ${attributeColor}`,
+    overflowY: isCheck ? 'initial' : 'auto', // View mode does not require scroll bars to be displayed
   };
 
   if (id === selectedId) {
