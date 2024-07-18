@@ -1394,9 +1394,10 @@ class RectOperation extends BasicToolOperation {
 
       case EKeyCode.P: {
         // Isolation combination key
-        if (!ctrlKey && !altKey && !shiftKey && !metaKey) {
-          this.resizeRect();
+        if (ctrlKey || altKey || shiftKey || metaKey) {
+          return          
         }
+        this.resizeRect();
         break;
       }
 
