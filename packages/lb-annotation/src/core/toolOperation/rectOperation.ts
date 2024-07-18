@@ -1325,7 +1325,7 @@ class RectOperation extends BasicToolOperation {
       return;
     }
 
-    const { keyCode, ctrlKey } = e;
+    const { keyCode, ctrlKey, altKey, shiftKey, metaKey } = e;
     switch (keyCode) {
       case EKeyCode.Ctrl:
         if (this.drawingRect) {
@@ -1392,11 +1392,12 @@ class RectOperation extends BasicToolOperation {
         break;
       }
 
-      case EKeyCode.Four:
-      case EKeyCode.NumberFour: {
-        if (ctrlKey) {
-          this.resizeRect();
+      case EKeyCode.P: {
+        // Isolation combination key
+        if (ctrlKey || altKey || shiftKey || metaKey) {
+          return          
         }
+        this.resizeRect();
         break;
       }
 

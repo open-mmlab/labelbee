@@ -58,7 +58,7 @@ class PointCloud2DRectOperation extends RectOperation {
   }
 
   public onKeyDown(e: KeyboardEvent) {
-    if (this.checkMode || ![EKeyCode.Delete, EKeyCode.Four, EKeyCode.NumberFour].includes(e.keyCode)) {
+    if (this.checkMode || ![EKeyCode.Delete, EKeyCode.P].includes(e.keyCode)) {
       return;
     }
 
