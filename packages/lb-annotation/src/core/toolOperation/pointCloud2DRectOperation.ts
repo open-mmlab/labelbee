@@ -66,11 +66,20 @@ class PointCloud2DRectOperation extends RectOperation {
     return true;
   }
 
-  public renderDrawingRect(rect: IPointCloud2DRectOperationViewRect & IRect, zoom = this.zoom, isZoom = false) {
-    // 是否使用强制默认值，如： lineDash: [3]
-    const shouldNotUseForceValue = rect?.boxID || rect?.lineDash;
+  private getComputedDrawingRect(rect: IPointCloud2DRectOperationViewRect & IRect) {
+    const keyOfExtId = 'extId';
+    // Is it 3d's projected or disconnected 3d's projected rect
+    // @ts-ignore
+    const shouldNotDashedLine = rect?.boxID || rect?.[keyOfExtId];
 
-    super.renderDrawingRect(shouldNotUseForceValue ? rect : { ...rect, lineDash: [3] }, zoom, isZoom);
+    return shouldNotDashedLine ? rect : { ...rect, lineDash: [3] };
+  }
+
+  public renderDrawingRect(rect: IPointCloud2DRectOperationViewRect & IRect, zoom = this.zoom, isZoom = false) {
+    const targetRect = this.getComputedDrawingRect(rect);
+    // window.console.log('[@DrawingRect] Rect: ', targetRect, ', Origin Rect: ', rect);
+
+    super.renderDrawingRect(targetRect, zoom, isZoom);
   }
 }
 
