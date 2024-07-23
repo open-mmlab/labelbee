@@ -7,6 +7,7 @@
 import { IPointCloud2DRectOperationViewRect } from '@labelbee/lb-utils';
 import EKeyCode from '@/constant/keyCode';
 import { RectOperation } from './rectOperation';
+import reCalcRect from './utils/reCalcRect';
 
 class PointCloud2DRectOperation extends RectOperation {
   // Whether it is in check mode
@@ -58,11 +59,27 @@ class PointCloud2DRectOperation extends RectOperation {
   }
 
   public onKeyDown(e: KeyboardEvent) {
-    if (this.checkMode || ![EKeyCode.Delete, EKeyCode.P].includes(e.keyCode)) {
+    if (this.checkMode || ![EKeyCode.Delete, EKeyCode.R].includes(e.keyCode)) {
       return;
     }
 
     super.onKeyDown(e);
+
+    const { keyCode, ctrlKey, altKey, shiftKey, metaKey } = e;
+
+    switch (keyCode) {
+      case EKeyCode.R: {
+        // Isolation combination key
+        if (ctrlKey || altKey || shiftKey || metaKey) {
+          return;
+        }
+
+        this.resizeRect();
+        break;
+      }
+      default:
+    }
+
     return true;
   }
 
@@ -80,6 +97,48 @@ class PointCloud2DRectOperation extends RectOperation {
     // window.console.log('[@DrawingRect] Rect: ', targetRect, ', Origin Rect: ', rect);
 
     super.renderDrawingRect(targetRect, zoom, isZoom);
+  }
+
+  /*
+    Resize the rectangular box 'rect' to specified dimensions, defaulting to 100x100 when the 'R' shortcut is used.
+   */
+  public resizeRect(resizeWidth: number = 100, resizeHeight: number = 100) {
+    // Do not execute if the image has not finished loading
+    if (!this.imgNode) return;
+    // Return if no rectangles are selected
+    if (!this.selectedRects?.length) return;
+    // Verify if resizeWidth and resizeHeight are valid
+    if (resizeWidth <= 0 || resizeHeight <= 0) return;
+    // Origin Size less than resizeWidth and resizeHeight , remains unchanged
+    if (this.selectedRects[0].width <= resizeWidth && this.selectedRects[0].height <= resizeHeight) return;
+
+    const { width, height } = this.basicImgInfo;
+    const targetRect = {
+      width,
+      height,
+      x: 0,
+      y: 0,
+    };
+
+    // Recalc the current rectangle size and position
+    const curRect = reCalcRect(this.selectedRects[0], targetRect, resizeWidth, resizeHeight);
+    // if no changes return, Optimize rendering times
+    if (curRect.noChange) return;
+
+    this.setRectList(
+      this.rectList.map((v) => {
+        if (this.selectedIDs.includes(v.id)) {
+          return {
+            ...v,
+            ...curRect,
+          };
+        }
+        return v;
+      }),
+      true,
+    );
+    this.render();
+    this.updateDragResult();
   }
 }
 

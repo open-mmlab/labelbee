@@ -197,7 +197,7 @@ const DeletePoint = {
 const Image2DBoxScale = {
   name: 'Image2DBoxScale',
   icon: Image2DBoxScaleSvg,
-  shortCut: ['P'],
+  shortCut: ['R'],
   noticeInfo: 'SelectedRect',
 };
 
