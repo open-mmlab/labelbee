@@ -22,6 +22,8 @@ import HeaderOption from './headerOption';
 import StepSwitch from './StepSwitch';
 import PredictTrackingIcon from '@/components/predictTracking/predictTrackingIcon';
 import SwitchPattern from './SwitchPattern';
+import { getStepConfig } from '@/store/annotation/reducer';
+import { jsonParser } from '@/utils';
 
 interface INextStep {
   stepProgress: number;
@@ -123,6 +125,10 @@ const ToolHeader: React.FC<IToolHeaderProps> = ({
   const dispatch = useDispatch();
   const [, forceUpdate] = useReducer((x) => x + 1, 0);
   const ref = useRef(null);
+
+  const configStr = getStepConfig(stepList, step)?.config;
+  const config = jsonParser(configStr) ?? {};
+  const { enableSegment = false } = config;
 
   const size = useSize(ref);
 
@@ -227,7 +233,7 @@ const ToolHeader: React.FC<IToolHeaderProps> = ({
           {headerOptionNode}
         </div>
         <div className={`${prefix}-header__titlePlacement`} />
-        <SwitchPattern />
+        {enableSegment && <SwitchPattern />}
         {rightActions}
       </div>
     </div>

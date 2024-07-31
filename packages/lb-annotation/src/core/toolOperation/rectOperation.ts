@@ -1324,7 +1324,7 @@ class RectOperation extends BasicToolOperation {
       return;
     }
 
-    const { keyCode, ctrlKey, altKey, shiftKey, metaKey } = e;
+    const { keyCode } = e;
     switch (keyCode) {
       case EKeyCode.Ctrl:
         if (this.drawingRect) {
