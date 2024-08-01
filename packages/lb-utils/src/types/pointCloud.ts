@@ -81,7 +81,10 @@ export interface IPointCloud2DRectOperationExtFields {
   order?: number;
 }
 
-export interface IPointCloudBoxRect extends Partial<IPointCloud2DRectOperationExtFields>, IBasicRect, IBasicStyleExt {
+export interface IPointCloudBoxRect
+  extends Partial<IPointCloud2DRectOperationExtFields>,
+    IBasicRect,
+    IBasicStyleExt {
   imageName: string;
   attribute: any;
 
@@ -89,7 +92,10 @@ export interface IPointCloudBoxRect extends Partial<IPointCloud2DRectOperationEx
   extId?: string;
 }
 
-export interface IPointCloud2DRectOperationViewRect extends IPointCloud2DRectOperationExtFields, IBasicRect, IBasicStyleExt {
+export interface IPointCloud2DRectOperationViewRect
+  extends IPointCloud2DRectOperationExtFields,
+    IBasicRect,
+    IBasicStyleExt {
   imageName: string;
   attribute: any;
 }
@@ -137,6 +143,7 @@ export interface IPointCloudConfig {
   lowerLimitPointsNumInBox: number;
   trackConfigurable: boolean;
   enableAutoMap2DRect?: boolean;
+  enableSegment?: boolean;
 }
 
 interface ICalib {
