@@ -385,6 +385,7 @@ export const PointCloudProvider: React.FC<PropsWithChildren<{}>> = ({ children }
               attribute: attribute,
               order: trackID,
               extId: id,
+              lineDash: [],
             };
           }
 
