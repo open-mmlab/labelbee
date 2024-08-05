@@ -1276,6 +1276,11 @@ $hotkey-container-padding: 7px;
   .ant-popover-buttons {
     min-width: 116px;
   }
+
+  .ant-popover-inner-content .ant-popover-message {
+    align-items: initial;
+  }
+
 }
 
 .#{$prefix}-annotated-attribute {
