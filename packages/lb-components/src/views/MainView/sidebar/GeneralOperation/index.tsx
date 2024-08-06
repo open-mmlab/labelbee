@@ -36,6 +36,7 @@ interface IProps {
   imgIndex: number;
   stepList: IStepInfo[];
   hideValidity?: boolean;
+  setValidity?: IOperationConfig;
 }
 
 const GeneralOperation: React.FC<IProps> = ({ toolInstance, stepInfo, hideValidity }) => {
@@ -63,7 +64,7 @@ export const PointCloudOperation: ConnectedComponent<
     'toolInstance' | 'stepInfo' | 'imgList' | 'imgIndex' | 'stepList'
   >
 > = connect(mapStateToProps, null, null, { context: LabelBeeContext })(
-  ({ toolInstance, stepInfo, imgList, stepList, imgIndex }) => {
+  ({ toolInstance, stepInfo, imgList, stepList, imgIndex, setValidity }) => {
     const { t } = useTranslation();
     const { selectedBox } = useSingleBox();
     const operationList = useOperationList(toolInstance);
@@ -72,11 +73,11 @@ export const PointCloudOperation: ConnectedComponent<
     const { isPointCloudDetectionPattern, isPointCloudSegmentationPattern } = useStatus();
 
     const config = jsonParser(stepInfo.config);
-
+    const setValidityNode = setValidity ?? operationList.setValidity;
     let allOperation: IOperationConfig[] = [
       operationList.copyPrevious,
       operationList.empty,
-      operationList.setValidity,
+      setValidityNode,
     ];
 
     if (isPointCloudDetectionPattern && config.trackConfigurable === true) {
