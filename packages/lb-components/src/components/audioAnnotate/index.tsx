@@ -35,6 +35,7 @@ import ToggleTagModeSvg from '@/assets/annotation/audio/tag.svg';
 import ToggleTagModeASvg from '@/assets/annotation/audio/tagA.svg';
 import ClipSvg from '@/assets/annotation/audio/clip.svg';
 import ClipASvg from '@/assets/annotation/audio/clipA.svg';
+import { isImageValue } from '@/utils/audio';
 
 const { EAudioToolName } = cTool;
 const EKeyCode = cKeyCode.default;
@@ -351,6 +352,7 @@ const AudioAnnotate: React.FC<AppProps & IProps> = (props) => {
   const [loading, setLoading] = useState<boolean>(true);
   const [result, setResult] = useState<any>(null);
   const [duration, setDuration] = useState<number>(0);
+  const [valid, setValid] = useState(true);
 
   useEffect(() => {
     setLoading(true);
@@ -376,7 +378,8 @@ const AudioAnnotate: React.FC<AppProps & IProps> = (props) => {
     toolInstanceRef.current.currentPageResult = result?.regions;
     toolInstanceRef.current.emit('updatePageNumber');
     toolInstanceRef.current.setSelectedRegion = setSelectedRegion;
-  }, [result]);
+    toolInstanceRef.current.setValid = setValidValue;
+  }, [result, valid]);
 
   const setSelectedRegion = (id: number | string) => {
     EventBus.emit('setSelectedRegion', { id, isLoopStatus: true, playImmediately: true });
@@ -440,7 +443,6 @@ const AudioAnnotate: React.FC<AppProps & IProps> = (props) => {
     clipTextList,
   };
 
-  const valid = audioContext ? audioContext?.valid : true;
   const count = CommonToolUtils.jsonParser(currentData.result)?.duration ?? 0;
   const totalText = valid ? count : 0;
   const inputDisabled =
@@ -479,6 +481,8 @@ const AudioAnnotate: React.FC<AppProps & IProps> = (props) => {
         regions: [],
       });
     }
+    const valid = isImageValue(imgList[imgIndex].result || '[]');
+    setValid(valid);
   };
 
   /** 获取文本的默认数据 */
@@ -570,6 +574,10 @@ const AudioAnnotate: React.FC<AppProps & IProps> = (props) => {
       regions: [],
     }));
     EventBus.emit('clearRegions');
+  };
+
+  const setValidValue = (valid: boolean) => {
+    setValid(valid);
   };
 
   return (
