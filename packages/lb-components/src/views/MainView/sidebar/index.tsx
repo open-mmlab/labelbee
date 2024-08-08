@@ -136,9 +136,7 @@ const Sidebar: React.FC<IProps> = ({
 
   const pointCloudToolSidebar = <PointCloudToolSidebar enableColorPicker={enableColorPicker} />;
 
-  const pointCloudOperation = (props?: { [key: string]: IOperationConfig }) => (
-    <PointCloudOperation {...props} />
-  );
+  const pointCloudOperation = <PointCloudOperation />;
 
   if (sider) {
     if (typeof sider === 'function') {
