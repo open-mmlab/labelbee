@@ -26,22 +26,15 @@ const ImgView = (props: IProps) => {
     <div className={styles.imgView}>
       {answerList.map((i: IAnswerList, index: number) => {
         return (
-          <div
-            key={index}
-            className={styles.item}
-          >
-            <Tag
-              className={`${LLMViewCls}-tag`}
-            >
-              {i?.order}
-            </Tag>
+          <div key={index} className={styles.item}>
+            <Tag className={`${LLMViewCls}-tag`}>{i?.order}</Tag>
             <div
               className={classNames({
                 [`${styles.image}`]: true,
                 [`${LLMViewCls}__contentActive`]: hoverKey === i?.order,
               })}
             >
-              <Image src={i?.url} fallback={ImgFail} />
+              <Image src={i?.url} fallback={ImgFail} style={{ objectFit: 'contain' }} />
             </div>
           </div>
         );
