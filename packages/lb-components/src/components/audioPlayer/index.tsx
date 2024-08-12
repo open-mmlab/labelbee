@@ -199,7 +199,8 @@ export const AudioPlayer = ({
   const setSelectedRegion = (select: ISetSelectedRegionParams) => {
     const { id, loop = true, playImmediately = false, isLoopStatus } = select;
 
-    const loopStatus = isLoopStatus ? isPlayingRef.current : loop;
+    const loopStatus = false;
+
     if (id) {
       const regionListMap = waveRef.current?.regions?.list ?? {};
       Object.entries(regionListMap).forEach(([, value]: [any, any]) => {
@@ -216,8 +217,8 @@ export const AudioPlayer = ({
         selectedAttribute: regionsRef.current?.find((item) => item.id === id)?.attribute ?? '',
       });
 
-      if (loopStatus && playImmediately) {
-        getRegionInstanceById(id)?.playLoop();
+      if (playImmediately) {
+        getRegionInstanceById(id)?.play();
       }
     } else {
       setAudioClipState({
@@ -302,7 +303,7 @@ export const AudioPlayer = ({
 
   useEffect(() => {
     if (hoverRegionId) {
-      const needLoop = isPlayingRef.current;
+      const needLoop = false;
       setSelectedRegion({
         id: hoverRegionId,
         loop: needLoop,
