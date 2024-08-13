@@ -56,7 +56,11 @@ const PointCloudListener: React.FC<IProps> = ({
   } = useSingleBox();
   const { selectedSphere, updatePointCloudSphere } = useSphere();
   const { clearAllResult, updatePointCloudPattern } = useStatus();
-  const { copySelectedBoxes, pasteSelectedBoxes, copiedBoxes } = useBoxes({ config });
+  const { copySelectedBoxes, pasteSelectedBoxes, copiedBoxes } = useBoxes({
+    config,
+    currentData,
+  });
+
   const { updateRotate } = useRotate({ currentData });
   const { updateRotateEdge } = useRotateEdge({ currentData });
   const { updatePointCloudData, topViewSelectedChanged } = usePointCloudViews();
@@ -75,7 +79,7 @@ const PointCloudListener: React.FC<IProps> = ({
   const { t } = useTranslation();
 
   // For event calling or etc to avoid react hook re-bind
-  const currentDataRef = useLatest(currentData)
+  const currentDataRef = useLatest(currentData);
 
   const updatePolygonOffset = (offset: Partial<ICoordinate>) => {
     const { topViewInstance } = ptCtx;
