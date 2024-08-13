@@ -81,8 +81,8 @@ export const useBoxes = ({
       const mappingImgList = currentData?.mappingImgList ?? [];
       const preMappingImgList = copiedParams?.copiedMappingImgList ?? [];
       /**
-       * Updates the `rects` array within a given `IPointCloudBox` object.
        * For each `rect`, the value of `imageName` on the paste page should be calculated from the value on the copy page using `getNextPath` in `AnnotationDataUtils`.
+       * When a box with 2D rects having image names like "1_a.png" and "1_b.png" is copied on page 1 and pasted on page 10, the rects' image names should be updated to "10_a.png" and "10_b.png" respectively to match the images on page 10.
        * Filters out any `rect` objects that have an empty `imageName`.
        *
        * @param {IPointCloudBox} box - The point cloud box containing the rects array to be updated.
