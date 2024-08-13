@@ -80,7 +80,15 @@ export const useBoxes = ({
     const updatePointCloudResult = (pointCloudBoxList: IPointCloudBoxList) => {
       const mappingImgList = currentData?.mappingImgList ?? [];
       const preMappingImgList = copiedParams?.copiedMappingImgList ?? [];
-      const updateBox = (box: IPointCloudBox) => {
+      /**
+       * Updates the `rects` array within a given `IPointCloudBox` object.
+       * For each `rect`, the value of `imageName` on the paste page should be calculated from the value on the copy page using `getNextPath` in `AnnotationDataUtils`.
+       * Filters out any `rect` objects that have an empty `imageName`.
+       *
+       * @param {IPointCloudBox} box - The point cloud box containing the rects array to be updated.
+       * @returns {IPointCloudBox} - A new point cloud box object with the updated rects array.
+       */
+      const updateBoxRects = (box: IPointCloudBox) => {
         const { rects = [] } = box;
 
         const newRects = rects
@@ -101,7 +109,7 @@ export const useBoxes = ({
         };
       };
 
-      const newPointCloudBoxList = pointCloudBoxList.map(updateBox);
+      const newPointCloudBoxList = pointCloudBoxList.map(updateBoxRects);
       /** Paste succeed and empty */
       setPointCloudResult(newPointCloudBoxList);
       pointCloudBoxListUpdated?.(newPointCloudBoxList);
