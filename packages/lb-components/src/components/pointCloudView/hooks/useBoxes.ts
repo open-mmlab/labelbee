@@ -8,6 +8,40 @@ import { useTranslation } from 'react-i18next';
 import { EPointCloudBoxRenderTrigger } from '@/utils/ToolPointCloudBoxRenderHelper';
 import AnnotationDataUtils from '@/utils/AnnotationDataUtils';
 import { IFileItem } from '@/types/data';
+
+/**
+ * For each `rect`, the value of `imageName` on the paste page should be calculated from the value on the copy page using `getNextPath` in `AnnotationDataUtils`.
+ * When a box with 2D rects having image names like "1_a.png" and "1_b.png" is copied on page 1 and pasted on page 10, the rects' image names should be updated to "10_a.png" and "10_b.png" respectively to match the images on page 10.
+ * Filters out any `rect` objects that have an empty `imageName`.
+ *
+ * @param {IPointCloudBox} box - The point cloud box containing the rects array to be updated.
+ * @returns {IPointCloudBox} - A new point cloud box object with the updated rects array.
+ */
+const updateBoxRects = (
+  box: IPointCloudBox,
+  mappingImgList: IFileItem['mappingImgList'] = [],
+  preMappingImgList: IFileItem['mappingImgList'] = [],
+) => {
+  const { rects = [] } = box;
+
+  const newRects = rects
+    .map((rect) => ({
+      ...rect,
+      imageName:
+        AnnotationDataUtils.getNextPath({
+          prePath: rect.imageName,
+          preMappingImgList,
+          nextMappingImgList: mappingImgList,
+        }) ?? '',
+    }))
+    .filter((rect) => rect.imageName !== '');
+
+  return {
+    ...box,
+    rects: newRects,
+  };
+};
+
 /**
  * Actions for selected boxes
  */
@@ -77,39 +111,14 @@ export const useBoxes = ({
 
     const hasDuplicate = hasDuplicateID(copiedBoxes);
 
-    const updatePointCloudResult = (pointCloudBoxList: IPointCloudBoxList) => {
-      const mappingImgList = currentData?.mappingImgList ?? [];
-      const preMappingImgList = copiedParams?.copiedMappingImgList ?? [];
-      /**
-       * For each `rect`, the value of `imageName` on the paste page should be calculated from the value on the copy page using `getNextPath` in `AnnotationDataUtils`.
-       * When a box with 2D rects having image names like "1_a.png" and "1_b.png" is copied on page 1 and pasted on page 10, the rects' image names should be updated to "10_a.png" and "10_b.png" respectively to match the images on page 10.
-       * Filters out any `rect` objects that have an empty `imageName`.
-       *
-       * @param {IPointCloudBox} box - The point cloud box containing the rects array to be updated.
-       * @returns {IPointCloudBox} - A new point cloud box object with the updated rects array.
-       */
-      const updateBoxRects = (box: IPointCloudBox) => {
-        const { rects = [] } = box;
+    const mappingImgList = currentData?.mappingImgList ?? [];
+    const preMappingImgList = copiedParams?.copiedMappingImgList ?? [];
 
-        const newRects = rects
-          .map((rect) => ({
-            ...rect,
-            imageName:
-              AnnotationDataUtils.getNextPath({
-                prePath: rect.imageName,
-                preMappingImgList,
-                nextMappingImgList: mappingImgList,
-              }) ?? '',
-          }))
-          .filter((rect) => rect.imageName !== '');
+    const pastedBoxes = copiedBoxes.map((box) => {
+      return updateBoxRects(box, mappingImgList, preMappingImgList);
+    });
 
-        return {
-          ...box,
-          rects: newRects,
-        };
-      };
-
-      const newPointCloudBoxList = pointCloudBoxList.map(updateBoxRects);
+    const updatePointCloudResult = (newPointCloudBoxList: IPointCloudBoxList) => {
       /** Paste succeed and empty */
       setPointCloudResult(newPointCloudBoxList);
       pointCloudBoxListUpdated?.(newPointCloudBoxList);
@@ -130,19 +139,19 @@ export const useBoxes = ({
            */
           const newPointCloudResult = pointCloudBoxList
             .filter((v) => {
-              if (copiedBoxes.find((c) => c.trackID === v.trackID)) {
+              if (pastedBoxes.find((c) => c.trackID === v.trackID)) {
                 return false;
               }
               return true;
             })
-            .concat(copiedBoxes);
+            .concat(pastedBoxes);
 
           updatePointCloudResult(newPointCloudResult);
         },
       });
     } else {
       /** Paste succeed and empty */
-      const newPointCloudResult = [...displayPointCloudList, ...copiedBoxes];
+      const newPointCloudResult = [...displayPointCloudList, ...pastedBoxes];
 
       updatePointCloudResult(newPointCloudResult);
     }
