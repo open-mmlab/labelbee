@@ -39,6 +39,7 @@ import ToolFooter from '@/views/MainView/toolFooter';
 import { IInputList, RenderFooter } from '@/types/main';
 import { decimalReserved } from '@/components/videoPlayer/utils';
 import { I18nextProvider } from 'react-i18next';
+import useSize from '@/hooks/useSize';
 
 const { EToolName } = cTool;
 const EKeyCode = cKeyCode.default;
@@ -139,7 +140,7 @@ export const AudioPlayer = ({
   };
   // 鼠标移入到进度条上的时间
   const [hoverTime, setHoverTime] = useState<number>(0);
-  const [zoom, setZoom] = useState<number>(1);
+  const [zoom, setZoom] = useState<number>(audioZoomInfo.defaultValue);
   const waveformContainerRef = useRef<null | HTMLDivElement>(null);
   const [edgeAdsorption, setEdgeAdsorption] = useState<{ start?: number; end?: number }>({});
   const { audioClipState, setAudioClipState } = useAudioClipStore();
@@ -152,6 +153,8 @@ export const AudioPlayer = ({
   const update = useUpdate();
   const [sortByStartRegions, setSortByStartRegions] = useState<IAudioTimeSlice[]>([]);
   const [regionMap, setRegionMap] = useState<{ [key: string]: IAudioTimeSlice }>({});
+  const [visibleTimeRange, setVisibleTimeRange] = useState({ start: 0, end: 0 });
+  const waveSize = useSize(waveformContainerRef);
 
   const debounceZoom = debounce(() => {
     EventBus.emit('audioZoom');
@@ -393,7 +396,7 @@ export const AudioPlayer = ({
   };
 
   const { run: throttleSelectedRegion } = useThrottleFn(setSelectedRegion, {
-    wait: 500,
+    wait: 100,
   });
 
   useSwitchHotkey({
@@ -808,6 +811,28 @@ export const AudioPlayer = ({
     setAudioUrl();
   }, [url]);
 
+  useEffect(() => {
+    getVisibleAreaRange();
+  }, [waveSize, duration]);
+
+  const getVisibleAreaRange = () => {
+    if (waveformContainerRef.current && duration) {
+      const currentScroll = waveformContainerRef.current.scrollLeft;
+      const containerWidth = waveformContainerRef.current.clientWidth;
+
+      // Calculate the start time and end time of the visible area
+      const visibleStartTime =
+        (currentScroll / waveformContainerRef.current.scrollWidth) * duration;
+      const visibleEndTime =
+        ((currentScroll + containerWidth) / waveformContainerRef.current.scrollWidth) * duration;
+
+      setVisibleTimeRange({
+        start: visibleStartTime,
+        end: visibleEndTime,
+      });
+    }
+  };
+
   // 计算播放到鼠标位置的时间
   const calcTime = (e: React.MouseEvent<HTMLDivElement, MouseEvent>) => {
     if (waveRef?.current && progressRef?.current) {
@@ -835,6 +860,17 @@ export const AudioPlayer = ({
   };
   const remainingTime = duration ? Math.max(duration - currentTime, 0) : 0;
 
+  const getRegions = () => {
+    return regions.filter((i) => {
+      const { start, end } = visibleTimeRange;
+      if (i.start <= end && i.end >= start) {
+        return true;
+      }
+      return false;
+    });
+  };
+  const regionList = getRegions();
+
   const showRemark =
     context?.toolName !== EToolName.Empty &&
     context?.isEdit !== true &&
@@ -853,7 +889,11 @@ export const AudioPlayer = ({
       <ClipTip getRegionInstanceById={getRegionInstanceById} clipping={clipping} />
       <CombineTip container={waveformContainerRef.current} />
       <SegmentTip segmentTimeTip={segmentTimeTip} />
-      <div className={styles.waveformContainer} ref={waveformContainerRef}>
+      <div
+        className={styles.waveformContainer}
+        ref={waveformContainerRef}
+        onScroll={() => getVisibleAreaRange()}
+      >
         <div
           id='waveform'
           style={{
@@ -921,6 +961,7 @@ export const AudioPlayer = ({
         />
         <ZoomSlider
           onChange={(val) => {
+            getWaveRef()?.pause();
             zoomHandler(val);
           }}
           zoom={zoom}
@@ -934,7 +975,7 @@ export const AudioPlayer = ({
     return (
       <AudioPlayerContext.Provider value={context}>
         {audioPlayer}
-        {regions.map((region) => {
+        {regionList.map((region) => {
           const { id } = region;
           const el = document.querySelector(`[data-id=${id}]`);
           return el ? (
