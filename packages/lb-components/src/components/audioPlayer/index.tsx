@@ -1,4 +1,4 @@
-import React, { useState, useRef, useEffect } from 'react';
+import React, { useState, useRef, useEffect, useMemo } from 'react';
 import { getWebPcm2WavBase64 } from '@/components/audioAnnotate/utils/getWebPcm2Wac';
 import _, { debounce, sortBy } from 'lodash';
 import { PauseOutlined, CaretRightOutlined } from '@ant-design/icons';
@@ -155,6 +155,17 @@ export const AudioPlayer = ({
   const [regionMap, setRegionMap] = useState<{ [key: string]: IAudioTimeSlice }>({});
   const [visibleTimeRange, setVisibleTimeRange] = useState({ start: 0, end: 0 });
   const waveSize = useSize(waveformContainerRef);
+  const regionList = useMemo(
+    () =>
+      regions.filter((i) => {
+        const { start, end } = visibleTimeRange;
+        if (i.start <= end && i.end >= start) {
+          return true;
+        }
+        return false;
+      }),
+    [regions, visibleTimeRange],
+  );
 
   const debounceZoom = debounce(() => {
     EventBus.emit('audioZoom');
@@ -812,10 +823,10 @@ export const AudioPlayer = ({
   }, [url]);
 
   useEffect(() => {
-    getVisibleAreaRange();
+    throttleSetTimeRange();
   }, [waveSize, duration]);
 
-  const getVisibleAreaRange = () => {
+  const setVisibleAreaRange = () => {
     if (waveformContainerRef.current && duration) {
       const currentScroll = waveformContainerRef.current.scrollLeft;
       const containerWidth = waveformContainerRef.current.clientWidth;
@@ -825,13 +836,16 @@ export const AudioPlayer = ({
         (currentScroll / waveformContainerRef.current.scrollWidth) * duration;
       const visibleEndTime =
         ((currentScroll + containerWidth) / waveformContainerRef.current.scrollWidth) * duration;
-
       setVisibleTimeRange({
         start: visibleStartTime,
         end: visibleEndTime,
       });
     }
   };
+
+  const { run: throttleSetTimeRange } = useThrottleFn(setVisibleAreaRange, {
+    wait: 300,
+  });
 
   // 计算播放到鼠标位置的时间
   const calcTime = (e: React.MouseEvent<HTMLDivElement, MouseEvent>) => {
@@ -860,17 +874,6 @@ export const AudioPlayer = ({
   };
   const remainingTime = duration ? Math.max(duration - currentTime, 0) : 0;
 
-  const getRegions = () => {
-    return regions.filter((i) => {
-      const { start, end } = visibleTimeRange;
-      if (i.start <= end && i.end >= start) {
-        return true;
-      }
-      return false;
-    });
-  };
-  const regionList = getRegions();
-
   const showRemark =
     context?.toolName !== EToolName.Empty &&
     context?.isEdit !== true &&
@@ -892,7 +895,7 @@ export const AudioPlayer = ({
       <div
         className={styles.waveformContainer}
         ref={waveformContainerRef}
-        onScroll={() => getVisibleAreaRange()}
+        onScroll={() => throttleSetTimeRange()}
       >
         <div
           id='waveform'
