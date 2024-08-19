@@ -677,7 +677,7 @@ export const AudioPlayer = ({
 
     wavesurfer.on('region-update-end', (instance: any) => {
       handleRegionUpdateEnd(instance);
-      setCreateID('')
+      setCreateID('');
     });
 
     wavesurfer.on('region-contextmenu', (instance: any, e: MouseEvent) => {
@@ -831,7 +831,7 @@ export const AudioPlayer = ({
 
   useEffect(() => {
     throttleSetTimeRange();
-  }, [waveSize, duration]);
+  }, [waveSize, duration, zoom]);
 
   const setVisibleAreaRange = () => {
     if (waveformContainerRef.current && duration) {
