@@ -15,7 +15,7 @@ const EKeyCode = cKeyCode.default;
 export const audioZoomInfo = {
   min: 1,
   max: 150,
-  ratio: 10,
+  ratio: 1,
   defaultValue: 30,
 };
 
