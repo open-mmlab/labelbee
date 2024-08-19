@@ -153,19 +153,24 @@ export const AudioPlayer = ({
   const update = useUpdate();
   const [sortByStartRegions, setSortByStartRegions] = useState<IAudioTimeSlice[]>([]);
   const [regionMap, setRegionMap] = useState<{ [key: string]: IAudioTimeSlice }>({});
+  const [createID, setCreateID] = useState<string>('');
   const [visibleTimeRange, setVisibleTimeRange] = useState({ start: 0, end: 0 });
   const waveSize = useSize(waveformContainerRef);
-  const regionList = useMemo(
-    () =>
-      regions.filter((i) => {
-        const { start, end } = visibleTimeRange;
-        if (i.start <= end && i.end >= start) {
-          return true;
-        }
-        return false;
-      }),
-    [regions, visibleTimeRange],
-  );
+
+  const regionList = useMemo(() => {
+    return regions.filter((i) => {
+      const { start, end } = visibleTimeRange;
+
+      if (
+        (i.start >= start && i.start <= end) ||
+        (i.end >= start && i.end <= end) ||
+        i.id === createID
+      ) {
+        return true;
+      }
+      return false;
+    });
+  }, [regions, visibleTimeRange]);
 
   const debounceZoom = debounce(() => {
     EventBus.emit('audioZoom');
@@ -579,6 +584,7 @@ export const AudioPlayer = ({
       if (regionsRef.current.find((item) => item.id === id)) {
         return;
       }
+      setCreateID(id);
       const regionItem: IAudioTimeSlice = {
         id,
         start: decimalReserved(start, 3),
@@ -671,6 +677,7 @@ export const AudioPlayer = ({
 
     wavesurfer.on('region-update-end', (instance: any) => {
       handleRegionUpdateEnd(instance);
+      setCreateID('')
     });
 
     wavesurfer.on('region-contextmenu', (instance: any, e: MouseEvent) => {
