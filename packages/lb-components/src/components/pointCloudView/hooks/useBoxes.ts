@@ -1,13 +1,15 @@
 import { IPointCloudBox, IPointCloudBoxList, IPointCloudConfig } from '@labelbee/lb-utils';
 import { useCallback, useContext, useMemo, useState } from 'react';
 import _ from 'lodash';
-import { message, Modal } from 'antd';
+import { message } from 'antd';
 import { usePointCloudViews } from './usePointCloudViews';
 import { PointCloudContext } from '../PointCloudContext';
 import { useTranslation } from 'react-i18next';
 import { EPointCloudBoxRenderTrigger } from '@/utils/ToolPointCloudBoxRenderHelper';
 import AnnotationDataUtils from '@/utils/AnnotationDataUtils';
 import { IFileItem } from '@/types/data';
+import { uuid } from '@labelbee/lb-annotation';
+import { useHistory } from './useHistory';
 
 /**
  * For each `rect`, the value of `imageName` on the paste page should be calculated from the value on the copy page using `getNextPath` in `AnnotationDataUtils`.
@@ -42,6 +44,30 @@ const updateBoxRects = (
   };
 };
 
+// Update the Id of the copied box
+const updateCopiedBoxesId = (
+  pointCloudBoxList: IPointCloudBoxList,
+  copiedBoxes: IPointCloudBoxList,
+) => {
+  // View the ID of the largest box
+  const maxTrackID = Math.max(...pointCloudBoxList.map((item) => item.trackID || 0), 0);
+  const positionValue = 5;
+
+  return copiedBoxes.map((item, index) => {
+    return {
+      ...item,
+      id: uuid(),
+      uuid: uuid(),
+      center: {
+        x: item.center.x - positionValue,
+        y: item.center.y - positionValue,
+        z: item.center.z,
+      },
+      trackID: maxTrackID + index + 1,
+    };
+  });
+};
+
 /**
  * Actions for selected boxes
  */
@@ -72,16 +98,7 @@ export const useBoxes = ({
 
   const { pointCloudBoxListUpdated } = usePointCloudViews();
   const { t, i18n } = useTranslation();
-
-  const hasDuplicateID = (checkBoxList: IPointCloudBoxList) => {
-    if (config.trackConfigurable !== true) {
-      return false;
-    }
-
-    return pointCloudBoxList.some((item) => {
-      return checkBoxList.some((i) => i.trackID === item.trackID);
-    });
-  };
+  const { pushHistoryWithList } = useHistory();
 
   const selectedBoxes = useMemo(() => {
     return displayPointCloudList.filter((i) => selectedIDs.includes(i.id));
@@ -101,6 +118,7 @@ export const useBoxes = ({
       });
       message.error(t('CopyEmptyInPointCloud'));
     }
+    message.success(t('CopySuccess'));
   }, [selectedIDs, displayPointCloudList, i18n.language, currentData]);
 
   const pasteSelectedBoxes = useCallback(() => {
@@ -109,16 +127,14 @@ export const useBoxes = ({
       return;
     }
 
-    const hasDuplicate = hasDuplicateID(copiedBoxes);
+    // Update the results of all point cloud 3D frames
+    const updatePointCloudResult = (pointCloudBoxList: IPointCloudBoxList) => {
+      const mappingImgList = currentData?.mappingImgList ?? [];
+      const preMappingImgList = copiedParams?.copiedMappingImgList ?? [];
+      const newPointCloudBoxList = pointCloudBoxList.map((box) =>
+        updateBoxRects(box, mappingImgList, preMappingImgList),
+      );
 
-    const mappingImgList = currentData?.mappingImgList ?? [];
-    const preMappingImgList = copiedParams?.copiedMappingImgList ?? [];
-
-    const pastedBoxes = copiedBoxes.map((box) => {
-      return updateBoxRects(box, mappingImgList, preMappingImgList);
-    });
-
-    const updatePointCloudResult = (newPointCloudBoxList: IPointCloudBoxList) => {
       /** Paste succeed and empty */
       setPointCloudResult(newPointCloudBoxList);
       pointCloudBoxListUpdated?.(newPointCloudBoxList);
@@ -126,35 +142,23 @@ export const useBoxes = ({
         copiedBoxes: [],
         copiedMappingImgList: [],
       });
+
+      /**
+       * Update the data in the historical data stack to ensure data synchronization.
+       * To solve the problem of dragging A to highlight the color without updating when copying and pasting an A1
+       */
+      pushHistoryWithList({
+        pointCloudBoxList: newPointCloudBoxList,
+      });
+
       syncAllViewPointCloudColor(EPointCloudBoxRenderTrigger.MultiPaste, newPointCloudBoxList);
     };
 
-    if (hasDuplicate) {
-      Modal.confirm({
-        title: t('HasDuplicateIDHeader'),
-        content: t('HasDuplicateIDMsg'),
-        onOk: () => {
-          /**
-           * Filter the same trackID in old-pointCloudBoxList.
-           */
-          const newPointCloudResult = pointCloudBoxList
-            .filter((v) => {
-              if (pastedBoxes.find((c) => c.trackID === v.trackID)) {
-                return false;
-              }
-              return true;
-            })
-            .concat(pastedBoxes);
+    // Get the box with the latest updated ID
+    const pastedBoxes = updateCopiedBoxesId(displayPointCloudList, copiedBoxes);
+    const newPointCloudResult = [...displayPointCloudList, ...pastedBoxes];
 
-          updatePointCloudResult(newPointCloudResult);
-        },
-      });
-    } else {
-      /** Paste succeed and empty */
-      const newPointCloudResult = [...displayPointCloudList, ...pastedBoxes];
-
-      updatePointCloudResult(newPointCloudResult);
-    }
+    updatePointCloudResult(newPointCloudResult);
   }, [copiedBoxes, displayPointCloudList, i18n.language, currentData]);
 
   return { copySelectedBoxes, pasteSelectedBoxes, copiedBoxes, selectedBoxes };
