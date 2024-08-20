@@ -605,7 +605,11 @@ export const synchronizeTopView = (
   pointCloud2dOperation.setResultAndSelectedID(newPolygonList, newPolygon.id);
 };
 
-export const usePointCloudViews = () => {
+interface IUsePointCloudViewsParams {
+  setResourceLoading?: (loading: boolean) => void;
+}
+
+export const usePointCloudViews = (params?: IUsePointCloudViewsParams) => {
   const ptCtx = useContext(PointCloudContext);
   const {
     topViewInstance,
@@ -1308,6 +1312,7 @@ export const usePointCloudViews = () => {
 
     SetAnnotationLoading(dispatch, true);
     SetLoadPCDFileLoading(dispatch, true);
+    params?.setResourceLoading?.(true);
     await mainViewInstance.loadPCDFile(newData.url, config?.radius ?? DEFAULT_RADIUS);
 
     mainViewInstance?.clearAllBox();
@@ -1385,6 +1390,7 @@ export const usePointCloudViews = () => {
 
     SetAnnotationLoading(dispatch, false);
     SetLoadPCDFileLoading(dispatch, false);
+    params?.setResourceLoading?.(false);
   };
 
   return {

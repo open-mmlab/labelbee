@@ -108,9 +108,9 @@ export interface AppProps {
   preDataProcess?: (params: IPreDataProcessParams) => IPointCloudBox[];
   auditContext?: any;
   getImgIndexByExternal: GetImgIndexByExternal;
-  annotationBefore?: (setAnnotationData:Function)=>void;
-
-  toolStyle?: ToolStyle
+  annotationBefore?: (setAnnotationData: Function) => void;
+  setResourceLoading?: (loading: boolean) => void;
+  toolStyle?: ToolStyle;
 }
 
 const App: React.FC<AppProps> = (props) => {

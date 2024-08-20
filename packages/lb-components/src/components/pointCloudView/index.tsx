@@ -45,6 +45,7 @@ interface IProps extends IA2MapStateProps {
   checkMode?: boolean;
   intelligentFit?: boolean;
   measureVisible?: boolean;
+  setResourceLoading?: (loading: boolean) => void;
 }
 
 const PointCloudView: React.FC<IProps> = (props) => {
@@ -57,6 +58,7 @@ const PointCloudView: React.FC<IProps> = (props) => {
     imgIndex,
     config,
     measureVisible,
+    setResourceLoading,
   } = props;
   const ptCtx = useContext(PointCloudContext);
   const { globalPattern, setGlobalPattern, selectedIDs } = ptCtx;
@@ -160,7 +162,11 @@ const PointCloudView: React.FC<IProps> = (props) => {
 
   return (
     <>
-      <PointCloudListener checkMode={checkMode} toolInstanceRef={toolInstanceRef} />
+      <PointCloudListener
+        checkMode={checkMode}
+        toolInstanceRef={toolInstanceRef}
+        setResourceLoading={setResourceLoading}
+      />
       <div className={getClassName('point-cloud-layout')} onContextMenu={(e) => e.preventDefault()}>
         <div className={getClassName('point-cloud-wrapper')}>
           <AnnotatedAttributesPanelFixedLeft />

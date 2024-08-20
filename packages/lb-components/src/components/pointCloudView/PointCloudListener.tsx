@@ -36,6 +36,7 @@ const { EPolygonPattern } = cTool;
 interface IProps extends IA2MapStateProps {
   checkMode?: boolean;
   toolInstanceRef: React.MutableRefObject<ICustomToolInstance>;
+  setResourceLoading?: (loading: boolean) => void;
 }
 
 const PointCloudListener: React.FC<IProps> = ({
@@ -45,6 +46,7 @@ const PointCloudListener: React.FC<IProps> = ({
   configString,
   imgIndex,
   toolInstanceRef,
+  setResourceLoading,
 }) => {
   const ptCtx = useContext(PointCloudContext);
   const {
@@ -63,7 +65,9 @@ const PointCloudListener: React.FC<IProps> = ({
 
   const { updateRotate } = useRotate({ currentData });
   const { updateRotateEdge } = useRotateEdge({ currentData });
-  const { updatePointCloudData, topViewSelectedChanged } = usePointCloudViews();
+  const { updatePointCloudData, topViewSelectedChanged } = usePointCloudViews({
+    setResourceLoading,
+  });
   const {
     redo,
     undo,
