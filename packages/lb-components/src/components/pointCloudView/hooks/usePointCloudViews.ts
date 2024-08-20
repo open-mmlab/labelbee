@@ -40,7 +40,7 @@ import { jsonParser, getRectPointCloudBox, generatePointCloudBoxRects } from '@/
 import type { GeneratePointCloudBoxRectsOptions } from '@/utils';
 import {
   PreDataProcess,
-  SetPointCloudLoading,
+  SetAnnotationLoading,
   SetLoadPCDFileLoading,
 } from '@/store/annotation/actionCreators';
 import { useHistory } from './useHistory';
@@ -1306,7 +1306,7 @@ export const usePointCloudViews = () => {
      */
     setHighlight2DDataList([]);
 
-    SetPointCloudLoading(dispatch, true);
+    SetAnnotationLoading(dispatch, true);
     SetLoadPCDFileLoading(dispatch, true);
     await mainViewInstance.loadPCDFile(newData.url, config?.radius ?? DEFAULT_RADIUS);
 
@@ -1383,7 +1383,7 @@ export const usePointCloudViews = () => {
       pointCloudSphereList: sphereParamsList,
     });
 
-    SetPointCloudLoading(dispatch, false);
+    SetAnnotationLoading(dispatch, false);
     SetLoadPCDFileLoading(dispatch, false);
   };
 
