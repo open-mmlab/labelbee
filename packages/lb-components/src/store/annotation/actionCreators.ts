@@ -476,23 +476,6 @@ export const ToSubmitFileData = (submitType: ESubmitType) => (dispatch: any) =>
     dispatch({ type: ANNOTATION_ACTIONS.SUBMIT_FILE_DATA, payload: { submitType } }),
   ];
 
-/**
- * 提交数据并且切换标注文件
- * @param dispatch
- * @param nextIndex
- * @param submitType
- * @param nextBasicIndex
- */
-const SubmitAndChangeFileIndex = (
-  dispatch: any,
-  nextIndex: number,
-  submitType: ESubmitType,
-  nextBasicIndex?: number,
-) => [
-  dispatch(ToSubmitFileData(submitType)),
-  dispatch(LoadFileAndFileData(nextIndex, nextBasicIndex)),
-];
-
 const ChangeBasicIndex = (dispatch: any, nextBasicIndex: number) => [
   dispatch({ type: ANNOTATION_ACTIONS.SUBMIT_RESULT }),
   dispatch({ type: ANNOTATION_ACTIONS.SET_BASIC_INDEX, payload: { basicIndex: nextBasicIndex } }),
@@ -636,13 +619,22 @@ export const DispatcherTurning = async (
       }
     }
 
+    const state = getState();
+
     annotationStore.onPageChange?.(fileIndex);
     const index =
       submitType === ESubmitType.Backward
-        ? getBasicIndex(getState().annotation, basicIndex)
+        ? getBasicIndex(state.annotation, basicIndex)
         : basicIndex;
 
-    return SubmitAndChangeFileIndex(dispatch, fileIndex, submitType, index);
+    dispatch(ToSubmitFileData(submitType));
+
+    const { onSubmit, imgIndex, imgList } = state.annotation;
+    if (onSubmit) {
+      await onSubmit([imgList[imgIndex]], submitType, imgIndex, imgList);
+    }
+
+    return dispatch(LoadFileAndFileData(fileIndex, index));
   }
 
   if (basicIndexChanged) {
