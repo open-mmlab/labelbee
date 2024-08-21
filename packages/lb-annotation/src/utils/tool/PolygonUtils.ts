@@ -58,11 +58,6 @@ export default class PolygonUtils {
     polygonPoints: (IPolygonPoint | ICoordinate)[],
     lineType: ELineTypes = ELineTypes.Line,
   ): boolean {
-    let counter = 0;
-    let i;
-    let xinters;
-    let p1;
-    let p2;
     polygonPoints = [...polygonPoints];
     if (lineType === ELineTypes.Curve) {
       polygonPoints = this.createSmoothCurvePoints(
@@ -74,28 +69,38 @@ export default class PolygonUtils {
         20,
       );
     }
+    return this.isPointInOrOnPolygon(checkPoint, polygonPoints);
+  }
 
-    [p1] = polygonPoints;
-    const pointCount = polygonPoints.length;
+  static isPointInOrOnPolygon(point: IPolygonPoint, polygonData: (IPolygonPoint | ICoordinate)[], errorMargin = 1e-9) {
+    const { x: px, y: py } = point;
+    let isInside = false;
 
-    for (i = 1; i <= pointCount; i++) {
-      p2 = polygonPoints[i % pointCount];
-      if (checkPoint.x > Math.min(p1.x, p2.x) && checkPoint.x <= Math.max(p1.x, p2.x)) {
-        if (checkPoint.y <= Math.max(p1.y, p2.y)) {
-          if (p1.x !== p2.x) {
-            xinters = ((checkPoint.x - p1.x) * (p2.y - p1.y)) / (p2.x - p1.x) + p1.y;
-            if (p1.y === p2.y || checkPoint.y <= xinters) {
-              counter++;
-            }
-          }
-        }
+    for (let i = 0, j = polygonData.length - 1; i < polygonData.length; j = i++) {
+      const { x: xi, y: yi } = polygonData[i];
+      const { x: xj, y: yj } = polygonData[j];
+
+      // Determine whether the point is within the range of the edge
+      const onSegment =
+        px <= Math.max(xi, xj) && px >= Math.min(xi, xj) && py <= Math.max(yi, yj) && py >= Math.min(yi, yj);
+
+      // Determine whether the point is on the edge (Cross Product)
+      const crossProduct = (py - yi) * (xj - xi) - (px - xi) * (yj - yi);
+
+      if (onSegment && Math.abs(crossProduct) < errorMargin) {
+        return true;
       }
-      p1 = p2;
+      /**
+       * Determine the intersection of the ray and the edge
+       * yi > py !== yj > py: Vertical cross
+       * px < ((xj - xi) * (py - yi)) / (yj - yi) + xi: Crossing in horizontal direction
+       */
+      const intersect = yi > py !== yj > py && px < ((xj - xi) * (py - yi)) / (yj - yi) + xi;
+
+      if (intersect) isInside = !isInside;
     }
-    if (counter % 2 === 0) {
-      return false;
-    }
-    return true;
+
+    return isInside;
   }
 
   /**
