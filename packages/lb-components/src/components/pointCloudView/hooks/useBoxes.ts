@@ -127,15 +127,18 @@ export const useBoxes = ({
       return;
     }
 
-    // Update the results of all point cloud 3D frames
-    const updatePointCloudResult = (pointCloudBoxList: IPointCloudBoxList) => {
-      const mappingImgList = currentData?.mappingImgList ?? [];
-      const preMappingImgList = copiedParams?.copiedMappingImgList ?? [];
-      const newPointCloudBoxList = pointCloudBoxList.map((box) =>
-        updateBoxRects(box, mappingImgList, preMappingImgList),
-      );
+    const mappingImgList = currentData?.mappingImgList ?? [];
+    const preMappingImgList = copiedParams?.copiedMappingImgList ?? [];
+    
+    const newCopiedBoxes = copiedBoxes.map((box) =>
+      updateBoxRects(box, mappingImgList, preMappingImgList),
+    );
 
-      /** Paste succeed and empty */
+    // Get the box with the latest updated ID
+    const pastedBoxes = updateCopiedBoxesId(displayPointCloudList, newCopiedBoxes);
+
+    // Update the results of all point cloud 3D frames
+    const updatePointCloudResult = (newPointCloudBoxList: IPointCloudBoxList) => {
       setPointCloudResult(newPointCloudBoxList);
       pointCloudBoxListUpdated?.(newPointCloudBoxList);
       setCopiedParams({
@@ -154,8 +157,6 @@ export const useBoxes = ({
       syncAllViewPointCloudColor(EPointCloudBoxRenderTrigger.MultiPaste, newPointCloudBoxList);
     };
 
-    // Get the box with the latest updated ID
-    const pastedBoxes = updateCopiedBoxesId(displayPointCloudList, copiedBoxes);
     const newPointCloudResult = [...displayPointCloudList, ...pastedBoxes];
 
     updatePointCloudResult(newPointCloudResult);
