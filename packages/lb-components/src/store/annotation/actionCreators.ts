@@ -476,6 +476,24 @@ export const ToSubmitFileData = (submitType: ESubmitType) => (dispatch: any) =>
     dispatch({ type: ANNOTATION_ACTIONS.SUBMIT_FILE_DATA, payload: { submitType } }),
   ];
 
+/**
+ * 提交数据并且切换标注文件
+ * @param dispatch
+ * @param nextIndex
+ * @param submitType
+ * @param nextBasicIndex
+ */
+const SubmitAndChangeFileIndex = async (
+  dispatch: any,
+  nextIndex: number,
+  submitType: ESubmitType,
+  nextBasicIndex?: number,
+) => {
+  dispatch(ToSubmitFileData(submitType));
+  await dispatch(SubmitHandler(submitType));
+  dispatch(LoadFileAndFileData(nextIndex, nextBasicIndex));
+};
+
 const ChangeBasicIndex = (dispatch: any, nextBasicIndex: number) => [
   dispatch({ type: ANNOTATION_ACTIONS.SUBMIT_RESULT }),
   dispatch({ type: ANNOTATION_ACTIONS.SET_BASIC_INDEX, payload: { basicIndex: nextBasicIndex } }),
@@ -627,14 +645,7 @@ export const DispatcherTurning = async (
         ? getBasicIndex(state.annotation, basicIndex)
         : basicIndex;
 
-    dispatch(ToSubmitFileData(submitType));
-
-    const { onSubmit, imgIndex, imgList } = state.annotation;
-    if (onSubmit) {
-      await onSubmit([imgList[imgIndex]], submitType, imgIndex, imgList);
-    }
-
-    return dispatch(LoadFileAndFileData(fileIndex, index));
+    return SubmitAndChangeFileIndex(dispatch, fileIndex, submitType, index);
   }
 
   if (basicIndexChanged) {
@@ -708,3 +719,14 @@ export const PreDataProcess =
     const { annotation } = getState();
     return annotation?.preDataProcess?.(params) ?? params.dataList;
   };
+
+export const SubmitHandler = (submitType: ESubmitType) => async (dispatch: any, getState: any) => {
+  const { annotation } = getState();
+  const { onSubmit, imgIndex, imgList } = annotation;
+
+  if (!onSubmit) {
+    return;
+  }
+
+  await onSubmit([imgList[imgIndex]], submitType, imgIndex, imgList);
+};
