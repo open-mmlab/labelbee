@@ -78,7 +78,7 @@ const LLMToolSidebar = (props: IProps) => {
     toolInstanceRef.current.clearResult = clearResult;
     onSetValid();
     initResult();
-  }, [imgIndex, LLMConfig]);
+  }, [imgIndex, LLMConfig, currentData?.id]);
 
   const clearResult = () => {
     initResult(currentData?.questionList);
