@@ -91,7 +91,7 @@ const LLMToolView: React.FC<IProps> = (props) => {
       }
     }
     setAnswerList(list);
-  }, [imgIndex, newAnswerList, LLMConfig]);
+  }, [imgIndex, newAnswerList, LLMConfig, imgList[imgIndex]?.id]);
 
   useEffect(() => {
     if (!imgList[imgIndex]) {

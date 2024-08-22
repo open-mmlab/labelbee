@@ -31,13 +31,14 @@ import { WrapAudioPlayer as AudioPlayer } from './components/audioPlayer';
 import { generatePointCloudBoxRects } from './utils';
 import SubAttributeList from './components/subAttributeList';
 import { ToolStyleProvider } from './hooks/useToolStyle';
+import { LoadFileAndFileData } from './store/annotation/reducer';
 
 export const store = configureStore();
 
-i18n.use(initReactI18next)
+i18n.use(initReactI18next);
 i18n.options.react = {
-  useSuspense: false
-}
+  useSuspense: false,
+};
 
 const OutputApp = (props: AppProps, ref: any) => {
   const [toolInstance, setToolInstance] = useState<ToolInstance>();
@@ -50,9 +51,12 @@ const OutputApp = (props: AppProps, ref: any) => {
         annotationEngine: (store.getState() as AppState).annotation.annotationEngine,
         pageBackwardActions: () => store.dispatch(PageBackward() as unknown as AnyAction),
         pageForwardActions: () => store.dispatch(PageForward() as unknown as AnyAction),
-        pageJump: (page: string) => {
+        pageJump: (page: string, isLoadData?: boolean) => {
           const imgIndex = ~~page - 1;
           store.dispatch(PageJump(imgIndex) as unknown as AnyAction);
+          if (isLoadData) {
+            store.dispatch(LoadFileAndFileData(imgIndex));
+          }
         },
         hello: () => alert(`hello labelBee!!!`),
       };
