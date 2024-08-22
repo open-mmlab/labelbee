@@ -40,7 +40,7 @@ import { jsonParser, getRectPointCloudBox, generatePointCloudBoxRects } from '@/
 import type { GeneratePointCloudBoxRectsOptions } from '@/utils';
 import {
   PreDataProcess,
-  SetPointCloudLoading,
+  SetAnnotationLoading,
   SetLoadPCDFileLoading,
 } from '@/store/annotation/actionCreators';
 import { useHistory } from './useHistory';
@@ -605,7 +605,11 @@ export const synchronizeTopView = (
   pointCloud2dOperation.setResultAndSelectedID(newPolygonList, newPolygon.id);
 };
 
-export const usePointCloudViews = () => {
+interface IUsePointCloudViewsParams {
+  setResourceLoading?: (loading: boolean) => void;
+}
+
+export const usePointCloudViews = (params?: IUsePointCloudViewsParams) => {
   const ptCtx = useContext(PointCloudContext);
   const {
     topViewInstance,
@@ -1306,8 +1310,9 @@ export const usePointCloudViews = () => {
      */
     setHighlight2DDataList([]);
 
-    SetPointCloudLoading(dispatch, true);
+    SetAnnotationLoading(dispatch, true);
     SetLoadPCDFileLoading(dispatch, true);
+    params?.setResourceLoading?.(true);
     await mainViewInstance.loadPCDFile(newData.url, config?.radius ?? DEFAULT_RADIUS);
 
     mainViewInstance?.clearAllBox();
@@ -1383,8 +1388,9 @@ export const usePointCloudViews = () => {
       pointCloudSphereList: sphereParamsList,
     });
 
-    SetPointCloudLoading(dispatch, false);
+    SetAnnotationLoading(dispatch, false);
     SetLoadPCDFileLoading(dispatch, false);
+    params?.setResourceLoading?.(false);
   };
 
   return {

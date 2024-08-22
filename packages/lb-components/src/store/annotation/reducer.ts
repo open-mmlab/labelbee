@@ -328,10 +328,6 @@ export const annotationReducer = (
         };
       }
 
-      if (onSubmit) {
-        onSubmit([newImgList[imgIndex]], action.payload?.submitType, imgIndex, newImgList);
-      }
-
       const stepProgress = calcStepProgress(newImgList, step);
       return {
         ...state,

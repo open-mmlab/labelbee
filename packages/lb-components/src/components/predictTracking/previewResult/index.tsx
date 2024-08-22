@@ -8,7 +8,7 @@ import { PointCloudContext } from '@/components/pointCloudView/PointCloudContext
 import { AppState } from '@/store';
 import {
   BatchUpdateImgListResultByPredictResult,
-  SetPointCloudLoading,
+  SetAnnotationLoading,
   SetPredictResult,
   SetPredictResultVisible,
 } from '@/store/annotation/actionCreators';
@@ -41,9 +41,9 @@ const PreviewResult = (props: IProps) => {
   };
 
   const apply = async () => {
-    SetPointCloudLoading(dispatch, true);
+    SetAnnotationLoading(dispatch, true);
     await dispatch(BatchUpdateImgListResultByPredictResult());
-    SetPointCloudLoading(dispatch, false);
+    SetAnnotationLoading(dispatch, false);
     close();
   };
 
@@ -198,7 +198,7 @@ const GenerateViewsDataUrl = (props: {
         }
 
         setList(result);
-        SetPointCloudLoading(dispatch, false);
+        SetAnnotationLoading(dispatch, false);
       }
     };
 

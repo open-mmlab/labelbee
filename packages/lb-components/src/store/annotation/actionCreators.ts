@@ -483,15 +483,16 @@ export const ToSubmitFileData = (submitType: ESubmitType) => (dispatch: any) =>
  * @param submitType
  * @param nextBasicIndex
  */
-const SubmitAndChangeFileIndex = (
+const SubmitAndChangeFileIndex = async (
   dispatch: any,
   nextIndex: number,
   submitType: ESubmitType,
   nextBasicIndex?: number,
-) => [
-  dispatch(ToSubmitFileData(submitType)),
-  dispatch(LoadFileAndFileData(nextIndex, nextBasicIndex)),
-];
+) => {
+  dispatch(ToSubmitFileData(submitType));
+  await dispatch(SubmitHandler(submitType));
+  dispatch(LoadFileAndFileData(nextIndex, nextBasicIndex));
+};
 
 const ChangeBasicIndex = (dispatch: any, nextBasicIndex: number) => [
   dispatch({ type: ANNOTATION_ACTIONS.SUBMIT_RESULT }),
@@ -636,10 +637,12 @@ export const DispatcherTurning = async (
       }
     }
 
+    const state = getState();
+
     annotationStore.onPageChange?.(fileIndex);
     const index =
       submitType === ESubmitType.Backward
-        ? getBasicIndex(getState().annotation, basicIndex)
+        ? getBasicIndex(state.annotation, basicIndex)
         : basicIndex;
 
     return SubmitAndChangeFileIndex(dispatch, fileIndex, submitType, index);
@@ -661,15 +664,6 @@ export const ChangeSave = (dispatch: Function) => {
 };
 
 export const SetAnnotationLoading = (dispatch: Function, loading: boolean) => {
-  dispatch({
-    type: ANNOTATION_ACTIONS.SET_LOADING,
-    payload: {
-      loading,
-    },
-  });
-};
-
-export const SetPointCloudLoading = (dispatch: Function, loading: boolean) => {
   dispatch({
     type: ANNOTATION_ACTIONS.SET_LOADING,
     payload: {
@@ -725,3 +719,14 @@ export const PreDataProcess =
     const { annotation } = getState();
     return annotation?.preDataProcess?.(params) ?? params.dataList;
   };
+
+export const SubmitHandler = (submitType: ESubmitType) => async (dispatch: any, getState: any) => {
+  const { annotation } = getState();
+  const { onSubmit, imgIndex, imgList } = annotation;
+
+  if (!onSubmit) {
+    return;
+  }
+
+  await onSubmit([imgList[imgIndex]], submitType, imgIndex, imgList);
+};

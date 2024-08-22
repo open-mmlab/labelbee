@@ -9,7 +9,7 @@ import { AppState } from '@/store';
 import {
   ChangeSave,
   GetBoxesByID,
-  SetPointCloudLoading,
+  SetAnnotationLoading,
   SetPredictResult,
   SetPredictResultVisible,
 } from '@/store/annotation/actionCreators';
@@ -77,7 +77,7 @@ const PredictTrackingIcon = (props: { loading: boolean; predictionResultVisible:
       }),
     );
 
-    SetPointCloudLoading(dispatch, true);
+    SetAnnotationLoading(dispatch, true);
     const result = predict(start, end);
     SetPredictResult(dispatch, result);
     SetPredictResultVisible(dispatch, true);

@@ -57,6 +57,7 @@ const PointCloudAnnotate: React.FC<AppProps & IProps> = (props) => {
         checkMode={props.checkMode}
         intelligentFit={props.intelligentFit}
         measureVisible={props.measureVisible}
+        setResourceLoading={props.setResourceLoading}
       />
       <ToolFooter style={props.style?.footer} mode={props.mode} footer={props?.footer} />
     </>
