@@ -262,7 +262,7 @@ export class TagToolInstanceAdaptor extends React.Component<
   }
 
   public componentWillUnmount() {
-    document.addEventListener('keydown', this.keydown);
+    document.removeEventListener('keydown', this.keydown);
     this.props.onUnmounted();
   }
 
