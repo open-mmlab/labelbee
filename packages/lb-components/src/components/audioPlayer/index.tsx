@@ -737,7 +737,6 @@ export const AudioPlayer = ({
 
   const playPause = () => {
     getWaveRef()?.playPause();
-    setSelectedRegion({});
   };
 
   const keyDownEvents = (e: KeyboardEvent) => {
