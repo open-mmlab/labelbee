@@ -3,6 +3,7 @@ import { Coord, distance } from '@turf/turf';
 import MathUtils from '@/utils/MathUtils';
 import AxisUtils from '@/utils/tool/AxisUtils';
 import RectUtils from '@/utils/tool/RectUtils';
+import TagUtils from '@/utils/tool/TagUtils';
 import { DEFAULT_TEXT_SHADOW, EDragStatus, ESortDirection } from '../../constant/annotation';
 import { EDragTarget, EOperationMode } from '../../constant/tool';
 import EKeyCode from '../../constant/keyCode';
@@ -87,6 +88,7 @@ class RectOperation extends BasicToolOperation {
     this.getCurrentSelectedData = this.getCurrentSelectedData.bind(this);
     this.updateSelectedRectTextAttribute = this.updateSelectedRectTextAttribute.bind(this);
     this.setSelectedID = this.setSelectedID.bind(this);
+    this.updateSelectedRectSubAttribute = this.updateSelectedRectSubAttribute.bind(this);
     this.selection = new Selection(this);
   }
 
@@ -300,6 +302,22 @@ class RectOperation extends BasicToolOperation {
       );
 
       this.emit('updateTextAttribute');
+      this.render();
+    }
+  }
+
+  public updateSelectedRectSubAttribute(key: string, value: string) {
+    if (value && this.config.secondaryAttributeConfigurable === true && this.selectedRectID) {
+      this.setRectList(
+        this.rectList.map((v) => {
+          if (v.id === this.selectedRectID) {
+            const currentSubAttribute = v?.subAttribute ?? {};
+            return { ...v, subAttribute: { ...currentSubAttribute, [key]: value } };
+          }
+          return v;
+        }),
+        true,
+      );
       this.render();
     }
   }
@@ -1000,6 +1018,22 @@ class RectOperation extends BasicToolOperation {
     this.emit('updateResult');
   }
 
+  public setDefaultSubAttribute = () => {
+    if (this.config?.secondaryAttributeConfigurable && this.config?.subAttributeList) {
+      const subAttribute = TagUtils.getDefaultResultByConfig(this.config?.subAttributeList ?? []);
+      this.setRectList(
+        this.rectList.map((v) => {
+          if (v.id === this.selectedRectID) {
+            const currentSubAttribute = v?.subAttribute ?? subAttribute;
+            return { ...v, subAttribute: currentSubAttribute };
+          }
+          return v;
+        }),
+        true,
+      );
+    }
+  };
+
   public createNewDrawingRect(e: MouseEvent, basicSourceID: string) {
     if (!this.imgInfo) {
       return;
@@ -1074,6 +1108,14 @@ class RectOperation extends BasicToolOperation {
           textAttribute,
         };
       }
+    }
+
+    if (this.config?.secondaryAttributeConfigurable && this.config?.subAttributeList) {
+      const subAttribute = TagUtils.getDefaultResultByConfig(this.config?.subAttributeList ?? []);
+      this.drawingRect = {
+        ...this.drawingRect,
+        subAttribute,
+      };
     }
 
     // 标注序号添加
@@ -1215,6 +1257,9 @@ class RectOperation extends BasicToolOperation {
           this.setMarkerIndex(markerIndex);
           this.emit('markIndexChange');
         }
+      }
+      if (this.config?.secondaryAttributeConfigurable && this.config?.subAttributeList) {
+        this.setDefaultSubAttribute();
       }
     }
 
@@ -1630,6 +1675,13 @@ class RectOperation extends BasicToolOperation {
 
       if (rect.attribute) {
         showText = `${showText}  ${AttributeUtils.getAttributeShowText(rect.attribute, this.config?.attributeList)}`;
+        // Secondary Attributes
+        if (rect?.subAttribute && this.config?.secondaryAttributeConfigurable && this.config?.subAttributeList) {
+          const list = TagUtils.getTagNameList(rect.subAttribute, this.config.subAttributeList);
+          list.forEach((i) => {
+            showText += `\n${i.keyName}: ${i.value.join(`、`)}`;
+          });
+        }
       }
 
       const transformRect = AxisUtils.changeRectByZoom(rect, isZoom ? zoom : this.zoom, this.currentPos);

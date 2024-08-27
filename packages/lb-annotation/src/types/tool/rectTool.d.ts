@@ -14,6 +14,7 @@ declare interface IRect {
 
   label?: string; // 列表标签
   lineDash?: number[];
+  subAttribute?: { [key: string]: string };
 }
 
 declare interface RectStyle {
@@ -36,4 +37,6 @@ declare interface IRectConfig extends IToolConfig {
 
   markerConfigurable?: boolean;
   markerList?: IInputList[];
+  secondaryAttributeConfigurable?: boolean;
+  subAttributeList?: IInputList[];
 }
