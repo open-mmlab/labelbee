@@ -10,6 +10,7 @@ import AnnotationDataUtils from '@/utils/AnnotationDataUtils';
 import { IFileItem } from '@/types/data';
 import { uuid } from '@labelbee/lb-annotation';
 import { useHistory } from './useHistory';
+import { generatePointCloudBoxRects } from '@/utils';
 
 /**
  * For each `rect`, the value of `imageName` on the paste page should be calculated from the value on the copy page using `getNextPath` in `AnnotationDataUtils`.
@@ -51,7 +52,7 @@ const updateCopiedBoxesId = (
 ) => {
   // View the ID of the largest box
   const maxTrackID = Math.max(...pointCloudBoxList.map((item) => item.trackID || 0), 0);
-  const positionValue = 5;
+  const positionValue = 0.2;
 
   return copiedBoxes.map((item, index) => {
     return {
@@ -59,8 +60,8 @@ const updateCopiedBoxesId = (
       id: uuid(),
       uuid: uuid(),
       center: {
-        x: item.center.x - positionValue,
-        y: item.center.y - positionValue,
+        x: item.center.x - positionValue * 5,
+        y: item.center.y + positionValue,
         z: item.center.z,
       },
       trackID: maxTrackID + index + 1,
@@ -84,6 +85,7 @@ export const useBoxes = ({
     displayPointCloudList,
     setPointCloudResult,
     syncAllViewPointCloudColor,
+    imageSizes,
   } = useContext(PointCloudContext);
 
   const [copiedParams, setCopiedParams] = useState<{
@@ -129,7 +131,7 @@ export const useBoxes = ({
 
     const mappingImgList = currentData?.mappingImgList ?? [];
     const preMappingImgList = copiedParams?.copiedMappingImgList ?? [];
-    
+
     const newCopiedBoxes = copiedBoxes.map((box) =>
       updateBoxRects(box, mappingImgList, preMappingImgList),
     );
@@ -158,6 +160,18 @@ export const useBoxes = ({
     };
 
     const newPointCloudResult = [...displayPointCloudList, ...pastedBoxes];
+
+    /**
+     * Synchronize the values of rects in the latest 3D point cloud list
+     * which have a direct impact on 2D views
+     */
+    newPointCloudResult.forEach((pointCloudBox) =>
+      generatePointCloudBoxRects({
+        pointCloudBox,
+        mappingImgList,
+        imageSizes,
+      }),
+    );
 
     updatePointCloudResult(newPointCloudResult);
   }, [copiedBoxes, displayPointCloudList, i18n.language, currentData]);
