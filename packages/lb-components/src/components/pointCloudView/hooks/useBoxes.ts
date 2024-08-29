@@ -52,17 +52,29 @@ const updateCopiedBoxesId = (
 ) => {
   // View the ID of the largest box
   const maxTrackID = Math.max(...pointCloudBoxList.map((item) => item.trackID || 0), 0);
-  const positionValue = 0.2;
+  const ratio = 0.2;
 
   return copiedBoxes.map((item, index) => {
+    const { width, height, center, rotation } = item;
+    const { x, y, z } = center;
+    const offsetX = width * ratio;
+    const offsetY = height * ratio;
+    // Rotate offset in reverse coordinate system
+    const rotatedOffsetX = offsetX * Math.cos(rotation) - offsetY * Math.sin(rotation);
+    const rotatedOffsetY = offsetX * Math.sin(rotation) + offsetY * Math.cos(rotation);
+
+    // Rotate offset in reverse coordinate system
+    const newCx = x - Math.abs(rotatedOffsetX);
+    const newCy = y - Math.abs(rotatedOffsetY);
+
     return {
       ...item,
       id: uuid(),
       uuid: uuid(),
       center: {
-        x: item.center.x - positionValue * 5,
-        y: item.center.y + positionValue,
-        z: item.center.z,
+        x: newCx,
+        y: newCy,
+        z,
       },
       trackID: maxTrackID + index + 1,
     };
