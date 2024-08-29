@@ -59,14 +59,13 @@ const updateCopiedBoxesId = (
     const { x, y, z } = center;
     const offsetX = width * ratio;
     const offsetY = height * ratio;
-
     // Rotate offset in reverse coordinate system
     const rotatedOffsetX = offsetX * Math.cos(rotation) - offsetY * Math.sin(rotation);
     const rotatedOffsetY = offsetX * Math.sin(rotation) + offsetY * Math.cos(rotation);
 
-    // The center point of the new rectangle
-    const newCx = x - rotatedOffsetX;
-    const newCy = y - rotatedOffsetY;
+    // Rotate offset in reverse coordinate system
+    const newCx = x - Math.abs(rotatedOffsetX);
+    const newCy = y - Math.abs(rotatedOffsetY);
 
     return {
       ...item,
