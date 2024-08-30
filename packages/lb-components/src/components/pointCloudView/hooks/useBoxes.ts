@@ -171,19 +171,19 @@ export const useBoxes = ({
       syncAllViewPointCloudColor(EPointCloudBoxRenderTrigger.MultiPaste, newPointCloudBoxList);
     };
 
-    const newPointCloudResult = [...displayPointCloudList, ...pastedBoxes];
-
     /**
      * Synchronize the values of rects in the latest 3D point cloud list
      * which have a direct impact on 2D views
      */
-    newPointCloudResult.forEach((pointCloudBox) =>
+    pastedBoxes.forEach((pointCloudBox) =>
       generatePointCloudBoxRects({
         pointCloudBox,
         mappingImgList,
         imageSizes,
       }),
     );
+
+    const newPointCloudResult = [...displayPointCloudList, ...pastedBoxes];
 
     updatePointCloudResult(newPointCloudResult);
   }, [copiedBoxes, displayPointCloudList, i18n.language, currentData]);
