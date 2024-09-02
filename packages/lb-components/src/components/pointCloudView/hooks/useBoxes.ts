@@ -51,11 +51,12 @@ const updateCopiedBoxesId = (
   copiedBoxes: IPointCloudBoxList,
 ) => {
   // View the ID of the largest box
-  const maxTrackID = Math.max(...pointCloudBoxList.map((item) => item.trackID || 0), 0);
+  const existingTrackIDs = new Set(pointCloudBoxList.map((item) => item.trackID || 0));
+  let maxTrackID = Math.max(...existingTrackIDs, 0);
   const ratio = 0.2;
 
   return copiedBoxes.map((item, index) => {
-    const { width, height, center, rotation } = item;
+    const { width, height, center, rotation, trackID = 0 } = item;
     const { x, y, z } = center;
     const offsetX = width * ratio;
     const offsetY = height * ratio;
@@ -67,6 +68,15 @@ const updateCopiedBoxesId = (
     const newCx = x - Math.abs(rotatedOffsetX);
     const newCy = y - Math.abs(rotatedOffsetY);
 
+    // Check if the trackID already exists in the list
+    let newTrackID = trackID;
+    if (existingTrackIDs.has(trackID)) {
+      // If it exists, use a new unique trackID
+      newTrackID = ++maxTrackID;
+    }
+    // In any case, add the trackID to the set of existing IDs to ensure uniqueness
+    existingTrackIDs.add(newTrackID);
+
     return {
       ...item,
       id: uuid(),
@@ -76,7 +86,7 @@ const updateCopiedBoxesId = (
         y: newCy,
         z,
       },
-      trackID: maxTrackID + index + 1,
+      trackID: newTrackID,
     };
   });
 };
