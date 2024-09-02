@@ -25,6 +25,7 @@ import car1 from './mock/cuboidImages/1.png';
 import { EToolName } from '@labelbee/lb-annotation';
 import { LLMToolQa, LLMToolResult } from './mock/LLMTool';
 import { textData, NLPToolResult } from './mock/NLPTool';
+import { LLMMultiWheelToolQa, LLMMultiWheelToolResult } from './mock/LLMMultiWheelTool';
 
 const App = () => {
   const tool = qs.parse(window.location.search, {
@@ -73,9 +74,18 @@ const App = () => {
         },
       }));
     }
+    if (EToolName.LLMMultiWheelTool === tool) {
+      return srcList.map((url, i) => ({
+        ...extraData,
+        id: i + 1,
+        url,
+        result: JSON.stringify(LLMMultiWheelToolResult.step_1.result),
+        modelList: LLMMultiWheelToolQa,
+      }));
+    }
 
     if (EToolName.NLP === tool) {
-      return srcList.map((url, i) => ({
+    return srcList.map((url, i) => ({
         ...extraData,
         id: i + 1,
         url,

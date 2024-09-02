@@ -83,7 +83,11 @@ const updateToolInstance = (annotation: AnnotationState, imgNode: HTMLImageEleme
     return;
   }
 
-  if ([EToolName.LLM as string, EToolName.NLP as string].includes(stepConfig?.tool)) {
+  if (
+    [EToolName.LLM as string, EToolName.NLP as string, EToolName.LLMMultiWheel].includes(
+      stepConfig?.tool,
+    )
+  ) {
     return;
   }
 

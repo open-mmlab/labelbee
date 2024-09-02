@@ -46,6 +46,7 @@ export enum EToolName {
   PointCloudPolygon = 'pointCloudPolygon',
   LLM = 'LLMTool',
   NLP = 'NLPTool',
+  LLMMultiWheel = "LLMMultiWheelTool"
 }
 
 // 文本标注类型
