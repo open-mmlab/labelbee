@@ -73,6 +73,8 @@ const updateCopiedBoxesId = (
     if (existingTrackIDs.has(trackID)) {
       // If it exists, use a new unique trackID
       newTrackID = ++maxTrackID;
+    } else {
+      maxTrackID = Math.max(maxTrackID, newTrackID);
     }
     // In any case, add the trackID to the set of existing IDs to ensure uniqueness
     existingTrackIDs.add(newTrackID);
