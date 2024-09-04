@@ -32,6 +32,7 @@ import { generatePointCloudBoxRects } from './utils';
 import SubAttributeList from './components/subAttributeList';
 import { ToolStyleProvider } from './hooks/useToolStyle';
 import { LoadFileAndFileData } from './store/annotation/reducer';
+import useToolConfigStore from '@/store/toolConfig';
 
 export const store = configureStore();
 
@@ -104,6 +105,7 @@ export {
   AudioPlayer,
   generatePointCloudBoxRects,
   SubAttributeList,
+  useToolConfigStore,
 };
 
 export * from './constant';

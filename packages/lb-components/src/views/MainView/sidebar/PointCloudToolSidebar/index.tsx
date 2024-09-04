@@ -19,6 +19,7 @@ import BatchUpdateModal from './components/batchUpdateModal';
 import AnnotatedBox from './components/annotatedBox';
 import RectRotateSensitivitySlider from './components/rectRotateSensitivitySlider';
 import FindTrackIDIndex from './components/findTrackIDIndex';
+import FirstFrameDataSwitch from './components/firstFrameDataSwitch';
 import { IFileItem } from '@/types/data';
 import {
   IInputList,
@@ -509,6 +510,7 @@ const PointCloudToolSidebar: React.FC<IProps> = ({
               <FindTrackIDIndex imgList={imgList} imgIndex={imgIndex} />
               <Divider style={{ margin: 0 }} />
               <RectRotateSensitivitySlider />
+              <FirstFrameDataSwitch/>
             </div>
           ) : (
             <div />
