@@ -1,14 +1,13 @@
 import { create } from 'zustand';
-import { IPointCloudContext } from '@/components/pointCloudView/PointCloudContext';
 
-interface Store {
-  ptCtx: IPointCloudContext | {};
-  setPtCtx: (ptCtx: IPointCloudContext) => void;
+interface toolConfigStore {
+  onlyLoadFirstData: boolean;
+  setOnlyLoadFirstData: (onlyLoadFirstData: boolean) => void;
 }
 
-const useToolConfigStore = create<Store>((set) => ({
-  ptCtx: {},
-  setPtCtx: (ptCtx) => set((state) => ({ ptCtx })),
+const useToolConfigStore = create<toolConfigStore>((set) => ({
+  onlyLoadFirstData: false,
+  setOnlyLoadFirstData: (onlyLoadFirstData) => set((state) => ({ onlyLoadFirstData })),
 }));
 
 export default useToolConfigStore;

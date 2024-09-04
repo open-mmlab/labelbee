@@ -28,7 +28,6 @@ import {
 import { useDispatch } from '@/store/ctx';
 import { ChangeSave } from '@/store/annotation/actionCreators';
 import useAnnotatedBoxStore from '@/store/annotatedBox';
-import useToolConfigStore from '@/store/toolConfig';
 import _ from 'lodash';
 import type { MapIndirectWeakSet } from './utils/map';
 import { addMapIndirectWeakSetItem } from './utils/map';
@@ -177,9 +176,6 @@ export interface IPointCloudContext
 
   updateRectListByReducer: UpdateRectListByReducer;
   windowKeydownListenerHook: WindowKeydownListenerHooker;
-
-  onlyLoadFirstData: boolean;
-  setOnlyLoadFirstData: (sensitivity: boolean) => void;
 }
 
 const pickRectObject = (rect: IPointCloud2DRectOperationViewRect) => {
@@ -273,9 +269,6 @@ export const PointCloudContext = React.createContext<IPointCloudContext>({
 
   updateRectListByReducer: () => {},
   windowKeydownListenerHook: getEmptyUseWindowKeydownListener(),
-
-  onlyLoadFirstData: false,
-  setOnlyLoadFirstData: () => {},
 });
 
 export const PointCloudProvider: React.FC<PropsWithChildren<{}>> = ({ children }) => {
@@ -306,9 +299,7 @@ export const PointCloudProvider: React.FC<PropsWithChildren<{}>> = ({ children }
   const [segmentation, setSegmentation] = useState<IPointCloudSegmentation[]>([]);
   const [highlight2DDataList, setHighlight2DDataList] = useState<IHighlight2DData[]>([]);
   const [highlight2DLoading, setHighlight2DLoading] = useState<boolean>(false);
-  const [onlyLoadFirstData, setOnlyLoadFirstData] = useState<boolean>(false);
   const state = useAnnotatedBoxStore();
-  const toolConfigState = useToolConfigStore();
 
   const [imageSizes, setImageSizes] = useState<{
     [key: string]: ISize;
@@ -831,9 +822,6 @@ export const PointCloudProvider: React.FC<PropsWithChildren<{}>> = ({ children }
 
       updateRectListByReducer,
       windowKeydownListenerHook,
-
-      onlyLoadFirstData,
-      setOnlyLoadFirstData,
     };
   }, [
     valid,
@@ -869,16 +857,7 @@ export const PointCloudProvider: React.FC<PropsWithChildren<{}>> = ({ children }
 
     updateRectListByReducer,
     windowKeydownListenerHook,
-
-    onlyLoadFirstData,
   ]);
-
-  const toolConfigCtx = useMemo(() => {
-    return {
-      onlyLoadFirstData,
-      setOnlyLoadFirstData,
-    };
-  }, [onlyLoadFirstData, setOnlyLoadFirstData]);
 
   useEffect(() => {
     state?.setPointCloudBoxList?.(pointCloudBoxList);
@@ -889,10 +868,6 @@ export const PointCloudProvider: React.FC<PropsWithChildren<{}>> = ({ children }
   useEffect(() => {
     state?.setPtCtx?.(ptCtx);
   }, [ptCtx]);
-
-  useEffect(() => {
-    toolConfigState?.setPtCtx?.(toolConfigCtx as IPointCloudContext);
-  }, [toolConfigCtx]);
 
   const updateSelectedIDsAndRenderAfterHide = () => {
     const pointCloudForFilteredList = pointCloudBoxList.filter((i) =>

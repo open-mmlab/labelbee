@@ -510,7 +510,7 @@ const PointCloudToolSidebar: React.FC<IProps> = ({
               <FindTrackIDIndex imgList={imgList} imgIndex={imgIndex} />
               <Divider style={{ margin: 0 }} />
               <RectRotateSensitivitySlider />
-              <FirstFrameDataSwitch/>
+              {stepInfo.loadPreStep > 0 && <FirstFrameDataSwitch />}
             </div>
           ) : (
             <div />
