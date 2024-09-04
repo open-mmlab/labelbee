@@ -714,7 +714,6 @@ export const PointCloudProvider: React.FC<PropsWithChildren<{}>> = ({ children }
           points: points.geometry.attributes.position.array,
         });
 
-
         const color = await mainViewInstance?.highlightOriginPointCloud(
           pointCloudList,
           highlightIndex,
