@@ -4,7 +4,7 @@ import { Button, Empty } from 'antd';
 import AnswerSort from './components/answerSort';
 import { AppState } from '@/store';
 import { connect } from 'react-redux';
-import { isBoolean, isNumber, isObject, isString } from 'lodash';
+import { isArray, isBoolean, isNumber, isObject, isString } from 'lodash';
 import AnswerList from './components/answerList';
 import { LabelBeeContext, LLMContext } from '@/store/ctx';
 import { jsonParser } from '@/utils';
@@ -30,6 +30,8 @@ import emptySvg from '@/assets/annotation/LLMTool/empty.svg';
 import TextInputBox from './components/textInputBox';
 import OverallTagList from '@/components/tagList/components/overall';
 import StepUtils from '@/utils/StepUtils';
+import ModelSort from './components/modelSort';
+import ModelAnswerSort from './components/modelAnswerSort';
 
 interface IProps {
   annotation?: any;
@@ -245,6 +247,52 @@ const LLMToolSidebar = (props: IProps) => {
         <div style={{ fontSize: '18px', fontWeight: 500, padding: '0px 16px', marginTop: '16px' }}>
           {t('GlobalAnnotation')}
         </div>
+        {/* 全局模型排序 */}
+        <ModelSort
+          setSort={() => {}}
+          modelList={[
+            { id: 1, title: 11 },
+            { id: 2, title: 22 },
+            { id: 3, title: 33 },
+            { id: 4, title: 44 },
+          ]}
+          selectedSort={[[1], [2, 4]]}
+          title={t('SortConversationQuality')}
+          prefixId='model'
+        />
+        {/* 答案模型排序 */}
+        <ModelAnswerSort
+          maxAnswerList={[
+            { id: 'A1', answer: '1' },
+            { id: 'A2', answer: '2' },
+            { id: 'A3', answer: '3' },
+          ]}
+          modelData={[
+            {
+              id: 1,
+              answerList: [
+                { id: 'A1', answer: '11' },
+                { id: 'A2', answer: '21' },
+              ],
+            },
+            {
+              id: 2,
+              answerList: [
+                { id: 'A1', answer: '1' },
+                { id: 'A2', answer: '2' },
+                { id: 'A3', answer: '3' },
+              ],
+            },
+            {
+              id: 3,
+              answerList: [
+                { id: 'A1', answer: '13' },
+                { id: 'A2', answer: '23' },
+              ],
+            },
+          ]}
+        />
+
         {enableSort && (
           <AnswerSort
             waitSortList={annotationResult?.waitSorts || []}
@@ -276,7 +324,7 @@ const LLMToolSidebar = (props: IProps) => {
           <div style={{ padding: '0px 16px', marginTop: '16px' }}>
             <TextInputBox
               textAttribute={annotationResult?.textAttribute || []}
-              LLMConfig={LLMConfig}
+              textConfig={LLMConfig?.text && isArray(LLMConfig.text) ? LLMConfig?.text : []}
               setText={(v) => setAnnotationResult({ ...annotationResult, textAttribute: v })}
               disabeledAll={disabeledAll}
             />

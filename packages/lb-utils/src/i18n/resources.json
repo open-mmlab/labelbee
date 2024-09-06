@@ -372,7 +372,8 @@
     "Connect": "Connect",
     "Disconnect": "disconnect",
     "Image2DBoxScale": "Image 2D Box Scale",
-    "SelectedRect": "Selected Rect"
+    "SelectedRect": "Selected Rect",
+    "SortConversationQuality": "Please rank the quality of each conversation"
   },
   "cn": {
     "TextInput": "文本输入",
@@ -747,6 +748,7 @@
     "Connect": "连接",
     "Disconnect": "断开",
     "Image2DBoxScale": "图片2D框体缩小处理",
-    "SelectedRect": "选中框体"
+    "SelectedRect": "选中框体",
+    "SortConversationQuality": "请对每组对话的质量进行排序"
   }
 }
