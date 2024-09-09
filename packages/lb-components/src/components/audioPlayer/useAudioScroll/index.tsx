@@ -63,12 +63,18 @@ const useAudioScroll = (props: IProps) => {
       return;
     }
 
-    if (containerBoundingClientRectLeft + bufferWidth > targetBoundingClientRectLeft) {
+    if (
+      containerBoundingClientRectLeft + bufferWidth > targetBoundingClientRectLeft &&
+      targetBoundingClientRectLeft > containerBoundingClientRectLeft
+    ) {
       window.requestAnimationFrame(() => {
         container.scrollLeft = containerScrollLeft - 20;
       });
     }
-    if (targetBoundingClientRectRight + bufferWidth > containerBoundingClientRectRight) {
+    if (
+      targetBoundingClientRectRight + bufferWidth > containerBoundingClientRectRight &&
+      targetBoundingClientRectRight < containerBoundingClientRectRight
+    ) {
       window.requestAnimationFrame(() => {
         container.scrollLeft = containerScrollLeft + 20;
       });
