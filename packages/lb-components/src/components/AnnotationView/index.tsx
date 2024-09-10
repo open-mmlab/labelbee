@@ -3,11 +3,18 @@
  * @author laoluo
  */
 
-import React, { useEffect, useCallback, useRef, useImperativeHandle, useState, useContext } from 'react';
+import React, {
+  useEffect,
+  useCallback,
+  useRef,
+  useImperativeHandle,
+  useState,
+  useContext,
+} from 'react';
 import { ViewOperation, ImgUtils } from '@labelbee/lb-annotation';
 import { Spin } from 'antd/es';
 import useRefCache from '@/hooks/useRefCache';
-import { TAnnotationViewData } from '@labelbee/lb-utils';
+import { TAnnotationViewData, IPointCloudBoxList } from '@labelbee/lb-utils';
 import MeasureCanvas from '../measureCanvas';
 import { PointCloudContext } from '@/components/pointCloudView/PointCloudContext';
 
@@ -41,7 +48,9 @@ interface IProps {
   };
   staticMode?: boolean;
   measureVisible?: boolean;
-  onRightClick?: (e: { event: MouseEvent, targetId: string }) => void;
+  onRightClick?: (e: { event: MouseEvent; targetId: string }) => void;
+  pointCloudBoxList: IPointCloudBoxList;
+  hiddenText: boolean;
 }
 
 const DEFAULT_SIZE = {
@@ -88,7 +97,9 @@ const AnnotationView = (props: IProps, ref: any) => {
     globalStyle,
     afterImgOnLoad,
     measureVisible,
-    onRightClick
+    onRightClick,
+    pointCloudBoxList,
+    hiddenText,
   } = props;
   const size = sizeInitialized(props.size);
   const [loading, setLoading] = useState(false);
@@ -168,7 +179,7 @@ const AnnotationView = (props: IProps, ref: any) => {
       viewOperation.current?.setLoading(false);
       setLoading(false);
     },
-    [loadAndSetImage, fallbackSrc]
+    [loadAndSetImage, fallbackSrc],
   );
 
   useEffect(() => {
@@ -176,6 +187,14 @@ const AnnotationView = (props: IProps, ref: any) => {
       loadImage(src);
     }
   }, [src, measureVisible, fallbackSrc, loadImage]);
+
+  useEffect(() => {
+    viewOperation.current.setPointCloudBoxList(pointCloudBoxList);
+  }, [pointCloudBoxList]);
+
+  useEffect(() => {
+    viewOperation.current.setHiddenText(hiddenText);
+  }, [hiddenText]);
 
   /**
    * 基础数据绘制监听

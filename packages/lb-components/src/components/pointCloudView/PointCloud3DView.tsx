@@ -30,6 +30,7 @@ import { LabelBeeContext } from '@/store/ctx';
 import PointCloudSizeSlider from './components/PointCloudSizeSlider';
 import TitleButton from './components/TitleButton';
 import { LeftOutlined } from '@ant-design/icons';
+import { useToolStyleContext } from '@/hooks/useToolStyle';
 
 const EKeyCode = cKeyCode.default;
 const pointCloudID = 'LABELBEE-POINTCLOUD';
@@ -128,6 +129,16 @@ const PointCloud3D: React.FC<IA2MapStateProps> = ({ currentData, config, highlig
   const { initPointCloud3d } = usePointCloudViews();
   const size = useSize(ref);
   const { t } = useTranslation();
+  const { value: toolStyle } = useToolStyleContext();
+  const { hiddenText } = toolStyle || {};
+
+  useEffect(() => {
+    let pointCloud = ptCtx.mainViewInstance;
+    if (pointCloud) {
+      pointCloud.updateHiddenTextAndRender(hiddenText, ptCtx.pointCloudBoxList);
+    }
+  }, [toolStyle]);
+
   useEffect(() => {
     if (!ptCtx.mainViewInstance) {
       return;
@@ -181,6 +192,7 @@ const PointCloud3D: React.FC<IA2MapStateProps> = ({ currentData, config, highlig
           isOrthographicCamera: true,
           orthographicParams: PointCloudUtils.getDefaultOrthographicParams(size),
           config,
+          hiddenText,
         });
         pointCloud.setHandlerPipe({setSelectedIDs: ptCtx.setSelectedIDs, setNeedUpdateCenter});
         ptCtx.setMainViewInstance(pointCloud);

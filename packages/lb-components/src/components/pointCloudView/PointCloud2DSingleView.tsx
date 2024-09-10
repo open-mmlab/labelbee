@@ -12,6 +12,7 @@ import { PointCloudContext } from './PointCloudContext';
 import useDataLinkSwitch from './hooks/useDataLinkSwitch';
 
 import PointCloud2DRectOperationView from '@/components/pointCloud2DRectOperationView';
+import { useToolStyleContext } from '@/hooks/useToolStyle';
 
 const PointCloud2DSingleView = ({
   view2dData,
@@ -35,8 +36,18 @@ const PointCloud2DSingleView = ({
   const { url, fallbackUrl, calib, path } = view2dData;
   const { toggle2dVisible, isHighlightVisible } = useHighlight({ currentData });
   const [loading, setLoading] = useState(false);
-  const { highlight2DLoading, setHighlight2DLoading, cuboidBoxIn2DView, cacheImageNodeSize, setSelectedIDs } =
-    useContext(PointCloudContext);
+  const {
+    highlight2DLoading,
+    setHighlight2DLoading,
+    cuboidBoxIn2DView,
+    cacheImageNodeSize,
+    setSelectedIDs,
+    pointCloudBoxList,
+  } = useContext(PointCloudContext);
+
+  const { value: toolStyle } = useToolStyleContext();
+  const { hiddenText } = toolStyle || {};
+
   const hiddenData = !view2dData;
 
   const dataLinkSwitchOpts = useMemo(() => {
@@ -119,7 +130,9 @@ const PointCloud2DSingleView = ({
             ratio: 0.4,
           }}
           measureVisible={measureVisible}
-          onRightClick={({targetId}) =>setSelectedIDs(targetId)}
+          onRightClick={({ targetId }) => setSelectedIDs(targetId)}
+          pointCloudBoxList={pointCloudBoxList}
+          hiddenText={hiddenText}
         />
       ) : (
         <>

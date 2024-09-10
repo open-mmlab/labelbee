@@ -19,6 +19,7 @@ import {
   PointCloudUtils,
   DEFAULT_SPHERE_PARAMS,
   ICalib,
+  IPointCloudBoxList,
 } from '@labelbee/lb-utils';
 import { BufferAttribute, OrthographicCamera, PerspectiveCamera } from 'three';
 import HighlightWorker from 'web-worker:./highlightWorker.js';
@@ -57,6 +58,8 @@ interface IProps {
 
   isSegment?: boolean;
   checkMode?: boolean;
+
+  hiddenText?: boolean;
 }
 
 interface IPipeTypes {
@@ -154,6 +157,8 @@ export class PointCloud extends EventListener {
 
   private pipe?: IPipeTypes;
 
+  private hiddenText = false;
+
   constructor({
     container,
     noAppend,
@@ -163,6 +168,7 @@ export class PointCloud extends EventListener {
     config,
     isSegment,
     checkMode,
+    hiddenText = false,
   }: IProps) {
     super();
     this.container = container;
@@ -170,6 +176,7 @@ export class PointCloud extends EventListener {
     this.backgroundColor = backgroundColor;
     this.config = config;
     this.checkMode = checkMode ?? false;
+    this.hiddenText = hiddenText;
 
     // TODO: Need to extracted.
     if (isOrthographicCamera && orthographicParams) {
@@ -1373,50 +1380,147 @@ export class PointCloud extends EventListener {
     return arrowHelper;
   };
 
+  /**
+   * Universal generation of label information
+   * @param text generation text
+   * @param scaleFactor  scale size
+   * @returns  { sprite, canvasWidth, canvasHeight }
+   */
+  public generateLabel = (text: string, scaleFactor: number) => {
+    const canvas = this.getTextCanvas(text);
+    const texture = new THREE.Texture(canvas);
+
+    // Use filters that are more suitable for UI and text
+    texture.minFilter = THREE.LinearFilter;
+    texture.magFilter = THREE.LinearFilter;
+    texture.needsUpdate = true;
+
+    // Calculate canvas width and height to avoid blurring
+    const canvasWidth = canvas.width / window.devicePixelRatio;
+    const canvasHeight = canvas.height / window.devicePixelRatio;
+
+    const spriteMaterial = new THREE.SpriteMaterial({ map: texture, depthWrite: false });
+    const sprite = new THREE.Sprite(spriteMaterial);
+    sprite.scale.set(canvasWidth / scaleFactor, canvasHeight / scaleFactor, 1);
+
+    return { sprite, canvasWidth, canvasHeight };
+  };
+
+  /**
+   * Generate label information for ID
+   * @param boxParams
+   * @returns sprite
+   */
   public generateBoxTrackID = (boxParams: IPointCloudBox) => {
-    if (!boxParams.trackID) {
-      return;
-    }
+    if (!boxParams.trackID) return;
 
-    const texture = new THREE.Texture(this.getTextCanvas(boxParams.trackID.toString()));
-    texture.needsUpdate = true;
-    const sprite = new THREE.SpriteMaterial({ map: texture, depthWrite: false });
-    const boxID = new THREE.Sprite(sprite);
-    boxID.scale.set(5, 5, 5);
-    boxID.position.set(-boxParams.width / 2, 0, boxParams.depth / 2 + 0.5);
-    return boxID;
+    const { sprite } = this.generateLabel(boxParams.trackID.toString(), 50);
+
+    sprite.position.set(-boxParams.width / 2, 0, boxParams.depth / 2 + 0.5);
+
+    return sprite;
   };
 
+  /**
+   * Generate label information for secondary attributes
+   * @param boxParams
+   * @returns sprite
+   */
   public generateBoxAttributeLabel = (boxParams: IPointCloudBox) => {
-    if (!boxParams.attribute) {
-      return;
-    }
+    if (!boxParams.attribute || this.hiddenText) return;
 
-    const texture = new THREE.Texture(this.getTextCanvas(boxParams.attribute.toString()));
-    texture.needsUpdate = true;
-    const sprite = new THREE.SpriteMaterial({ map: texture, depthWrite: false });
-    const attributeLabel = new THREE.Sprite(sprite);
-    attributeLabel.scale.set(5, 5, 5);
+    const classLabel = this.findSubAttributeLabel(boxParams, this.config);
+    const subAttributeLabel = classLabel ? `${boxParams.attribute}\n${classLabel}` : `${boxParams.attribute}`;
 
-    // 将label放在box的下方
-    attributeLabel.position.set(-boxParams.width / 2, boxParams.height, -boxParams.depth / 2);
+    const { sprite, canvasWidth, canvasHeight } = this.generateLabel(subAttributeLabel, 100);
 
-    return attributeLabel;
+    sprite.position.set(
+      -boxParams.width / 2,
+      boxParams.height / 2 - canvasWidth / 200,
+      -boxParams.depth / 2 - canvasHeight / 150,
+    );
+
+    return sprite;
   };
+
+  /**
+   * Splicing sub attribute content
+   * @param boxParams
+   * @param config
+   * @returns
+   */
+  public findSubAttributeLabel(boxParams: IPointCloudBox, config: IPointCloudConfig) {
+    const { inputList } = config;
+    let resultStr = '';
+    // Return directly without any secondary attributes
+    if (Object.keys(boxParams.subAttribute).length === 0) return resultStr;
+
+    Object.keys(boxParams.subAttribute).forEach((key) => {
+      const classInfo = inputList.find((item: { value: string }) => item.value === key);
+      // If the type of the secondary attribute cannot be found, it will be returned directly
+      if (!classInfo) return;
+      resultStr = `${resultStr + classInfo.key}:`;
+      const { subSelected } = classInfo;
+      subSelected.forEach((subItem: { value: string; key: string }, index: number) => {
+        if (subItem.value === boxParams.subAttribute[key]) {
+          resultStr += subItem.key;
+          if (index !== subSelected.length - 1) {
+            resultStr += '、';
+          }
+        }
+      });
+    });
+
+    return resultStr;
+  }
 
   public getTextCanvas(text: string) {
     const canvas = document.createElement('canvas');
-
     const ctx = canvas.getContext('2d');
+    // Obtain the pixel ratio of the device
+    const dpr = window.devicePixelRatio || 1;
+    const fontSize = 50;
+
     if (ctx) {
-      ctx.font = `${50}px " bold`;
+      ctx.font = `${fontSize}px bold`;
+      // Split text into multiple lines using line breaks
+      const lines = text.split('\n');
+
+      // Find the longest row and calculate its width
+      const maxWidth = Math.max(...lines.map((line) => ctx.measureText(line).width));
+
+      // Calculate the logical width and height of the canvas
+      const canvasWidth = Math.ceil(maxWidth);
+      const lineHeight = fontSize * 1.5; // 每行的高度
+      const canvasHeight = lineHeight * lines.length;
+
+      // Modify the logical and physical width and height of the canvas
+      canvas.width = canvasWidth * dpr;
+      canvas.height = canvasHeight * dpr;
+
+      canvas.style.width = `${canvasWidth}px`;
+      canvas.style.height = `${canvasHeight}px`;
+
+      ctx.scale(dpr, dpr);
+
+      // Reset font (font size using dpr scaling)
+      ctx.font = `${fontSize}px bold`;
       ctx.fillStyle = 'white';
-      ctx.textAlign = 'center';
-      ctx.textBaseline = 'middle';
-      ctx.fillText(text, canvas.width / 2, canvas.height / 2);
+      ctx.textAlign = 'left';
+      ctx.textBaseline = 'top';
+
+      // Draw text line by line
+      lines.forEach((line, index) => {
+        ctx.fillText(line, 0, index * lineHeight); // The Y coordinate of each line of text is index * line height
+      });
     }
 
     return canvas;
+  }
+
+  public updateHiddenTextAndRender(hiddenText: boolean, pointCloudBoxList: IPointCloudBoxList) {
+    this.hiddenText = hiddenText;
+    this.generateBoxes(pointCloudBoxList);
   }
 
   /**

@@ -12,6 +12,8 @@ import {
   IBasicStyle,
   TAnnotationViewCuboid,
   ImgPosUtils,
+  IPointCloudBox,
+  IPointCloudBoxList,
 } from '@labelbee/lb-utils';
 import _ from 'lodash';
 import rgba from 'color-rgba';
@@ -36,6 +38,8 @@ interface IViewOperationProps extends IBasicToolOperationProps {
   style: IBasicStyle;
   staticMode?: boolean;
   annotations: TAnnotationViewData[];
+  pointCloudBoxList: IPointCloudBoxList;
+  hiddenText: boolean;
 }
 
 export interface ISpecificStyle {
@@ -75,6 +79,10 @@ export default class ViewOperation extends BasicToolOperation {
   private posTimer: ReturnType<typeof setTimeout> | null = null;
 
   private convexHullGroup: IConvexHullGroupType = {};
+
+  private pointCloudBoxList: IPointCloudBoxList;
+
+  private hiddenText: boolean = false;
 
   constructor(props: IViewOperationProps) {
     super({ ...props, showDefaultCursor: true });
@@ -290,6 +298,15 @@ export default class ViewOperation extends BasicToolOperation {
     }
   }
 
+  public setPointCloudBoxList(pointCloudBoxList: IPointCloudBoxList) {
+    this.pointCloudBoxList = pointCloudBoxList;
+  }
+
+  public setHiddenText(hiddenText: boolean) {
+    this.hiddenText = hiddenText;
+    this.render();
+  }
+
   public setConfig(config: { [a: string]: any } | string) {
     this.config = config;
   }
@@ -429,6 +446,28 @@ export default class ViewOperation extends BasicToolOperation {
 
       DrawUtils.drawCircleWithFill(this.canvas, renderPoint, 4, { color: '#fff' });
       DrawUtils.drawCircleWithFill(this.canvas, renderPoint, 2, { color: '#000' });
+    });
+  }
+
+  /**
+   * Separate rendering of sub attribute content
+   * The principle is the same as other tools for rendering sub attribute content
+   */
+  public renderAttribute() {
+    const annotationChunks = _.chunk(this.annotations, 6);
+    annotationChunks.forEach((annotationList) => {
+      const annotation = annotationList.find((item) => item.type === 'polygon');
+      if (!annotation) return;
+
+      const { fontStyle } = this.getRenderStyle(annotation);
+      const polygon = annotation.annotation;
+      const curPointCloudBox = this.pointCloudBoxList.find((item: IPointCloudBox) => item.id === polygon.id);
+      const headerText = this.hiddenText ? '' : curPointCloudBox.attribute;
+      const renderPolygon = AxisUtils.changePointListByZoom(polygon?.pointList ?? [], this.zoom, this.currentPos);
+
+      if (headerText) {
+        DrawUtils.drawText(this.canvas, this.appendOffset(renderPolygon[0]), headerText, fontStyle);
+      }
     });
   }
 
@@ -938,6 +977,7 @@ export default class ViewOperation extends BasicToolOperation {
       });
 
       this.renderConnectionPoints();
+      this.renderAttribute();
     } catch (e) {
       console.error('ViewOperation Render Error', e);
     }
