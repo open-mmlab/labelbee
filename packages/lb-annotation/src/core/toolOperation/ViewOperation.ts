@@ -25,7 +25,6 @@ import { DEFAULT_FONT, ELineTypes, SEGMENT_NUMBER } from '@/constant/tool';
 import { DEFAULT_TEXT_SHADOW, DEFAULT_TEXT_OFFSET, TEXT_ATTRIBUTE_OFFSET } from '@/constant/annotation';
 import ImgUtils, { cropAndEnlarge } from '@/utils/ImgUtils';
 import CanvasUtils from '@/utils/tool/CanvasUtils';
-import TagUtils from '@/utils/tool/TagUtils';
 import { BasicToolOperation, IBasicToolOperationProps } from './basicToolOperation';
 import { pointCloudLidar2image } from '../pointCloud/matrix';
 
@@ -354,12 +353,8 @@ export default class ViewOperation extends BasicToolOperation {
     }
 
     // show subAttributeList
-    const { secondaryAttributeConfigurable, subAttributeList } = this.config;
-    if (result?.subAttribute && secondaryAttributeConfigurable && subAttributeList) {
-      const list = TagUtils.getTagNameList(result?.subAttribute, subAttributeList);
-      list.forEach((i) => {
-        headerText += `\n${i.keyName}: ${i.value.join(`、`)}`;
-      });
+    if (result?.subAttributeText) {
+      headerText += result?.subAttributeText;
     }
     return { headerText, bottomText };
   }
