@@ -1183,7 +1183,7 @@ class RectOperation extends BasicToolOperation {
       return;
     }
 
-    if (this.config.textConfigurable) {
+    if (this.config.textConfigurable || this.config?.secondaryAttributeConfigurable) {
       this.setSelectedRectID(this.drawingRect.id);
     } else {
       this.setSelectedRectID();
