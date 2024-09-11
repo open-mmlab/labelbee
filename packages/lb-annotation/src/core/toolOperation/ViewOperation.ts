@@ -14,6 +14,7 @@ import {
   ImgPosUtils,
   IPointCloudBox,
   IPointCloudBoxList,
+  IBasicPolygon,
 } from '@labelbee/lb-utils';
 import _ from 'lodash';
 import rgba from 'color-rgba';
@@ -38,8 +39,6 @@ interface IViewOperationProps extends IBasicToolOperationProps {
   style: IBasicStyle;
   staticMode?: boolean;
   annotations: TAnnotationViewData[];
-  pointCloudBoxList: IPointCloudBoxList;
-  hiddenText: boolean;
 }
 
 export interface ISpecificStyle {
@@ -80,9 +79,9 @@ export default class ViewOperation extends BasicToolOperation {
 
   private convexHullGroup: IConvexHullGroupType = {};
 
-  private pointCloudBoxList: IPointCloudBoxList;
+  private pointCloudBoxList?: IPointCloudBoxList = [];
 
-  private hiddenText: boolean = false;
+  private hiddenText?: boolean = false;
 
   constructor(props: IViewOperationProps) {
     super({ ...props, showDefaultCursor: true });
@@ -460,9 +459,9 @@ export default class ViewOperation extends BasicToolOperation {
       if (!annotation) return;
 
       const { fontStyle } = this.getRenderStyle(annotation);
-      const polygon = annotation.annotation;
-      const curPointCloudBox = this.pointCloudBoxList.find((item: IPointCloudBox) => item.id === polygon.id);
-      const headerText = this.hiddenText ? '' : curPointCloudBox.attribute;
+      const polygon = annotation.annotation as IBasicPolygon;
+      const curPointCloudBox = this.pointCloudBoxList?.find((item: IPointCloudBox) => item.id === polygon.id);
+      const headerText = this.hiddenText ? '' : curPointCloudBox?.attribute;
       const renderPolygon = AxisUtils.changePointListByZoom(polygon?.pointList ?? [], this.zoom, this.currentPos);
 
       if (headerText) {

@@ -310,6 +310,7 @@ const PointCloudListener: React.FC<IProps> = ({
             newSelectedBox: selectBox,
             newPointCloudList: newPointCloudList,
           });
+          ptCtx.mainViewInstance.generateBoxes(newPointCloudList);
         }
       }
       if (selectedPolygon) {
@@ -344,6 +345,9 @@ const PointCloudListener: React.FC<IProps> = ({
         };
 
         updateSelectedBox(selectBox);
+        if (ptCtx.mainViewInstance && ptCtx.selectedPointCloudBox) {
+          ptCtx.mainViewInstance.generateBox(ptCtx.selectedPointCloudBox);
+        }
       }
     };
     toolInstanceRef.current.clearResult = () => {

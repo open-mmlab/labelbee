@@ -1449,26 +1449,28 @@ export class PointCloud extends EventListener {
    * @param config
    * @returns
    */
-  public findSubAttributeLabel(boxParams: IPointCloudBox, config: IPointCloudConfig) {
+  public findSubAttributeLabel(boxParams: IPointCloudBox, config?: IPointCloudConfig) {
+    if (!boxParams?.subAttribute || typeof boxParams.subAttribute !== 'object' || !config) {
+      return '';
+    }
+
     const { inputList } = config;
     let resultStr = '';
     // Return directly without any secondary attributes
-    if (Object.keys(boxParams.subAttribute).length === 0) return resultStr;
+    const subAttributeKeys = Object.keys(boxParams.subAttribute);
+    if (subAttributeKeys.length === 0) return resultStr;
 
-    Object.keys(boxParams.subAttribute).forEach((key) => {
+    subAttributeKeys.forEach((key) => {
       const classInfo = inputList.find((item: { value: string }) => item.value === key);
-      // If the type of the secondary attribute cannot be found, it will be returned directly
-      if (!classInfo) return;
-      resultStr = `${resultStr + classInfo.key}:`;
-      const { subSelected } = classInfo;
-      subSelected.forEach((subItem: { value: string; key: string }, index: number) => {
-        if (subItem.value === boxParams.subAttribute[key]) {
-          resultStr += subItem.key;
-          if (index !== subSelected.length - 1) {
-            resultStr += '、';
-          }
-        }
-      });
+      if (!classInfo || !classInfo.subSelected) return; // If the type of the secondary attribute cannot be found, it will be returned directly
+
+      const { key: classKey, subSelected } = classInfo;
+      const subItem = subSelected.find((item: { value: string }) => item.value === boxParams.subAttribute?.[key]);
+
+      if (subItem) {
+        if (resultStr) resultStr += '、';
+        resultStr += `${classKey}:${subItem.key}`;
+      }
     });
 
     return resultStr;
