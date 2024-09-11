@@ -1,11 +1,19 @@
 import { difference, polygon, union } from '@turf/turf';
 import { ERotateDirection } from '@/constant/annotation';
+import { TAnnotationViewData, TAnnotationViewLine } from '@labelbee/lb-utils';
 import CommonToolUtils from './CommonToolUtils';
 import { IPolygonData, IPolygonPoint } from '../../types/tool/polygon';
 import { ELineTypes, SEGMENT_NUMBER } from '../../constant/tool';
 import AxisUtils from './AxisUtils';
 import MathUtils from '../MathUtils';
 import LineToolUtils from './LineToolUtils';
+
+export interface IConvexHullGroupType {
+  [id: string]: {
+    points: TAnnotationViewLine['annotation']['pointList'];
+    convexHull: ICoordinate[];
+  };
+}
 
 export default class PolygonUtils {
   static getHoverPolygonID(
@@ -775,5 +783,50 @@ export default class PolygonUtils {
     });
 
     return polygonList;
+  }
+
+  /**
+   * Convex hull algorithm - Graham scan
+   */
+  public static computeConvexHull(points: IPolygonPoint[]) {
+    points.sort((a, b) => (a.x !== b.x ? a.x - b.x : a.y - b.y));
+    const cross = (o: IPolygonPoint, a: IPolygonPoint, b: IPolygonPoint) =>
+      (a.x - o.x) * (b.y - o.y) - (a.y - o.y) * (b.x - o.x);
+
+    const lower = [];
+    for (const point of points) {
+      while (lower.length >= 2 && cross(lower[lower.length - 2], lower[lower.length - 1], point) <= 0) {
+        lower.pop();
+      }
+      lower.push(point);
+    }
+
+    const upper = [];
+    for (let i = points.length - 1; i >= 0; i--) {
+      const point = points[i];
+      while (upper.length >= 2 && cross(upper[upper.length - 2], upper[upper.length - 1], point) <= 0) {
+        upper.pop();
+      }
+      upper.push(point);
+    }
+
+    upper.pop();
+    lower.pop();
+    return lower.concat(upper);
+  }
+
+  public static createConvexHullGroup(annotations: TAnnotationViewData[]) {
+    const result: IConvexHullGroupType = {};
+    annotations.forEach((item) => {
+      if (item.type !== 'line') return;
+      if (!result[item.annotation.id]) {
+        result[item.annotation.id] = { points: [], convexHull: [] };
+      }
+      result[item.annotation.id].points.push(...item.annotation.pointList);
+    });
+    Object.keys(result).forEach((key) => {
+      result[key].convexHull = this.computeConvexHull(result[key].points);
+    });
+    return result;
   }
 }

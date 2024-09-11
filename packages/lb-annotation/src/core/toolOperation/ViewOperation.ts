@@ -18,7 +18,7 @@ import rgba from 'color-rgba';
 import DrawUtils from '@/utils/tool/DrawUtils';
 import AxisUtils from '@/utils/tool/AxisUtils';
 import RectUtils from '@/utils/tool/RectUtils';
-import PolygonUtils from '@/utils/tool/PolygonUtils';
+import PolygonUtils, { IConvexHullGroupType } from '@/utils/tool/PolygonUtils';
 import MathUtils from '@/utils/MathUtils';
 import RenderDomClass from '@/utils/tool/RenderDomClass';
 import { DEFAULT_FONT, ELineTypes, SEGMENT_NUMBER } from '@/constant/tool';
@@ -70,10 +70,17 @@ export default class ViewOperation extends BasicToolOperation {
 
   private cacheCanvas?: { [url: string]: HTMLCanvasElement }; // Cache the temporary canvas.
 
+  private needUpdatePosition = true;
+
+  private posTimer: ReturnType<typeof setTimeout> | null = null;
+
+  private convexHullGroup: IConvexHullGroupType = {};
+
   constructor(props: IViewOperationProps) {
     super({ ...props, showDefaultCursor: true });
     this.style = props.style ?? { stroke: DEFAULT_STROKE_COLOR, thickness: 3 };
     this.annotations = props.annotations;
+    this.convexHullGroup = PolygonUtils.createConvexHullGroup(props.annotations);
     this.loading = false;
     this.renderDomInstance = new RenderDomClass({
       container: this.container,
@@ -167,6 +174,23 @@ export default class ViewOperation extends BasicToolOperation {
     });
   }
 
+  public onRightClick(e: MouseEvent): void {
+    const targetId = this.getClickTargetId(e);
+    if (!targetId) return;
+    this.needUpdatePosition = false;
+    if (this.posTimer) {
+      clearTimeout(this.posTimer);
+    }
+    this.emit('onRightClick', { event: e, targetId });
+    /**
+     * this timer is used to control the execution of the focusPositionByPointList method
+     * when switching selectId in the current area no need to resetting the current view
+     */
+    this.posTimer = setTimeout(() => {
+      this.needUpdatePosition = true;
+    }, 1000);
+  }
+
   public onMouseMove(e: MouseEvent) {
     if (super.onMouseMove(e) || this.forbidMouseOperation || !this.imgInfo) {
       return;
@@ -242,6 +266,7 @@ export default class ViewOperation extends BasicToolOperation {
     }
     this.annotations = annotations;
 
+    this.convexHullGroup = PolygonUtils.createConvexHullGroup(annotations);
     if (this.staticMode) {
       this.staticImgNode = undefined;
     }
@@ -368,6 +393,7 @@ export default class ViewOperation extends BasicToolOperation {
    * @param pointList
    */
   public focusPositionByPointList(pointList: ICoordinate[]) {
+    if (!this.needUpdatePosition) return;
     const basicZone = MathUtils.calcViewportBoundaries(pointList);
     const newBoundary = {
       x: basicZone.left,
@@ -915,5 +941,18 @@ export default class ViewOperation extends BasicToolOperation {
     } catch (e) {
       console.error('ViewOperation Render Error', e);
     }
+  }
+
+  private getClickTargetId(e: MouseEvent) {
+    const coordinate = this.getCoordinateUnderZoom(e);
+    const originCoordinate = AxisUtils.changePointByZoom(coordinate, 1 / this.zoom);
+    for (const key in this.convexHullGroup) {
+      if (!Object.prototype.hasOwnProperty.call(this.convexHullGroup, key)) continue;
+      const polygonPoints = this.convexHullGroup[key].convexHull;
+      if (PolygonUtils.isInPolygon(originCoordinate, polygonPoints)) {
+        return key;
+      }
+    }
+    return undefined;
   }
 }

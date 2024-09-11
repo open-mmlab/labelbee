@@ -229,6 +229,8 @@ const PointCloud2DRectOperationView = (props: IPointCloud2DRectOperationViewProp
     }
   });
 
+  const onRightClick = ({targetId}: { targetId: string }) => setSelectedIDs(targetId)
+
   useEffect(() => {
     if (ref.current) {
       const toolInstance = new PointCloud2DRectOperation({
@@ -243,11 +245,13 @@ const PointCloud2DRectOperationView = (props: IPointCloud2DRectOperationViewProp
       operation.current.on('updateDragResult', handleUpdateDragResult);
       operation.current.on('afterAddingDrawingRect', handleAddRect);
       operation.current.on('deleteSelectedRects', handleRemoveRect);
+      operation.current.on('onRightClick', onRightClick);
 
       return () => {
         operation.current?.unbind('updateDragResult', handleUpdateDragResult);
         operation.current?.unbind('afterAddingDrawingRect', handleAddRect);
         operation.current?.unbind('deleteSelectedRects', handleRemoveRect);
+        operation.current?.unbind('onRightClick', onRightClick);
         operation.current?.destroy();
       };
     }

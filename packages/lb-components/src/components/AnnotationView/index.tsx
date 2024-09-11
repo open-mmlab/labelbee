@@ -3,12 +3,13 @@
  * @author laoluo
  */
 
-import React, { useEffect, useCallback, useRef, useImperativeHandle, useState } from 'react';
+import React, { useEffect, useCallback, useRef, useImperativeHandle, useState, useContext } from 'react';
 import { ViewOperation, ImgUtils } from '@labelbee/lb-annotation';
 import { Spin } from 'antd/es';
 import useRefCache from '@/hooks/useRefCache';
 import { TAnnotationViewData } from '@labelbee/lb-utils';
 import MeasureCanvas from '../measureCanvas';
+import { PointCloudContext } from '@/components/pointCloudView/PointCloudContext';
 
 export type TAfterImgOnLoad = (img: HTMLImageElement) => void;
 
@@ -40,6 +41,7 @@ interface IProps {
   };
   staticMode?: boolean;
   measureVisible?: boolean;
+  onRightClick?: (e: { event: MouseEvent, targetId: string }) => void;
 }
 
 const DEFAULT_SIZE = {
@@ -86,6 +88,7 @@ const AnnotationView = (props: IProps, ref: any) => {
     globalStyle,
     afterImgOnLoad,
     measureVisible,
+    onRightClick
   } = props;
   const size = sizeInitialized(props.size);
   const [loading, setLoading] = useState(false);
@@ -94,6 +97,8 @@ const AnnotationView = (props: IProps, ref: any) => {
   const afterImgOnLoadRef = useRefCache<TAfterImgOnLoad | undefined>(afterImgOnLoad);
   const annotationListCacheRef = useRef<TAnnotationViewData[][]>([]);
   const canUpdateRef = useRef(true); // Judge if rending is Possible.
+
+  const { setSelectedIDs } = useContext(PointCloudContext);
 
   useImperativeHandle(
     ref,
@@ -126,9 +131,11 @@ const AnnotationView = (props: IProps, ref: any) => {
       });
 
       viewOperation.current.init();
+      onRightClick && viewOperation.current.on('onRightClick', onRightClick);
     }
 
     return () => {
+      onRightClick && viewOperation.current?.unbind('onRightClick', onRightClick);
       viewOperation.current?.destroy();
     };
   }, [measureVisible]);

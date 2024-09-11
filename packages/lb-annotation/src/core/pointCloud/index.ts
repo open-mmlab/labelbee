@@ -59,6 +59,11 @@ interface IProps {
   checkMode?: boolean;
 }
 
+interface IPipeTypes {
+  setSelectedIDs: (ids?: string[] | string) => void;
+  setNeedUpdateCenter: (value: boolean) => void;
+}
+
 export interface IEventBus {
   on: EventListener['on'];
   emit: EventListener['emit'];
@@ -143,6 +148,12 @@ export class PointCloud extends EventListener {
 
   private workerLoading = false;
 
+  private raycaster = new THREE.Raycaster();
+
+  private pointer = new THREE.Vector2();
+
+  private pipe?: IPipeTypes;
+
   constructor({
     container,
     noAppend,
@@ -201,6 +212,35 @@ export class PointCloud extends EventListener {
       this.initSegment();
       this.isSegment = true;
     }
+
+    this.controls.addEventListener('rightClick', (event) => {
+      const rect = this.renderer.domElement.getBoundingClientRect();
+      const x = event.originalEvent.clientX - rect.left;
+      const y = event.originalEvent.clientY - rect.top;
+      this.pointer.x = (x / rect.width) * 2 - 1;
+      this.pointer.y = -(y / rect.height) * 2 + 1;
+      this.raycaster.setFromCamera(this.pointer, this.camera);
+
+      const clickMeshes: THREE.Object3D[] = [];
+      this.scene.children.forEach((child) => {
+        if (!(child instanceof THREE.Group)) return;
+        child.children.forEach((grandson) => {
+          if (grandson instanceof THREE.Mesh) {
+            clickMeshes.push(grandson);
+          }
+        });
+      });
+      const intersects = this.raycaster.intersectObjects(clickMeshes, false);
+      if (intersects.length > 0) {
+        const intersectedObject = intersects[0].object;
+        this.pipe?.setNeedUpdateCenter(false);
+        this.pipe?.setSelectedIDs([intersectedObject.userData.selectedID]);
+      }
+    });
+  }
+
+  public setHandlerPipe(pipe: IPipeTypes) {
+    this.pipe = pipe;
   }
 
   public initSegment() {
@@ -553,6 +593,12 @@ export class PointCloud extends EventListener {
       group.rotation.set(0, 0, rotation);
     }
     group.name = `box${id}`;
+    const clickGeometry = new THREE.BoxGeometry(width, height, depth);
+    const clickMaterial = new THREE.MeshBasicMaterial({ visible: false });
+    const clickMesh = new THREE.Mesh(clickGeometry, clickMaterial);
+    clickMesh.userData = { selectedID: id };
+    group.add(clickMesh);
+
     this.scene.add(group);
   };
 

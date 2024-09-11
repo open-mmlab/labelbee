@@ -136,6 +136,7 @@ const PointCloud3D: React.FC<IA2MapStateProps> = ({ currentData, config, highlig
   }, [size]);
   const { selectedBox } = useSingleBox();
   const { selectedSphere } = useSphere();
+  const [needUpdateCenter, setNeedUpdateCenter] = useState(true);
 
   const setTarget3DView = (perspectiveView: EPerspectiveView) => {
     const box = selectedBox?.info;
@@ -181,6 +182,7 @@ const PointCloud3D: React.FC<IA2MapStateProps> = ({ currentData, config, highlig
           orthographicParams: PointCloudUtils.getDefaultOrthographicParams(size),
           config,
         });
+        pointCloud.setHandlerPipe({setSelectedIDs: ptCtx.setSelectedIDs, setNeedUpdateCenter});
         ptCtx.setMainViewInstance(pointCloud);
       }
     }
@@ -224,6 +226,10 @@ const PointCloud3D: React.FC<IA2MapStateProps> = ({ currentData, config, highlig
      */
     const selectedId = selectedBox?.info?.id;
 
+    if (!needUpdateCenter) {
+      setNeedUpdateCenter(true);
+      return;
+    };
     if (selectedId !== undefined) {
       setTarget3DView(EPerspectiveView.Top);
 

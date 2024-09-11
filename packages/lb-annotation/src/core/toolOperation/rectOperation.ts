@@ -1263,6 +1263,7 @@ class RectOperation extends BasicToolOperation {
     }
 
     this.render();
+    return hoverRect;
   }
 
   public shiftRightMouseUp(e: MouseEvent) {
