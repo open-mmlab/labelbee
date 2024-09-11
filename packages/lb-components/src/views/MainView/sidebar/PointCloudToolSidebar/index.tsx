@@ -103,6 +103,9 @@ const BoxTrackIDInput = () => {
   const updateCurrentPolygonList = (newTrackID: number) => {
     const newPointCloudList = updateSelectedBox({ trackID: newTrackID });
     ptCtx?.topViewInstance?.updatePolygonList(newPointCloudList ?? []);
+    if (ptCtx.mainViewInstance && ptCtx.selectedPointCloudBox) {
+      ptCtx?.mainViewInstance.generateBox(ptCtx?.selectedPointCloudBox);
+    }
   };
 
   return (
