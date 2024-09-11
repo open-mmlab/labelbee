@@ -131,6 +131,14 @@ class PointCloud2DRectOperation extends RectOperation {
     this.render();
     this.updateDragResult();
   }
+
+  public rightMouseUp(e: MouseEvent) {
+    const hoverRect: (IRect & { boxID?: string }) | undefined = super.rightMouseUp(e);
+    if (hoverRect) {
+      this.emit('onRightClick', { event: e, targetId: hoverRect.boxID });
+    }
+    return hoverRect;
+  }
 }
 
 export default PointCloud2DRectOperation;

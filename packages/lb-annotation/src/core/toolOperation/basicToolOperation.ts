@@ -238,6 +238,7 @@ class BasicToolOperation extends EventListener {
     this.onLeftDblClick = this.onLeftDblClick.bind(this);
     this.onRightDblClick = this.onRightDblClick.bind(this);
     this.onClick = this.onClick.bind(this);
+    this.onRightClick = this.onRightClick.bind(this);
     this.clearImgDrag = this.clearImgDrag.bind(this);
 
     // 初始化监听事件
@@ -829,6 +830,7 @@ class BasicToolOperation extends EventListener {
     this.container.addEventListener('mouseleave', this.onMouseLeave);
     this.container.addEventListener('click', this.onClick);
     this.container.addEventListener('wheel', this.onWheel);
+    this.container.addEventListener('contextmenu', this.onRightClick);
     document.addEventListener('keydown', this.onKeyDown);
     document.addEventListener('keyup', this.onKeyUp);
     window.parent.document.addEventListener('contextmenu', this.onContextmenu, false);
@@ -841,6 +843,7 @@ class BasicToolOperation extends EventListener {
     this.container.removeEventListener('mouseleave', this.onMouseLeave);
     this.container.removeEventListener('wheel', this.onWheel);
     this.container.removeEventListener('click', this.onClick);
+    this.container.removeEventListener('contextmenu', this.onRightClick);
     document.removeEventListener('keydown', this.onKeyDown);
     document.removeEventListener('keyup', this.onKeyUp);
     window.parent.document.removeEventListener('contextmenu', this.onContextmenu, false);
@@ -966,6 +969,9 @@ class BasicToolOperation extends EventListener {
 
   // eslint-disable-next-line no-unused-vars
   public onClick(e: MouseEvent) {}
+
+  // eslint-disable-next-line no-unused-vars
+  public onRightClick(e: MouseEvent) {}
 
   // eslint-disable-next-line no-unused-vars
   public onLeftDblClick(e: MouseEvent) {

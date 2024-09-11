@@ -35,7 +35,7 @@ const PointCloud2DSingleView = ({
   const { url, fallbackUrl, calib, path } = view2dData;
   const { toggle2dVisible, isHighlightVisible } = useHighlight({ currentData });
   const [loading, setLoading] = useState(false);
-  const { highlight2DLoading, setHighlight2DLoading, cuboidBoxIn2DView, cacheImageNodeSize } =
+  const { highlight2DLoading, setHighlight2DLoading, cuboidBoxIn2DView, cacheImageNodeSize, setSelectedIDs } =
     useContext(PointCloudContext);
   const hiddenData = !view2dData;
 
@@ -119,6 +119,7 @@ const PointCloud2DSingleView = ({
             ratio: 0.4,
           }}
           measureVisible={measureVisible}
+          onRightClick={({targetId}) =>setSelectedIDs(targetId)}
         />
       ) : (
         <>
