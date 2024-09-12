@@ -1465,12 +1465,14 @@ export class PointCloud extends EventListener {
       if (!classInfo || !classInfo.subSelected) return; // If the type of the secondary attribute cannot be found, it will be returned directly
 
       const { key: classKey, subSelected } = classInfo;
-      const subItem = subSelected.find((item: { value: string }) => item.value === boxParams.subAttribute?.[key]);
+      subSelected.forEach((item) => {
+        const subAttributeKey = boxParams.subAttribute?.[key];
 
-      if (subItem) {
-        if (resultStr) resultStr += '、';
-        resultStr += `${classKey}:${subItem.key}`;
-      }
+        if (subAttributeKey?.includes(item.value)) {
+          if (resultStr) resultStr += '、';
+          resultStr += `${classKey}:${item.key}`;
+        }
+      });
     });
 
     return resultStr;

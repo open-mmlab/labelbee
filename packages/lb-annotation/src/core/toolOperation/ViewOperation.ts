@@ -461,7 +461,7 @@ export default class ViewOperation extends BasicToolOperation {
       const { fontStyle } = this.getRenderStyle(annotation);
       const polygon = annotation.annotation as IBasicPolygon;
       const curPointCloudBox = this.pointCloudBoxList?.find((item: IPointCloudBox) => item.id === polygon.id);
-      const headerText = this.hiddenText ? '' : curPointCloudBox?.attribute;
+      const headerText = this.hiddenText ? '' : `${curPointCloudBox?.trackID} ${curPointCloudBox?.attribute}`;
       const renderPolygon = AxisUtils.changePointListByZoom(polygon?.pointList ?? [], this.zoom, this.currentPos);
 
       if (headerText) {
