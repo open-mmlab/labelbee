@@ -1432,13 +1432,9 @@ export class PointCloud extends EventListener {
     const classLabel = this.findSubAttributeLabel(boxParams, this.config);
     const subAttributeLabel = classLabel ? `${boxParams.attribute}\n${classLabel}` : `${boxParams.attribute}`;
 
-    const { sprite, canvasWidth, canvasHeight } = this.generateLabel(subAttributeLabel, 100);
+    const { sprite, canvasHeight } = this.generateLabel(subAttributeLabel, 100);
 
-    sprite.position.set(
-      -boxParams.width / 2,
-      boxParams.height / 2 - canvasWidth / 200,
-      -boxParams.depth / 2 - canvasHeight / 150,
-    );
+    sprite.position.set(-boxParams.width / 2, 0, -boxParams.depth / 2 - canvasHeight / 150);
 
     return sprite;
   };
