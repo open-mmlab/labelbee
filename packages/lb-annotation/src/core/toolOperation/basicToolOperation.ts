@@ -830,7 +830,6 @@ class BasicToolOperation extends EventListener {
     this.container.addEventListener('mouseleave', this.onMouseLeave);
     this.container.addEventListener('click', this.onClick);
     this.container.addEventListener('wheel', this.onWheel);
-    this.container.addEventListener('contextmenu', this.onRightClick);
     document.addEventListener('keydown', this.onKeyDown);
     document.addEventListener('keyup', this.onKeyUp);
     window.parent.document.addEventListener('contextmenu', this.onContextmenu, false);
@@ -843,7 +842,6 @@ class BasicToolOperation extends EventListener {
     this.container.removeEventListener('mouseleave', this.onMouseLeave);
     this.container.removeEventListener('wheel', this.onWheel);
     this.container.removeEventListener('click', this.onClick);
-    this.container.removeEventListener('contextmenu', this.onRightClick);
     document.removeEventListener('keydown', this.onKeyDown);
     document.removeEventListener('keyup', this.onKeyUp);
     window.parent.document.removeEventListener('contextmenu', this.onContextmenu, false);
@@ -957,6 +955,10 @@ class BasicToolOperation extends EventListener {
     }
 
     this.startTime = 0;
+
+    if (e.button === 2) {
+      this.onRightClick(e);
+    }
     this.render();
   }
 

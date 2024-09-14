@@ -183,7 +183,6 @@ export default class ViewOperation extends BasicToolOperation {
 
   public onRightClick(e: MouseEvent): void {
     const targetId = this.getClickTargetId(e);
-    if (!targetId) return;
     this.needUpdatePosition = false;
     if (this.posTimer) {
       clearTimeout(this.posTimer);

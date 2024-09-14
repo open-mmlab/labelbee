@@ -241,7 +241,9 @@ export class PointCloud extends EventListener {
       if (intersects.length > 0) {
         const intersectedObject = intersects[0].object;
         this.pipe?.setNeedUpdateCenter(false);
-        this.pipe?.setSelectedIDs([intersectedObject.userData.selectedID]);
+        this.pipe?.setSelectedIDs(intersectedObject.userData.selectedID);
+      } else {
+        this.pipe?.setSelectedIDs(undefined);
       }
     });
   }
