@@ -121,7 +121,9 @@ export const LoadFileAndFileData =
     const { stepList, step } = getState().annotation;
     const currentIsVideo = StepUtils.currentToolIsVideo(step, stepList);
     const currentIsPointCloud = StepUtils.currentToolIsPointCloud(step, stepList);
-    const currentIsLLM = StepUtils.getCurrentStepInfo(step, stepList)?.tool === EToolName.LLM;
+    const currentIsLLM = [EToolName.LLM, EToolName.LLMMultiWheel].includes(
+      StepUtils.getCurrentStepInfo(step, stepList)?.tool,
+    );
     const currentIsNLP = StepUtils.getCurrentStepInfo(step, stepList)?.tool === EToolName.NLP;
     const currentIsAudio = StepUtils.currentToolIsAudio(step, stepList);
 

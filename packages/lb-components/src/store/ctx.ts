@@ -11,7 +11,7 @@ interface ILLMContext {
   setNewAnswerList: (value: IAnswerList[]) => void;
 }
 
-interface ILLMMultiMheelContext {
+interface ILLMMultiWheelContext {
   hoverKey: number;
   setHoverKey: (value: number) => void;
   selectKey: number;
@@ -39,7 +39,7 @@ export const NLPContext = React.createContext<INLPContext>({
   setHighlightKey: () => {},
 });
 
-export const LLMMultiMheelContext = React.createContext<ILLMMultiMheelContext>({
+export const LLMMultiWheelContext = React.createContext<ILLMMultiWheelContext>({
   hoverKey: -1,
   setHoverKey: () => {},
   selectKey: 1,

@@ -28,7 +28,7 @@ import AudioAnnotate from '@/components/audioAnnotate';
 import { LoadingOutlined } from '@ant-design/icons';
 import { useTranslation } from 'react-i18next';
 import { EPointCloudName } from '@labelbee/lb-annotation';
-import LLMMultiMheelLayout from './LLMMultiMheelLayout';
+import LLMMultiWheelLayout from './LLMMultiWheelLayout';
 
 interface IProps {
   path: string;
@@ -139,7 +139,7 @@ const MainView: React.FC<AppProps & IProps> = (props) => {
   if (isLLMMultiWheelTool) {
     return (
       <ViewportProviderLayout {...props}>
-        <LLMMultiMheelLayout {...props} />
+        <LLMMultiWheelLayout {...props} />
       </ViewportProviderLayout>
     );
   }
