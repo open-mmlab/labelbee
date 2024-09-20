@@ -27,6 +27,7 @@ import { useUpdateRectList } from './useUpdateRectList';
 import { TAfterImgOnLoad } from '../AnnotationView';
 import _ from 'lodash';
 import { useToolStyleContext } from '@/hooks/useToolStyle';
+import useToolConfigStore from '@/store/toolConfig';
 
 interface IPointCloud2DRectOperationViewProps {
   mappingData?: IMappingImg;
@@ -50,6 +51,7 @@ const PointCloud2DRectOperationView = (props: IPointCloud2DRectOperationViewProp
     afterImgOnLoad,
     shouldExcludePointCloudBoxListUpdate,
   } = props;
+  const { selectBoxVisibleSwitch } = useToolConfigStore();
 
   const imageUrl = mappingData?.url ?? '';
   const fallbackUrl = mappingData?.fallbackUrl ?? '';
@@ -146,7 +148,7 @@ const PointCloud2DRectOperationView = (props: IPointCloud2DRectOperationViewProp
 
   const handleRemoveRect = (rectList: IPointCloud2DRectOperationViewRect[]) => {
     if (rectList.length === 0) {
-      return
+      return;
     }
 
     if (!shouldExcludePointCloudBoxListUpdate) {
@@ -164,7 +166,7 @@ const PointCloud2DRectOperationView = (props: IPointCloud2DRectOperationViewProp
             return result;
           }
 
-          return null
+          return null;
         });
 
         return;
@@ -177,7 +179,7 @@ const PointCloud2DRectOperationView = (props: IPointCloud2DRectOperationViewProp
     if (matchedExtIdIDRect) {
       recoverSelectedIds(() => {
         // @ts-ignore
-        const { imageName, extId: boxID } = matchedExtIdIDRect
+        const { imageName, extId: boxID } = matchedExtIdIDRect;
         // NOTE maybe change selectIds
         const result = remove2DViewRectFn?.({ boxID, imageName });
 
@@ -187,7 +189,7 @@ const PointCloud2DRectOperationView = (props: IPointCloud2DRectOperationViewProp
           return result;
         }
 
-        return null
+        return null;
       });
     }
 
@@ -216,12 +218,29 @@ const PointCloud2DRectOperationView = (props: IPointCloud2DRectOperationViewProp
 
     // Case 2: Only show the selected ids
     const clonedSelectedIDs = selectedIDs.slice(0);
-    const img2dResult = selectSpecifiedRectsFromTopViewSelectedIds(
-      clonedSelectedIDs,
-      rectListByBoxList,
-      rectListInImage,
-    );
+    const img2dResult = selectBoxVisibleSwitch
+      ? selectSpecifiedRectsFromTopViewSelectedIds(
+          clonedSelectedIDs,
+          rectListByBoxList,
+          rectListInImage,
+        )
+      : [...rectListByBoxList, ...rectListInImage];
 
+    let highLightList: any = [];
+
+    // When the switch is turned off, highlight the 2D box of the corresponding 2D view in the selected top-down view
+    if (!selectBoxVisibleSwitch && selectedIDs?.length) {
+      highLightList = rectListByBoxList.filter((item) => {
+        // When selecting a rectangle, filter out the selected rectangle
+        if (selectedRectID) {
+          return selectedIDs.includes(item.boxID) && !selectedRectID.includes(item.boxID);
+        } else {
+          return selectedIDs.includes(item.boxID);
+        }
+      });
+    }
+
+    operation.current?.setHighLightRectList(highLightList);
     operation.current?.setResult(img2dResult);
 
     if (selectedRectID) {
@@ -229,7 +248,7 @@ const PointCloud2DRectOperationView = (props: IPointCloud2DRectOperationViewProp
     }
   });
 
-  const onRightClick = ({targetId}: { targetId: string }) => setSelectedIDs(targetId)
+  const onRightClick = ({ targetId }: { targetId: string }) => setSelectedIDs(targetId);
 
   useEffect(() => {
     if (ref.current) {
@@ -256,7 +275,6 @@ const PointCloud2DRectOperationView = (props: IPointCloud2DRectOperationViewProp
       };
     }
   }, []);
-
 
   useEffect(() => {
     const loadImage = async (url: string) => {
@@ -377,6 +395,10 @@ const PointCloud2DRectOperationView = (props: IPointCloud2DRectOperationViewProp
     // Set style and re-render `PointCloud2DRectOperation`
     instance.setStyle(newStyle);
   }, [toolStyle]);
+
+  useEffect(() => {
+    updateRectList();
+  }, [selectBoxVisibleSwitch]);
 
   return (
     <Spin spinning={loading}>

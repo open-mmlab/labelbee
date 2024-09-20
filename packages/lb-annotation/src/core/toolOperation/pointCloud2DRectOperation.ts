@@ -83,11 +83,16 @@ class PointCloud2DRectOperation extends RectOperation {
     return true;
   }
 
-  public renderDrawingRect(rect: IPointCloud2DRectOperationViewRect & IRect, zoom = this.zoom, isZoom = false) {
+  public renderDrawingRect(
+    rect: IPointCloud2DRectOperationViewRect & IRect,
+    zoom = this.zoom,
+    isZoom = false,
+    extraHightFlag = false,
+  ) {
     // 是否使用强制默认值，如： lineDash: [3]
     const shouldNotUseForceValue = rect?.boxID || rect?.lineDash;
 
-    super.renderDrawingRect(shouldNotUseForceValue ? rect : { ...rect, lineDash: [3] }, zoom, isZoom);
+    super.renderDrawingRect(shouldNotUseForceValue ? rect : { ...rect, lineDash: [3] }, zoom, isZoom, extraHightFlag);
   }
 
   /*

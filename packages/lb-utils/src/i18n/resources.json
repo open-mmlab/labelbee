@@ -373,7 +373,9 @@
     "Disconnect": "disconnect",
     "Image2DBoxScale": "Image 2D Box Scale",
     "SelectedRect": "Selected Rect",
-    "OnlyLoadTheFirstFramePreAnnotation": "Only load the first frame pre annotation"
+    "OnlyLoadTheFirstFramePreAnnotation": "Only load the first frame pre annotation",
+    "SelectBoxToDisplayIndependently": "Select box to display independently",
+    "SelectBoxSwitchTips": "After turning on the switch, select the box in the top view, and the image view will only display the corresponding 2D box, making it easier to view the corresponding relationship in the top view"
   },
   "cn": {
     "TextInput": "文本输入",
@@ -749,6 +751,8 @@
     "Disconnect": "断开",
     "Image2DBoxScale": "图片2D框体缩小处理",
     "SelectedRect": "选中框体",
-    "OnlyLoadTheFirstFramePreAnnotation": "仅载入第一帧预标注"
+    "OnlyLoadTheFirstFramePreAnnotation": "仅载入第一帧预标注",
+    "SelectBoxToDisplayIndependently": "选中框独立显示",
+    "SelectBoxSwitchTips": "开启开关后，选中俯视图的框体，图片视图仅显示对应的2D框体，便于查看俯视图的对应关系"
   }
 }
