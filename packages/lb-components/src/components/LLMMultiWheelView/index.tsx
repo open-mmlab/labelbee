@@ -21,11 +21,11 @@ interface IProps {
 const LLMMultiWheelView: React.FC<IProps> = (props) => {
   const { annotation } = props;
   const { imgIndex, imgList, stepList, step, toolInstance } = annotation;
-
   const [LLMConfig, setLLMConfig] = useState<ILLMMultiWheelToolConfig>();
   const { setSelectedID } = useLLMMultiWheelStore();
   const [dialogList, setDialogList] = useState([]);
-
+  const questionIsImg = LLMConfig?.dataType?.prompt === ELLMDataType.Picture;
+  const answerIsImg = LLMConfig?.dataType?.response === ELLMDataType.Picture;
   useEffect(() => {
     if (!imgList[imgIndex]) {
       return;
@@ -50,7 +50,15 @@ const LLMMultiWheelView: React.FC<IProps> = (props) => {
   return (
     <div className={`${LLMMultiWheelViewCls}-container`}>
       {dialogList?.map((item, index) => (
-        <DialogView {...item} key={index} index={index} isSelected={true} />
+        <DialogView
+          {...item}
+          key={index}
+          index={index}
+          isSelected={true}
+          questionIsImg={questionIsImg}
+          answerIsImg={answerIsImg}
+          LLMConfig={LLMConfig}
+        />
       ))}
     </div>
   );

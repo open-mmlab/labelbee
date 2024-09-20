@@ -46,7 +46,7 @@ interface IProps {
 
 export const LLMViewCls = `${prefix}-LLMView`;
 
-const RenderAnswer = ({
+export const RenderAnswer = ({
   i,
   dataFormatType,
   isTextControl,
@@ -66,6 +66,14 @@ const RenderAnswer = ({
     );
   }
   return <div style={{ whiteSpace: 'pre-wrap' }}>{i?.newAnswer || i?.answer}</div>;
+};
+
+export const getTextControlByConfig = (result: IAnswerList, LLMConfig: any) => {
+  if (LLMConfig?.isTextEdit) {
+    const textEdit = LLMConfig?.textEdit || [];
+    return !!textEdit.filter((v: ITextList) => v?.title === result.order)[0]?.textControl;
+  }
+  return false;
 };
 
 const QuestionView: React.FC<IProps> = (props) => {
@@ -91,18 +99,10 @@ const QuestionView: React.FC<IProps> = (props) => {
     }
   }, []);
 
-  const getTextControlByConfig = (result: IAnswerList) => {
-    if (LLMConfig?.isTextEdit) {
-      const textEdit = LLMConfig?.textEdit || [];
-      return !!textEdit.filter((v: ITextList) => v?.title === result.order)[0]?.textControl;
-    }
-    return false;
-  };
-
   const textAnswer = (
     <div>
       {answerList.map((i: IAnswerList, index: number) => {
-        const isTextControl = getTextControlByConfig(i);
+        const isTextControl = getTextControlByConfig(i, LLMConfig);
         return (
           <div
             className={classNames({

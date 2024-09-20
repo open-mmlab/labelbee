@@ -32,7 +32,7 @@ interface IProps {
 
 const LLMViewCls = `${prefix}-LLMView`;
 
-const Content = ({
+export const RenderQuestion = ({
   question,
   dataFormatType,
   isImg,
@@ -91,7 +91,7 @@ const Header = (props: IProps) => {
         />
       </div>
       <div className={`${LLMViewCls}__headerContent`}>
-        <Content question={question} dataFormatType={dataFormatType} isImg={isImg} />
+        <RenderQuestion question={question} dataFormatType={dataFormatType} isImg={isImg} />
       </div>
     </Resizable>
   );
