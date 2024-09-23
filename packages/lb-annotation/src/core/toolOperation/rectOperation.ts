@@ -71,6 +71,8 @@ class RectOperation extends BasicToolOperation {
   /** Whether or not add rect */
   private enableAddRect = true;
 
+  public renderPointCloud2DHighlight(): void {}
+
   constructor(props: IRectOperationProps) {
     super(props);
     this._drawOutSideTarget = props.drawOutSideTarget || false;
@@ -1646,7 +1648,7 @@ class RectOperation extends BasicToolOperation {
    * @param zoom  缩放比例
    * @param isZoom 是否进行缩放
    */
-  public renderDrawingRect(rect: IRect, zoom = this.zoom, isZoom = false) {
+  public renderDrawingRect(rect: IRect, zoom = this.zoom, isZoom = false, isPointCloud2DHighlight = false) {
     if (this.ctx && rect) {
       const { ctx, style } = this;
       // 不看图形信息
@@ -1715,7 +1717,8 @@ class RectOperation extends BasicToolOperation {
         // 高亮同textAttribute 的其他框
         isSameTextAttribute ||
         rect.id === this.selectedRectID ||
-        this.isMultiMoveMode
+        this.isMultiMoveMode ||
+        isPointCloud2DHighlight
       ) {
         DrawUtils.drawRectWithFill(this.canvas, transformRect, { color: fillColor });
       }
@@ -1817,6 +1820,9 @@ class RectOperation extends BasicToolOperation {
         }
       });
     }
+
+    // After selecting the top view, it is necessary to highlight the 2D box of the corresponding 2D view
+    this.renderPointCloud2DHighlight();
   }
 
   /**

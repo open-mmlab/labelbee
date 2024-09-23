@@ -20,6 +20,7 @@ import AnnotatedBox from './components/annotatedBox';
 import RectRotateSensitivitySlider from './components/rectRotateSensitivitySlider';
 import FindTrackIDIndex from './components/findTrackIDIndex';
 import FirstFrameDataSwitch from './components/firstFrameDataSwitch';
+import SelectBoxVisibleSwitch from './components/selectBoxVisibleSwitch';
 import { IFileItem } from '@/types/data';
 import {
   IInputList,
@@ -514,6 +515,7 @@ const PointCloudToolSidebar: React.FC<IProps> = ({
               <Divider style={{ margin: 0 }} />
               <RectRotateSensitivitySlider />
               {stepInfo.loadPreStep > 0 && <FirstFrameDataSwitch />}
+              <SelectBoxVisibleSwitch />
             </div>
           ) : (
             <div />
