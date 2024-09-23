@@ -80,6 +80,8 @@ const PointCloud2DRectOperationView = (props: IPointCloud2DRectOperationViewProp
 
   const [loading, setLoading] = useState(true);
 
+  const [rightClickRectId, setRightClickRectId] = useState<string>('');
+
   const rectListInImage = useMemo(
     () => rectList?.filter((item: IPointCloudBoxRect) => item.imageName === mappingData?.path),
     [mappingData?.path, rectList],
@@ -146,7 +148,7 @@ const PointCloud2DRectOperationView = (props: IPointCloud2DRectOperationViewProp
 
   const handleRemoveRect = (rectList: IPointCloud2DRectOperationViewRect[]) => {
     if (rectList.length === 0) {
-      return
+      return;
     }
 
     if (!shouldExcludePointCloudBoxListUpdate) {
@@ -164,7 +166,7 @@ const PointCloud2DRectOperationView = (props: IPointCloud2DRectOperationViewProp
             return result;
           }
 
-          return null
+          return null;
         });
 
         return;
@@ -177,7 +179,7 @@ const PointCloud2DRectOperationView = (props: IPointCloud2DRectOperationViewProp
     if (matchedExtIdIDRect) {
       recoverSelectedIds(() => {
         // @ts-ignore
-        const { imageName, extId: boxID } = matchedExtIdIDRect
+        const { imageName, extId: boxID } = matchedExtIdIDRect;
         // NOTE maybe change selectIds
         const result = remove2DViewRectFn?.({ boxID, imageName });
 
@@ -187,7 +189,7 @@ const PointCloud2DRectOperationView = (props: IPointCloud2DRectOperationViewProp
           return result;
         }
 
-        return null
+        return null;
       });
     }
 
@@ -209,7 +211,6 @@ const PointCloud2DRectOperationView = (props: IPointCloud2DRectOperationViewProp
 
   const updateRectList = useUpdateRectList(() => {
     const rectListByBoxList = shouldExcludePointCloudBoxListUpdate ? [] : getRectListByBoxList();
-    const selectedRectID = operation.current?.selectedRectID;
 
     // Case 1: Show all ids
     // const img2dResult = [...rectListByBoxList, ...rectListInImage]
@@ -223,13 +224,16 @@ const PointCloud2DRectOperationView = (props: IPointCloud2DRectOperationViewProp
     );
 
     operation.current?.setResult(img2dResult);
-
-    if (selectedRectID) {
-      operation.current?.setSelectedRectID(selectedRectID);
+    if (rightClickRectId) {
+      operation.current?.setSelectedRectID(rightClickRectId);
+      setRightClickRectId('');
     }
   });
 
-  const onRightClick = ({targetId}: { targetId: string }) => setSelectedIDs(targetId)
+  const onRightClick = ({ targetId, id }: { targetId: string; id: string }) => {
+    setSelectedIDs(targetId);
+    setRightClickRectId(id);
+  };
 
   useEffect(() => {
     if (ref.current) {
@@ -256,7 +260,6 @@ const PointCloud2DRectOperationView = (props: IPointCloud2DRectOperationViewProp
       };
     }
   }, []);
-
 
   useEffect(() => {
     const loadImage = async (url: string) => {
