@@ -213,6 +213,7 @@ const PointCloud2DRectOperationView = (props: IPointCloud2DRectOperationViewProp
 
   const updateRectList = useUpdateRectList(() => {
     const rectListByBoxList = shouldExcludePointCloudBoxListUpdate ? [] : getRectListByBoxList();
+    const selectedRectID = operation.current?.selectedRectID;
 
     // Case 1: Show all ids
     // const img2dResult = [...rectListByBoxList, ...rectListInImage]
@@ -243,6 +244,7 @@ const PointCloud2DRectOperationView = (props: IPointCloud2DRectOperationViewProp
 
     operation.current?.setHighLightRectList(highLightList);
     operation.current?.setResult(img2dResult);
+
     if (rightClickRectId) {
       operation.current?.setSelectedRectID(rightClickRectId);
       setRightClickRectId('');
