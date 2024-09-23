@@ -53,8 +53,6 @@ class RectOperation extends BasicToolOperation {
 
   public _textAttributeInstance?: TextAttributeClass;
 
-  public highLightRectList: IRect[] = [];
-
   private _drawOutSideTarget: boolean; // 是否能在边界外进行标注
 
   private selection: Selection;
@@ -72,6 +70,8 @@ class RectOperation extends BasicToolOperation {
 
   /** Whether or not add rect */
   private enableAddRect = true;
+
+  public renderPointCloud2DHighlight(): void {}
 
   constructor(props: IRectOperationProps) {
     super(props);
@@ -91,11 +91,6 @@ class RectOperation extends BasicToolOperation {
     this.setSelectedID = this.setSelectedID.bind(this);
     this.updateSelectedRectSubAttribute = this.updateSelectedRectSubAttribute.bind(this);
     this.selection = new Selection(this);
-    this.highLightRectList = [];
-  }
-
-  public setHighLightRectList(rectList: IRect[]) {
-    this.highLightRectList = rectList;
   }
 
   public setResult(rectList: IRect[]) {
@@ -1653,7 +1648,7 @@ class RectOperation extends BasicToolOperation {
    * @param zoom  缩放比例
    * @param isZoom 是否进行缩放
    */
-  public renderDrawingRect(rect: IRect, zoom = this.zoom, isZoom = false, extraHightFlag = false) {
+  public renderDrawingRect(rect: IRect, zoom = this.zoom, isZoom = false, isPointCloud2DHighlight = false) {
     if (this.ctx && rect) {
       const { ctx, style } = this;
       // 不看图形信息
@@ -1723,7 +1718,7 @@ class RectOperation extends BasicToolOperation {
         isSameTextAttribute ||
         rect.id === this.selectedRectID ||
         this.isMultiMoveMode ||
-        extraHightFlag
+        isPointCloud2DHighlight
       ) {
         DrawUtils.drawRectWithFill(this.canvas, transformRect, { color: fillColor });
       }
@@ -1827,19 +1822,7 @@ class RectOperation extends BasicToolOperation {
     }
 
     // After selecting the top view, it is necessary to highlight the 2D box of the corresponding 2D view
-    if (this.highLightRectList) {
-      this.highLightRectList.forEach((rect) => {
-        this.renderDrawingRect(rect, this.zoom, false, true);
-
-        if (renderEnhance.selectedRender) {
-          renderEnhance.selectedRender(
-            this.canvas,
-            AxisUtils.changeRectByZoom(rect, this.zoom, this.currentPos),
-            this.getRenderStyle(rect),
-          );
-        }
-      });
-    }
+    this.renderPointCloud2DHighlight();
   }
 
   /**

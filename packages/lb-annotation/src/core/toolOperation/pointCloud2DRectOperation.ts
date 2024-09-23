@@ -8,14 +8,23 @@ import { IPointCloud2DRectOperationViewRect } from '@labelbee/lb-utils';
 import EKeyCode from '@/constant/keyCode';
 import { RectOperation } from './rectOperation';
 import reCalcRect from './utils/reCalcRect';
+import AxisUtils from '@/utils/tool/AxisUtils';
 
 class PointCloud2DRectOperation extends RectOperation {
   // Whether it is in check mode
   public checkMode?: Boolean;
 
+  public highLightRectList: IRect[] = [];
+
   constructor(props: any) {
     super(props);
     this.checkMode = props.checkMode;
+    this.highLightRectList = [];
+  }
+
+  // Set highlighted point cloud 2D rectangular box list
+  public setHighLightRectList(rectList: IRect[]) {
+    this.highLightRectList = rectList;
   }
 
   // Disable creating new rect in checkMode
@@ -87,12 +96,36 @@ class PointCloud2DRectOperation extends RectOperation {
     rect: IPointCloud2DRectOperationViewRect & IRect,
     zoom = this.zoom,
     isZoom = false,
-    extraHightFlag = false,
+    isPointCloud2DHighlight = false,
   ) {
     // 是否使用强制默认值，如： lineDash: [3]
     const shouldNotUseForceValue = rect?.boxID || rect?.lineDash;
 
-    super.renderDrawingRect(shouldNotUseForceValue ? rect : { ...rect, lineDash: [3] }, zoom, isZoom, extraHightFlag);
+    super.renderDrawingRect(
+      shouldNotUseForceValue ? rect : { ...rect, lineDash: [3] },
+      zoom,
+      isZoom,
+      isPointCloud2DHighlight,
+    );
+  }
+
+  // The rendering function actually triggers the rendering of the parent class in the end
+  public renderPointCloud2DHighlight(): void {
+    const { renderEnhance = {} } = this;
+
+    if (this.highLightRectList) {
+      this.highLightRectList.forEach((rect: IRect) => {
+        this.renderDrawingRect(rect as IPointCloud2DRectOperationViewRect & IRect, this.zoom, false, true);
+
+        if (renderEnhance.selectedRender) {
+          renderEnhance.selectedRender(
+            this.canvas,
+            AxisUtils.changeRectByZoom(rect, this.zoom, this.currentPos),
+            this.getRenderStyle(rect),
+          );
+        }
+      });
+    }
   }
 
   /*

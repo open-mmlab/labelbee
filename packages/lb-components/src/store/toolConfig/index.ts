@@ -1,18 +1,11 @@
 import { create } from 'zustand';
+import { ToolConfigStore } from './types';
+import baseToolStateCreator from './baseToolConfig';
+import pointCloudToolStateCreator from './pointCloudToolConfig';
 
-interface toolConfigStore {
-  onlyLoadFirstData: boolean;
-  selectBoxVisibleSwitch: boolean;
-  setOnlyLoadFirstData: (onlyLoadFirstData: boolean) => void;
-  setSelectBoxVisibleSwitch: (selectBoxVisibleSwitch: boolean) => void;
-}
-
-const useToolConfigStore = create<toolConfigStore>((set) => ({
-  onlyLoadFirstData: false,
-  selectBoxVisibleSwitch: false,
-  setOnlyLoadFirstData: (onlyLoadFirstData) => set((state) => ({ onlyLoadFirstData })),
-  setSelectBoxVisibleSwitch: (selectBoxVisibleSwitch) =>
-    set((state) => ({ selectBoxVisibleSwitch })),
+const useToolConfigStore = create<ToolConfigStore>((set, get, api) => ({
+  ...baseToolStateCreator(set, get, api),
+  ...pointCloudToolStateCreator(set, get, api),
 }));
 
 export default useToolConfigStore;
