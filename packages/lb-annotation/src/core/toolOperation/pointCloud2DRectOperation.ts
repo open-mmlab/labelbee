@@ -6,9 +6,9 @@
 
 import { IPointCloud2DRectOperationViewRect } from '@labelbee/lb-utils';
 import EKeyCode from '@/constant/keyCode';
+import AxisUtils from '@/utils/tool/AxisUtils';
 import { RectOperation } from './rectOperation';
 import reCalcRect from './utils/reCalcRect';
-import AxisUtils from '@/utils/tool/AxisUtils';
 
 class PointCloud2DRectOperation extends RectOperation {
   // Whether it is in check mode

@@ -83,11 +83,16 @@ const PointCloud2DRectOperationView = (props: IPointCloud2DRectOperationViewProp
   const [loading, setLoading] = useState(true);
 
   const [rightClickRectId, setRightClickRectId] = useState<string>('');
+  // Peugeot used to record the status of boxes that need to be updated
+  const [isMemoryChange, setIsMemoryChange] = useState<boolean>(false);
 
   const rectListInImage = useMemo(
     () => rectList?.filter((item: IPointCloudBoxRect) => item.imageName === mappingData?.path),
     [mappingData?.path, rectList],
   );
+
+  // Save the previous rectListSnImage using useRef
+  const prevRectListRef = useRef(rectListInImage);
 
   const mappingDataPath = useLatest(mappingData?.path);
 
@@ -248,6 +253,15 @@ const PointCloud2DRectOperationView = (props: IPointCloud2DRectOperationViewProp
     if (rightClickRectId) {
       operation.current?.setSelectedRectID(rightClickRectId);
       setRightClickRectId('');
+    } else {
+      /**
+       *  In addition to right-click selection, special scenarios require recording the state of the box before resetting,
+       *  The setResult method will reset the state of all boxes in the current instance, and then use the setSelectedRectID method to reset the state of the previous boxes
+       */
+      if (isMemoryChange && selectedRectID) {
+        operation.current?.setSelectedRectID(selectedRectID);
+        setIsMemoryChange(false);
+      }
     }
   });
 
@@ -357,11 +371,23 @@ const PointCloud2DRectOperationView = (props: IPointCloud2DRectOperationViewProp
         ];
       });
     }
+    // When the attribute changes, it is necessary to record the status of the previous clicks
+    setIsMemoryChange(true);
     updateRectList();
   }, [defaultAttribute]);
 
   useEffect(() => {
-    updateRectList();
+    const prevRectList = prevRectListRef.current;
+    /**
+     *  When there are changes related to box content such as deletion, movement, size change, etc.,
+     *  it is necessary to record the previous state and maintain it
+     */
+    if (!_.isEqual(prevRectList, rectListInImage)) {
+      setIsMemoryChange(true);
+      updateRectList();
+      // Record the latest list of rectangles
+      prevRectListRef.current = rectListInImage;
+    }
   }, [rectListInImage]);
 
   useEffect(() => {
