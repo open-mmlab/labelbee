@@ -28,6 +28,7 @@ import AudioAnnotate from '@/components/audioAnnotate';
 import { LoadingOutlined } from '@ant-design/icons';
 import { useTranslation } from 'react-i18next';
 import { EPointCloudName } from '@labelbee/lb-annotation';
+import LLMMultiWheelLayout from './LLMMultiWheelLayout';
 
 interface IProps {
   path: string;
@@ -91,8 +92,12 @@ const ViewportProviderLayout = (props: AppProps & IProps & { children: any }) =>
   const { t } = useTranslation();
   const { stepList, step } = props;
   const currentToolName = getStepConfig(stepList, step)?.tool;
-  const hasLangNode = ![EToolName.LLM, EToolName.NLP].includes(currentToolName);
-  const hasHeaderOption = ![EToolName.LLM, EToolName.NLP].includes(currentToolName);
+  const hasLangNode = ![EToolName.LLM, EToolName.NLP, EToolName.LLMMultiWheel].includes(
+    currentToolName,
+  );
+  const hasHeaderOption = ![EToolName.LLM, EToolName.NLP, EToolName.LLMMultiWheel].includes(
+    currentToolName,
+  );
   const hasPredictTrackingIcon = [EPointCloudName.PointCloud].includes(currentToolName);
   return (
     <ViewportProvider>
@@ -128,8 +133,16 @@ const MainView: React.FC<AppProps & IProps> = (props) => {
   const currentToolName = getStepConfig(stepList, step)?.tool;
   const isLLMTool = EToolName.LLM === currentToolName;
   const isNLPTool = EToolName.NLP === currentToolName;
+  const isLLMMultiWheelTool = EToolName.LLMMultiWheel === currentToolName;
   const isAudioTool = ToolUtils.isAudioTool(currentToolName);
 
+  if (isLLMMultiWheelTool) {
+    return (
+      <ViewportProviderLayout {...props}>
+        <LLMMultiWheelLayout {...props} />
+      </ViewportProviderLayout>
+    );
+  }
   if (isLLMTool) {
     return (
       <ViewportProviderLayout {...props}>

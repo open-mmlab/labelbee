@@ -62,6 +62,11 @@ export interface ILLMToolConfig {
   inputList?: IInputList[];
 }
 
+export interface ILLMMultiWheelToolConfig
+  extends Omit<ILLMToolConfig, 'enableModelAPI' | 'modelAPIConfigList'> {
+  dialogSort?: boolean; // 对话排序
+}
+
 // LLM文本
 export interface ITextList {
   textId?: string;
@@ -104,8 +109,8 @@ export interface ILLMBoxResult {
   id: number;
   sort?: number[][];
   textAttribute?: ITextList[];
-  valid:boolean;
-  tagList?:ISelectedTags
+  valid: boolean;
+  tagList?: ISelectedTags;
 }
 
 export interface IInputList {
