@@ -122,6 +122,7 @@ export const LoadFileAndFileData =
     const currentIsVideo = StepUtils.currentToolIsVideo(step, stepList);
     const currentIsPointCloud = StepUtils.currentToolIsPointCloud(step, stepList);
     const currentIsLLM = [EToolName.LLM, EToolName.LLMMultiWheel].includes(
+      // @ts-ignore
       StepUtils.getCurrentStepInfo(step, stepList)?.tool,
     );
     const currentIsNLP = StepUtils.getCurrentStepInfo(step, stepList)?.tool === EToolName.NLP;

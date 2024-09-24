@@ -23,6 +23,7 @@ import {
   ITextList,
   ISelectedTags,
   IConfigUpdate,
+  ILLMMultiWheelToolConfig,
 } from '@/components/LLMToolView/types';
 import { useTranslation } from 'react-i18next';
 import { formatSort, getCurrentResultFromResultList, getRenderDataByResult } from '../utils/data';
@@ -38,7 +39,7 @@ interface IProps {
   dispatch: any;
   checkMode?: boolean;
 }
-interface IAnnotationResult {
+export interface IAnnotationResult {
   newSort?: IAnswerSort[][];
   waitSorts?: IWaitAnswerSort[];
   answerList?: IAnswerList[];
@@ -48,6 +49,57 @@ interface IAnnotationResult {
 
 const EKeyCode = cKeyCode.default;
 const sidebarCls = `${prefix}-sidebar`;
+
+export const EmptyConfig = () => {
+  const { t } = useTranslation();
+  return (
+    <div className={`${sidebarCls}`}>
+      <div
+        className={`${sidebarCls}__content`}
+        style={{ display: 'flex', justifyContent: 'center', alignItems: 'center' }}
+      >
+        <Empty
+          description={<span style={{ color: '#ccc' }}>{t('NoScoringScale')}</span>}
+          imageStyle={{
+            width: 200,
+            height: 200,
+          }}
+          image={<img src={emptySvg} />}
+        />
+      </div>
+    </div>
+  );
+};
+
+export const getLLMIsNoConfig = (LLMConfig?: ILLMMultiWheelToolConfig | ILLMToolConfig) => {
+  const {
+    indicatorScore = [],
+    indicatorDetermine = [],
+    text = [],
+    enableSort,
+    isTextEdit,
+    tagInputListConfigurable,
+    // @ts-ignore
+    dialogSort = false,
+  } = LLMConfig || {};
+
+  const hasIndicatorScore =
+    indicatorScore?.filter((i: IndicatorScore) => i.label && i.value && i.score)?.length > 0;
+
+  const hasIndicatorDetermine =
+    indicatorDetermine?.filter((i: IndicatorDetermine) => i.label && i.value)?.length > 0;
+  const hasText = text?.length > 0;
+  const noConfig = !(
+    hasIndicatorScore ||
+    hasIndicatorDetermine ||
+    hasText ||
+    enableSort ||
+    isTextEdit ||
+    tagInputListConfigurable ||
+    dialogSort
+  );
+  return noConfig;
+};
 
 const LLMToolSidebar = (props: IProps) => {
   const { annotation, dispatch, checkMode } = props;
@@ -183,52 +235,14 @@ const LLMToolSidebar = (props: IProps) => {
     setAnnotationResult({ ...annotationResult, answerList: newList || [] });
   };
 
-  const isNoConfig = () => {
-    const {
-      indicatorScore = [],
-      indicatorDetermine = [],
-      text = [],
-      enableSort,
-      isTextEdit,
-      tagInputListConfigurable,
-    } = LLMConfig || {};
+  const isNoConfig = useMemo(() => {
+    return getLLMIsNoConfig(LLMConfig);
+  }, [LLMConfig]);
 
-    const hasIndicatorScore =
-      indicatorScore?.filter((i: IndicatorScore) => i.label && i.value && i.score)?.length > 0;
-
-    const hasIndicatorDetermine =
-      indicatorDetermine?.filter((i: IndicatorDetermine) => i.label && i.value)?.length > 0;
-    const hasText = text?.length > 0;
-    const noConfig = !(
-      hasIndicatorScore ||
-      hasIndicatorDetermine ||
-      hasText ||
-      enableSort ||
-      isTextEdit ||
-      tagInputListConfigurable
-    );
-    return noConfig;
-  };
-
-  if (isNoConfig()) {
-    return (
-      <div className={`${sidebarCls}`}>
-        <div
-          className={`${sidebarCls}__content`}
-          style={{ display: 'flex', justifyContent: 'center', alignItems: 'center' }}
-        >
-          <Empty
-            description={<span style={{ color: '#ccc' }}>{t('NoScoringScale')}</span>}
-            imageStyle={{
-              width: 200,
-              height: 200,
-            }}
-            image={<img src={emptySvg} />}
-          />
-        </div>
-      </div>
-    );
+  if (isNoConfig) {
+    return <EmptyConfig />;
   }
+
   const {
     indicatorScore = [],
     indicatorDetermine = [],
@@ -247,51 +261,6 @@ const LLMToolSidebar = (props: IProps) => {
         <div style={{ fontSize: '18px', fontWeight: 500, padding: '0px 16px', marginTop: '16px' }}>
           {t('GlobalAnnotation')}
         </div>
-        {/* 全局模型排序 */}
-        <ModelSort
-          setSort={() => {}}
-          modelList={[
-            { id: 1, title: 11 },
-            { id: 2, title: 22 },
-            { id: 3, title: 33 },
-            { id: 4, title: 44 },
-          ]}
-          selectedSort={[[1], [2, 4]]}
-          title={t('SortConversationQuality')}
-          prefixId='model'
-        />
-        {/* 答案模型排序 */}
-        <ModelAnswerSort
-          maxAnswerList={[
-            { id: 'A1', answer: '1' },
-            { id: 'A2', answer: '2' },
-            { id: 'A3', answer: '3' },
-          ]}
-          modelData={[
-            {
-              id: 1,
-              answerList: [
-                { id: 'A1', answer: '11' },
-                { id: 'A2', answer: '21' },
-              ],
-            },
-            {
-              id: 2,
-              answerList: [
-                { id: 'A1', answer: '1' },
-                { id: 'A2', answer: '2' },
-                { id: 'A3', answer: '3' },
-              ],
-            },
-            {
-              id: 3,
-              answerList: [
-                { id: 'A1', answer: '13' },
-                { id: 'A2', answer: '23' },
-              ],
-            },
-          ]}
-        />
 
         {enableSort && (
           <AnswerSort

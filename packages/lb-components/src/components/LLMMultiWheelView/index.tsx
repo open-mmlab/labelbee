@@ -32,8 +32,7 @@ const LLMMultiWheelView: React.FC<IProps> = (props) => {
     }
     const currentData = imgList[imgIndex] ?? {};
     const dialogList = currentData?.questionList?.textList ?? [];
-    const result = getCurrentResultFromResultList(currentData?.result, step);
-    const currentResult = result?.length > 0 ? result[0] : result;
+
     setDialogList(dialogList);
     if (dialogList?.length) {
       setSelectedID(dialogList[0].id);
@@ -49,7 +48,7 @@ const LLMMultiWheelView: React.FC<IProps> = (props) => {
 
   return (
     <div className={`${LLMMultiWheelViewCls}-container`}>
-      {dialogList?.map((item, index) => (
+      {dialogList?.map((item: any, index) => (
         <DialogView
           {...item}
           key={index}
