@@ -10,9 +10,18 @@ import useLLMMultiWheelStore from '@/store/LLMMultiWheel';
 import { LLMMultiWheelViewCls } from '@/views/MainView/LLMMultiWheelLayout';
 import { ToggleDataFormatType } from '../LLMToolView/questionView/components/header';
 import DialogView from './dialogView';
+import { DrawLayerSlot } from '@/types/main';
+import MessageMaskLayer from '../messageMaskLayer';
+import AnnotationTips from '@/views/MainView/annotationTips';
+import { useTranslation } from 'react-i18next';
+import { LLMViewCls } from '../LLMToolView/questionView';
+import { Layout } from 'antd';
 
 interface IProps {
   annotation?: any;
+  showTips?: boolean;
+  tips?: string;
+  drawLayerSlot?: DrawLayerSlot;
 }
 
 interface ILLMMultiWheelSourceViewProps {
@@ -56,13 +65,16 @@ export const LLMMultiWheelSourceView: React.FC<ILLMMultiWheelSourceViewProps> = 
 };
 
 const LLMMultiWheelView: React.FC<IProps> = (props) => {
-  const { annotation } = props;
-  const { imgIndex, imgList, stepList, step } = annotation;
+  const { annotation, tips, showTips, drawLayerSlot } = props;
+  const { imgIndex, imgList, stepList, step, toolInstance } = annotation;
   const [LLMConfig, setLLMConfig] = useState<ILLMMultiWheelToolConfig>();
   const { setSelectedID } = useLLMMultiWheelStore();
   const [dialogList, setDialogList] = useState([]);
   const questionIsImg = LLMConfig?.dataType?.prompt === ELLMDataType.Picture;
   const answerIsImg = LLMConfig?.dataType?.response === ELLMDataType.Picture;
+  const { t } = useTranslation();
+  const [, forceRender] = useState(0);
+
   useEffect(() => {
     if (!imgList[imgIndex]) {
       return;
@@ -83,13 +95,29 @@ const LLMMultiWheelView: React.FC<IProps> = (props) => {
     }
   }, [stepList, step]);
 
+  useEffect(() => {
+    if (toolInstance) {
+      toolInstance.on('validUpdated', () => {
+        forceRender((s) => s + 1);
+      });
+      return () => {
+        toolInstance.unbindAll('validUpdated');
+      };
+    }
+  }, [toolInstance]);
+
   return (
-    <LLMMultiWheelSourceView
-      questionIsImg={questionIsImg}
-      answerIsImg={answerIsImg}
-      LLMConfig={LLMConfig}
-      dialogList={dialogList}
-    />
+    <Layout className={LLMViewCls}>
+      {!toolInstance?.valid && <MessageMaskLayer message={t('InvalidQuestionAndSkip')} />}
+      {drawLayerSlot?.({})}
+      {showTips === true && <AnnotationTips tips={tips} />}
+      <LLMMultiWheelSourceView
+        questionIsImg={questionIsImg}
+        answerIsImg={answerIsImg}
+        LLMConfig={LLMConfig}
+        dialogList={dialogList}
+      />
+    </Layout>
   );
 };
 

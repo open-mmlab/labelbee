@@ -29,7 +29,11 @@ const LLMMultiWheelLayout: React.FC<AppProps & IProps> = (props) => {
           [`${prefix}-LLMLayout`]: true,
         })}
       >
-        <LLMMultiWheelView />
+        <LLMMultiWheelView
+          showTips={props.showTips}
+          tips={props.tips}
+          drawLayerSlot={props.drawLayerSlot}
+        />
         <ToolFooter style={props.style?.footer} mode={props.mode} footer={props?.footer} />
       </Content>
       <Sider className={`${layoutCls}__side`} width={600} style={{ position: 'relative' }}>
