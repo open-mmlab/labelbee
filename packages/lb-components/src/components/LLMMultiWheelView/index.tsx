@@ -1,26 +1,63 @@
-import React, { useContext, useEffect, useState } from 'react';
-
-import { connect } from 'react-redux';
+import React, { useEffect, useState } from 'react';
+import { ELLMDataType } from '@/constant';
 import { AppState } from '@/store';
 import { getStepConfig } from '@/store/annotation/reducer';
-import { getCurrentResultFromResultList } from '../LLMToolView/utils/data';
-import { jsonParser } from '@/utils';
-import { ILLMMultiWheelToolConfig } from '../LLMToolView/types';
-import { ELLMDataType, prefix } from '@/constant';
-import { Layout } from 'antd/es';
 import { LabelBeeContext } from '@/store/ctx';
-import QuestionView from '../LLMToolView/questionView';
-import DialogView from './dialogView';
-import { LLMMultiWheelViewCls } from '@/views/MainView/LLMMultiWheelLayout';
+import { jsonParser } from '@/utils';
+import { connect } from 'react-redux';
+import { ILLMMultiWheelToolConfig } from '../LLMToolView/types';
 import useLLMMultiWheelStore from '@/store/LLMMultiWheel';
+import { LLMMultiWheelViewCls } from '@/views/MainView/LLMMultiWheelLayout';
+import { ToggleDataFormatType } from '../LLMToolView/questionView/components/header';
+import DialogView from './dialogView';
 
 interface IProps {
   annotation?: any;
 }
 
+interface ILLMMultiWheelSourceViewProps {
+  questionIsImg: boolean;
+  answerIsImg: boolean;
+  LLMConfig?: ILLMMultiWheelToolConfig;
+  dialogList: any[];
+}
+
+export const LLMMultiWheelSourceView: React.FC<ILLMMultiWheelSourceViewProps> = (props) => {
+  const { questionIsImg, answerIsImg, LLMConfig, dialogList } = props;
+  const { dataFormatType, setDataFormatType } = useLLMMultiWheelStore();
+  return (
+    <div className={`${LLMMultiWheelViewCls}`}>
+      <div
+        style={{
+          display: 'flex',
+          justifyContent: 'flex-end',
+        }}
+      >
+        <ToggleDataFormatType
+          dataFormatType={dataFormatType}
+          setDataFormatType={setDataFormatType}
+        />
+      </div>
+
+      <div className={`${LLMMultiWheelViewCls}-container`}>
+        {dialogList?.map((item: any, index: number) => (
+          <DialogView
+            {...item}
+            key={index}
+            index={index}
+            questionIsImg={questionIsImg}
+            answerIsImg={answerIsImg}
+            LLMConfig={LLMConfig}
+          />
+        ))}
+      </div>
+    </div>
+  );
+};
+
 const LLMMultiWheelView: React.FC<IProps> = (props) => {
   const { annotation } = props;
-  const { imgIndex, imgList, stepList, step, toolInstance } = annotation;
+  const { imgIndex, imgList, stepList, step } = annotation;
   const [LLMConfig, setLLMConfig] = useState<ILLMMultiWheelToolConfig>();
   const { setSelectedID } = useLLMMultiWheelStore();
   const [dialogList, setDialogList] = useState([]);
@@ -47,19 +84,12 @@ const LLMMultiWheelView: React.FC<IProps> = (props) => {
   }, [stepList, step]);
 
   return (
-    <div className={`${LLMMultiWheelViewCls}-container`}>
-      {dialogList?.map((item: any, index) => (
-        <DialogView
-          {...item}
-          key={index}
-          index={index}
-          isSelected={true}
-          questionIsImg={questionIsImg}
-          answerIsImg={answerIsImg}
-          LLMConfig={LLMConfig}
-        />
-      ))}
-    </div>
+    <LLMMultiWheelSourceView
+      questionIsImg={questionIsImg}
+      answerIsImg={answerIsImg}
+      LLMConfig={LLMConfig}
+      dialogList={dialogList}
+    />
   );
 };
 
