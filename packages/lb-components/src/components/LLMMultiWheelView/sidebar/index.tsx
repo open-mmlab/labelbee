@@ -4,8 +4,8 @@
  * @createdate 2024-9-24
  */
 
-import React, { useState, useEffect, useContext, useMemo } from 'react';
-import { LabelBeeContext, LLMContext } from '@/store/ctx';
+import React, { useState, useEffect, useMemo, useRef } from 'react';
+import { LabelBeeContext } from '@/store/ctx';
 import { connect } from 'react-redux';
 
 import { AppState } from '@/store';
@@ -14,11 +14,14 @@ import {
   ILLMMultiWheelToolConfig,
   IAnswerList,
   IConfigUpdate,
+  IAnswerSort,
+  IWaitAnswerSort,
 } from '@/components/LLMToolView/types';
 import { getStepConfig } from '@/store/annotation/reducer';
 import { jsonParser } from '@/utils';
-import ModelSort from '@/components/LLMToolView/sidebar/components/modelSort';
-import ModelAnswerSort from '@/components/LLMToolView/sidebar/components/modelAnswerSort';
+import ModelAnswerSort, {
+  getSorts,
+} from '@/components/LLMToolView/sidebar/components/modelAnswerSort';
 import { useTranslation } from 'react-i18next';
 import { useCustomToolInstance } from '@/hooks/annotation';
 import { isArray, isBoolean, isNumber, isObject, isString } from 'lodash';
@@ -35,6 +38,8 @@ import {
   getRenderDataByResult,
 } from '@/components/LLMToolView/utils/data';
 import { useMemoizedFn } from 'ahooks';
+import { ITextList } from '../types';
+import AnswerSort from '@/components/LLMToolView/sidebar/components/answerSort';
 
 const EKeyCode = cKeyCode.default;
 
@@ -53,6 +58,18 @@ interface ILLMAnnotationResultMap {
   };
 }
 
+interface IGlobalResult {
+  sort: Array<number[]>;
+  answerSort: { [key: string]: number[] };
+  textAttribute: ITextList[];
+}
+
+const initGlobalResult = {
+  sort: [],
+  answerSort: {},
+  textAttribute: [],
+};
+
 const LLMMultiWheelToolSidebar = (props: IProps) => {
   const { annotation, dispatch, checkMode } = props;
   const { imgIndex, imgList, stepList, step, skipBeforePageTurning } = annotation;
@@ -64,6 +81,13 @@ const LLMMultiWheelToolSidebar = (props: IProps) => {
   const [valid, setValid] = useState(true);
   const [annotationResultMap, setAnnotationResultMap] = useState<ILLMAnnotationResultMap>({});
   const { selectedID } = useLLMMultiWheelStore();
+  const [globalResult, setGlobalResult] = useState<IGlobalResult>(initGlobalResult);
+  const answerSortRef = useRef<any>();
+  const sortRef = useRef<any>();
+  const [sortData, setSortData] = useState<{
+    newSort?: IAnswerSort[][];
+    waitSorts?: IWaitAnswerSort[];
+  }>({});
 
   const currentLLMAnnotationResult = useMemo(() => {
     return annotationResultMap[selectedID];
@@ -90,6 +114,15 @@ const LLMMultiWheelToolSidebar = (props: IProps) => {
 
   const clearResult = () => {
     initResult(currentData?.questionList?.textList);
+    if (answerSortRef.current?.clearValue) {
+      answerSortRef.current?.clearValue();
+    }
+    const { waitSorts } = getSorts({
+      selectedSort: getCurrentResult()?.sort ?? [],
+      initSelected: [],
+      modelList: dialogSort ? modelList ?? [] : [],
+    });
+    setSortData({ ...sortData, waitSorts, newSort: [] });
   };
 
   const onSetValid = (newValid?: boolean) => {
@@ -101,9 +134,13 @@ const LLMMultiWheelToolSidebar = (props: IProps) => {
     }
   };
 
-  const initResult = (initData?: any) => {
+  const getCurrentResult = () => {
     const currentStepInfo = StepUtils.getCurrentStepInfo(step, stepList);
-    const result: any = getCurrentResultFromResultList(currentData?.result, currentStepInfo.step);
+    return getCurrentResultFromResultList(currentData?.result, currentStepInfo.step);
+  };
+
+  const initResult = (initData?: any) => {
+    const result: any = getCurrentResult();
 
     let sourceData = currentData?.questionList?.textList;
 
@@ -113,9 +150,11 @@ const LLMMultiWheelToolSidebar = (props: IProps) => {
     if (initData) {
       sourceData = initData;
       result.sort = [];
+      result.textAttribute = [];
+      result.answerSort = [];
     }
-    let tmpMap: ILLMAnnotationResultMap = {};
 
+    let tmpMap: ILLMAnnotationResultMap = {};
     sourceData?.forEach((item: any, modelIndex: number) => {
       const data = getRenderDataByResult(LLMConfig, {
         ...item,
@@ -132,13 +171,23 @@ const LLMMultiWheelToolSidebar = (props: IProps) => {
         id: item.id,
       };
     });
+    const { waitSorts, newSort } = getSorts({
+      selectedSort: getCurrentResult()?.sort ?? [],
+      modelList: dialogSort ? modelList ?? [] : [],
+    });
+    setSortData({ waitSorts, newSort });
 
+    setGlobalResult({
+      sort: result?.sort ?? [],
+      textAttribute: result?.textAttribute ?? [],
+      answerSort: result?.answerSort ?? [],
+    });
     setAnnotationResultMap(tmpMap);
   };
 
   useEffect(() => {
     setExportData();
-  }, [annotationResultMap, valid]);
+  }, [annotationResultMap, valid, globalResult]);
 
   useEffect(() => {
     window.addEventListener('keydown', onKeyDown);
@@ -156,7 +205,7 @@ const LLMMultiWheelToolSidebar = (props: IProps) => {
       };
     });
 
-    const result = { modelData };
+    const result = { ...globalResult, modelData };
     toolInstanceRef.current.exportData = () => {
       return [[result], { valid }];
     };
@@ -209,6 +258,14 @@ const LLMMultiWheelToolSidebar = (props: IProps) => {
     });
   });
 
+  // Used to update global results
+  const updateGlobalValue = (key: string, value: any) => {
+    setGlobalResult((prevState) => ({
+      ...prevState,
+      [key]: value,
+    }));
+  };
+
   const {
     indicatorScore = [],
     indicatorDetermine = [],
@@ -244,65 +301,45 @@ const LLMMultiWheelToolSidebar = (props: IProps) => {
   const hasTagList = tagInputListConfigurable && inputList.filter((i) => !i.isOverall)?.length > 0;
   const showAnwerList =
     indicatorDetermine?.length > 0 || indicatorScore?.length > 0 || isTextEdit || hasTagList;
+
   return (
     <div className={`${sidebarCls}`}>
       <div className={`${sidebarCls}__content`}>
         <div style={{ fontSize: '18px', fontWeight: 500, padding: '0px 16px', marginTop: '16px' }}>
           {t('GlobalAnnotation')}
         </div>
+        {/* Global Model sort */}
+        <AnswerSort
+          waitSortList={sortData?.waitSorts || []}
+          sortList={sortData?.newSort || []}
+          setSortList={(value) => {
+            const sort = value.map((i) => i.map((item) => item.id));
+            updateGlobalValue('sort', sort);
+            setSortData({ ...sortData, newSort: value });
+          }}
+          disabeledAll={disabeledAll}
+          title={t('SortConversationQuality')}
+          prefixId='model'
+        />
 
-        {/* 全局模型排序 */}
-        {dialogSort && (
-          <ModelSort
-            setSort={() => {}}
-            modelList={dialogSort ? modelList ?? [] : []}
-            title={t('SortConversationQuality')}
-            prefixId='model'
-          />
-        )}
-
-        {/* 文本输入 */}
+        {/* Global text input */}
         {LLMConfig?.text && (
           <div style={{ padding: '0px 16px', marginTop: '16px' }}>
             <TextInputBox
-              textAttribute={[]}
+              textAttribute={globalResult?.textAttribute ?? []}
               textConfig={LLMConfig?.text && isArray(LLMConfig.text) ? LLMConfig?.text : []}
-              setText={(v) => {}}
+              setText={(v) => updateGlobalValue('textAttribute', v)}
               disabeledAll={disabeledAll}
             />
           </div>
         )}
-        {/* 答案模型排序 */}
+        {/* Answer Model sort */}
         <ModelAnswerSort
-          maxAnswerList={[
-            { id: 'A1', answer: '1' },
-            { id: 'A2', answer: '2' },
-            { id: 'A3', answer: '3' },
-          ]}
-          modelData={[
-            {
-              id: 1,
-              answerList: [
-                { id: 'A1', answer: '11' },
-                { id: 'A2', answer: '21' },
-              ],
-            },
-            {
-              id: 2,
-              answerList: [
-                { id: 'A1', answer: '1' },
-                { id: 'A2', answer: '2' },
-                { id: 'A3', answer: '3' },
-              ],
-            },
-            {
-              id: 3,
-              answerList: [
-                { id: 'A1', answer: '13' },
-                { id: 'A2', answer: '23' },
-              ],
-            },
-          ]}
+          modelData={currentData?.questionList?.textList ?? []}
+          selectedAnswerSort={(v) => updateGlobalValue('answerSort', v)}
+          selectedSort={getCurrentResult()?.answerSort ?? []}
+          ref={answerSortRef}
+          disabeledAll={disabeledAll}
         />
         {currentLLMAnnotationResult && (
           <>

@@ -82,7 +82,7 @@ export interface ITextList {
 
 // 单个答案
 export interface IWaitAnswerSort {
-  title: number;
+  title: number | string;
   id: number;
 }
 
@@ -98,7 +98,7 @@ export interface ITagVertexPoint {
   tr: IPoint;
 }
 export interface IAnswerSort {
-  title: number;
+  title: number | string;
   id: number;
   tagCenterPoint?: IPoint;
   tagVertexPoint?: ITagVertexPoint;

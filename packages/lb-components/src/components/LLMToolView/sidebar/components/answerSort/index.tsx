@@ -182,7 +182,6 @@ const AnswerSort = (props: IProps) => {
 
   const formatSortList = () => {
     const sortBox = document.getElementById(sortBoxId);
-
     if (sortBox?.childNodes) {
       let newSortList: IAnswerSort[][] = [];
       sortBox.childNodes.forEach((item: any, nodeIndex: number) => {
@@ -245,6 +244,7 @@ const AnswerSort = (props: IProps) => {
       if (!sourceTagCenterPoint.x || !sourceTagCenterPoint.y) {
         return;
       }
+
       // 不以拖动的tag做参照
       if (getAttributeIndex(e.target.id) === tagNearest[0]?.id) {
         setTargetTagKey(undefined);
@@ -340,7 +340,7 @@ const AnswerSort = (props: IProps) => {
               answers.map((i: IWaitAnswerSort) =>
                 singleAnswerItem({
                   item: i,
-                  id: `waitBoxItem${SEGMENTATION_OF_KEY}${i?.id}`,
+                  id: `${waitBoxId}-waitBoxItem${SEGMENTATION_OF_KEY}${i?.id}`,
                   operation: {
                     onDrag: onDrag,
                     onDragEnd: onDragEnd,
@@ -362,7 +362,7 @@ const AnswerSort = (props: IProps) => {
                   {i.map((item: IAnswerSort) =>
                     singleAnswerItem({
                       item,
-                      id: `sortBoxItem${SEGMENTATION_OF_KEY}${item?.id}`,
+                      id: `${sortBoxId}-sortBoxItem${SEGMENTATION_OF_KEY}${item?.id}`,
                       operation: {
                         onDrag: onDrag,
                         onDragEnd: onDragEnd,

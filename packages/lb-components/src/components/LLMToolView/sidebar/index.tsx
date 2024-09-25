@@ -31,8 +31,6 @@ import emptySvg from '@/assets/annotation/LLMTool/empty.svg';
 import TextInputBox from './components/textInputBox';
 import OverallTagList from '@/components/tagList/components/overall';
 import StepUtils from '@/utils/StepUtils';
-import ModelSort from './components/modelSort';
-import ModelAnswerSort from './components/modelAnswerSort';
 
 interface IProps {
   annotation?: any;
