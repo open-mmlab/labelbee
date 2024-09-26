@@ -83,7 +83,11 @@ const updateToolInstance = (annotation: AnnotationState, imgNode: HTMLImageEleme
     return;
   }
 
-  if ([EToolName.LLM as string, EToolName.NLP as string].includes(stepConfig?.tool)) {
+  if (
+    [EToolName.LLM as string, EToolName.NLP as string, EToolName.LLMMultiWheel].includes(
+      stepConfig?.tool,
+    )
+  ) {
     return;
   }
 
@@ -117,7 +121,10 @@ export const LoadFileAndFileData =
     const { stepList, step } = getState().annotation;
     const currentIsVideo = StepUtils.currentToolIsVideo(step, stepList);
     const currentIsPointCloud = StepUtils.currentToolIsPointCloud(step, stepList);
-    const currentIsLLM = StepUtils.getCurrentStepInfo(step, stepList)?.tool === EToolName.LLM;
+    const currentIsLLM = [EToolName.LLM, EToolName.LLMMultiWheel].includes(
+      // @ts-ignore
+      StepUtils.getCurrentStepInfo(step, stepList)?.tool,
+    );
     const currentIsNLP = StepUtils.getCurrentStepInfo(step, stepList)?.tool === EToolName.NLP;
     const currentIsAudio = StepUtils.currentToolIsAudio(step, stepList);
 

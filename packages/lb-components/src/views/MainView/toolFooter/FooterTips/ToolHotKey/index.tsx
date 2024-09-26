@@ -19,7 +19,7 @@ import scribbleShortCutTable from './scribble';
 import cuboidShortCutTable from './cuboid';
 import LLMShortCutTable from './LLM';
 import NLPShortCutTable from './NLP';
-import audioTextShortCutTable from './audioText'
+import audioTextShortCutTable from './audioText';
 
 import { footerCls } from '../../index';
 import { useTranslation } from 'react-i18next';
@@ -63,6 +63,7 @@ export const shortCutTable: { [a: string]: IShortCutInfo[] } = {
   [EToolName.ScribbleTool]: scribbleShortCutTable,
   [EToolName.Cuboid]: cuboidShortCutTable,
   [EToolName.LLM]: LLMShortCutTable,
+  [EToolName.LLMMultiWheel]: LLMShortCutTable,
   [EToolName.NLP]: NLPShortCutTable,
   [EAudioToolName.AudioTextTool]: audioTextShortCutTable,
 };

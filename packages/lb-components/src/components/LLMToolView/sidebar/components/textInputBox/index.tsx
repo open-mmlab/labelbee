@@ -12,13 +12,12 @@ import LongText from '@/components/longText';
 interface IProps {
   textAttribute: ITextList[];
   disabeledAll?: boolean;
-  LLMConfig?: ILLMToolConfig;
   setText: (value: ITextList[]) => void;
+  textConfig: ITextList[];
 }
 
 const TextInputBox = (props: IProps) => {
-  const { disabeledAll, LLMConfig, textAttribute, setText } = props;
-  const textConfig = LLMConfig?.text && isArray(LLMConfig.text) ? LLMConfig?.text : [];
+  const { disabeledAll, textConfig, textAttribute, setText } = props;
   const { TextArea } = Input;
   const [form] = Form.useForm();
   const { t } = useTranslation();

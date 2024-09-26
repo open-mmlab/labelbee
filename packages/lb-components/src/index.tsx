@@ -33,6 +33,7 @@ import SubAttributeList from './components/subAttributeList';
 import { ToolStyleProvider } from './hooks/useToolStyle';
 import { LoadFileAndFileData } from './store/annotation/reducer';
 import useToolConfigStore from '@/store/toolConfig';
+import { LLMMultiWheelSourceView } from './components/LLMMultiWheelView';
 
 export const store = configureStore();
 
@@ -90,6 +91,7 @@ export {
   AnnotationView,
   PointCloudAnnotationView,
   QuestionView,
+  LLMMultiWheelSourceView,
   TextContent,
   LLMToolView,
   i18n,

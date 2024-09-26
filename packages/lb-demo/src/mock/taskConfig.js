@@ -312,6 +312,52 @@ const LLMToolConfig = {
   ],
 };
 
+const LLMMultiWheelToolConfig = {
+  enableSort: true, // 开启答案排序
+  enableTextAttribute: true, // 文本标注
+  score: 7, // 答案评分
+  indicatorScore: [
+    { label: '可读性', value: 'readability', text: '阅读起来是否顺畅', score: 10 },
+    { label: '不可读性', value: 'unReadability', text: '偶是基督教精神', score: 10 },
+  ], // 指标评分
+  indicatorDetermine: [
+    { label: '包含敏感信息', value: 'sensitiveInfo' },
+    { label: '包含敏感信息2', value: 'sensitiveInfo2' },
+  ], // 指标判断
+  dataType: {
+    prompt: 'picture',
+    response: 'text',
+  },
+  isTextEdit: true, // 是否打开文本编辑
+  textEdit: [
+    {
+      title: 1,
+      min: 11,
+      max: 1000,
+      isFillAnswer: true, // 是否填充答案
+      isLaText: true, // 是否打开LaTex编辑
+      textControl: true, // 文本对照
+    },
+    {
+      title: 2,
+      min: 10,
+      isFillAnswer: false, // 是否填充答案
+      textControl: true, // 文本对照
+    },
+    {
+      title: 3,
+      max: 100,
+      isFillAnswer: true, // 是否填充答案
+      textControl: false, // 文本对照
+    },
+    {
+      title: 4,
+      isFillAnswer: false, // 是否填充答案
+      textControl: false, // 文本对照
+    },
+  ],
+};
+
 const NLPToolConfig = {
   indicatorDetermine: [
     {
@@ -480,6 +526,10 @@ export const getConfig = (tool) => {
 
   if (tool === EToolName.LLM) {
     return LLMToolConfig;
+  }
+
+  if (tool === EToolName.LLMMultiWheel) {
+    return LLMMultiWheelToolConfig;
   }
 
   if (tool === EToolName.NLP) {

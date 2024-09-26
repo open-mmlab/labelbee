@@ -4,7 +4,7 @@ import { Button, Empty } from 'antd';
 import AnswerSort from './components/answerSort';
 import { AppState } from '@/store';
 import { connect } from 'react-redux';
-import { isBoolean, isNumber, isObject, isString } from 'lodash';
+import { isArray, isBoolean, isNumber, isObject, isString } from 'lodash';
 import AnswerList from './components/answerList';
 import { LabelBeeContext, LLMContext } from '@/store/ctx';
 import { jsonParser } from '@/utils';
@@ -23,6 +23,7 @@ import {
   ITextList,
   ISelectedTags,
   IConfigUpdate,
+  ILLMMultiWheelToolConfig,
 } from '@/components/LLMToolView/types';
 import { useTranslation } from 'react-i18next';
 import { formatSort, getCurrentResultFromResultList, getRenderDataByResult } from '../utils/data';
@@ -30,13 +31,15 @@ import emptySvg from '@/assets/annotation/LLMTool/empty.svg';
 import TextInputBox from './components/textInputBox';
 import OverallTagList from '@/components/tagList/components/overall';
 import StepUtils from '@/utils/StepUtils';
+import ModelSort from './components/modelSort';
+import ModelAnswerSort from './components/modelAnswerSort';
 
 interface IProps {
   annotation?: any;
   dispatch: any;
   checkMode?: boolean;
 }
-interface IAnnotationResult {
+export interface IAnnotationResult {
   newSort?: IAnswerSort[][];
   waitSorts?: IWaitAnswerSort[];
   answerList?: IAnswerList[];
@@ -46,6 +49,57 @@ interface IAnnotationResult {
 
 const EKeyCode = cKeyCode.default;
 const sidebarCls = `${prefix}-sidebar`;
+
+export const EmptyConfig = () => {
+  const { t } = useTranslation();
+  return (
+    <div className={`${sidebarCls}`}>
+      <div
+        className={`${sidebarCls}__content`}
+        style={{ display: 'flex', justifyContent: 'center', alignItems: 'center' }}
+      >
+        <Empty
+          description={<span style={{ color: '#ccc' }}>{t('NoScoringScale')}</span>}
+          imageStyle={{
+            width: 200,
+            height: 200,
+          }}
+          image={<img src={emptySvg} />}
+        />
+      </div>
+    </div>
+  );
+};
+
+export const getLLMIsNoConfig = (LLMConfig?: ILLMMultiWheelToolConfig | ILLMToolConfig) => {
+  const {
+    indicatorScore = [],
+    indicatorDetermine = [],
+    text = [],
+    enableSort,
+    isTextEdit,
+    tagInputListConfigurable,
+    // @ts-ignore
+    dialogSort = false,
+  } = LLMConfig || {};
+
+  const hasIndicatorScore =
+    indicatorScore?.filter((i: IndicatorScore) => i.label && i.value && i.score)?.length > 0;
+
+  const hasIndicatorDetermine =
+    indicatorDetermine?.filter((i: IndicatorDetermine) => i.label && i.value)?.length > 0;
+  const hasText = text?.length > 0;
+  const noConfig = !(
+    hasIndicatorScore ||
+    hasIndicatorDetermine ||
+    hasText ||
+    enableSort ||
+    isTextEdit ||
+    tagInputListConfigurable ||
+    dialogSort
+  );
+  return noConfig;
+};
 
 const LLMToolSidebar = (props: IProps) => {
   const { annotation, dispatch, checkMode } = props;
@@ -181,52 +235,14 @@ const LLMToolSidebar = (props: IProps) => {
     setAnnotationResult({ ...annotationResult, answerList: newList || [] });
   };
 
-  const isNoConfig = () => {
-    const {
-      indicatorScore = [],
-      indicatorDetermine = [],
-      text = [],
-      enableSort,
-      isTextEdit,
-      tagInputListConfigurable,
-    } = LLMConfig || {};
+  const isNoConfig = useMemo(() => {
+    return getLLMIsNoConfig(LLMConfig);
+  }, [LLMConfig]);
 
-    const hasIndicatorScore =
-      indicatorScore?.filter((i: IndicatorScore) => i.label && i.value && i.score)?.length > 0;
-
-    const hasIndicatorDetermine =
-      indicatorDetermine?.filter((i: IndicatorDetermine) => i.label && i.value)?.length > 0;
-    const hasText = text?.length > 0;
-    const noConfig = !(
-      hasIndicatorScore ||
-      hasIndicatorDetermine ||
-      hasText ||
-      enableSort ||
-      isTextEdit ||
-      tagInputListConfigurable
-    );
-    return noConfig;
-  };
-
-  if (isNoConfig()) {
-    return (
-      <div className={`${sidebarCls}`}>
-        <div
-          className={`${sidebarCls}__content`}
-          style={{ display: 'flex', justifyContent: 'center', alignItems: 'center' }}
-        >
-          <Empty
-            description={<span style={{ color: '#ccc' }}>{t('NoScoringScale')}</span>}
-            imageStyle={{
-              width: 200,
-              height: 200,
-            }}
-            image={<img src={emptySvg} />}
-          />
-        </div>
-      </div>
-    );
+  if (isNoConfig) {
+    return <EmptyConfig />;
   }
+
   const {
     indicatorScore = [],
     indicatorDetermine = [],
@@ -245,6 +261,7 @@ const LLMToolSidebar = (props: IProps) => {
         <div style={{ fontSize: '18px', fontWeight: 500, padding: '0px 16px', marginTop: '16px' }}>
           {t('GlobalAnnotation')}
         </div>
+
         {enableSort && (
           <AnswerSort
             waitSortList={annotationResult?.waitSorts || []}
@@ -276,7 +293,7 @@ const LLMToolSidebar = (props: IProps) => {
           <div style={{ padding: '0px 16px', marginTop: '16px' }}>
             <TextInputBox
               textAttribute={annotationResult?.textAttribute || []}
-              LLMConfig={LLMConfig}
+              textConfig={LLMConfig?.text && isArray(LLMConfig.text) ? LLMConfig?.text : []}
               setText={(v) => setAnnotationResult({ ...annotationResult, textAttribute: v })}
               disabeledAll={disabeledAll}
             />

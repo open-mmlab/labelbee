@@ -10,6 +10,14 @@ interface ILLMContext {
   setModelAPIResponse: React.Dispatch<React.SetStateAction<IModelAPIAnswer[]>>;
   setNewAnswerList: (value: IAnswerList[]) => void;
 }
+
+interface ILLMMultiWheelContext {
+  hoverKey: number;
+  setHoverKey: (value: number) => void;
+  selectKey: number;
+  setSelectKey: (value: number) => void;
+}
+
 interface INLPContext {
   highlightKey: string;
   setHighlightKey: (value: string) => void;
@@ -29,4 +37,11 @@ export const LLMContext = React.createContext<ILLMContext>({
 export const NLPContext = React.createContext<INLPContext>({
   highlightKey: '',
   setHighlightKey: () => {},
+});
+
+export const LLMMultiWheelContext = React.createContext<ILLMMultiWheelContext>({
+  hoverKey: -1,
+  setHoverKey: () => {},
+  selectKey: 1,
+  setSelectKey: () => {},
 });
