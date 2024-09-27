@@ -22,6 +22,7 @@ export interface IAnswerList {
   newAnswer?: string;
   url?: string; // used to display picture
   tagList?: ISelectedTags;
+  id?: string | number;
 }
 
 export interface IModelAPIAnswer {

@@ -54,7 +54,7 @@ interface IProps {
 interface ILLMAnnotationResultMap {
   [id: string | number]: IAnnotationResult & {
     id: string | number;
-    order: string;
+    order: string | number;
   };
 }
 
@@ -80,7 +80,6 @@ const LLMMultiWheelToolSidebar = (props: IProps) => {
   const { toolInstanceRef } = useCustomToolInstance({ basicInfo });
   const [valid, setValid] = useState(true);
   const [annotationResultMap, setAnnotationResultMap] = useState<ILLMAnnotationResultMap>({});
-  const { selectedID } = useLLMMultiWheelStore();
   const [globalResult, setGlobalResult] = useState<IGlobalResult>(initGlobalResult);
   const answerSortRef = useRef<any>();
   const sortRef = useRef<any>();
@@ -88,6 +87,7 @@ const LLMMultiWheelToolSidebar = (props: IProps) => {
     newSort?: IAnswerSort[][];
     waitSorts?: IWaitAnswerSort[];
   }>({});
+  const { selectedID, setNewAnswerListMap, newAnswerListMap } = useLLMMultiWheelStore();
 
   const currentLLMAnnotationResult = useMemo(() => {
     return annotationResultMap[selectedID];
@@ -139,7 +139,7 @@ const LLMMultiWheelToolSidebar = (props: IProps) => {
     return getCurrentResultFromResultList(currentData?.result, currentStepInfo.step);
   };
 
-  const initResult = (initData?: any) => {
+  const initResult = useMemoizedFn((initData?: any) => {
     const result: any = getCurrentResult();
 
     let sourceData = currentData?.questionList?.textList;
@@ -159,15 +159,19 @@ const LLMMultiWheelToolSidebar = (props: IProps) => {
       const data = getRenderDataByResult(LLMConfig, {
         ...item,
         answerList: item?.answerList?.map((answer: any, index: number) => {
+          setNewAnswerListMap({
+            ...newAnswerListMap,
+            [`${item.id}-${answer.id}`]: answer.answer,
+          });
           return {
             ...answer,
-            order: `${index + 1}`,
+            order: index + 1,
           };
         }),
       });
       tmpMap[item.id] = {
         ...data,
-        order: `${modelIndex + 1}`,
+        order: modelIndex + 1,
         id: item.id,
       };
     });
@@ -183,7 +187,7 @@ const LLMMultiWheelToolSidebar = (props: IProps) => {
       answerSort: result?.answerSort ?? [],
     });
     setAnnotationResultMap(tmpMap);
-  };
+  });
 
   useEffect(() => {
     setExportData();
@@ -232,6 +236,10 @@ const LLMMultiWheelToolSidebar = (props: IProps) => {
       if (i?.order === order) {
         // text edit
         if (key === 'textEdit' && isString(value)) {
+          setNewAnswerListMap({
+            ...newAnswerListMap,
+            [`${selectedID}-${i?.id ?? ''}`]: value,
+          });
           return { ...i, newAnswer: value };
         }
         if (isNumber(value)) {
@@ -284,7 +292,7 @@ const LLMMultiWheelToolSidebar = (props: IProps) => {
       currentData?.questionList?.textList?.map((item: any, index: number) => {
         return {
           ...item,
-          title: `${index + 1}`,
+          title: index + 1,
         };
       }) ?? []
     );

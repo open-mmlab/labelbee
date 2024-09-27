@@ -4,10 +4,8 @@ import ImgView from '@/components/LLMToolView/questionView/components/imgView';
 import { ILLMMultiWheelToolConfig } from '@/components/LLMToolView/types';
 import useLLMMultiWheelStore from '@/store/LLMMultiWheel';
 import { classnames } from '@/utils';
-import { LLMMultiWheelViewCls } from '@/views/MainView/LLMMultiWheelLayout';
 import { Button } from 'antd';
-import React, { useContext, useEffect, useState } from 'react';
-// import { LLMMultiWheelViewCls } from '..';
+import React from 'react';
 
 interface IDialogViewProps {
   id: number | string;
@@ -64,15 +62,17 @@ const DialogView = (props: IDialogViewProps) => {
       </div>
       <div className={`dialog-answer`}>
         {answerList.map((item: any, index: number) => {
-          const isTextControl = getTextControlByConfig(item, LLMConfig);
+          const order = index + 1;
+          const answer = { ...item, order };
+          const isTextControl = getTextControlByConfig(answer, LLMConfig);
           return (
             <div key={index}>
-              <Button type='primary'>答案{index + 1}</Button>
+              <Button type='primary'>答案{order}</Button>
               {answerIsImg ? (
                 <ImgView answerList={answerList} />
               ) : (
                 <RenderAnswer
-                  i={item}
+                  i={answer}
                   isTextControl={isTextControl}
                   dataFormatType={dataFormatType}
                 />

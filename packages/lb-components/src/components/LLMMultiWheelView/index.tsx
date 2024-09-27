@@ -68,8 +68,8 @@ const LLMMultiWheelView: React.FC<IProps> = (props) => {
   const { annotation, tips, showTips, drawLayerSlot } = props;
   const { imgIndex, imgList, stepList, step, toolInstance } = annotation;
   const [LLMConfig, setLLMConfig] = useState<ILLMMultiWheelToolConfig>();
-  const { setSelectedID } = useLLMMultiWheelStore();
-  const [dialogList, setDialogList] = useState([]);
+  const { setSelectedID, newAnswerListMap } = useLLMMultiWheelStore();
+  const [dialogList, setDialogList] = useState<any[]>([]);
   const questionIsImg = LLMConfig?.dataType?.prompt === ELLMDataType.Picture;
   const answerIsImg = LLMConfig?.dataType?.response === ELLMDataType.Picture;
   const { t } = useTranslation();
@@ -87,6 +87,22 @@ const LLMMultiWheelView: React.FC<IProps> = (props) => {
       setSelectedID(dialogList[0].id);
     }
   }, [imgIndex]);
+
+  useEffect(() => {
+    const newDialogList = dialogList.map((item: any) => {
+      return {
+        ...item,
+        answerList: item?.answerList?.map((answer: any) => {
+          const mapId = `${item?.id ?? ''}-${answer?.id ?? ''}`;
+          return {
+            ...answer,
+            newAnswer: newAnswerListMap[mapId] ?? answer.answer,
+          };
+        }),
+      };
+    });
+    setDialogList(newDialogList);
+  }, [newAnswerListMap]);
 
   useEffect(() => {
     if (stepList && step) {
