@@ -66,21 +66,23 @@ export const LLMMultiWheelSourceView: React.FC<ILLMMultiWheelSourceViewProps> = 
 
 const getInfoFromLLMFile = ({
   type,
-  index,
+  questionIndex,
+  answerIndex,
   llmFile,
 }: {
   type: string;
-  index: number;
+  questionIndex: number;
+  answerIndex?: number;
   llmFile: any;
 }) => {
   if (type === 'question') {
-    return llmFile?.find((item: any, fileIndex: number) => index === fileIndex);
+    return llmFile?.find((item: any, fileIndex: number) => questionIndex === fileIndex);
   }
   let info = null;
 
-  llmFile?.forEach((item: any) => {
-    item.answerList?.forEach((answer: any, answerIndex: number) => {
-      if (answerIndex === index) {
+  llmFile?.forEach((item: any, fileIndex: number) => {
+    item.answerList?.forEach((answer: any, currentAnswerIndex: number) => {
+      if (fileIndex === questionIndex && answerIndex === currentAnswerIndex) {
         info = answer;
       }
     });
@@ -126,22 +128,26 @@ const LLMMultiWheelView: React.FC<IProps> = (props) => {
         question: questionIsImg
           ? getInfoFromLLMFile({
               type: 'question',
-              index: questionIndex,
+              questionIndex,
               llmFile,
             }) || item?.question
           : item?.question,
         answerList: item?.answerList?.map((i: any, answerIndex: number) => {
           const mapId = `${item?.id ?? ''}-${i?.id ?? ''}`;
+          const info = answerIsImg
+            ? getInfoFromLLMFile({
+                type: 'answer',
+                questionIndex,
+                answerIndex,
+                llmFile,
+              }) || {}
+            : {};
           return {
             ...i,
-            answer: answerIsImg
-              ? getInfoFromLLMFile({
-                  type: 'answer',
-                  index: answerIndex,
-                  llmFile,
-                }) || i.answer
-              : i.answer,
+            answer: i.answer,
             newAnswer: newAnswerListMap[mapId] ?? i.answer,
+            order: answerIndex + 1,
+            ...info,
           };
         }),
       };
