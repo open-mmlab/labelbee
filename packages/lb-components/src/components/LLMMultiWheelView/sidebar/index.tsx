@@ -82,7 +82,6 @@ const LLMMultiWheelToolSidebar = (props: IProps) => {
   const [annotationResultMap, setAnnotationResultMap] = useState<ILLMAnnotationResultMap>({});
   const [globalResult, setGlobalResult] = useState<IGlobalResult>(initGlobalResult);
   const answerSortRef = useRef<any>();
-  const sortRef = useRef<any>();
   const [sortData, setSortData] = useState<{
     newSort?: IAnswerSort[][];
     waitSorts?: IWaitAnswerSort[];
@@ -184,7 +183,7 @@ const LLMMultiWheelToolSidebar = (props: IProps) => {
     setGlobalResult({
       sort: result?.sort ?? [],
       textAttribute: result?.textAttribute ?? [],
-      answerSort: result?.answerSort ?? [],
+      answerSort: result?.answerSort ?? {},
     });
     setAnnotationResultMap(tmpMap);
   });
@@ -353,9 +352,9 @@ const LLMMultiWheelToolSidebar = (props: IProps) => {
             selectedSort={getCurrentResult()?.answerSort ?? []}
             ref={answerSortRef}
             disabeledAll={disabeledAll}
+            imgIndex={imgIndex}
           />
         )}
-
         {currentLLMAnnotationResult && (
           <>
             <div

@@ -83,9 +83,6 @@ const AnswerSort = (props: IProps) => {
     setAnswers(waitSortList);
   }, [waitSortList]);
 
-  useEffect(() => {
-    formatSortList();
-  }, [JSON.stringify(sortList)]);
 
   const singleAnswerItem = ({
     item,
@@ -251,7 +248,12 @@ const AnswerSort = (props: IProps) => {
         return;
       }
       setTargetTagKey(tagNearest[0]?.id);
-      if (tagNearest[0]?.tagVertexPoint && sourceTagCenterPoint) {
+      if (
+        tagNearest[0]?.tagVertexPoint &&
+        sourceTagCenterPoint &&
+        sourceTagCenterPoint?.x &&
+        sourceTagCenterPoint?.y
+      ) {
         setActivateDirectionBycompareDistance(sourceTagCenterPoint, tagNearest[0]?.tagVertexPoint);
       }
     }
@@ -344,6 +346,7 @@ const AnswerSort = (props: IProps) => {
                   operation: {
                     onDrag: onDrag,
                     onDragEnd: onDragEnd,
+                    onDragStart:()=>formatSortList()
                   },
                 }),
               )}
@@ -366,6 +369,7 @@ const AnswerSort = (props: IProps) => {
                       operation: {
                         onDrag: onDrag,
                         onDragEnd: onDragEnd,
+                        onDragStart:()=>formatSortList()
                       },
                     }),
                   )}
@@ -378,6 +382,7 @@ const AnswerSort = (props: IProps) => {
               operation: {
                 onDrag: onDrag,
                 onDragEnd: onDragEnd,
+                onDragStart:()=>formatSortList()
               },
             });
           })}
