@@ -65,7 +65,11 @@ export const RenderAnswer = ({
       </div>
     );
   }
-  return <div style={{ whiteSpace: 'pre-wrap' }}>{i?.newAnswer || i?.answer}</div>;
+  return (
+    <div style={{ whiteSpace: 'pre-wrap', overflowWrap: 'break-word' }}>
+      {i?.newAnswer || i?.answer}
+    </div>
+  );
 };
 
 export const getTextControlByConfig = (result: IAnswerList, LLMConfig: any) => {

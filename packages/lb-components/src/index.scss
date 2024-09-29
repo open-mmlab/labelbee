@@ -2395,7 +2395,7 @@ $predictTrackingPrefix: #{$prefix}-point-cloud-predict-tracking;
 
 .#{$prefix}-LLMMultiWheelView {
   display: flex;
-  flex: auto;
+  flex: 1;
   flex-direction: column;
   overflow: hidden;
   background-color: #fff;
@@ -2404,7 +2404,7 @@ $predictTrackingPrefix: #{$prefix}-point-cloud-predict-tracking;
 .#{$prefix}-LLMMultiWheelView-container {
   flex: auto;
   display: flex;
-  overflow: hidden;
+  overflow: auto;
   .dialog {
     min-width: 50%;
     padding: 8px;

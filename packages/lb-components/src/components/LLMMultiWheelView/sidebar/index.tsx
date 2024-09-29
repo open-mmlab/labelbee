@@ -281,6 +281,7 @@ const LLMMultiWheelToolSidebar = (props: IProps) => {
     dialogSort = false,
     inputList = [],
     tagInputListConfigurable,
+    enableSort = false,
   } = LLMConfig || {};
 
   const modelList = useMemo(() => {
@@ -317,18 +318,20 @@ const LLMMultiWheelToolSidebar = (props: IProps) => {
           {t('GlobalAnnotation')}
         </div>
         {/* Global Model sort */}
-        <AnswerSort
-          waitSortList={sortData?.waitSorts || []}
-          sortList={sortData?.newSort || []}
-          setSortList={(value) => {
-            const sort = value.map((i) => i.map((item) => item.id));
-            updateGlobalValue('sort', sort);
-            setSortData({ ...sortData, newSort: value });
-          }}
-          disabeledAll={disabeledAll}
-          title={t('SortConversationQuality')}
-          prefixId='model'
-        />
+        {dialogSort && (
+          <AnswerSort
+            waitSortList={sortData?.waitSorts || []}
+            sortList={sortData?.newSort || []}
+            setSortList={(value) => {
+              const sort = value.map((i) => i.map((item) => item.id));
+              updateGlobalValue('sort', sort);
+              setSortData({ ...sortData, newSort: value });
+            }}
+            disabeledAll={disabeledAll}
+            title={t('SortConversationQuality')}
+            prefixId='model'
+          />
+        )}
 
         {/* Global text input */}
         {LLMConfig?.text && (
@@ -341,14 +344,18 @@ const LLMMultiWheelToolSidebar = (props: IProps) => {
             />
           </div>
         )}
+
         {/* Answer Model sort */}
-        <ModelAnswerSort
-          modelData={currentData?.questionList?.textList ?? []}
-          selectedAnswerSort={(v) => updateGlobalValue('answerSort', v)}
-          selectedSort={getCurrentResult()?.answerSort ?? []}
-          ref={answerSortRef}
-          disabeledAll={disabeledAll}
-        />
+        {enableSort && (
+          <ModelAnswerSort
+            modelData={currentData?.questionList?.textList ?? []}
+            selectedAnswerSort={(v) => updateGlobalValue('answerSort', v)}
+            selectedSort={getCurrentResult()?.answerSort ?? []}
+            ref={answerSortRef}
+            disabeledAll={disabeledAll}
+          />
+        )}
+
         {currentLLMAnnotationResult && (
           <>
             <div

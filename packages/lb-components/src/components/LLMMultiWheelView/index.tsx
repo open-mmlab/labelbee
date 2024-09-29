@@ -64,6 +64,30 @@ export const LLMMultiWheelSourceView: React.FC<ILLMMultiWheelSourceViewProps> = 
   );
 };
 
+const getInfoFromLLMFile = ({
+  type,
+  index,
+  llmFile,
+}: {
+  type: string;
+  index: number;
+  llmFile: any;
+}) => {
+  if (type === 'question') {
+    return llmFile?.find((item: any, fileIndex: number) => index === fileIndex);
+  }
+  let info = null;
+
+  llmFile?.forEach((item: any) => {
+    item.answerList?.forEach((answer: any, answerIndex: number) => {
+      if (answerIndex === index) {
+        info = answer;
+      }
+    });
+  });
+  return info;
+};
+
 const LLMMultiWheelView: React.FC<IProps> = (props) => {
   const { annotation, tips, showTips, drawLayerSlot } = props;
   const { imgIndex, imgList, stepList, step, toolInstance } = annotation;
@@ -89,20 +113,41 @@ const LLMMultiWheelView: React.FC<IProps> = (props) => {
   }, [imgIndex]);
 
   useEffect(() => {
-    const newDialogList = dialogList.map((item: any) => {
+    const currentData = imgList[imgIndex] ?? {};
+    const qaData = currentData?.questionList;
+
+    const llmFile = currentData?.llmFile?.textList;
+
+    const textList = qaData?.textList;
+
+    const newDialogList = textList?.map((item: any, questionIndex: number) => {
       return {
         ...item,
-        answerList: item?.answerList?.map((answer: any) => {
-          const mapId = `${item?.id ?? ''}-${answer?.id ?? ''}`;
+        question: questionIsImg
+          ? getInfoFromLLMFile({
+              type: 'question',
+              index: questionIndex,
+              llmFile,
+            }) || item?.question
+          : item?.question,
+        answerList: item?.answerList?.map((i: any, answerIndex: number) => {
+          const mapId = `${item?.id ?? ''}-${i?.id ?? ''}`;
           return {
-            ...answer,
-            newAnswer: newAnswerListMap[mapId] ?? answer.answer,
+            ...i,
+            answer: answerIsImg
+              ? getInfoFromLLMFile({
+                  type: 'answer',
+                  index: answerIndex,
+                  llmFile,
+                }) || i.answer
+              : i.answer,
+            newAnswer: newAnswerListMap[mapId] ?? i.answer,
           };
         }),
       };
     });
     setDialogList(newDialogList);
-  }, [newAnswerListMap]);
+  }, [newAnswerListMap, questionIsImg, answerIsImg]);
 
   useEffect(() => {
     if (stepList && step) {
