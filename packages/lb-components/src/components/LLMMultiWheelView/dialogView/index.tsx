@@ -61,25 +61,28 @@ const DialogView = (props: IDialogViewProps) => {
         </div>
       </div>
       <div className={`dialog-answer`}>
-        {answerList.map((item: any, index: number) => {
-          const order = index + 1;
-          const answer = { ...item, order };
-          const isTextControl = getTextControlByConfig(answer, LLMConfig);
-          return (
-            <div key={index}>
-              <Button type='primary'>答案{order}</Button>
-              {answerIsImg ? (
-                <ImgView answerList={answerList} />
-              ) : (
+        {answerIsImg ? (
+          <>
+            <Button type='primary'>答案</Button>
+            <ImgView answerList={answerList} />
+          </>
+        ) : (
+          answerList.map((item: any, index: number) => {
+            const order = index + 1;
+            const answer = { ...item, order };
+            const isTextControl = getTextControlByConfig(answer, LLMConfig);
+            return (
+              <div key={index}>
+                <Button type='primary'>答案{order}</Button>
                 <RenderAnswer
                   i={answer}
                   isTextControl={isTextControl}
                   dataFormatType={dataFormatType}
                 />
-              )}
-            </div>
-          );
-        })}
+              </div>
+            );
+          })
+        )}
       </div>
     </div>
   );
