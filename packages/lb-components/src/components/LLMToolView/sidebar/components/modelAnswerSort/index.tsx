@@ -3,6 +3,8 @@ import { useTranslation } from 'react-i18next';
 import { useDebounceFn } from 'ahooks';
 import AnswerSort from '../answerSort';
 import { IAnswerSort } from '@/components/LLMToolView/types';
+import { Tag } from 'antd';
+import { isArray } from 'lodash';
 
 interface ISelectAnswerSort {
   [key: string]: number[][];
@@ -29,6 +31,7 @@ interface IProps {
   modelData: IModelList[];
   selectedAnswerSort: (sorts: ISelectAnswerSort) => void;
   disabeledAll?: boolean;
+  imgIndex: number;
 }
 
 export const getSorts = ({
@@ -56,7 +59,7 @@ export const getSorts = ({
 };
 
 const ModelAnswerSort = (props: IProps, ref: any) => {
-  const { selectedSort, modelData, selectedAnswerSort, disabeledAll } = props;
+  const { selectedSort, modelData, selectedAnswerSort, disabeledAll, imgIndex } = props;
   const [answerSortData, setAnswerSortData] = useState<any>({
     waitSorts: {},
     selecteds: selectedSort,
@@ -69,7 +72,7 @@ const ModelAnswerSort = (props: IProps, ref: any) => {
       ...i,
       title: itemIndex + 1,
     }));
-  }, [modelData]);
+  }, [modelData, imgIndex]);
 
   const maxAnswerList: IMaxAnswerList[] = useMemo(() => {
     const maxList = modelData.reduce((longest: any[], current: any) => {
@@ -80,13 +83,13 @@ const ModelAnswerSort = (props: IProps, ref: any) => {
       title: `${index + 1}`,
     }));
     return renderValue || [];
-  }, [modelData]);
+  }, [modelData, imgIndex]);
 
   useEffect(() => {
     if (selectedSort) {
       setRenderAnswerSortData();
     }
-  }, [modelData]);
+  }, [modelData, imgIndex]);
 
   const getModelList = (id: string) => {
     const values = modelDatas.filter((i) => i.answerList.some((item) => item.id === id)) || [];
@@ -113,7 +116,7 @@ const ModelAnswerSort = (props: IProps, ref: any) => {
         clearValue: () => setRenderAnswerSortData({}),
       };
     },
-    [modelData],
+    [modelData, imgIndex],
   );
 
   const exportData = (id: string, value: IAnswerSort[][]) => {
@@ -132,7 +135,13 @@ const ModelAnswerSort = (props: IProps, ref: any) => {
       setAnswerSortData({ ...answerSortData, selecteds: newSelecteds });
     }
   };
-  const { run: exportSort } = useDebounceFn(exportData, { wait: 10 });
+  const { run: exportSort } = useDebounceFn(exportData, { wait: 0 });
+  const hasWaitSort = Object.keys(answerSortData.waitSorts).some(
+    (key) =>
+      maxAnswerList.some((j) => j.id === key) &&
+      isArray(answerSortData.waitSorts[key]) &&
+      answerSortData.waitSorts[key].length > 0,
+  );
 
   return (
     <div>
@@ -146,11 +155,11 @@ const ModelAnswerSort = (props: IProps, ref: any) => {
         }}
       >
         <span>{t('RankingQualityOfAnswers')}</span>
-        {/* {answerSortData?.waitSorts?.length > 0 && (
+        {hasWaitSort && (
           <Tag color='#FFD9D9' style={{ color: '#F26549', marginLeft: 8 }}>
             {t('Unfinished')}
           </Tag>
-        )} */}
+        )}
       </div>
       {maxAnswerList.map((i: IMaxAnswerList, index: number) => {
         return (
