@@ -376,7 +376,11 @@
     "OnlyLoadTheFirstFramePreAnnotation": "Only load the first frame pre annotation",
     "SelectBoxToDisplayIndependently": "Select box to display independently",
     "SelectBoxSwitchTips": "After turning on the switch, select the box in the top view, and the image view will only display the corresponding 2D box, making it easier to view the corresponding relationship in the top view",
-    "SortConversationQuality": "Please rank the quality of each conversation"
+    "SortConversationQuality": "Please rank the quality of each conversation",
+    "Dialog": "Dialog",
+    "SelectionOfAnnotation": "Selection of annotation",
+    "Annotating": "Annotating",
+    "Group": "Group"
   },
   "cn": {
     "TextInput": "文本输入",
@@ -755,6 +759,10 @@
     "OnlyLoadTheFirstFramePreAnnotation": "仅载入第一帧预标注",
     "SelectBoxToDisplayIndependently": "选中框独立显示",
     "SelectBoxSwitchTips": "开启开关后，选中俯视图的框体，图片视图仅显示对应的2D框体，便于查看俯视图的对应关系",
-    "SortConversationQuality": "请对每组对话的质量进行排序"
+    "SortConversationQuality": "请对每组对话的质量进行排序",
+    "Dialog": "对话",
+    "SelectionOfAnnotation": "选中标注",
+    "Annotating": "正在标注",
+    "Group": "组"
   }
 }

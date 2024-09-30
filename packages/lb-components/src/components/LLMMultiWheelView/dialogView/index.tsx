@@ -6,6 +6,7 @@ import useLLMMultiWheelStore from '@/store/LLMMultiWheel';
 import { classnames } from '@/utils';
 import { Button } from 'antd';
 import React from 'react';
+import { useTranslation } from 'react-i18next';
 
 interface IDialogViewProps {
   id: number | string;
@@ -30,9 +31,11 @@ const DialogView = (props: IDialogViewProps) => {
     questionIsImg,
     LLMConfig,
   } = props;
+  const { t } = useTranslation();
   const { dataFormatType, selectedID, setSelectedID } = useLLMMultiWheelStore();
+
   const order = index + 1;
-  const showName = name || `对话${order}`;
+  const showName = name || `${t('Dialog')}${order}`;
 
   return (
     <div
@@ -47,11 +50,14 @@ const DialogView = (props: IDialogViewProps) => {
         <span className={`order`}>{order}</span>
         <div className={`name`}>
           <div className={`show-name`}>{showName}</div>
-          <div className={`tips`}>（选中标注）</div>
+          <div className={`tips`}>（{t('SelectionOfAnnotation')}）</div>
         </div>
       </div>
       <div className={`dialog-question`}>
-        <Button type='primary'>题目{order}</Button>
+        <Button type='primary'>
+          {t('Title')}
+          {order}
+        </Button>
         <div>
           <RenderQuestion
             question={question}
@@ -63,7 +69,7 @@ const DialogView = (props: IDialogViewProps) => {
       <div className={`dialog-answer`}>
         {answerIsImg ? (
           <>
-            <Button type='primary'>答案</Button>
+            <Button type='primary'>{t('Answer')}</Button>
             <ImgView answerList={answerList} />
           </>
         ) : (
@@ -73,7 +79,10 @@ const DialogView = (props: IDialogViewProps) => {
             const isTextControl = getTextControlByConfig(answer, LLMConfig);
             return (
               <div key={index}>
-                <Button type='primary'>答案{order}</Button>
+                <Button type='primary'>
+                  {t('Answer')}
+                  {order}
+                </Button>
                 <RenderAnswer
                   i={answer}
                   isTextControl={isTextControl}
