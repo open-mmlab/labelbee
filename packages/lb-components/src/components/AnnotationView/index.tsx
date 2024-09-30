@@ -109,7 +109,7 @@ const AnnotationView = (props: IProps, ref: any) => {
   const annotationListCacheRef = useRef<TAnnotationViewData[][]>([]);
   const canUpdateRef = useRef(true); // Judge if rending is Possible.
 
-  const { setSelectedIDs } = useContext(PointCloudContext);
+  const { setSelectedIDs, pointCloudPattern } = useContext(PointCloudContext);
 
   useImperativeHandle(
     ref,
@@ -139,6 +139,7 @@ const AnnotationView = (props: IProps, ref: any) => {
         config: '{}', // TODO，暂时不需要
         zoomInfo: props.zoomInfo,
         staticMode: props.staticMode,
+        toolName: pointCloudPattern,
       });
 
       viewOperation.current.init();

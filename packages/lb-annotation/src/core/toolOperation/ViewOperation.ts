@@ -24,7 +24,7 @@ import RectUtils from '@/utils/tool/RectUtils';
 import PolygonUtils, { IConvexHullGroupType } from '@/utils/tool/PolygonUtils';
 import MathUtils from '@/utils/MathUtils';
 import RenderDomClass from '@/utils/tool/RenderDomClass';
-import { DEFAULT_FONT, ELineTypes, SEGMENT_NUMBER } from '@/constant/tool';
+import { DEFAULT_FONT, ELineTypes, EToolName, SEGMENT_NUMBER } from '@/constant/tool';
 import { DEFAULT_TEXT_SHADOW, DEFAULT_TEXT_OFFSET, TEXT_ATTRIBUTE_OFFSET } from '@/constant/annotation';
 import ImgUtils, { cropAndEnlarge } from '@/utils/ImgUtils';
 import CanvasUtils from '@/utils/tool/CanvasUtils';
@@ -39,6 +39,7 @@ interface IViewOperationProps extends IBasicToolOperationProps {
   style: IBasicStyle;
   staticMode?: boolean;
   annotations: TAnnotationViewData[];
+  toolName?: EToolName;
 }
 
 export interface ISpecificStyle {
@@ -83,6 +84,8 @@ export default class ViewOperation extends BasicToolOperation {
 
   private hiddenText?: boolean = false;
 
+  private toolName?: EToolName = EToolName.Empty;
+
   constructor(props: IViewOperationProps) {
     super({ ...props, showDefaultCursor: true });
     this.style = props.style ?? { stroke: DEFAULT_STROKE_COLOR, thickness: 3 };
@@ -93,6 +96,7 @@ export default class ViewOperation extends BasicToolOperation {
       container: this.container,
       height: this.canvas.height,
     });
+    this.toolName = props.toolName || EToolName.Empty;
   }
 
   public clearConnectionPoints() {
@@ -450,6 +454,7 @@ export default class ViewOperation extends BasicToolOperation {
   /**
    * Separate rendering of sub attribute content
    * The principle is the same as other tools for rendering sub attribute content
+   * Currently, only secondary attributes are being rendered in point cloud rendering
    */
   public renderAttribute() {
     const annotationChunks = _.chunk(this.annotations, 6);
@@ -460,6 +465,8 @@ export default class ViewOperation extends BasicToolOperation {
       const { fontStyle } = this.getRenderStyle(annotation);
       const polygon = annotation.annotation as IBasicPolygon;
       const curPointCloudBox = this.pointCloudBoxList?.find((item: IPointCloudBox) => item.id === polygon.id);
+      // Without this rendered graphic, return in advance to avoid errors in the future
+      if (!curPointCloudBox) return;
       const headerText = this.hiddenText ? '' : `${curPointCloudBox?.trackID} ${curPointCloudBox?.attribute}`;
       const renderPolygon = AxisUtils.changePointListByZoom(polygon?.pointList ?? [], this.zoom, this.currentPos);
 
@@ -975,7 +982,9 @@ export default class ViewOperation extends BasicToolOperation {
       });
 
       this.renderConnectionPoints();
-      this.renderAttribute();
+      if (this.toolName && this.toolName === EToolName.Rect) {
+        this.renderAttribute();
+      }
     } catch (e) {
       console.error('ViewOperation Render Error', e);
     }
