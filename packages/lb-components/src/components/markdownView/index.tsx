@@ -8,12 +8,14 @@ import React from 'react';
 import Markdown, { Components } from 'react-markdown';
 import remarkMath from 'remark-math';
 import rehypeKatex from 'rehype-katex';
+import rehypeRaw from 'rehype-raw';
 import SyntaxHighlighter from 'react-syntax-highlighter';
 import { docco } from 'react-syntax-highlighter/dist/esm/styles/hljs';
 import remarkGfm from 'remark-gfm';
 import 'github-markdown-css';
 import styles from './index.module.scss';
 import { classnames } from '@/utils';
+import { Plugin } from 'unified';
 
 interface IProps {
   value: string;
@@ -56,6 +58,7 @@ const MarkdownView = (props: IProps) => {
       })}
       remarkPlugins={[remarkGfm, remarkMath]}
       rehypePlugins={[
+        rehypeRaw as unknown as Plugin,
         [
           rehypeKatex,
           {
