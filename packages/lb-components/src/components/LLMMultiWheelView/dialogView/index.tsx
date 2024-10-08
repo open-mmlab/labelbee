@@ -67,7 +67,7 @@ const DialogView = (props: IDialogViewProps) => {
             <ImgView answerList={answerList} />
           </>
         ) : (
-          answerList.map((item: any, index: number) => {
+          answerList?.map((item: any, index: number) => {
             const order = index + 1;
             const answer = { ...item, order };
             const isTextControl = getTextControlByConfig(answer, LLMConfig);
