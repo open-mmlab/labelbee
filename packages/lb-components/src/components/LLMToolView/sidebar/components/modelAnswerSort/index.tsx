@@ -53,7 +53,9 @@ export const getSorts = ({
     return true;
   });
   if (selecteds && selecteds?.length > 0) {
-    newSort = selecteds.map((i) => i.map((item) => modelList.find((j) => j.id === item)));
+    newSort = selecteds
+      .map((i) => i.map((item) => modelList.find((j) => j.id === item))?.filter((arr) => arr))
+      ?.filter((arr) => arr?.length > 0);
   }
   return { waitSorts, newSort };
 };
@@ -86,7 +88,7 @@ const ModelAnswerSort = (props: IProps, ref: any) => {
   }, [modelData, imgIndex]);
 
   useEffect(() => {
-    if (selectedSort) {
+    if (selectedSort && modelData.length > 0) {
       setRenderAnswerSortData();
     }
   }, [modelData, imgIndex]);
