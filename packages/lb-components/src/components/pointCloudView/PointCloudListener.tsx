@@ -18,17 +18,16 @@ import { a2MapStateToProps, IA2MapStateProps } from '@/store/annotation/map';
 import { ICustomToolInstance } from '@/hooks/annotation';
 import { useStatus } from './hooks/useStatus';
 import { usePointCloudViews } from './hooks/usePointCloudViews';
-import { LabelBeeContext, useDispatch } from '@/store/ctx';
+import { LabelBeeContext } from '@/store/ctx';
 import { useHistory } from './hooks/useHistory';
 import { useAttribute } from './hooks/useAttribute';
 import { ICoordinate } from '@labelbee/lb-utils/dist/types/types/common';
 import { useConfig } from './hooks/useConfig';
 import { usePolygon } from './hooks/usePolygon';
 import { useLine } from './hooks/useLine';
+import { useUpdatePointCloudColor } from './hooks/useUpdatePointCloudColor';
 import { useTranslation } from 'react-i18next';
 import { IFileItem } from '@/types/data';
-import { PreDataProcess } from '@/store/annotation/actionCreators';
-import { IPointCloudBox } from '@labelbee/lb-utils';
 import { useLatest } from 'ahooks';
 
 const { EPolygonPattern } = cTool;
@@ -75,12 +74,12 @@ const PointCloudListener: React.FC<IProps> = ({
     pushHistoryUnderUpdatePolygon,
     pushHistoryUnderUpdateLine,
   } = useHistory();
-  const dispatch = useDispatch();
   const { syncThreeViewsAttribute } = useAttribute();
   const { syncAllViewsConfig, reRenderTopViewRange } = useConfig();
   const { selectedPolygon } = usePolygon();
   const { selectedLine } = useLine();
   const { t } = useTranslation();
+  const { updatePointCloudColor } = useUpdatePointCloudColor(setResourceLoading, config);
 
   // For event calling or etc to avoid react hook re-bind
   const currentDataRef = useLatest(currentData);
@@ -282,37 +281,13 @@ const PointCloudListener: React.FC<IProps> = ({
   useEffect(() => {
     toolInstanceRef.current.setDefaultAttribute = (newAttribute: string) => {
       syncThreeViewsAttribute(newAttribute);
-      const selectBox = ptCtx.selectedPointCloudBox;
-      if (selectBox) {
-        selectBox.attribute = newAttribute;
 
-        const nextResult = dispatch(
-          PreDataProcess({
-            tool: EPointCloudName.PointCloud,
-            dataList: [selectBox],
-            stepConfig: config,
-            action: 'viewUpdateBox',
-          }),
-        ) as unknown as IPointCloudBox[];
+      /**
+       * The logic for extracting the updated color of the original point cloud due to changes in the main attribute,
+       * which originally only supported single selection, now supports multiple selection, and merges to reduce the number of updates
+       */
+      updatePointCloudColor(newAttribute);
 
-        selectBox.valid = nextResult[0].valid;
-
-        const newPointCloudList = updateSelectedBox(selectBox);
-
-        ptCtx?.topViewInstance?.pointCloud2dOperation?.setPolygonValidAndRender?.(
-          selectBox.id,
-          true,
-          selectBox.valid,
-        );
-
-        if (ptCtx.mainViewInstance) {
-          topViewSelectedChanged({
-            newSelectedBox: selectBox,
-            newPointCloudList: newPointCloudList,
-          });
-          ptCtx.mainViewInstance.generateBoxes(newPointCloudList);
-        }
-      }
       if (selectedPolygon) {
         pushHistoryUnderUpdatePolygon({ ...selectedPolygon, attribute: newAttribute });
       }
@@ -401,6 +376,7 @@ const PointCloudListener: React.FC<IProps> = ({
     ptCtx.pointCloudBoxList,
     ptCtx.pointCloudSphereList,
     ptCtx.selectedID,
+    ptCtx.selectedIDs,
     ptCtx.valid,
     ptCtx.polygonList,
     ptCtx.lineList,

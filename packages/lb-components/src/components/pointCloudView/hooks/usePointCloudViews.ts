@@ -609,6 +609,21 @@ interface IUsePointCloudViewsParams {
   setResourceLoading?: (loading: boolean) => void;
 }
 
+/**
+ * Sync views' data from omit view, regenerate and highlight box on 3D-view
+ * @param omitView
+ * @param polygon
+ * @param boxParams
+ */
+interface ISyncPointCloudViews {
+  // 如果不传omitView，则同步所有视图
+  omitView?: string;
+  polygon: any;
+  boxParams: IPointCloudBox;
+  zoom?: number;
+  newPointCloudBoxList?: IPointCloudBox[];
+}
+
 export const usePointCloudViews = (params?: IUsePointCloudViewsParams) => {
   const ptCtx = useContext(PointCloudContext);
   const {
@@ -1228,22 +1243,11 @@ export const usePointCloudViews = (params?: IUsePointCloudViewsParams) => {
     }
     mainViewGenSphere(sphereParams);
   };
-  /**
-   * Sync views' data from omit view, regenerate and highlight box on 3D-view
-   * @param omitView
-   * @param polygon
-   * @param boxParams
-   */
-  interface ISyncPointCloudViews {
-    // 如果不传omitView，则同步所有视图
-    omitView?: string;
-    polygon: any;
-    boxParams: IPointCloudBox;
-    zoom?: number;
-    newPointCloudBoxList?: IPointCloudBox[];
-  }
 
-  const syncPointCloudViews = (params: ISyncPointCloudViews) => {
+  const syncPointCloudViews = (
+    params: ISyncPointCloudViews,
+    trigger: EPointCloudBoxRenderTrigger = EPointCloudBoxRenderTrigger.Default,
+  ) => {
     const { omitView, polygon, boxParams, zoom, newPointCloudBoxList } = params;
 
     const dataUrl = currentData?.url;
@@ -1253,7 +1257,7 @@ export const usePointCloudViews = (params?: IUsePointCloudViewsParams) => {
      */
     if (newPointCloudBoxList) {
       // Wait for the mainPointCloudData.
-      ptCtx.syncAllViewPointCloudColor(EPointCloudBoxRenderTrigger.Single, newPointCloudBoxList);
+      ptCtx.syncAllViewPointCloudColor(trigger, newPointCloudBoxList);
     }
     const viewToBeUpdated = {
       [PointCloudView.Side]: () => {
@@ -1403,6 +1407,8 @@ export const usePointCloudViews = (params?: IUsePointCloudViewsParams) => {
     topViewUpdateBox,
     sideViewUpdateBox,
     backViewUpdateBox,
+    syncPointCloudViews,
+    syncPointCloudPoint,
     pointCloudBoxListUpdated,
     initPointCloud3d,
     updatePointCloudData,
