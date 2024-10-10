@@ -428,6 +428,7 @@ const PointCloud2DRectOperationView = (props: IPointCloud2DRectOperationViewProp
     }
     const currentPos = MathUtils.getCurrentPosFromRectCenter(size, centerPoint, zoom)
     operation.current.setCurrentPos(currentPos)
+    operation.current.renderBasicCanvas()
     operation.current.render()
   }, [selectedID]);
 
