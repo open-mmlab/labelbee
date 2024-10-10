@@ -16,6 +16,7 @@ import {
   IConfigUpdate,
   IAnswerSort,
   IWaitAnswerSort,
+  ISelectedTags,
 } from '@/components/LLMToolView/types';
 import { getStepConfig } from '@/store/annotation/reducer';
 import { jsonParser } from '@/utils';
@@ -40,6 +41,7 @@ import {
 import { useMemoizedFn } from 'ahooks';
 import { ITextList } from '../types';
 import AnswerSort from '@/components/LLMToolView/sidebar/components/answerSort';
+import OverallTagList from '@/components/tagList/components/overall';
 
 const EKeyCode = cKeyCode.default;
 
@@ -62,12 +64,14 @@ interface IGlobalResult {
   sort: Array<number[]>;
   answerSort: { [key: string]: number[] };
   textAttribute: ITextList[];
+  tagList?: ISelectedTags;
 }
 
 const initGlobalResult = {
   sort: [],
   answerSort: {},
   textAttribute: [],
+  tagList: {},
 };
 
 const LLMMultiWheelToolSidebar = (props: IProps) => {
@@ -117,7 +121,7 @@ const LLMMultiWheelToolSidebar = (props: IProps) => {
       answerSortRef.current?.clearValue();
     }
     const { waitSorts } = getSorts({
-      selectedSort: getCurrentResult()?.sort ?? [],
+      selectedSort: currentResult?.sort ?? [],
       initSelected: [],
       modelList: dialogSort ? modelList ?? [] : [],
     });
@@ -138,8 +142,12 @@ const LLMMultiWheelToolSidebar = (props: IProps) => {
     return getCurrentResultFromResultList(currentData?.result, currentStepInfo.step);
   };
 
+  const currentResult = useMemo(() => {
+    return getCurrentResult();
+  }, [step, stepList, currentData]);
+
   const initResult = useMemoizedFn((initData?: any) => {
-    const result: any = getCurrentResult();
+    const result: any = currentResult;
 
     let sourceData = currentData?.questionList?.textList;
 
@@ -175,7 +183,7 @@ const LLMMultiWheelToolSidebar = (props: IProps) => {
       };
     });
     const { waitSorts, newSort } = getSorts({
-      selectedSort: getCurrentResult()?.sort ?? [],
+      selectedSort: currentResult?.sort ?? [],
       modelList: dialogSort ? modelList ?? [] : [],
     });
     setSortData({ waitSorts, newSort });
@@ -184,6 +192,7 @@ const LLMMultiWheelToolSidebar = (props: IProps) => {
       sort: result?.sort ?? [],
       textAttribute: result?.textAttribute ?? [],
       answerSort: result?.answerSort ?? {},
+      tagList: result?.tagList,
     });
     setAnnotationResultMap(tmpMap);
   });
@@ -349,12 +358,29 @@ const LLMMultiWheelToolSidebar = (props: IProps) => {
           <ModelAnswerSort
             modelData={currentData?.questionList?.textList ?? []}
             selectedAnswerSort={(v) => updateGlobalValue('answerSort', v)}
-            selectedSort={getCurrentResult()?.answerSort ?? []}
+            selectedSort={currentResult?.answerSort ?? []}
             ref={answerSortRef}
             disabeledAll={disabeledAll}
             imgIndex={imgIndex}
           />
         )}
+
+        {tagInputListConfigurable && inputList.length && (
+          <OverallTagList
+            inputList={inputList}
+            selectedTags={globalResult?.tagList || {}}
+            updateValue={(changeValue) => {
+              const { key, value } = changeValue;
+              const originData = globalResult?.tagList || {};
+              updateGlobalValue('tagList', {
+                ...originData,
+                [key]: value,
+              });
+            }}
+            disabeledAll={disabeledAll}
+          />
+        )}
+
         {currentLLMAnnotationResult && (
           <>
             <div
