@@ -15,7 +15,7 @@ import { PointCloudContext } from '@/components/pointCloudView/PointCloudContext
 import { a2MapStateToProps } from '@/store/annotation/map';
 import { LabelBeeContext } from '@/store/ctx';
 import { IMappingImg } from '@/types/data';
-import { ImgUtils, PointCloud2DRectOperation, uuid } from '@labelbee/lb-annotation';
+import { ImgUtils, PointCloud2DRectOperation, uuid, MathUtils } from '@labelbee/lb-annotation';
 import {
   IPointCloudBoxRect,
   IPointCloud2DRectOperationViewRect,
@@ -67,6 +67,7 @@ const PointCloud2DRectOperationView = (props: IPointCloud2DRectOperationViewProp
     updateRectListByReducer,
     selectedIDs,
     setSelectedIDs,
+    selectedID
   } = useContext(PointCloudContext);
 
   const { value: toolStyle } = useToolStyleContext();
@@ -85,6 +86,7 @@ const PointCloud2DRectOperationView = (props: IPointCloud2DRectOperationViewProp
   const [rightClickRectId, setRightClickRectId] = useState<string>('');
   // Peugeot used to record the status of boxes that need to be updated
   const [isMemoryChange, setIsMemoryChange] = useState<boolean>(false);
+  const [needUpdateCenter, setNeedUpdateCenter] = useState(true);
 
   const rectListInImage = useMemo(
     () => rectList?.filter((item: IPointCloudBoxRect) => item.imageName === mappingData?.path),
@@ -266,6 +268,7 @@ const PointCloud2DRectOperationView = (props: IPointCloud2DRectOperationViewProp
   });
 
   const onRightClick = ({ targetId, id }: { targetId: string; id: string }) => {
+    setNeedUpdateCenter(false);
     setSelectedIDs(targetId);
     setRightClickRectId(id);
   };
@@ -406,6 +409,27 @@ const PointCloud2DRectOperationView = (props: IPointCloud2DRectOperationViewProp
     operation.current?.setEnableAddRect(selectedIDs.length === 0);
     updateRectList();
   }, [selectedIDs]);
+
+  useEffect(() => {
+    // Center the view by selectedID
+    if (!selectedID || !needUpdateCenter) {
+      setNeedUpdateCenter(true);
+      return;
+    } 
+    const {rectList, size, zoom} = operation.current
+    const rect = rectList.find((el: any) => el.boxID === selectedID)
+    if (!rect) {
+      setNeedUpdateCenter(true);
+      return;
+    }
+    const centerPoint = {
+      x: rect.x + rect.width / 2,
+      y: rect.y + rect.height / 2
+    }
+    const currentPos = MathUtils.getCurrentPosFromRectCenter(size, centerPoint, zoom)
+    operation.current.setCurrentPos(currentPos)
+    operation.current.render()
+  }, [selectedID]);
 
   useEffect(() => {
     const { hiddenText } = toolStyle || {};

@@ -785,4 +785,16 @@ export default class MathUtils {
     }
     return false;
   }
+
+  // Determine the required position to center the rectangle on the canvas
+  public static getCurrentPosFromRectCenter(
+    size: { width: number; height: number },
+    centerPoint: IPolygonPoint,
+    zoom: number,
+  ) {
+    return {
+      x: size.width / 2 - centerPoint.x * zoom,
+      y: size.height / 2 - centerPoint.y * zoom,
+    };
+  }
 }

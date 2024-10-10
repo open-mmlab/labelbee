@@ -13,6 +13,7 @@ import {
   PointCloudAnnotation,
   THybridToolName,
   cKeyCode,
+  MathUtils,
 } from '@labelbee/lb-annotation';
 import {
   IPolygonData,
@@ -216,7 +217,8 @@ const PointCloudTopView: React.FC<IProps> = ({
   const { t } = useTranslation();
   const pointCloudViews = usePointCloudViews();
   const { pushHistoryWithList } = useHistory();
-
+  const [needUpdateCenter, setNeedUpdateCenter] = useState(true);
+  
   useLayoutEffect(() => {
     if (ptCtx.topViewInstance) {
       return;
@@ -300,6 +302,7 @@ const PointCloudTopView: React.FC<IProps> = ({
         return;
       }
 
+      setNeedUpdateCenter(false);
       pointCloudViews.topViewAddBox({
         polygon,
         size,
@@ -324,6 +327,7 @@ const PointCloudTopView: React.FC<IProps> = ({
     });
 
     TopView2dOperation.singleOn('setSelectedIDs', (selectedIDs: string[]) => {
+      setNeedUpdateCenter(false);
       ptCtx.setSelectedIDs(selectedIDs);
     });
 
@@ -424,6 +428,31 @@ const PointCloudTopView: React.FC<IProps> = ({
     pointCloudViews.topViewSelectedChanged({});
     ptCtx.topViewInstance?.toolInstance?.selection?.hardSetSelectedIDs?.(ptCtx.selectedIDs);
   }, [ptCtx.selectedIDs]);
+
+  useEffect(() => {
+    // Center the view by selectedID
+    const {topViewInstance, selectedID, selectedPointCloudBox, zoom} = ptCtx
+    if (!topViewInstance || !selectedID || !selectedPointCloudBox || !needUpdateCenter) {
+      setNeedUpdateCenter(true);
+      return;
+    }
+    const { center } = selectedPointCloudBox;
+    const { pointCloudInstance: pointCloud, toolInstance } = topViewInstance
+    const basicResult = toolInstance.polygonList.find((el: { id: string; }) => el.id === ptCtx.selectedID);
+    if (!basicResult) {
+      setNeedUpdateCenter(true);
+      return;
+    };
+    const centerPoint = MathUtils.getRectCenterPoint(basicResult.pointList);
+    const currentPos = MathUtils.getCurrentPosFromRectCenter(toolInstance.size, centerPoint, zoom)
+    toolInstance.setCurrentPos(currentPos);
+    toolInstance.render();
+    const { x, y, z } = pointCloud.initCameraPosition;
+    pointCloud.camera.position.set(center.x, center.y, z);
+    pointCloud.render();
+    syncTopviewToolZoom(currentPos, zoom, size);
+    setAnnotationPos({ zoom, currentPos });
+  }, [ptCtx.selectedID]);
 
   useEffect(() => {
     window.addEventListener('keydown', onKeyDown);
