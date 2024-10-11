@@ -17,6 +17,7 @@ import {
   IAnswerSort,
   IWaitAnswerSort,
   ISelectedTags,
+  IInputList,
 } from '@/components/LLMToolView/types';
 import { getStepConfig } from '@/store/annotation/reducer';
 import { jsonParser } from '@/utils';
@@ -37,6 +38,7 @@ import StepUtils from '@/utils/StepUtils';
 import {
   getCurrentResultFromResultList,
   getRenderDataByResult,
+  getTagResult,
 } from '@/components/LLMToolView/utils/data';
 import { useMemoizedFn } from 'ahooks';
 import { ITextList } from '../types';
@@ -188,11 +190,15 @@ const LLMMultiWheelToolSidebar = (props: IProps) => {
     });
     setSortData({ waitSorts, newSort });
 
+    const overallInputList = LLMConfig?.inputList?.filter((i: IInputList) => i?.isOverall) || [];
+
+    const tagList = getTagResult(overallInputList, result?.tagList);
+
     setGlobalResult({
       sort: result?.sort ?? [],
       textAttribute: result?.textAttribute ?? [],
       answerSort: result?.answerSort ?? {},
-      tagList: result?.tagList,
+      tagList: tagList,
     });
     setAnnotationResultMap(tmpMap);
   });
