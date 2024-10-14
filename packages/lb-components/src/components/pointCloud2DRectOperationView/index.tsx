@@ -417,7 +417,8 @@ const PointCloud2DRectOperationView = (props: IPointCloud2DRectOperationViewProp
       return;
     } 
     const {rectList, size, zoom} = operation.current
-    const rect = rectList.find((el: any) => el.boxID === selectedID)
+    // Use boxId for a normal connection, and use extId when disconnected. 
+    const rect = rectList.find((el: any) => el.boxID === selectedID || el.extId === selectedID)
     if (!rect) {
       setNeedUpdateCenter(true);
       return;
@@ -427,6 +428,7 @@ const PointCloud2DRectOperationView = (props: IPointCloud2DRectOperationViewProp
       y: rect.y + rect.height / 2
     }
     const currentPos = MathUtils.getCurrentPosFromRectCenter(size, centerPoint, zoom)
+    operation.current.setHoverRectID(rect.id)
     operation.current.setCurrentPos(currentPos)
     operation.current.renderBasicCanvas()
     operation.current.render()
