@@ -2005,7 +2005,7 @@ class RectOperation extends BasicToolOperation {
   }
 
   public setHoverRectID(id: string) {
-    this.hoverRectID = id
+    this.hoverRectID = id;
   }
 }
 
