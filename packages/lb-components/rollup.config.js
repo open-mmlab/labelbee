@@ -42,35 +42,44 @@ export default {
   input: 'src/index.tsx',
   output: [
     {
-      format: 'es',
-      dir: ES_OUTPUT_DIR,
-      preserveModules: true,
-      preserveModulesRoot: 'src',
-    },
-    {
       format: 'cjs',
       dir: CJS_OUTPUT_DIR,
       preserveModules: true,
       preserveModulesRoot: 'src',
     },
+    ...(isProd
+      ? [
+          {
+            format: 'es',
+            dir: ES_OUTPUT_DIR,
+            preserveModules: true,
+            preserveModulesRoot: 'src',
+          },
+        ]
+      : []),
   ],
+  onwarn: () => {},
   plugins: [
     webWorkerLoader({
       targetPlatform: 'browser',
       plugins: [
         resolve(),
         commonjs(),
-        terser({
-          compress: {
-            drop_console: true,
-            drop_debugger: true,
-          },
-          output: {
-            comments: false,
-          },
-        })
-      ]
-     }),
+        ...(isProd
+          ? [
+              terser({
+                compress: {
+                  drop_console: true,
+                  drop_debugger: true,
+                },
+                output: {
+                  comments: false,
+                },
+              }),
+            ]
+          : []),
+      ],
+    }),
     alias({
       entries: [
         { find: '@', replacement: path.resolve(projectRootDir, './src') },
