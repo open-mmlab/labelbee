@@ -13,10 +13,10 @@ import DialogView from './dialogView';
 import { DrawLayerSlot } from '@/types/main';
 import MessageMaskLayer from '../messageMaskLayer';
 import AnnotationTips from '@/views/MainView/annotationTips';
-import { useTranslation } from 'react-i18next';
+import { I18nextProvider, useTranslation } from 'react-i18next';
 import { LLMViewCls } from '../LLMToolView/questionView';
 import { Layout } from 'antd';
-
+import { i18n } from '@labelbee/lb-utils';
 interface IProps {
   annotation?: any;
   showTips?: boolean;
@@ -29,38 +29,48 @@ interface ILLMMultiWheelSourceViewProps {
   answerIsImg: boolean;
   LLMConfig?: ILLMMultiWheelToolConfig;
   dialogList: any[];
+  lang?: string;
 }
 
 export const LLMMultiWheelSourceView: React.FC<ILLMMultiWheelSourceViewProps> = (props) => {
-  const { questionIsImg, answerIsImg, LLMConfig, dialogList } = props;
+  const { questionIsImg, answerIsImg, LLMConfig, dialogList, lang = 'cn' } = props;
   const { dataFormatType, setDataFormatType } = useLLMMultiWheelStore();
-  return (
-    <div className={`${LLMMultiWheelViewCls}`}>
-      <div
-        style={{
-          display: 'flex',
-          justifyContent: 'flex-end',
-        }}
-      >
-        <ToggleDataFormatType
-          dataFormatType={dataFormatType}
-          setDataFormatType={setDataFormatType}
-        />
-      </div>
 
-      <div className={`${LLMMultiWheelViewCls}-container`}>
-        {dialogList?.map((item: any, index: number) => (
-          <DialogView
-            {...item}
-            key={index}
-            index={index}
-            questionIsImg={questionIsImg}
-            answerIsImg={answerIsImg}
-            LLMConfig={LLMConfig}
+  useEffect(() => {
+    if (lang) {
+      i18n?.changeLanguage(lang);
+    }
+  }, [lang]);
+
+  return (
+    <I18nextProvider i18n={i18n}>
+      <div className={`${LLMMultiWheelViewCls}`}>
+        <div
+          style={{
+            display: 'flex',
+            justifyContent: 'flex-end',
+          }}
+        >
+          <ToggleDataFormatType
+            dataFormatType={dataFormatType}
+            setDataFormatType={setDataFormatType}
           />
-        ))}
+        </div>
+
+        <div className={`${LLMMultiWheelViewCls}-container`}>
+          {dialogList?.map((item: any, index: number) => (
+            <DialogView
+              {...item}
+              key={index}
+              index={index}
+              questionIsImg={questionIsImg}
+              answerIsImg={answerIsImg}
+              LLMConfig={LLMConfig}
+            />
+          ))}
+        </div>
       </div>
-    </div>
+    </I18nextProvider>
   );
 };
 
