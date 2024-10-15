@@ -51,7 +51,7 @@ interface IProps {
   onRightClick?: (e: { event: MouseEvent; targetId: string }) => void;
   pointCloudBoxList?: IPointCloudBoxList;
   hiddenText?: boolean;
-  renderToolName: EPointCloudName.PointCloud | undefined;
+  renderToolName?: EPointCloudName.PointCloud | undefined;
 }
 
 const DEFAULT_SIZE = {
