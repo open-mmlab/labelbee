@@ -159,6 +159,10 @@ export class PointCloud extends EventListener {
 
   private hiddenText = false;
 
+  private filterBoxWorker: Worker;
+
+  private geometry: THREE.BufferGeometry;
+
   constructor({
     container,
     noAppend,
@@ -199,6 +203,10 @@ export class PointCloud extends EventListener {
     this.pcdLoader = new PCDLoader();
 
     this.axesHelper = new THREE.AxesHelper(1000);
+
+    this.filterBoxWorker = new FilterBoxWorker();
+
+    this.geometry = new THREE.BufferGeometry();
 
     // For Developer
     // this.scene.add(this.axesHelper);
@@ -806,19 +814,20 @@ export class PointCloud extends EventListener {
         position,
       };
 
+      if (!this.filterBoxWorker) {
+        return Promise.resolve(undefined);
+      }
+
       return new Promise((resolve) => {
-        const filterBoxWorker = new FilterBoxWorker();
-        filterBoxWorker.postMessage(params);
-        filterBoxWorker.onmessage = (e: any) => {
+        this.filterBoxWorker.postMessage(params);
+        this.filterBoxWorker.onmessage = (e: any) => {
           const { color: newColor, position: newPosition, num } = e.data;
-
-          const geometry = new THREE.BufferGeometry();
-          geometry.setAttribute('position', new THREE.Float32BufferAttribute(newPosition, 3));
-          geometry.setAttribute('color', new THREE.Float32BufferAttribute(newColor, 3));
-          geometry.computeBoundingSphere();
-
-          filterBoxWorker.terminate();
-          resolve({ geometry, num });
+          this.geometry.dispose();
+          this.geometry.setAttribute('position', new THREE.Float32BufferAttribute(newPosition, 3));
+          this.geometry.setAttribute('color', new THREE.Float32BufferAttribute(newColor, 3));
+          this.geometry.computeBoundingSphere();
+          this.filterBoxWorker.terminate();
+          resolve({ geometry: this.geometry, num });
         };
       });
     }

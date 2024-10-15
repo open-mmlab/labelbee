@@ -110,6 +110,8 @@ const AttributeList = React.forwardRef((props: IProps, ref) => {
     props.attributeChanged(e.target.value);
   };
 
+  const attributeClickDebounce = _.debounce(attributeClick, 100);
+
   const checkLock = (e: any, attributeInfo: any) => {
     if (props?.forbidColor) {
       return;
@@ -124,7 +126,7 @@ const AttributeList = React.forwardRef((props: IProps, ref) => {
     setAttributeLockList(newAttributeLockList);
     props?.attributeLockChange?.(newAttributeLockList);
     if (!hadLock) {
-      message.success(t('AttributeLockNotify', { label: attributeInfo.label }))
+      message.success(t('AttributeLockNotify', { label: attributeInfo.label }));
     }
     e.preventDefault();
   };
@@ -167,7 +169,12 @@ const AttributeList = React.forwardRef((props: IProps, ref) => {
           const showLimitPopover = isChosen && hasLimit && props.forbidShowLimitPopover !== true;
 
           return (
-            <Radio value={i.value} ref={radioRef} key={i.label + index} onClick={(e) => attributeClick(e, i)}>
+            <Radio
+              value={i.value}
+              ref={radioRef}
+              key={i.label + index}
+              onClick={(e) => attributeClickDebounce(e, i)}
+            >
               <span className='sensebee-radio-label' title={i.label}>
                 {!props?.forbidColor && (
                   <Popover
