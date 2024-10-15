@@ -2003,6 +2003,10 @@ class RectOperation extends BasicToolOperation {
       this.render();
     }
   }
+
+  public setHoverRectID(id: string) {
+    this.hoverRectID = id
+  }
 }
 
 export { RectOperation, IRectOperationProps };
