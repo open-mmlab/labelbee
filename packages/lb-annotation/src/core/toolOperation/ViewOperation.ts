@@ -24,7 +24,7 @@ import RectUtils from '@/utils/tool/RectUtils';
 import PolygonUtils, { IConvexHullGroupType } from '@/utils/tool/PolygonUtils';
 import MathUtils from '@/utils/MathUtils';
 import RenderDomClass from '@/utils/tool/RenderDomClass';
-import { DEFAULT_FONT, ELineTypes, EToolName, SEGMENT_NUMBER } from '@/constant/tool';
+import { DEFAULT_FONT, ELineTypes, SEGMENT_NUMBER, EPointCloudName } from '@/constant/tool';
 import { DEFAULT_TEXT_SHADOW, DEFAULT_TEXT_OFFSET, TEXT_ATTRIBUTE_OFFSET } from '@/constant/annotation';
 import ImgUtils, { cropAndEnlarge } from '@/utils/ImgUtils';
 import CanvasUtils from '@/utils/tool/CanvasUtils';
@@ -39,7 +39,7 @@ interface IViewOperationProps extends IBasicToolOperationProps {
   style: IBasicStyle;
   staticMode?: boolean;
   annotations: TAnnotationViewData[];
-  toolName?: EToolName;
+  renderToolName?: EPointCloudName;
 }
 
 export interface ISpecificStyle {
@@ -84,7 +84,7 @@ export default class ViewOperation extends BasicToolOperation {
 
   private hiddenText?: boolean = false;
 
-  private toolName?: EToolName = EToolName.Empty;
+  private renderToolName?: EPointCloudName = undefined;
 
   constructor(props: IViewOperationProps) {
     super({ ...props, showDefaultCursor: true });
@@ -96,7 +96,7 @@ export default class ViewOperation extends BasicToolOperation {
       container: this.container,
       height: this.canvas.height,
     });
-    this.toolName = props.toolName || EToolName.Empty;
+    this.renderToolName = props.renderToolName;
   }
 
   public clearConnectionPoints() {
@@ -456,7 +456,7 @@ export default class ViewOperation extends BasicToolOperation {
    * The principle is the same as other tools for rendering sub attribute content
    * Currently, only secondary attributes are being rendered in point cloud rendering
    */
-  public renderAttribute() {
+  public renderPointCloud3DRectAttribute() {
     const annotationChunks = _.chunk(this.annotations, 6);
     annotationChunks.forEach((annotationList) => {
       const annotation = annotationList.find((item) => item.type === 'polygon');
@@ -982,8 +982,8 @@ export default class ViewOperation extends BasicToolOperation {
       });
 
       this.renderConnectionPoints();
-      if (this.toolName && this.toolName === EToolName.Rect) {
-        this.renderAttribute();
+      if (this.renderToolName && this.renderToolName === EPointCloudName.PointCloud) {
+        this.renderPointCloud3DRectAttribute();
       }
     } catch (e) {
       console.error('ViewOperation Render Error', e);
