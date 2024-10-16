@@ -17,6 +17,8 @@ import useRefCache from '@/hooks/useRefCache';
 import { TAnnotationViewData, IPointCloudBoxList } from '@labelbee/lb-utils';
 import MeasureCanvas from '../measureCanvas';
 import { PointCloudContext } from '@/components/pointCloudView/PointCloudContext';
+import useFilterAnnotations from './hooks/useFilterAnnotations';
+import useToolConfigStore from '@/store/toolConfig';
 
 export type TAfterImgOnLoad = (img: HTMLImageElement) => void;
 
@@ -86,7 +88,7 @@ const AnnotationView = (props: IProps, ref: any) => {
   const {
     src,
     fallbackSrc,
-    annotations = [],
+    annotations: originAnnotations = [],
     style = {
       stroke: 'blue',
       thickness: 3,
@@ -110,8 +112,9 @@ const AnnotationView = (props: IProps, ref: any) => {
   const afterImgOnLoadRef = useRefCache<TAfterImgOnLoad | undefined>(afterImgOnLoad);
   const annotationListCacheRef = useRef<TAnnotationViewData[][]>([]);
   const canUpdateRef = useRef(true); // Judge if rending is Possible.
-
-  const { setSelectedIDs } = useContext(PointCloudContext);
+  const { selectedIDs } = useContext(PointCloudContext);
+  const { selectBoxVisibleSwitch } = useToolConfigStore();
+  const annotations = useFilterAnnotations(originAnnotations, selectedIDs, selectBoxVisibleSwitch);
 
   useImperativeHandle(
     ref,
