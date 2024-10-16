@@ -49,11 +49,16 @@ export default {
       preserveModules: true,
       preserveModulesRoot: 'src',
     },
-    {
-      format: 'cjs',
-      dir: CJS_OUTPUT_DIR,
-      preserveModules: true,
-      preserveModulesRoot: 'src',
-    },
+    ...(isProd
+      ? [
+          {
+            format: 'cjs',
+            dir: CJS_OUTPUT_DIR,
+            preserveModules: true,
+            preserveModulesRoot: 'src',
+          },
+        ]
+      : []),
   ],
+  onwarn: () => {},
 };

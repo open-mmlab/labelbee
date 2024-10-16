@@ -5,6 +5,7 @@ import json from '@rollup/plugin-json';
 const CJS_OUTPUT_DIR = 'dist';
 const ES_OUTPUT_DIR = 'es';
 
+const isProd = process.env.NODE_ENV === 'production';
 export default {
   input: 'src/index.ts',
   output: [
@@ -14,13 +15,18 @@ export default {
       preserveModules: true,
       preserveModulesRoot: 'src',
     },
-    {
-      format: 'cjs',
-      dir: CJS_OUTPUT_DIR,
-      preserveModules: true,
-      preserveModulesRoot: 'src',
-    }
+    ...(isProd
+      ? [
+          {
+            format: 'cjs',
+            dir: CJS_OUTPUT_DIR,
+            preserveModules: true,
+            preserveModulesRoot: 'src',
+          },
+        ]
+      : []),
   ],
+  onwarn: () => {},
   plugins: [
     json(),
     esbuild({

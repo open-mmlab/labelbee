@@ -11,7 +11,7 @@ import React, {
   useState,
   useContext,
 } from 'react';
-import { ViewOperation, ImgUtils } from '@labelbee/lb-annotation';
+import { ViewOperation, ImgUtils, EPointCloudName } from '@labelbee/lb-annotation';
 import { Spin } from 'antd/es';
 import useRefCache from '@/hooks/useRefCache';
 import { TAnnotationViewData, IPointCloudBoxList } from '@labelbee/lb-utils';
@@ -53,6 +53,7 @@ interface IProps {
   onRightClick?: (e: { event: MouseEvent; targetId: string }) => void;
   pointCloudBoxList?: IPointCloudBoxList;
   hiddenText?: boolean;
+  renderToolName?: EPointCloudName.PointCloud | undefined;
 }
 
 const DEFAULT_SIZE = {
@@ -102,6 +103,7 @@ const AnnotationView = (props: IProps, ref: any) => {
     onRightClick,
     pointCloudBoxList = [],
     hiddenText = false,
+    renderToolName,
   } = props;
   const size = sizeInitialized(props.size);
   const [loading, setLoading] = useState(false);
@@ -142,6 +144,7 @@ const AnnotationView = (props: IProps, ref: any) => {
         config: '{}', // TODO，暂时不需要
         zoomInfo: props.zoomInfo,
         staticMode: props.staticMode,
+        renderToolName,
       });
 
       viewOperation.current.init();

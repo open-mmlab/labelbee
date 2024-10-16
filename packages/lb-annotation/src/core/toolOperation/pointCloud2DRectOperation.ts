@@ -171,8 +171,10 @@ class PointCloud2DRectOperation extends RectOperation {
   }
 
   public rightMouseUp(e: MouseEvent) {
-    const hoverRect: (IRect & { boxID?: string }) | undefined = super.rightMouseUp(e);
-    this.emit('onRightClick', { event: e, targetId: hoverRect?.boxID, id: hoverRect?.id });
+    const hoverRect: (IRect & { boxID?: string, extId?: string}) | undefined = super.rightMouseUp(e);
+    // Use boxId for a normal connection, and use extId when disconnected. 
+    const targetId = hoverRect?.boxID || hoverRect?.extId
+    this.emit('onRightClick', { event: e, targetId, id: hoverRect?.id });
     return hoverRect;
   }
 }

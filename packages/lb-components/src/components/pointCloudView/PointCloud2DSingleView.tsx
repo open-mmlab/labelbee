@@ -3,7 +3,7 @@ import React, { useCallback, useContext, useEffect, useMemo, useRef, useState } 
 import AnnotationView from '@/components/AnnotationView';
 import useSize from '@/hooks/useSize';
 import { useSingleBox } from './hooks/useSingleBox';
-import { ViewOperation } from '@labelbee/lb-annotation';
+import { ViewOperation, EPointCloudName } from '@labelbee/lb-annotation';
 import { IAnnotationData2dView, IAnnotationDataTemporarily } from './PointCloud2DView';
 import { useHighlight } from './hooks/useHighlight';
 import HighlightVisible from './components/HighlightVisible';
@@ -133,6 +133,7 @@ const PointCloud2DSingleView = ({
           onRightClick={({ targetId }) => setSelectedIDs(targetId)}
           pointCloudBoxList={pointCloudBoxList}
           hiddenText={hiddenText}
+          renderToolName={EPointCloudName.PointCloud}
         />
       ) : (
         <>

@@ -402,14 +402,14 @@ const LLMMultiWheelToolSidebar = (props: IProps) => {
               }}
             >
               <Button type='primary' danger>
-                正在标注
+                {t('Annotating')}
               </Button>
               <div
                 style={{
                   padding: 16,
                 }}
               >
-                组：{currentLLMAnnotationResult.order}
+                {t('Group')}：{currentLLMAnnotationResult.order}
               </div>
             </div>
             <div>
