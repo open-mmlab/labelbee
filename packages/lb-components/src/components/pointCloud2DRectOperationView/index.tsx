@@ -1,4 +1,4 @@
-import { useLatest, useMemoizedFn } from 'ahooks';
+import { useLatest, useMemoizedFn, useDebounceEffect } from 'ahooks';
 import { Spin } from 'antd/es';
 import React, {
   useCallback,
@@ -67,7 +67,7 @@ const PointCloud2DRectOperationView = (props: IPointCloud2DRectOperationViewProp
     updateRectListByReducer,
     selectedIDs,
     setSelectedIDs,
-    selectedID
+    selectedID,
   } = useContext(PointCloudContext);
 
   const { value: toolStyle } = useToolStyleContext();
@@ -125,7 +125,7 @@ const PointCloud2DRectOperationView = (props: IPointCloud2DRectOperationViewProp
 
   const handleUpdateDragResult = (rect: IPointCloud2DRectOperationViewRect) => {
     const { boxID } = rect;
-
+    setNeedUpdateCenter(false);
     if (!shouldExcludePointCloudBoxListUpdate) {
       if (boxID) {
         recoverSelectedIds(() => {
@@ -410,29 +410,35 @@ const PointCloud2DRectOperationView = (props: IPointCloud2DRectOperationViewProp
     updateRectList();
   }, [selectedIDs]);
 
-  useEffect(() => {
-    // Center the view by selectedID
-    if (!selectedID || !needUpdateCenter) {
-      setNeedUpdateCenter(true);
-      return;
-    } 
-    const {rectList, size, zoom} = operation.current
-    // Use boxId for a normal connection, and use extId when disconnected. 
-    const rect = rectList.find((el: any) => el.boxID === selectedID || el.extId === selectedID)
-    if (!rect) {
-      setNeedUpdateCenter(true);
-      return;
-    }
-    const centerPoint = {
-      x: rect.x + rect.width / 2,
-      y: rect.y + rect.height / 2
-    }
-    const currentPos = MathUtils.getCurrentPosFromRectCenter(size, centerPoint, zoom)
-    operation.current.setHoverRectID(rect.id)
-    operation.current.setCurrentPos(currentPos)
-    operation.current.renderBasicCanvas()
-    operation.current.render()
-  }, [selectedID]);
+  useDebounceEffect(
+    () => {
+      // Center the view by selectedID
+      if (!selectedID || !needUpdateCenter) {
+        setNeedUpdateCenter(true);
+        return;
+      }
+      const { rectList, size, zoom } = operation.current;
+      // Use boxId for a normal connection, and use extId when disconnected.
+      const rect = rectList.find((el: any) => el.boxID === selectedID || el.extId === selectedID);
+      if (!rect) {
+        setNeedUpdateCenter(true);
+        return;
+      }
+      const centerPoint = {
+        x: rect.x + rect.width / 2,
+        y: rect.y + rect.height / 2,
+      };
+      const currentPos = MathUtils.getCurrentPosFromRectCenter(size, centerPoint, zoom);
+      operation.current.setHoverRectID(rect.id);
+      operation.current.setCurrentPos(currentPos);
+      operation.current.renderBasicCanvas();
+      operation.current.render();
+    },
+    [selectedID],
+    {
+      wait: 200,
+    },
+  );
 
   useEffect(() => {
     const { hiddenText } = toolStyle || {};
