@@ -159,9 +159,11 @@ export class PointCloud extends EventListener {
 
   private hiddenText = false;
 
-  private filterBoxWorker: Worker;
+  private filterBoxWorker: Worker | null;
 
   private geometry: THREE.BufferGeometry;
+
+  private filterBoxWorkerTimer: ReturnType<typeof setTimeout> | null = null;
 
   constructor({
     container,
@@ -815,18 +817,29 @@ export class PointCloud extends EventListener {
       };
 
       if (!this.filterBoxWorker) {
-        return Promise.resolve(undefined);
+        this.filterBoxWorker = new FilterBoxWorker();
       }
 
       return new Promise((resolve) => {
-        this.filterBoxWorker.postMessage(params);
-        this.filterBoxWorker.onmessage = (e: any) => {
+        this.filterBoxWorker?.postMessage(params);
+        this.filterBoxWorker!.onmessage = (e: any) => {
           const { color: newColor, position: newPosition, num } = e.data;
           this.geometry.dispose();
           this.geometry.setAttribute('position', new THREE.Float32BufferAttribute(newPosition, 3));
           this.geometry.setAttribute('color', new THREE.Float32BufferAttribute(newColor, 3));
           this.geometry.computeBoundingSphere();
-          this.filterBoxWorker.terminate();
+
+          if (this.filterBoxWorkerTimer) {
+            clearTimeout(this.filterBoxWorkerTimer);
+          }
+          // The creation of Worker themselves is time-consuming. Detect within 3 seconds whether the user still needs to use Worker to calculate
+          this.filterBoxWorkerTimer = setTimeout(() => {
+            if (this.filterBoxWorker) {
+              this.filterBoxWorker.terminate();
+              this.filterBoxWorker = null;
+            }
+          }, 3000);
+
           resolve({ geometry: this.geometry, num });
         };
       });
