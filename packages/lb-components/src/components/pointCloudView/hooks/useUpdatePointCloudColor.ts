@@ -121,13 +121,17 @@ const useUpdatePointCloudColor = (setResourceLoading: any, config: any) => {
           : EPointCloudBoxRenderTrigger.Single;
       // Update all view related colors first
       ptCtx.syncAllViewPointCloudColor(trigger, pointCloudBoxList);
-      // Update the relevant content of the original point cloud again
-      pointCloudBoxList.forEach((selectBox) => {
+      /**
+       * Update the relevant content of the original point cloud again
+       * This method maintains the same judgment logic as the original topViewSlectedChanged, and only triggers an update when one box is selected
+       */
+      if (selectedIDs && selectedIDs.length === 1) {
+        const newSelectedBox = pointCloudBoxList.find((item) => item.id === selectedIDs[0]);
         topViewSelectedChanged({
           trigger,
-          newSelectedBox: selectBox,
+          newSelectedBox,
         });
-      });
+      }
       mainViewInstance.generateBoxes(pointCloudBoxList);
     }
 
