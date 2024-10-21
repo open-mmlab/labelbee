@@ -1,5 +1,5 @@
-import { IToolConfig } from './common'
-import { IInputList } from './base'
+import { IToolConfig } from './common';
+import { IInputList } from './base';
 export interface IAudioTimeSlice {
   /** 开始的时间 */
   start: number;
@@ -11,6 +11,10 @@ export interface IAudioTimeSlice {
   attribute: string;
   /** 文本标注 */
   text: string;
+  subAttribute?: {
+    [key: string]: string;
+  };
+  [key: string]: any;
 }
 
 export interface ITextConfigItem {
@@ -29,5 +33,7 @@ export interface IAudioTextToolConfig extends IToolConfig {
   clipConfigurable: boolean;
   clipAttributeConfigurable: boolean;
   clipAttributeList: IInputList[];
+  secondaryAttributeConfigurable?: boolean;
+  subAttributeList?: IInputList[];
   clipTextConfigurable: boolean;
 }

@@ -86,37 +86,34 @@ const tagToolConfig = {
 };
 
 const textToolConfig = {
-  "showConfirm": true,
-  "showDirection": false,
-  "skipWhileNoDependencies": false,
-  "configList": [
+  showConfirm: true,
+  showDirection: false,
+  skipWhileNoDependencies: false,
+  configList: [
     {
-      "label": "文本",
-      "key": "text",
-      "required": false,
-      "default": "",
-      "maxLength": 1000
+      label: '文本',
+      key: 'text',
+      required: false,
+      default: '',
+      maxLength: 1000,
     },
     {
-      "label": "文本2",
-      "key": "text2",
-      "required": false,
-      "default": "",
-      "maxLength": 1000
+      label: '文本2',
+      key: 'text2',
+      required: false,
+      default: '',
+      maxLength: 1000,
     },
     {
-      "label": "文本3",
-      "key": "text3",
-      "required": false,
-      "default": "",
-      "maxLength": 1000
-    }
+      label: '文本3',
+      key: 'text3',
+      required: false,
+      default: '',
+      maxLength: 1000,
+    },
   ],
-  "filterData": [
-    "valid",
-    "invalid"
-  ]
-}
+  filterData: ['valid', 'invalid'],
+};
 
 const lineToolConfig = {
   lineType: 0,
@@ -293,112 +290,198 @@ const LLMToolConfig = {
       max: 1000,
       isFillAnswer: true, // 是否填充答案
       isLaText: true, // 是否打开LaTex编辑
-      textControl: true // 文本对照
+      textControl: true, // 文本对照
     },
     {
       title: 2,
       min: 10,
       isFillAnswer: false, // 是否填充答案
-      textControl: true // 文本对照
+      textControl: true, // 文本对照
     },
     {
       title: 3,
       max: 100,
       isFillAnswer: true, // 是否填充答案
-      textControl: false // 文本对照
+      textControl: false, // 文本对照
     },
     {
       title: 4,
       isFillAnswer: false, // 是否填充答案
-      textControl: false // 文本对照
+      textControl: false, // 文本对照
     },
   ],
 };
 
-const audioToolConfig = {
-  "showConfirm": true,
-  "showDirection": false,
-  "skipWhileNoDependencies": false,
-  "configList": [
+const LLMMultiWheelToolConfig = {
+  enableSort: true, // 开启答案排序
+  enableTextAttribute: true, // 文本标注
+  score: 7, // 答案评分
+  indicatorScore: [
+    { label: '可读性', value: 'readability', text: '阅读起来是否顺畅', score: 10 },
+    { label: '不可读性', value: 'unReadability', text: '偶是基督教精神', score: 10 },
+  ], // 指标评分
+  indicatorDetermine: [
+    { label: '包含敏感信息', value: 'sensitiveInfo' },
+    { label: '包含敏感信息2', value: 'sensitiveInfo2' },
+  ], // 指标判断
+  dataType: {
+    prompt: 'picture',
+    response: 'text',
+  },
+  isTextEdit: true, // 是否打开文本编辑
+  textEdit: [
     {
-      "label": "测试文本",
-      "key": "text",
-      "required": false,
-      "default": "",
-      "maxLength": 1000
-    }
+      title: 1,
+      min: 11,
+      max: 1000,
+      isFillAnswer: true, // 是否填充答案
+      isLaText: true, // 是否打开LaTex编辑
+      textControl: true, // 文本对照
+    },
+    {
+      title: 2,
+      min: 10,
+      isFillAnswer: false, // 是否填充答案
+      textControl: true, // 文本对照
+    },
+    {
+      title: 3,
+      max: 100,
+      isFillAnswer: true, // 是否填充答案
+      textControl: false, // 文本对照
+    },
+    {
+      title: 4,
+      isFillAnswer: false, // 是否填充答案
+      textControl: false, // 文本对照
+    },
   ],
-  "inputList": [
-    {
-      "key": "类别1",
-      "value": "class1",
-      "isMulti": false,
-      "subSelected": [
-        {
-          "key": "选项1",
-          "value": "option1",
-          "isDefault": false
-        }
-      ]
-    },
-    {
-      "key": "类别xl",
-      "value": "class-xl",
-      "isMulti": false,
-      "subSelected": [
-        {
-          "key": "选项2-1",
-          "value": "option2-1",
-          "isMulti": false
-        }
-      ]
-    },
-    {
-      "key": "类别dg",
-      "value": "class-dg",
-      "isMulti": false,
-      "subSelected": [
-        {
-          "key": "选项3-1",
-          "value": "option3-1",
-          "isMulti": false
-        }
-      ]
-    }
-  ],
-  "tagConfigurable": true,
-  "textConfigurable": true,
-  "filterData": [
-    "valid",
-    "invalid"
-  ],
-  "clipConfigurable": true,
-  "clipTextConfigurable": true,
-  "clipAttributeList": [
-    {
-      "key": "类别1",
-      "value": "类别1"
-    },
-    {
-      "key": "类别Jy",
-      "value": "class-Jy"
-    },
-    {
-      "key": "类别JU",
-      "value": "class-JU"
-    },
-    {
-      "key": "类别EZ",
-      "value": "class-EZ"
-    },
-    {
-      "key": "类别4E",
-      "value": "class-4E"
-    }
-  ],
-  "clipAttributeConfigurable": true
-}
+};
 
+const NLPToolConfig = {
+  indicatorDetermine: [
+    {
+      label: '指标判断-Mm',
+      value: 'indicatorDetermine-Mm',
+    },
+    {
+      label: '指标判断-Y8',
+      value: 'indicatorDetermine-Y8',
+    },
+  ],
+  attributeConfigurable: true,
+  attributeList: [
+    {
+      key: '类别1',
+      value: '类别1',
+    },
+    {
+      key: '类别bk',
+      value: 'class-bk',
+      color: 'rgba(0, 255, 48, 1)',
+    },
+    {
+      key: '类别e4',
+      value: 'class-e4',
+      color: 'rgba(255, 136, 247, 1)',
+    },
+  ],
+  isTextEdit: true,
+  textEdit: [
+    {
+      title: '标题',
+      isFillAnswer: true,
+      isLaText: true,
+      textControl: true,
+      min: 1,
+      max: 222,
+    },
+  ],
+  showConfirm: true,
+  showDirection: false,
+  skipWhileNoDependencies: false,
+};
+
+const audioToolConfig = {
+  showConfirm: true,
+  showDirection: false,
+  skipWhileNoDependencies: false,
+  configList: [
+    {
+      label: '测试文本',
+      key: 'text',
+      required: false,
+      default: '',
+      maxLength: 1000,
+    },
+  ],
+  inputList: [
+    {
+      key: '类别1',
+      value: 'class1',
+      isMulti: false,
+      subSelected: [
+        {
+          key: '选项1',
+          value: 'option1',
+          isDefault: false,
+        },
+      ],
+    },
+    {
+      key: '类别xl',
+      value: 'class-xl',
+      isMulti: false,
+      subSelected: [
+        {
+          key: '选项2-1',
+          value: 'option2-1',
+          isMulti: false,
+        },
+      ],
+    },
+    {
+      key: '类别dg',
+      value: 'class-dg',
+      isMulti: false,
+      subSelected: [
+        {
+          key: '选项3-1',
+          value: 'option3-1',
+          isMulti: false,
+        },
+      ],
+    },
+  ],
+  tagConfigurable: true,
+  textConfigurable: true,
+  filterData: ['valid', 'invalid'],
+  clipConfigurable: true,
+  clipTextConfigurable: true,
+  clipAttributeList: [
+    {
+      key: '类别1',
+      value: '类别1',
+    },
+    {
+      key: '类别Jy',
+      value: 'class-Jy',
+    },
+    {
+      key: '类别JU',
+      value: 'class-JU',
+    },
+    {
+      key: '类别EZ',
+      value: 'class-EZ',
+    },
+    {
+      key: '类别4E',
+      value: 'class-4E',
+    },
+  ],
+  clipAttributeConfigurable: true,
+};
 
 export const getConfig = (tool) => {
   if (tool === EToolName.Line) {
@@ -445,8 +528,16 @@ export const getConfig = (tool) => {
     return LLMToolConfig;
   }
 
+  if (tool === EToolName.LLMMultiWheel) {
+    return LLMMultiWheelToolConfig;
+  }
+
+  if (tool === EToolName.NLP) {
+    return NLPToolConfig;
+  }
+
   if (tool === EAudioToolName.AudioTextTool) {
-    return audioToolConfig
+    return audioToolConfig;
   }
 
   return rectToolConfig;

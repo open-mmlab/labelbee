@@ -105,8 +105,34 @@ const useCustomToolInstance = ({ basicInfo }: ICustomToolInstanceProps = {}) => 
     Object.assign(toolInstanceRef.current, initialCustomToolInstance);
   };
 
+  const initEventEmitter = () => {
+    toolInstanceRef.current.emit = (event: string) => {
+      const listener = toolInstanceRef.current.fns.get(event);
+      if (listener) {
+        listener.forEach((fn: any) => {
+          if (fn) {
+            fn?.();
+          }
+        });
+      }
+    }
+    toolInstanceRef.current.fns = new Map()
+    toolInstanceRef.current.singleOn = (event: string, func: () => void) => {
+      toolInstanceRef.current.fns.set(event, [func]);
+    };
+
+    toolInstanceRef.current.on = (event: string, func: () => void) => {
+      toolInstanceRef.current.singleOn(event, func);
+    };
+
+    toolInstanceRef.current.unbindAll = (eventName: string) => {
+      toolInstanceRef.current.fns.delete(eventName);
+    };
+  }
+
   useEffect(() => {
     // Initial toolInstance
+    initEventEmitter()
     onMounted(toolInstanceRef.current);
     return () => {
       onUnmounted();
@@ -116,6 +142,7 @@ const useCustomToolInstance = ({ basicInfo }: ICustomToolInstanceProps = {}) => 
   return {
     toolInstanceRef,
     clearToolInstance,
+    initEventEmitter,
   };
 };
 

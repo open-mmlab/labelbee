@@ -1,10 +1,10 @@
-import React, { useState, useEffect, useContext } from 'react';
+import React, { useState, useEffect, useContext, useMemo } from 'react';
 import { prefix } from '@/constant';
 import { Button, Empty } from 'antd';
 import AnswerSort from './components/answerSort';
 import { AppState } from '@/store';
 import { connect } from 'react-redux';
-import { isNumber, isObject, isString } from 'lodash';
+import { isArray, isBoolean, isNumber, isObject, isString } from 'lodash';
 import AnswerList from './components/answerList';
 import { LabelBeeContext, LLMContext } from '@/store/ctx';
 import { jsonParser } from '@/utils';
@@ -21,44 +21,99 @@ import {
   IndicatorScore,
   IndicatorDetermine,
   ITextList,
+  ISelectedTags,
+  IConfigUpdate,
+  ILLMMultiWheelToolConfig,
 } from '@/components/LLMToolView/types';
 import { useTranslation } from 'react-i18next';
-import { formatSort, getCurrentResultFromResultList } from '../utils/data';
+import { formatSort, getCurrentResultFromResultList, getRenderDataByResult } from '../utils/data';
 import emptySvg from '@/assets/annotation/LLMTool/empty.svg';
 import TextInputBox from './components/textInputBox';
+import OverallTagList from '@/components/tagList/components/overall';
+import StepUtils from '@/utils/StepUtils';
 
 interface IProps {
   annotation?: any;
   dispatch: any;
   checkMode?: boolean;
 }
-
-interface IConfigUpdate {
-  order: number;
-  value: number | string | { key: string; value?: number | boolean };
-  key?: string;
-}
-interface IAnnotationResult {
+export interface IAnnotationResult {
   newSort?: IAnswerSort[][];
   waitSorts?: IWaitAnswerSort[];
   answerList?: IAnswerList[];
   textAttribute?: ITextList[];
+  tagList?: ISelectedTags;
 }
 
 const EKeyCode = cKeyCode.default;
 const sidebarCls = `${prefix}-sidebar`;
 
-const LLMToolSidebar: React.FC<IProps> = (props) => {
+export const EmptyConfig = () => {
+  const { t } = useTranslation();
+  return (
+    <div className={`${sidebarCls}`}>
+      <div
+        className={`${sidebarCls}__content`}
+        style={{ display: 'flex', justifyContent: 'center', alignItems: 'center' }}
+      >
+        <Empty
+          description={<span style={{ color: '#ccc' }}>{t('NoScoringScale')}</span>}
+          imageStyle={{
+            width: 200,
+            height: 200,
+          }}
+          image={<img src={emptySvg} />}
+        />
+      </div>
+    </div>
+  );
+};
+
+export const getLLMIsNoConfig = (LLMConfig?: ILLMMultiWheelToolConfig | ILLMToolConfig) => {
+  const {
+    indicatorScore = [],
+    indicatorDetermine = [],
+    text = [],
+    enableSort,
+    isTextEdit,
+    tagInputListConfigurable,
+    // @ts-ignore
+    dialogSort = false,
+  } = LLMConfig || {};
+
+  const hasIndicatorScore =
+    indicatorScore?.filter((i: IndicatorScore) => i.label && i.value && i.score)?.length > 0;
+
+  const hasIndicatorDetermine =
+    indicatorDetermine?.filter((i: IndicatorDetermine) => i.label && i.value)?.length > 0;
+  const hasText = text?.length > 0;
+  const noConfig = !(
+    hasIndicatorScore ||
+    hasIndicatorDetermine ||
+    hasText ||
+    enableSort ||
+    isTextEdit ||
+    tagInputListConfigurable ||
+    dialogSort
+  );
+  return noConfig;
+};
+
+const LLMToolSidebar = (props: IProps) => {
   const { annotation, dispatch, checkMode } = props;
   const { imgIndex, imgList, stepList, step, skipBeforePageTurning } = annotation;
-  const { modelAPIResponse } = useContext(LLMContext);
+  const { modelAPIResponse, setModelAPIResponse } = useContext(LLMContext);
   const { t } = useTranslation();
   const currentData = imgList[imgIndex] ?? {};
   const basicInfo = jsonParser(currentData?.result);
   const { toolInstanceRef } = useCustomToolInstance({ basicInfo });
   const [LLMConfig, setLLMConfig] = useState<ILLMToolConfig>();
+  const [valid, setValid] = useState(true);
+
   const { setNewAnswerList } = useContext(LLMContext);
   const [annotationResult, setAnnotationResult] = useState<IAnnotationResult>({});
+
+  const disabeledAll = !toolInstanceRef.current.valid || checkMode;
 
   useEffect(() => {
     if (stepList && step) {
@@ -71,54 +126,50 @@ const LLMToolSidebar: React.FC<IProps> = (props) => {
     if (!currentData || imgIndex === -1) {
       return;
     }
+    toolInstanceRef.current.setValid = onSetValid;
+    toolInstanceRef.current.clearResult = clearResult;
+    onSetValid();
+    initResult();
+  }, [imgIndex, LLMConfig, currentData?.id]);
 
-    const result: ILLMBoxResult = getCurrentResultFromResultList(currentData?.result);
-    let qaData = result?.answerList ? result : currentData?.questionList;
-    let answerList: IAnswerList[] = [];
-    let newSort: IAnswerSort[][] = [];
-    let waitSorts: IWaitAnswerSort[] = [];
-    if (qaData?.answerList) {
-      answerList = initAnswerList(qaData.answerList) || [];
-      newSort = getWaitSortList(qaData.answerList).newSort;
-      waitSorts = getWaitSortList(qaData.answerList).waitSorts;
+  const clearResult = () => {
+    initResult(currentData?.questionList);
+  };
+
+  const onSetValid = (newValid?: boolean) => {
+    const valid = newValid ?? basicInfo.valid;
+    if (isBoolean(valid)) {
+      setValid(valid);
+      toolInstanceRef.current.valid = valid;
+      toolInstanceRef.current?.emit('validUpdated');
+    }
+  };
+
+  const initResult = (initData?: ILLMBoxResult) => {
+    const currentStepInfo = StepUtils.getCurrentStepInfo(step, stepList);
+    const result: ILLMBoxResult = getCurrentResultFromResultList(
+      currentData?.result,
+      currentStepInfo.step,
+    );
+
+    let sourceData = currentData?.questionList;
+    if (result?.answerList && toolInstanceRef.current.valid) {
+      sourceData = result;
+    }
+    if (initData) {
+      sourceData = initData;
+      result.sort = [];
     }
 
-    setAnnotationResult({
-      newSort,
-      waitSorts,
-      answerList,
-      textAttribute: result?.textAttribute,
-    });
-  }, [imgIndex, LLMConfig]);
+    const annotations = getRenderDataByResult(LLMConfig, sourceData);
+    setAnnotationResult({ ...annotations });
+    setModelAPIResponse([]);
+  };
 
   useEffect(() => {
-    const { newSort, answerList, textAttribute } = annotationResult;
-    toolInstanceRef.current.exportData = () => {
-      const sort = formatSort(newSort || []);
-      const result = [
-        {
-          answerList,
-          sort,
-          textAttribute,
-          id: currentData?.id,
-          modelAPIResponse,
-        },
-      ];
-      return [result, {}];
-    };
-    const sort = formatSort(newSort || []);
-    const result = {
-      answerList,
-      sort,
-      textAttribute,
-      id: currentData?.id,
-      toolName: EToolName.LLM,
-      modelAPIResponse,
-    };
-
-    toolInstanceRef.current.currentPageResult = result;
-    setNewAnswerList(answerList || []);
-  }, [annotationResult, modelAPIResponse]);
+    setExportData();
+    setNewAnswerList(annotationResult?.answerList || []);
+  }, [annotationResult, modelAPIResponse, valid]);
 
   useEffect(() => {
     window.addEventListener('keydown', onKeyDown);
@@ -127,16 +178,26 @@ const LLMToolSidebar: React.FC<IProps> = (props) => {
     };
   }, []);
 
-  const initAnswerList = (initValue: IAnswerList[]) => {
-    const { isTextEdit, textEdit = [] } = LLMConfig || {};
-    if (!isTextEdit) {
-      return initValue;
-    }
-    const data = initValue.map((i) => {
-      const isFillAnswer = textEdit.filter((v) => v.title === i.order)[0]?.isFillAnswer;
-      return isFillAnswer ? { ...i, newAnswer: i?.newAnswer ?? i.answer } : i;
-    });
-    return data;
+  const setExportData = () => {
+    const { newSort, answerList, textAttribute, tagList } = annotationResult;
+    const sort = formatSort(newSort || []);
+    const result = {
+      answerList,
+      sort,
+      tagList,
+      textAttribute,
+      id: currentData?.id,
+      modelAPIResponse,
+    };
+    toolInstanceRef.current.exportData = () => {
+      return [[result], { valid }];
+    };
+
+    toolInstanceRef.current.currentPageResult = {
+      ...result,
+      toolName: EToolName.LLM,
+      valid,
+    };
   };
 
   const onKeyDown = (e: KeyboardEvent) => {
@@ -149,44 +210,11 @@ const LLMToolSidebar: React.FC<IProps> = (props) => {
     }
   };
 
-  const getWaitSortList = (answerList: IAnswerList[]) => {
-    let waitSorts: IWaitAnswerSort[] = [];
-    let newSort: IAnswerSort[][] = [];
-    if (answerList?.length > 0) {
-      // 将[[1],[2,3]]格式转成[[{ title: 1, id: 1 }],[{...},{...}]]
-      const result = getCurrentResultFromResultList(currentData?.result);
-      const currentResult = result?.length > 0 ? result[0] : result;
-      if (currentResult?.sort?.length > 0) {
-        newSort = currentResult.sort.reduce((i: IWaitAnswerSort[][], key: number[]) => {
-          let tagColumn = [{ title: key[0], id: key[0] }];
-          if (key.length > 1) {
-            tagColumn = key.map((item: number) => ({ title: item, id: item }));
-          }
-          return [...i, tagColumn];
-        }, []);
-      }
-      // 待排序容器需要过滤已排序容器存在的答案
-      answerList.forEach((i: IAnswerList) => {
-        const existed = newSort.some((sortItem: IAnswerSort[]) => {
-          if (sortItem.length > 1) {
-            return sortItem.some((v: IAnswerSort) => v.id === i.order);
-          }
-          return sortItem[0].id === i.order;
-        });
-        if (existed) {
-          return;
-        }
-        waitSorts.push({ title: i.order, id: i.order });
-      });
-    }
-    return { newSort, waitSorts };
-  };
-
   const updateValue = ({ order, value, key }: IConfigUpdate) => {
     const { answerList } = annotationResult;
     const newList = answerList?.map((i: IAnswerList) => {
       if (i?.order === order) {
-        // 文本编辑
+        // text edit
         if (key === 'textEdit' && isString(value)) {
           return { ...i, newAnswer: value };
         }
@@ -205,57 +233,33 @@ const LLMToolSidebar: React.FC<IProps> = (props) => {
     setAnnotationResult({ ...annotationResult, answerList: newList || [] });
   };
 
-  const isNoConfig = () => {
-    const {
-      indicatorScore = [],
-      indicatorDetermine = [],
-      text = [],
-      enableSort,
-      isTextEdit,
-    } = LLMConfig || {};
-    const hasIndicatorScore =
-      indicatorScore?.filter((i: IndicatorScore) => i.label && i.value && i.score)?.length > 0;
+  const isNoConfig = useMemo(() => {
+    return getLLMIsNoConfig(LLMConfig);
+  }, [LLMConfig]);
 
-    const hasIndicatorDetermine =
-      indicatorDetermine?.filter((i: IndicatorDetermine) => i.label && i.value)?.length > 0;
-    const hasText = text?.length > 0;
-    const noConfig = !(
-      hasIndicatorScore ||
-      hasIndicatorDetermine ||
-      hasText ||
-      enableSort ||
-      isTextEdit
-    );
-    return noConfig;
-  };
-
-  if (isNoConfig()) {
-    return (
-      <div className={`${sidebarCls}`}>
-        <div
-          className={`${sidebarCls}__content`}
-          style={{ display: 'flex', justifyContent: 'center', alignItems: 'center' }}
-        >
-          <Empty
-            description={<span style={{ color: '#ccc' }}>{t('NoScoringScale')}</span>}
-            imageStyle={{
-              width: 200,
-              height: 200,
-            }}
-            image={<img src={emptySvg} />}
-          />
-        </div>
-      </div>
-    );
+  if (isNoConfig) {
+    return <EmptyConfig />;
   }
-  const { indicatorScore = [], indicatorDetermine = [], enableSort, isTextEdit } = LLMConfig || {};
-  const answerList = annotationResult?.answerList || [];
+
+  const {
+    indicatorScore = [],
+    indicatorDetermine = [],
+    enableSort,
+    isTextEdit,
+    inputList = [],
+    tagInputListConfigurable,
+  } = LLMConfig || {};
+
+  const hasTagList = tagInputListConfigurable && inputList.filter((i) => !i.isOverall)?.length > 0;
   const showAnwerList =
-    answerList.length > 0 &&
-    (indicatorDetermine?.length > 0 || indicatorScore?.length > 0 || isTextEdit);
+    indicatorDetermine?.length > 0 || indicatorScore?.length > 0 || isTextEdit || hasTagList;
   return (
     <div className={`${sidebarCls}`}>
       <div className={`${sidebarCls}__content`}>
+        <div style={{ fontSize: '18px', fontWeight: 500, padding: '0px 16px', marginTop: '16px' }}>
+          {t('GlobalAnnotation')}
+        </div>
+
         {enableSort && (
           <AnswerSort
             waitSortList={annotationResult?.waitSorts || []}
@@ -263,28 +267,50 @@ const LLMToolSidebar: React.FC<IProps> = (props) => {
             setSortList={(value) => {
               setAnnotationResult({ ...annotationResult, newSort: value });
             }}
-            checkMode={checkMode}
-          />
-        )}
-        {showAnwerList && (
-          <AnswerList
-            list={annotationResult?.answerList || []}
-            LLMConfig={LLMConfig}
-            updateValue={updateValue}
-            checkMode={checkMode}
+            disabeledAll={disabeledAll}
           />
         )}
 
+        {tagInputListConfigurable && inputList.length && (
+          <OverallTagList
+            inputList={inputList}
+            selectedTags={annotationResult?.tagList || {}}
+            updateValue={(changeValue) => {
+              const { key, value } = changeValue;
+              const originData = annotationResult?.tagList;
+
+              setAnnotationResult({
+                ...annotationResult,
+                tagList: { ...originData, [key]: value },
+              });
+            }}
+            disabeledAll={disabeledAll}
+          />
+        )}
         {LLMConfig?.text && (
           <div style={{ padding: '0px 16px', marginTop: '16px' }}>
             <TextInputBox
               textAttribute={annotationResult?.textAttribute || []}
-              LLMConfig={LLMConfig}
+              textConfig={LLMConfig?.text && isArray(LLMConfig.text) ? LLMConfig?.text : []}
               setText={(v) => setAnnotationResult({ ...annotationResult, textAttribute: v })}
-              checkMode={checkMode}
+              disabeledAll={disabeledAll}
             />
           </div>
         )}
+
+        <div style={{ fontSize: '18px', fontWeight: 500, padding: '0px 16px', marginTop: '16px' }}>
+          {t('QualifiedAnnotation')}
+        </div>
+        <div>
+          {showAnwerList && (
+            <AnswerList
+              list={annotationResult?.answerList || []}
+              LLMConfig={LLMConfig}
+              updateValue={updateValue}
+              disabeledAll={disabeledAll}
+            />
+          )}
+        </div>
       </div>
       <div style={{ margin: '24px 16px', display: 'flex' }}>
         {imgList?.length - 1 !== imgIndex && (
@@ -298,7 +324,7 @@ const LLMToolSidebar: React.FC<IProps> = (props) => {
               }
               dispatch(PageForward());
             }}
-            disabled={checkMode}
+            disabled={disabeledAll}
           >
             {t('Save')}
           </Button>

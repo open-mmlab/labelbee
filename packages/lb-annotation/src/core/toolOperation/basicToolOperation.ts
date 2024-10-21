@@ -238,6 +238,7 @@ class BasicToolOperation extends EventListener {
     this.onLeftDblClick = this.onLeftDblClick.bind(this);
     this.onRightDblClick = this.onRightDblClick.bind(this);
     this.onClick = this.onClick.bind(this);
+    this.onRightClick = this.onRightClick.bind(this);
     this.clearImgDrag = this.clearImgDrag.bind(this);
 
     // 初始化监听事件
@@ -954,6 +955,10 @@ class BasicToolOperation extends EventListener {
     }
 
     this.startTime = 0;
+
+    if (e.button === 2) {
+      this.onRightClick(e);
+    }
     this.render();
   }
 
@@ -966,6 +971,9 @@ class BasicToolOperation extends EventListener {
 
   // eslint-disable-next-line no-unused-vars
   public onClick(e: MouseEvent) {}
+
+  // eslint-disable-next-line no-unused-vars
+  public onRightClick(e: MouseEvent) {}
 
   // eslint-disable-next-line no-unused-vars
   public onLeftDblClick(e: MouseEvent) {
@@ -1262,8 +1270,11 @@ class BasicToolOperation extends EventListener {
     this.coordUtils.setDependInfo(dependToolName, dependToolConfig);
   }
 
+  public filterCacheContext() {}
+
   public setAttributeLockList(attributeLockList: string[]) {
     this.attributeLockList = attributeLockList;
+    this.filterCacheContext();
     this.render();
   }
 

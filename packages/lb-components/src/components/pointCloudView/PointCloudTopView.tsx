@@ -13,6 +13,7 @@ import {
   PointCloudAnnotation,
   THybridToolName,
   cKeyCode,
+  MathUtils,
 } from '@labelbee/lb-annotation';
 import {
   IPolygonData,
@@ -21,9 +22,11 @@ import {
   IPointUnit,
   ILine,
 } from '@labelbee/lb-utils';
+import { EPointCloudBoxRenderTrigger } from '@/utils/ToolPointCloudBoxRenderHelper';
 import React, { useEffect, useLayoutEffect, useRef, useState } from 'react';
 import { PointCloudContext } from './PointCloudContext';
 import { useRotate } from './hooks/useRotate';
+import { useRotateEdge } from './hooks/useRotateEdge';
 import { useSingleBox } from './hooks/useSingleBox';
 import { PointCloudContainer } from './PointCloudLayout';
 import { BoxInfos, PointCloudValidity } from './PointCloudInfos';
@@ -84,22 +87,21 @@ const TopViewToolbar = ({ currentData }: IAnnotationStateProps) => {
   const { selectNextBox, selectPrevBox } = useSingleBox();
   const { switchToNextSphere } = useSphere();
   const { updateRotate } = useRotate({ currentData });
+  const { updateRotateEdge } = useRotateEdge({ currentData });
   const ptCtx = React.useContext(PointCloudContext);
   const { topViewInstance } = ptCtx;
 
   const currentToolName = ptCtx?.topViewInstance?.toolScheduler?.getCurrentToolName();
 
-  const ratio = 2;
-
   const clockwiseRotate = () => {
-    updateRotate(-ratio);
+    updateRotate(-Number(ptCtx.rectRotateSensitivity));
   };
   const anticlockwiseRotate = () => {
-    updateRotate(ratio);
+    updateRotate(ptCtx.rectRotateSensitivity);
   };
 
   const reverseRotate = () => {
-    updateRotate(180);
+    updateRotateEdge(-90);
   };
 
   return (
@@ -114,7 +116,7 @@ const TopViewToolbar = ({ currentData }: IAnnotationStateProps) => {
         className={getClassName('point-cloud', 'rotate-reserve')}
       />
       <span onClick={clockwiseRotate} className={getClassName('point-cloud', 'rotate')} />
-      <span onClick={reverseRotate} className={getClassName('point-cloud', 'rotate-180')} />
+      <span onClick={reverseRotate} className={getClassName('point-cloud', 'rotate-90')} />
       <FooterDivider />
       <UpSquareOutlined
         onClick={() => {
@@ -215,7 +217,8 @@ const PointCloudTopView: React.FC<IProps> = ({
   const { t } = useTranslation();
   const pointCloudViews = usePointCloudViews();
   const { pushHistoryWithList } = useHistory();
-
+  const [needUpdateCenter, setNeedUpdateCenter] = useState(true);
+  
   useLayoutEffect(() => {
     if (ptCtx.topViewInstance) {
       return;
@@ -299,6 +302,7 @@ const PointCloudTopView: React.FC<IProps> = ({
         return;
       }
 
+      setNeedUpdateCenter(false);
       pointCloudViews.topViewAddBox({
         polygon,
         size,
@@ -323,6 +327,7 @@ const PointCloudTopView: React.FC<IProps> = ({
     });
 
     TopView2dOperation.singleOn('setSelectedIDs', (selectedIDs: string[]) => {
+      setNeedUpdateCenter(false);
       ptCtx.setSelectedIDs(selectedIDs);
     });
 
@@ -336,7 +341,7 @@ const PointCloudTopView: React.FC<IProps> = ({
 
       // HighLight
       if (newPointCloudList) {
-        ptCtx.syncAllViewPointCloudColor(newPointCloudList);
+        ptCtx.syncAllViewPointCloudColor(EPointCloudBoxRenderTrigger.Default, newPointCloudList);
       }
       if (ptCtx.polygonList.find((v) => v.id === id)) {
         ptCtx.topViewInstance?.toolInstance.setPolygonValidAndRender(id, true);
@@ -423,6 +428,31 @@ const PointCloudTopView: React.FC<IProps> = ({
     pointCloudViews.topViewSelectedChanged({});
     ptCtx.topViewInstance?.toolInstance?.selection?.hardSetSelectedIDs?.(ptCtx.selectedIDs);
   }, [ptCtx.selectedIDs]);
+
+  useEffect(() => {
+    // Center the view by selectedID
+    const {topViewInstance, selectedID, selectedPointCloudBox, zoom} = ptCtx
+    if (!topViewInstance || !selectedID || !selectedPointCloudBox || !needUpdateCenter) {
+      setNeedUpdateCenter(true);
+      return;
+    }
+    const { center } = selectedPointCloudBox;
+    const { pointCloudInstance: pointCloud, toolInstance } = topViewInstance
+    const basicResult = toolInstance.polygonList.find((el: { id: string; }) => el.id === ptCtx.selectedID);
+    if (!basicResult) {
+      setNeedUpdateCenter(true);
+      return;
+    };
+    const centerPoint = MathUtils.getRectCenterPoint(basicResult.pointList);
+    const currentPos = MathUtils.getCurrentPosFromRectCenter(toolInstance.size, centerPoint, zoom)
+    toolInstance.setCurrentPos(currentPos);
+    toolInstance.render();
+    const { x, y, z } = pointCloud.initCameraPosition;
+    pointCloud.camera.position.set(center.x, center.y, z);
+    pointCloud.render();
+    syncTopviewToolZoom(currentPos, zoom, size);
+    setAnnotationPos({ zoom, currentPos });
+  }, [ptCtx.selectedID]);
 
   useEffect(() => {
     window.addEventListener('keydown', onKeyDown);

@@ -1,3 +1,5 @@
+import { EStepType } from '@/constant';
+import { IStepInfo } from '@/types/step';
 import { jsonParser } from '.';
 import StepUtils from './StepUtils';
 
@@ -79,3 +81,4 @@ export const composeResult = (
     return result;
   }
 };
+

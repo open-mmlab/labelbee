@@ -4,6 +4,8 @@ import img3 from './images/20.jpg';
 import img4 from './images/66.jpg';
 import { pointCloudResult1 } from './pointCloud';
 import { LLMToolResult } from './LLMTool';
+import { LLMMultiWheelToolResult } from './LLMMultiWheelTool';
+import { NLPToolResult } from './NLPTool';
 
 // audios
 import audio1 from './audios/audio1.mp3'
@@ -131,6 +133,14 @@ export const getMockResult = (tool) => {
 
   if (tool === 'LLMTool') {
     return LLMToolResult;
+  }
+
+  if (tool === 'LLMMultiWheelTool') {
+    return LLMMultiWheelToolResult;
+  }
+
+  if (tool === 'NLPTool') {
+    return NLPToolResult;
   }
 
   if (tool === 'pointCloudTool') {

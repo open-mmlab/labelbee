@@ -7,17 +7,17 @@ import { isArray } from 'lodash';
 import LatexEditor from '@/components/latexEditor';
 import styles from './index.module.scss';
 import MarkdownView from '@/components/markdownView';
+import LongText from '@/components/longText';
 
 interface IProps {
   textAttribute: ITextList[];
-  checkMode?: boolean;
-  LLMConfig?: ILLMToolConfig;
+  disabeledAll?: boolean;
   setText: (value: ITextList[]) => void;
+  textConfig: ITextList[];
 }
 
 const TextInputBox = (props: IProps) => {
-  const { checkMode, LLMConfig, textAttribute, setText } = props;
-  const textConfig = LLMConfig?.text && isArray(LLMConfig.text) ? LLMConfig?.text : [];
+  const { disabeledAll, textConfig, textAttribute, setText } = props;
   const { TextArea } = Input;
   const [form] = Form.useForm();
   const { t } = useTranslation();
@@ -104,7 +104,7 @@ const TextInputBox = (props: IProps) => {
                     {showTextInput && (
                       <Form.Item
                         name={[field.name, 'title']}
-                        extra={tip}
+                        extra={<LongText text={tip ?? ''} overflowMaxLines={3} openByText={true} />}
                         className={styles.textTitle}
                         required={!!min}
                         label={' '}
@@ -115,11 +115,11 @@ const TextInputBox = (props: IProps) => {
                           <span
                             className={classnames({
                               [`clearText`]: true,
-                              [`clearText__disabled`]: checkMode,
+                              [`clearText__disabled`]: disabeledAll,
                             })}
                             style={{ verticalAlign: 'initial' }}
                             onClick={() => {
-                              if (checkMode) {
+                              if (disabeledAll) {
                                 return;
                               }
                               form.setFields([
@@ -141,7 +141,7 @@ const TextInputBox = (props: IProps) => {
                         onSelectLatex={(value) =>
                           insertText({ newText: value, fieldName: field.name, max })
                         }
-                        disabled={checkMode}
+                        disabled={disabeledAll}
                       />
                     )}
                     {showTextInput && (
@@ -164,7 +164,7 @@ const TextInputBox = (props: IProps) => {
                       >
                         <TextArea
                           maxLength={max}
-                          disabled={checkMode}
+                          disabled={disabeledAll}
                           showCount={max ? true : false}
                           autoSize={{ minRows: 4, maxRows: 10 }}
                           style={{ width: '100%' }}

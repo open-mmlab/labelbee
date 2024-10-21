@@ -10,11 +10,13 @@ const HighlightVisible = ({
   style,
   onClick,
   loading,
+  disabled,
 }: {
   visible: boolean;
   loading: boolean;
   style?: React.CSSProperties;
   onClick: () => void;
+  disabled?: boolean;
 }) => {
   const defaultStyle = {
     background: 'rgba(0, 0, 0, 0.74)',
@@ -23,6 +25,11 @@ const HighlightVisible = ({
     padding: 6,
     fontSize: 16,
   };
+  const disabledStyle = {
+    background: 'rgba(0, 0, 0, 0.2)',
+    color: 'rgba(255, 255, 255, 0.5)',
+    cursor: 'not-allowed',
+  };
   let ShowIcon = visible ? EyeFilled : EyeInvisibleFilled;
 
   if (loading) {
@@ -30,11 +37,18 @@ const HighlightVisible = ({
     Object.assign(defaultStyle, { borderRadius: 100 });
   }
 
+  const allStyle = { ...defaultStyle, ...style };
+
+  if (disabled) {
+    Object.assign(allStyle, disabledStyle);
+  }
+
   return (
     <ShowIcon
+      disabled={disabled}
       className={getClassName('point-cloud-highlight-view')}
-      style={{ ...defaultStyle, ...style }}
-      onClick={loading ? () => {} : onClick}
+      style={allStyle}
+      onClick={loading || disabled ? () => {} : onClick}
     />
   );
 };

@@ -210,6 +210,14 @@ class PointCloud2dOperation extends PolygonOperation {
    * Add direction
    * @override
    * */
+
+  /* 
+    绘制静态矩形步骤：
+      1、通过drawPolygonWithFillAndLine绘制一个闭环完整的4条实线边矩形
+      2、判断当前polygon是不是矩形以及有没有展示showDirectionLine，如果是则绘制矩形的虚线边
+      3、调用renderRectPolygonDirection，取pointList第一个点为起点，第二个点为终点，进行绘制一条虚线边
+      4、如果当前polygon有trackID，则调用renderdrawTrackID方法,绘制label信息展示到边上
+  */
   public renderStaticPolygon() {
     if (this.isHidden === false) {
       this.visiblePolygonList?.forEach((polygon) => {
@@ -290,7 +298,7 @@ class PointCloud2dOperation extends PolygonOperation {
     if (polygon.length < 2) {
       return;
     }
-
+    // 绘制标注中间部分的矩形的虚线边
     DrawUtils.drawLine(this.canvas, polygon[0], polygon[1], {
       color: 'white',
       thickness: 3,

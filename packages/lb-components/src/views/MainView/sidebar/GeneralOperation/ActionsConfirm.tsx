@@ -11,6 +11,7 @@ export interface IOperationConfig {
   onClick?: () => void;
   forbidConfirm?: boolean; // 是否禁止二次确认
   forbidOperation?: boolean; // 禁止操作,会有置灰操作（该部分由用户自己更改 ImgSvg 进行展示）
+  content?: React.ReactElement;
 }
 
 // 禁止的样式
@@ -21,7 +22,12 @@ const forbidStyle = {
 const PopconfirmTitle = ({ info }: { info: IOperationConfig }) => {
   const { t } = useTranslation();
   if (info.key.startsWith('sure')) {
-    return <div key={info.key}>{`${t('ConfirmTo')}${info.name.slice(0)}？`}</div>;
+    return (
+      <div key={info.key}>
+        {`${t('ConfirmTo')}${info.name.slice(0)}？`}
+        {info?.content ? info.content : ''}
+      </div>
+    );
   }
 
   return <span>{info.name}</span>;
@@ -71,7 +77,7 @@ const ActionsConfirm: React.FC<{ allOperation: IOperationConfig[] }> = ({ allOpe
   return (
     <div className='generalOperation' ref={ref}>
       {allOperation.map((info, index) => (
-        <Col span={annotationLength} key={index}>
+        <Col span={annotationLength} key={index} className='generalOperation-col'>
           <div
             key={info.key}
             className='item'

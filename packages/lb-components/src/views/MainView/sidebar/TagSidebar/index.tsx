@@ -49,7 +49,7 @@ const TagSidebar: React.FC<IProps> = ({ toolInstance, imgIndex }) => {
       // 该写法会不断的重复绑定，后续写法上可以更改（如果将 singleOn 改为 on 会有很大问题）
       toolInstance.singleOn('expend', expendRender);
 
-      if (toolInstance.labelSelectedList.length === 1) {
+      if (toolInstance?.labelSelectedList?.length === 1) {
         let height = 0;
         for (let i = 0; i < toolInstance.labelSelectedList[0]; i++) {
           height += 46;

@@ -9,10 +9,11 @@ import { cKeyCode } from '@labelbee/lb-annotation';
 import { useAudioClipStore } from '@/components/audioAnnotate/audioContext';
 import { useEventListener, useMemoizedFn } from 'ahooks';
 import { useEffect } from 'react';
-import { IAudioTimeSlice } from '@labelbee/lb-utils'
+import { IAudioTimeSlice } from '@labelbee/lb-utils';
 import { ISetSelectedRegionParams } from '..';
+import { cloneDeep } from 'lodash';
 
-const EKeyCode = cKeyCode.default
+const EKeyCode = cKeyCode.default;
 
 interface IProps {
   /** WaveSurfer */
@@ -43,8 +44,34 @@ const useAudioCombine = (props: IProps) => {
     setSelectedRegion,
   } = props;
   const { audioClipState, setAudioClipState } = useAudioClipStore();
-  const { selectedRegion, clipConfigurable, combined } = audioClipState;
+  const { selectedRegion, clipConfigurable, combined, clipTextList } =
+    audioClipState;
   const { id } = selectedRegion;
+
+  const combineTextByConfig = (
+    region: IAudioTimeSlice,
+    current: IAudioTimeSlice,
+    target: IAudioTimeSlice,
+  ) => {
+    const newRegion = cloneDeep(region);
+    // If the merged text is not empty, it needs to be wrapped.
+    clipTextList.forEach((i, index) => {
+      const curText = current[i.key];
+      const targetText = target[i.key];
+      const inCludeEmpty = [curText, targetText].includes('');
+      const showText = inCludeEmpty
+        ? `${curText}${targetText}`
+        : `${curText}
+${targetText}`;
+      // index === 0: Compatible with old data
+      if (index === 0) {
+        Object.assign(newRegion, { text: showText });
+      } else {
+        Object.assign(newRegion, { [i.key]: showText });
+      }
+    });
+    return newRegion;
+  };
 
   const combineInstance = useMemoizedFn((instance) => {
     if (!id) {
@@ -75,7 +102,7 @@ const useAudioCombine = (props: IProps) => {
     const start = Math.min(...times);
     const end = Math.max(...times);
 
-    const newRegion = {
+    const region: IAudioTimeSlice = {
       id: waveRef.current?.util.getId('combined_'),
       start,
       end,
@@ -84,8 +111,11 @@ const useAudioCombine = (props: IProps) => {
       text: [current.text, target.text].includes('')
         ? `${current.text}${target.text}`
         : `${current.text}
-${target.text}`,
+        ${target.text}`,
+      subAttribute: target.subAttribute ?? {},
     };
+    const newRegion = combineTextByConfig(region, current, target);
+
     updateRegion?.(newRegion);
     removeRegion?.(id);
     removeRegion?.(target.id);

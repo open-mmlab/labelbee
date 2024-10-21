@@ -1,11 +1,19 @@
 import { difference, polygon, union } from '@turf/turf';
 import { ERotateDirection } from '@/constant/annotation';
+import { TAnnotationViewData, TAnnotationViewLine } from '@labelbee/lb-utils';
 import CommonToolUtils from './CommonToolUtils';
 import { IPolygonData, IPolygonPoint } from '../../types/tool/polygon';
 import { ELineTypes, SEGMENT_NUMBER } from '../../constant/tool';
 import AxisUtils from './AxisUtils';
 import MathUtils from '../MathUtils';
 import LineToolUtils from './LineToolUtils';
+
+export interface IConvexHullGroupType {
+  [id: string]: {
+    points: TAnnotationViewLine['annotation']['pointList'];
+    convexHull: ICoordinate[];
+  };
+}
 
 export default class PolygonUtils {
   static getHoverPolygonID(
@@ -58,11 +66,6 @@ export default class PolygonUtils {
     polygonPoints: (IPolygonPoint | ICoordinate)[],
     lineType: ELineTypes = ELineTypes.Line,
   ): boolean {
-    let counter = 0;
-    let i;
-    let xinters;
-    let p1;
-    let p2;
     polygonPoints = [...polygonPoints];
     if (lineType === ELineTypes.Curve) {
       polygonPoints = this.createSmoothCurvePoints(
@@ -74,28 +77,38 @@ export default class PolygonUtils {
         20,
       );
     }
+    return this.isPointInOrOnPolygon(checkPoint, polygonPoints);
+  }
 
-    [p1] = polygonPoints;
-    const pointCount = polygonPoints.length;
+  static isPointInOrOnPolygon(point: IPolygonPoint, polygonData: (IPolygonPoint | ICoordinate)[], errorMargin = 1e-9) {
+    const { x: px, y: py } = point;
+    let isInside = false;
 
-    for (i = 1; i <= pointCount; i++) {
-      p2 = polygonPoints[i % pointCount];
-      if (checkPoint.x > Math.min(p1.x, p2.x) && checkPoint.x <= Math.max(p1.x, p2.x)) {
-        if (checkPoint.y <= Math.max(p1.y, p2.y)) {
-          if (p1.x !== p2.x) {
-            xinters = ((checkPoint.x - p1.x) * (p2.y - p1.y)) / (p2.x - p1.x) + p1.y;
-            if (p1.y === p2.y || checkPoint.y <= xinters) {
-              counter++;
-            }
-          }
-        }
+    for (let i = 0, j = polygonData.length - 1; i < polygonData.length; j = i++) {
+      const { x: xi, y: yi } = polygonData[i];
+      const { x: xj, y: yj } = polygonData[j];
+
+      // Determine whether the point is within the range of the edge
+      const onSegment =
+        px <= Math.max(xi, xj) && px >= Math.min(xi, xj) && py <= Math.max(yi, yj) && py >= Math.min(yi, yj);
+
+      // Determine whether the point is on the edge (Cross Product)
+      const crossProduct = (py - yi) * (xj - xi) - (px - xi) * (yj - yi);
+
+      if (onSegment && Math.abs(crossProduct) < errorMargin) {
+        return true;
       }
-      p1 = p2;
+      /**
+       * Determine the intersection of the ray and the edge
+       * yi > py !== yj > py: Vertical cross
+       * px < ((xj - xi) * (py - yi)) / (yj - yi) + xi: Crossing in horizontal direction
+       */
+      const intersect = yi > py !== yj > py && px < ((xj - xi) * (py - yi)) / (yj - yi) + xi;
+
+      if (intersect) isInside = !isInside;
     }
-    if (counter % 2 === 0) {
-      return false;
-    }
-    return true;
+
+    return isInside;
   }
 
   /**
@@ -251,7 +264,7 @@ export default class PolygonUtils {
     checkPoint: ICoordinate,
     pointList: IPolygonPoint[],
     lineType: ELineTypes = ELineTypes.Line,
-    scope: number = 3,
+    scope: number = 5,
   ) {
     let points = [...pointList];
 
@@ -272,7 +285,7 @@ export default class PolygonUtils {
     let minLength = scope;
 
     for (let i = 0; i < points.length - 1; i++) {
-      const { length } = MathUtils.getFootOfPerpendicular(checkPoint, points[i], points[i + 1]);
+      const { length } = MathUtils.getFootOfPerpendicular(checkPoint, points[i], points[i + 1], true);
       if (length < minLength) {
         edgeIndex = i;
         minLength = length;
@@ -770,5 +783,50 @@ export default class PolygonUtils {
     });
 
     return polygonList;
+  }
+
+  /**
+   * Convex hull algorithm - Graham scan
+   */
+  public static computeConvexHull(points: IPolygonPoint[]) {
+    points.sort((a, b) => (a.x !== b.x ? a.x - b.x : a.y - b.y));
+    const cross = (o: IPolygonPoint, a: IPolygonPoint, b: IPolygonPoint) =>
+      (a.x - o.x) * (b.y - o.y) - (a.y - o.y) * (b.x - o.x);
+
+    const lower = [];
+    for (const point of points) {
+      while (lower.length >= 2 && cross(lower[lower.length - 2], lower[lower.length - 1], point) <= 0) {
+        lower.pop();
+      }
+      lower.push(point);
+    }
+
+    const upper = [];
+    for (let i = points.length - 1; i >= 0; i--) {
+      const point = points[i];
+      while (upper.length >= 2 && cross(upper[upper.length - 2], upper[upper.length - 1], point) <= 0) {
+        upper.pop();
+      }
+      upper.push(point);
+    }
+
+    upper.pop();
+    lower.pop();
+    return lower.concat(upper);
+  }
+
+  public static createConvexHullGroup(annotations: TAnnotationViewData[]) {
+    const result: IConvexHullGroupType = {};
+    annotations.forEach((item) => {
+      if (item.type !== 'line') return;
+      if (!result[item.annotation.id]) {
+        result[item.annotation.id] = { points: [], convexHull: [] };
+      }
+      result[item.annotation.id].points.push(...item.annotation.pointList);
+    });
+    Object.keys(result).forEach((key) => {
+      result[key].convexHull = this.computeConvexHull(result[key].points);
+    });
+    return result;
   }
 }

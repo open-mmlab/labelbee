@@ -1,9 +1,9 @@
-import React, { useState, useRef, useEffect } from 'react';
+import React, { useState, useRef, useEffect, useMemo } from 'react';
 import { getWebPcm2WavBase64 } from '@/components/audioAnnotate/utils/getWebPcm2Wac';
 import _, { debounce, sortBy } from 'lodash';
 import { PauseOutlined, CaretRightOutlined } from '@ant-design/icons';
-import { cKeyCode, cTool, EventBus } from '@labelbee/lb-annotation';
-import { IAudioTimeSlice } from '@labelbee/lb-utils'
+import { cKeyCode, cTool, EventBus, TagUtils } from '@labelbee/lb-annotation';
+import { i18n, IAudioTimeSlice, ITextConfigItem } from '@labelbee/lb-utils';
 import { Button } from 'antd';
 import InvalidPage from '@/components/invalidPage';
 import ImageError from '@/components/imageError';
@@ -19,7 +19,15 @@ import { ISelectedRegion, useAudioClipStore } from '@/components/audioAnnotate/a
 import { useDeepCompareEffect, useLatest, useThrottleFn, useUpdate } from 'ahooks';
 import useAudioScroll from './useAudioScroll';
 import styles from './index.module.scss';
-import { getAttributeColor, precisionMinus, isDoubleClick, timeFormat, formatTime, getCanMoveRange, dispatchResizeEvent } from '@/utils/audio';
+import {
+  getAttributeColor,
+  precisionMinus,
+  isDoubleClick,
+  timeFormat,
+  formatTime,
+  getCanMoveRange,
+  dispatchResizeEvent,
+} from '@/utils/audio';
 import ProgressDot from './progressDot';
 import ClipTip from './clipTip';
 import useSwitchHotkey from './useSwitchHotkey';
@@ -29,10 +37,12 @@ import CombineTip from './combineTip';
 import SegmentTip from './segmentTip';
 import ToolFooter from '@/views/MainView/toolFooter';
 import { IInputList, RenderFooter } from '@/types/main';
-import { decimalReserved } from '@/components/videoPlayer/utils'
+import { decimalReserved } from '@/components/videoPlayer/utils';
+import { I18nextProvider } from 'react-i18next';
+import useSize from '@/hooks/useSize';
 
-const { EToolName } = cTool
-const EKeyCode = cKeyCode.default
+const { EToolName } = cTool;
+const EKeyCode = cKeyCode.default;
 
 /** 快进/快退时间 */
 const PER_PROGRESS = 0.1;
@@ -40,6 +50,7 @@ const PER_PROGRESS = 0.1;
 export interface ISetSelectedRegionParams extends ISelectedRegion {
   /** 是否立即播放截取片段 */
   playImmediately?: boolean;
+  isLoopStatus?: boolean;
 }
 
 interface IAudioPlayerContext {
@@ -47,6 +58,38 @@ interface IAudioPlayerContext {
   isEdit: boolean;
   toolName: string;
   imgIndex: number;
+}
+
+interface IProps {
+  fileData: any;
+  height?: number;
+  invalid: boolean;
+  onLoaded?: any;
+  onError?: () => void;
+  context?: IAudioPlayerContext;
+  hideError?: boolean;
+  /** Intercepting fragment data: area changes do not trigger updates */
+  regions?: IAudioTimeSlice[];
+  /** Update the intercepted fragment. If the passed id does not exist, a new data will be created. */
+  updateRegion?: (region: IAudioTimeSlice) => void;
+  /** Delete intercepted data based on ID */
+  removeRegion?: (id: string) => void;
+  /** The currently used tool panel is used to determine whether to display the annotation layer */
+  activeToolPanel?: string;
+  clipConfigurable: boolean;
+  clipTextConfigurable: boolean;
+  clipAttributeConfigurable: boolean;
+  secondaryAttributeConfigurable: boolean;
+  subAttributeList: IInputList[];
+  clipAttributeList: IInputList[];
+  /** Whether it is in view mode: In view mode, the new and adjustment functions of interception need to be disabled */
+  isCheck?: boolean;
+  /** View the hoverId used in the pattern */
+  hoverRegionId?: string;
+  footer?: RenderFooter;
+  drawLayerSlot?: any;
+  clipTextList: ITextConfigItem[];
+  lang?: string;
 }
 
 export const AudioPlayerContext = React.createContext<IAudioPlayerContext>({
@@ -72,37 +115,15 @@ export const AudioPlayer = ({
   clipTextConfigurable,
   clipAttributeList,
   clipAttributeConfigurable,
+  secondaryAttributeConfigurable,
+  subAttributeList,
   isCheck,
   hoverRegionId,
   footer,
   drawLayerSlot,
-}: {
-  fileData: any;
-  height?: number;
-  invalid: boolean;
-  onLoaded?: any;
-  onError?: () => void;
-  context?: IAudioPlayerContext;
-  hideError?: boolean;
-  /** 截取片段数据:regions变化不会触发更新 */
-  regions?: IAudioTimeSlice[];
-  /** 更新截取片段，如果传入的id不存在，会新建一个数据 */
-  updateRegion?: (region: IAudioTimeSlice) => void;
-  /** 根据id删除截取数据 */
-  removeRegion?: (id: string) => void;
-  /** 当前使用的工具panel，用于判断是否展示批注层 */
-  activeToolPanel?: string;
-  clipConfigurable: boolean;
-  clipTextConfigurable: boolean;
-  clipAttributeConfigurable: boolean;
-  clipAttributeList: IInputList[];
-  /** 是否是查看模式：查看模式需要禁用截取的新建、调整功能 */
-  isCheck?: boolean;
-  /** 查看模式用到的hoverId */
-  hoverRegionId?: string;
-  footer?: RenderFooter;
-  drawLayerSlot?: any,
-}) => {
+  clipTextList,
+  lang,
+}: IProps) => {
   const { url, path } = fileData;
   const [isPlaying, setIsPlaying] = useState<boolean>(false);
   const [loading, setLoading] = useState<boolean>(false);
@@ -119,7 +140,7 @@ export const AudioPlayer = ({
   };
   // 鼠标移入到进度条上的时间
   const [hoverTime, setHoverTime] = useState<number>(0);
-  const [zoom, setZoom] = useState<number>(1);
+  const [zoom, setZoom] = useState<number>(audioZoomInfo.defaultValue);
   const waveformContainerRef = useRef<null | HTMLDivElement>(null);
   const [edgeAdsorption, setEdgeAdsorption] = useState<{ start?: number; end?: number }>({});
   const { audioClipState, setAudioClipState } = useAudioClipStore();
@@ -132,6 +153,24 @@ export const AudioPlayer = ({
   const update = useUpdate();
   const [sortByStartRegions, setSortByStartRegions] = useState<IAudioTimeSlice[]>([]);
   const [regionMap, setRegionMap] = useState<{ [key: string]: IAudioTimeSlice }>({});
+  const [createID, setCreateID] = useState<string>('');
+  const [visibleTimeRange, setVisibleTimeRange] = useState({ start: 0, end: 0 });
+  const waveSize = useSize(waveformContainerRef);
+
+  const regionList = useMemo(() => {
+    return regions.filter((i) => {
+      const { start, end } = visibleTimeRange;
+
+      if (
+        (i.start >= start && i.start <= end) ||
+        (i.end >= start && i.end <= end) ||
+        i.id === createID
+      ) {
+        return true;
+      }
+      return false;
+    });
+  }, [regions, visibleTimeRange]);
 
   const debounceZoom = debounce(() => {
     EventBus.emit('audioZoom');
@@ -177,7 +216,9 @@ export const AudioPlayer = ({
    * @param {ISetSelectedRegionParams}
    */
   const setSelectedRegion = (select: ISetSelectedRegionParams) => {
-    const { id, loop = true, playImmediately = false } = select;
+    const { id, loop = true, playImmediately = false, isLoopStatus } = select;
+
+    const loopStatus = false;
 
     if (id) {
       const regionListMap = waveRef.current?.regions?.list ?? {};
@@ -191,12 +232,12 @@ export const AudioPlayer = ({
       });
 
       setAudioClipState({
-        selectedRegion: { id, loop },
+        selectedRegion: { id, loop: loopStatus },
         selectedAttribute: regionsRef.current?.find((item) => item.id === id)?.attribute ?? '',
       });
 
-      if (loop && playImmediately) {
-        getRegionInstanceById(id)?.playLoop();
+      if (playImmediately) {
+        getRegionInstanceById(id)?.play();
       }
     } else {
       setAudioClipState({
@@ -229,7 +270,16 @@ export const AudioPlayer = ({
     clipAttributeList,
     clipAttributeConfigurable,
     clipConfigurable,
+    secondaryAttributeConfigurable,
+    subAttributeList,
+    clipTextList,
   };
+
+  useEffect(() => {
+    if (lang) {
+      i18n?.changeLanguage(lang);
+    }
+  }, []);
 
   useEffect(() => {
     setAudioClipState({
@@ -254,6 +304,7 @@ export const AudioPlayer = ({
 
   useDeepCompareEffect(() => {
     setSortByStartRegions(sortBy(regions, ['start']));
+
     setRegionMap(
       regions.reduce((prev, current) => {
         const { id } = current;
@@ -263,11 +314,15 @@ export const AudioPlayer = ({
         };
       }, {}),
     );
+    // TODO: In view mode, the frame is not displayed when switching tree nodes.
+    if (isCheck) {
+      generateRegions();
+    }
   }, [regions]);
 
   useEffect(() => {
     if (hoverRegionId) {
-      const needLoop = isPlayingRef.current;
+      const needLoop = false;
       setSelectedRegion({
         id: hoverRegionId,
         loop: needLoop,
@@ -357,7 +412,7 @@ export const AudioPlayer = ({
   };
 
   const { run: throttleSelectedRegion } = useThrottleFn(setSelectedRegion, {
-    wait: 500,
+    wait: 100,
   });
 
   useSwitchHotkey({
@@ -395,7 +450,9 @@ export const AudioPlayer = ({
       setSelectedRegion({ id });
     }
 
-    const instance = getRegionInstanceById((id ?? audioClipStateRef.current.selectedRegion?.id) || '');
+    const instance = getRegionInstanceById(
+      (id ?? audioClipStateRef.current.selectedRegion?.id) || '',
+    );
     // 属性对应的time;
     const sameAttributeTimes: number[] = [];
     const otherRegions =
@@ -441,7 +498,7 @@ export const AudioPlayer = ({
       id,
       start: decimalReserved(start, 3),
       end: decimalReserved(end, 3),
-    }
+    };
     updateRegion?.(regionParam as IAudioTimeSlice);
     update();
   };
@@ -527,7 +584,8 @@ export const AudioPlayer = ({
       if (regionsRef.current.find((item) => item.id === id)) {
         return;
       }
-      const regionItem = {
+      setCreateID(id);
+      const regionItem: IAudioTimeSlice = {
         id,
         start: decimalReserved(start, 3),
         end: decimalReserved(end, 3),
@@ -535,6 +593,23 @@ export const AudioPlayer = ({
         text: '',
       };
 
+      if (audioClipStateRef.current.secondaryAttributeConfigurable) {
+        const defaultSubAttribute = TagUtils.getDefaultResultByConfig(
+          audioClipStateRef.current.subAttributeList ?? [],
+        );
+        regionItem.subAttribute = defaultSubAttribute ?? {};
+      }
+
+      if (clipTextConfigurable) {
+        const clipTextList = audioClipStateRef.current.clipTextList;
+        clipTextList.forEach((i, index) => {
+          if (index === 0) {
+            Object.assign(regionItem, { text: i?.default });
+          } else {
+            Object.assign(regionItem, { [i.key]: i?.default });
+          }
+        });
+      }
       updateRegion?.(regionItem);
     });
 
@@ -602,6 +677,7 @@ export const AudioPlayer = ({
 
     wavesurfer.on('region-update-end', (instance: any) => {
       handleRegionUpdateEnd(instance);
+      setCreateID('');
     });
 
     wavesurfer.on('region-contextmenu', (instance: any, e: MouseEvent) => {
@@ -661,7 +737,6 @@ export const AudioPlayer = ({
 
   const playPause = () => {
     getWaveRef()?.playPause();
-    setSelectedRegion({});
   };
 
   const keyDownEvents = (e: KeyboardEvent) => {
@@ -753,6 +828,31 @@ export const AudioPlayer = ({
     setAudioUrl();
   }, [url]);
 
+  useEffect(() => {
+    throttleSetTimeRange();
+  }, [waveSize, duration, zoom]);
+
+  const setVisibleAreaRange = () => {
+    if (waveformContainerRef.current && duration) {
+      const currentScroll = waveformContainerRef.current.scrollLeft;
+      const containerWidth = waveformContainerRef.current.clientWidth;
+
+      // Calculate the start time and end time of the visible area
+      const visibleStartTime =
+        (currentScroll / waveformContainerRef.current.scrollWidth) * duration;
+      const visibleEndTime =
+        ((currentScroll + containerWidth) / waveformContainerRef.current.scrollWidth) * duration;
+      setVisibleTimeRange({
+        start: visibleStartTime,
+        end: visibleEndTime,
+      });
+    }
+  };
+
+  const { run: throttleSetTimeRange } = useThrottleFn(setVisibleAreaRange, {
+    wait: 300,
+  });
+
   // 计算播放到鼠标位置的时间
   const calcTime = (e: React.MouseEvent<HTMLDivElement, MouseEvent>) => {
     if (waveRef?.current && progressRef?.current) {
@@ -798,7 +898,11 @@ export const AudioPlayer = ({
       <ClipTip getRegionInstanceById={getRegionInstanceById} clipping={clipping} />
       <CombineTip container={waveformContainerRef.current} />
       <SegmentTip segmentTimeTip={segmentTimeTip} />
-      <div className={styles.waveformContainer} ref={waveformContainerRef}>
+      <div
+        className={styles.waveformContainer}
+        ref={waveformContainerRef}
+        onScroll={() => throttleSetTimeRange()}
+      >
         <div
           id='waveform'
           style={{
@@ -836,9 +940,7 @@ export const AudioPlayer = ({
             </div>
             <ProgressDot playPercentage={playPercentage} />
           </div>
-          {
-            showRemark && drawLayerSlot?.({ currentTime, remainingTime, audioPlayer: getWaveRef() })
-          }
+          {showRemark && drawLayerSlot?.({ currentTime, remainingTime, audioPlayer: getWaveRef() })}
         </div>
       </div>
 
@@ -868,11 +970,12 @@ export const AudioPlayer = ({
         />
         <ZoomSlider
           onChange={(val) => {
+            getWaveRef()?.pause();
             zoomHandler(val);
           }}
           zoom={zoom}
         />
-        <LabelDisplayToggle EventBus={EventBus}/>
+        <LabelDisplayToggle EventBus={EventBus} />
       </div>
     </div>
   );
@@ -881,7 +984,7 @@ export const AudioPlayer = ({
     return (
       <AudioPlayerContext.Provider value={context}>
         {audioPlayer}
-        {regions.map((region) => {
+        {regionList.map((region) => {
           const { id } = region;
           const el = document.querySelector(`[data-id=${id}]`);
           return el ? (
@@ -893,6 +996,7 @@ export const AudioPlayer = ({
               clipping={clipping}
               zoom={zoom}
               instance={getRegionInstanceById(id)}
+              isCheck={isCheck}
             />
           ) : null;
         })}
@@ -902,4 +1006,12 @@ export const AudioPlayer = ({
     );
   }
   return audioPlayer;
+};
+
+export const WrapAudioPlayer = (props: IProps) => {
+  return (
+    <I18nextProvider i18n={i18n}>
+      <AudioPlayer {...props} />
+    </I18nextProvider>
+  );
 };

@@ -1,4 +1,4 @@
-import { backward, forward } from '../common';
+import { backward, forward, setValid } from '../common';
 import ForwardSvg from '@/assets/annotation/toolHotKeyIcon/icon_next_kj.svg';
 
 export const forwardWithEnter = {
@@ -7,6 +7,6 @@ export const forwardWithEnter = {
   shortCut: ['Ctrl', 'Enter'],
 };
 
-const LLMShortCutTable = [backward, forward, forwardWithEnter];
+const LLMShortCutTable = [setValid, backward, forward, forwardWithEnter];
 
 export default LLMShortCutTable;

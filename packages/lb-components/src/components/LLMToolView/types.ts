@@ -21,6 +21,8 @@ export interface IAnswerList {
   };
   newAnswer?: string;
   url?: string; // used to display picture
+  tagList?: ISelectedTags;
+  id?: string | number;
 }
 
 export interface IModelAPIAnswer {
@@ -57,6 +59,13 @@ export interface ILLMToolConfig {
   };
   isTextEdit: boolean;
   textEdit: ITextList[];
+  tagInputListConfigurable: boolean;
+  inputList?: IInputList[];
+}
+
+export interface ILLMMultiWheelToolConfig
+  extends Omit<ILLMToolConfig, 'enableModelAPI' | 'modelAPIConfigList'> {
+  dialogSort?: boolean; // 对话排序
 }
 
 // LLM文本
@@ -74,7 +83,7 @@ export interface ITextList {
 
 // 单个答案
 export interface IWaitAnswerSort {
-  title: number;
+  title: number | string;
   id: number;
 }
 
@@ -90,7 +99,7 @@ export interface ITagVertexPoint {
   tr: IPoint;
 }
 export interface IAnswerSort {
-  title: number;
+  title: number | string;
   id: number;
   tagCenterPoint?: IPoint;
   tagVertexPoint?: ITagVertexPoint;
@@ -101,4 +110,27 @@ export interface ILLMBoxResult {
   id: number;
   sort?: number[][];
   textAttribute?: ITextList[];
+  valid: boolean;
+  tagList?: ISelectedTags;
+}
+
+export interface IInputList {
+  key: string;
+  value: string;
+  isMulti: boolean;
+  isOverall: boolean;
+  subSelected: Array<{
+    key: string;
+    value: string;
+    isDefault: boolean;
+  }>;
+}
+
+export interface ISelectedTags {
+  [key: string]: string[];
+}
+export interface IConfigUpdate {
+  order: number;
+  value: number | string | { key: string; value?: number | boolean | string[] };
+  key?: string;
 }

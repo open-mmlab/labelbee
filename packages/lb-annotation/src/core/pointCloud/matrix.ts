@@ -18,6 +18,7 @@ import {
   ECameraType,
 } from '@labelbee/lb-utils';
 import uuid from '@/utils/uuid';
+import { transformPointCloudToImage } from './omniCamera';
 
 export function createThreeMatrix4(matrix4: TMatrix4Tuple) {
   return new THREE.Matrix4().set(...matrix4);
@@ -150,22 +151,18 @@ export const oCamFisheyeTransfer = (point: I3DSpaceCoord, calib: ICalib): THREE.
   return lastCoord;
 };
 
-/**
- * For kbCamFisheyeTransfer
- * @param fisheyeDistortion
- * @param theta
- * @returns
- */
-const batchPolyval = (fisheyeDistortion: number[], theta: number) => {
-  const n = fisheyeDistortion.length;
-  let res = 0;
-  const rec = [];
-  for (let itr = 0; itr < fisheyeDistortion.length; itr++) {
-    rec.push(fisheyeDistortion[n - itr - 1] + res * theta);
-    res = fisheyeDistortion[n - itr - 1] + res * theta;
+export const omniCamera11VTransfer = (point: I3DSpaceCoord, calib: ICalib): THREE.Vector4 | undefined => {
+  if (isFisheyeCalibValid(calib) === false) {
+    console.error('Error Calib, it need fisheye calib');
+    return;
   }
 
-  return res;
+  const { P, fisheyeDistortion, T } = calib;
+
+  const resultArray = transformPointCloudToImage([[point.x, point.y, point.z]], T, P, fisheyeDistortion);
+
+  const result = new THREE.Vector4(resultArray[0][0], resultArray[0][1], 1);
+  return result;
 };
 
 /**
@@ -178,10 +175,18 @@ const batchPolyval = (fisheyeDistortion: number[], theta: number) => {
  * @returns
  */
 const kbCamFisheyeTransfer = (point: I3DSpaceCoord, calib: ICalib): ICoordinate | undefined => {
-  const { P, fisheyeDistortion } = calib;
+  const { P, T, fisheyeDistortion } = calib;
 
-  const { x, y, z } = point;
+  // Transform point to camera coordinates
+  const list = [point.x, point.y, point.z, 1];
+  const result = T.map((row) => row.reduce((sum, value, index) => sum + value * list[index], 0));
+  const x = result[0];
+  const y = result[1];
+  const z = result[2];
+  // Filter z coordinates greater than 0.01 and valid
+  if (!(z >= 0.01 && isFinite(z))) return undefined;
 
+  // Extract intrinsic parameters
   const aff_ = [
     [P[0][0], P[0][1]],
     [P[1][0], P[1][1]],
@@ -190,21 +195,30 @@ const kbCamFisheyeTransfer = (point: I3DSpaceCoord, calib: ICalib): ICoordinate 
   const xc_ = P[0][2];
   const yc_ = P[1][2];
 
-  // Calculate the norm of the 2D points and inverse of the norm
-  const invNorm = 1 / Math.hypot(x, y);
+  // Apply fisheye distortion
+  const r = Math.sqrt(x * x + y * y);
+  const theta = Math.atan2(r, z);
+  const distortedTheta = theta + fisheyeDistortion.reduce((sum, k, i) => sum + k * Math.pow(theta, 2 * i + 3), 0);
 
-  // Initialize arrays for xn
-  const xn = [];
+  // Project to image plane
+  let xn;
+  let yn;
+  if (r !== 0) {
+    xn = (x * distortedTheta) / r;
+    yn = (y * distortedTheta) / r;
+  } else {
+    xn = 0;
+    yn = 0;
+  }
 
-  // Calculate theta and rho based on the camera type
-  const theta = Math.atan2(Math.hypot(x, y), z);
-  const rho = batchPolyval(fisheyeDistortion, theta);
-  xn[0] = x * invNorm * rho;
-  xn[1] = y * invNorm * rho;
+  // Apply intrinsic matrix
+  const xAffine = aff_[0][0] * xn + aff_[0][1] * yn;
+  const yAffine = aff_[1][0] * xn + aff_[1][1] * yn;
 
+  // Add principal point offset
   return {
-    x: aff_[0][0] * xn[0] + aff_[0][1] * xn[1] + xc_,
-    y: aff_[1][0] * xn[0] + aff_[1][1] * xn[1] + yc_,
+    x: xAffine + xc_,
+    y: yAffine + yc_,
   };
 };
 
@@ -229,6 +243,10 @@ export const lidar2FisheyeImage = (point: I3DSpaceCoord, calib: ICalib) => {
 
   if (calib?.cameraType === ECameraType.KannalaBrandt) {
     return kbCamFisheyeTransfer(point, calib);
+  }
+
+  if (calib?.cameraType === ECameraType.OmniCamera11V) {
+    return omniCamera11VTransfer(point, calib);
   }
 };
 
@@ -492,7 +510,7 @@ export function pointCloudLidar2image(
     .filter((v) => v.pointList.length !== 0);
 
   // The front polygon need to highlight.
-  if (transferViewData[0] && transferViewData[0].pointList && isFisheyeCalib) {
+  if (transferViewData[0] && transferViewData[0].pointList) {
     transferViewData[0].pointList = transferViewData[0].pointList.map((v) => ({ ...v, specialEdge: true }));
   }
 

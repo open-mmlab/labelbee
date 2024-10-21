@@ -11,12 +11,12 @@ interface IProps {
   title: React.ReactNode;
   score?: number;
   selectScore?: number;
-  isDisableAll?: boolean;
+  disabeledAll?: boolean;
   updateScore: (score: number) => void;
 }
 
 const ScoreGroupButton = (props: IProps) => {
-  const { title, score = 5, selectScore, updateScore, isDisableAll } = props;
+  const { title, score = 5, selectScore, updateScore, disabeledAll } = props;
   const scoreLists = Array.from({ length: score }, (val, i) => i + 1);
   return (
     <div className={`${prefix}-LLMSidebar-contentBox`}>
@@ -24,7 +24,7 @@ const ScoreGroupButton = (props: IProps) => {
       <Radio.Group
         value={selectScore}
         onChange={(e) => updateScore(Number(e.target.value))}
-        disabled={isDisableAll}
+        disabled={disabeledAll}
       >
         {scoreLists.map((i, index) => (
           <Radio.Button value={i} key={index} style={{ padding: '0px 16px' }}>

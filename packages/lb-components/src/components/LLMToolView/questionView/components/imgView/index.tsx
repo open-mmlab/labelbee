@@ -24,24 +24,18 @@ const ImgView = (props: IProps) => {
   const ImgFail = i18n.language === 'en' ? ImgFailEn : ImgFailCn;
   return (
     <div className={styles.imgView}>
-      {answerList.map((i: IAnswerList, index: number) => {
+      {answerList?.map((i: IAnswerList, index: number) => {
         return (
           <div
             key={index}
-            className={styles.item}
+            className={classNames({
+              [`${styles.item}`]: true,
+              [`${LLMViewCls}__contentActive`]: hoverKey === i?.order,
+            })}
           >
-            <Tag
-              className={`${LLMViewCls}-tag`}
-            >
-              {i?.order}
-            </Tag>
-            <div
-              className={classNames({
-                [`${styles.image}`]: true,
-                [`${LLMViewCls}__contentActive`]: hoverKey === i?.order,
-              })}
-            >
-              <Image src={i?.url} fallback={ImgFail} />
+            <Tag className={`${LLMViewCls}-tag`}>{i?.order}</Tag>
+            <div className={styles.image}>
+              <Image src={i?.url} fallback={ImgFail} style={{ objectFit: 'contain' }} />
             </div>
           </div>
         );

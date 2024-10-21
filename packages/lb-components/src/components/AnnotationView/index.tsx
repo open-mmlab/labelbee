@@ -3,17 +3,28 @@
  * @author laoluo
  */
 
-import React, { useEffect, useRef, useImperativeHandle, useState } from 'react';
-import { ViewOperation, ImgUtils } from '@labelbee/lb-annotation';
+import React, {
+  useEffect,
+  useCallback,
+  useRef,
+  useImperativeHandle,
+  useState,
+  useContext,
+} from 'react';
+import { ViewOperation, ImgUtils, EPointCloudName } from '@labelbee/lb-annotation';
 import { Spin } from 'antd/es';
 import useRefCache from '@/hooks/useRefCache';
-import { TAnnotationViewData } from '@labelbee/lb-utils';
+import { TAnnotationViewData, IPointCloudBoxList } from '@labelbee/lb-utils';
 import MeasureCanvas from '../measureCanvas';
+import { PointCloudContext } from '@/components/pointCloudView/PointCloudContext';
+import useFilterAnnotations from './hooks/useFilterAnnotations';
+import useToolConfigStore from '@/store/toolConfig';
 
 export type TAfterImgOnLoad = (img: HTMLImageElement) => void;
 
 interface IProps {
   src: string; // 图片路径
+  fallbackSrc?: string; // alternate pictures when picture loading fails
   size?: {
     width?: number;
     height?: number;
@@ -39,6 +50,10 @@ interface IProps {
   };
   staticMode?: boolean;
   measureVisible?: boolean;
+  onRightClick?: (e: { event: MouseEvent; targetId: string }) => void;
+  pointCloudBoxList?: IPointCloudBoxList;
+  hiddenText?: boolean;
+  renderToolName?: EPointCloudName.PointCloud | undefined;
 }
 
 const DEFAULT_SIZE = {
@@ -72,7 +87,8 @@ const sizeInitialized = (size?: { width?: number; height?: number }) => {
 const AnnotationView = (props: IProps, ref: any) => {
   const {
     src,
-    annotations = [],
+    fallbackSrc,
+    annotations: originAnnotations = [],
     style = {
       stroke: 'blue',
       thickness: 3,
@@ -84,6 +100,10 @@ const AnnotationView = (props: IProps, ref: any) => {
     globalStyle,
     afterImgOnLoad,
     measureVisible,
+    onRightClick,
+    pointCloudBoxList = [],
+    hiddenText = false,
+    renderToolName,
   } = props;
   const size = sizeInitialized(props.size);
   const [loading, setLoading] = useState(false);
@@ -92,6 +112,9 @@ const AnnotationView = (props: IProps, ref: any) => {
   const afterImgOnLoadRef = useRefCache<TAfterImgOnLoad | undefined>(afterImgOnLoad);
   const annotationListCacheRef = useRef<TAnnotationViewData[][]>([]);
   const canUpdateRef = useRef(true); // Judge if rending is Possible.
+  const { selectedIDs } = useContext(PointCloudContext);
+  const { selectBoxVisibleSwitch } = useToolConfigStore();
+  const annotations = useFilterAnnotations(originAnnotations, selectedIDs, selectBoxVisibleSwitch);
 
   useImperativeHandle(
     ref,
@@ -121,37 +144,67 @@ const AnnotationView = (props: IProps, ref: any) => {
         config: '{}', // TODO，暂时不需要
         zoomInfo: props.zoomInfo,
         staticMode: props.staticMode,
+        renderToolName,
       });
 
       viewOperation.current.init();
+      onRightClick && viewOperation.current.on('onRightClick', onRightClick);
     }
 
     return () => {
+      onRightClick && viewOperation.current?.unbind('onRightClick', onRightClick);
       viewOperation.current?.destroy();
     };
   }, [measureVisible]);
 
-  useEffect(() => {
-    if (viewOperation.current) {
+  const loadAndSetImage = useCallback(async (imageSrc: string) => {
+    try {
+      const imgNode = await ImgUtils.load(imageSrc);
+      viewOperation.current?.setImgNode(imgNode);
+      afterImgOnLoadRef.current?.(imgNode);
+      return null;
+    } catch (error) {
+      console.error('Error loading image:', error);
+      return error;
+    }
+  }, []);
+
+  const loadImage = useCallback(
+    async (imageSrc: string) => {
       setLoading(true);
       viewOperation.current?.setLoading(true);
-      ImgUtils.load(src)
-        .then((imgNode: HTMLImageElement) => {
-          viewOperation.current?.setLoading(false);
-          setLoading(false);
 
-          viewOperation.current?.setImgNode(imgNode);
+      const error = await loadAndSetImage(imageSrc);
+      if (error && fallbackSrc) {
+        const fallbackError = await loadAndSetImage(fallbackSrc);
+        if (fallbackError) {
+          console.error('Error loading fallback image:', fallbackError);
+        }
+      }
 
-          if (afterImgOnLoadRef.current) {
-            afterImgOnLoadRef.current(imgNode);
-          }
-        })
-        .catch(() => {
-          viewOperation.current?.setLoading(false);
-          setLoading(false);
-        });
+      viewOperation.current?.setLoading(false);
+      setLoading(false);
+    },
+    [loadAndSetImage, fallbackSrc],
+  );
+
+  useEffect(() => {
+    if (viewOperation.current) {
+      loadImage(src);
     }
-  }, [src, measureVisible]);
+  }, [src, measureVisible, fallbackSrc, loadImage]);
+
+  useEffect(() => {
+    if (viewOperation?.current) {
+      viewOperation.current.setPointCloudBoxList(pointCloudBoxList);
+    }
+  }, [pointCloudBoxList]);
+
+  useEffect(() => {
+    if (viewOperation?.current) {
+      viewOperation.current?.setHiddenText(hiddenText);
+    }
+  }, [hiddenText]);
 
   /**
    * 基础数据绘制监听

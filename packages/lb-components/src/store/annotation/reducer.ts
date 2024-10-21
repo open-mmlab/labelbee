@@ -78,13 +78,16 @@ const updateToolInstance = (annotation: AnnotationState, imgNode: HTMLImageEleme
     return;
   }
 
-
   // TODO: 点云实例化对接
   if (ToolUtils.isPointCloudTool(stepConfig?.tool)) {
     return;
   }
 
-  if (EToolName.LLM === stepConfig?.tool) {
+  if (
+    [EToolName.LLM as string, EToolName.NLP as string, EToolName.LLMMultiWheel].includes(
+      stepConfig?.tool,
+    )
+  ) {
     return;
   }
 
@@ -118,8 +121,12 @@ export const LoadFileAndFileData =
     const { stepList, step } = getState().annotation;
     const currentIsVideo = StepUtils.currentToolIsVideo(step, stepList);
     const currentIsPointCloud = StepUtils.currentToolIsPointCloud(step, stepList);
-    const currentIsLLM = StepUtils.getCurrentStepInfo(step, stepList)?.tool === EToolName.LLM;
-    const currentIsAudio = StepUtils.currentToolIsAudio(step, stepList)
+    const currentIsLLM = [EToolName.LLM, EToolName.LLMMultiWheel].includes(
+      // @ts-ignore
+      StepUtils.getCurrentStepInfo(step, stepList)?.tool,
+    );
+    const currentIsNLP = StepUtils.getCurrentStepInfo(step, stepList)?.tool === EToolName.NLP;
+    const currentIsAudio = StepUtils.currentToolIsAudio(step, stepList);
 
     SetAnnotationLoading(dispatch, true);
 
@@ -129,7 +136,7 @@ export const LoadFileAndFileData =
       dispatch(AfterVideoLoaded(nextIndex));
       return;
     }
-    if (currentIsPointCloud || currentIsLLM || currentIsAudio) {
+    if (currentIsPointCloud || currentIsLLM || currentIsAudio || currentIsNLP) {
       dispatch(AfterCommonLoaded(nextIndex));
       return;
     }
@@ -328,10 +335,6 @@ export const annotationReducer = (
         };
       }
 
-      if (onSubmit) {
-        onSubmit([newImgList[imgIndex]], action.payload?.submitType, imgIndex, newImgList);
-      }
-
       const stepProgress = calcStepProgress(newImgList, step);
       return {
         ...state,
@@ -450,7 +453,6 @@ export const annotationReducer = (
       if (!toolInstance) {
         return { ...state, imgIndex: action.payload.nextIndex };
       }
-
 
       const currentStepInfo = StepUtils.getCurrentStepInfo(step, stepList);
 
@@ -663,6 +665,13 @@ export const annotationReducer = (
       };
     }
 
+    case ANNOTATION_ACTIONS.UPDATE_IMG_INDEX_BY_EXTERNAL: {
+      return {
+        ...state,
+        getImgIndexByExternal: action.payload.getImgIndexByExternal,
+      };
+    }
+
     case ANNOTATION_ACTIONS.SKIP_BEFORE_PAGE_TURNING: {
       return {
         ...state,
@@ -714,7 +723,7 @@ export const annotationReducer = (
     }
 
     case ANNOTATION_ACTIONS.COPY_BACKWARD_RESULT: {
-      const { toolInstance, imgIndex, imgList, step } = state;
+      const { toolInstance, imgIndex, imgList, step, stepList } = state;
       if (!toolInstance) {
         return state;
       }
@@ -728,11 +737,19 @@ export const annotationReducer = (
         return state;
       }
 
-      const newResult = AnnotationDataUtils.copyResultChange(
-        backwardResult,
-        step,
-        imgList[imgIndex].result ?? '',
-      );
+      const currentStepInfo = StepUtils.getCurrentStepInfo(step, stepList);
+      const copyStep = currentStepInfo?.step ?? step;
+      const valid = toolInstance?.valid ?? true;
+
+      const newResult = AnnotationDataUtils.copyResultChange({
+        copyResult: backwardResult,
+        step: copyStep,
+        currentResult: imgList[imgIndex].result ?? '',
+        preMappingImgList: imgList[imgIndex - 1].mappingImgList ?? [],
+        mappingImgList: imgList[imgIndex].mappingImgList ?? [],
+        valid,
+      });
+
       imgList[imgIndex] = {
         ...imgList[imgIndex],
         result: newResult,
@@ -751,6 +768,7 @@ export const annotationReducer = (
        */
       // @ts-ignore
       toolInstance?.asyncData?.(imgList[imgIndex]);
+
       return {
         ...state,
         imgList: [...imgList],
@@ -761,17 +779,18 @@ export const annotationReducer = (
       const { stepList, annotationEngine } = state;
       const { toStep } = action.payload;
 
-      if (!annotationEngine) {
-        return state;
+      if (annotationEngine) {
+        const stepConfig = getStepConfig(stepList, toStep);
+        annotationEngine?.setToolName(stepConfig.tool, stepConfig.config);
+        return {
+          ...state,
+          step: toStep,
+          toolInstance: annotationEngine?.toolInstance,
+        };
       }
-
-      const stepConfig = getStepConfig(stepList, toStep);
-      annotationEngine?.setToolName(stepConfig.tool, stepConfig.config);
-
       return {
         ...state,
         step: toStep,
-        toolInstance: annotationEngine?.toolInstance,
       };
     }
 

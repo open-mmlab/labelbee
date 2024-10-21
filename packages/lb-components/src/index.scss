@@ -390,6 +390,7 @@ $prefix: bee;
   #style-width,
   #style-color,
   #style-fillOpacity,
+  #style-rectRotateSensitivity,
   #style-borderOpacity {
     .ant-slider {
       .ant-slider-track {
@@ -463,7 +464,8 @@ $prefix: bee;
   }
 
   #style-radius,
-  #style-width {
+  #style-width,
+  #style-rectRotateSensitivity {
     .ant-slider-step {
       .ant-slider-dot {
         height: 12px;
@@ -827,11 +829,15 @@ $hotkey-container-padding: 7px;
   -ms-user-select: none;
   user-select: none;
 
+  .generalOperation-col {
+    display: flex;
+    justify-content: center;
+  }
+
   .item {
     text-align: center;
-    flex: 1;
     box-sizing: border-box;
-    width: 100%;
+    width: 100px;
     height: 100%;
     display: flex;
     flex-direction: column;
@@ -1270,6 +1276,10 @@ $hotkey-container-padding: 7px;
   .ant-popover-buttons {
     min-width: 116px;
   }
+
+  .ant-popover-inner-content .ant-popover-message {
+    align-items: initial;
+  }
 }
 
 .#{$prefix}-annotated-attribute {
@@ -1568,9 +1578,9 @@ $headerHeight: 40px;
           background-image: url('./assets/annotation/pointCloudTool/rotateReserve.svg');
         }
 
-        &__rotate-180 {
+        &__rotate-90 {
           @include icon(24px);
-          background-image: url('./assets/annotation/pointCloudTool/rotate180.svg');
+          background-image: url('./assets/annotation/pointCloudTool/rotate90.svg');
         }
 
         &__next {
@@ -2006,6 +2016,7 @@ $ptToolHeight: 40px;
   background-color: #ffffff;
   overflow-y: auto;
   flex: auto;
+  position: relative;
 
   .ant-layout {
     flex: 1;
@@ -2175,6 +2186,82 @@ $ptToolHeight: 40px;
   }
 }
 
+/** NLP style */
+
+.#{$prefix}-NLPLayout {
+  overflow: hidden;
+}
+.#{$prefix}-NLPView {
+  height: 100%;
+  background-color: #ffffff;
+  overflow-y: auto;
+  flex: auto;
+  padding: 26px 32px;
+  line-height: 26px;
+}
+
+.#{$prefix}-NLPView-question {
+  flex: 1;
+  overflow: hidden;
+  &-title {
+    font-weight: 500;
+    font-size: 18px;
+    margin-bottom: 24px;
+  }
+  &-content {
+    font-size: 14px;
+    font-weight: 400;
+    background-color: #f5f5f5;
+    border-radius: 4px;
+    padding: 8px;
+    &-mask {
+      position: absolute;
+      left: 0px;
+      top: 0px;
+      background-color: transparent;
+      color: transparent;
+      z-index: 10;
+      opacity: 1;
+    }
+  }
+}
+
+.#{$prefix}-sidebar__content__NLPList {
+  display: flex;
+  flex-direction: column;
+  &__item {
+    display: flex;
+    align-items: center;
+    cursor: pointer;
+
+    .#{$prefix}-sidebar-pop-remove {
+      margin: 0px 16px;
+      display: none;
+    }
+
+    &:hover {
+      .#{$prefix}-sidebar-pop-remove {
+        display: block;
+      }
+    }
+
+    &__text {
+      font-weight: 400;
+      font-size: 12px;
+      line-height: 20px;
+      color: #666666;
+      padding: 16px;
+      width: 100%;
+    }
+    &__active {
+      background-color: #eeefff;
+      &__text {
+        color: #666fff;
+      }
+    }
+  }
+}
+
 /** longText style */
 .#{$prefix}-longText {
   display: flex;
@@ -2302,4 +2389,55 @@ $predictTrackingPrefix: #{$prefix}-point-cloud-predict-tracking;
 }
 .bee-audio-combined {
   cursor: url('./assets/annotation/audio/combine.svg') 10 12, default;
+}
+
+/** LLMMultiWheel style */
+
+.#{$prefix}-LLMMultiWheelView {
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  overflow: hidden;
+  background-color: #fff;
+}
+
+.#{$prefix}-LLMMultiWheelView-container {
+  flex: auto;
+  display: flex;
+  overflow: auto;
+  .dialog {
+    min-width: 50%;
+    padding: 8px;
+    border: 1px solid transparent;
+    overflow: auto;
+    &.selected {
+      border-color: #69b1ff;
+    }
+    .header {
+      position: relative;
+      .order {
+        position: absolute;
+        left: 0;
+        top: 0;
+        width: 32px;
+        height: 32px;
+        line-height: 32px;
+        text-align: center;
+        background: #d4cbcb;
+        border-radius: 4px;
+      }
+      .name {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        .show-name {
+          font-size: 16px;
+        }
+        .tips {
+          color: #d4cbcb;
+        }
+      }
+    }
+  }
 }

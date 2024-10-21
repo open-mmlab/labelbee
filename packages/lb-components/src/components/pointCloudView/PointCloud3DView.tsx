@@ -30,6 +30,7 @@ import { LabelBeeContext } from '@/store/ctx';
 import PointCloudSizeSlider from './components/PointCloudSizeSlider';
 import TitleButton from './components/TitleButton';
 import { LeftOutlined } from '@ant-design/icons';
+import { useToolStyleContext } from '@/hooks/useToolStyle';
 
 const EKeyCode = cKeyCode.default;
 const pointCloudID = 'LABELBEE-POINTCLOUD';
@@ -128,6 +129,16 @@ const PointCloud3D: React.FC<IA2MapStateProps> = ({ currentData, config, highlig
   const { initPointCloud3d } = usePointCloudViews();
   const size = useSize(ref);
   const { t } = useTranslation();
+  const { value: toolStyle } = useToolStyleContext();
+  const { hiddenText } = toolStyle || {};
+
+  useEffect(() => {
+    let pointCloud = ptCtx.mainViewInstance;
+    if (pointCloud) {
+      pointCloud.updateHiddenTextAndRender(hiddenText, ptCtx.pointCloudBoxList);
+    }
+  }, [toolStyle]);
+
   useEffect(() => {
     if (!ptCtx.mainViewInstance) {
       return;
@@ -136,6 +147,7 @@ const PointCloud3D: React.FC<IA2MapStateProps> = ({ currentData, config, highlig
   }, [size]);
   const { selectedBox } = useSingleBox();
   const { selectedSphere } = useSphere();
+  const [needUpdateCenter, setNeedUpdateCenter] = useState(true);
 
   const setTarget3DView = (perspectiveView: EPerspectiveView) => {
     const box = selectedBox?.info;
@@ -180,7 +192,9 @@ const PointCloud3D: React.FC<IA2MapStateProps> = ({ currentData, config, highlig
           isOrthographicCamera: true,
           orthographicParams: PointCloudUtils.getDefaultOrthographicParams(size),
           config,
+          hiddenText,
         });
+        pointCloud.setHandlerPipe({setSelectedIDs: ptCtx.setSelectedIDs, setNeedUpdateCenter});
         ptCtx.setMainViewInstance(pointCloud);
       }
     }
@@ -207,6 +221,8 @@ const PointCloud3D: React.FC<IA2MapStateProps> = ({ currentData, config, highlig
         });
         pointCloud.render();
         ptCtx.setPointCloudResult(boxParamsList);
+        const rectParamsList = PointCloudUtils.getRectParamsFromResultList(currentData.result);
+        ptCtx.setRectList(rectParamsList);
         ptCtx.setPointCloudValid(jsonParser(currentData.result)?.valid);
       }
     }
@@ -216,7 +232,17 @@ const PointCloud3D: React.FC<IA2MapStateProps> = ({ currentData, config, highlig
    *  Observe selectedID and reset camera to target top-view
    */
   useEffect(() => {
-    if (selectedBox) {
+    /**
+     * When the selected rectangle is switched, it is necessary to update the 3D view perspective and zoom size of the currently selected rectangle. Other rendering logic remains unchanged.
+     * Originally, the perspective was updated whenever any property changed; now it is updated only when the Id changes.
+     */
+    const selectedId = selectedBox?.info?.id;
+
+    if (!needUpdateCenter) {
+      setNeedUpdateCenter(true);
+      return;
+    };
+    if (selectedId !== undefined) {
       setTarget3DView(EPerspectiveView.Top);
 
       /**
@@ -225,7 +251,7 @@ const PointCloud3D: React.FC<IA2MapStateProps> = ({ currentData, config, highlig
       const zoom = ptCtx.topViewInstance?.pointCloudInstance?.camera.zoom ?? 1;
       ptCtx.mainViewInstance?.updateCameraZoom(zoom);
     }
-  }, [selectedBox]);
+  }, [selectedBox?.info?.id]);
 
   useEffect(() => {
     if (selectedSphere) {

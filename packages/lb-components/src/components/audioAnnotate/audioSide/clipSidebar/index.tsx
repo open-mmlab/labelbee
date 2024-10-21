@@ -1,7 +1,7 @@
-import React from 'react';
+import React, { useMemo } from 'react';
 import AttributeList from '@/components/attributeList';
-import { IAudioTimeSlice } from '@labelbee/lb-utils'
-import { EventBus } from '@labelbee/lb-annotation';
+import { IAudioTimeSlice, ITextConfigItem } from '@labelbee/lb-utils';
+import { EventBus, TagUtils } from '@labelbee/lb-annotation';
 import ClipIcon from '@/assets/annotation/audio/clipSmall.svg';
 import ClipActiveIcon from '@/assets/annotation/audio/clipASmall.svg';
 import DeleteIcon from '@/assets/annotation/audio/delete.svg';
@@ -12,6 +12,7 @@ import { classnames } from '@/utils';
 
 import styles from './index.module.scss';
 import { useTranslation } from 'react-i18next';
+import SubAttributeList from '@/components/subAttributeList';
 
 interface IClipSidebarProps {
   /** 截取片段数组 */
@@ -31,13 +32,19 @@ const ClipSidebar = (props: IClipSidebarProps) => {
     clipTextConfigurable,
     clipAttributeList,
     clipAttributeConfigurable,
+    secondaryAttributeConfigurable,
+    subAttributeList,
+    clipTextList,
   } = audioClipState;
 
   const { id: selectedId } = selectedRegion;
 
+  const currentRegion = useMemo(() => {
+    return regions.find((item) => item.id === selectedId);
+  }, [regions, selectedId]);
+
   const attributeChanged = (attr: string) => {
     if (regions.length && selectedId) {
-      const currentRegion = regions.find((item) => item.id === selectedId);
       updateRegion({
         ...(currentRegion as IAudioTimeSlice),
         attribute: attr,
@@ -49,12 +56,52 @@ const ClipSidebar = (props: IClipSidebarProps) => {
     });
   };
 
+  const setSubAttribute = (key: string, value: string) => {
+    if (regions.length && selectedId) {
+      const currentSubAttribute = currentRegion?.subAttribute ?? {};
+      updateRegion({
+        ...(currentRegion as IAudioTimeSlice),
+        subAttribute: { ...currentSubAttribute, [key]: value },
+      });
+    }
+  };
+
   const list = [
     { label: '无属性', value: '', key: '无属性' },
     ...clipAttributeList.map((i: any) => {
       return { ...i, label: i.key };
     }),
   ];
+
+  // Display attribute and secondary attribute text
+  const getAttributeText = (
+    attribute: string,
+    subAttribute?: {
+      [key: string]: string;
+    },
+  ) => {
+    const text = getAttributeShowText(attribute, list);
+    const subAttributes = subAttribute
+      ? TagUtils.getTagNameList(subAttribute, subAttributeList)
+      : [];
+    let subAttributeText = '';
+    const segmentSymbol = '，\n';
+    subAttributes.forEach((i) => {
+      subAttributeText += `${i.keyName}：${i.value.join(`、`)}${segmentSymbol}`;
+    });
+    return `${text}${segmentSymbol}${subAttributeText}`;
+  };
+
+  const showClipText = (region: IAudioTimeSlice) => {
+    let clipShowText = '';
+    if (clipTextConfigurable && clipTextList?.length > 0) {
+      clipTextList.forEach((i: ITextConfigItem, index: number) => {
+        const segmentSymbol = !clipAttributeConfigurable && index === 0 ? '' : '，';
+        clipShowText = clipShowText + `${i.label}：${region[i.key]}${segmentSymbol}`;
+      });
+    }
+    return clipShowText;
+  };
 
   return (
     <div className={styles.clipSidebar}>
@@ -63,14 +110,12 @@ const ClipSidebar = (props: IClipSidebarProps) => {
         {regions.length > 0 ? (
           <div className={styles.regions}>
             {regions.map((item) => {
-              const { id, attribute, text, start, end } = item;
+              const { id, attribute, text, start, end, subAttribute } = item;
               const showLoop = id === selectedId && selectedRegion.loop;
 
               const showText = `${
-                clipAttributeConfigurable ? getAttributeShowText(attribute, list) : ''
-              }${clipAttributeConfigurable && clipTextConfigurable ? '，' : ''}${
-                clipTextConfigurable ? `${t('textTool')}：${text}` : ''
-              }`;
+                clipAttributeConfigurable ? getAttributeText(attribute, subAttribute) : ''
+              }${showClipText(item)}`;
               return (
                 <div
                   className={classnames({
@@ -114,12 +159,21 @@ const ClipSidebar = (props: IClipSidebarProps) => {
             list={list}
             attributeChanged={attributeChanged}
             selectedAttribute={selectedAttribute}
-            attributeLockChange={(list: any) => {
+            attributeLockChange={(list: string[]) => {
               setAudioClipState({
                 attributeLockList: list,
               });
             }}
           />
+          {selectedId && secondaryAttributeConfigurable && (
+            <SubAttributeList
+              subAttributeList={subAttributeList}
+              setSubAttribute={setSubAttribute}
+              getValue={(subAttribute) => {
+                return currentRegion?.subAttribute?.[subAttribute.value];
+              }}
+            />
+          )}
         </div>
       )}
     </div>

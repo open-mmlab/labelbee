@@ -1,0 +1,1 @@
+export { default, EventBusEvent as BatchSwitchConnectionEventBusEvent } from './BatchSwitchConnectIn2DView'

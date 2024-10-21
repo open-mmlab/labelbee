@@ -4,8 +4,118 @@ import { EToolName } from '@/data/enums/ToolType';
 import _ from 'lodash';
 import StepUtils from './StepUtils';
 import { IStepInfo } from '@/types/step';
+import { IMappingImg } from '@/types/data';
+import { message } from 'antd';
+import { i18n } from '@labelbee/lb-utils';
+
+interface ICopyResultChangeParams {
+  copyResult: string;
+  step: number;
+  currentResult: string;
+  mappingImgList: IMappingImg[];
+  preMappingImgList: IMappingImg[];
+  valid: boolean;
+}
+
+interface IGetNextPath {
+  prePath: string;
+  preMappingImgList: IMappingImg[];
+  nextMappingImgList: IMappingImg[];
+}
+
+interface ICopyResultItemHandlerParams {
+  item: any;
+  key?: string | number;
+  parent: any;
+  mappingImgList: IMappingImg[];
+  preMappingImgList: IMappingImg[];
+}
 
 export default class AnnotationDataUtils {
+  /**
+   * Performs a depth-first traversal of an object or array, executing a callback function on each element.
+   *
+   * @param {any} objOrArr - The object or array to be traversed.
+   * @param {Function} callback - The callback function to be executed on each element.
+   *                               The callback function takes three parameters: element, key, and parent.
+   * @param {string | number} [key] - The key or index of the current element in its parent (optional).
+   * @param {any} [parent] - The parent of the current element (optional).
+   */
+  public static traverseDF(
+    objOrArr: any,
+    callback: (element: any, key?: string | number, parent?: any) => void,
+    key?: string | number,
+    parent?: any,
+  ) {
+    callback(objOrArr, key, parent);
+    if (typeof objOrArr === 'object' && objOrArr !== null) {
+      if (Array.isArray(objOrArr)) {
+        objOrArr.forEach((item, index) => {
+          this.traverseDF(item, callback, index, objOrArr);
+        });
+      } else {
+        Object.keys(objOrArr).forEach((key) => {
+          this.traverseDF(objOrArr[key], callback, key, objOrArr);
+        });
+      }
+    }
+  }
+
+  /**
+   * Calculates the next path based on the provided parameters.
+   *
+   * @param {IGetNextPath} params - The object containing necessary information.
+   * @param {string} params.prePath - The current path.
+   * @param {IImgList} params.preMappingImgList - The list of current mapping images.
+   * @param {IImgList} params.nextMappingImgList - The list of next mapping images.
+   * @returns {string} The next path, returns an empty string if not found.
+   */
+  public static getNextPath(params: IGetNextPath) {
+    const { prePath, preMappingImgList, nextMappingImgList } = params;
+
+    const calName = preMappingImgList?.find((item) => item.path === prePath)?.calib?.calName;
+
+    const nextPath = nextMappingImgList.find((img) => img.calib?.calName === calName)?.path;
+
+    return nextPath;
+  }
+  /**
+   * Handles the processing of individual items during the traversal of results or resultRect.
+   * This function updates specific properties of the parent object based on the key of the current item.
+   *
+   * @param {ICopyResultItemHandlerParams} params - Parameters containing the current item, its key, parent object, and image lists.
+   * @param {ICopyResultItemHandlerParams.item} item - The current item being processed.
+   * @param {ICopyResultItemHandlerParams.key} key - The key associated with the current item.
+   * @param {ICopyResultItemHandlerParams.parent} parent - The parent object of the current item.
+   * @param {ICopyResultItemHandlerParams.mappingImgList} mappingImgList - The list of images for mapping.
+   * @param {ICopyResultItemHandlerParams.preMappingImgList} preMappingImgList - The list of images before mapping.
+   */
+  public static copyResultItemHandler(params: ICopyResultItemHandlerParams) {
+    const { item, key, parent, mappingImgList, preMappingImgList } = params;
+
+    // Get the pre-processing value
+    const oldValue = key === undefined ? undefined : parent[key];
+
+    if (key === 'id') {
+      parent.id = uuid(8, 62);
+    }
+    if (key === 'imageName') {
+      parent.imageName = this.getNextPath({
+        prePath: item,
+        preMappingImgList,
+        nextMappingImgList: mappingImgList,
+      });
+    }
+
+    // Get the pos-processing value
+    const value = key === undefined ? undefined : parent[key];
+
+    return {
+      value,
+      oldValue,
+    };
+  }
+
   /**
    * 复制上一张图片结果
    * @param copyResult 复制的结果
@@ -13,28 +123,96 @@ export default class AnnotationDataUtils {
    * @param currentResult 当前的步骤
    * @returns
    */
-  public static copyResultChange(copyResult: string, step: number, currentResult: string) {
+  public static copyResultChange(params: ICopyResultChangeParams) {
+    const { copyResult, step, currentResult, mappingImgList, preMappingImgList, valid } = params;
     // 其实其限定的范围一般都在单图的情况
     try {
       const copyData = jsonParser(copyResult);
       const currentData = jsonParser(currentResult);
+      currentData.valid = valid;
       const stepName = `step_${step}`;
       if (copyData[stepName]) {
         // 这层可能还要处理 dataSource 依赖问题
         const info = copyData[stepName];
-        if (info.result) {
-          info.result = info.result.map((info: any) => ({
-            ...info,
-            // @ts-ignore
-            id: uuid(8, 62),
-          }));
-          currentData[stepName] = info;
-          return JSON.stringify(currentData);
+        // need copy fields
+        const fields = ['result', 'resultRect'];
+
+        // 新老id的映射
+        const resultIdMapping = new Map<string, string>();
+
+        // 数据处理
+        fields.forEach((field) => {
+          if (info[field]) {
+            this.traverseDF(info[field], (item: any, key?: string | number, parent?: any) => {
+              const { value: newValue, oldValue } = this.copyResultItemHandler({
+                item,
+                key,
+                parent,
+                mappingImgList,
+                preMappingImgList,
+              });
+
+              // FIXME 目前result是一维简单对象数组，后续复杂对象数组项需要考虑先辈key
+              if (field === 'result' && key === 'id') {
+                if (newValue !== undefined && oldValue !== undefined) {
+                  resultIdMapping.set(oldValue, newValue);
+                }
+              }
+            });
+          }
+        });
+
+        /**
+         * 更新resultRect里面的 extId 值，以便同步前面result的数据处理
+         *
+         * @description extId用于识别来源哪个result项
+         */
+        if (resultIdMapping.size) {
+          const resultRect = info['resultRect'];
+          if (Array.isArray(resultRect)) {
+            resultRect.forEach((item) => {
+              const extId = item.extId;
+              const newExtId = resultIdMapping.get(extId);
+              if (extId !== undefined && newExtId !== undefined) {
+                item.extId = newExtId;
+              }
+            });
+          }
         }
+        
+        const needFilterFields = ['resultRect', 'rects'];
+
+        const errorValues: any[] = [];
+
+        this.traverseDF(info, (item: any, key?: string | number, parent?: any) => {
+          if (_.isString(key) && needFilterFields.includes(key) && Array.isArray(item)) {
+            parent[key] = item.filter((i: any) => {
+              if (i.imageName) {
+                return true;
+              }
+
+              errorValues.push(i);
+
+              return false;
+            });
+          }
+        });
+
+        if (errorValues.length) {
+          console.log(errorValues);
+          message.info(i18n.t('PartialResultsReplicationFailure'));
+        }
+
+        currentData[stepName] = info;
+        return JSON.stringify(currentData);
       }
       return copyResult;
     } catch {
-      return copyResult;
+      /**
+       * Note: This function should not return `copyResult`, as this will cause duplicate ID issues with the previous image.
+       * Additionally, `imageName` will also cause errors because it is based on the previous image's address and cannot be correctly displayed on the current page.
+       */
+      message.info(i18n.t('FailedToCopyResults'));
     }
   }
 

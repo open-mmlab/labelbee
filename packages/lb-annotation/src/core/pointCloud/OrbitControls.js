@@ -918,6 +918,7 @@ class OrbitControls extends EventDispatcher {
       if (scope.enabled === false) return;
 
       event.preventDefault();
+      scope.dispatchEvent({ type: 'rightClick', originalEvent: event });
     }
 
     function addPointer(event) {

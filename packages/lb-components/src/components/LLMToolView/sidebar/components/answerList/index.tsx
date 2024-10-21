@@ -3,7 +3,7 @@
  * @Author: lixinghua lixinghua@sensetime.com
  * @Date: 2023-04-10
  */
-import React, { useContext } from 'react';
+import React, { useContext, useMemo } from 'react';
 import { prefix } from '@/constant';
 import { Tag, Collapse, Popover } from 'antd';
 import { useTranslation } from 'react-i18next';
@@ -19,24 +19,18 @@ import {
   ILLMToolConfig,
   IAnswerList,
   ITextList,
+  IConfigUpdate,
 } from '@/components/LLMToolView/types';
 import { isBoolean } from 'lodash';
 import LongText from '@/components/longText';
 import TextEditor from '../textEditor';
+import PortionTagList from '@/components/tagList/components/portion';
 
 interface IProps {
   list?: IAnswerList[];
-  checkMode?: boolean;
+  disabeledAll?: boolean;
   LLMConfig?: ILLMToolConfig;
-  updateValue: ({
-    order,
-    value,
-    key,
-  }: {
-    order: number;
-    value: number | string | { key: string; value: number | boolean };
-    key?: string;
-  }) => void;
+  updateValue: (value: IConfigUpdate) => void;
 }
 
 enum ETagType {
@@ -48,11 +42,10 @@ enum ETagType {
 const { Panel } = Collapse;
 const LLMSidebarCls = `${prefix}-LLMSidebar`;
 const AnswerList = (props: IProps) => {
-  const { list = [], LLMConfig, updateValue, checkMode } = props;
+  const { list = [], LLMConfig, updateValue, disabeledAll } = props;
 
   const { hoverKey, setHoverKey } = useContext(LLMContext);
   const { t } = useTranslation();
-  const isDisableAll = checkMode;
 
   const getFinishStatus = (i: IAnswerList) => {
     const {
@@ -146,7 +139,7 @@ const AnswerList = (props: IProps) => {
       defaultActiveKey={
         list.length > 0 ? list.map((i: IAnswerList, index: number) => index) : undefined
       }
-      style={{ margin: '16px 0px', background: '#fff' }}
+      style={{ marginBottom: '16px', background: '#fff' }}
     >
       {list.map((i: IAnswerList, index: number) => {
         const {
@@ -154,6 +147,8 @@ const AnswerList = (props: IProps) => {
           indicatorDetermine = [],
           textEdit = [],
           isTextEdit = false,
+          inputList = [],
+          tagInputListConfigurable,
         } = LLMConfig || {};
         const { backgroundColor, fontColor, tagText, tagStatus } = getTagStyle(i);
         const textEditObject = getAnswerTextEditConfig(i, textEdit) || {};
@@ -196,6 +191,18 @@ const AnswerList = (props: IProps) => {
               [`${LLMSidebarCls}-errorPanel`]: tagStatus === ETagType.UnFinish,
             })}
           >
+            {/* attribute tag */}
+            {tagInputListConfigurable && inputList?.length > 0 && (
+              <PortionTagList
+                inputList={inputList}
+                selectedTags={i?.tagList || {}}
+                updateValue={(changeValue) => {
+                  updateValue({ order: i.order, value: changeValue, key: 'tagList' });
+                }}
+                disabeledAll={disabeledAll}
+              />
+            )}
+
             {/* Indicator score  */}
             {indicatorScore?.length > 0 &&
               indicatorScore.map((item: IndicatorScore, index: number) => {
@@ -227,7 +234,7 @@ const AnswerList = (props: IProps) => {
                       updateValue({ order: i.order, value: values, key: 'indicatorScore' });
                     }}
                     key={index}
-                    isDisableAll={isDisableAll}
+                    disabeledAll={disabeledAll}
                   />
                 ) : null;
               })}
@@ -248,14 +255,14 @@ const AnswerList = (props: IProps) => {
                       updateValue({ order: i.order, value: values, key: 'indicatorDetermine' });
                     }}
                     key={index}
-                    isDisableAll={isDisableAll}
+                    disabeledAll={disabeledAll}
                   />
                 ) : null;
               })}
             {/* Text Editor */}
             {isTextEdit && (
               <TextEditor
-                checkMode={checkMode}
+                disabeledAll={disabeledAll}
                 newAnswer={i?.newAnswer}
                 textEditObject={textEditObject}
                 updateValue={(changeValue) => {

@@ -17,6 +17,7 @@ import {
   OnPageChange,
   OnStepChange,
   LoadFileList,
+  GetImgIndexByExternal,
 } from '@/types/data';
 import { ESubmitType } from '@/constant';
 import { IPointCloudBox } from '@labelbee/lb-utils';
@@ -72,6 +73,7 @@ export interface AnnotationState {
   predictionResultVisible: boolean;
   highlightAttribute: string;
   preDataProcess?: (params: IPreDataProcessParams) => IPointCloudBox[];
+  getImgIndexByExternal?: GetImgIndexByExternal;
 }
 
 interface UpdateToolInstance {
@@ -172,6 +174,13 @@ interface UpdateGetFileList {
   };
 }
 
+interface UpdataImgIndexByExternal {
+  type: typeof ANNOTATION_ACTIONS.UPDATE_IMG_INDEX_BY_EXTERNAL;
+  payload: {
+    getImgIndexByExternal: GetImgIndexByExternal;
+  };
+}
+
 interface CopyBackWordResult extends CommonActions {
   type: typeof ANNOTATION_ACTIONS.COPY_BACKWARD_RESULT;
 }
@@ -216,4 +225,5 @@ export type AnnotationActionTypes =
   | UpdateOnSave
   | BatchUpdateTrackID
   | BatchUpdateResultByTrackID
+  | UpdataImgIndexByExternal
   | InitAnnotationState;

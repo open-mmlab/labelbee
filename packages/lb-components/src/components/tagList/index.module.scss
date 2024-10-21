@@ -1,0 +1,46 @@
+.tagList {
+  padding: 0px 16px 16px 16px;
+
+  .content {
+    display: flex;
+    flex-wrap: nowrap;
+    margin-top: 16px;
+
+  }
+
+  .left {
+    display: flex;
+    align-items: center;
+  }
+
+  .right {
+    display: flex;
+    flex-wrap: wrap;
+
+    :global {
+      .ant-tag-checkable {
+        border: 1px solid #D9D9D9;
+        margin: 4px;
+        display: flex;
+      }
+    }
+
+    .tagItem {
+      display: flex;
+      max-width: 60px;
+    }
+
+    .disabled {
+      animation: none;
+      transition: none;
+      background: transparent;
+
+    }
+
+    .active {
+      background-color: #4689ff;
+      border-color: #4689ff;
+      color: #fff;
+    }
+  }
+}

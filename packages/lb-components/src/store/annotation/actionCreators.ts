@@ -8,6 +8,7 @@ import {
   OnSave,
   OnStepChange,
   OnSubmit,
+  GetImgIndexByExternal,
 } from '@/types/data';
 import { AnnotationActionTypes, ToolInstance } from './types';
 import { LoadFileAndFileData, getStepConfig } from './reducer';
@@ -44,7 +45,7 @@ const getSubmitByPageOperation = (pageTurningOperation: EPageTurningOperation) =
 const getBasicIndex = (annotationStore: any, basicIndex: number) => {
   const { imgList, imgIndex } = annotationStore;
   const { dataSourceStep } = getStepConfig(annotationStore.stepList, annotationStore.step);
-  let backwardResult = jsonParser(imgList[imgIndex - 1].result);
+  let backwardResult = jsonParser(imgList[imgIndex - 1]?.result);
   const index = backwardResult[`step_${dataSourceStep}`]?.result?.length - 1;
   return index || basicIndex;
 };
@@ -211,6 +212,17 @@ export function CopyBackWordResult(): AnnotationActionTypes {
   };
 }
 
+export function UpdateImgIndexByExternal(
+  getImgIndexByExternal: GetImgIndexByExternal,
+): AnnotationActionTypes {
+  return {
+    type: ANNOTATION_ACTIONS.UPDATE_IMG_INDEX_BY_EXTERNAL,
+    payload: {
+      getImgIndexByExternal,
+    },
+  };
+}
+
 export function BatchUpdateTrackID({
   id,
   newID,
@@ -292,6 +304,7 @@ export function InitTaskData({
   checkMode,
   highlightAttribute,
   preDataProcess,
+  getImgIndexByExternal,
 }: any): any {
   const tasks: any[] = [];
 
@@ -335,6 +348,10 @@ export function InitTaskData({
 
   if (typeof checkMode === 'boolean') {
     tasks.push(UpdateCheckMode(checkMode));
+  }
+
+  if (getImgIndexByExternal) {
+    tasks.push(UpdateImgIndexByExternal(getImgIndexByExternal));
   }
 
   tasks.push(UpdateHighlightAttribute(highlightAttribute));
@@ -466,15 +483,16 @@ export const ToSubmitFileData = (submitType: ESubmitType) => (dispatch: any) =>
  * @param submitType
  * @param nextBasicIndex
  */
-const SubmitAndChangeFileIndex = (
+const SubmitAndChangeFileIndex = async (
   dispatch: any,
   nextIndex: number,
   submitType: ESubmitType,
   nextBasicIndex?: number,
-) => [
-  dispatch(ToSubmitFileData(submitType)),
-  dispatch(LoadFileAndFileData(nextIndex, nextBasicIndex)),
-];
+) => {
+  dispatch(ToSubmitFileData(submitType));
+  await dispatch(SubmitHandler(submitType));
+  dispatch(LoadFileAndFileData(nextIndex, nextBasicIndex));
+};
 
 const ChangeBasicIndex = (dispatch: any, nextBasicIndex: number) => [
   dispatch({ type: ANNOTATION_ACTIONS.SUBMIT_RESULT }),
@@ -589,10 +607,19 @@ export const DispatcherTurning = async (
   toIndex?: number,
 ) => {
   const annotationStore = getState().annotation;
-  const { fileIndexChanged, fileIndex, basicIndexChanged, basicIndex } =
-    PageOperator.getNextPageInfo(pageTurningOperation, annotationStore, toIndex);
-
   const submitType: ESubmitType = getSubmitByPageOperation(pageTurningOperation);
+
+  let { fileIndexChanged, fileIndex, basicIndexChanged, basicIndex } = PageOperator.getNextPageInfo(
+    pageTurningOperation,
+    annotationStore,
+    toIndex,
+  );
+
+  const newIndex = annotationStore?.getImgIndexByExternal?.(annotationStore.imgIndex, submitType);
+  if (newIndex !== undefined) {
+    fileIndexChanged = true;
+    fileIndex = newIndex;
+  }
 
   ChangeTriggerEventAfterIndexChanged(dispatch, triggerEventAfterIndexChanged);
 
@@ -610,11 +637,14 @@ export const DispatcherTurning = async (
       }
     }
 
+    const state = getState();
+
     annotationStore.onPageChange?.(fileIndex);
     const index =
       submitType === ESubmitType.Backward
-        ? getBasicIndex(getState().annotation, basicIndex)
+        ? getBasicIndex(state.annotation, basicIndex)
         : basicIndex;
+
     return SubmitAndChangeFileIndex(dispatch, fileIndex, submitType, index);
   }
 
@@ -634,15 +664,6 @@ export const ChangeSave = (dispatch: Function) => {
 };
 
 export const SetAnnotationLoading = (dispatch: Function, loading: boolean) => {
-  dispatch({
-    type: ANNOTATION_ACTIONS.SET_LOADING,
-    payload: {
-      loading,
-    },
-  });
-};
-
-export const SetPointCloudLoading = (dispatch: Function, loading: boolean) => {
   dispatch({
     type: ANNOTATION_ACTIONS.SET_LOADING,
     payload: {
@@ -698,3 +719,14 @@ export const PreDataProcess =
     const { annotation } = getState();
     return annotation?.preDataProcess?.(params) ?? params.dataList;
   };
+
+export const SubmitHandler = (submitType: ESubmitType) => async (dispatch: any, getState: any) => {
+  const { annotation } = getState();
+  const { onSubmit, imgIndex, imgList } = annotation;
+
+  if (!onSubmit) {
+    return;
+  }
+
+  await onSubmit([imgList[imgIndex]], submitType, imgIndex, imgList);
+};

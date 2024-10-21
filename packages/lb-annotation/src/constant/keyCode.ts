@@ -17,6 +17,7 @@ enum EKeyCode {
   Y = 89,
   S = 83,
   Q = 81,
+  P = 80,
   One = 49,
   Two = 50,
   Three = 51,

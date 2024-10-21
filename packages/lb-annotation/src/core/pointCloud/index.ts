@@ -19,6 +19,7 @@ import {
   PointCloudUtils,
   DEFAULT_SPHERE_PARAMS,
   ICalib,
+  IPointCloudBoxList,
 } from '@labelbee/lb-utils';
 import { BufferAttribute, OrthographicCamera, PerspectiveCamera } from 'three';
 import HighlightWorker from 'web-worker:./highlightWorker.js';
@@ -57,6 +58,13 @@ interface IProps {
 
   isSegment?: boolean;
   checkMode?: boolean;
+
+  hiddenText?: boolean;
+}
+
+interface IPipeTypes {
+  setSelectedIDs: (ids?: string[] | string) => void;
+  setNeedUpdateCenter: (value: boolean) => void;
 }
 
 export interface IEventBus {
@@ -143,6 +151,20 @@ export class PointCloud extends EventListener {
 
   private workerLoading = false;
 
+  private raycaster = new THREE.Raycaster();
+
+  private pointer = new THREE.Vector2();
+
+  private pipe?: IPipeTypes;
+
+  private hiddenText = false;
+
+  private filterBoxWorker: Worker | null;
+
+  private geometry: THREE.BufferGeometry;
+
+  private filterBoxWorkerTimer: ReturnType<typeof setTimeout> | null = null;
+
   constructor({
     container,
     noAppend,
@@ -152,6 +174,7 @@ export class PointCloud extends EventListener {
     config,
     isSegment,
     checkMode,
+    hiddenText = false,
   }: IProps) {
     super();
     this.container = container;
@@ -159,6 +182,7 @@ export class PointCloud extends EventListener {
     this.backgroundColor = backgroundColor;
     this.config = config;
     this.checkMode = checkMode ?? false;
+    this.hiddenText = hiddenText;
 
     // TODO: Need to extracted.
     if (isOrthographicCamera && orthographicParams) {
@@ -182,6 +206,10 @@ export class PointCloud extends EventListener {
 
     this.axesHelper = new THREE.AxesHelper(1000);
 
+    this.filterBoxWorker = new FilterBoxWorker();
+
+    this.geometry = new THREE.BufferGeometry();
+
     // For Developer
     // this.scene.add(this.axesHelper);
 
@@ -201,6 +229,37 @@ export class PointCloud extends EventListener {
       this.initSegment();
       this.isSegment = true;
     }
+
+    this.controls.addEventListener('rightClick', (event) => {
+      const rect = this.renderer.domElement.getBoundingClientRect();
+      const x = event.originalEvent.clientX - rect.left;
+      const y = event.originalEvent.clientY - rect.top;
+      this.pointer.x = (x / rect.width) * 2 - 1;
+      this.pointer.y = -(y / rect.height) * 2 + 1;
+      this.raycaster.setFromCamera(this.pointer, this.camera);
+
+      const clickMeshes: THREE.Object3D[] = [];
+      this.scene.children.forEach((child) => {
+        if (!(child instanceof THREE.Group)) return;
+        child.children.forEach((grandson) => {
+          if (grandson instanceof THREE.Mesh) {
+            clickMeshes.push(grandson);
+          }
+        });
+      });
+      const intersects = this.raycaster.intersectObjects(clickMeshes, false);
+      if (intersects.length > 0) {
+        const intersectedObject = intersects[0].object;
+        this.pipe?.setNeedUpdateCenter(false);
+        this.pipe?.setSelectedIDs(intersectedObject.userData.selectedID);
+      } else {
+        this.pipe?.setSelectedIDs(undefined);
+      }
+    });
+  }
+
+  public setHandlerPipe(pipe: IPipeTypes) {
+    this.pipe = pipe;
   }
 
   public initSegment() {
@@ -544,6 +603,12 @@ export class PointCloud extends EventListener {
       group.add(boxID);
     }
 
+    // 生成并添加attribute标签
+    const attributeLabel = this.generateBoxAttributeLabel(boxParams);
+    if (attributeLabel) {
+      group.add(attributeLabel);
+    }
+
     group.add(box);
     group.add(arrow);
     if (center) {
@@ -553,6 +618,12 @@ export class PointCloud extends EventListener {
       group.rotation.set(0, 0, rotation);
     }
     group.name = `box${id}`;
+    const clickGeometry = new THREE.BoxGeometry(width, height, depth);
+    const clickMaterial = new THREE.MeshBasicMaterial({ visible: false });
+    const clickMesh = new THREE.Mesh(clickGeometry, clickMaterial);
+    clickMesh.userData = { selectedID: id };
+    group.add(clickMesh);
+
     this.scene.add(group);
   };
 
@@ -745,19 +816,31 @@ export class PointCloud extends EventListener {
         position,
       };
 
+      if (!this.filterBoxWorker) {
+        this.filterBoxWorker = new FilterBoxWorker();
+      }
+
       return new Promise((resolve) => {
-        const filterBoxWorker = new FilterBoxWorker();
-        filterBoxWorker.postMessage(params);
-        filterBoxWorker.onmessage = (e: any) => {
+        this.filterBoxWorker?.postMessage(params);
+        this.filterBoxWorker!.onmessage = (e: any) => {
           const { color: newColor, position: newPosition, num } = e.data;
+          this.geometry.dispose();
+          this.geometry.setAttribute('position', new THREE.Float32BufferAttribute(newPosition, 3));
+          this.geometry.setAttribute('color', new THREE.Float32BufferAttribute(newColor, 3));
+          this.geometry.computeBoundingSphere();
 
-          const geometry = new THREE.BufferGeometry();
-          geometry.setAttribute('position', new THREE.Float32BufferAttribute(newPosition, 3));
-          geometry.setAttribute('color', new THREE.Float32BufferAttribute(newColor, 3));
-          geometry.computeBoundingSphere();
+          if (this.filterBoxWorkerTimer) {
+            clearTimeout(this.filterBoxWorkerTimer);
+          }
+          // The creation of Worker themselves is time-consuming. Detect within 3 seconds whether the user still needs to use Worker to calculate
+          this.filterBoxWorkerTimer = setTimeout(() => {
+            if (this.filterBoxWorker) {
+              this.filterBoxWorker.terminate();
+              this.filterBoxWorker = null;
+            }
+          }, 3000);
 
-          filterBoxWorker.terminate();
-          resolve({ geometry, num });
+          resolve({ geometry: this.geometry, num });
         };
       });
     }
@@ -988,14 +1071,38 @@ export class PointCloud extends EventListener {
     mappingImgList,
     points,
   }: {
-    mappingImgList: Array<{ url: string; calib?: ICalib }>;
+    mappingImgList: Array<{ url: string; fallbackUrl: string; calib?: ICalib }>;
     points: ArrayLike<number>;
   }) => {
     /**
      * The img is loaded, so it can use cache in browser.
      */
+    const loadImage = async (url: string) => {
+      try {
+        const imgNode = await ImgUtils.load(url);
+        return imgNode;
+      } catch (error) {
+        console.error('Error loading image:', error);
+        return null;
+      }
+    };
     const imgNodeList =
-      mappingImgList.length === 0 ? [] : await Promise.all(mappingImgList.map((v) => ImgUtils.load(v.url)));
+      mappingImgList.length === 0
+        ? []
+        : ((
+            await Promise.all(
+              mappingImgList.map(async (v) => {
+                let imgNode = await loadImage(v.url);
+
+                if (!imgNode && v.fallbackUrl) {
+                  // If the primary URL fails and an alternate URL exists, try loading the alternate URL
+                  imgNode = await loadImage(v.fallbackUrl);
+                }
+                return imgNode;
+              }),
+            )
+          ).filter((v) => v !== null) as unknown as HTMLImageElement[]);
+
     const highlightIndexList = mappingImgList.map((v, i) => {
       if (this.cacheInstance.cache2DHighlightIndex.has(v.url)) {
         return this.cacheInstance.cache2DHighlightIndex.get(v.url) ?? [];
@@ -1038,7 +1145,7 @@ export class PointCloud extends EventListener {
   public async handleWebworker(params: any) {
     return new Promise((resolve, reject) => {
       if (this.workerLoading) {
-        reject(new Error('workerLoading'));
+        reject(new Error('highlightWorker called repeatedly, new call discarded'));
         return;
       }
       this.workerLoading = true;
@@ -1060,30 +1167,56 @@ export class PointCloud extends EventListener {
    * @param boxParams
    * @returns
    */
-  public async highlightOriginPointCloud(pointCloudBoxList?: IPointCloudBox[], highlightIndex: number[] = []) {
+  public async highlightOriginPointCloud(
+    pointCloudBoxList?: IPointCloudBox[],
+    highlightIndex: number[] = [],
+    config: {
+      modifiedBoxIds: string[];
+      resetAreas: ICoordinate[][];
+    } = {
+      modifiedBoxIds: [],
+      resetAreas: [],
+    },
+  ) {
+    const { modifiedBoxIds, resetAreas } = config;
     const oldPointCloud = this.scene.getObjectByName(this.pointCloudObjectName) as THREE.Points;
     if (!oldPointCloud) {
       return;
     }
     this.highlightPCDSrc = this.currentPCDSrc;
+
     return new Promise<BufferAttribute[] | undefined>((resolve, reject) => {
       if (window.Worker) {
         const newPointCloudBoxList = pointCloudBoxList ? [...pointCloudBoxList] : [];
-
         const cuboidList = newPointCloudBoxList.map((v) => getCuboidFromPointCloudBox(v));
         const colorList = this.getAllAttributeColor(cuboidList);
+        const position = oldPointCloud.geometry.attributes.position.array;
+        const oldColor = oldPointCloud.geometry.attributes.dimensions.array;
+
         const params = {
           cuboidList,
-          position: oldPointCloud.geometry.attributes.position.array,
-          color: oldPointCloud.geometry.attributes.dimensions.array,
+          position,
+          color: oldColor,
           colorList,
           highlightIndex,
+          modifiedBoxIds,
+          resetAreas,
         };
-
         this.handleWebworker(params)
           .then((res: any) => {
             const { color } = res;
-            const colorAttribute = new THREE.BufferAttribute(color, 3);
+            let combinedColor = color;
+            if (modifiedBoxIds.length || resetAreas.length) {
+              combinedColor = color.map((item: any, index: number) => {
+                if (item === -1) {
+                  // A magic number is needed here to represent the color used in the last rendering
+                  // involved by packages/lb-annotation/src/core/pointCloud/highlightWorker.js REMAINED_COLOR_FLAG
+                  return oldColor[index];
+                }
+                return item;
+              });
+            }
+            const colorAttribute = new THREE.BufferAttribute(combinedColor, 3);
             /**
              * Need to return;
              *
@@ -1101,7 +1234,7 @@ export class PointCloud extends EventListener {
             }
 
             // Save the new highlight color.
-            this.cacheInstance.updateColor(this.highlightPCDSrc, color);
+            this.cacheInstance.updateColor(this.highlightPCDSrc, combinedColor);
 
             // Clear
             this.highlightPCDSrc = undefined;
@@ -1110,7 +1243,7 @@ export class PointCloud extends EventListener {
 
             oldPointCloud.geometry.setAttribute('dimensions', colorAttribute);
             oldPointCloud.geometry.attributes.dimensions.needsUpdate = true;
-            resolve(color);
+            resolve(combinedColor);
             this.render();
           })
           .catch((e) => {
@@ -1271,33 +1404,147 @@ export class PointCloud extends EventListener {
     return arrowHelper;
   };
 
+  /**
+   * Universal generation of label information
+   * @param text generation text
+   * @param scaleFactor  scale size
+   * @returns  { sprite, canvasWidth, canvasHeight }
+   */
+  public generateLabel = (text: string, scaleFactor: number) => {
+    const canvas = this.getTextCanvas(text);
+    const texture = new THREE.Texture(canvas);
+
+    // Use filters that are more suitable for UI and text
+    texture.minFilter = THREE.LinearFilter;
+    texture.magFilter = THREE.LinearFilter;
+    texture.needsUpdate = true;
+
+    // Calculate canvas width and height to avoid blurring
+    const canvasWidth = canvas.width / window.devicePixelRatio;
+    const canvasHeight = canvas.height / window.devicePixelRatio;
+
+    const spriteMaterial = new THREE.SpriteMaterial({ map: texture, depthWrite: false });
+    const sprite = new THREE.Sprite(spriteMaterial);
+    sprite.scale.set(canvasWidth / scaleFactor, canvasHeight / scaleFactor, 1);
+
+    return { sprite, canvasWidth, canvasHeight };
+  };
+
+  /**
+   * Generate label information for ID
+   * @param boxParams
+   * @returns sprite
+   */
   public generateBoxTrackID = (boxParams: IPointCloudBox) => {
-    if (!boxParams.trackID) {
-      return;
+    if (!boxParams.trackID) return;
+
+    const { sprite } = this.generateLabel(boxParams.trackID.toString(), 50);
+
+    sprite.position.set(-boxParams.width / 2, 0, boxParams.depth / 2 + 0.5);
+
+    return sprite;
+  };
+
+  /**
+   * Generate label information for secondary attributes
+   * @param boxParams
+   * @returns sprite
+   */
+  public generateBoxAttributeLabel = (boxParams: IPointCloudBox) => {
+    if (!boxParams.attribute || this.hiddenText) return;
+
+    const classLabel = this.findSubAttributeLabel(boxParams, this.config);
+    const subAttributeLabel = classLabel ? `${boxParams.attribute}\n${classLabel}` : `${boxParams.attribute}`;
+
+    const { sprite, canvasHeight } = this.generateLabel(subAttributeLabel, 100);
+
+    sprite.position.set(-boxParams.width / 2, 0, -boxParams.depth / 2 - canvasHeight / 150);
+
+    return sprite;
+  };
+
+  /**
+   * Splicing sub attribute content
+   * @param boxParams
+   * @param config
+   * @returns
+   */
+  public findSubAttributeLabel(boxParams: IPointCloudBox, config?: IPointCloudConfig) {
+    if (!boxParams?.subAttribute || typeof boxParams.subAttribute !== 'object' || !config) {
+      return '';
     }
 
-    const texture = new THREE.Texture(this.getTextCanvas(boxParams.trackID.toString()));
-    texture.needsUpdate = true;
-    const sprite = new THREE.SpriteMaterial({ map: texture, depthWrite: false });
-    const boxID = new THREE.Sprite(sprite);
-    boxID.scale.set(5, 5, 5);
-    boxID.position.set(-boxParams.width / 2, 0, boxParams.depth / 2 + 0.5);
-    return boxID;
-  };
+    const { inputList } = config;
+    let resultStr = '';
+    // Return directly without any secondary attributes
+    const subAttributeKeys = Object.keys(boxParams.subAttribute);
+    if (subAttributeKeys.length === 0) return resultStr;
+
+    subAttributeKeys.forEach((key) => {
+      const classInfo = inputList.find((item: { value: string }) => item.value === key);
+      if (!classInfo || !classInfo.subSelected) return; // If the type of the secondary attribute cannot be found, it will be returned directly
+
+      const { key: classKey, subSelected } = classInfo;
+      subSelected.forEach((item) => {
+        const subAttributeKey = boxParams.subAttribute?.[key];
+
+        if (subAttributeKey?.includes(item.value)) {
+          if (resultStr) resultStr += '、';
+          resultStr += `${classKey}:${item.key}`;
+        }
+      });
+    });
+
+    return resultStr;
+  }
 
   public getTextCanvas(text: string) {
     const canvas = document.createElement('canvas');
-
     const ctx = canvas.getContext('2d');
+    // Obtain the pixel ratio of the device
+    const dpr = window.devicePixelRatio || 1;
+    const fontSize = 50;
+
     if (ctx) {
-      ctx.font = `${50}px " bold`;
+      ctx.font = `${fontSize}px bold`;
+      // Split text into multiple lines using line breaks
+      const lines = text.split('\n');
+
+      // Find the longest row and calculate its width
+      const maxWidth = Math.max(...lines.map((line) => ctx.measureText(line).width));
+
+      // Calculate the logical width and height of the canvas
+      const canvasWidth = Math.ceil(maxWidth);
+      const lineHeight = fontSize * 1.5; // 每行的高度
+      const canvasHeight = lineHeight * lines.length;
+
+      // Modify the logical and physical width and height of the canvas
+      canvas.width = canvasWidth * dpr;
+      canvas.height = canvasHeight * dpr;
+
+      canvas.style.width = `${canvasWidth}px`;
+      canvas.style.height = `${canvasHeight}px`;
+
+      ctx.scale(dpr, dpr);
+
+      // Reset font (font size using dpr scaling)
+      ctx.font = `${fontSize}px bold`;
       ctx.fillStyle = 'white';
-      ctx.textAlign = 'center';
-      ctx.textBaseline = 'middle';
-      ctx.fillText(text, canvas.width / 2, canvas.height / 2);
+      ctx.textAlign = 'left';
+      ctx.textBaseline = 'top';
+
+      // Draw text line by line
+      lines.forEach((line, index) => {
+        ctx.fillText(line, 0, index * lineHeight); // The Y coordinate of each line of text is index * line height
+      });
     }
 
     return canvas;
+  }
+
+  public updateHiddenTextAndRender(hiddenText: boolean, pointCloudBoxList: IPointCloudBoxList) {
+    this.hiddenText = hiddenText;
+    this.generateBoxes(pointCloudBoxList);
   }
 
   /**

@@ -8,7 +8,8 @@ import { useHistory } from './useHistory';
  * @returns
  */
 export const usePolygon = () => {
-  const { polygonList, setPolygonList, selectedID } = useContext(PointCloudContext);
+  const { polygonList, pointCloudBoxList, setPolygonList, selectedID } =
+    useContext(PointCloudContext);
   const { addHistory, pushHistoryWithList } = useHistory();
 
   const selectedPolygon = polygonList.find((v) => v.id === selectedID);
@@ -21,7 +22,27 @@ export const usePolygon = () => {
   const deletePolygon = (id: string) => {
     const newPolygonList = polygonList.filter((v) => v.id !== id).map((v) => ({ ...v }));
     setPolygonList(newPolygonList);
-    pushHistoryWithList({ polygonList: newPolygonList });
+
+    const params: any = { polygonList: newPolygonList };
+
+    try {
+      // TODO decoupling deletePointCloudBox deletePolygon
+      // deletePointCloudBox and deletePolygon are now coupled for historical reasons
+      // No matter how you delete pointCloudBoxList, double click the right button or press the delete button, and the execution will come here
+      // I know it's ugly, but there's no better way to change it
+      // In order to solve the problem that the pointCloudBoxList in history.record is not updated after deleting the box, use this current coupling mechanism
+      const newPointCloudBoxList = pointCloudBoxList
+        .filter((v) => v.id !== id)
+        .map((v) => ({ ...v }));
+
+      if (newPointCloudBoxList.length < pointCloudBoxList.length) {
+        params.pointCloudBoxList = newPointCloudBoxList;
+      }
+    } catch (error) {
+      console.error('exec update history pointCloudBoxList error:', error);
+    }
+
+    pushHistoryWithList(params);
   };
 
   const updateSelectedPolygon = (polygon: IPolygonData) => {

@@ -535,7 +535,7 @@ export class Region {
                 !this.canMove &&
                 event.target.tagName.toLowerCase() !== "handle"
             ) {
-                event.stopPropagation();
+                // event.stopPropagation();
                 return;
             }
             const duration = this.wavesurfer.getDuration();

@@ -11,19 +11,20 @@ import { InfoCircleOutlined } from '@ant-design/icons';
 import MarkdownView from '@/components/markdownView';
 import LatexEditor from '@/components/latexEditor';
 import styles from './index.module.scss';
+import LongText from '@/components/longText';
 
 interface IProps {
   newAnswer?: string;
   textEditObject: ITextList;
   updateValue: (changeValue: string) => void;
-  checkMode?: boolean;
+  disabeledAll?: boolean;
   answerIndex: number;
 }
 
 const TextEditor = (props: IProps) => {
-  const { checkMode, newAnswer, textEditObject, updateValue, answerIndex } = props;
+  const { disabeledAll, newAnswer, textEditObject, updateValue, answerIndex } = props;
 
-  const { max, min, isLaText } = textEditObject;
+  const { max, min, isLaText, tip } = textEditObject;
   const { TextArea } = Input;
   const [form] = Form.useForm();
   const { t } = useTranslation();
@@ -38,7 +39,7 @@ const TextEditor = (props: IProps) => {
      * and answers that have been edited will be filled in with the last edited answer.
      */
     form.setFieldsValue({ value: newAnswer });
-    if (!checkMode) {
+    if (!disabeledAll) {
       form.validateFields();
     }
   }, [newAnswer]);
@@ -88,7 +89,7 @@ const TextEditor = (props: IProps) => {
     >
       <Form.Item
         name='title'
-        style={{ marginBottom: '8px' }}
+        style={{ marginBottom: 0 }}
         label={
           <>
             {t('AnswerTextEdit')}
@@ -100,8 +101,10 @@ const TextEditor = (props: IProps) => {
         colon={false}
         required={!!min}
       />
-
-      {isLaText && <LatexEditor onSelectLatex={insertText} disabled={checkMode} />}
+      <div className={styles.tip}>
+        <LongText text={tip ?? ''} overflowMaxLines={3} openByText={true} />
+      </div>
+      {isLaText && <LatexEditor onSelectLatex={insertText} disabled={disabeledAll} />}
       <Form.Item
         name='value'
         style={{
@@ -122,7 +125,7 @@ const TextEditor = (props: IProps) => {
           maxLength={max}
           autoSize={{ minRows: 4, maxRows: 10 }}
           allowClear={true}
-          disabled={checkMode}
+          disabled={disabeledAll}
           showCount={max ? true : false}
           style={{ width: '100%' }}
           id={`inputTextarea_${answerIndex}`}

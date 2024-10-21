@@ -35,14 +35,15 @@ interface IProps {
   imgList: AnnotationFileList;
   imgIndex: number;
   stepList: IStepInfo[];
+  hideValidity?: boolean;
 }
 
-const GeneralOperation: React.FC<IProps> = ({ toolInstance, stepInfo }) => {
+const GeneralOperation: React.FC<IProps> = ({ toolInstance, stepInfo, hideValidity }) => {
   const operationList = useOperationList(toolInstance);
   const config = jsonParser(stepInfo?.config);
   const allOperation: IOperationConfig[] = [operationList.empty];
 
-  if (stepInfo?.dataSourceStep === 0) {
+  if (stepInfo?.dataSourceStep === 0 && !hideValidity) {
     allOperation.push(operationList.setValidity);
   }
 
@@ -71,7 +72,6 @@ export const PointCloudOperation: ConnectedComponent<
     const { isPointCloudDetectionPattern, isPointCloudSegmentationPattern } = useStatus();
 
     const config = jsonParser(stepInfo.config);
-
     let allOperation: IOperationConfig[] = [
       operationList.copyPrevious,
       operationList.empty,

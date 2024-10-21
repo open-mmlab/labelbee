@@ -10,6 +10,18 @@ interface ILLMContext {
   setModelAPIResponse: React.Dispatch<React.SetStateAction<IModelAPIAnswer[]>>;
   setNewAnswerList: (value: IAnswerList[]) => void;
 }
+
+interface ILLMMultiWheelContext {
+  hoverKey: number;
+  setHoverKey: (value: number) => void;
+  selectKey: number;
+  setSelectKey: (value: number) => void;
+}
+
+interface INLPContext {
+  highlightKey: string;
+  setHighlightKey: (value: string) => void;
+}
 export const LabelBeeContext = React.createContext(undefined) as any;
 export const useDispatch = createDispatchHook(LabelBeeContext) as () => Dispatch<AnyAction | any>; // TODO, Any need to be updated.
 export const useSelector = createSelectorHook(LabelBeeContext);
@@ -20,4 +32,16 @@ export const LLMContext = React.createContext<ILLMContext>({
   modelAPIResponse: [],
   setModelAPIResponse: () => {},
   setNewAnswerList: () => {},
+});
+
+export const NLPContext = React.createContext<INLPContext>({
+  highlightKey: '',
+  setHighlightKey: () => {},
+});
+
+export const LLMMultiWheelContext = React.createContext<ILLMMultiWheelContext>({
+  hoverKey: -1,
+  setHoverKey: () => {},
+  selectKey: 1,
+  setSelectKey: () => {},
 });

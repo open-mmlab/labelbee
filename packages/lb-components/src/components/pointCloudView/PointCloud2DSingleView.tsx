@@ -1,16 +1,18 @@
 import { getClassName } from '@/utils/dom';
-import React, { useCallback, useContext, useEffect, useRef, useState } from 'react';
+import React, { useCallback, useContext, useEffect, useMemo, useRef, useState } from 'react';
 import AnnotationView from '@/components/AnnotationView';
 import useSize from '@/hooks/useSize';
 import { useSingleBox } from './hooks/useSingleBox';
-import { ViewOperation } from '@labelbee/lb-annotation';
+import { ViewOperation, EPointCloudName } from '@labelbee/lb-annotation';
 import { IAnnotationData2dView, IAnnotationDataTemporarily } from './PointCloud2DView';
 import { useHighlight } from './hooks/useHighlight';
 import HighlightVisible from './components/HighlightVisible';
 import { IFileItem } from '@/types/data';
 import { PointCloudContext } from './PointCloudContext';
+import useDataLinkSwitch from './hooks/useDataLinkSwitch';
 
 import PointCloud2DRectOperationView from '@/components/pointCloud2DRectOperationView';
+import { useToolStyleContext } from '@/hooks/useToolStyle';
 
 const PointCloud2DSingleView = ({
   view2dData,
@@ -31,11 +33,33 @@ const PointCloud2DSingleView = ({
   const viewRef = useRef<{ toolInstance: ViewOperation }>();
   const { selectedBox } = useSingleBox();
   const size = useSize(ref);
-  const { url, calib, path } = view2dData;
+  const { url, fallbackUrl, calib, path } = view2dData;
   const { toggle2dVisible, isHighlightVisible } = useHighlight({ currentData });
   const [loading, setLoading] = useState(false);
-  const { cuboidBoxIn2DView, cacheImageNodeSize } = useContext(PointCloudContext);
+  const {
+    highlight2DLoading,
+    setHighlight2DLoading,
+    cuboidBoxIn2DView,
+    cacheImageNodeSize,
+    setSelectedIDs,
+    pointCloudBoxList,
+  } = useContext(PointCloudContext);
+
+  const { value: toolStyle } = useToolStyleContext();
+  const { hiddenText } = toolStyle || {};
+
   const hiddenData = !view2dData;
+
+  const dataLinkSwitchOpts = useMemo(() => {
+    return {
+      zIndex: showEnlarge ? -1 : 101,
+      is2DView: !cuboidBoxIn2DView,
+      imageName: view2dData.path,
+    };
+  }, [showEnlarge, cuboidBoxIn2DView, view2dData.path]);
+
+  const { rendered: dataLinkRendered, isLinking: isLinkToPointCloudDataOrNot } =
+    useDataLinkSwitch(dataLinkSwitchOpts);
 
   const afterImgOnLoad = (imgNode: HTMLImageElement) => {
     focusSelectBox();
@@ -76,8 +100,15 @@ const PointCloud2DSingleView = ({
 
   const highlightOnClick = async () => {
     setLoading(true);
-    await toggle2dVisible(url, calib);
-    setLoading(false);
+    setHighlight2DLoading(true);
+    try {
+      await toggle2dVisible(url, fallbackUrl ?? '', calib);
+    } catch (error) {
+      console.error('highlightOnClick error:', error);
+    } finally {
+      setLoading(false);
+      setHighlight2DLoading(false);
+    }
   };
 
   return (
@@ -85,6 +116,7 @@ const PointCloud2DSingleView = ({
       {cuboidBoxIn2DView ? (
         <AnnotationView
           src={view2dData?.url ?? ''}
+          fallbackSrc={view2dData?.fallbackUrl ?? ''}
           annotations={view2dData.annotations}
           size={size}
           ref={viewRef}
@@ -98,21 +130,29 @@ const PointCloud2DSingleView = ({
             ratio: 0.4,
           }}
           measureVisible={measureVisible}
+          onRightClick={({ targetId }) => setSelectedIDs(targetId)}
+          pointCloudBoxList={pointCloudBoxList}
+          hiddenText={hiddenText}
+          renderToolName={EPointCloudName.PointCloud}
         />
       ) : (
-        <PointCloud2DRectOperationView
-          mappingData={view2dData}
-          size={size}
-          checkMode={checkMode}
-          afterImgOnLoad={afterImgOnLoad}
-        />
+        <>
+          <PointCloud2DRectOperationView
+            shouldExcludePointCloudBoxListUpdate={!isLinkToPointCloudDataOrNot}
+            mappingData={view2dData}
+            size={size}
+            checkMode={checkMode}
+            afterImgOnLoad={afterImgOnLoad}
+          />
+          {!checkMode && dataLinkRendered}
+        </>
       )}
-
       {calib && (
         <HighlightVisible
           visible={isHighlightVisible(url)}
           onClick={highlightOnClick}
           loading={loading}
+          disabled={highlight2DLoading}
           style={{
             position: 'absolute',
             right: 16,

@@ -9,7 +9,7 @@
 import { IInputList } from './base';
 import { IPolygonData } from './polygon';
 import { ICoordinate } from './common';
-import { IBasicRect } from './annotationView';
+import { IBasicRect, IBasicStyleExt } from './annotationView';
 
 export type TMatrix4Tuple = [
   number,
@@ -76,8 +76,28 @@ export interface I3DSpaceCoord {
   z: number;
 }
 
-export interface IPointCloudBoxRect extends IBasicRect {
+export interface IPointCloud2DRectOperationExtFields {
+  boxID: string;
+  order?: number;
+}
+
+export interface IPointCloudBoxRect
+  extends Partial<IPointCloud2DRectOperationExtFields>,
+    IBasicRect,
+    IBasicStyleExt {
   imageName: string;
+  attribute: any;
+
+  /** 用于识别外部资源，一般用作外键值 */
+  extId?: string;
+}
+
+export interface IPointCloud2DRectOperationViewRect
+  extends IPointCloud2DRectOperationExtFields,
+    IBasicRect,
+    IBasicStyleExt {
+  imageName: string;
+  attribute: any;
 }
 
 export interface IPointCloudBox extends IVolume {
@@ -122,6 +142,8 @@ export interface IPointCloudConfig {
 
   lowerLimitPointsNumInBox: number;
   trackConfigurable: boolean;
+  enableAutoMap2DRect?: boolean;
+  enableSegment?: boolean;
 }
 
 interface ICalib {

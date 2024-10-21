@@ -23,6 +23,7 @@ const LLMLayout: React.FC<AppProps & IProps> = (props) => {
   const [hoverKey, setHoverKey] = useState(-1);
   const [modelAPIResponse, setModelAPIResponse] = useState<IModelAPIAnswer[]>([]);
   const [newAnswerList, setNewAnswerList] = useState<IAnswerList[]>([]);
+
   return (
     <Layout className={getClassName('layout', 'container')}>
       <LLMContext.Provider
@@ -44,10 +45,14 @@ const LLMLayout: React.FC<AppProps & IProps> = (props) => {
             [`${prefix}-LLMLayout`]: true,
           })}
         >
-          <LLMToolView checkMode={props.checkMode} showTips={props.showTips} tips={props.tips} />
+          <LLMToolView
+            checkMode={props.checkMode}
+            showTips={props.showTips}
+            tips={props.tips}
+            drawLayerSlot={props.drawLayerSlot}
+          />
           <ToolFooter style={props.style?.footer} mode={props.mode} footer={props?.footer} />
         </Content>
-
         <Sider className={`${layoutCls}__side`} width={600} style={{ position: 'relative' }}>
           <Sidebar sider={props?.sider} checkMode={props?.checkMode} />
           {props.drawLayerSlot?.({})}
