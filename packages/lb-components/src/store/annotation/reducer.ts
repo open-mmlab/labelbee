@@ -507,7 +507,7 @@ export const annotationReducer = (
       }
 
       // TODO，非查看模式才允许添加数据
-      if (currentStepInfo.tool !== 'check') {
+      if (currentStepInfo.tool !== 'check' && hasDataSourceStep) {
         const sourceID = stepBasicResultList[basicIndex]?.id ?? '';
         const resultForBasicIndex = hasDataSourceStep
           ? result.filter((i: { sourceID: string | number }) =>
