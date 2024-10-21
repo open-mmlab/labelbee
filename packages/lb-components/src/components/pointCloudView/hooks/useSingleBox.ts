@@ -1,10 +1,16 @@
-import { IPointCloudBox, PartialIPointCloudBoxList } from '@labelbee/lb-utils';
+import {
+  IPointCloud2DRectOperationViewRect,
+  IPointCloudBox,
+  PartialIPointCloudBoxList,
+} from '@labelbee/lb-utils';
 import { useCallback, useContext, useMemo } from 'react';
 import _ from 'lodash';
 import { PointCloudContext } from '../PointCloudContext';
 import { EToolName, cAnnotation } from '@labelbee/lb-annotation';
 import { useHistory } from './useHistory';
 import { usePolygon } from './usePolygon';
+import { IFileItem } from '@/types/data';
+import { EPointCloudBoxRenderTrigger } from '@/utils/ToolPointCloudBoxRenderHelper';
 
 const { ESortDirection } = cAnnotation;
 
@@ -27,6 +33,11 @@ export const useSingleBox = (props?: IUseSingleBoxParams) => {
     syncAllViewPointCloudColor,
     polygonList,
     pointCloudPattern,
+    rectList,
+    updateRectIn2DView,
+    removeRectIn2DView,
+    addRectIn2DView,
+    updateRectListByReducer,
   } = useContext(PointCloudContext);
   const { selectedPolygon, updateSelectedPolygon, updatePolygonValidByID, deletePolygon } =
     usePolygon();
@@ -95,7 +106,7 @@ export const useSingleBox = (props?: IUseSingleBoxParams) => {
       const newPointCloudList = updateSelectedBox({ valid: !valid });
 
       // Async
-      syncAllViewPointCloudColor(newPointCloudList);
+      syncAllViewPointCloudColor(EPointCloudBoxRenderTrigger.SingleToggleValid, newPointCloudList);
       changePolygonViewValid(id);
     }
 
@@ -162,21 +173,104 @@ export const useSingleBox = (props?: IUseSingleBoxParams) => {
     switchToNext(ESortDirection.ascend, manual);
   };
 
-  const deletePointCloudBox = (id: string) => {
+  const deletePointCloudBox = (id: string, shouldUpdateMatchingRectList = true) => {
     const newPointCloudList = pointCloudBoxList.filter((v) => v.id !== id);
     setPointCloudResult(newPointCloudList);
     mainViewInstance?.removeObjectByName(id, 'box');
     mainViewInstance?.render();
-    syncAllViewPointCloudColor(newPointCloudList);
+
+    syncAllViewPointCloudColor(EPointCloudBoxRenderTrigger.SingleDelete, newPointCloudList);
+
+    // Transform to the normal shape
+    if (shouldUpdateMatchingRectList) {
+      const matchedRects = rectList.filter((r) => r.extId === id);
+      const set = new Set(matchedRects.map((item) => item.id));
+      updateRectListByReducer(getUpdateRectListByReducerFn(set));
+    }
+
+
   };
+
+  const getUpdateRectListByReducerFn = (
+    set: Set<string>,
+  ): Parameters<typeof updateRectListByReducer>[0] => {
+    return (prevRectList, pickRectObject) => {
+      let hasUpdated = false;
+      const newList = prevRectList.map((item) => {
+        if (set.has(item.id)) {
+          hasUpdated = true
+          return pickRectObject(item as IPointCloud2DRectOperationViewRect);
+        }
+
+        return item;
+      });
+
+      if (hasUpdated) {
+        return newList;
+      }
+
+      return prevRectList;
+    };
+  };
+
+  /**
+   * Convert the deleted pointCloudBox's matching rects to the normal rects
+   */
+  const updateExtIdMatchingRects = useCallback(
+    (deletedPointCloudBoxList: IPointCloudBox[], currentData: IFileItem) => {
+      const currentImageNameSet = new Set(
+        currentData.mappingImgList?.map((item) => item.path) ?? [],
+      );
+
+      /** Map: imageName -> Set(extId) */
+      const imageNameAndExtIdSetMap = new Map<string, Set<string>>();
+
+      deletedPointCloudBoxList.forEach((pcBox) => {
+        const extId = pcBox.id;
+
+        (pcBox.rects || []).forEach((item) => {
+          const { imageName } = item;
+          if (currentImageNameSet.has(imageName)) {
+            let set = imageNameAndExtIdSetMap.get(imageName);
+            if (!set) {
+              set = new Set<string>();
+              imageNameAndExtIdSetMap.set(imageName, set);
+            }
+
+            set.add(extId);
+          }
+        });
+      });
+
+      const deletedHasExtIdRectList = rectList.filter(
+        (item): item is IPointCloud2DRectOperationViewRect => {
+          const extId = item.extId;
+          const imageName = item.imageName;
+
+          if (imageName !== undefined && extId !== undefined) {
+            const set = imageNameAndExtIdSetMap.get(imageName);
+            return set?.has(extId) ?? false;
+          }
+
+          return false;
+        },
+      );
+
+      const set = new Set(deletedHasExtIdRectList.map((item) => item.id));
+      updateRectListByReducer(getUpdateRectListByReducerFn(set));
+    },
+    [rectList, removeRectIn2DView, addRectIn2DView],
+  );
 
   /**
    * Delete all polygon by hotkey.
    */
-  const deleteSelectedPointCloudBoxAndPolygon = () => {
+  const deleteSelectedPointCloudBoxAndPolygon = (currentData: IFileItem) => {
     if (selectedBox) {
-      deletePointCloudBox(selectedBox.info.id);
+      deletePointCloudBox(selectedBox.info.id, false);
       topViewInstance?.pointCloud2dOperation.deletePolygon(selectedBox.info.id);
+
+      updateExtIdMatchingRects([selectedBox.info], currentData);
     }
 
     if (selectedPolygon) {

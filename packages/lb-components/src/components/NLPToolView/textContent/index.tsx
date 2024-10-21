@@ -86,6 +86,7 @@ const TextContent = (props: IProps) => {
   const [extraStyle, setExtraStyle] = useState<React.CSSProperties | undefined>(undefined);
 
   const content = useMemo(() => {
+    setExtraStyle(undefined);
     return textData?.[0]?.content;
   }, [textData]);
 
@@ -113,8 +114,10 @@ const TextContent = (props: IProps) => {
   }, [customAnnotationData]);
 
   const getColor = (attribute = '') => {
-    const style = CommonToolUtils.jsonParser(styleString);
-    return toolStyleConverter.getColorByConfig({ attribute, config: NLPConfig, style });
+    if (NLPConfig?.attributeConfigurable) {
+      const style = CommonToolUtils.jsonParser(styleString);
+      return toolStyleConverter.getColorByConfig({ attribute, config: NLPConfig, style });
+    }
   };
 
   useEffect(() => {
@@ -132,17 +135,27 @@ const TextContent = (props: IProps) => {
     if (!extraData?.editAuditID) {
       return;
     }
+    const container = document.getElementById('NLPView');
     const extraItem = displayRemarkList.filter(
       (item: IExtraInAnnotation) => item?.auditID === extraData.editAuditID,
     )[0];
+
     const id = extraItem?.id ?? '';
     const element = document.getElementById(id);
     if (element && contentRef.current) {
       const elementRect = element.getBoundingClientRect();
       const parentRect = contentRef.current.getBoundingClientRect();
       const relativeLeft = elementRect.right - parentRect.left;
-      const relativeTop = elementRect.bottom - parentRect.top - element.offsetHeight;
+      const relativeTop = element.offsetTop;
+
       if (relativeLeft && relativeTop && setExtraStyle) {
+        if (container) {
+          // behavior:'auto': Since the pop-up window is displayed based on the position, the position is accurate only after the scrolling effect is completed
+          container.scrollTo({
+            top: relativeTop,
+            behavior: 'auto',
+          });
+        }
         setExtraStyle({ left: relativeLeft, top: relativeTop });
       }
     }
@@ -155,7 +168,7 @@ const TextContent = (props: IProps) => {
         className={classnames({
           [`${NLPViewCls}-question-content`]: true,
         })}
-        style={{ position: 'relative' }}
+        style={{ position: 'relative', whiteSpace: 'pre-wrap' }}
         onDoubleClick={(e) => {
           e.preventDefault();
         }}
@@ -164,14 +177,20 @@ const TextContent = (props: IProps) => {
           {splitIntervals.map((interval: INLPInterval, index: number) => {
             const annotation = _.last(interval.annotations);
             if (annotation) {
-              const color = getColor(annotation.attribute);
+              let color = getColor(annotation.attribute);
               const highlight = interval?.annotations?.find(
                 (v: INLPTextAnnotation) => v.id === highlightKey,
               );
+              if (highlight) {
+                const attribute = interval?.annotations?.filter((i) => i.id === highlightKey)?.[0]
+                  ?.attribute;
+                color = getColor(attribute);
+              }
+
               return (
                 <span
                   style={{
-                    backgroundColor: color.valid.stroke,
+                    backgroundColor: color?.valid?.stroke,
                     color: highlight ? 'white' : undefined,
                     padding: '2px 0px',
                   }}

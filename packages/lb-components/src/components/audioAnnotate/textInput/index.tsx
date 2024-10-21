@@ -1,18 +1,27 @@
-import React, { FocusEvent, useEffect, useRef, useState } from 'react';
+import React, { FocusEvent, useEffect, useMemo, useRef, useState } from 'react';
 import { Radio, Switch, Tooltip } from 'antd';
 import { QuestionCircleOutlined } from '@ant-design/icons';
 import { TextareaWithFooter } from '@/views/MainView/sidebar/TextToolSidebar';
-import { DEFAULT_TEXT_CONFIG_ITEM, timeFormat, getAttributeColor, getAttributeFontColor, getAttributeShowText, updateColorOpacity } from '@/utils/audio';
-import { cKeyCode } from '@labelbee/lb-annotation'
+import {
+  DEFAULT_TEXT_CONFIG_ITEM,
+  timeFormat,
+  getAttributeColor,
+  getAttributeFontColor,
+  getAttributeShowText,
+  updateColorOpacity,
+} from '@/utils/audio';
+import { cKeyCode } from '@labelbee/lb-annotation';
 import { IAudioTimeSlice, ITextConfigItem } from '@labelbee/lb-utils';
 import classnames from 'classnames';
-import AudioContext, { useAudioClipStore } from '../audioContext';
+import AudioContext, { DEFAULT_CLIP_TEXT_CONFIG_ITEM, useAudioClipStore } from '../audioContext';
 import styles from './index.module.scss';
 import { IInputList } from '@/types/main';
 import { useTranslation } from 'react-i18next';
-// import { AlgorithmButtonForText } from '../icons/algorithmButton';
+import LongText from '@/components/longText';
+import IconClearSmallA from '@/assets/annotation/common/icon_clearSmall_a.svg';
+import IconClearSmall from '@/assets/annotation/common/icon_clearSmall.svg';
 
-const EKeyCode = cKeyCode.default
+const EKeyCode = cKeyCode.default;
 
 interface IClearIcon {
   onClick: () => void;
@@ -21,13 +30,22 @@ interface IClearIcon {
 }
 
 export const ClearIcon = ({ onClick, title, disabled }: IClearIcon) => {
+  const [hoverDelete, setHoverDelete] = useState<boolean>(false);
   return (
     <Tooltip placement='bottom' title={title}>
-      <span
+      <img
+        onMouseEnter={() => {
+          if (disabled) {
+            return;
+          }
+          setHoverDelete(true);
+        }}
+        onMouseLeave={() => setHoverDelete(false)}
         className={classnames({
           [styles.clearIcon]: true,
           [styles.disabled]: disabled,
         })}
+        src={hoverDelete ? IconClearSmallA : IconClearSmall}
         onClick={onClick}
       />
     </Tooltip>
@@ -72,6 +90,7 @@ interface IProps {
   /** 更新截取片段数据 */
   updateRegion?: (region: IAudioTimeSlice) => void;
   isEdit?: boolean;
+  clipTextList: ITextConfigItem[];
 }
 
 export const SingleTextInput = (props: any) => {
@@ -96,6 +115,7 @@ export const SingleTextInput = (props: any) => {
     onFocusStyle = {},
     // 右侧输入框上方展示元素
     extra,
+    errorText,
   } = props;
   const { maxLength } = config;
 
@@ -203,16 +223,22 @@ export const SingleTextInput = (props: any) => {
   return (
     <div className={styles.textField}>
       <div className={styles.label}>
-        <span className={classnames({ [styles.required]: config.required })}>{config.label}</span>
-        <ClearIcon
-          onClick={() => {
-            if (!disabled) {
-              updateTextWithKey('');
-            }
-          }}
-          title=''
-          disabled={disabled}
-        />
+        <div className={styles.labelText}>
+          <span
+            className={classnames({ [styles.titleText]: true, [styles.required]: config.required })}
+          >
+            <LongText text={config.label} openByText={true} isToolTips={true} />
+          </span>
+          <ClearIcon
+            onClick={() => {
+              if (!disabled) {
+                updateTextWithKey('');
+              }
+            }}
+            title=''
+            disabled={disabled}
+          />
+        </div>
 
         {/* {!algorithmDisabled && ( */}
         {/*  <AlgorithmButtonForText */}
@@ -237,6 +263,7 @@ export const SingleTextInput = (props: any) => {
       >
         <TextareaWithFooter footer={TextareaFooter} textareaProps={textareaProps} />
       </div>
+      {errorText && <span style={{ color: '#ff4d4f', lineHeight: '22px' }}>{errorText}</span>}
     </div>
   );
 };
@@ -262,6 +289,7 @@ const TextInput = (props: IProps) => {
     clipAttributeConfigurable,
     updateRegion,
     clipAttributeList = [],
+    clipTextList = DEFAULT_CLIP_TEXT_CONFIG_ITEM,
   } = props;
 
   const { t } = useTranslation();
@@ -273,14 +301,12 @@ const TextInput = (props: IProps) => {
   const configList = dataList || [{ ...DEFAULT_TEXT_CONFIG_ITEM }];
   let regionsList = regions;
 
-
   if (clipTextConfigurable && !isCheck) {
     const selectedId = audioClipState.selectedRegion.id;
     regionsList = regionsList.filter((item) => {
       return item.id === selectedId;
     });
   }
-
 
   const textareaFocus = (index: number) => {
     setTimeout(() => {
@@ -296,7 +322,7 @@ const TextInput = (props: IProps) => {
 
   const switchToNextTextarea = (currentIndex: number) => {
     const configListLength = textConfigurable ? configList.length : 0;
-    const regionsLength = clipTextConfigurable ? regionsList.length : 0;
+    const regionsLength = clipTextConfigurable ? regionsList.length * clipTextList.length : 0;
     const allTextareaLength = configListLength + regionsLength;
     const nextIndex = (currentIndex + 1) % allTextareaLength;
     textareaFocus(nextIndex);
@@ -305,7 +331,9 @@ const TextInput = (props: IProps) => {
   const tabToFirstTextarea = (e: KeyboardEvent) => {
     if (e.keyCode === EKeyCode.Tab) {
       e.preventDefault();
-      if (configList.length > 0) {
+      const canChangeFocuByTab =
+        configList.length > 0 || (clipTextConfigurable && clipTextList.length > 0);
+      if (canChangeFocuByTab) {
         textareaFocus(0);
       }
     }
@@ -353,13 +381,22 @@ const TextInput = (props: IProps) => {
     });
   }
 
-  let clipIdMapText: { [key: string]: string } = {};
-  if (clipTextConfigurable && regionsList) {
-    regionsList.forEach((item) => {
-      const { id, text } = item;
-      clipIdMapText[id] = text;
-    });
-  }
+  const regionsListFormat = useMemo(() => {
+    return clipTextList.reduce(
+      (acc: Array<ITextConfigItem & { clipTextResult: IAudioTimeSlice }>, i) => {
+        regionsList.forEach((j: IAudioTimeSlice) => {
+          if (j) {
+            acc.push({
+              ...i,
+              clipTextResult: j,
+            });
+          }
+        });
+        return acc;
+      },
+      [],
+    );
+  }, [clipTextList, regionsList]);
 
   return (
     <>
@@ -430,16 +467,25 @@ const TextInput = (props: IProps) => {
             />
           ))}
         {clipTextConfigurable &&
-          regionsList.map((item, index) => {
-            const { id, start, end, attribute } = item;
+          regionsList.length > 0 &&
+          regionsListFormat.map((item, index) => {
+            const { clipTextResult } = item;
+            const { id, start, end, attribute } = clipTextResult;
+            const { maxLength = 3000, label, key, required } = item;
+            const text = clipTextResult?.[key];
+            const clipIdMapText = { [clipTextResult.id]: text };
+
             // 兼容SingleTextInput的props
             const config = {
-              label: `${t('textTool')}（${timeFormat(start, 'ss.SSS')} - ${timeFormat(end, 'ss.SSS')}）`,
+              label: `${label ?? t('textTool')}（${timeFormat(start, 'ss.SSS')} - ${timeFormat(
+                end,
+                'ss.SSS',
+              )}）`,
               key: id,
-              maxLength: 3000,
+              maxLength,
             };
             // 处理按tab无法正常切换问题
-            const regionIndex = _configList.length + index;
+            const regionIndex = (textConfigurable ? _configList.length : 0) + index;
 
             const attributeColor = getAttributeColor(attribute, clipAttributeList);
 
@@ -447,7 +493,15 @@ const TextInput = (props: IProps) => {
               color: getAttributeFontColor(attribute, clipAttributeList),
               backgroundColor: attributeColor,
             };
-
+            const errorTips = t('LeastCharacterError', {
+              num: 1,
+            });
+            const errorText = required && text.length < 1 ? errorTips : undefined;
+            const attributeText =
+              getAttributeShowText(attribute, [
+                { value: '', key: t('NoAttribute') },
+                ...clipAttributeList,
+              ]) ?? '';
             return (
               <SingleTextInput
                 config={config}
@@ -457,8 +511,8 @@ const TextInput = (props: IProps) => {
                 result={clipIdMapText}
                 updateText={(text: string) => {
                   updateRegion?.({
-                    ...item,
-                    text,
+                    ...clipTextResult,
+                    [key]: text,
                   });
                 }}
                 switchToNextTextarea={() => {
@@ -477,13 +531,11 @@ const TextInput = (props: IProps) => {
                 extra={
                   clipAttributeConfigurable ? (
                     <div style={textStyle} className={styles.attribute}>
-                      {getAttributeShowText(attribute, [
-                        { value: '', key: t('NoAttribute') },
-                        ...clipAttributeList,
-                      ])}
+                      <LongText text={attributeText} openByText={true} isToolTips={true} />
                     </div>
                   ) : null
                 }
+                errorText={errorText}
               />
             );
           })}

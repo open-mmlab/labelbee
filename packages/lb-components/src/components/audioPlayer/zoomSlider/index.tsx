@@ -9,13 +9,14 @@ import { useLatest } from 'ahooks';
 import styles from './index.module.scss';
 import { useTranslation } from 'react-i18next';
 
-const EKeyCode = cKeyCode.default
+const EKeyCode = cKeyCode.default;
 
 // 建议用户裁剪音频到10分钟以下送标
 export const audioZoomInfo = {
   min: 1,
   max: 150,
   ratio: 1,
+  defaultValue: 30,
 };
 
 interface IZoomSliderProps {

@@ -30,7 +30,7 @@ export default ({
         const highlight = interval?.extraAnnotations?.find(
           (i) => i?.auditID === extraData?.hoverAuditID,
         );
-        const color = highlight ? '#ffc60a' : '#fcdf7e';
+        const color = highlight ? '#ff8609' : '#fcdf7e';
         let borderStyle = `2px solid ${color}`;
         if (!extraData?.isShowRemark) {
           borderStyle = '';

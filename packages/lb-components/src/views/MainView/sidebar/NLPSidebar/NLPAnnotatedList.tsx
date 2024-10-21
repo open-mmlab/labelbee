@@ -9,8 +9,9 @@ import { ICustomToolInstance } from '@/hooks/annotation';
 import { prefix } from '@/constant';
 import { classnames, jsonParser } from '@/utils';
 import { INLPTextAnnotation, INLPToolConfig } from '@/components/NLPToolView/types';
-import { Popconfirm, Tooltip } from 'antd';
+import { Col, Popconfirm, Row } from 'antd';
 import { CloseOutlined } from '@ant-design/icons';
+import LongText from '@/components/longText';
 interface IProps {
   toolInstance: ICustomToolInstance;
   stepInfo: IStepInfo;
@@ -23,12 +24,20 @@ interface INLPTextAnnotationList extends INLPTextAnnotation {
 
 export const sidebarCls = `${prefix}-sidebar`;
 
-const getAnnotatedList = (config: INLPToolConfig, textAnnotation: INLPTextAnnotation[]) => {
+const getAnnotatedList = (
+  config: INLPToolConfig,
+  textAnnotation: INLPTextAnnotation[],
+  attributeLockList: string[],
+) => {
   const attributeList = config?.attributeList || [];
-  return textAnnotation.map((i) => {
+  const data = textAnnotation.map((i) => {
     const label = attributeList.filter((item) => item.value === i.attribute)?.[0]?.key || '';
     return { ...i, label };
   });
+  if (attributeLockList?.length > 0) {
+    return data.filter((i) => attributeLockList.includes(i.attribute));
+  }
+  return data;
 };
 
 const NLPAnnotatedList: React.FC<IProps> = (props) => {
@@ -53,7 +62,7 @@ const NLPAnnotatedList: React.FC<IProps> = (props) => {
 
   const [result] = toolInstance.exportData();
   const list = result?.[0]?.textAnnotation ?? [];
-  const annotatedList = getAnnotatedList(config, list);
+  const annotatedList = getAnnotatedList(config, list, toolInstance?.attributeLockList ?? []);
 
   const setHighlightKey = (key: string) => {
     let chooseKey = key === highlight ? '' : key;
@@ -79,11 +88,14 @@ const NLPAnnotatedList: React.FC<IProps> = (props) => {
             })}
             onClick={() => setHighlightKey(v.id)}
           >
-            <span className={`${sidebarCls}__content__NLPList__item__text`}>
-              <Tooltip title={v.text} overlayInnerStyle={{ maxHeight: '400px', overflow: 'auto' }}>
-                <span>{`${v.label || t('NoAttribute')}，${t('textTool')}：${v.text}`}</span>
-              </Tooltip>
-            </span>
+            <Row className={`${sidebarCls}__content__NLPList__item__text`}>
+              <Col span={7}>
+                <LongText text={`${v.label}，${t('textTool')}: `} openByText={true} isToolTips={true} />
+              </Col>
+              <Col span={16} offset={1}>
+                <LongText text={v.text} openByText={true} isToolTips={true} />
+              </Col>
+            </Row>
 
             {!checkMode && (
               <Popconfirm

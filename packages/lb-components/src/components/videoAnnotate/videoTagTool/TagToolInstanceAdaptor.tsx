@@ -10,12 +10,12 @@ import { CommonToolUtils, uuid, TagUtils } from '@labelbee/lb-annotation';
 import { jsonParser } from '@/utils';
 import { VideoPlayer } from '../../videoPlayer';
 import { VideoTagLayer } from '../../videoPlayer/VideoTagLayer';
-import _ from 'lodash';
+import _, { cloneDeep } from 'lodash';
 import type { ObjectString } from '../../videoPlayer/types';
 import { getKeyCodeNumber } from '../../videoPlayer/utils';
 import { IVideoAnnotateProps } from '@/components/videoAnnotate';
 
-export interface IVideoTagInstanceAdaptorProps extends IVideoAnnotateProps{
+export interface IVideoTagInstanceAdaptorProps extends IVideoAnnotateProps {
   pageForward: () => void;
   pageJump: (page: string) => void;
   pageBackward: () => void;
@@ -86,10 +86,7 @@ export class TagToolInstanceAdaptor extends React.Component<
   public exportData = () => {
     const duration = this.videoPlayer?.duration ?? 0;
 
-    return [
-      this.state.tagResult,
-      { valid: this.state.valid, duration },
-    ];
+    return [this.state.tagResult, { valid: this.state.valid, duration }];
   };
 
   public singleOn(event: string, func: () => void) {
@@ -129,7 +126,6 @@ export class TagToolInstanceAdaptor extends React.Component<
 
   public setLabelBySelectedList(num1: number, num2?: number) {
     const newTagConfig = this.getTagResultByCode(num1, num2);
-
     if (newTagConfig) {
       const tagRes = this.combineResult(newTagConfig, this.state.tagResult[0]?.result ?? {});
 
@@ -140,6 +136,18 @@ export class TagToolInstanceAdaptor extends React.Component<
           result: tagRes,
         },
       ];
+
+      if (typeof this.props?.annotationBefore === 'function') {
+        this.props?.annotationBefore(() =>
+          this.setState(
+            {
+              tagResult,
+            },
+            () => this.emitEvent('render'),
+          ),
+        );
+        return;
+      }
 
       this.setState(
         {
@@ -164,8 +172,9 @@ export class TagToolInstanceAdaptor extends React.Component<
    */
   public combineResult = (
     inputValue: { value: { key: string; value: string }; isMulti: boolean },
-    existValue: ObjectString = {},
+    existData: ObjectString = {},
   ) => {
+    const existValue = cloneDeep(existData);
     const { isMulti } = inputValue;
     const { key, value } = inputValue.value;
 
@@ -253,7 +262,7 @@ export class TagToolInstanceAdaptor extends React.Component<
   }
 
   public componentWillUnmount() {
-    document.addEventListener('keydown', this.keydown);
+    document.removeEventListener('keydown', this.keydown);
     this.props.onUnmounted();
   }
 
@@ -265,12 +274,15 @@ export class TagToolInstanceAdaptor extends React.Component<
     }
     const res = jsonParser(imgList[imgIndex].result);
     const stepRes = res[`step_${stepInfo.step}`];
-    const defaultTagResult = this.getInitResultList()
+    const defaultTagResult = this.getInitResultList();
 
-    this.setState({
-      tagResult: stepRes ? stepRes?.result : defaultTagResult,
-      valid: res?.valid === undefined ? true : res.valid,
-    }, () => this.emitEvent('render'));
+    this.setState(
+      {
+        tagResult: stepRes ? stepRes?.result : defaultTagResult,
+        valid: res?.valid === undefined ? true : res.valid,
+      },
+      () => this.emitEvent('render'),
+    );
   };
 
   /**
@@ -293,7 +305,15 @@ export class TagToolInstanceAdaptor extends React.Component<
     const { tagResult, valid } = this.state;
 
     return (
-      <div style={{ height: '100%', width: '100%', position: 'relative', display: 'flex', flexDirection: 'column' }}>
+      <div
+        style={{
+          height: '100%',
+          width: '100%',
+          position: 'relative',
+          display: 'flex',
+          flexDirection: 'column',
+        }}
+      >
         <VideoPlayer
           imgIndex={imgIndex}
           imgList={imgList}
@@ -308,7 +328,11 @@ export class TagToolInstanceAdaptor extends React.Component<
           drawLayerSlot={this.props.drawLayerSlot}
           footer={this.props.footer}
         />
-        <VideoTagLayer result={tagResult} inputList={this.config?.inputList} hasPromptLayer={!!this.props.drawLayerSlot}/>
+        <VideoTagLayer
+          result={tagResult}
+          inputList={this.config?.inputList}
+          hasPromptLayer={!!this.props.drawLayerSlot}
+        />
       </div>
     );
   }

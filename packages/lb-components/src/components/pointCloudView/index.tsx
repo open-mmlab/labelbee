@@ -45,6 +45,7 @@ interface IProps extends IA2MapStateProps {
   checkMode?: boolean;
   intelligentFit?: boolean;
   measureVisible?: boolean;
+  setResourceLoading?: (loading: boolean) => void;
 }
 
 const PointCloudView: React.FC<IProps> = (props) => {
@@ -56,8 +57,9 @@ const PointCloudView: React.FC<IProps> = (props) => {
     intelligentFit,
     imgIndex,
     config,
-    measureVisible
-  } = props
+    measureVisible,
+    setResourceLoading,
+  } = props;
   const ptCtx = useContext(PointCloudContext);
   const { globalPattern, setGlobalPattern, selectedIDs } = ptCtx;
   const dispatch = useDispatch();
@@ -89,12 +91,13 @@ const PointCloudView: React.FC<IProps> = (props) => {
   useEffect(() => {
     SetLoadPCDFileLoading(dispatch, true);
     if (currentData) {
-      const { boxParamsList, polygonList, lineList, sphereParamsList, segmentation } =
+      const { boxParamsList, polygonList, lineList, sphereParamsList, segmentation, rectList } =
         PointCloudUtils.parsePointCloudCurrentResult(currentData?.result ?? '');
       ptCtx.setPointCloudResult(boxParamsList);
       ptCtx.setPolygonList(polygonList);
       ptCtx.setLineList(lineList);
       ptCtx.setPointCloudSphereList(sphereParamsList);
+      ptCtx.setRectList(rectList);
       ptCtx.setSegmentation(segmentation);
     }
   }, [imgIndex]);
@@ -109,11 +112,13 @@ const PointCloudView: React.FC<IProps> = (props) => {
         resultPolygon: ptCtx.polygonList ?? [],
         resultLine: ptCtx.lineList ?? [],
         resultPoint: ptCtx.pointCloudSphereList ?? [],
+        resultRect: ptCtx.rectList ?? [],
         segmentation: ptCtx.segmentation ?? [],
       };
     };
   }, [
     ptCtx.pointCloudBoxList,
+    ptCtx.rectList,
     ptCtx.valid,
     ptCtx.polygonList,
     ptCtx.lineList,
@@ -157,7 +162,11 @@ const PointCloudView: React.FC<IProps> = (props) => {
 
   return (
     <>
-      <PointCloudListener checkMode={checkMode} toolInstanceRef={toolInstanceRef} />
+      <PointCloudListener
+        checkMode={checkMode}
+        toolInstanceRef={toolInstanceRef}
+        setResourceLoading={setResourceLoading}
+      />
       <div className={getClassName('point-cloud-layout')} onContextMenu={(e) => e.preventDefault()}>
         <div className={getClassName('point-cloud-wrapper')}>
           <AnnotatedAttributesPanelFixedLeft />

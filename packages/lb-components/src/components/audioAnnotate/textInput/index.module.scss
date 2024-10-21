@@ -23,6 +23,18 @@
   @include fontStyle;
   font-size: 14px;
 
+  .labelText{
+    display: flex;
+    overflow: hidden;
+    width: 60%;
+    align-items: center;
+
+    .titleText{
+      max-width: calc(100% - 20px);
+      overflow: hidden;
+    }
+  }
+
   .required::before {
     display: inline-block;
     margin-right: 4px;
@@ -35,6 +47,7 @@
   .extra {
     float: right;
     margin-right: 5px;
+    width: 40%;
   }
 }
 
@@ -182,6 +195,7 @@
       flex-wrap: wrap;
       align-items: center;
       justify-content: center;
+      overflow: hidden;
     }
     .text {
       color: #333;
@@ -200,7 +214,10 @@
 
 .attribute {
   height: 22px;
-  padding: 2px 8px;
+  padding: 0px 8px;
+  width: max-content;
+  max-width: 100%;
+  margin-left: auto;
 }
 
 .clearIcon {
@@ -209,14 +226,9 @@
   height: 14px;
   margin-left: 4px;
   vertical-align: text-top;
-  //background-image: url(~@/assets/tool_Icon/icon_clearSmall.svg);
   background-repeat: no-repeat;
   background-position: center;
   cursor: pointer;
-
-  &:not(.disabled):hover {
-    //background-image: url(~@/assets/tool_Icon/icon_clearSmall_a.svg);
-  }
 
   &.disabled {
     cursor: not-allowed;

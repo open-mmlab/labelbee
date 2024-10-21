@@ -72,7 +72,6 @@ export const PointCloudOperation: ConnectedComponent<
     const { isPointCloudDetectionPattern, isPointCloudSegmentationPattern } = useStatus();
 
     const config = jsonParser(stepInfo.config);
-
     let allOperation: IOperationConfig[] = [
       operationList.copyPrevious,
       operationList.empty,

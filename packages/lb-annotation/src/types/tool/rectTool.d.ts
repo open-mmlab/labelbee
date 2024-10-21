@@ -13,6 +13,8 @@ declare interface IRect {
   isHighlight?: boolean; // 是否为高亮框
 
   label?: string; // 列表标签
+  lineDash?: number[];
+  subAttribute?: { [key: string]: string };
 }
 
 declare interface RectStyle {
@@ -26,6 +28,7 @@ declare interface IRectConfig extends IToolConfig {
   attributeConfigurable: boolean;
   drawOutsideTarget: boolean;
   textConfigurable: boolean;
+  isHighlightSameTextAttribute: boolean;
   copyBackwardResult: boolean;
   minWidth: number;
   minHeight: number;
@@ -34,4 +37,6 @@ declare interface IRectConfig extends IToolConfig {
 
   markerConfigurable?: boolean;
   markerList?: IInputList[];
+  secondaryAttributeConfigurable?: boolean;
+  subAttributeList?: IInputList[];
 }

@@ -359,12 +359,19 @@ class PointOperation extends BasicToolOperation {
     }
     // 拖拽停止
     if (this.dragStatus === EDragStatus.Move) {
+      const movePoint = this.pointList.find((v) => v?.id === this.selectedID);
+      if (movePoint) {
+        const { newPoint, hasClosed } = this.getNearPoint(movePoint);
+        if (newPoint) {
+          Object.assign(movePoint, newPoint);
+        }
+        if (hasClosed) {
+          this.emit('messageSuccess', `${locale.getMessagesByLocale(EMessage.SuccessfulEdgeAdsorption, this.lang)}`);
+        }
+      }
+
       this.history.pushHistory(this.pointList);
-      this.emit(
-        'updatePointByDrag',
-        this.pointList.find((v) => v?.id === this.selectedID),
-        this.dragInfo?.originPointList,
-      );
+      this.emit('updatePointByDrag', movePoint, this.dragInfo?.originPointList);
       this.dragInfo = undefined;
     }
     this.dragStatus = EDragStatus.Wait;
@@ -467,6 +474,28 @@ class PointOperation extends BasicToolOperation {
     });
   };
 
+  public getNearPoint(coordinate: ICoordinate) {
+    if (this.config.edgeAdsorption && this.basicResult && this.dependToolName) {
+      const isAllowEdgeAdsoption = [EToolName.Polygon, EToolName.Line].includes(this.dependToolName);
+      const polygonData = [this.basicResult];
+
+      // Currently only available for PolygonTool and LineTool
+      if (isAllowEdgeAdsoption) {
+        const isClose = this.dependToolName === EToolName.Polygon;
+
+        const { dropFoot, hasClosed } = PolygonUtils.getClosestPoint(
+          coordinate,
+          polygonData as IPolygonData[],
+          this.referenceData?.config?.lineType ?? ELineTypes.Line,
+          edgeAdsorptionScope / this.zoom,
+          { isClose },
+        );
+        return { newPoint: dropFoot, hasClosed };
+      }
+    }
+    return { newPoint: coordinate, hasClosed: false };
+  }
+
   public createPoint(e: MouseEvent) {
     if (!this.imgInfo) return;
     if (this.forbidAddNew) return;
@@ -480,28 +509,12 @@ class PointOperation extends BasicToolOperation {
     const basicSourceID = CommonToolUtils.getSourceID(this.basicResult);
     const coordinateZoom = this.getCoordinateUnderZoom(e);
     let coordinate = AxisUtils.getOriginCoordinateWithOffsetCoordinate(this.coord, this.zoom, this.currentPos);
-
-    if (this.config.edgeAdsorption && this.referenceData) {
-      const isAllowEdgeAdsoption = [EToolName.Polygon, EToolName.Line].includes(this.referenceData?.toolName);
-
-      // Currently only available for PolygonTool and LineTool
-      if (isAllowEdgeAdsoption) {
-        const isClose = this.referenceData?.toolName === EToolName.Polygon;
-
-        const { dropFoot, hasClosed } = PolygonUtils.getClosestPoint(
-          coordinate,
-          this.referenceData.result as IPolygonData[],
-          this.referenceData.config?.lineType ?? ELineTypes.Line,
-          edgeAdsorptionScope / this.zoom,
-          { isClose },
-        );
-        if (dropFoot) {
-          coordinate = dropFoot;
-        }
-        if (hasClosed) {
-          this.emit('messageSuccess', `${locale.getMessagesByLocale(EMessage.SuccessfulEdgeAdsorption, this.lang)}`);
-        }
-      }
+    const { newPoint, hasClosed } = this.getNearPoint(coordinate);
+    if (newPoint) {
+      coordinate = newPoint;
+    }
+    if (hasClosed) {
+      this.emit('messageSuccess', `${locale.getMessagesByLocale(EMessage.SuccessfulEdgeAdsorption, this.lang)}`);
     }
 
     // 边缘判断
@@ -963,14 +976,15 @@ class PointOperation extends BasicToolOperation {
     const color = this.getLineColor(this.defaultAttribute);
     this.renderCursorLine(color);
 
-    if (this.config.edgeAdsorption && this.referenceData) {
+    if (this.config.edgeAdsorption && this.basicResult && this.dependToolName) {
       let coordinate = AxisUtils.getOriginCoordinateWithOffsetCoordinate(this.coord, this.zoom, this.currentPos);
-      const isClose = this.referenceData?.toolName === EToolName.Polygon;
+      const isClose = this.dependToolName === EToolName.Polygon;
+      const polygonData = [this.basicResult];
 
       const { dropFoot } = PolygonUtils.getClosestPoint(
         coordinate,
-        this.referenceData.result as IPolygonData[],
-        this.referenceData.config?.lineType ?? ELineTypes.Line,
+        polygonData as IPolygonData[],
+        this.referenceData?.config?.lineType ?? ELineTypes.Line,
         edgeAdsorptionScope / this.zoom,
         {
           isClose,

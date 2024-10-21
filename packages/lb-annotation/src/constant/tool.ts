@@ -71,6 +71,7 @@ export enum EToolName {
   LLM = 'LLMTool',
   /** NLP标注工具-大模型 */
   NLP = 'NLPTool',
+  LLMMultiWheel = 'LLMMultiWheelTool',
 }
 
 export enum ECheckModel {
@@ -110,6 +111,7 @@ export const TOOL_NAME: { [a: string]: string } = {
   [EToolName.Cuboid]: '立体框',
   [EToolName.LLM]: '大模型',
   [EToolName.NLP]: 'NLP标注',
+  [EToolName.LLMMultiWheel]: '大模型（多轮对话）',
 };
 
 export const TOOL_NAME_EN: { [a: string]: string } = {
@@ -136,6 +138,7 @@ export const TOOL_NAME_EN: { [a: string]: string } = {
   [EToolName.Cuboid]: 'Cuboid',
   [EToolName.LLM]: 'LLM',
   [EToolName.NLP]: 'NLP',
+  [EToolName.LLMMultiWheel]: 'LLMMultiWheelTool',
 };
 
 export enum EDependPattern {

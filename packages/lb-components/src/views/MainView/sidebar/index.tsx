@@ -23,8 +23,10 @@ import { Tabs } from 'antd';
 import { classnames } from '@/utils';
 import menuFoldSvg from '@/assets/annotation/common/icon_menu_fold.svg';
 import LLMToolSidebar from '@/components/LLMToolView/sidebar';
-import NLPToolSidebar from './NLPSidebar'
-import VideoClipAnnotatedList from '@/components/videoAnnotate/videoClipTool/components/annotatedList'
+import LLMMultiWheelToolSidebar from '@/components/LLMMultiWheelView/sidebar';
+import NLPToolSidebar from './NLPSidebar';
+import VideoClipAnnotatedList from '@/components/videoAnnotate/videoClipTool/components/annotatedList';
+import { IOperationConfig } from './GeneralOperation/ActionsConfirm';
 
 const { EVideoToolName, EPointCloudName } = cTool;
 
@@ -117,7 +119,7 @@ const Sidebar: React.FC<IProps> = ({
 
   const tagToolSideBar = <TagSidebar />;
 
-  const textToolSideBar = (disabled: boolean) => <TextToolSidebar disabled={disabled}/>;
+  const textToolSideBar = (disabled: boolean) => <TextToolSidebar disabled={disabled} />;
 
   const scribbleSidebar = (
     <ScribbleSidebar
@@ -127,10 +129,9 @@ const Sidebar: React.FC<IProps> = ({
     />
   );
 
-  const videoClipSidebar = (
-    <VideoClipAnnotatedList />
-  )
+  const videoClipSidebar = <VideoClipAnnotatedList />;
   const LLMSidebar = <LLMToolSidebar checkMode={checkMode} />;
+  const LLMMultiWheelSidebar = <LLMMultiWheelToolSidebar checkMode={checkMode} />;
   const NLPSidebar = <NLPToolSidebar checkMode={checkMode} />;
 
   const horizontal = <div className={`${sidebarCls}__horizontal`} />;
@@ -158,8 +159,9 @@ const Sidebar: React.FC<IProps> = ({
             pointCloudOperation,
             scribbleSidebar,
             LLMSidebar,
+            LLMMultiWheelSidebar,
             videoClipSidebar,
-            NLPSidebar
+            NLPSidebar,
           })}
         </div>
       );
@@ -213,7 +215,7 @@ const Sidebar: React.FC<IProps> = ({
         </div>
         {operation}
       </div>
-    )
+    );
   }
 
   if (toolName === EVideoToolName.VideoTagTool) {
@@ -232,12 +234,13 @@ const Sidebar: React.FC<IProps> = ({
       <div className={`${sidebarCls}`}>
         <TextToolSidebar />
       </div>
-    )
+    );
   }
 
   if (toolName === EToolName.Text) {
     return (
-      <div className={`${sidebarCls}`}>s
+      <div className={`${sidebarCls}`}>
+        s
         <TextToolSidebar />
       </div>
     );

@@ -45,6 +45,7 @@ export type Sider = ({
   horizontal: React.ReactNode;
   scribbleSidebar: React.ReactNode;
   LLMSidebar: React.ReactNode;
+  LLMMultiWheelSidebar: React.ReactNode;
   NLPSidebar: React.ReactNode;
   videoClipSidebar: React.ReactNode;
   NLPSidebar: React.ReactNode;

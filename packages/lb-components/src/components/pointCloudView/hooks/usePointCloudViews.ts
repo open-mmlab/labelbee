@@ -3,12 +3,14 @@
  * @author Glenfiddish <edwinlee0927@hotmail.com>
  * @createdate 2022-08-17
  */
+
 import {
   PointCloudAnnotation,
   PointCloud,
   MathUtils,
   getCuboidFromPointCloudBox,
   EPointCloudName,
+  TagUtils,
 } from '@labelbee/lb-annotation';
 import {
   IPointCloudBox,
@@ -24,25 +26,27 @@ import {
   IBasicRect,
   POINT_CLOUD_DEFAULT_STEP,
 } from '@labelbee/lb-utils';
-import { useContext } from 'react';
+import { useCallback, useContext } from 'react';
 import { PointCloudContext } from '../PointCloudContext';
 import { useSingleBox } from './useSingleBox';
 import { useSphere } from './useSphere';
 import { ISize } from '@/types/main';
-import _ from 'lodash';
+import _, { pick } from 'lodash';
 import { useDispatch, useSelector } from '@/store/ctx';
 import { AppState } from '@/store';
 import StepUtils from '@/utils/StepUtils';
-import { jsonParser, getRectPointCloudBox } from '@/utils';
+import { EPointCloudBoxRenderTrigger } from '@/utils/ToolPointCloudBoxRenderHelper';
+import { jsonParser, getRectPointCloudBox, generatePointCloudBoxRects } from '@/utils';
+import type { GeneratePointCloudBoxRectsOptions } from '@/utils';
 import {
   PreDataProcess,
-  SetPointCloudLoading,
+  SetAnnotationLoading,
   SetLoadPCDFileLoading,
 } from '@/store/annotation/actionCreators';
 import { useHistory } from './useHistory';
 import { usePolygon } from './usePolygon';
 import { IFileItem, IMappingImg } from '@/types/data';
-import type { ICoordinate } from '@labelbee/lb-utils';
+import type { ICoordinate, IPointCloudBoxRect } from '@labelbee/lb-utils';
 import { useLatest } from 'ahooks';
 
 const DEFAULT_SCOPE = 5;
@@ -601,7 +605,26 @@ export const synchronizeTopView = (
   pointCloud2dOperation.setResultAndSelectedID(newPolygonList, newPolygon.id);
 };
 
-export const usePointCloudViews = () => {
+interface IUsePointCloudViewsParams {
+  setResourceLoading?: (loading: boolean) => void;
+}
+
+/**
+ * Sync views' data from omit view, regenerate and highlight box on 3D-view
+ * @param omitView
+ * @param polygon
+ * @param boxParams
+ */
+interface ISyncPointCloudViews {
+  // 如果不传omitView，则同步所有视图
+  omitView?: string;
+  polygon: any;
+  boxParams: IPointCloudBox;
+  zoom?: number;
+  newPointCloudBoxList?: IPointCloudBox[];
+}
+
+export const usePointCloudViews = (params?: IUsePointCloudViewsParams) => {
   const ptCtx = useContext(PointCloudContext);
   const {
     topViewInstance,
@@ -618,6 +641,8 @@ export const usePointCloudViews = () => {
     setHighlight2DDataList,
     cuboidBoxIn2DView,
     imageSizes,
+    history,
+    linkageImageNameRectMap,
   } = ptCtx;
   const { addHistory, initHistory, pushHistoryUnderUpdatePolygon } = useHistory();
   const { selectedPolygon } = usePolygon();
@@ -634,20 +659,47 @@ export const usePointCloudViews = () => {
   const dispatch = useDispatch();
 
   const cuboidBoxIn2DViewLatest = useLatest(cuboidBoxIn2DView);
+  const linkageImageNameRectMapRef = useLatest(linkageImageNameRectMap);
+
+  const prepareRectsFn = useCallback<
+    NonNullable<GeneratePointCloudBoxRectsOptions['prepareRectsFn']>
+  >((rects, pointCloudBox) => {
+    const linkageImageNameRectMap = linkageImageNameRectMapRef.current;
+    const extId = pointCloudBox.id;
+
+    const newRects = rects.filter((rt) => {
+      if (!rt) {
+        return false;
+      }
+
+      const map = linkageImageNameRectMap.get(rt.imageName);
+
+      // Be regarded as `connected` item
+      if (map === undefined) {
+        return true;
+      }
+
+      // Be regarded as `disconnected` item
+      return Boolean(map.get(extId));
+    });
+
+    return newRects;
+  }, []);
 
   const generateRects = (boxParams: IPointCloudBox) => {
-    if (!cuboidBoxIn2DViewLatest.current) {
+    const { enableAutoMap2DRect = false } = config;
+    if (!cuboidBoxIn2DViewLatest.current || enableAutoMap2DRect) {
       const { mappingImgList = [] } = currentData;
-      const rects: Array<ReturnType<typeof getRectPointCloudBox>> = mappingImgList.map(
-        (v: IMappingImg) =>
-          getRectPointCloudBox({
-            pointCloudBox: boxParams,
-            mappingData: v,
-            imageSizes,
-          }),
+      generatePointCloudBoxRects(
+        {
+          pointCloudBox: boxParams,
+          mappingImgList,
+          imageSizes,
+        },
+        {
+          prepareRectsFn,
+        },
       );
-
-      Object.assign(boxParams, { rects: rects.filter((rect) => rect !== undefined) });
     }
   };
   const { selectedBox, updateSelectedBox, updateSelectedBoxes, getPointCloudByID } = useSingleBox({
@@ -667,12 +719,6 @@ export const usePointCloudViews = () => {
   }
 
   const { pointCloudInstance: topViewPointCloud } = topViewInstance;
-
-  const mainViewGenBox = (boxParams: IPointCloudBox) => {
-    mainViewInstance?.generateBox(boxParams);
-    mainViewInstance?.controls.update();
-    mainViewInstance?.render();
-  };
 
   const mainViewGenSphere = (sphereParams: IPointCloudSphere) => {
     mainViewInstance?.generateSphere(sphereParams);
@@ -782,6 +828,11 @@ export const usePointCloudViews = () => {
     generateRects(boxParams);
     const newPointCloudList = addPointCloudBox(boxParams);
     const polygonList = ptCtx?.polygonList ?? [];
+
+    boxParams.subAttribute = TagUtils.getDefaultResultByConfig(
+      config?.secondaryAttributeConfigurable ? config?.inputList ?? [] : [],
+    );
+
     topViewInstance?.updatePolygonList(newPointCloudList ?? [], polygonList);
     /** If new box is hidden will not active target point box */
     if (isBoxHidden) {
@@ -812,24 +863,43 @@ export const usePointCloudViews = () => {
   ) => {
     const { boxID, imageName, width, height, x, y } = params;
     const currentBox = pointCloudBoxList.find((v) => v.id === boxID);
-    if (currentBox?.rects) {
-      const { rects = [] } = currentBox;
-      const currentRect = rects.find((v) => v.imageName === imageName);
-      if (currentRect) {
-        let newRects = rects as IPointCloudBox['rects'];
-
-        const newRect = { ...currentRect, width, height, x, y };
-        newRects = rects.map((v) => (v === currentRect ? newRect : v));
-
-        const newBox = { ...currentBox, rects: newRects };
-
-        const newPointCloudBoxList = pointCloudBoxList.map((v) => (v === currentBox ? newBox : v));
-
-        topViewInstance?.updatePolygonList(newPointCloudBoxList ?? []);
-
-        return newPointCloudBoxList;
-      }
+    if (!currentBox?.rects) {
+      return;
     }
+
+    const currentRect = currentBox.rects.find((v) => v.imageName === imageName);
+    if (!currentRect) {
+      return;
+    }
+
+    const updatedRects = currentBox.rects.map((rect) =>
+      rect.imageName === imageName ? { ...rect, width, height, x, y } : rect,
+    );
+
+    const updatedBox = { ...currentBox, rects: updatedRects };
+    const updatedPointCloudBoxList = pointCloudBoxList.map((box) =>
+      box.id === boxID ? updatedBox : box,
+    );
+
+    topViewInstance?.updatePolygonList(updatedPointCloudBoxList ?? []);
+    return updatedPointCloudBoxList;
+  };
+
+  const remove2DViewRect = (params: { boxID: string; imageName: string }) => {
+    const { boxID, imageName } = params;
+    const currentBox = pointCloudBoxList.find((v) => v.id === boxID);
+    if (!currentBox?.rects) {
+      return;
+    }
+
+    const updatedRects = currentBox.rects.filter((rect) => rect.imageName !== imageName);
+    const updatedBox = { ...currentBox, rects: updatedRects };
+    const updatedPointCloudBoxList = pointCloudBoxList.map((box) =>
+      box.id === boxID ? updatedBox : box,
+    );
+
+    topViewInstance?.updatePolygonList(updatedPointCloudBoxList ?? []);
+    return updatedPointCloudBoxList;
   };
 
   /** Top-view selected changed and render to other view */
@@ -1079,7 +1149,10 @@ export const usePointCloudViews = () => {
     } else {
       const newPointCloudBoxList = updateSelectedBoxes(updatePointCloudList);
       if (newPointCloudBoxList) {
-        ptCtx.syncAllViewPointCloudColor(newPointCloudBoxList);
+        ptCtx.syncAllViewPointCloudColor(
+          EPointCloudBoxRenderTrigger.MultiMove,
+          newPointCloudBoxList,
+        );
       }
     }
   };
@@ -1170,22 +1243,11 @@ export const usePointCloudViews = () => {
     }
     mainViewGenSphere(sphereParams);
   };
-  /**
-   * Sync views' data from omit view, regenerate and highlight box on 3D-view
-   * @param omitView
-   * @param polygon
-   * @param boxParams
-   */
-  interface ISyncPointCloudViews {
-    // 如果不传omitView，则同步所有视图
-    omitView?: string;
-    polygon: any;
-    boxParams: IPointCloudBox;
-    zoom?: number;
-    newPointCloudBoxList?: IPointCloudBox[];
-  }
 
-  const syncPointCloudViews = async (params: ISyncPointCloudViews) => {
+  const syncPointCloudViews = (
+    params: ISyncPointCloudViews,
+    trigger: EPointCloudBoxRenderTrigger = EPointCloudBoxRenderTrigger.Default,
+  ) => {
     const { omitView, polygon, boxParams, zoom, newPointCloudBoxList } = params;
 
     const dataUrl = currentData?.url;
@@ -1195,7 +1257,7 @@ export const usePointCloudViews = () => {
      */
     if (newPointCloudBoxList) {
       // Wait for the mainPointCloudData.
-      await ptCtx.syncAllViewPointCloudColor(newPointCloudBoxList);
+      ptCtx.syncAllViewPointCloudColor(trigger, newPointCloudBoxList);
     }
     const viewToBeUpdated = {
       [PointCloudView.Side]: () => {
@@ -1220,8 +1282,6 @@ export const usePointCloudViews = () => {
     if (zoom) {
       mainViewInstance?.updateCameraZoom(zoom);
     }
-
-    mainViewGenBox(boxParams);
   };
 
   const pointCloudBoxListUpdated = (newBoxes: IPointCloudBox[]) => {
@@ -1249,14 +1309,14 @@ export const usePointCloudViews = () => {
     if (!newData?.url || !mainViewInstance) {
       return;
     }
-
     /**
      * Init Cache Data.
      */
     setHighlight2DDataList([]);
 
-    SetPointCloudLoading(dispatch, true);
+    SetAnnotationLoading(dispatch, true);
     SetLoadPCDFileLoading(dispatch, true);
+    params?.setResourceLoading?.(true);
     await mainViewInstance.loadPCDFile(newData.url, config?.radius ?? DEFAULT_RADIUS);
 
     mainViewInstance?.clearAllBox();
@@ -1318,7 +1378,11 @@ export const usePointCloudViews = () => {
        * Use [] to replace the default highlight2DDataList.
        * Need to await syncAllViewPointCloudColor before setLoading(false).
        */
-      await ptCtx.syncAllViewPointCloudColor(boxParamsList, []);
+      await ptCtx.syncAllViewPointCloudColor(
+        EPointCloudBoxRenderTrigger.Default,
+        boxParamsList,
+        [],
+      );
     }
 
     initHistory({
@@ -1328,8 +1392,9 @@ export const usePointCloudViews = () => {
       pointCloudSphereList: sphereParamsList,
     });
 
-    SetPointCloudLoading(dispatch, false);
+    SetAnnotationLoading(dispatch, false);
     SetLoadPCDFileLoading(dispatch, false);
+    params?.setResourceLoading?.(false);
   };
 
   return {
@@ -1342,11 +1407,80 @@ export const usePointCloudViews = () => {
     topViewUpdateBox,
     sideViewUpdateBox,
     backViewUpdateBox,
+    syncPointCloudViews,
+    syncPointCloudPoint,
     pointCloudBoxListUpdated,
     initPointCloud3d,
     updatePointCloudData,
     updateViewsByDefaultSize,
     generateRects,
     update2DViewRect,
+    remove2DViewRect,
+  };
+};
+
+type PosDim = Pick<IBasicRect, 'x' | 'y' | 'width' | 'height'>;
+
+export const useSyncRectPositionDimensionToPointCloudList = () => {
+  const { pointCloudBoxList, rectList, setPointCloudResult } = useContext(PointCloudContext);
+
+  const pointCloudBoxListRef = useLatest(pointCloudBoxList);
+  const rectListRef = useLatest(rectList);
+
+  const syncToPointCloudBoxList = useCallback(() => {
+    const pCloudBoxList = pointCloudBoxListRef.current;
+    const rects = rectListRef.current;
+
+    if (rects.length === 0) {
+      return null;
+    }
+
+    const posDimMap = new Map<string, Map<string, PosDim>>();
+    const extIdSet = new Set();
+    rects
+      .filter((rect) => rect.extId !== undefined)
+      .forEach((rect) => {
+        const extId = rect.extId!;
+        const imageName = rect.imageName;
+        const posDim = pick<IPointCloudBoxRect, keyof PosDim>(rect, ['x', 'y', 'width', 'height']);
+
+        let item = posDimMap.get(extId);
+        if (!item) {
+          item = new Map();
+          posDimMap.set(extId, item);
+        }
+
+        item.set(imageName, posDim);
+        extIdSet.add(extId);
+      });
+
+    if (posDimMap.size) {
+      const newPointCloudBoxList = pCloudBoxList.map((item) => {
+        const id = item.id;
+        if (extIdSet.has(id)) {
+          const newItem = { ...item };
+
+          // Update position and dimension if found
+          newItem.rects?.forEach((rect) => {
+            const imageName = rect.imageName;
+            Object.assign(rect, posDimMap.get(id)?.get(imageName));
+          });
+
+          return newItem;
+        }
+
+        return item;
+      });
+
+      setPointCloudResult(newPointCloudBoxList);
+
+      return newPointCloudBoxList;
+    }
+
+    return null;
+  }, []);
+
+  return {
+    syncToPointCloudBoxList,
   };
 };

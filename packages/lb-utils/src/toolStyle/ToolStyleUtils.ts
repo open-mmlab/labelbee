@@ -44,7 +44,7 @@ class ToolStyleUtils {
       .replace(/,[0-9]+([.]{1}[0-9]+){0,1}\)/, `,${opacity.toFixed(2)})`);
   };
 
-  public static toRGBAArr = (rgbStr: string, opacity = 1) => {
+  public static toRGBAArr = (rgbStr: string) => {
     const match = rgbStr.match(/\d+/g);
 
     if (match) {

@@ -12,16 +12,19 @@ import {
   IBasicStyle,
   TAnnotationViewCuboid,
   ImgPosUtils,
+  IPointCloudBox,
+  IPointCloudBoxList,
+  IBasicPolygon,
 } from '@labelbee/lb-utils';
 import _ from 'lodash';
 import rgba from 'color-rgba';
 import DrawUtils from '@/utils/tool/DrawUtils';
 import AxisUtils from '@/utils/tool/AxisUtils';
 import RectUtils from '@/utils/tool/RectUtils';
-import PolygonUtils from '@/utils/tool/PolygonUtils';
+import PolygonUtils, { IConvexHullGroupType } from '@/utils/tool/PolygonUtils';
 import MathUtils from '@/utils/MathUtils';
 import RenderDomClass from '@/utils/tool/RenderDomClass';
-import { DEFAULT_FONT, ELineTypes, SEGMENT_NUMBER } from '@/constant/tool';
+import { DEFAULT_FONT, ELineTypes, SEGMENT_NUMBER, EPointCloudName } from '@/constant/tool';
 import { DEFAULT_TEXT_SHADOW, DEFAULT_TEXT_OFFSET, TEXT_ATTRIBUTE_OFFSET } from '@/constant/annotation';
 import ImgUtils, { cropAndEnlarge } from '@/utils/ImgUtils';
 import CanvasUtils from '@/utils/tool/CanvasUtils';
@@ -36,6 +39,7 @@ interface IViewOperationProps extends IBasicToolOperationProps {
   style: IBasicStyle;
   staticMode?: boolean;
   annotations: TAnnotationViewData[];
+  renderToolName?: EPointCloudName;
 }
 
 export interface ISpecificStyle {
@@ -70,15 +74,29 @@ export default class ViewOperation extends BasicToolOperation {
 
   private cacheCanvas?: { [url: string]: HTMLCanvasElement }; // Cache the temporary canvas.
 
+  private needUpdatePosition = true;
+
+  private posTimer: ReturnType<typeof setTimeout> | null = null;
+
+  private convexHullGroup: IConvexHullGroupType = {};
+
+  private pointCloudBoxList?: IPointCloudBoxList = [];
+
+  private hiddenText?: boolean = false;
+
+  private renderToolName?: EPointCloudName = undefined;
+
   constructor(props: IViewOperationProps) {
     super({ ...props, showDefaultCursor: true });
     this.style = props.style ?? { stroke: DEFAULT_STROKE_COLOR, thickness: 3 };
     this.annotations = props.annotations;
+    this.convexHullGroup = PolygonUtils.createConvexHullGroup(props.annotations);
     this.loading = false;
     this.renderDomInstance = new RenderDomClass({
       container: this.container,
       height: this.canvas.height,
     });
+    this.renderToolName = props.renderToolName;
   }
 
   public clearConnectionPoints() {
@@ -167,6 +185,22 @@ export default class ViewOperation extends BasicToolOperation {
     });
   }
 
+  public onRightClick(e: MouseEvent): void {
+    const targetId = this.getClickTargetId(e);
+    this.needUpdatePosition = false;
+    if (this.posTimer) {
+      clearTimeout(this.posTimer);
+    }
+    this.emit('onRightClick', { event: e, targetId });
+    /**
+     * this timer is used to control the execution of the focusPositionByPointList method
+     * when switching selectId in the current area no need to resetting the current view
+     */
+    this.posTimer = setTimeout(() => {
+      this.needUpdatePosition = true;
+    }, 1000);
+  }
+
   public onMouseMove(e: MouseEvent) {
     if (super.onMouseMove(e) || this.forbidMouseOperation || !this.imgInfo) {
       return;
@@ -242,6 +276,7 @@ export default class ViewOperation extends BasicToolOperation {
     }
     this.annotations = annotations;
 
+    this.convexHullGroup = PolygonUtils.createConvexHullGroup(annotations);
     if (this.staticMode) {
       this.staticImgNode = undefined;
     }
@@ -263,6 +298,19 @@ export default class ViewOperation extends BasicToolOperation {
       });
       this.staticImgNode = tmp;
     }
+  }
+
+  public setPointCloudBoxList(pointCloudBoxList: IPointCloudBoxList) {
+    this.pointCloudBoxList = pointCloudBoxList;
+  }
+
+  public setHiddenText(hiddenText: boolean) {
+    this.hiddenText = hiddenText;
+    this.render();
+  }
+
+  public setConfig(config: { [a: string]: any } | string) {
+    this.config = config;
   }
 
   /**
@@ -347,6 +395,11 @@ export default class ViewOperation extends BasicToolOperation {
     if (result?.textAttribute) {
       bottomText = result?.textAttribute;
     }
+
+    // show subAttributeList
+    if (result?.subAttributeText) {
+      headerText += result?.subAttributeText;
+    }
     return { headerText, bottomText };
   }
 
@@ -359,6 +412,7 @@ export default class ViewOperation extends BasicToolOperation {
    * @param pointList
    */
   public focusPositionByPointList(pointList: ICoordinate[]) {
+    if (!this.needUpdatePosition) return;
     const basicZone = MathUtils.calcViewportBoundaries(pointList);
     const newBoundary = {
       x: basicZone.left,
@@ -394,6 +448,31 @@ export default class ViewOperation extends BasicToolOperation {
 
       DrawUtils.drawCircleWithFill(this.canvas, renderPoint, 4, { color: '#fff' });
       DrawUtils.drawCircleWithFill(this.canvas, renderPoint, 2, { color: '#000' });
+    });
+  }
+
+  /**
+   * Separate rendering of sub attribute content
+   * The principle is the same as other tools for rendering sub attribute content
+   * Currently, only secondary attributes are being rendered in point cloud rendering
+   */
+  public renderPointCloud3DRectAttribute() {
+    const annotationChunks = _.chunk(this.annotations, 6);
+    annotationChunks.forEach((annotationList) => {
+      const annotation = annotationList.find((item) => item.type === 'polygon');
+      if (!annotation) return;
+
+      const { fontStyle } = this.getRenderStyle(annotation);
+      const polygon = annotation.annotation as IBasicPolygon;
+      const curPointCloudBox = this.pointCloudBoxList?.find((item: IPointCloudBox) => item.id === polygon.id);
+      // Without this rendered graphic, return in advance to avoid errors in the future
+      if (!curPointCloudBox) return;
+      const headerText = this.hiddenText ? '' : `${curPointCloudBox?.trackID} ${curPointCloudBox?.attribute}`;
+      const renderPolygon = AxisUtils.changePointListByZoom(polygon?.pointList ?? [], this.zoom, this.currentPos);
+
+      if (headerText) {
+        DrawUtils.drawText(this.canvas, this.appendOffset(renderPolygon[0]), headerText, fontStyle);
+      }
     });
   }
 
@@ -544,8 +623,7 @@ export default class ViewOperation extends BasicToolOperation {
       DrawUtils.drawText(this.canvas, this.appendOffset(renderPolygon[0]), headerText, fontStyle);
     }
     if (bottomText) {
-      const endPoint = renderPolygon[renderPolygon.length - 1];
-
+      const endPoint = renderPolygon[renderPolygon.length - 2];
       DrawUtils.drawText(
         this.canvas,
         this.appendOffset({ x: endPoint.x + TEXT_ATTRIBUTE_OFFSET.x, y: endPoint.y + TEXT_ATTRIBUTE_OFFSET.y }),
@@ -813,11 +891,16 @@ export default class ViewOperation extends BasicToolOperation {
               lineHeight = 25,
               font = DEFAULT_FONT,
               position,
+              offset,
             } = textAnnotation;
             const paddingTB = 10;
             const paddingLR = 10;
 
             const renderPoint = AxisUtils.changePointByZoom({ x, y }, this.zoom, this.currentPos);
+            if (offset) {
+              renderPoint.x += offset.x ?? 0;
+              renderPoint.y += offset.y ?? 0;
+            }
 
             const {
               width,
@@ -899,8 +982,24 @@ export default class ViewOperation extends BasicToolOperation {
       });
 
       this.renderConnectionPoints();
+      if (this.renderToolName && this.renderToolName === EPointCloudName.PointCloud) {
+        this.renderPointCloud3DRectAttribute();
+      }
     } catch (e) {
       console.error('ViewOperation Render Error', e);
     }
+  }
+
+  private getClickTargetId(e: MouseEvent) {
+    const coordinate = this.getCoordinateUnderZoom(e);
+    const originCoordinate = AxisUtils.changePointByZoom(coordinate, 1 / this.zoom);
+    for (const key in this.convexHullGroup) {
+      if (!Object.prototype.hasOwnProperty.call(this.convexHullGroup, key)) continue;
+      const polygonPoints = this.convexHullGroup[key].convexHull;
+      if (PolygonUtils.isInPolygon(originCoordinate, polygonPoints)) {
+        return key;
+      }
+    }
+    return undefined;
   }
 }

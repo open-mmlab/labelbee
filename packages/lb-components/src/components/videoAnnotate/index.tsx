@@ -34,6 +34,7 @@ export interface IVideoAnnotateProps {
   drawLayerSlot?: DrawLayerSlot;
   footer?: any;
   skipBeforePageTurning?: (pageTurning: Function) => void;
+  annotationBefore?: (setAnnotationData: Function) => void;
 }
 
 const VideoAnnotate: React.FC<IVideoAnnotateProps> = (props) => {
@@ -66,7 +67,7 @@ const VideoAnnotate: React.FC<IVideoAnnotateProps> = (props) => {
         loading: false,
       },
     });
-  }
+  };
 
   const pageBackward = () => {
     if (skipBeforePageTurning) {
@@ -85,27 +86,31 @@ const VideoAnnotate: React.FC<IVideoAnnotateProps> = (props) => {
   };
 
   if (currentToolName === EVideoToolName.VideoClipTool) {
-    return <VideoClipTool
-      {...props}
-      pageBackward={pageBackward}
-      pageForward={pageForward}
-      pageJump={(page) => dispatch(PageJump(~~page - 1))}
-      onMounted={onMounted}
-      onUnmounted={onUnmounted}
-      onVideoLoaded={onVideoLoaded}
-    />
+    return (
+      <VideoClipTool
+        {...props}
+        pageBackward={pageBackward}
+        pageForward={pageForward}
+        pageJump={(page) => dispatch(PageJump(~~page - 1))}
+        onMounted={onMounted}
+        onUnmounted={onUnmounted}
+        onVideoLoaded={onVideoLoaded}
+      />
+    );
   }
 
   if (currentToolName === EVideoToolName.VideoTextTool) {
-    return <VideoTextTool
-      {...props}
-      pageBackward={pageBackward}
-      pageForward={pageForward}
-      pageJump={(page) => dispatch(PageJump(~~page - 1))}
-      onMounted={onMounted}
-      onUnmounted={onUnmounted}
-      onVideoLoaded={onVideoLoaded}
-    />
+    return (
+      <VideoTextTool
+        {...props}
+        pageBackward={pageBackward}
+        pageForward={pageForward}
+        pageJump={(page) => dispatch(PageJump(~~page - 1))}
+        onMounted={onMounted}
+        onUnmounted={onUnmounted}
+        onVideoLoaded={onVideoLoaded}
+      />
+    );
   }
 
   if (currentToolName === EVideoToolName.VideoTagTool) {
@@ -121,10 +126,10 @@ const VideoAnnotate: React.FC<IVideoAnnotateProps> = (props) => {
       />
     );
   }
-  return null
+  return null;
 };
 
-const mapStateToProps = (state : AppState) => {
+const mapStateToProps = (state: AppState) => {
   const {
     annotation: { imgList, imgIndex, step, stepList, loading, skipBeforePageTurning },
   } = state;

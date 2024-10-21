@@ -4,7 +4,7 @@ import { ToolIcons } from '../ToolIcons';
 import { EToolName } from '@/data/enums/ToolType';
 import { cTool } from '@labelbee/lb-annotation';
 import { PointCloudContext } from '@/components/pointCloudView/PointCloudContext';
-import { Select, message, Input, Divider } from 'antd';
+import { message, Input, Divider } from 'antd';
 import { AppState } from '@/store';
 import StepUtils from '@/utils/StepUtils';
 import { connect } from 'react-redux';
@@ -17,7 +17,10 @@ import { useTranslation } from 'react-i18next';
 import { LabelBeeContext, useDispatch } from '@/store/ctx';
 import BatchUpdateModal from './components/batchUpdateModal';
 import AnnotatedBox from './components/annotatedBox';
+import RectRotateSensitivitySlider from './components/rectRotateSensitivitySlider';
 import FindTrackIDIndex from './components/findTrackIDIndex';
+import FirstFrameDataSwitch from './components/firstFrameDataSwitch';
+import SelectBoxVisibleSwitch from './components/selectBoxVisibleSwitch';
 import { IFileItem } from '@/types/data';
 import {
   IInputList,
@@ -37,7 +40,8 @@ import RectASvg from '@/assets/annotation/rectTool/icon_rect_a.svg';
 import { sidebarCls } from '..';
 import { SetTaskStepList } from '@/store/annotation/actionCreators';
 import { usePointCloudViews } from '@/components/pointCloudView/hooks/usePointCloudViews';
-
+import SubAttributeList from '@/components/subAttributeList';
+import DynamicResizer from '@/components/DynamicResizer';
 interface IProps {
   stepInfo: IStepInfo;
   toolInstance: ICustomToolInstance; // Created by useCustomToolInstance.
@@ -100,6 +104,9 @@ const BoxTrackIDInput = () => {
   const updateCurrentPolygonList = (newTrackID: number) => {
     const newPointCloudList = updateSelectedBox({ trackID: newTrackID });
     ptCtx?.topViewInstance?.updatePolygonList(newPointCloudList ?? []);
+    if (ptCtx.mainViewInstance && ptCtx.selectedPointCloudBox) {
+      ptCtx?.mainViewInstance.generateBox(ptCtx?.selectedPointCloudBox);
+    }
   };
 
   return (
@@ -219,13 +226,6 @@ const AttributeUpdater = ({
     margin: '12px 0 8px 20px',
   };
 
-  const subTitleStyle = {
-    margin: '12px 20px 8px',
-    fontSize: 14,
-    fontWeight: 500,
-    wordWrap: 'break-word' as any, // WordWrap Type ?
-  };
-
   useEffect(() => {
     if (!ptSegmentInstance) {
       return;
@@ -310,72 +310,45 @@ const AttributeUpdater = ({
   return (
     <div
       style={{
-        flex: 1,
-        overflowX: 'hidden',
-        overflowY: 'auto',
+        height: '100%',
+        overflow: 'auto',
+        display: 'flex',
+        flexDirection: 'column',
       }}
     >
       <div style={titleStyle}>{t('Attribute')}</div>
-      <AttributeList
-        list={list}
-        forbidDefault={true}
-        selectedAttribute={defaultAttribute ?? ''}
-        attributeChanged={(attribute: string) => setAttribute(attribute)}
-        updateColorConfig={updateColorConfig}
-        enableColorPicker={enableColorPicker}
-        updateSize={updateSize}
-        forbidShowLimitPopover={forbidShowLimitPopover}
-      />
-      <Divider style={{ margin: 0 }} />
-      {isSelected && (
-        <>
-          {subAttributeList.map(
-            (subAttribute) =>
-              subAttribute?.subSelected && (
-                <div style={{ marginTop: 12 }} key={subAttribute.value}>
-                  <div style={subTitleStyle}>
-                    {t('SubAttribute')}-{subAttribute.key}
-                  </div>
-                  {subAttribute.subSelected?.length < 5 ? (
-                    <AttributeList
-                      list={subAttribute.subSelected.map((v: IInputList) => ({
-                        label: v.key,
-                        value: v.value,
-                      }))}
-                      selectedAttribute={
-                        ptx.selectedPointCloudBox?.subAttribute?.[subAttribute.value] ||
-                        segmentData.cacheSegData?.subAttribute?.[subAttribute.value]
-                      }
-                      num='-'
-                      forbidColor={true}
-                      forbidDefault={true}
-                      attributeChanged={(value) => setSubAttribute(subAttribute.value, value)}
-                      style={{ marginBottom: 12 }}
-                    />
-                  ) : (
-                    <Select
-                      style={{ margin: '0px 21px 17px 16px', width: '87%' }}
-                      value={
-                        ptx.selectedPointCloudBox?.subAttribute?.[subAttribute.value] ||
-                        segmentData.cacheSegData?.subAttribute?.[subAttribute.value]
-                      }
-                      placeholder={t('PleaseSelect')}
-                      onChange={(value) => setSubAttribute(subAttribute.value, value)}
-                      allowClear={true}
-                    >
-                      {subAttribute.subSelected.map((sub: any) => (
-                        <Select.Option key={sub.value} value={sub.value}>
-                          {sub.key}
-                        </Select.Option>
-                      ))}
-                    </Select>
-                  )}
-                  <Divider style={{ margin: 0 }} />
-                </div>
-              ),
-          )}
-        </>
-      )}
+      <div
+        style={{
+          height: 0,
+          flex: 1,
+          overflowY: 'auto',
+          overflowX: 'hidden',
+        }}
+      >
+        <AttributeList
+          list={list}
+          forbidDefault={true}
+          selectedAttribute={defaultAttribute ?? ''}
+          attributeChanged={(attribute: string) => setAttribute(attribute)}
+          updateColorConfig={updateColorConfig}
+          enableColorPicker={enableColorPicker}
+          updateSize={updateSize}
+          forbidShowLimitPopover={forbidShowLimitPopover}
+        />
+        <Divider style={{ margin: 0 }} />
+        {isSelected && (
+          <SubAttributeList
+            subAttributeList={subAttributeList}
+            setSubAttribute={setSubAttribute}
+            getValue={(subAttribute) => {
+              return (
+                ptx.selectedPointCloudBox?.subAttribute?.[subAttribute.value] ||
+                segmentData.cacheSegData?.subAttribute?.[subAttribute.value]
+              );
+            }}
+          />
+        )}
+      </div>
     </div>
   );
 };
@@ -498,30 +471,57 @@ const PointCloudToolSidebar: React.FC<IProps> = ({
         selectedToolName={pointCloudPattern}
         onChange={(v) => updatePointCloudPattern?.(v)}
       />
-      <AttributeUpdater
-        toolInstance={toolInstance}
-        attributeList={attributeList}
-        subAttributeList={subAttributeList}
-        config={config}
-        stepList={stepList}
-        stepInfo={stepInfo}
-        enableColorPicker={enableColorPicker}
-      />
-      {config?.trackConfigurable === true && pointCloudPattern === EToolName.Rect && (
-        <div
-          style={{
-            flexShrink: 0,
-            height: 280,
-            overflow: 'auto',
-          }}
+      <div
+        style={{
+          flex: 1,
+          overflow: 'hidden',
+        }}
+      >
+        <DynamicResizer
+          minTopHeight={42}
+          defaultHeight={400}
+          localKey={
+            'id:' +
+            stepInfo?.id +
+            'taskID:' +
+            stepInfo?.taskID +
+            'step:' +
+            stepInfo?.step +
+            'type:' +
+            stepInfo?.type
+          }
         >
-          <BoxTrackIDInput />
-          <Divider style={{ margin: 0 }} />
-          <AnnotatedBox imgList={imgList} imgIndex={imgIndex} />
-          <Divider style={{ margin: 0 }} />
-          <FindTrackIDIndex imgList={imgList} imgIndex={imgIndex} />
-        </div>
-      )}
+          <AttributeUpdater
+            toolInstance={toolInstance}
+            attributeList={attributeList}
+            subAttributeList={subAttributeList}
+            config={config}
+            stepList={stepList}
+            stepInfo={stepInfo}
+            enableColorPicker={enableColorPicker}
+          />
+          {config?.trackConfigurable === true && pointCloudPattern === EToolName.Rect ? (
+            <div
+              style={{
+                height: '100%',
+                overflow: 'auto',
+              }}
+            >
+              <BoxTrackIDInput />
+              <Divider style={{ margin: 0 }} />
+              <AnnotatedBox imgList={imgList} imgIndex={imgIndex} />
+              <Divider style={{ margin: 0 }} />
+              <FindTrackIDIndex imgList={imgList} imgIndex={imgIndex} />
+              <Divider style={{ margin: 0 }} />
+              <RectRotateSensitivitySlider />
+              {stepInfo.loadPreStep > 0 && <FirstFrameDataSwitch />}
+              <SelectBoxVisibleSwitch />
+            </div>
+          ) : (
+            <div />
+          )}
+        </DynamicResizer>
+      </div>
     </>
   );
 };

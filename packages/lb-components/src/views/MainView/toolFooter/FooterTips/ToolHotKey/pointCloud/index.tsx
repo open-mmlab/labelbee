@@ -8,7 +8,7 @@ import copy from '@/assets/annotation/pointCloudTool/copy.svg';
 import nextBox from '@/assets/annotation/pointCloudTool/nextBox.svg';
 import paste from '@/assets/annotation/pointCloudTool/patse.svg';
 import prevBox from '@/assets/annotation/pointCloudTool/prevBox.svg';
-import rotate180_black from '@/assets/annotation/pointCloudTool/rotate180_black.svg';
+import rotate90_black from '@/assets/annotation/pointCloudTool/rotate90_black.svg';
 import selectAll from '@/assets/annotation/pointCloudTool/selectAll.svg';
 import selectMultiple from '@/assets/annotation/pointCloudTool/selectMultiple.svg';
 import TabChangeSelectedSvg from '@/assets/annotation/toolHotKeyIcon/icon_tab_kj.svg';
@@ -18,6 +18,7 @@ import RectSvg from '@/assets/annotation/rectTool/icon_rect.svg';
 import CirCleSelectorSvg from '@/assets/annotation/pointCloudTool/circleSelector.svg';
 import AddSvg from '@/assets/annotation/pointCloudTool/addSvg.svg';
 import ClearSvg from '@/assets/annotation/pointCloudTool/clearSvg.svg';
+import Image2DBoxScaleSvg from '@/assets/annotation/pointCloudTool/Image2DBoxScale.svg';
 
 import { IShortcut } from '@/types/tool';
 import React from 'react';
@@ -111,9 +112,9 @@ const NextBox = {
   shortCut: ['Tab'],
 };
 
-const Rotate180 = {
-  name: 'Rotate180',
-  icon: rotate180_black,
+const Rotate90 = {
+  name: 'Rotate90',
+  icon: rotate90_black,
   shortCut: ['G'],
   noticeInfo: 'SelectedStatus',
 };
@@ -193,6 +194,13 @@ const DeletePoint = {
   shortCut: ['I'],
 };
 
+const Image2DBoxScale = {
+  name: 'Image2DBoxScale',
+  icon: Image2DBoxScaleSvg,
+  shortCut: ['R'],
+  noticeInfo: 'SelectedRect',
+};
+
 const pointCloudShortCutTable: IShortcut[] = [
   { name: 'GeneralOperation' },
   backward,
@@ -210,13 +218,14 @@ const pointCloudShortCutTable: IShortcut[] = [
   RightRotate,
   PrevBox,
   NextBox,
-  Rotate180,
+  Rotate90,
   CopyPrevPage,
   ChangeBoxInvalid,
   deleteBox,
   SelectMulti,
   SelectAll,
   fullScreen,
+  Image2DBoxScale,
 ];
 
 const pointCloudShortCutTable_POLYGON: IShortcut[] = [

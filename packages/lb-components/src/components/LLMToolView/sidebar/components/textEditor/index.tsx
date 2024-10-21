@@ -11,6 +11,7 @@ import { InfoCircleOutlined } from '@ant-design/icons';
 import MarkdownView from '@/components/markdownView';
 import LatexEditor from '@/components/latexEditor';
 import styles from './index.module.scss';
+import LongText from '@/components/longText';
 
 interface IProps {
   newAnswer?: string;
@@ -23,7 +24,7 @@ interface IProps {
 const TextEditor = (props: IProps) => {
   const { disabeledAll, newAnswer, textEditObject, updateValue, answerIndex } = props;
 
-  const { max, min, isLaText } = textEditObject;
+  const { max, min, isLaText, tip } = textEditObject;
   const { TextArea } = Input;
   const [form] = Form.useForm();
   const { t } = useTranslation();
@@ -88,7 +89,7 @@ const TextEditor = (props: IProps) => {
     >
       <Form.Item
         name='title'
-        style={{ marginBottom: '8px' }}
+        style={{ marginBottom: 0 }}
         label={
           <>
             {t('AnswerTextEdit')}
@@ -100,7 +101,9 @@ const TextEditor = (props: IProps) => {
         colon={false}
         required={!!min}
       />
-
+      <div className={styles.tip}>
+        <LongText text={tip ?? ''} overflowMaxLines={3} openByText={true} />
+      </div>
       {isLaText && <LatexEditor onSelectLatex={insertText} disabled={disabeledAll} />}
       <Form.Item
         name='value'

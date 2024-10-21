@@ -3,6 +3,7 @@ import { Coord, distance } from '@turf/turf';
 import MathUtils from '@/utils/MathUtils';
 import AxisUtils from '@/utils/tool/AxisUtils';
 import RectUtils from '@/utils/tool/RectUtils';
+import TagUtils from '@/utils/tool/TagUtils';
 import { DEFAULT_TEXT_SHADOW, EDragStatus, ESortDirection } from '../../constant/annotation';
 import { EDragTarget, EOperationMode } from '../../constant/tool';
 import EKeyCode from '../../constant/keyCode';
@@ -38,6 +39,8 @@ class RectOperation extends BasicToolOperation {
   // 具体操作
   public hoverRectID?: string; // 当前是否hover rect
 
+  public selectedRectTextAttribute: string; // 当前选中的文本
+
   public hoverRectPointIndex: number; //  当前 hoverIndex, 依次为左上角、右上角、右下角、左下角
 
   public hoverRectEdgeIndex: number; //  当前 hover 的边
@@ -65,6 +68,11 @@ class RectOperation extends BasicToolOperation {
 
   private highlightVisible = false;
 
+  /** Whether or not add rect */
+  private enableAddRect = true;
+
+  public renderPointCloud2DHighlight(): void {}
+
   constructor(props: IRectOperationProps) {
     super(props);
     this._drawOutSideTarget = props.drawOutSideTarget || false;
@@ -73,6 +81,7 @@ class RectOperation extends BasicToolOperation {
     this.config = CommonToolUtils.jsonParser(props.config);
     this.hoverRectEdgeIndex = -1;
     this.hoverRectPointIndex = -1;
+    this.selectedRectTextAttribute = '';
     this.markerIndex = 0;
     this.createNewDrawingRect = this.createNewDrawingRect.bind(this);
     this.getDrawingRectWithRectList = this.getDrawingRectWithRectList.bind(this);
@@ -80,6 +89,7 @@ class RectOperation extends BasicToolOperation {
     this.getCurrentSelectedData = this.getCurrentSelectedData.bind(this);
     this.updateSelectedRectTextAttribute = this.updateSelectedRectTextAttribute.bind(this);
     this.setSelectedID = this.setSelectedID.bind(this);
+    this.updateSelectedRectSubAttribute = this.updateSelectedRectSubAttribute.bind(this);
     this.selection = new Selection(this);
   }
 
@@ -297,6 +307,22 @@ class RectOperation extends BasicToolOperation {
     }
   }
 
+  public updateSelectedRectSubAttribute(key: string, value: string) {
+    if (value && this.config.secondaryAttributeConfigurable === true && this.selectedRectID) {
+      this.setRectList(
+        this.rectList.map((v) => {
+          if (v.id === this.selectedRectID) {
+            const currentSubAttribute = v?.subAttribute ?? {};
+            return { ...v, subAttribute: { ...currentSubAttribute, [key]: value } };
+          }
+          return v;
+        }),
+        true,
+      );
+      this.render();
+    }
+  }
+
   public getHoverRectID = (e: MouseEvent) => {
     const coordinate = this.getCoordinateUnderZoom(e);
     const newScope = scope;
@@ -332,6 +358,17 @@ class RectOperation extends BasicToolOperation {
       }
     }
 
+    return '';
+  };
+
+  /**
+   * 获取当前选中rect的文本
+   */
+  public getSelectedRectTextAttribute = (hoverRectID: string) => {
+    if (hoverRectID) {
+      const hoverRect = this.rectList.find((v) => v.id === hoverRectID);
+      return hoverRect?.textAttribute || '';
+    }
     return '';
   };
 
@@ -573,6 +610,7 @@ class RectOperation extends BasicToolOperation {
     this.render();
   }
 
+  // 选中了一个盒子对盒子进行拖动或者更改大小
   public onDragMove(coordinate: ICoordinate) {
     if (!this.dragInfo) {
       return;
@@ -874,7 +912,7 @@ class RectOperation extends BasicToolOperation {
       this.render();
     }
 
-    if (this.drawingRect && this.firstClickCoord) {
+    if (this.enableAddRect && this.drawingRect && this.firstClickCoord) {
       let { x, y } = this.firstClickCoord;
       let { width, height } = this.drawingRect;
 
@@ -981,6 +1019,22 @@ class RectOperation extends BasicToolOperation {
     this.emit('updateResult');
   }
 
+  public setDefaultSubAttribute = () => {
+    if (this.config?.secondaryAttributeConfigurable && this.config?.subAttributeList) {
+      const subAttribute = TagUtils.getDefaultResultByConfig(this.config?.subAttributeList ?? []);
+      this.setRectList(
+        this.rectList.map((v) => {
+          if (v.id === this.selectedRectID) {
+            const currentSubAttribute = v?.subAttribute ?? subAttribute;
+            return { ...v, subAttribute: currentSubAttribute };
+          }
+          return v;
+        }),
+        true,
+      );
+    }
+  };
+
   public createNewDrawingRect(e: MouseEvent, basicSourceID: string) {
     if (!this.imgInfo) {
       return;
@@ -1057,6 +1111,14 @@ class RectOperation extends BasicToolOperation {
       }
     }
 
+    if (this.config?.secondaryAttributeConfigurable && this.config?.subAttributeList) {
+      const subAttribute = TagUtils.getDefaultResultByConfig(this.config?.subAttributeList ?? []);
+      this.drawingRect = {
+        ...this.drawingRect,
+        subAttribute,
+      };
+    }
+
     // 标注序号添加
     Object.assign(this.drawingRect, {
       order:
@@ -1104,10 +1166,7 @@ class RectOperation extends BasicToolOperation {
     if (Math.round(width) < this.config.minWidth || Math.round(height) < this.config.minHeight) {
       this.emit('messageInfo', locale.getMessagesByLocale(EMessage.RectErrorSizeNotice, this.lang));
 
-      this.drawingRect = undefined;
-      this.firstClickCoord = undefined;
-      this.dragInfo = undefined;
-      this.dragStatus = EDragStatus.Wait;
+      this.clearDrawingStatus();
       this.render();
       return;
     }
@@ -1118,10 +1177,7 @@ class RectOperation extends BasicToolOperation {
     this.history.pushHistory(this.rectList);
     this.setSelectedIdAfterAddingDrawingRect();
 
-    this.firstClickCoord = undefined;
-    this.drawingRect = undefined;
-    this.dragInfo = undefined;
-    this.dragStatus = EDragStatus.Wait;
+    this.clearDrawingStatus();
   }
 
   public setSelectedIdAfterAddingDrawingRect() {
@@ -1129,7 +1185,7 @@ class RectOperation extends BasicToolOperation {
       return;
     }
 
-    if (this.config.textConfigurable) {
+    if (this.config.textConfigurable || this.config?.secondaryAttributeConfigurable) {
       this.setSelectedRectID(this.drawingRect.id);
     } else {
       this.setSelectedRectID();
@@ -1167,7 +1223,7 @@ class RectOperation extends BasicToolOperation {
     const hoverRectID = this.getHoverRectID(e);
 
     const hoverRect = this.rectList.find((v) => v.id === hoverRectID);
-
+    this.selectedRectTextAttribute = '';
     if (this.drawingRect) {
       // 取消绘制
       this.drawingRect = undefined;
@@ -1186,10 +1242,14 @@ class RectOperation extends BasicToolOperation {
       }
 
       this.setSelectedRectID(hoverRectID, e.ctrlKey);
+
       // Only executed when one is selected
       if (hoverRect && this.selectedIDs?.length === 1) {
+        // 缓存选中 rect 的文本值
+        this.selectedRectTextAttribute = this.getSelectedRectTextAttribute(hoverRectID);
         this.setDefaultAttribute(hoverRect.attribute);
       }
+
       this.hoverRectID = '';
 
       if (hoverRect?.label && this.hasMarkerConfig) {
@@ -1199,9 +1259,13 @@ class RectOperation extends BasicToolOperation {
           this.emit('markIndexChange');
         }
       }
+      if (this.config?.secondaryAttributeConfigurable && this.config?.subAttributeList) {
+        this.setDefaultSubAttribute();
+      }
     }
 
     this.render();
+    return hoverRect;
   }
 
   public shiftRightMouseUp(e: MouseEvent) {
@@ -1212,6 +1276,11 @@ class RectOperation extends BasicToolOperation {
 
   public updateDragResult() {
     this.emit('updateDragResult', { ...this.selectedRect });
+  }
+
+  /** Allow/Disallow to add rect to rectList */
+  public setEnableAddRect(isEnableAddRect: boolean) {
+    this.enableAddRect = isEnableAddRect;
   }
 
   public onMouseUp(e: MouseEvent) {
@@ -1245,8 +1314,15 @@ class RectOperation extends BasicToolOperation {
 
     const basicSourceID = CommonToolUtils.getSourceID(this.basicResult);
     if (this.drawingRect) {
-      // 结束框的绘制
-      this.addDrawingRectToRectList();
+      if (this.enableAddRect) {
+        // 结束框的绘制
+        this.addDrawingRectToRectList();
+      } else {
+        // Clear the drawing
+        this.clearDrawingStatus();
+        this.render();
+      }
+
       return;
     }
 
@@ -1256,9 +1332,11 @@ class RectOperation extends BasicToolOperation {
       return;
     }
 
-    // 创建框
-    this.createNewDrawingRect(e, basicSourceID);
-    this.render();
+    if (this.enableAddRect) {
+      // 创建框
+      this.createNewDrawingRect(e, basicSourceID);
+      this.render();
+    }
 
     return undefined;
   }
@@ -1269,11 +1347,12 @@ class RectOperation extends BasicToolOperation {
 
     // 删除选中
     if (this.selection.isIdSelected(hoverRectID)) {
-      this.deleteSelectedRect();
+      this.deleteSelectedRect(e);
     }
   }
 
-  public deleteSelectedRect() {
+  // eslint-disable-next-line no-unused-vars
+  public deleteSelectedRect(e: UIEvent) {
     this.selectedRects.forEach((rect) => {
       this.deleteRect(rect.id);
     });
@@ -1318,7 +1397,7 @@ class RectOperation extends BasicToolOperation {
         break;
 
       case EKeyCode.Delete:
-        this.deleteSelectedRect();
+        this.deleteSelectedRect(e);
         break;
 
       case EKeyCode.Tab: {
@@ -1378,7 +1457,6 @@ class RectOperation extends BasicToolOperation {
 
   public onKeyUp(e: KeyboardEvent) {
     super.onKeyUp(e);
-
     switch (e.keyCode) {
       case EKeyCode.Ctrl:
         if (this.drawingRect) {
@@ -1567,10 +1645,10 @@ class RectOperation extends BasicToolOperation {
   /**
    *  绘制当前框的
    * @param rect 当前矩形框
-   * @param zoom 是否进行缩放
-   * @param isZoom 矩形框是否为缩放后的比例
+   * @param zoom  缩放比例
+   * @param isZoom 是否进行缩放
    */
-  public renderDrawingRect(rect: IRect, zoom = this.zoom, isZoom = false) {
+  public renderDrawingRect(rect: IRect, zoom = this.zoom, isZoom = false, isPointCloud2DHighlight = false) {
     if (this.ctx && rect) {
       const { ctx, style } = this;
       // 不看图形信息
@@ -1594,6 +1672,13 @@ class RectOperation extends BasicToolOperation {
 
       if (rect.attribute) {
         showText = `${showText}  ${AttributeUtils.getAttributeShowText(rect.attribute, this.config?.attributeList)}`;
+        // Secondary Attributes
+        if (rect?.subAttribute && this.config?.secondaryAttributeConfigurable && this.config?.subAttributeList) {
+          const list = TagUtils.getTagNameList(rect.subAttribute, this.config.subAttributeList);
+          list.forEach((i) => {
+            showText += `\n${i.keyName}: ${i.value.join(`、`)}`;
+          });
+        }
       }
 
       const transformRect = AxisUtils.changeRectByZoom(rect, isZoom ? zoom : this.zoom, this.currentPos);
@@ -1621,11 +1706,29 @@ class RectOperation extends BasicToolOperation {
 
       const lineWidth = this.style?.width ?? 2;
 
-      if (rect.id === this.hoverRectID || rect.id === this.selectedRectID || this.isMultiMoveMode) {
+      const isSameTextAttribute =
+        this.config.textConfigurable &&
+        this.config.isHighlightSameTextAttribute &&
+        this.selectedRectTextAttribute !== '' &&
+        rect.textAttribute === this.selectedRectTextAttribute;
+
+      if (
+        rect.id === this.hoverRectID ||
+        // 高亮同textAttribute 的其他框
+        isSameTextAttribute ||
+        rect.id === this.selectedRectID ||
+        this.isMultiMoveMode ||
+        isPointCloud2DHighlight
+      ) {
         DrawUtils.drawRectWithFill(this.canvas, transformRect, { color: fillColor });
       }
 
-      DrawUtils.drawRect(this.canvas, transformRect, { color: strokeColor, thickness: lineWidth, hiddenText: true });
+      DrawUtils.drawRect(this.canvas, transformRect, {
+        color: strokeColor,
+        thickness: lineWidth,
+        hiddenText: true,
+        lineDash: rect.lineDash,
+      });
       ctx.restore();
 
       // 框大小数值显示
@@ -1717,6 +1820,9 @@ class RectOperation extends BasicToolOperation {
         }
       });
     }
+
+    // After selecting the top view, it is necessary to highlight the 2D box of the corresponding 2D view
+    this.renderPointCloud2DHighlight();
   }
 
   /**
@@ -1816,14 +1922,18 @@ class RectOperation extends BasicToolOperation {
     this.emit('updateResult');
   }
 
-  /**
-   *  清楚所有的中间状态
-   */
-  public clearActiveStatus() {
+  private clearDrawingStatus() {
     this.drawingRect = undefined;
     this.firstClickCoord = undefined;
     this.dragInfo = undefined;
     this.dragStatus = EDragStatus.Wait;
+  }
+
+  /**
+   *  清楚所有的中间状态
+   */
+  public clearActiveStatus() {
+    this.clearDrawingStatus();
     this.setSelectedRectID(undefined);
     this.setOperationMode(EOperationMode.General);
   }
@@ -1892,6 +2002,10 @@ class RectOperation extends BasicToolOperation {
       this.setRectList(rectList, true);
       this.render();
     }
+  }
+
+  public setHoverRectID(id: string) {
+    this.hoverRectID = id;
   }
 }
 

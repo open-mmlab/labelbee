@@ -22,6 +22,7 @@ export interface IAnswerList {
   newAnswer?: string;
   url?: string; // used to display picture
   tagList?: ISelectedTags;
+  id?: string | number;
 }
 
 export interface IModelAPIAnswer {
@@ -62,6 +63,11 @@ export interface ILLMToolConfig {
   inputList?: IInputList[];
 }
 
+export interface ILLMMultiWheelToolConfig
+  extends Omit<ILLMToolConfig, 'enableModelAPI' | 'modelAPIConfigList'> {
+  dialogSort?: boolean; // 对话排序
+}
+
 // LLM文本
 export interface ITextList {
   textId?: string;
@@ -77,7 +83,7 @@ export interface ITextList {
 
 // 单个答案
 export interface IWaitAnswerSort {
-  title: number;
+  title: number | string;
   id: number;
 }
 
@@ -93,7 +99,7 @@ export interface ITagVertexPoint {
   tr: IPoint;
 }
 export interface IAnswerSort {
-  title: number;
+  title: number | string;
   id: number;
   tagCenterPoint?: IPoint;
   tagVertexPoint?: ITagVertexPoint;
@@ -104,8 +110,8 @@ export interface ILLMBoxResult {
   id: number;
   sort?: number[][];
   textAttribute?: ITextList[];
-  valid:boolean;
-  tagList?:ISelectedTags
+  valid: boolean;
+  tagList?: ISelectedTags;
 }
 
 export interface IInputList {

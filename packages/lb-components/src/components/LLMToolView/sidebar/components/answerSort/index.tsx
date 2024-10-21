@@ -19,6 +19,9 @@ interface IProps {
   sortList: IAnswerSort[][];
   waitSortList: IWaitAnswerSort[];
   disabeledAll?: boolean;
+  header?: HTMLElement | string;
+  title?: string;
+  prefixId?: string;
 }
 enum EDirection {
   Top = 'Top',
@@ -41,14 +44,16 @@ interface ITagPoints {
 
 const contentBoxCls = `${prefix}-LLMSidebar-contentBox`;
 
+const SEGMENTATION_OF_KEY = '@';
+
 const Navigation = () => {
   const { t } = useTranslation();
   return (
     <div className={`${contentBoxCls}__navigation`}>
       <span>{t('Best')}</span>
-      <div style={{ display: 'flex', alignItems: 'center' }}>
+      <div style={{ display: 'flex', alignItems: 'center', flex: 1, margin: '0px 20px' }}>
         <LeftOutlined />
-        <div style={{ height: 0, border: '1px solid #999999', width: '450px' }} />
+        <div style={{ height: 0, border: '1px solid #999999', width: '100%' }} />
       </div>
       <span>{t('Worst')}</span>
     </div>
@@ -57,7 +62,18 @@ const Navigation = () => {
 
 const AnswerSort = (props: IProps) => {
   const [, forceUpdate] = useReducer((x) => x + 1, 0);
-  const { sortList, setSortList, waitSortList, disabeledAll } = props;
+  const {
+    sortList,
+    setSortList,
+    waitSortList,
+    disabeledAll,
+    header,
+    title,
+    prefixId = 'answer',
+  } = props;
+
+  const waitBoxId = `${prefixId}-waitBox`;
+  const sortBoxId = `${prefixId}-sortBox`;
   const { setHoverKey } = useContext(LLMContext);
   const [activateDirection, setActivateDirection] = useState<EDirection | undefined>(undefined);
   const [targetTagKey, setTargetTagKey] = useState<number | undefined>(undefined);
@@ -67,9 +83,6 @@ const AnswerSort = (props: IProps) => {
     setAnswers(waitSortList);
   }, [waitSortList]);
 
-  useEffect(() => {
-    formatSortList();
-  }, [JSON.stringify(sortList)]);
 
   const singleAnswerItem = ({
     item,
@@ -165,8 +178,7 @@ const AnswerSort = (props: IProps) => {
   };
 
   const formatSortList = () => {
-    const sortBox = document.getElementById('sortBox');
-
+    const sortBox = document.getElementById(sortBoxId);
     if (sortBox?.childNodes) {
       let newSortList: IAnswerSort[][] = [];
       sortBox.childNodes.forEach((item: any, nodeIndex: number) => {
@@ -229,13 +241,19 @@ const AnswerSort = (props: IProps) => {
       if (!sourceTagCenterPoint.x || !sourceTagCenterPoint.y) {
         return;
       }
+
       // 不以拖动的tag做参照
       if (getAttributeIndex(e.target.id) === tagNearest[0]?.id) {
         setTargetTagKey(undefined);
         return;
       }
       setTargetTagKey(tagNearest[0]?.id);
-      if (tagNearest[0]?.tagVertexPoint && sourceTagCenterPoint) {
+      if (
+        tagNearest[0]?.tagVertexPoint &&
+        sourceTagCenterPoint &&
+        sourceTagCenterPoint?.x &&
+        sourceTagCenterPoint?.y
+      ) {
         setActivateDirectionBycompareDistance(sourceTagCenterPoint, tagNearest[0]?.tagVertexPoint);
       }
     }
@@ -250,14 +268,14 @@ const AnswerSort = (props: IProps) => {
     let formatList = cloneDeep(sortList);
 
     tagIndex = formatList.findIndex((i: IAnswerSort[]) => i[0].id === Number(targetTagKey));
-    if (target?.parentNode?.parentNode.id === 'sortBox') {
+    if (target?.parentNode?.parentNode.id === sortBoxId) {
       key = getAttributeIndex(target.parentNode.id); // 父级
       const curKey = getAttributeIndex(target.id); // 拖动tag
       newList = formatList[~~key].filter((i: IAnswerSort) => i.id === ~~curKey);
       const removeIndex = formatList[~~key].findIndex((i: IAnswerSort) => i.id === ~~curKey);
       formatList[~~key].splice(removeIndex, 1);
     }
-    if (target?.parentNode.id === 'sortBox') {
+    if (target?.parentNode.id === sortBoxId) {
       if (!targetTagKey) {
         return;
       }
@@ -270,7 +288,7 @@ const AnswerSort = (props: IProps) => {
       formatList.splice(oldIndex, 1);
       tagIndex = formatList.findIndex((i: IAnswerSort[]) => i[0].id === ~~targetTagKey);
     }
-    if (target.parentNode.id === 'waitBox') {
+    if (target.parentNode.id === waitBoxId) {
       key = getAttributeIndex(target.id);
       oldIndex = answers.findIndex((i: IWaitAnswerSort) => i.id === key);
       newList = [answers[oldIndex]];
@@ -298,50 +316,60 @@ const AnswerSort = (props: IProps) => {
   };
 
   const getAttributeIndex = (str: string) => {
-    const index = str.indexOf('-');
+    const index = str.indexOf(SEGMENTATION_OF_KEY);
     return Number(str.substring(index + 1, str.length));
   };
 
+  const headerContainer = header ?? (
+    <div className={`${contentBoxCls}__title`}>
+      <span>{title ?? t('RankingQualityOfAnswers')}</span>
+      {answers.length > 0 && (
+        <Tag color='#FFD9D9' style={{ color: '#F26549', marginLeft: 8 }}>
+          {t('Unfinished')}
+        </Tag>
+      )}
+    </div>
+  );
+
   return (
-    <div style={{ padding: '0px 16px', marginBottom: '16px' }}>
-      <div className={`${contentBoxCls}__title`}>
-        <span>{t('RankingQualityOfAnswers')}</span>
-        {answers.length > 0 && (
-          <Tag color='#FFD9D9' style={{ color: '#F26549', marginLeft: 8 }}>
-            {t('Unfinished')}
-          </Tag>
-        )}
-      </div>
+    <div style={{ padding: '0px 16px', marginBottom: '16px', width: '100%' }}>
+      {headerContainer}
       <div>
         <div style={{ display: 'flex', alignItems: 'center' }}>
           <span style={{ marginRight: '16px' }}>{t('ToBeSorted')}</span>
-          <div id='waitBox' className={`${contentBoxCls}__answerBox`}>
+          <div id={waitBoxId} className={`${contentBoxCls}__answerBox`}>
             {answers.length > 0 &&
               answers.map((i: IWaitAnswerSort) =>
                 singleAnswerItem({
                   item: i,
-                  id: `waitBoxItem-${i?.id}`,
+                  id: `${waitBoxId}-waitBoxItem${SEGMENTATION_OF_KEY}${i?.id}`,
                   operation: {
                     onDrag: onDrag,
                     onDragEnd: onDragEnd,
+                    onDragStart:()=>formatSortList()
                   },
                 }),
               )}
           </div>
         </div>
         <Navigation />
-        <div id='sortBox' className={`${contentBoxCls}__answerBox`}>
+        <div id={sortBoxId} className={`${contentBoxCls}__answerBox`}>
           {sortList.map((i: IAnswerSort[], index: number) => {
             if (i.length > 1) {
               return (
-                <div key={`item-${index}`} id={`sortBox-${index}`}>
+                <div
+                  key={`item-${index}`}
+                  id={`${sortBoxId}${SEGMENTATION_OF_KEY}${index}`}
+                  style={{ border: '1px dashed #d9d9d9' }}
+                >
                   {i.map((item: IAnswerSort) =>
                     singleAnswerItem({
                       item,
-                      id: `sortBoxItem-${item?.id}`,
+                      id: `${sortBoxId}-sortBoxItem${SEGMENTATION_OF_KEY}${item?.id}`,
                       operation: {
                         onDrag: onDrag,
                         onDragEnd: onDragEnd,
+                        onDragStart:()=>formatSortList()
                       },
                     }),
                   )}
@@ -350,10 +378,11 @@ const AnswerSort = (props: IProps) => {
             }
             return singleAnswerItem({
               item: i[0],
-              id: `sortBox-${i[0]?.id}`,
+              id: `${sortBoxId}${SEGMENTATION_OF_KEY}${i[0]?.id}`,
               operation: {
                 onDrag: onDrag,
                 onDragEnd: onDragEnd,
+                onDragStart:()=>formatSortList()
               },
             });
           })}

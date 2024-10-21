@@ -16,6 +16,7 @@ import { LoadFileAndFileData } from './store/annotation/reducer';
 import { ToolInstance } from './store/annotation/types';
 import {
   GetFileData,
+  GetImgIndexByExternal,
   IFileItem,
   LoadFileList,
   OnPageChange,
@@ -29,6 +30,7 @@ import { ConfigProvider } from 'antd/es';
 import zhCN from 'antd/es/locale/zh_CN';
 import enUS from 'antd/es/locale/en_US';
 import { EPointCloudName } from '@labelbee/lb-annotation';
+import type { ToolStyle } from './types/toolStyle';
 
 interface IAnnotationStyle {
   strokeColor: string;
@@ -105,6 +107,10 @@ export interface AppProps {
   onLoad?: ({ toolInstance }: { toolInstance: ToolInstance }) => void;
   preDataProcess?: (params: IPreDataProcessParams) => IPointCloudBox[];
   auditContext?: any;
+  getImgIndexByExternal: GetImgIndexByExternal;
+  annotationBefore?: (setAnnotationData: Function) => void;
+  setResourceLoading?: (loading: boolean) => void;
+  toolStyle?: ToolStyle;
 }
 
 const App: React.FC<AppProps> = (props) => {
@@ -130,6 +136,8 @@ const App: React.FC<AppProps> = (props) => {
     intelligentFit = true,
     highlightAttribute = '',
     preDataProcess,
+    getImgIndexByExternal,
+    annotationBefore,
   } = props;
 
   useEffect(() => {
@@ -149,6 +157,8 @@ const App: React.FC<AppProps> = (props) => {
         checkMode,
         highlightAttribute,
         preDataProcess,
+        getImgIndexByExternal,
+        annotationBefore,
       }),
     );
 
@@ -205,6 +215,15 @@ const App: React.FC<AppProps> = (props) => {
   useEffect(() => {
     setToolInstance?.(toolInstance);
   }, [toolInstance]);
+
+  useEffect(() => {
+    store.dispatch({
+      type: ANNOTATION_ACTIONS.SET_STEP,
+      payload: {
+        toStep: step,
+      },
+    });
+  }, [step]);
 
   // 初始化imgList 优先以loadFileList方式加载数据
   const initImgList = () => {

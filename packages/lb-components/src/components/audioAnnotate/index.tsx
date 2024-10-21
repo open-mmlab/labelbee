@@ -6,24 +6,36 @@ import { Layout } from 'antd/es';
 import { Spin } from 'antd';
 import { prefix } from '@/constant';
 import { AppProps } from '@/App';
-import { cKeyCode, CommonToolUtils, cTool, uuid, TagUtils, EventBus } from '@labelbee/lb-annotation';
+import {
+  cKeyCode,
+  CommonToolUtils,
+  cTool,
+  uuid,
+  TagUtils,
+  EventBus,
+} from '@labelbee/lb-annotation';
 import styles from './index.module.scss';
 import TagResultShow from '@/components/audioAnnotate/tagResultShow';
-import { AudioClipProvider, useAudioClipStore } from './audioContext';
+import {
+  AudioClipProvider,
+  DEFAULT_CLIP_TEXT_CONFIG_ITEM,
+  useAudioClipStore,
+} from './audioContext';
 import TextInput from './textInput';
 import { connect } from 'react-redux';
 import { a2MapStateToProps, IA2MapStateProps } from '@/store/annotation/map';
 import { LabelBeeContext } from '@/store/ctx';
 import { jsonParser } from '@/utils';
 import { useCustomToolInstance } from '@/hooks/annotation';
-import { IAudioTimeSlice, ITextConfigItem } from '@labelbee/lb-utils'
+import { IAudioTimeSlice, ITextConfigItem } from '@labelbee/lb-utils';
 import { sidebarCls } from '@/views/MainView/sidebar';
-import LabelSidebar from './audioSide/labelSidebar'
-import ClipSidebar from './audioSide/clipSidebar'
+import LabelSidebar from './audioSide/labelSidebar';
+import ClipSidebar from './audioSide/clipSidebar';
 import ToggleTagModeSvg from '@/assets/annotation/audio/tag.svg';
 import ToggleTagModeASvg from '@/assets/annotation/audio/tagA.svg';
-import ClipSvg from '@/assets/annotation/audio/clip.svg'
-import ClipASvg from '@/assets/annotation/audio/clipA.svg'
+import ClipSvg from '@/assets/annotation/audio/clip.svg';
+import ClipASvg from '@/assets/annotation/audio/clipA.svg';
+import { isImageValue } from '@/utils/audio';
 
 const { EAudioToolName } = cTool;
 const EKeyCode = cKeyCode.default;
@@ -94,6 +106,7 @@ const AudioTextToolTextarea = ({
   textConfigurable,
   updateRegion,
   clipAttributeList,
+  clipTextList,
 }: any) => {
   return (
     <div className={styles.textareaContainer}>
@@ -113,6 +126,7 @@ const AudioTextToolTextarea = ({
           textConfigurable={textConfigurable}
           updateRegion={updateRegion}
           clipAttributeList={clipAttributeList}
+          clipTextList={clipTextList}
         />
       </div>
     </div>
@@ -129,10 +143,10 @@ const AudioSideBar = (props: any) => {
     isEdit,
     tagConfigurable,
     clipConfigurable,
-  } = props
-  let labelInfoSet = config?.inputList || []
-  let tagResult = result?.tag ?? {}
-  let regions = result?.regions ?? []
+  } = props;
+  let labelInfoSet = config?.inputList || [];
+  let tagResult = result?.tag ?? {};
+  let regions = result?.regions ?? [];
 
   const [labelSelectedList, setLabelSelectedList] = useState<number[]>([]);
 
@@ -263,33 +277,41 @@ const AudioSideBar = (props: any) => {
     updateTagResult(tagResult);
   };
 
-  const toggleAudioOption = tagConfigurable && clipConfigurable && <ToggleAudioOption setSideTab={setSideTab} sideTab={sideTab} />
+  const toggleAudioOption = tagConfigurable && clipConfigurable && (
+    <ToggleAudioOption setSideTab={setSideTab} sideTab={sideTab} />
+  );
 
-  const labelSidebar = sideTab === 'tag' && <LabelSidebar
-    labelInfoSet={tagConfigurable ? labelInfoSet : []} // 工具配置
-    labelSelectedList={labelSelectedList}
-    setLabel={setLabel}
-    tagResult={tagResult}
-    clearResult={clearTagResult}
-    isEdit={isEdit}
-    withPanelTab={false}
-  />
+  const labelSidebar = sideTab === 'tag' && (
+    <LabelSidebar
+      labelInfoSet={tagConfigurable ? labelInfoSet : []} // 工具配置
+      labelSelectedList={labelSelectedList}
+      setLabel={setLabel}
+      tagResult={tagResult}
+      clearResult={clearTagResult}
+      isEdit={isEdit}
+      withPanelTab={false}
+    />
+  );
 
-  const clipSidebar = sideTab === 'clip' && <ClipSidebar
-    regions={regions}
-    updateRegion={updateRegion}
-    useAudioClipStore={useAudioClipStore}
-  />
+  const clipSidebar = sideTab === 'clip' && (
+    <ClipSidebar
+      regions={regions}
+      updateRegion={updateRegion}
+      useAudioClipStore={useAudioClipStore}
+    />
+  );
 
   if (sider) {
     if (typeof sider === 'function') {
-      return <div className={`${sidebarCls}`}>
-        {sider({
-          toggleAudioOption,
-          labelSidebar,
-          clipSidebar,
-        })}
-      </div>
+      return (
+        <div className={`${sidebarCls}`}>
+          {sider({
+            toggleAudioOption,
+            labelSidebar,
+            clipSidebar,
+          })}
+        </div>
+      );
     } else {
       return sider;
     }
@@ -303,48 +325,65 @@ const AudioSideBar = (props: any) => {
       </div>
     </div>
   );
-
 };
 
 const AudioAnnotate: React.FC<AppProps & IProps> = (props) => {
   const siderWidth = props.style?.sider?.width;
 
   // 迁移部分sensebee的参数
-  const { step, stepList, audioContext, sider, drawLayerSlot, imgList, imgIndex, currentData, config, stepInfo } = props;
+  const {
+    step,
+    stepList,
+    audioContext,
+    sider,
+    drawLayerSlot,
+    imgList,
+    imgIndex,
+    currentData,
+    config,
+    stepInfo,
+    checkMode,
+  } = props;
   const annotationStepInfo = CommonToolUtils.getCurrentStepToolAndConfig(step, stepList);
 
   const basicInfo = jsonParser(currentData.result);
   const { toolInstanceRef } = useCustomToolInstance({ basicInfo });
 
   const [loading, setLoading] = useState<boolean>(true);
-  const [result, setResult] = useState<any>(null)
-  const [duration, setDuration] = useState<number>(0)
+  const [result, setResult] = useState<any>(null);
+  const [duration, setDuration] = useState<number>(0);
+  const [valid, setValid] = useState(true);
 
   useEffect(() => {
-    setLoading(true)
-  }, [imgIndex])
+    setLoading(true);
+  }, [imgIndex]);
 
   useEffect(() => {
     if (loading === false) {
-      initResult()
+      initResult();
     }
-  }, [loading])
+  }, [loading]);
 
   useEffect(() => {
-    initToolInstance()
-  }, [])
+    initToolInstance();
+  }, []);
 
   useEffect(() => {
     toolInstanceRef.current.exportData = () => {
       return [[result], { duration, valid }];
     };
 
-    toolInstanceRef.current.setResult = updateResult
-    toolInstanceRef.current.clearResult = clearResult
-    toolInstanceRef.current.currentPageResult = result?.regions
-    toolInstanceRef.current.emit('updatePageNumber')
-  }, [result]);
+    toolInstanceRef.current.setResult = updateResult;
+    toolInstanceRef.current.clearResult = clearResult;
+    toolInstanceRef.current.currentPageResult = result?.regions;
+    toolInstanceRef.current.emit('updatePageNumber');
+    toolInstanceRef.current.setSelectedRegion = setSelectedRegion;
+    toolInstanceRef.current.setValid = setValidValue;
+  }, [result, valid]);
 
+  const setSelectedRegion = (id: number | string) => {
+    EventBus.emit('setSelectedRegion', { id, isLoopStatus: true, playImmediately: true });
+  };
 
   const initToolInstance = () => {
     toolInstanceRef.current.emit = (event: string) => {
@@ -356,8 +395,8 @@ const AudioAnnotate: React.FC<AppProps & IProps> = (props) => {
           }
         });
       }
-    }
-    toolInstanceRef.current.fns = new Map()
+    };
+    toolInstanceRef.current.fns = new Map();
     toolInstanceRef.current.singleOn = (event: string, func: () => void) => {
       toolInstanceRef.current.fns.set(event, [func]);
     };
@@ -369,12 +408,12 @@ const AudioAnnotate: React.FC<AppProps & IProps> = (props) => {
     toolInstanceRef.current.unbindAll = (eventName: string) => {
       toolInstanceRef.current.fns.delete(eventName);
     };
-  }
+  };
 
   const currentResult = useMemo(() => {
-    const stepResult = basicInfo[`step_${stepInfo?.step}`]
-    return stepResult?.result || []
-  }, [config, basicInfo, stepInfo])
+    const stepResult = basicInfo[`step_${stepInfo?.step}`];
+    return stepResult?.result || [];
+  }, [config, basicInfo, stepInfo]);
 
   const {
     tagConfigurable,
@@ -383,8 +422,11 @@ const AudioAnnotate: React.FC<AppProps & IProps> = (props) => {
     clipAttributeConfigurable = false,
     clipAttributeList = [],
     clipTextConfigurable = false,
+    subAttributeList = [],
+    secondaryAttributeConfigurable = false,
     inputList = [],
     configList = [],
+    clipTextList = DEFAULT_CLIP_TEXT_CONFIG_ITEM,
   } = useMemo(() => {
     if (annotationStepInfo) {
       return CommonToolUtils.jsonParser(annotationStepInfo?.config);
@@ -396,16 +438,21 @@ const AudioAnnotate: React.FC<AppProps & IProps> = (props) => {
     clipAttributeConfigurable,
     clipAttributeList,
     clipTextConfigurable,
+    subAttributeList,
+    secondaryAttributeConfigurable,
+    clipTextList,
   };
 
-  const valid = audioContext ? audioContext?.valid : true;
   const count = CommonToolUtils.jsonParser(currentData.result)?.duration ?? 0;
   const totalText = valid ? count : 0;
-  const inputDisabled = !valid || loading || ![textConfigurable, clipTextConfigurable].includes(true);
+  const inputDisabled =
+    !valid || loading || ![textConfigurable, clipTextConfigurable].includes(true) || checkMode;
   let preContext: { [key: string]: any } = {};
   if (imgIndex !== -1 && imgList?.length) {
     const preResult = imgList[imgIndex]?.preResult;
-    const loadPreStep = audioContext?.isEdit ? audioContext?.stepConfig?.loadPreStep : stepInfo?.loadPreStep;
+    const loadPreStep = audioContext?.isEdit
+      ? audioContext?.stepConfig?.loadPreStep
+      : stepInfo?.loadPreStep;
 
     if (preResult && loadPreStep) {
       const preResultObj = CommonToolUtils.jsonParser(preResult);
@@ -424,7 +471,7 @@ const AudioAnnotate: React.FC<AppProps & IProps> = (props) => {
 
   const initResult = () => {
     if (currentResult?.length > 0) {
-      setResult(currentResult[0])
+      setResult(currentResult[0]);
     } else {
       setResult({
         id: uuid(),
@@ -432,9 +479,11 @@ const AudioAnnotate: React.FC<AppProps & IProps> = (props) => {
         value: getInitValue(),
         tag: getInitTagValue(),
         regions: [],
-      })
+      });
     }
-  }
+    const valid = isImageValue(imgList[imgIndex].result || '[]');
+    setValid(valid);
+  };
 
   /** 获取文本的默认数据 */
   const getInitValue = (useDefault = true) => {
@@ -455,15 +504,18 @@ const AudioAnnotate: React.FC<AppProps & IProps> = (props) => {
   };
 
   const onLoaded = ({ duration, hasError }: any) => {
+    if (audioContext?.onLoaded) {
+      audioContext?.onLoaded();
+    }
     setLoading(false);
     setDuration(duration);
-  }
+  };
 
   const removeRegion = (id: string) => {
     setResult((result: any) => ({
       ...result,
       regions: (result?.regions || []).filter((item: any) => item.id !== id),
-    }))
+    }));
   };
 
   const updateRegion = (region: IAudioTimeSlice) => {
@@ -483,14 +535,14 @@ const AudioAnnotate: React.FC<AppProps & IProps> = (props) => {
             }
             return item;
           }),
-        }
+        };
       } else {
         return {
           ...result,
           regions: [...currentRegions, region],
-        }
+        };
       }
-    })
+    });
   };
 
   const updateText = (val: string, key: string) => {
@@ -499,20 +551,20 @@ const AudioAnnotate: React.FC<AppProps & IProps> = (props) => {
       value: {
         ...result.value,
         [key]: val,
-      }
-    }))
-  }
+      },
+    }));
+  };
 
   const updateTagResult = (tagResult: any) => {
     setResult((result: any) => ({
       ...result,
       tag: tagResult,
-    }))
-  }
+    }));
+  };
 
   const updateResult = (result: any) => {
-    setResult(result)
-  }
+    setResult(result);
+  };
 
   const clearResult = () => {
     setResult((result: any) => ({
@@ -520,77 +572,93 @@ const AudioAnnotate: React.FC<AppProps & IProps> = (props) => {
       value: getInitValue(),
       tag: {},
       regions: [],
-    }))
+    }));
     EventBus.emit('clearRegions');
-  }
+  };
 
-  return <AudioClipProvider>
-    <Spin spinning={loading} wrapperClassName='audio-tool-spinner'>
-      <Layout className={getClassName('layout', 'container')} style={{ height: '100%' }}>
-        {props?.leftSider}
-        <Content className={`${layoutCls}__content`}>
-          <div className={styles.containerWrapper}>
-            <div className={styles.audioWrapper}>
-              {tagConfigurable && (
-                <TagResultShow result={result?.tag} labelInfoSet={inputList} hasPromptLayer={!!audioContext?.promptLayer}/>
-              )}
-              {audioContext?.promptLayer}
-              <AudioPlayer
-                context={{
-                  isEdit: audioContext?.isEdit,
-                  count: totalText,
-                  toolName: EAudioToolName.AudioTextTool,
-                  imgIndex,
-                }}
-                drawLayerSlot={drawLayerSlot}
-                fileData={currentData}
-                onLoaded={onLoaded}
-                invalid={!valid}
-                updateRegion={updateRegion}
-                removeRegion={removeRegion}
-                regions={result?.regions}
-                activeToolPanel={audioContext?.activeToolPanel}
-                footer={props.footer}
-                {...clipConfig}
-              />
-            </div>
-            {(textConfigurable || clipTextConfigurable) && (
-              <AudioTextToolTextarea
-                preContext={preContext}
-                result={result}
-                inputDisabled={inputDisabled}
-                updateText={updateText}
-                updateRegion={updateRegion}
-                configList={configList}
-                autofocus={false}
-                textConfigurable={textConfigurable}
-                clipTextConfigurable={clipTextConfigurable}
-                clipAttributeList={clipAttributeList}
-                clipAttributeConfigurable={clipAttributeConfigurable}
-              />
-            )}
-          </div>
-        </Content>
-        <Sider
-          className={`${layoutCls}__side`}
-          width={siderWidth ?? 240}
-          style={props.style?.sider}
+  const setValidValue = (valid: boolean) => {
+    setValid(valid);
+  };
+
+  return (
+    <AudioClipProvider>
+      <Spin spinning={loading} wrapperClassName='audio-tool-spinner'>
+        <Layout
+          className={getClassName('layout', 'container')}
+          style={{ height: '100%', userSelect: 'none' }}
         >
-          <AudioSideBar
-            sider={sider}
-            config={config}
-            result={result}
-            updateTagResult={updateTagResult}
-            updateRegion={updateRegion}
-            isEdit={audioContext?.isEdit}
-            tagConfigurable={tagConfigurable}
-            clipConfigurable={clipConfigurable}
-          />
-        </Sider>
-        <PreviewResult />
-      </Layout>
-    </Spin>
-  </AudioClipProvider>;
+          {props?.leftSider}
+          <Content className={`${layoutCls}__content`}>
+            <div className={styles.containerWrapper}>
+              <div className={styles.audioWrapper}>
+                {tagConfigurable && (
+                  <TagResultShow
+                    result={result?.tag}
+                    labelInfoSet={inputList}
+                    hasPromptLayer={!!audioContext?.promptLayer}
+                  />
+                )}
+                {audioContext?.promptLayer}
+                <AudioPlayer
+                  context={{
+                    isEdit: audioContext?.isEdit,
+                    count: totalText,
+                    toolName: EAudioToolName.AudioTextTool,
+                    imgIndex,
+                  }}
+                  drawLayerSlot={drawLayerSlot}
+                  fileData={currentData}
+                  onLoaded={onLoaded}
+                  invalid={!valid}
+                  updateRegion={updateRegion}
+                  removeRegion={removeRegion}
+                  regions={result?.regions}
+                  activeToolPanel={audioContext?.activeToolPanel}
+                  footer={props.footer}
+                  isCheck={checkMode}
+                  {...clipConfig}
+                />
+              </div>
+              {(textConfigurable || clipTextConfigurable) && (
+                <AudioTextToolTextarea
+                  preContext={preContext}
+                  result={result}
+                  inputDisabled={inputDisabled}
+                  updateText={updateText}
+                  updateRegion={updateRegion}
+                  configList={configList}
+                  autofocus={false}
+                  textConfigurable={textConfigurable}
+                  clipTextConfigurable={clipTextConfigurable}
+                  clipAttributeList={clipAttributeList}
+                  clipAttributeConfigurable={clipAttributeConfigurable}
+                  clipTextList={clipTextList}
+                  isCheck={checkMode}
+                />
+              )}
+            </div>
+          </Content>
+          <Sider
+            className={`${layoutCls}__side`}
+            width={siderWidth ?? 240}
+            style={props.style?.sider}
+          >
+            <AudioSideBar
+              sider={sider}
+              config={config}
+              result={result}
+              updateTagResult={updateTagResult}
+              updateRegion={updateRegion}
+              isEdit={audioContext?.isEdit}
+              tagConfigurable={tagConfigurable}
+              clipConfigurable={clipConfigurable}
+            />
+          </Sider>
+          <PreviewResult />
+        </Layout>
+      </Spin>
+    </AudioClipProvider>
+  );
 };
 
-export default connect(a2MapStateToProps, null, null, { context: LabelBeeContext })(AudioAnnotate)
+export default connect(a2MapStateToProps, null, null, { context: LabelBeeContext })(AudioAnnotate);

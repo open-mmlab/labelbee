@@ -7,7 +7,7 @@ import { PointCloudContext } from './PointCloudContext';
 import { CommonToolUtils } from '@labelbee/lb-annotation';
 import { EPointCloudSegmentMode, PointCloudUtils } from '@labelbee/lb-utils';
 import { useAttribute } from './hooks/useAttribute';
-import { SetPointCloudLoading } from '@/store/annotation/actionCreators';
+import { SetAnnotationLoading } from '@/store/annotation/actionCreators';
 import { jsonParser } from '@/utils';
 
 interface IProps extends IA2MapStateProps {
@@ -42,13 +42,13 @@ const PointCloudSegmentListener: React.FC<IProps> = ({
        * 2. clear all segment data.
        *
        */
-      SetPointCloudLoading(dispatch, true);
+      SetAnnotationLoading(dispatch, true);
       ptSegmentInstance.emit('clearStash');
       ptSegmentInstance.emit('clearAllSegmentData');
       ptSegmentInstance.loadPCDFile(currentData?.url ?? '').then(() => {
         const segmentData = PointCloudUtils.getSegmentFromResultList(currentData?.result ?? '');
         ptSegmentInstance?.store?.updateCurrentSegment(segmentData);
-        SetPointCloudLoading(dispatch, false);
+        SetAnnotationLoading(dispatch, false);
       });
 
       // Update segmentData.

@@ -265,7 +265,7 @@ const TextToolSidebar: React.FC<IProps> = ({
   const showToggleText = stepConfig.tool === EVideoToolName.VideoTextTool
   return toolInstance && (
     <div className='textToolOperationMenu'>
-      {configList.map((i, index) => (
+      {configList?.map((i, index) => (
         <SingleTextInput
           config={i}
           key={i.key}

@@ -59,7 +59,8 @@
   }
   .attributeList {
     flex: 1;
-    overflow: auto;
+    overflow-x: hidden;
+    overflow-y: auto;
     :global {
       .sensebee-radio-group,
       .sensebee-radio-group-no-limit-height .ant-radio-group {

@@ -10,7 +10,14 @@ import { connect } from 'react-redux';
 import { LabelBeeContext, NLPContext } from '@/store/ctx';
 import { prefix } from '@/constant';
 import TextContent from './textContent';
-import { ITextData, INLPTextAnnotation, INLPResult, IExtraLayer, ISelectText, IExtraData } from './types';
+import {
+  ITextData,
+  INLPTextAnnotation,
+  INLPResult,
+  IExtraLayer,
+  ISelectText,
+  IExtraData,
+} from './types';
 import AnnotationTips from '@/views/MainView/annotationTips';
 import { getStepConfig } from '@/store/annotation/reducer';
 import { jsonParser } from '@/utils';
@@ -90,6 +97,9 @@ const NLPToolView: React.FC<IProps> = (props) => {
     }
     const textData = imgList[imgIndex]?.textData;
     setTextData(textData);
+    if (!NLPConfig?.attributeConfigurable) {
+      setVisibleResult([]);
+    }
   }, [imgIndex, NLPConfig]);
 
   useEffect(() => {
@@ -99,6 +109,7 @@ const NLPToolView: React.FC<IProps> = (props) => {
     const currentData = imgList[imgIndex] ?? {};
     const result = getCurrentResultFromResultList(currentData?.result);
     setResult(result);
+    setVisibleResult(result.textAnnotation);
   }, [imgIndex]);
 
   useEffect(() => {
@@ -131,6 +142,8 @@ const NLPToolView: React.FC<IProps> = (props) => {
 
   const setAttributeLockList = (list: string[]) => {
     setLockList(list);
+    toolInstanceRef.current.attributeLockList = list;
+    toolInstanceRef.current.emit('changeAttributeSidebar');
   };
 
   const setVisibleResult = (list: INLPTextAnnotation[]) => {
@@ -144,14 +157,16 @@ const NLPToolView: React.FC<IProps> = (props) => {
       indicatorDetermine: {},
       textAnnotation: [],
     });
+    setVisibleResult([]);
     updateSidebar();
   };
 
   const deleteTextAnnotation = (key: string) => {
-    setResult((origin: INLPResult) => ({
-      ...origin,
-      textAnnotation: origin.textAnnotation.filter((item: INLPTextAnnotation) => item.id !== key),
-    }));
+    const textAnnotation = result.textAnnotation.filter(
+      (item: INLPTextAnnotation) => item.id !== key,
+    );
+    setResult({ ...result, textAnnotation });
+    setVisibleResult(textAnnotation);
   };
 
   const onSelectionChange = (contentRef: RefObject<HTMLDivElement>, text: string) => {
@@ -201,18 +216,18 @@ const NLPToolView: React.FC<IProps> = (props) => {
       ) {
         return;
       }
-
-      setResult({
-        ...result,
-        textAnnotation: [
-          ...(result?.textAnnotation || []),
-          {
-            ...value,
-            attribute: selectedAttribute,
-          },
-        ],
-      });
-
+      if (NLPConfig?.attributeConfigurable) {
+        const list = result?.textAnnotation || [];
+        list.push({
+          ...value,
+          attribute: selectedAttribute,
+        });
+        const data = {
+          ...result,
+          textAnnotation: list,
+        };
+        setResult(data);
+      }
       window.getSelection()?.empty();
     }
   };
@@ -229,7 +244,7 @@ const NLPToolView: React.FC<IProps> = (props) => {
   };
 
   return (
-    <div className={NLPViewCls}>
+    <div className={NLPViewCls} id='NLPView'>
       <div className={`${NLPViewCls}-question`}>
         {showTips === true && <AnnotationTips tips={tips} />}
         <TextContent

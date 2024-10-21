@@ -3,6 +3,7 @@ import { TMatrix13Tuple, TMatrix14Tuple, ICalib } from '@labelbee/lb-utils';
 
 export interface IMappingImg {
   url: string;
+  fallbackUrl?: string;
   calib?: ICalib;
   path: string;
 }
@@ -36,3 +37,4 @@ export type LoadFileList = (
   page: number,
   pageSize: number,
 ) => Promise<{ fileList: IFileItem[]; total: number }>;
+export type GetImgIndexByExternal = (currentIndex: number, submitType: number) => void;
