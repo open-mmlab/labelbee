@@ -840,14 +840,8 @@ export const usePointCloudViews = (params?: IUsePointCloudViewsParams) => {
       setSelectedIDs([]);
     } else {
       setSelectedIDs(boxParams.id);
-      polygonOperation.selection.setSelectedIDs(newPolygon.id);
-      syncPointCloudViews({
-        omitView: PointCloudView.Top,
-        polygon: newPolygon,
-        boxParams,
-        zoom,
-        newPointCloudBoxList: newPointCloudList,
-      });
+      // 不需要重复通过polygonOperation.selection.setSelectedIDs设置2D视图选中id，会触发很多监听，耗时
+      // 不需要执行syncPointCloudViews这个方法，这个方法会更新全部框体，添加的情况下只需要更新当前框体就行
       if (intelligentFit) {
         synchronizeTopView(boxParams, newPolygon, topViewInstance, mainViewInstance);
       }
@@ -959,7 +953,12 @@ export const usePointCloudViews = (params?: IUsePointCloudViewsParams) => {
    * @param originPolygon
    * @param fromView Back or Side
    */
-  const viewUpdateBox = (newPolygon: any, originPolygon: any, fromView: string) => {
+  const viewUpdateBox = (
+    newPolygon: any,
+    originPolygon: any,
+    fromView: string,
+    trigger: EPointCloudBoxRenderTrigger = EPointCloudBoxRenderTrigger.Default,
+  ) => {
     if (selectedPointCloudBox) {
       let transfer2PointCloud;
       let newBoxParams: IPointCloudBox;
@@ -1021,12 +1020,15 @@ export const usePointCloudViews = (params?: IUsePointCloudViewsParams) => {
         (item) => item.id === newBoxParams.id,
       ) as IPointCloudBox;
 
-      syncPointCloudViews({
-        omitView: updateCurrentView ? undefined : fromView,
-        polygon: newPolygon,
-        boxParams: newBoxParams,
-        newPointCloudBoxList,
-      });
+      syncPointCloudViews(
+        {
+          omitView: updateCurrentView ? undefined : fromView,
+          polygon: newPolygon,
+          boxParams: newBoxParams,
+          newPointCloudBoxList,
+        },
+        trigger,
+      );
 
       return newPointCloudBoxList;
     }
@@ -1067,11 +1069,21 @@ export const usePointCloudViews = (params?: IUsePointCloudViewsParams) => {
   };
 
   const sideViewUpdateBox = (newPolygon: any, originPolygon: any) => {
-    viewUpdateBox(newPolygon, originPolygon, PointCloudView.Side);
+    viewUpdateBox(
+      newPolygon,
+      originPolygon,
+      PointCloudView.Side,
+      EPointCloudBoxRenderTrigger.Single,
+    );
   };
 
   const backViewUpdateBox = (newPolygon: any, originPolygon: any) => {
-    viewUpdateBox(newPolygon, originPolygon, PointCloudView.Back);
+    viewUpdateBox(
+      newPolygon,
+      originPolygon,
+      PointCloudView.Back,
+      EPointCloudBoxRenderTrigger.Single,
+    );
   };
 
   const topViewUpdatePoint = (updatePoint: IPointUnit, size: ISize) => {
@@ -1142,11 +1154,14 @@ export const usePointCloudViews = (params?: IUsePointCloudViewsParams) => {
     if (updatePointCloudList.length === 1) {
       const { newPolygon: polygon } = updateList[0];
       const newPointCloudBoxList = updateSelectedBoxes(updatePointCloudList);
-      syncPointCloudViews({
-        polygon,
-        boxParams: updatePointCloudList[0],
-        newPointCloudBoxList,
-      });
+      syncPointCloudViews(
+        {
+          polygon,
+          boxParams: updatePointCloudList[0],
+          newPointCloudBoxList,
+        },
+        EPointCloudBoxRenderTrigger.Single,
+      );
     } else {
       const newPointCloudBoxList = updateSelectedBoxes(updatePointCloudList);
       if (newPointCloudBoxList) {

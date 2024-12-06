@@ -284,10 +284,14 @@ class PointCloud2dOperation extends PolygonOperation {
   };
 
   public renderdrawTrackID(polygon: IPolygonData) {
-    const pointList = AxisUtils.changePointListByZoom(polygon.pointList, this.zoom, this.currentPos);
-    const endPoint = pointList[pointList.length - 1];
-    const trackID = polygon?.trackID;
-    DrawUtils.drawText(this.canvas, endPoint, `${trackID}`, {
+    if (!polygon?.pointList?.length) return; // 保护性校验
+
+    // 提取点云数据最后一个点并进行变换
+    const lastPoint = polygon.pointList[polygon.pointList.length - 1];
+    const transformedPoint = AxisUtils.changePointByZoom(lastPoint, this.zoom, this.currentPos);
+
+    const trackID = polygon?.trackID?.toString() || ''; // 确保trackID是字符串
+    DrawUtils.drawText(this.canvas, transformedPoint, trackID, {
       textAlign: 'center',
       color: 'white',
       ...DEFAULT_TEXT_OFFSET,

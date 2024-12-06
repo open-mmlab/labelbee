@@ -603,9 +603,7 @@ export default class DrawUtils {
     text: string,
     options: Partial<IDrawTextConfig> = {},
   ): void {
-    if (!text) {
-      return;
-    }
+    if (!text) return;
 
     const ctx: CanvasRenderingContext2D = canvas.getContext('2d')!;
     const {
@@ -622,15 +620,20 @@ export default class DrawUtils {
       lineHeight,
     } = options;
 
+    if (!ctx) return; // 防止 getContext 失败
+
     ctx.save();
-    ctx.textAlign = textAlign;
-    ctx.fillStyle = color ?? 'white';
-    ctx.font = font;
-    ctx.shadowColor = shadowColor;
-    ctx.shadowOffsetX = shadowOffsetX;
-    ctx.shadowOffsetY = shadowOffsetY;
-    ctx.shadowBlur = shadowBlur;
-    this.wrapText(canvas, `${text}`, startPoint.x + offsetX, startPoint.y + offsetY, textMaxWidth, lineHeight);
+    Object.assign(ctx, {
+      textAlign,
+      fillStyle: color ?? 'white',
+      font,
+      shadowColor,
+      shadowOffsetX,
+      shadowOffsetY,
+      shadowBlur,
+    });
+
+    this.wrapText(canvas, text, startPoint.x + offsetX, startPoint.y + offsetY, textMaxWidth, lineHeight);
     ctx.restore();
   }
 

@@ -231,7 +231,8 @@ export const calcResetAreasAndBoxIds = (
             modifiedBoxIds.push(modifiedBox.box.id);
             if (
               modifiedBox.modifiedType === EPointCloudBoxSingleModifiedType.ChangeSize ||
-              modifiedBox.modifiedType === EPointCloudBoxSingleModifiedType.Move
+              modifiedBox.modifiedType === EPointCloudBoxSingleModifiedType.Move ||
+              modifiedBox.modifiedType === EPointCloudBoxSingleModifiedType.ChangeDepth
             ) {
               // Use the oldBox box here to calculate intersection
               const oldBox = oldList.find((item) => item.id === modifiedBox.box.id)!;

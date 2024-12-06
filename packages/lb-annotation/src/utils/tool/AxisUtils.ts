@@ -121,6 +121,10 @@ export default class AxisUtils {
     zoom: number,
     currentPos: ICoordinate = { x: 0, y: 0 },
   ) {
+    // 无需变换，提前Return，减少不必要的判断
+    if (zoom === 1 && currentPos.x === 0 && currentPos.y === 0) {
+      return point;
+    }
     return {
       ...point,
       x: point.x * zoom + currentPos.x,

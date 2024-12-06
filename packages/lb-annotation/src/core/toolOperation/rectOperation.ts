@@ -862,117 +862,131 @@ class RectOperation extends BasicToolOperation {
     this.render();
   }
 
+  private lastMouseMoveTime = 0; // 记录上次鼠标移动的时间
+
+  private mouseMoveThrottle = 16; // 节流时间（毫秒）
+
   public onMouseMove(e: MouseEvent) {
-    if (super.onMouseMove(e) || this.forbidMouseOperation || !this.imgInfo) {
-      return;
-    }
+    requestAnimationFrame(() => {
+      const now = Date.now();
 
-    const coordinateZoom = this.getCoordinateUnderZoom(e);
+      // 节流：如果上次调用时间未超过设定的时间间隔，则跳过
+      if (now - this.lastMouseMoveTime < this.mouseMoveThrottle) {
+        return;
+      }
+      this.lastMouseMoveTime = now;
 
-    const coordinate = AxisUtils.changeDrawOutsideTarget(
-      coordinateZoom,
-      { x: 0, y: 0 },
-      this.imgInfo,
-      this.drawOutSideTarget,
-      this.basicResult,
-      this.zoom,
-    );
-
-    if (this.selectedIDs.length > 0 && this.dragInfo) {
-      this.onDragMove(coordinate);
-      return;
-    }
-
-    if (this.selectedRectID) {
-      const hoverRectPointIndex = this.getHoverRectPointIndex(e);
-
-      if (hoverRectPointIndex !== this.hoverRectPointIndex) {
-        this.hoverRectPointIndex = hoverRectPointIndex;
-        this.hoverRectEdgeIndex = -1;
-        this.render();
+      if (super.onMouseMove(e) || this.forbidMouseOperation || !this.imgInfo) {
         return;
       }
 
-      if (this.hoverRectPointIndex === -1) {
-        // 边的检测
-        const hoverRectEdgeIndex = this.getHoverRectEdgeIndex(e);
+      const coordinateZoom = this.getCoordinateUnderZoom(e);
 
-        if (hoverRectEdgeIndex !== this.hoverRectEdgeIndex) {
-          this.hoverRectEdgeIndex = hoverRectEdgeIndex;
+      const coordinate = AxisUtils.changeDrawOutsideTarget(
+        coordinateZoom,
+        { x: 0, y: 0 },
+        this.imgInfo,
+        this.drawOutSideTarget,
+        this.basicResult,
+        this.zoom,
+      );
+
+      if (this.selectedIDs.length > 0 && this.dragInfo) {
+        this.onDragMove(coordinate);
+        return;
+      }
+
+      if (this.selectedRectID) {
+        const hoverRectPointIndex = this.getHoverRectPointIndex(e);
+
+        if (hoverRectPointIndex !== this.hoverRectPointIndex) {
+          this.hoverRectPointIndex = hoverRectPointIndex;
+          this.hoverRectEdgeIndex = -1;
           this.render();
           return;
         }
-      }
-    }
 
-    const hoverRectID = this.getHoverRectID(e);
-    const oldHoverRectID = this.hoverRectID;
-    this.hoverRectID = hoverRectID;
-    if (hoverRectID !== oldHoverRectID) {
-      this.render();
-    }
+        if (this.hoverRectPointIndex === -1) {
+          // 边的检测
+          const hoverRectEdgeIndex = this.getHoverRectEdgeIndex(e);
 
-    if (this.enableAddRect && this.drawingRect && this.firstClickCoord) {
-      let { x, y } = this.firstClickCoord;
-      let { width, height } = this.drawingRect;
-
-      width = Math.abs(x - coordinate.x); // zoom 下的 width
-      height = Math.abs(y - coordinate.y);
-      if (coordinate.x < x) {
-        x = coordinate.x;
-      }
-      if (coordinate.y < y) {
-        y = coordinate.y;
-      }
-
-      if (this.drawOutSideTarget === false) {
-        if (this.basicResult?.pointList?.length > 0) {
-          // changeDrawOutsideTarget 最好还是在这里下功夫这里暂时进行多边形的判断
-          if (
-            RectUtils.isRectNotInPolygon(
-              {
-                ...this.drawingRect,
-                x,
-                y,
-                width,
-                height,
-              },
-              getPolygonPointUnderZoom(this.basicResult.pointList, this.zoom),
-            )
-          ) {
+          if (hoverRectEdgeIndex !== this.hoverRectEdgeIndex) {
+            this.hoverRectEdgeIndex = hoverRectEdgeIndex;
+            this.render();
             return;
           }
         }
-
-        if (coordinate.x < 0) {
-          width = Math.abs(this.firstClickCoord.x);
-          x = 0;
-        }
-        if (coordinate.y < 0) {
-          height = Math.abs(this.firstClickCoord.y);
-          y = 0;
-        }
-        if (this.imgInfo) {
-          if (x + width > this.imgInfo.width) {
-            width = Math.abs(this.imgInfo.width - x);
-          }
-          if (y + height > this.imgInfo.height) {
-            height = Math.abs(this.imgInfo.height - y);
-          }
-        }
       }
 
-      this.drawingRect = {
-        ...this.drawingRect,
-        x,
-        y,
-        width,
-        height,
-      };
-      this.render();
-    }
+      const hoverRectID = this.getHoverRectID(e);
+      const oldHoverRectID = this.hoverRectID;
+      this.hoverRectID = hoverRectID;
+      if (hoverRectID !== oldHoverRectID) {
+        this.render();
+      }
 
-    return undefined;
+      if (this.enableAddRect && this.drawingRect && this.firstClickCoord) {
+        let { x, y } = this.firstClickCoord;
+        let { width, height } = this.drawingRect;
+
+        width = Math.abs(x - coordinate.x); // zoom 下的 width
+        height = Math.abs(y - coordinate.y);
+        if (coordinate.x < x) {
+          x = coordinate.x;
+        }
+        if (coordinate.y < y) {
+          y = coordinate.y;
+        }
+
+        if (this.drawOutSideTarget === false) {
+          if (this.basicResult?.pointList?.length > 0) {
+            // changeDrawOutsideTarget 最好还是在这里下功夫这里暂时进行多边形的判断
+            if (
+              RectUtils.isRectNotInPolygon(
+                {
+                  ...this.drawingRect,
+                  x,
+                  y,
+                  width,
+                  height,
+                },
+                getPolygonPointUnderZoom(this.basicResult.pointList, this.zoom),
+              )
+            ) {
+              return;
+            }
+          }
+
+          if (coordinate.x < 0) {
+            width = Math.abs(this.firstClickCoord.x);
+            x = 0;
+          }
+          if (coordinate.y < 0) {
+            height = Math.abs(this.firstClickCoord.y);
+            y = 0;
+          }
+          if (this.imgInfo) {
+            if (x + width > this.imgInfo.width) {
+              width = Math.abs(this.imgInfo.width - x);
+            }
+            if (y + height > this.imgInfo.height) {
+              height = Math.abs(this.imgInfo.height - y);
+            }
+          }
+        }
+
+        this.drawingRect = {
+          ...this.drawingRect,
+          x,
+          y,
+          width,
+          height,
+        };
+        this.render();
+      }
+
+      return undefined;
+    });
   }
 
   public setHighlightVisible(highlightVisible: boolean) {

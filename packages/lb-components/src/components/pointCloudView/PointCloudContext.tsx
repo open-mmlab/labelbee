@@ -533,17 +533,17 @@ export const PointCloudProvider: React.FC<PropsWithChildren<{}>> = ({ children }
     };
 
     const setSelectedIDs = (selectedIDs?: string[] | string) => {
-      if (selectedIDs === undefined) {
-        setSelectedIDsState([]);
+      let newSelectedIDs: string[] = [];
+
+      if (selectedIDs === undefined || selectedIDs === '') {
+        newSelectedIDs = [];
+      } else if (typeof selectedIDs === 'string') {
+        newSelectedIDs = [selectedIDs];
+      } else if (Array.isArray(selectedIDs)) {
+        newSelectedIDs = selectedIDs.length > 1 ? Array.from(new Set(selectedIDs)) : selectedIDs;
       }
 
-      if (typeof selectedIDs === 'string') {
-        setSelectedIDsState([selectedIDs]);
-      }
-
-      if (Array.isArray(selectedIDs)) {
-        setSelectedIDsState(Array.from(new Set(selectedIDs)));
-      }
+      setSelectedIDsState(newSelectedIDs);
     };
 
     /**

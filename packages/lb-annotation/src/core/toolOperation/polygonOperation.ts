@@ -1278,7 +1278,6 @@ class PolygonOperation extends BasicToolOperation {
     this.dragInfo!.dragPrevCoord = this.getCoordinateUnderZoom(e);
 
     this.setPolygonList(newPolygonList);
-    this.render();
   }
 
   /**
@@ -1397,44 +1396,85 @@ class PolygonOperation extends BasicToolOperation {
     return selectedPointList;
   }
 
-  public onMouseMove(e: MouseEvent) {
-    if (super.onMouseMove(e) || this.forbidMouseOperation || !this.imgInfo) {
-      return;
+  private lastMouseMoveTime = 0; // 记录上次鼠标移动的时间
+
+  private mouseMoveThrottle = 16; // 节流时间（毫秒）
+
+  private determineTrigger(e: MouseEvent): string {
+    if (this.isDrag) {
+      return 'drag';
+    }
+
+    if (this.dragInfo) {
+      return 'dragSingle';
+    }
+
+    let trigger = '';
+    const newHoverID = this.getHoverID(e);
+    if (this.hoverID !== newHoverID) {
+      this.hoverID = newHoverID;
+      trigger = '';
+    } else {
+      trigger = 'move';
     }
 
     let hoverPointIndex = -1;
     let hoverEdgeIndex = -1;
-
+    // 高亮逻辑判断完毕后需要判断当前选中的状态更新逻辑
     const { selectedID } = this;
     if (selectedID) {
-      this.hoverEdgeIndex = -1;
-      this.hoverPointIndex = -1;
-
       hoverPointIndex = this.getHoverPointIndex(e);
-
       // 注意： 点的优先级大于边
       if (hoverPointIndex > -1) {
-        this.hoverPointIndex = hoverPointIndex;
+        if (this.hoverPointIndex !== hoverPointIndex) {
+          trigger = '';
+        } else {
+          // 在同一个点上进行移动的时候不需要更新和渲染
+          trigger = 'noRender';
+        }
       } else {
         hoverEdgeIndex = this.getHoverEdgeIndex(e);
-        this.hoverEdgeIndex = hoverEdgeIndex;
+        if (this.hoverEdgeIndex !== hoverEdgeIndex) {
+          trigger = '';
+        } else {
+          // 在同一条边上进行移动的时候不需要更新和渲染
+          trigger = 'noRender';
+        }
       }
+      this.hoverEdgeIndex = hoverEdgeIndex;
+      this.hoverPointIndex = hoverPointIndex;
     }
 
-    if (this.drawingPointList.length > 0) {
-      // 编辑中无需 hover操作
-      return;
-    }
+    return trigger;
+  }
 
-    const newHoverID = this.getHoverID(e);
-    if (this.hoverID !== newHoverID) {
-      this.hoverID = newHoverID;
-      this.render();
-    }
+  public onMouseMove(e: MouseEvent) {
+    requestAnimationFrame(() => {
+      const now = Date.now();
 
-    if (this.selectedIDs.length > 0 && this.dragInfo) {
-      this.onDragMove(e);
-    }
+      // 节流：如果上次调用时间未超过设定的时间间隔，则跳过
+      if (now - this.lastMouseMoveTime < this.mouseMoveThrottle) {
+        return;
+      }
+      this.lastMouseMoveTime = now;
+      if (super.onMouseMove(e, false) || this.forbidMouseOperation || !this.imgInfo) {
+        return;
+      }
+
+      if (this.drawingPointList.length > 0) {
+        // 编辑中无需 hover操作
+        this.render();
+        return;
+      }
+
+      const trigger = this.determineTrigger(e);
+
+      if (this.selectedIDs.length > 0 && this.dragInfo) {
+        this.onDragMove(e);
+      }
+
+      this.render(trigger);
+    });
   }
 
   /**
@@ -1741,9 +1781,11 @@ class PolygonOperation extends BasicToolOperation {
     }
   }
 
-  public renderPolygon() {
+  public renderPolygon(trigger?: string) {
     // 1. 静态多边形
-    this.renderStaticPolygon();
+    if (trigger !== 'move') {
+      this.renderStaticPolygon();
+    }
 
     // 2. hover 多边形
     this.renderHoverPolygon();
@@ -1860,52 +1902,65 @@ class PolygonOperation extends BasicToolOperation {
     return result;
   }
 
-  public render() {
+  public render(trigger?: string) {
     if (!this.ctx) {
       return;
     }
-
-    super.render();
-    this.renderPolygon();
+    if (trigger !== 'move') {
+      super.render();
+    }
+    if (trigger !== 'drag' && trigger !== 'dragSingle') {
+      this.renderPolygon(trigger);
+    }
+    if (trigger === 'dragSingle') {
+      this.renderSelectedPolygons();
+    }
     this.renderCursorLine(this.getLineColor(this.defaultAttribute));
   }
 
   public renderCursorLine(lineColor: string) {
-    super.renderCursorLine(lineColor);
-    if (this.isCombined) {
+    requestAnimationFrame(() => {
+      this.clearOffscreenCanvas();
       const { x, y } = this.coord;
-      const padding = 10; // 框的边界
-      const rectWidth = 186; // 框的宽度
-      const rectHeight = 32; // 框的高度
-      DrawUtils.drawRectWithFill(
-        this.canvas,
-        {
-          x: x + padding,
-          y: y - padding * 4 - 1,
-          width: rectWidth,
-          height: rectHeight,
-        } as IRect,
-        { color: 'black' },
-      );
 
-      DrawUtils.drawText(this.canvas, { x, y }, i18n.t('ClickAnotherPolygon'), {
-        textAlign: 'center',
-        color: 'white',
-        offsetX: rectWidth / 2 + padding,
-        offsetY: -(rectHeight / 2 + padding / 2),
-      });
+      DrawUtils.drawLine(this.offscreenCanvas, { x: 0, y }, { x: 10000, y }, { color: lineColor });
+      DrawUtils.drawLine(this.offscreenCanvas, { x, y: 0 }, { x, y: 10000 }, { color: lineColor });
+      DrawUtils.drawCircleWithFill(this.offscreenCanvas, { x, y }, 1, { color: 'white' });
 
-      DrawUtils.drawRect(
-        this.canvas,
-        {
-          x: x - padding,
-          y: y - padding,
-          width: padding * 2,
-          height: padding * 2,
-        } as IRect,
-        { lineDash: [6], color: 'white' },
-      );
-    }
+      if (this.isCombined) {
+        const padding = 10; // 框的边界
+        const rectWidth = 186; // 框的宽度
+        const rectHeight = 32; // 框的高度
+        DrawUtils.drawRectWithFill(
+          this.canvas,
+          {
+            x: x + padding,
+            y: y - padding * 4 - 1,
+            width: rectWidth,
+            height: rectHeight,
+          } as IRect,
+          { color: 'black' },
+        );
+
+        DrawUtils.drawText(this.canvas, { x, y }, i18n.t('ClickAnotherPolygon'), {
+          textAlign: 'center',
+          color: 'white',
+          offsetX: rectWidth / 2 + padding,
+          offsetY: -(rectHeight / 2 + padding / 2),
+        });
+
+        DrawUtils.drawRect(
+          this.canvas,
+          {
+            x: x - padding,
+            y: y - padding,
+            width: padding * 2,
+            height: padding * 2,
+          } as IRect,
+          { lineDash: [6], color: 'white' },
+        );
+      }
+    });
   }
 
   /** 撤销 */
