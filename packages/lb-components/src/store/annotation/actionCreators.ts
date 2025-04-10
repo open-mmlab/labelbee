@@ -493,6 +493,10 @@ const SubmitAndChangeFileIndex = async (
 ) => {
   dispatch(ToSubmitFileData(submitType));
   await dispatch(SubmitHandler(submitType));
+  // 等待reducer操作完成数据更新
+  await new Promise<void>((resolve) => {
+    setTimeout(resolve, 300);
+  });
   dispatch(LoadFileAndFileData(nextIndex, nextBasicIndex));
 };
 
