@@ -865,7 +865,9 @@ $hotkey-container-padding: 7px;
 }
 
 .tagOperationMenu {
+  height: 100%;
   .main {
+    height: 100%;
     padding: 8px 8px;
     overflow: auto;
     -moz-user-select: none;
