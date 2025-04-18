@@ -211,16 +211,13 @@ const TagSidebar: React.FC<IProps> = ({ toolInstance, imgIndex }) => {
       );
     });
   };
-  const height = window.innerHeight - 61 - 80;
 
   return (
     <div className='tagOperationMenu' ref={sidebarRef}>
       {inputList?.length === 0 ? (
         <div style={{ padding: 20, textAlign: 'center' }}>{t('NoConfiguration')}</div>
       ) : (
-        <div className='main' style={{ height }}>
-          {labelPanel(inputList)}
-        </div>
+        <div className='main'>{labelPanel(inputList)}</div>
       )}
     </div>
   );
