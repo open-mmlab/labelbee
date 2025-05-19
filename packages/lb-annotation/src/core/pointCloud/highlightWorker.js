@@ -7,9 +7,13 @@
  *  3. Refactor highlightIndex highlight logic
  *  4. resetAreas currently only supports one area, TODO supports multiple areas, personally feel the priority is not high
  */
+import { QuadTree25D, preprocessCuboid, getBoundaryFromPoints } from './QuadTree25D';
+
 const REMAINED_COLOR_FLAG = [-1, -1, -1];
 
 let isLastRender2DToggleOn = false;
+let quadTree = null;
+const zColorCache = new Map();
 
 /**
  * Generate index with a fixed range.
@@ -37,41 +41,39 @@ function getIndex(z) {
 function createColorMapJet() {
   let s;
   const p = new Array(256).fill('').map(() => new Array(3).fill(''));
-  for (let i = 0; i < 20; i++) {
-    for (s = 0; s < 32; s++) {
-      p[s][0] = 128 + 4 * s;
-      p[s][1] = 0;
-      p[s][2] = 0;
-    }
-    p[32][0] = 255;
-    p[32][1] = 0;
-    p[32][2] = 0;
-    for (s = 0; s < 63; s++) {
-      p[33 + s][0] = 255;
-      p[33 + s][1] = 4 + 4 * s;
-      p[33 + s][2] = 0;
-    }
-    p[96][0] = 254;
-    p[96][1] = 255;
-    p[96][2] = 2;
-    for (s = 0; s < 62; s++) {
-      p[97 + s][0] = 250 - 4 * s;
-      p[97 + s][1] = 255;
-      p[97 + s][2] = 6 + 4 * s;
-    }
-    p[159][0] = 1;
-    p[159][1] = 255;
-    p[159][2] = 254;
-    for (s = 0; s < 64; s++) {
-      p[160 + s][0] = 0;
-      p[160 + s][1] = 252 - s * 4;
-      p[160 + s][2] = 255;
-    }
-    for (s = 0; s < 32; s++) {
-      p[224 + s][0] = 0;
-      p[224 + s][1] = 0;
-      p[224 + s][2] = 252 - 4 * s;
-    }
+  for (s = 0; s < 32; s++) {
+    p[s][0] = 128 + 4 * s;
+    p[s][1] = 0;
+    p[s][2] = 0;
+  }
+  p[32][0] = 255;
+  p[32][1] = 0;
+  p[32][2] = 0;
+  for (s = 0; s < 63; s++) {
+    p[33 + s][0] = 255;
+    p[33 + s][1] = 4 + 4 * s;
+    p[33 + s][2] = 0;
+  }
+  p[96][0] = 254;
+  p[96][1] = 255;
+  p[96][2] = 2;
+  for (s = 0; s < 62; s++) {
+    p[97 + s][0] = 250 - 4 * s;
+    p[97 + s][1] = 255;
+    p[97 + s][2] = 6 + 4 * s;
+  }
+  p[159][0] = 1;
+  p[159][1] = 255;
+  p[159][2] = 254;
+  for (s = 0; s < 64; s++) {
+    p[160 + s][0] = 0;
+    p[160 + s][1] = 252 - s * 4;
+    p[160 + s][2] = 255;
+  }
+  for (s = 0; s < 32; s++) {
+    p[224 + s][0] = 0;
+    p[224 + s][1] = 0;
+    p[224 + s][2] = 252 - 4 * s;
   }
   return p;
 }
@@ -85,7 +87,6 @@ export function isInPolygon(checkPoint, polygonPoints, lineType = 0) {
   let p1;
   let p2;
 
-  polygonPoints = [...polygonPoints];
   if (lineType === 1) {
     polygonPoints = createSmoothCurvePoints(
       polygonPoints.reduce((acc, cur) => {
@@ -120,36 +121,31 @@ export function isInPolygon(checkPoint, polygonPoints, lineType = 0) {
   return true;
 }
 
-function getNewColorByBox({ zMin, zMax, polygonPointList, attribute, x, y, z, colorList, valid }) {
-  const inPolygon = isInPolygon({ x, y }, polygonPointList);
-  if (inPolygon && z >= zMin && z <= zMax) {
-    if (valid === false) {
-      /** INVALID-COlOR rgba(255, 51, 51, 1) - It is same with lb-utils( /src/constant/style.ts ) */
-      return [1, 103 / 255, 102 / 255];
-    }
-
-    if (colorList[attribute]) {
-      return colorList[attribute].rgba.slice(0, 3).map((v) => v / 255);
-    }
-
-    return [1, 0, 0];
-  }
-}
-
 /**
  * Update the color of points based on z-value
  * @param {number} z - z-coordinate value of a point
  */
 function getPointColorByZ(z) {
+  const zKey = Math.round(z * 1000) / 1000;
+  if (zColorCache.has(zKey)) {
+    return zColorCache.get(zKey);
+  }
+
   const index = getIndex(z);
   const newColor = COLOR_MAP_JET[index];
   const [r, g, b] = newColor;
-  return [r / 255, g / 255, b / 255];
+  const colorValue = [r / 255, g / 255, b / 255];
+
+  zColorCache.set(zKey, colorValue);
+
+  return colorValue;
 }
 
 onmessage = function onmessage(e) {
   const { position: points, color, cuboidList, colorList, highlightIndex } = e.data;
   let { modifiedBoxIds = [], resetAreas = [] } = e.data;
+
+  zColorCache.clear();
 
   let num = 0;
   function updateNum() {
@@ -187,6 +183,18 @@ onmessage = function onmessage(e) {
   const toRenderCuboidList = modifiedBoxIds.length
     ? cuboidList.filter((v) => modifiedBoxIds.includes(v.id))
     : cuboidList;
+
+  if (quadTree) {
+    quadTree.clear();
+  } else {
+    const boundary = getBoundaryFromPoints(points);
+    quadTree = new QuadTree25D(boundary, 32, 6);
+  }
+  toRenderCuboidList.forEach((cuboid) => {
+    const processedCuboid = preprocessCuboid(cuboid, colorList);
+    quadTree.insert(processedCuboid);
+  });
+
   //  Loop to determine if it is in range
   for (let i = 0; i < points.length; i += 3) {
     const x = points[i];
@@ -204,26 +212,14 @@ onmessage = function onmessage(e) {
     } else if (resetAreas.length || modifiedBoxIds.length) {
       // not init, Non-Single Box Delete
       let found = false;
-      toRenderCuboidList.some((cuboid) => {
-        const insideColor = getNewColorByBox({
-          polygonPointList: cuboid.polygonPointList,
-          zMin: cuboid.zMin,
-          zMax: cuboid.zMax,
-          x,
-          y,
-          z,
-          attribute: cuboid.attribute,
-          colorList,
-          valid: cuboid.valid,
-        });
-        if (insideColor) {
-          updateNum();
-          newColorInfo = insideColor;
-          found = true;
-          return true; // Find color inside box, stop traversing
-        }
-        return false; // continue traversing
-      });
+
+      const candidate = quadTree.queryPoint({ x, y, z });
+
+      if (candidate) {
+        updateNum();
+        newColorInfo = candidate.colorInfo;
+        found = true;
+      }
 
       if (!found && resetAreas.length) {
         found = resetAreas.some((area) => {
@@ -250,26 +246,12 @@ onmessage = function onmessage(e) {
         }
       }
     } else {
-      // init
-      toRenderCuboidList.some((cuboid) => {
-        const insideColor = getNewColorByBox({
-          polygonPointList: cuboid.polygonPointList,
-          zMin: cuboid.zMin,
-          zMax: cuboid.zMax,
-          x,
-          y,
-          z,
-          attribute: cuboid.attribute,
-          colorList,
-          valid: cuboid.valid,
-        });
-        if (insideColor) {
-          updateNum();
-          newColorInfo = insideColor;
-          return true;
-        }
-        return false;
-      });
+      const candidate = quadTree.queryPoint({ x, y, z });
+
+      if (candidate) {
+        updateNum();
+        newColorInfo = candidate.colorInfo;
+      }
     }
 
     const isPointHighlightBy2D = (index) => {

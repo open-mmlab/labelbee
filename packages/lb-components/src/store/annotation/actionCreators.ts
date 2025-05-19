@@ -491,6 +491,7 @@ const SubmitAndChangeFileIndex = async (
   submitType: ESubmitType,
   nextBasicIndex?: number,
 ) => {
+  SetAnnotationLoading(dispatch, true);
   dispatch(ToSubmitFileData(submitType));
   await dispatch(SubmitHandler(submitType));
   dispatch(LoadFileAndFileData(nextIndex, nextBasicIndex));
