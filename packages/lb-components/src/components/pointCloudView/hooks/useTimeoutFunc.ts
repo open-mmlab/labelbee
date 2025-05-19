@@ -8,7 +8,7 @@ import { useMemoizedFn } from 'ahooks';
 export const isNumber = (value: unknown): value is number => typeof value === 'number';
 
 const useTimeoutFunc = <T extends (...args: any[]) => void>(fn: T, delay?: number) => {
-  const timerCallback = useMemoizedFn(fn);
+  const timerCallback = useMemoizedFn(fn) as Function;
   const timerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   const clear = useCallback(() => {
