@@ -4,6 +4,7 @@ import MathUtils from '@/utils/MathUtils';
 import AxisUtils from '@/utils/tool/AxisUtils';
 import RectUtils from '@/utils/tool/RectUtils';
 import TagUtils from '@/utils/tool/TagUtils';
+import { i18n } from '@labelbee/lb-utils';
 import { DEFAULT_TEXT_SHADOW, EDragStatus, ESortDirection } from '../../constant/annotation';
 import { EDragTarget, EOperationMode } from '../../constant/tool';
 import EKeyCode from '../../constant/keyCode';
@@ -19,7 +20,6 @@ import uuid from '../../utils/uuid';
 import { BasicToolOperation, IBasicToolOperationProps } from './basicToolOperation';
 import TextAttributeClass from './textAttributeClass';
 import Selection, { SetDataList } from './Selection';
-import { i18n } from '@labelbee/lb-utils';
 
 interface IRectOperationProps extends IBasicToolOperationProps {
   drawOutSideTarget?: boolean; // 是否可以在边界外进行标注

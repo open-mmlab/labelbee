@@ -12,6 +12,7 @@ import MarkdownView from '@/components/markdownView';
 import LatexEditor from '@/components/latexEditor';
 import styles from './index.module.scss';
 import LongText from '@/components/longText';
+import { convertLatexFormat } from '@/utils/LLM';
 
 interface IProps {
   newAnswer?: string;
@@ -141,7 +142,7 @@ const TextEditor = (props: IProps) => {
               <div className={styles.outputDisplay}>
                 <div className={styles.title}>{t('OutputDisplay')}</div>
                 <div className={styles.content}>
-                  {inputValue ? <MarkdownView value={markdownText} /> : ''}
+                  {inputValue ? <MarkdownView value={convertLatexFormat(markdownText)} /> : ''}
                 </div>
               </div>
             );

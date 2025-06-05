@@ -8,6 +8,7 @@ import LatexEditor from '@/components/latexEditor';
 import styles from './index.module.scss';
 import MarkdownView from '@/components/markdownView';
 import LongText from '@/components/longText';
+import { convertLatexFormat } from '@/utils/LLM';
 
 interface IProps {
   textAttribute: ITextList[];
@@ -184,7 +185,11 @@ const TextInputBox = (props: IProps) => {
                             <div className={styles.outputDisplay}>
                               <div className={styles.title}>{t('OutputDisplay')}</div>
                               <div className={styles.content}>
-                                {inputValue ? <MarkdownView value={markdownText} /> : ''}
+                                {inputValue ? (
+                                  <MarkdownView value={convertLatexFormat(markdownText)} />
+                                ) : (
+                                  ''
+                                )}
                               </div>
                             </div>
                           );
