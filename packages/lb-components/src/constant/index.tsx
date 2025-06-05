@@ -27,6 +27,7 @@ export const componentCls = `${prefix}-component`;
 export enum EDataFormatType {
   Default = 'default', // 原文
   Markdown = 'markdown', // markdown
+  Latex = 'latex', // latex  
 }
 
 // LLM工具的数据类型

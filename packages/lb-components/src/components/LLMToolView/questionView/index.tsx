@@ -23,6 +23,7 @@ import Header from './components/header';
 import ImgView from './components/imgView';
 import { isString } from 'lodash';
 import AudioView from './components/audioView';
+import { convertLatexFormat } from '@/utils/LLM';
 
 interface IProps {
   hoverKey?: number;
@@ -59,6 +60,11 @@ export const RenderAnswer = ({
   if (dataFormatType === EDataFormatType.Markdown) {
     return <MarkdownView value={i?.newAnswer ?? i?.answer} />;
   }
+
+  if (dataFormatType === EDataFormatType.Latex) {
+    return <MarkdownView value={convertLatexFormat(i?.newAnswer ?? i?.answer)} />;
+  }
+
   if (isTextControl) {
     return (
       <div style={{ width: '100%', overflowWrap: 'break-word' }}>

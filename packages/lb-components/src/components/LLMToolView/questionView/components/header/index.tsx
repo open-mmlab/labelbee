@@ -8,12 +8,13 @@ import { useTranslation } from 'react-i18next';
 import { Resizable } from 're-resizable';
 import { Radio, Image, Empty } from 'antd';
 import { EDataFormatType, prefix } from '@/constant';
-import { FileTextOutlined } from '@ant-design/icons';
+import { FileTextOutlined, FileMarkdownOutlined } from '@ant-design/icons';
 import MarkdownView from '@/components/markdownView';
 import { isObject, isString } from 'lodash';
 import { i18n } from '@labelbee/lb-utils';
 import ImgFailCn from '@/assets/annotation/LLMTool/imgFail_cn.svg';
 import ImgFailEn from '@/assets/annotation/LLMTool/imgFail_en.svg';
+import { convertLatexFormat } from '@/utils/LLM';
 
 interface IProps {
   question:
@@ -74,7 +75,17 @@ export const RenderQuestion = ({
 
   return (
     <div style={{ whiteSpace: 'pre-wrap' }}>
-      {dataFormatType === EDataFormatType.Markdown ? <MarkdownView value={textValue} /> : textValue}
+      {(() => {
+        // 根据不同的数据格式类型渲染不同的视图
+        switch (dataFormatType) {
+          case EDataFormatType.Markdown:
+            return <MarkdownView value={textValue} />;
+          case EDataFormatType.Latex:
+            return <MarkdownView value={convertLatexFormat(textValue)} />;
+          default:
+            return textValue;
+        }
+      })()}
     </div>
   );
 };
@@ -140,6 +151,9 @@ export const ToggleDataFormatType = (props: {
           style={{ textAlign: 'center', width: '52px' }}
         >
           <FileTextOutlined />
+        </Radio.Button>
+        <Radio.Button value={EDataFormatType.Latex} style={{ textAlign: 'center', width: '52px' }}>
+          <FileMarkdownOutlined />
         </Radio.Button>
       </Radio.Group>
       <span style={{ marginLeft: '8px', width: '4px', background: '#1890ff' }} />

@@ -11,6 +11,7 @@ import { InfoCircleFilled, SyncOutlined } from '@ant-design/icons';
 import { LLMViewCls } from '../questionView';
 import { ILLMToolConfig, IModelAPIAnswer } from '../types';
 import { i18n } from '@labelbee/lb-utils';
+import { convertLatexFormat } from '@/utils/LLM';
 
 interface IProps {
   dataFormatType: EDataFormatType;
@@ -30,6 +31,10 @@ const RenderContent = ({
 }) => {
   if (dataFormatType === EDataFormatType.Markdown) {
     return <MarkdownView value={answer} />;
+  }
+
+  if (dataFormatType === EDataFormatType.Latex) {
+    return <MarkdownView value={convertLatexFormat(answer)} />;
   }
 
   return <span>{answer}</span>;
