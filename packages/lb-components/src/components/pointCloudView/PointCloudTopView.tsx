@@ -47,6 +47,7 @@ import _ from 'lodash';
 import PointCloudSizeSlider from './components/PointCloudSizeSlider';
 import { useHistory } from './hooks/useHistory';
 import TitleButton from './components/TitleButton';
+import { useDebounceFn } from 'ahooks';
 
 const { EPolygonPattern, EToolName } = cTool;
 const { ESortDirection } = cAnnotation;
@@ -208,6 +209,9 @@ const PointCloudTopView: React.FC<IProps> = ({
   const size = useSize(ref);
   const config = jsonParser(stepInfo.config);
   const { setZoom, syncTopviewToolZoom } = useZoom();
+  
+  const { run: debouncedSetZoom } = useDebounceFn(setZoom, { wait: 500 });
+  
   const { hideAttributes, setIsLargeStatus, selectedID, pointCloudBoxList } = ptCtx;
 
   const { addPolygon, deletePolygon } = usePolygon();
@@ -423,8 +427,7 @@ const PointCloudTopView: React.FC<IProps> = ({
 
       pointCloud.camera.updateProjectionMatrix();
       pointCloud.render();
-
-      setZoom(zoom);
+      debouncedSetZoom(zoom);
       syncTopviewToolZoom(currentPos, zoom, size);
       setAnnotationPos({ zoom, currentPos });
     });
