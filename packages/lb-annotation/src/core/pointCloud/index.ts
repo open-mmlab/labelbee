@@ -84,7 +84,7 @@ export interface IPointCloudDelegate extends IEventBus {
 }
 
 const DEFAULT_DISTANCE = 30;
-let highlightWorker = new HighlightWorker({ type: 'module' });
+let highlightWorker: Worker | null = null;
 
 export class PointCloud extends EventListener {
   public renderer: THREE.WebGLRenderer;
@@ -1170,13 +1170,17 @@ export class PointCloud extends EventListener {
 
   public async handleWebworker(params: any) {
     return new Promise((resolve, reject) => {
-      highlightWorker.terminate();
-      highlightWorker = new HighlightWorker({ type: 'module' });
+      if (highlightWorker) {
+        highlightWorker.terminate();
+        highlightWorker = null;
+      }
+      highlightWorker = new HighlightWorker({ type: 'module' }) as Worker;
       highlightWorker.postMessage(params);
 
       highlightWorker.onmessage = (e: any) => {
         resolve(e.data);
-        highlightWorker.terminate();
+        highlightWorker?.terminate();
+        highlightWorker = null;
       };
       highlightWorker.onerror = (e: any) => {
         reject(e);
