@@ -617,7 +617,7 @@ export const CheckExecutePageTurning = async (
   const { t } = i18n;
   const state = getState();
   const { confirmPageTurning, stepList, step } = state.annotation || false;
-  const stepInfo = stepList.find((item: IStepInfo, index: number) => index + 1 === step);
+  const stepInfo = getStepConfig(stepList, step);
   const { confirm, destroyAll } = Modal;
 
   // No need to confirm, just flip through the page directly
