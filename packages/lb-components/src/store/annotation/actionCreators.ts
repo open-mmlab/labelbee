@@ -16,9 +16,11 @@ import { ESubmitType } from '@/constant';
 import { EPageTurningOperation } from '@/data/enums/AnnotationSize';
 import PageOperator from '@/utils/PageOperator';
 import { jsonParser } from '@/utils';
-import { IPointCloudBox } from '@labelbee/lb-utils';
+import { IPointCloudBox, i18n } from '@labelbee/lb-utils';
+import { EVideoToolName } from '@labelbee/lb-annotation';
 import { getBoxesByTrackID } from '@/components/predictTracking/previewResult/util';
 import { IPreDataProcessParams } from '@/App';
+import { Modal } from 'antd';
 
 const dispatchTasks = (dispatch: any, tasks: any[]) => tasks.map((task) => dispatch(task));
 
@@ -518,7 +520,7 @@ const ChangeTriggerEventAfterIndexChanged = (
 export const PageBackward =
   (triggerEventAfterIndexChanged = false) =>
   (dispatch: any, getState: any) => {
-    return DispatcherTurning(
+    return CheckExecutePageTurning(
       dispatch,
       getState,
       EPageTurningOperation.Backward,
@@ -530,7 +532,7 @@ export const PageBackward =
 export const PageForward =
   (triggerEventAfterIndexChanged = false) =>
   (dispatch: any, getState: any) => {
-    return DispatcherTurning(
+    return CheckExecutePageTurning(
       dispatch,
       getState,
       EPageTurningOperation.Forward,
@@ -549,7 +551,7 @@ export const PageJump =
       return;
     }
 
-    return DispatcherTurning(
+    return CheckExecutePageTurning(
       dispatch,
       getState,
       EPageTurningOperation.Jump,
@@ -593,6 +595,63 @@ export const loadImgList = async (
     SetAnnotationLoading(dispatch, false);
     console.error(err);
   }
+};
+
+/**
+ * The CheckExecutePageTurning function is the extraction function of the DispatcherTurning function
+ * @param dispatch
+ * @param getState
+ * @param pageTurningOperation
+ * @param toIndex
+ */
+export const CheckExecutePageTurning = async (
+  dispatch: any,
+  getState: any,
+  pageTurningOperation: EPageTurningOperation,
+  triggerEventAfterIndexChanged = false,
+  toIndex?: number,
+) => {
+  // When flipping pages, check and verify first
+  dispatch({ type: ANNOTATION_ACTIONS.CHANGE_PAGE_CHECK });
+
+  const { t } = i18n;
+  const state = getState();
+  const { confirmPageTurning, stepList, step } = state.annotation || false;
+  const stepInfo = stepList.find((item: IStepInfo, index: number) => index + 1 === step);
+  const { confirm, destroyAll } = Modal;
+
+  // No need to confirm, just flip through the page directly
+  if (!confirmPageTurning || stepInfo.tool !== EVideoToolName.VideoTagTool) {
+    return DispatcherTurning(
+      dispatch,
+      getState,
+      pageTurningOperation,
+      triggerEventAfterIndexChanged,
+      toIndex,
+    );
+  }
+
+  // Pop up modal box when confirmation is needed
+  return new Promise((resolve) => {
+    destroyAll();
+    confirm({
+      centered: true,
+      title: t('TheCurrentImageHasNotBeenAnnotatedYetAreYouSureToTurnThePage'),
+      onCancel: () => resolve(false),
+      onOk: () => resolve(true),
+    });
+  }).then((confirmed) => {
+    if (confirmed) {
+      return DispatcherTurning(
+        dispatch,
+        getState,
+        pageTurningOperation,
+        triggerEventAfterIndexChanged,
+        toIndex,
+      );
+    }
+    return Promise.resolve();
+  });
 };
 
 /**

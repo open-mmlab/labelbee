@@ -74,6 +74,7 @@ export interface AnnotationState {
   highlightAttribute: string;
   preDataProcess?: (params: IPreDataProcessParams) => IPointCloudBox[];
   getImgIndexByExternal?: GetImgIndexByExternal;
+  confirmPageTurning?: boolean;
 }
 
 interface UpdateToolInstance {
