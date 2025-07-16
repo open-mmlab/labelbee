@@ -383,7 +383,8 @@
     "Annotating": "Annotating",
     "Group": "Group",
     "TheDrawFrameSizeIsSmallerThanTheMinimumDrawSizeInTheStepConfiguration": "The draw frame size is smaller than the minimum draw size in the step configuration",
-    "TheSizeOfTheDrawingBoxIsSmallerThanTheMinimumDrawingSizeInTheMainPropertyConfiguration": "The size of the drawing box is smaller than the minimum drawing size in the main property configuration"
+    "TheSizeOfTheDrawingBoxIsSmallerThanTheMinimumDrawingSizeInTheMainPropertyConfiguration": "The size of the drawing box is smaller than the minimum drawing size in the main property configuration",
+    "TheCurrentImageHasNotBeenAnnotatedYetAreYouSureToTurnThePage": "The current image has not been annotated yet. Are you sure to turn the page"
   },
   "cn": {
     "TextInput": "文本输入",
@@ -769,6 +770,7 @@
     "Annotating": "正在标注",
     "Group": "组",
     "TheDrawFrameSizeIsSmallerThanTheMinimumDrawSizeInTheStepConfiguration": "绘制框尺寸小于步骤配置里的最小绘制尺寸",
-    "TheSizeOfTheDrawingBoxIsSmallerThanTheMinimumDrawingSizeInTheMainPropertyConfiguration": "绘制框尺寸小于主属性配置里的最小绘制尺寸"
+    "TheSizeOfTheDrawingBoxIsSmallerThanTheMinimumDrawingSizeInTheMainPropertyConfiguration": "绘制框尺寸小于主属性配置里的最小绘制尺寸",
+    "TheCurrentImageHasNotBeenAnnotatedYetAreYouSureToTurnThePage": "当前图片仍未标注，是否确定翻页"
   }
 }

@@ -45,6 +45,7 @@ const initialState: AnnotationState = {
   predictionResult: [],
   predictionResultVisible: false,
   highlightAttribute: '',
+  confirmPageTurning: false,
 };
 
 /**
@@ -964,6 +965,31 @@ export const annotationReducer = (
       return {
         ...state,
         imgList: nextImgList,
+      };
+    }
+
+    // The judgment logic before flipping pages, to determine whether the page can be flipped
+    case ANNOTATION_ACTIONS.CHANGE_PAGE_CHECK: {
+      const { toolInstance, step, stepList } = state;
+      if (!toolInstance) {
+        return state;
+      }
+
+      // Retrieve the flipped data to determine if there are annotations present
+      const [exportResult] = toolInstance?.exportData() ?? [];
+
+      const stepConfig = getStepConfig(stepList, step);
+      const config = ConfigUtils.jsonParser(stepConfig.config);
+
+      // Is there any annotation for the number of pages being flipped
+      const hasAnnotation = exportResult.some(
+        (item: any) => item?.result && Object.keys(item.result).length > 0,
+      );
+
+      // Configuration enabled and labeled
+      return {
+        ...state,
+        confirmPageTurning: config.showConfirm && !hasAnnotation,
       };
     }
 
