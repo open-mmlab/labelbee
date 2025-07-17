@@ -48,7 +48,7 @@
     "@labelbee/wavesurfer": "1.1.0",
     "@types/react-dom": "18.3.1",
     "@types/react-transition-group": "^4.4.9",
-    "ahooks": "^3.4.0",
+    "ahooks": "3.8.5",
     "classnames": "^2.3.0",
     "decimal.js": "^10.4.3",
     "diff-match-patch": "^1.0.5",
