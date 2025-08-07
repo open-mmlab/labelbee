@@ -496,6 +496,8 @@ export const annotationReducer = (
 
       annotationEngine?.launchOperation();
 
+      const isNoDataSourceTool = [EToolName.Cuboid, EToolName.ScribbleTool].includes(tool);
+
       if (hasDataSourceStep) {
         if (stepBasicResultList?.length > 0) {
           annotationEngine?.setBasicInfo(dependStepConfig.tool, stepBasicResultList[basicIndex]);
@@ -508,7 +510,7 @@ export const annotationReducer = (
       }
 
       // TODO，非查看模式才允许添加数据
-      if (currentStepInfo.tool !== 'check' && hasDataSourceStep) {
+      if (currentStepInfo.tool !== 'check' && (isNoDataSourceTool || hasDataSourceStep)) {
         const sourceID = stepBasicResultList[basicIndex]?.id ?? '';
         const resultForBasicIndex = hasDataSourceStep
           ? result.filter((i: { sourceID: string | number }) =>
