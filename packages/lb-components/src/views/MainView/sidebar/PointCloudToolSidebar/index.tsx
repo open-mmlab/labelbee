@@ -454,11 +454,27 @@ const PointCloudToolSidebar: React.FC<IProps> = ({
 }) => {
   const { updatePointCloudPattern, pointCloudPattern, isPointCloudSegmentationPattern } =
     useStatus();
-
+  const { defaultAttribute } = useAttribute();
   const config = jsonParser(stepInfo.config);
   const attributeList = config?.attributeList ?? [];
-  const subAttributeList =
-    config?.secondaryAttributeConfigurable === true ? config?.inputList ?? [] : [];
+  const attributeMapping = config?.attributeMapping ?? {};
+
+  const subAttributeList = useMemo(() => {
+    // When the secondary attribute is not configurable or the primary attribute has not been selected, return an empty array directly
+    if (config?.secondaryAttributeConfigurable !== true || !defaultAttribute) {
+      return [];
+    }
+
+    const inputList = config?.inputList ?? [];
+    // The mapping relationship table of the current primary attribute
+    const curMappingValue = attributeMapping[defaultAttribute] ?? [];
+    // Is there an attribute mapping
+    const isNotAttributeMapping = Object.keys(attributeMapping).length === 0;
+    // There is no attributiMapping configuration, empty object returns all arrays
+    if (isNotAttributeMapping) return inputList;
+
+    return inputList.filter((item: any) => curMappingValue.includes(item.value));
+  }, [defaultAttribute]);
 
   if (isPointCloudSegmentationPattern) {
     return (

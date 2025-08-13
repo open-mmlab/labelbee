@@ -144,6 +144,8 @@ export interface IPointCloudConfig {
   trackConfigurable: boolean;
   enableAutoMap2DRect?: boolean;
   enableSegment?: boolean;
+
+  attributeMapping?: Record<string, string[]>;
 }
 
 interface ICalib {
