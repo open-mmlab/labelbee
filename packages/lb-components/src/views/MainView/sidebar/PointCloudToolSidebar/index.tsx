@@ -457,9 +457,10 @@ const PointCloudToolSidebar: React.FC<IProps> = ({
   const { defaultAttribute } = useAttribute();
   const config = jsonParser(stepInfo.config);
   const attributeList = config?.attributeList ?? [];
-  const attributeMapping = config?.attributeMapping ?? {};
-
+  
   const subAttributeList = useMemo(() => {
+    const attributeMapping = config?.attributeMapping ?? {};
+
     // When the secondary attribute is not configurable or the primary attribute has not been selected, return an empty array directly
     if (config?.secondaryAttributeConfigurable !== true || !defaultAttribute) {
       return [];
@@ -474,7 +475,12 @@ const PointCloudToolSidebar: React.FC<IProps> = ({
     if (isNotAttributeMapping) return inputList;
 
     return inputList.filter((item: any) => curMappingValue.includes(item.value));
-  }, [defaultAttribute]);
+  }, [
+    defaultAttribute,
+    config.secondaryAttributeConfigurable,
+    config.inputList,
+    config.attributeMapping,
+  ]);
 
   if (isPointCloudSegmentationPattern) {
     return (
