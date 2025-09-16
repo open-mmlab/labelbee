@@ -6,7 +6,7 @@ import { useTranslation } from 'react-i18next';
 
 const EKeyCode = cKeyCode.default
 
-export const VIDEO_PLAYBACK_RATE_SPEED = [0.5, 1, 1.5, 2, 4, 6, 8, 16];
+export const VIDEO_PLAYBACK_RATE_SPEED = [0.1, 0.2, 0.3, 0.4, 0.5, 1, 1.5, 2, 4, 6, 8, 16];
 export const AUDIO_PLAYBACK_RATE_SPEED = [0.5, 0.75, 1, 1.25, 1.5, 1.75, 2];
 
 export enum EPlayerType {
