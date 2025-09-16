@@ -54,7 +54,7 @@ export const VideoPlayerCtx = React.createContext<{
 
 const PER_INTERVAL = 50;
 const PER_FORWARD = 0.1;
-const PLAYBACK_RATES = [0.5, 1, 1.5, 2, 4, 6, 8, 16];
+const PLAYBACK_RATES = [0.1, 0.2, 0.3, 0.4, 0.5, 1, 1.5, 2, 4, 6, 8, 16];
 
 interface IVideoPlayerProps {
   imgList: IFileItem[];
