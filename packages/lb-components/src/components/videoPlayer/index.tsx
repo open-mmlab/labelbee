@@ -67,7 +67,7 @@ interface IVideoPlayerProps {
   showVideoTrack?: boolean;
   onTrackResize?: any;
   footer?: any;
-  dataLoaded?: () => void;
+  dataLoaded?: (isError?:boolean) => void;
   addTime?: () => void;
   toggleClipStatus?: () => void;
   drawLayerSlot?: any;
@@ -274,6 +274,7 @@ export class VideoPlayer extends React.Component<IVideoPlayerProps, IVideoPlayer
   };
 
   public onError = () => {
+    this.props.dataLoaded?.(true);
     this.resetVideoData();
     this.setState({ error: true });
   };

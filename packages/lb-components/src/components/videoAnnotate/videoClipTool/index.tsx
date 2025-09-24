@@ -26,7 +26,7 @@ interface IVideoClipProps extends IVideoAnnotateProps {
   pageBackward: () => void;
   onMounted: (instance: any) => void;
   onUnmounted: () => void;
-  onVideoLoaded: () => void;
+  onVideoLoaded: (isError?: boolean) => void;
 }
 
 interface IState {
