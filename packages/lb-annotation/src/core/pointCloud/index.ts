@@ -20,7 +20,7 @@ import {
   DEFAULT_SPHERE_PARAMS,
   ICalib,
   IPointCloudBoxList,
-  tipScopeParams,
+  ITipScopeParams,
 } from '@labelbee/lb-utils';
 import { BufferAttribute, OrthographicCamera, PerspectiveCamera } from 'three';
 import HighlightWorker from 'web-worker:./highlightWorker.js';
@@ -132,7 +132,7 @@ export class PointCloud extends EventListener {
 
   private highlightGroupName = 'highlightBoxes';
 
-  private cacheTipScopeList: tipScopeParams[] = [];
+  private cacheTipScopeList: ITipScopeParams[] = [];
 
   private cacheInstance: PointCloudCache; // PointCloud Cache Map
 
@@ -946,7 +946,7 @@ export class PointCloud extends EventListener {
   }
 
   /** Create prompt range */
-  public createTipScope(tipScope: tipScopeParams, index: number) {
+  public createTipScope(tipScope: ITipScopeParams, index: number) {
     this.removeObjectByName(this.tipScopeObjectName + index);
     let mesh: THREE.Object3D | null = null;
     const { scopeType, range } = tipScope;
@@ -1025,7 +1025,7 @@ export class PointCloud extends EventListener {
     };
   };
 
-  public renderPointCloud(points: THREE.Points, radius?: number, tipScopeList?: tipScopeParams[]) {
+  public renderPointCloud(points: THREE.Points, radius?: number, tipScopeList?: ITipScopeParams[]) {
     this.clearPointCloud();
     if (this.workerLoading) {
       return;
@@ -1112,7 +1112,7 @@ export class PointCloud extends EventListener {
   public loadPCDFile = async (
     src: string | undefined = this.currentPCDSrc,
     radius?: number,
-    tipScopeList?: tipScopeParams[],
+    tipScopeList?: ITipScopeParams[],
   ) => {
     if (!src || this.workerLoading) return;
     this.clearPointCloud();
@@ -1482,13 +1482,13 @@ export class PointCloud extends EventListener {
     this.scene.add(circle);
   };
 
-  public generateTipScopeList = (tipScopeList: tipScopeParams[]) => {
+  public generateTipScopeList = (tipScopeList: ITipScopeParams[]) => {
     // Remove old data first, then update new data
-    this.cacheTipScopeList.forEach((item: tipScopeParams, index: number) => {
+    this.cacheTipScopeList.forEach((item: ITipScopeParams, index: number) => {
       this.removeObjectByName(this.tipScopeObjectName + index);
     });
 
-    tipScopeList.forEach((item: tipScopeParams, index: number) => {
+    tipScopeList.forEach((item: ITipScopeParams, index: number) => {
       const tipScope = this.createTipScope(item, index);
 
       if (tipScope) {

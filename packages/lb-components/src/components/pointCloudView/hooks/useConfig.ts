@@ -1,6 +1,6 @@
 import { PointCloudContext } from '../PointCloudContext';
 import { useContext } from 'react';
-import { IPointCloudConfig, tipScopeParams } from '@labelbee/lb-utils';
+import { IPointCloudConfig, ITipScopeParams } from '@labelbee/lb-utils';
 
 export const useConfig = () => {
   const { topViewInstance, sideViewInstance, backViewInstance, mainViewInstance } =
@@ -26,7 +26,7 @@ export const useConfig = () => {
     topViewInstance?.pointCloudInstance?.render();
   };
 
-  const reRenderTopViewTipScopeList = (tipScopeList: tipScopeParams[] = []) => {
+  const reRenderTopViewTipScopeList = (tipScopeList: ITipScopeParams[] = []) => {
     topViewInstance?.pointCloudInstance?.generateTipScopeList?.(tipScopeList);
     topViewInstance?.pointCloudInstance?.render();
   };
