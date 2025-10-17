@@ -71,7 +71,7 @@ const PointCloudListener: React.FC<IProps> = ({
     pushHistoryUnderUpdateLine,
   } = useHistory();
   const { syncThreeViewsAttribute } = useAttribute();
-  const { syncAllViewsConfig, reRenderTopViewRange } = useConfig();
+  const { syncAllViewsConfig, reRenderTopViewRange, reRenderTopViewTipScopeList } = useConfig();
   const { selectedPolygon } = usePolygon();
   const { selectedLine } = useLine();
   const { t } = useTranslation();
@@ -257,6 +257,12 @@ const PointCloudListener: React.FC<IProps> = ({
       reRenderTopViewRange(config?.radius);
     }
   }, [config?.radius]);
+
+  useEffect(()=>{
+    if(config?.tipScopeList){
+      reRenderTopViewTipScopeList(config?.tipScopeList);
+    }
+  },[config?.tipScopeList]);
 
   // Page switch data initialization
   useEffect(() => {

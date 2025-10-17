@@ -133,6 +133,18 @@ export type PartialIPointCloudBoxList = Partial<IPointCloudBox> & Pick<IPointClo
 
 export type IPointCloudBoxList = IPointCloudBox[];
 
+export interface ITipScopeParams {
+  id: string;
+  scopeType: 'rect' | 'circle';
+  range: {
+    top?: number;
+    bottom?: number;
+    left?: number;
+    right?: number;
+    radius?: number;
+  };
+}
+
 export interface IPointCloudConfig {
   // 多边形持有
   attributeList: IInputList[];
@@ -146,6 +158,7 @@ export interface IPointCloudConfig {
   enableSegment?: boolean;
 
   attributeMapping?: Record<string, string[]>;
+  tipScopeList?: ITipScopeParams[];
 }
 
 interface ICalib {
