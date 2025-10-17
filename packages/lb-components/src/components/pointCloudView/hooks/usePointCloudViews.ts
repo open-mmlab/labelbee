@@ -1340,7 +1340,8 @@ export const usePointCloudViews = (params?: IUsePointCloudViewsParams) => {
     SetAnnotationLoading(dispatch, true);
     SetLoadPCDFileLoading(dispatch, true);
     params?.setResourceLoading?.(true);
-    await mainViewInstance.loadPCDFile(newData.url, config?.radius ?? DEFAULT_RADIUS);
+    
+    await mainViewInstance.loadPCDFile(newData.url, config?.radius ?? DEFAULT_RADIUS, config?.tipScopeList);
 
     mainViewInstance?.clearAllBox();
     mainViewInstance?.clearAllSphere();

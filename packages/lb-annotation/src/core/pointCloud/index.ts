@@ -20,6 +20,7 @@ import {
   DEFAULT_SPHERE_PARAMS,
   ICalib,
   IPointCloudBoxList,
+  tipScopeParams,
 } from '@labelbee/lb-utils';
 import { BufferAttribute, OrthographicCamera, PerspectiveCamera } from 'three';
 import HighlightWorker from 'web-worker:./highlightWorker.js';
@@ -127,7 +128,11 @@ export class PointCloud extends EventListener {
 
   private rangeObjectName = 'range';
 
+  private tipScopeObjectName = 'tipScope';
+
   private highlightGroupName = 'highlightBoxes';
+
+  private cacheTipScopeList: tipScopeParams[] = [];
 
   private cacheInstance: PointCloudCache; // PointCloud Cache Map
 
@@ -940,6 +945,46 @@ export class PointCloud extends EventListener {
     return ellipse;
   }
 
+  /** Create prompt range */
+  public createTipScope(tipScope: tipScopeParams, index: number) {
+    this.removeObjectByName(this.tipScopeObjectName + index);
+    let mesh: THREE.Object3D | null = null;
+    const { scopeType, range } = tipScope;
+    if (scopeType === 'circle') {
+      const curve = new THREE.EllipseCurve(0, 0, Number(range.radius), Number(range.radius), 0, 2 * Math.PI, false, 0);
+      const points = curve.getPoints(50);
+      const geometry = new THREE.BufferGeometry().setFromPoints(points);
+      const material = new THREE.LineBasicMaterial({ color: 0xff0000 });
+      mesh = new THREE.Line(geometry, material);
+    } else if (scopeType === 'rect') {
+      const { top = 0, bottom = 0, left = 0, right = 0 } = range;
+      // Calculate the four corner points based on the center as the origin
+      const y1 = left;
+      const y2 = -right;
+      const x1 = top;
+      const x2 = -bottom;
+
+      // Draw rectangular edges
+      const shape = new THREE.Shape();
+      shape.moveTo(x1, y1); // upper left
+      shape.lineTo(x2, y1); // upper right
+      shape.lineTo(x2, y2); // lower right
+      shape.lineTo(x1, y2); // lower left
+      shape.lineTo(x1, y1); // Return to the starting point and close
+
+      const geometry = new THREE.BufferGeometry().setFromPoints(shape.getPoints());
+      const material = new THREE.LineBasicMaterial({ color: 0xff0000 });
+      mesh = new THREE.Line(geometry, material);
+    }
+
+    if (!mesh) {
+      return null;
+    }
+
+    mesh.name = this.tipScopeObjectName + index;
+    return mesh;
+  }
+
   public initShaderMaterial = () => {
     return {
       vertexShader: `
@@ -980,7 +1025,7 @@ export class PointCloud extends EventListener {
     };
   };
 
-  public renderPointCloud(points: THREE.Points, radius?: number) {
+  public renderPointCloud(points: THREE.Points, radius?: number, tipScopeList?: tipScopeParams[]) {
     this.clearPointCloud();
     if (this.workerLoading) {
       return;
@@ -998,6 +1043,11 @@ export class PointCloud extends EventListener {
     if (radius) {
       // @ts-ignore
       this.generateRange(radius);
+    }
+
+    // If the prompt range list configuration exists, render the prompt range
+    if (tipScopeList) {
+      this.generateTipScopeList(tipScopeList);
     }
 
     this.pointsUuid = points.uuid;
@@ -1059,7 +1109,11 @@ export class PointCloud extends EventListener {
    * @param src
    * @param radius Render the range of circle
    */
-  public loadPCDFile = async (src: string | undefined = this.currentPCDSrc, radius?: number) => {
+  public loadPCDFile = async (
+    src: string | undefined = this.currentPCDSrc,
+    radius?: number,
+    tipScopeList?: tipScopeParams[],
+  ) => {
     if (!src || this.workerLoading) return;
     this.clearPointCloud();
     /**
@@ -1083,7 +1137,7 @@ export class PointCloud extends EventListener {
     this.initCloudData(points);
 
     const newPoints = new THREE.Points(geometry);
-    this.renderPointCloud(newPoints, radius);
+    this.renderPointCloud(newPoints, radius, tipScopeList);
 
     this.emit('loadPCDFileEnd');
   };
@@ -1426,6 +1480,24 @@ export class PointCloud extends EventListener {
   public generateRange = (radius: number) => {
     const circle = this.createRange(radius);
     this.scene.add(circle);
+  };
+
+  public generateTipScopeList = (tipScopeList: tipScopeParams[]) => {
+    // Remove old data first, then update new data
+    this.cacheTipScopeList.forEach((item: tipScopeParams, index: number) => {
+      this.removeObjectByName(this.tipScopeObjectName + index);
+    });
+
+    tipScopeList.forEach((item: tipScopeParams, index: number) => {
+      const tipScope = this.createTipScope(item, index);
+
+      if (tipScope) {
+        this.scene.add(tipScope);
+      }
+    });
+
+    // Update old data
+    this.cacheTipScopeList = tipScopeList;
   };
 
   public generateBoxArrow = ({ width }: IPointCloudBox) => {
