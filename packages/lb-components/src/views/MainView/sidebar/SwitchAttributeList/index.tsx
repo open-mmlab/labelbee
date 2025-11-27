@@ -70,12 +70,13 @@ const SwitchAttributeList: React.FC<IProps> = (props) => {
         forceRender((s) => s + 1);
       }
     };
+    const selectedAttribute = toolInstance?.defaultAttribute ?? '';
 
     return (
       <AttributeList
         list={list}
         attributeChanged={attributeChanged}
-        selectedAttribute={toolInstance?.defaultAttribute ?? ''}
+        selectedAttribute={selectedAttribute}
         ref={listRef}
         attributeLockChange={setAttributeLockList}
       />
