@@ -399,6 +399,7 @@ class VideoClipTool extends React.Component<IVideoClipProps, IState> {
         duration,
         id,
         type: ETimeSliceType.Period,
+        subAttribute: {},
       });
       textValue = this.defaultTextAttribute;
     } else {
@@ -449,6 +450,7 @@ class VideoClipTool extends React.Component<IVideoClipProps, IState> {
       id,
       type: ETimeSliceType.Time,
       duration: this.videoPlayer?.duration ?? 0,
+      subAttribute: {},
     });
     const newState = {
       result: newResult,
@@ -555,6 +557,7 @@ class VideoClipTool extends React.Component<IVideoClipProps, IState> {
           result={result}
           currentTime={currentTime}
           attributeList={this.props.config.attributeList}
+          inputList={this.props.config?.inputList ?? []}
           extraStyle={{ top: this.props.drawLayerSlot ? 40 : 0 }}
         />
         {this.isClipping && (
@@ -661,6 +664,28 @@ class VideoClipTool extends React.Component<IVideoClipProps, IState> {
       result: [...result],
     });
     this.updateSidebar();
+  };
+
+  /**
+   * Set the sub attributes of the currently selected segment
+   * @param key subAttribute key
+   * @param value subAttribute value
+   */
+  public setSubAttribute = (key: string, value: string) => {
+    const { result, selectedID } = this.state;
+    if (selectedID) {
+      const res = result.find((i) => i.id === selectedID);
+      if (res) {
+        if (!res.subAttribute) {
+          res.subAttribute = {};
+        }
+        res.subAttribute[key] = value;
+        this.setState({
+          result: [...result],
+        });
+        this.updateSidebar();
+      }
+    }
   };
 
   /**

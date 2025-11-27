@@ -4,14 +4,14 @@
  * @createdate 2022-11-08
  */
 import { classnames } from '@/utils';
-import { MathUtils, AttributeUtils } from '@labelbee/lb-annotation';
+import { MathUtils, AttributeUtils, TagUtils } from '@labelbee/lb-annotation';
 import React from 'react';
 import { CSSTransition, TransitionGroup } from 'react-transition-group';
 import { ETimeSliceType, TIME_SLICE_TYPE } from '../../constant';
 import styles from './index.module.scss';
 
 const VideoTimeSlicesOverVideo = (props: any) => {
-  const { attributeList, result, currentTime, extraStyle } = props;
+  const { attributeList, result, currentTime, extraStyle, inputList = [] } = props;
 
   const determineIfWithinTime = (i: any) => {
     const { type, start, end } = i;
@@ -49,19 +49,33 @@ const VideoTimeSlicesOverVideo = (props: any) => {
         <div
           className={styles.timeSliceItemAttribute}
           style={{
-            textAlign: 'right',
+            backgroundColor: AttributeUtils.getAttributeColor(i.attribute, attributeList),
           }}
         >
-          <span
-            style={{
-              backgroundColor: AttributeUtils.getAttributeColor(i.attribute, attributeList),
-            }}
-          >
-            {`${TIME_SLICE_TYPE[i.type]}: ${
-              AttributeUtils.getAttributeShowText(i.attribute, attributeList) || '无属性'
-            }`}
-          </span>
+          {`${TIME_SLICE_TYPE[i.type]}: ${
+            AttributeUtils.getAttributeShowText(i.attribute, attributeList) || '无属性'
+          }`}
         </div>
+
+        {i?.subAttribute && inputList.length > 0 &&
+          (() => {
+            const subAttributeList = TagUtils.getTagNameList(i.subAttribute, inputList);
+            if (subAttributeList.length > 0) {
+              return (
+                <div
+                  className={styles.timeSliceItemSubAttribute}
+                  style={{
+                    backgroundColor: AttributeUtils.getAttributeColor(i.attribute, attributeList),
+                  }}
+                >
+                  {subAttributeList.map((item, index) => (
+                    <div key={index}>{`${item.keyName}：${item.value.join('\n')}`}</div>
+                  ))}
+                </div>
+              );
+            }
+            return null;
+          })()}
 
         {i.textAttribute && (
           <div className={styles.timeSliceItemText}>{`文本: ${i.textAttribute}`}</div>

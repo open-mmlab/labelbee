@@ -171,7 +171,11 @@ const VideoTrack = (props: IProps) => {
     const array = sortTrack(result, selectedTrack);
     return array?.map((i: any, index: number) => (
       <div className={styles.track} key={i?.id || index}>
-        {i.data?.map((j: IVideoTimeSlice) => renderTracks(j))}
+        {i.data?.map((j: IVideoTimeSlice, dataIndex: number) => (
+          <React.Fragment key={j?.id || `${i?.id}_${dataIndex}`}>
+            {renderTracks(j)}
+          </React.Fragment>
+        ))}
       </div>
     ));
   }, [result, selectedTrack, total, JSON.stringify(attributeList)]);

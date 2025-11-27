@@ -26,6 +26,7 @@ import LLMToolSidebar from '@/components/LLMToolView/sidebar';
 import LLMMultiWheelToolSidebar from '@/components/LLMMultiWheelView/sidebar';
 import NLPToolSidebar from './NLPSidebar';
 import VideoClipAnnotatedList from '@/components/videoAnnotate/videoClipTool/components/annotatedList';
+import VideoClipToolAttributeList from './VideoClipToolAttributeList';
 import { IOperationConfig } from './GeneralOperation/ActionsConfirm';
 
 const { EVideoToolName, EPointCloudName } = cTool;
@@ -43,6 +44,27 @@ interface IProps {
 }
 
 export const sidebarCls = `${prefix}-sidebar`;
+
+/**
+ * Retrieve the corresponding attribute list component based on the tool name
+ * Used to support the use of custom attribute list components for different tools
+ * @param toolName 
+ * @returns Attribute List Component
+ */
+const getAttributeListComponent = (toolName: string): React.ReactNode => {
+  if (!toolName) {
+    return <SwitchAttributeList />;
+  }
+
+  // Mapping tool names to attribute list components
+  const attributeListMap: Record<string, React.ReactNode> = {
+    [EVideoToolName.VideoClipTool]: <VideoClipToolAttributeList />,
+  };
+
+  // If the tool name is in the mapping, return the corresponding component, otherwise return the default SwitchAttributeList
+  return attributeListMap[toolName] ?? <SwitchAttributeList />;
+};
+
 const Sidebar: React.FC<IProps> = ({
   sider,
   enableColorPicker,
@@ -77,7 +99,7 @@ const Sidebar: React.FC<IProps> = ({
 
   // onChange is empty by default.
   const toolIcon = <ToolIcons toolName={toolName} onChange={() => {}} />;
-  const attributeList = <SwitchAttributeList />;
+  const attributeList = getAttributeListComponent(toolName);
 
   const annotationText = <AnnotationText />;
 
