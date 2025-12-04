@@ -116,12 +116,10 @@ const VideoTrack = (props: IProps) => {
     if (i) {
       const attributeColor = AttributeUtils.getAttributeColor(i.attribute, attributeList);
       const diffTime = Math.max((i.end || currentTime) - i.start, 0) / total;
-      const widthValue = i.end ? Math.max(diffTime, 0.001) : diffTime;
-      const width = isNaN(Number(widthValue)) ? 0 : toPercentage(widthValue, 2);
       const styles: any = {
         backgroundColor: attributeColor,
         left: toPercentage(i.start / total, 2),
-        width,
+        width: toPercentage(i.end ? Math.max(diffTime, 0.001) : diffTime, 2),
         position: 'absolute',
         borderRadius: 5,
       };
@@ -177,6 +175,8 @@ const VideoTrack = (props: IProps) => {
   };
 
   const displayTracks = useMemo(() => {
+    if(!total) return
+    
     const array = sortTrack(result, selectedTrack);
     return array?.map((i: any, index: number) => (
       <div className={styles.track} key={i?.id || index}>
