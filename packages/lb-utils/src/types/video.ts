@@ -27,4 +27,6 @@ export interface IVideoTimeSlice {
   duration: number;
   /** 副属性 */
   subAttribute?: Record<string, string>;
+  /** 副属性文本 */
+  text?: string;
 }

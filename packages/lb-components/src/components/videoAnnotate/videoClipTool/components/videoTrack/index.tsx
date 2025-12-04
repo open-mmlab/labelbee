@@ -24,7 +24,14 @@ export const getDisplayContent = (i: any, attributeList: any) => {
   const { t } = useTranslation();
   const { attribute, textAttribute } = i;
   const attr = AttributeUtils.getAttributeShowText(attribute, attributeList) || t('NoAttribute');
-  return [attr, textAttribute ? `${t('textTool')}: ${textAttribute}` : ''].filter((i) => i).join('，');
+  const subAttr = i?.text || '';
+  return [
+    attr,
+    subAttr ? `${t('SubAttribute')}: ${subAttr}` : '',
+    textAttribute ? `${t('textTool')}: ${textAttribute}` : '',
+  ]
+    .filter((i) => i)
+    .join('，');
 };
 
 /**
@@ -109,10 +116,12 @@ const VideoTrack = (props: IProps) => {
     if (i) {
       const attributeColor = AttributeUtils.getAttributeColor(i.attribute, attributeList);
       const diffTime = Math.max((i.end || currentTime) - i.start, 0) / total;
+      const widthValue = i.end ? Math.max(diffTime, 0.001) : diffTime;
+      const width = isNaN(Number(widthValue)) ? 0 : toPercentage(widthValue, 2);
       const styles: any = {
         backgroundColor: attributeColor,
         left: toPercentage(i.start / total, 2),
-        width: toPercentage(i.end ? Math.max(diffTime, 0.001) : diffTime, 2),
+        width,
         position: 'absolute',
         borderRadius: 5,
       };

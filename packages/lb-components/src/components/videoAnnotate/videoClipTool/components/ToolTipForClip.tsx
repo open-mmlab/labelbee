@@ -18,7 +18,7 @@ const ToolTipForClip = (props: {
   if (!slot) {
     return null;
   }
-  const { type, attribute, textAttribute } = item;
+  const { type, attribute, textAttribute, text } = item;
   if (item.start === undefined || item.end === undefined) {
     return null;
   }
@@ -37,6 +37,7 @@ const ToolTipForClip = (props: {
           : timeFormat(start, 'ss:SS')}
       </div>
       <div>{`${t('Attribute')}：${AttributeUtils.getAttributeShowText(attribute, attributeList) || t('NoAttribute')}`}</div>
+      <div>{`${t('SubAttribute')}：${text}`}</div>
       <div>{`${t('textTool')}：${textAttribute}`}</div>
     </div>
   );
