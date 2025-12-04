@@ -1,4 +1,10 @@
-import { AttributeUtils, MathUtils, CommonToolUtils, uuid } from '@labelbee/lb-annotation';
+import {
+  AttributeUtils,
+  MathUtils,
+  CommonToolUtils,
+  uuid,
+  TagUtils,
+} from '@labelbee/lb-annotation';
 import { jsonParser } from '@/utils';
 import { precisionAdd, precisionMinus, isImageValue } from '@/utils/audio';
 import { message } from 'antd';
@@ -390,6 +396,7 @@ class VideoClipTool extends React.Component<IVideoClipProps, IState> {
 
     if (isStopped) {
       const id = uuid();
+      const subAttribute = {};
       selectedID = id;
       newResult.push({
         start: sliceStart,
@@ -399,7 +406,8 @@ class VideoClipTool extends React.Component<IVideoClipProps, IState> {
         duration,
         id,
         type: ETimeSliceType.Period,
-        subAttribute: {},
+        subAttribute,
+        text: this.getSubAttributeShowText(subAttribute, this.props.config?.inputList ?? []),
       });
       textValue = this.defaultTextAttribute;
     } else {
@@ -613,6 +621,12 @@ class VideoClipTool extends React.Component<IVideoClipProps, IState> {
       const resultRecord = jsonParser(imgList[imgIndex].result);
       const stepResult = resultRecord[`step_${this.stepInfo().step}`];
       const result = stepResult?.result || [];
+      // Generate a text attribute for each result item
+      const inputList = this.props.config?.inputList ?? [];
+      result.forEach((item: IVideoTimeSlice) => {
+        item.text = this.getSubAttributeShowText(item.subAttribute, inputList);
+      });
+
       const valid = isImageValue(imgList[imgIndex].result || '[]');
       this.setState(
         {
@@ -680,6 +694,10 @@ class VideoClipTool extends React.Component<IVideoClipProps, IState> {
           res.subAttribute = {};
         }
         res.subAttribute[key] = value;
+        res.text = this.getSubAttributeShowText(
+          res.subAttribute,
+          this.props.config?.inputList ?? [],
+        );
         this.setState({
           result: [...result],
         });
@@ -708,6 +726,27 @@ class VideoClipTool extends React.Component<IVideoClipProps, IState> {
         this.updateSidebar();
       }
     }
+  };
+
+  /**
+   * Splicing sub attributes into the format required for display
+   * @param subAttribute Sub attribute object
+   * @param subAttributeList Secondary attribute configuration list
+   * @returns The formatted text string
+   */
+  public getSubAttributeShowText = (
+    subAttribute: Record<string, string> | undefined,
+    subAttributeList: any[],
+  ) => {
+    if (!subAttribute || subAttributeList?.length === 0) {
+      return '';
+    }
+    let headerText = '';
+    const list = TagUtils.getTagNameList(subAttribute, subAttributeList);
+    list.forEach((i) => {
+      headerText += `\n${i.keyName}: ${i.value.join(`、`)}`;
+    });
+    return headerText;
   };
 
   public render() {

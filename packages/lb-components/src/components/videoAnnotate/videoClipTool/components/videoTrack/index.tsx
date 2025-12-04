@@ -24,7 +24,14 @@ export const getDisplayContent = (i: any, attributeList: any) => {
   const { t } = useTranslation();
   const { attribute, textAttribute } = i;
   const attr = AttributeUtils.getAttributeShowText(attribute, attributeList) || t('NoAttribute');
-  return [attr, textAttribute ? `${t('textTool')}: ${textAttribute}` : ''].filter((i) => i).join('，');
+  const subAttr = i?.text || '';
+  return [
+    attr,
+    subAttr ? `${t('SubAttribute')}: ${subAttr}` : '',
+    textAttribute ? `${t('textTool')}: ${textAttribute}` : '',
+  ]
+    .filter((i) => i)
+    .join('，');
 };
 
 /**
@@ -168,6 +175,8 @@ const VideoTrack = (props: IProps) => {
   };
 
   const displayTracks = useMemo(() => {
+    if(!total) return
+    
     const array = sortTrack(result, selectedTrack);
     return array?.map((i: any, index: number) => (
       <div className={styles.track} key={i?.id || index}>
