@@ -16,6 +16,7 @@ declare interface IPolygonData {
   attribute: string;
   isRect?: boolean; // 用于判断当前多边形矩形模式生成
   trackID?: number;
+  subAttribute?: { [key: string]: string }; //  subAttribute
 }
 
 declare interface IPolygonPoint {
@@ -49,4 +50,6 @@ declare interface IPolygonConfig extends IToolConfig {
   segmentSupport?: boolean; // 分割辅助
   showConfirm?: boolean;
   panopticModel?: string; // 分割模型
+  secondaryAttributeConfigurable?: boolean; //  subAttribute Configurable
+  subAttributeList?: IInputList[]; //  subAttribute List
 }

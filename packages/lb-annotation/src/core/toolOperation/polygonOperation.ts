@@ -23,6 +23,7 @@ import CommonToolUtils from '../../utils/tool/CommonToolUtils';
 import DrawUtils from '../../utils/tool/DrawUtils';
 import PolygonUtils from '../../utils/tool/PolygonUtils';
 import StyleUtils from '../../utils/tool/StyleUtils';
+import TagUtils from '../../utils/tool/TagUtils';
 import uuid from '../../utils/uuid';
 import { BasicToolOperation, IBasicToolOperationProps } from './basicToolOperation';
 import TextAttributeClass from './textAttributeClass';
@@ -1660,6 +1661,14 @@ class PolygonOperation extends BasicToolOperation {
         let showText = `${AttributeUtils.getAttributeShowText(attribute, this.config.attributeList) ?? ''}`;
         if (this.config?.isShowOrder && polygon?.order > 0) {
           showText = `${polygon.order} ${showText}`;
+        }
+
+        // Add sub attribute display
+        if (polygon?.subAttribute && this.config?.secondaryAttributeConfigurable && this.config?.subAttributeList) {
+          const list = TagUtils.getTagNameList(polygon.subAttribute, this.config.subAttributeList);
+          list.forEach((i) => {
+            showText += `\n${i.keyName}: ${i.value.join(`、`)}`;
+          });
         }
 
         DrawUtils.drawText(this.canvas, transformPointList[0], showText, {
