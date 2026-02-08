@@ -1,0 +1,37 @@
+.custom-attribute-input-wrapper {
+  padding: 12px;
+  
+  &.display {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    
+    .attribute-text {
+      flex: 1;
+      font-size: 14px;
+      color: rgba(0, 0, 0, 0.85);
+      word-break: break-all;
+    }
+    
+    .ant-btn-link {
+      padding: 0 8px;
+      height: auto;
+    }
+  }
+  
+  &.editing {
+    .ant-input {
+      font-size: 14px;
+      margin-bottom: 8px;
+    }
+    
+    .button-group {
+      display: flex;
+      justify-content: flex-end;
+      
+      .ant-btn {
+        font-size: 12px;
+      }
+    }
+  }
+}

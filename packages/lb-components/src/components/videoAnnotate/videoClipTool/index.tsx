@@ -398,10 +398,12 @@ class VideoClipTool extends React.Component<IVideoClipProps, IState> {
       const id = uuid();
       const subAttribute = {};
       selectedID = id;
+      // In the custom attribute input mode, the new clip defaults to having no attributes
+      const defaultAttribute = this.props.config?.customAttributeInput === true ? '无属性' : selectedAttribute;
       newResult.push({
         start: sliceStart,
         end: null,
-        attribute: selectedAttribute,
+        attribute: defaultAttribute,
         textAttribute: this.defaultTextAttribute,
         duration,
         id,
@@ -431,12 +433,19 @@ class VideoClipTool extends React.Component<IVideoClipProps, IState> {
       }
     }
 
-    this.setState({
+    const newState: any = {
       clipStatus,
       result: newResult,
       selectedID,
       textValue,
-    });
+    };
+    
+    // In the custom attribute input mode, update the selectedAttribute synchronously
+    if (this.props.config?.customAttributeInput && isStopped) {
+      newState.selectedAttribute = '无属性';
+    }
+
+    this.setState(newState);
     this.updateSidebar();
   };
 
@@ -450,10 +459,11 @@ class VideoClipTool extends React.Component<IVideoClipProps, IState> {
     const id = uuid();
     const newResult = _.cloneDeep(result);
     const currentTime = this.videoPlayer?.currentTime || 0;
+    const defaultAttribute = this.props.config?.customAttributeInput ? '无属性' : selectedAttribute;
     newResult.push({
       start: currentTime,
       end: currentTime,
-      attribute: selectedAttribute,
+      attribute: defaultAttribute,
       textAttribute: this.defaultTextAttribute,
       id,
       type: ETimeSliceType.Time,
@@ -465,6 +475,10 @@ class VideoClipTool extends React.Component<IVideoClipProps, IState> {
       selectedID: id,
       textValue: this.defaultTextAttribute,
     } as any;
+
+    if (this.props.config?.customAttributeInput) {
+      newState.selectedAttribute = '无属性';
+    }
 
     const currentSnippet = newResult.find((i) => i.id === selectedID);
 

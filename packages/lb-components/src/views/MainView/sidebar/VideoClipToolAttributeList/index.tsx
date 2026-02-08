@@ -3,6 +3,7 @@ import { connect } from 'react-redux';
 import { AppState } from 'src/store';
 import { GraphToolInstance } from 'src/store/annotation/types';
 import AttributeList from '@/components/attributeList';
+import AttributeInputEditor from '@/components/attributeInputEditor';
 import StepUtils from '@/utils/StepUtils';
 import { IStepInfo } from '@/types/step';
 import { jsonParser } from '@/utils';
@@ -63,17 +64,9 @@ const VideoClipToolAttributeList: React.FC<IProps> = (props) => {
     return null;
   }
 
-  if (config.attributeConfigurable !== true || !config?.attributeList) {
+  if (config.attributeConfigurable !== true) {
     return null;
   }
-
-  const list = config.attributeList.map((i: any) => ({
-    label: i.key,
-    value: i.value,
-    color: i?.color,
-  }));
-
-  list.unshift({ label: t('NoAttribute'), value: '' });
 
   const attributeChanged = (v: string) => {
     if (toolInstance) {
@@ -102,6 +95,49 @@ const VideoClipToolAttributeList: React.FC<IProps> = (props) => {
     selectedTimeSlice &&
     subAttributeList.length > 0 &&
     config?.secondaryAttributeConfigurable === true;
+
+  // Render custom attribute input mode
+  const renderCustomAttributeInput = () => {
+    return (
+      <div style={{ height: 0, flex: 1, overflowY: 'auto', overflowX: 'hidden' }}>
+        {selectedID && (
+          <AttributeInputEditor
+            selectedAttribute={selectedAttribute}
+            attributeChanged={attributeChanged}
+          />
+        )}
+        {shouldShowSubAttribute && (
+          <>
+            <Divider style={{ margin: 0 }} />
+            <SubAttributeList
+              subAttributeList={subAttributeList}
+              setSubAttribute={setSubAttribute}
+              getValue={getSubAttributeValue}
+              lang='cn'
+            />
+          </>
+        )}
+      </div>
+    );
+  };
+
+  // First, execute the custom attribute input mode
+  if (config.customAttributeInput) {
+    return renderCustomAttributeInput();
+  }
+
+  // Otherwise, the original owner attribute list selection mode will be used, with no changes to the original logic
+  if (!config?.attributeList) {
+    return null;
+  }
+
+  const list = config.attributeList.map((i: any) => ({
+    label: i.key,
+    value: i.value,
+    color: i?.color,
+  }));
+
+  list.unshift({ label: t('NoAttribute'), value: '' });
 
   return (
     <div style={{ height: 0, flex: 1, overflowY: 'auto', overflowX: 'hidden' }}>
