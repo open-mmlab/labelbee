@@ -64,6 +64,7 @@ const VideoClipToolAttributeList: React.FC<IProps> = (props) => {
     return null;
   }
 
+  // If the attribute configuration is not enabled, return null
   if (config.attributeConfigurable !== true) {
     return null;
   }
