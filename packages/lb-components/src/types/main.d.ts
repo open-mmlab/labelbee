@@ -33,6 +33,7 @@ export type Sider = ({
   LLMSidebar,
   NLPSidebar,
   videoClipSidebar,
+  globalTagList,
 }: {
   toolIcon: React.ReactNode;
   attributeList: React.ReactNode;
@@ -49,6 +50,7 @@ export type Sider = ({
   NLPSidebar: React.ReactNode;
   videoClipSidebar: React.ReactNode;
   NLPSidebar: React.ReactNode;
+  globalTagList: React.ReactNode;
   // PointCloud
   pointCloudToolSidebar: React.ReactNode;
   pointCloudOperation: React.ReactNode;

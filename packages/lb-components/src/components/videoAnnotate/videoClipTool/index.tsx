@@ -35,6 +35,10 @@ interface IVideoClipProps extends IVideoAnnotateProps {
   onVideoLoaded: (isError?: boolean) => void;
 }
 
+interface IExtraResult {
+  globalTag?: Record<string, string>;
+}
+
 interface IState {
   result: IVideoTimeSlice[];
   selectedAttribute: string;
@@ -47,6 +51,7 @@ interface IState {
   currentTime: number;
   configLoading: boolean; // 动态标签加载配置
   valid: boolean;
+  extraResult: IExtraResult;
 }
 
 class VideoClipTool extends React.Component<IVideoClipProps, IState> {
@@ -102,6 +107,7 @@ class VideoClipTool extends React.Component<IVideoClipProps, IState> {
       onSelectedTimeSlice: this.onSelectedTimeSlice,
       removeTimeSlice: this.removeTimeSlice,
       updateSelectedSliceTimeProperty: this.updateSelectedSliceTimeProperty,
+      extraResult: this.state.extraResult,
     };
   }
   public fns: Map<string, any[]> = new Map();
@@ -133,6 +139,7 @@ class VideoClipTool extends React.Component<IVideoClipProps, IState> {
       currentTime: 0,
       configLoading: false,
       valid: true,
+      extraResult: { globalTag: {} },
     };
   }
 
@@ -218,12 +225,17 @@ class VideoClipTool extends React.Component<IVideoClipProps, IState> {
     this.emitEvent('changeClipSidebar');
     this.emitEvent('updateTextAttribute');
     this.emitEvent('changeAttributeSidebar');
+    this.emitEvent('changeGlobalTag');
   };
 
   public exportData = () => {
     const duration = this.videoRef?.duration ?? 0;
 
     return [this.state.result.filter((i) => i.end !== null), { valid: this.state.valid, duration }];
+  };
+
+  public exportCustomData = () => {
+    return { extraResult: this.state.extraResult }
   };
   /**
    * 微调选中截取片段的开始时间（start）
@@ -635,6 +647,7 @@ class VideoClipTool extends React.Component<IVideoClipProps, IState> {
       const resultRecord = jsonParser(imgList[imgIndex].result);
       const stepResult = resultRecord[`step_${this.stepInfo().step}`];
       const result = stepResult?.result || [];
+      const extraResult = stepResult?.extraResult || { globalTag: {} };
       // Generate a text attribute for each result item
       const inputList = this.props.config?.inputList ?? [];
       result.forEach((item: IVideoTimeSlice) => {
@@ -651,6 +664,7 @@ class VideoClipTool extends React.Component<IVideoClipProps, IState> {
           selectedAttribute: '',
           clipStatus: EClipStatus.Stop,
           valid,
+          extraResult,
         },
         () => {
           this.updateSidebar();
@@ -669,6 +683,7 @@ class VideoClipTool extends React.Component<IVideoClipProps, IState> {
           textValue: '',
           selectedAttribute: '',
           valid: true,
+          extraResult: { globalTag: {} },
         },
         () => {
           this.updateSidebar();
@@ -740,6 +755,25 @@ class VideoClipTool extends React.Component<IVideoClipProps, IState> {
         this.updateSidebar();
       }
     }
+  };
+
+  /**
+   * Set global tags
+   * @param key tag key
+   * @param value tag value
+   */
+  public setGlobalTag = (key: string, value: string) => {
+    const { extraResult } = this.state;
+    this.setState({
+      extraResult: {
+        ...extraResult,
+        globalTag: {
+          ...(extraResult.globalTag || {}),
+          [key]: value,
+        },
+      },
+    });
+    this.updateSidebar();
   };
 
   /**

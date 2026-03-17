@@ -141,7 +141,7 @@ const VideoClipToolAttributeList: React.FC<IProps> = (props) => {
   list.unshift({ label: t('NoAttribute'), value: '' });
 
   return (
-    <div style={{ height: 0, flex: 1, overflowY: 'auto', overflowX: 'hidden' }}>
+    <div>
       <AttributeList
         list={list}
         attributeChanged={attributeChanged}

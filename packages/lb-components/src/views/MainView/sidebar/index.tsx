@@ -27,6 +27,7 @@ import LLMMultiWheelToolSidebar from '@/components/LLMMultiWheelView/sidebar';
 import NLPToolSidebar from './NLPSidebar';
 import VideoClipAnnotatedList from '@/components/videoAnnotate/videoClipTool/components/annotatedList';
 import VideoClipToolAttributeList from './VideoClipToolAttributeList';
+import GlobalTagList from './GlobalTagList';
 import { IOperationConfig } from './GeneralOperation/ActionsConfirm';
 
 const { EVideoToolName, EPointCloudName } = cTool;
@@ -154,6 +155,7 @@ const Sidebar: React.FC<IProps> = ({
   );
 
   const videoClipSidebar = <VideoClipAnnotatedList />;
+  const globalTagList = <GlobalTagList />;
   const LLMSidebar = <LLMToolSidebar checkMode={checkMode} />;
   const LLMMultiWheelSidebar = <LLMMultiWheelToolSidebar checkMode={checkMode} />;
   const NLPSidebar = <NLPToolSidebar checkMode={checkMode} />;
@@ -186,6 +188,7 @@ const Sidebar: React.FC<IProps> = ({
             LLMMultiWheelSidebar,
             videoClipSidebar,
             NLPSidebar,
+            globalTagList,
           })}
         </div>
       );
