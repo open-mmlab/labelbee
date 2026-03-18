@@ -225,7 +225,6 @@ class VideoClipTool extends React.Component<IVideoClipProps, IState> {
     this.emitEvent('changeClipSidebar');
     this.emitEvent('updateTextAttribute');
     this.emitEvent('changeAttributeSidebar');
-    this.emitEvent('changeGlobalTag');
   };
 
   public exportData = () => {
@@ -764,16 +763,17 @@ class VideoClipTool extends React.Component<IVideoClipProps, IState> {
    */
   public setGlobalTag = (key: string, value: string) => {
     const { extraResult } = this.state;
-    this.setState({
-      extraResult: {
-        ...extraResult,
-        globalTag: {
-          ...(extraResult.globalTag || {}),
-          [key]: value,
+    this.setState(
+      {
+        extraResult: {
+          ...extraResult,
+          globalTag: {
+            ...(extraResult.globalTag || {}),
+            [key]: value,
+          },
         },
-      },
-    });
-    this.updateSidebar();
+      }
+    );
   };
 
   /**

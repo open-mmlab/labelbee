@@ -36,17 +36,6 @@ const GlobalTagList: React.FC<IProps> = (props) => {
   const extraResult = videoClipContext?.extraResult ?? {};
   const globalTag = extraResult?.globalTag ?? {};
 
-  useEffect(() => {
-    if (toolInstance) {
-      toolInstance.singleOn('changeGlobalTag', () => {
-        forceRender((s) => s + 1);
-      });
-    }
-    return () => {
-      toolInstance?.unbindAll('changeGlobalTag');
-    };
-  }, [toolInstance]);
-
   if (!props.stepInfo || !globalTagConfigurable || globalTagList.length === 0) {
     return null;
   }
