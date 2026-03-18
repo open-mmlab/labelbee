@@ -34,7 +34,6 @@ const GlobalTagList: React.FC<IProps> = (props) => {
 
   const videoClipContext = (toolInstance as any)?.exportContext;
   const extraResult = videoClipContext?.extraResult ?? {};
-  // console.log(config,videoClipContext,3737);
   const globalTag = extraResult?.globalTag ?? {};
 
   useEffect(() => {
