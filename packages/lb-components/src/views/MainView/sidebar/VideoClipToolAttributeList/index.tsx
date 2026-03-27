@@ -100,7 +100,7 @@ const VideoClipToolAttributeList: React.FC<IProps> = (props) => {
   // Render custom attribute input mode
   const renderCustomAttributeInput = () => {
     return (
-      <div style={{ height: 0, flex: 1, overflowY: 'auto', overflowX: 'hidden' }}>
+      <>
         {selectedID && (
           <AttributeInputEditor
             selectedAttribute={selectedAttribute}
@@ -118,7 +118,7 @@ const VideoClipToolAttributeList: React.FC<IProps> = (props) => {
             />
           </>
         )}
-      </div>
+      </>
     );
   };
 
