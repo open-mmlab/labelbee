@@ -37,3 +37,4 @@ yarn-debug.log*
 yarn-error.log*
 lerna-debug.log*
 packages/sensebee_frontend/
+.codegraph/

@@ -15,6 +15,7 @@ interface IVideoClipToolContext {
   clipStatus: EClipStatus;
   selectedAttribute?: string;
   contextToCancel?: (e: any) => void;
+  selectTimeSliceByTime?: (time: number) => void;
 }
 
 export const VideoClipToolContext = React.createContext<IVideoClipToolContext>({
