@@ -52,7 +52,7 @@ export const VideoPlayerCtx = React.createContext<{
   toggleClipStatus: () => {},
 });
 
-const PER_INTERVAL = 50;
+const PER_INTERVAL = 300;
 const PER_FORWARD = 0.1;
 const PLAYBACK_RATES = [0.1, 0.2, 0.3, 0.4, 0.5, 1, 1.5, 2, 4, 6, 8, 16];
 
@@ -221,12 +221,9 @@ export class VideoPlayer extends React.Component<IVideoPlayerProps, IVideoPlayer
         try {
           if (this.videoElm?.buffered.length > 0) {
             const buffered = this.videoElm?.buffered.end(0);
-
-            this.setState({
-              currentTime: decimalReserved(this.videoElm?.currentTime, 1),
-              buffered,
-            });
+            this.setState({ buffered });
           }
+          this.props.updateCurrentTime?.(decimalReserved(this.videoElm?.currentTime, 1));
         } catch (error) {
           console.error(error);
         }

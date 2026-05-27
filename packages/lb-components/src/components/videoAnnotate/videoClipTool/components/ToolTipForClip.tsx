@@ -41,7 +41,7 @@ const ToolTipForClip = (props: {
       <div>{`${t('textTool')}：${textAttribute}`}</div>
     </div>
   );
-  return <Tooltip title={title}>{slot}</Tooltip>;
+  return <Tooltip title={title} placement="leftTop">{slot}</Tooltip>;
 };
 
 export default ToolTipForClip;

@@ -7,7 +7,7 @@ import { timeFormat } from '@/utils/audio';
 import { IVideoTimeSlice } from '@labelbee/lb-utils';
 import { classnames } from '@/utils';
 import { EnvironmentFilled, ScissorOutlined, CloseCircleFilled } from '@ant-design/icons';
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useLayoutEffect, useRef, useState } from 'react';
 import { EClipStatus, ETimeSliceType, TIME_SLICE_TYPE } from '../../constant';
 import TimeSliceRange from '../timeSliceRange';
 import ToolTipForClip from '../ToolTipForClip';
@@ -51,11 +51,18 @@ const EmptyVideoClipAnnotatedList = () => {
  * 标注列表包裹组件，无内容时渲染 EmptyVideoClipAnnotatedList
  * @returns
  */
-const VideoClipAnnotatedListWrapper = ({ children }: { children: any }) => {
+const VideoClipAnnotatedListWrapper = ({
+  children,
+  scrollRef,
+}: {
+  children: any;
+  scrollRef?: React.Ref<HTMLDivElement>;
+}) => {
   const isEmpty = children.length === 0;
 
   return (
     <div
+      ref={scrollRef}
       className={classnames({
         [styles.empty]: isEmpty,
         [styles.timeSliceListContent]: true,
@@ -70,12 +77,14 @@ const VideoClipAnnotatedItem = ({
   timeSliceProps,
   index,
   exportContext,
+  onItemClick,
 }: {
   timeSliceProps: IVideoTimeSlice;
   index: number;
-  exportContext: any,
+  exportContext: any;
+  onItemClick: (timeSliceProps: IVideoTimeSlice) => void;
 }) => {
-  const { selectedID, attributeList, onSelectedTimeSlice, removeTimeSlice } = exportContext
+  const { selectedID, attributeList, removeTimeSlice } = exportContext;
 
   return (
     <div
@@ -85,7 +94,7 @@ const VideoClipAnnotatedItem = ({
         [styles.timeSliceItemActivated]: timeSliceProps.id === selectedID,
       })}
       onClick={() => {
-        onSelectedTimeSlice(timeSliceProps);
+        onItemClick(timeSliceProps);
       }}
     >
       <ToolTipForClip
@@ -138,6 +147,8 @@ const VideoClipAnnotatedList = (props: { toolInstance: any }) => {
   const { selectedID, result, videoPlayer, clipStatus, updateSelectedSliceTimeProperty } = toolInstance?.exportContext || {}
 
   const [_, forceRender] = useState(0);
+  const listRef = useRef<HTMLDivElement>(null);
+  const skipScrollRef = useRef(false);
   const { t } = useTranslation();
 
   useEffect(() => {
@@ -154,19 +165,42 @@ const VideoClipAnnotatedList = (props: { toolInstance: any }) => {
   const selectedTimeSlice = result?.find((i: any) => i.id === selectedID);
   const resultList = result?.filter((i: any) => i.end !== null);
 
+  const handleItemClick = (timeSliceProps: IVideoTimeSlice) => {
+    skipScrollRef.current = true;
+    toolInstance.exportContext.onSelectedTimeSlice(timeSliceProps);
+  };
+
+  useLayoutEffect(() => {
+    if (!selectedID || !listRef.current) {
+      return;
+    }
+    if (skipScrollRef.current) {
+      skipScrollRef.current = false;
+      return;
+    }
+    const list = toolInstance?.exportContext?.result?.filter(
+      (i: IVideoTimeSlice) => i.end !== null,
+    );
+    const index = list?.findIndex((i: IVideoTimeSlice) => i.id === selectedID);
+    if (index >= 0) {
+      listRef.current.children[index]?.scrollIntoView({ block: 'nearest' });
+    }
+  }, [selectedID, _, toolInstance]);
+
   if (!toolInstance?.exportContext) {
     return null
   }
   return (
     <div>
       <div className={styles.timeSliceListHeader}>{t('AnnotatedList')}</div>
-      <VideoClipAnnotatedListWrapper>
+      <VideoClipAnnotatedListWrapper scrollRef={listRef}>
         {resultList?.map((timeSliceProps: IVideoTimeSlice, index: number) => (
           <VideoClipAnnotatedItem
             timeSliceProps={timeSliceProps}
             index={index}
             key={timeSliceProps.id}
             exportContext={toolInstance?.exportContext || {}}
+            onItemClick={handleItemClick}
           />
         ))}
       </VideoClipAnnotatedListWrapper>

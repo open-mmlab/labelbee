@@ -511,6 +511,45 @@ class VideoClipTool extends React.Component<IVideoClipProps, IState> {
     this.setState({
       currentTime: time,
     });
+    this.selectTimeSliceByTime(time);
+  };
+
+  /** 根据时间查找片段 */
+  public findTimeSliceByTime = (time: number): IVideoTimeSlice | undefined => {
+    const t = decimalReserved(time, 2);
+    return this.state.result.find((item) => {
+      if (item.end === null) {
+        return false;
+      }
+      if (item.type === ETimeSliceType.Time) {
+        return decimalReserved(item.start, 2) === t;
+      }
+      return item.start <= t && t < item.end;
+    });
+  };
+
+  /** 根据时间选中片段（不 seek、不 pause） */
+  public selectTimeSliceByTime = (time: number) => {
+    if (this.isClipping) {
+      return;
+    }
+    const slice = this.findTimeSliceByTime(time);
+    if (slice) {
+      if (slice.id === this.state.selectedID) {
+        return;
+      }
+      this.setState({
+        selectedID: slice.id,
+        selectedAttribute: slice.attribute,
+        textValue: slice.textAttribute,
+      });
+    } else {
+      if (!this.state.selectedID) {
+        return;
+      }
+      this.setState({ selectedID: '' });
+    }
+    this.updateSidebar();
   };
 
   /**
@@ -810,6 +849,7 @@ class VideoClipTool extends React.Component<IVideoClipProps, IState> {
           clipStatus,
           selectedAttribute,
           contextToCancel: this.contextToCancel,
+          selectTimeSliceByTime: this.selectTimeSliceByTime,
         }}
       >
         {this.renderMediaContent()}
