@@ -7,7 +7,7 @@ import { timeFormat } from '@/utils/audio';
 import { IVideoTimeSlice } from '@labelbee/lb-utils';
 import { classnames } from '@/utils';
 import { EnvironmentFilled, ScissorOutlined, CloseCircleFilled } from '@ant-design/icons';
-import React, { useEffect, useLayoutEffect, useRef, useState } from 'react';
+import React, { useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react';
 import { EClipStatus, ETimeSliceType, TIME_SLICE_TYPE } from '../../constant';
 import TimeSliceRange from '../timeSliceRange';
 import ToolTipForClip from '../ToolTipForClip';
@@ -163,8 +163,13 @@ const VideoClipAnnotatedList = (props: { toolInstance: any }) => {
   }, [toolInstance]);
 
   const selectedTimeSlice = result?.find((i: any) => i.id === selectedID);
-  const resultList = result?.filter((i: any) => i.end !== null);
-
+  const resultList = useMemo(
+    () =>
+      [...(result?.filter((i: IVideoTimeSlice) => i.end !== null) ?? [])].sort(
+        (a, b) => a.start - b.start,
+      ),
+    [result, _],
+  );
   const handleItemClick = (timeSliceProps: IVideoTimeSlice) => {
     skipScrollRef.current = true;
     toolInstance.exportContext.onSelectedTimeSlice(timeSliceProps);
@@ -178,14 +183,11 @@ const VideoClipAnnotatedList = (props: { toolInstance: any }) => {
       skipScrollRef.current = false;
       return;
     }
-    const list = toolInstance?.exportContext?.result?.filter(
-      (i: IVideoTimeSlice) => i.end !== null,
-    );
-    const index = list?.findIndex((i: IVideoTimeSlice) => i.id === selectedID);
+    const index = resultList.findIndex((i: IVideoTimeSlice) => i.id === selectedID);
     if (index >= 0) {
       listRef.current.children[index]?.scrollIntoView({ block: 'nearest' });
     }
-  }, [selectedID, _, toolInstance]);
+  }, [selectedID, _, resultList]);
 
   if (!toolInstance?.exportContext) {
     return null
