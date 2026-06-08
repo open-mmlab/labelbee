@@ -1353,7 +1353,9 @@ export const usePointCloudViews = (params?: IUsePointCloudViewsParams) => {
 
     mainViewInstance.updateTopCamera();
 
-    const valid = jsonParser(newData.result)?.valid ?? true;
+    const resultObj = jsonParser(newData.result);
+    const preResultObj = jsonParser(newData.preResult);
+    const valid = resultObj?.valid ?? preResultObj?.valid ?? true;
     ptCtx.setPointCloudValid(valid);
 
     // Clear other view data during initialization

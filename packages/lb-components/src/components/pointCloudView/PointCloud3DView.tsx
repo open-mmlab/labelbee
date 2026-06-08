@@ -231,7 +231,9 @@ const PointCloud3D: React.FC<IA2MapStateProps> = ({
           // Because updatePolygonList will reset the selected state, it is necessary to reset the current rectangle selection
           ptCtx.setSelectedIDs(currentSelectInfo.id);
         }
-        ptCtx.setPointCloudValid(jsonParser(currentData.result)?.valid);
+        const resultObj = jsonParser(currentData.result);
+        const preResultObj = jsonParser(currentData.preResult);
+        ptCtx.setPointCloudValid(resultObj?.valid ?? preResultObj?.valid);
         ptCtx.setPointCloudResult(boxParamsList);
         ptCtx.setRectList(rectParamsList);
         // Update the box of 3D view
