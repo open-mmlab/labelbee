@@ -19,7 +19,7 @@ import { PointCloudContainer } from './PointCloudLayout';
 import { PointCloudContext } from './PointCloudContext';
 import { a2MapStateToProps, IA2MapStateProps } from '@/store/annotation/map';
 import { connect } from 'react-redux';
-import { jsonParser } from '@/utils';
+import { jsonParser, resolveFileItemValid } from '@/utils';
 import { useSingleBox } from './hooks/useSingleBox';
 import { useSphere } from './hooks/useSphere';
 import { Switch, Tooltip } from 'antd';
@@ -231,9 +231,7 @@ const PointCloud3D: React.FC<IA2MapStateProps> = ({
           // Because updatePolygonList will reset the selected state, it is necessary to reset the current rectangle selection
           ptCtx.setSelectedIDs(currentSelectInfo.id);
         }
-        const resultObj = jsonParser(currentData.result);
-        const preResultObj = jsonParser(currentData.preResult);
-        ptCtx.setPointCloudValid(resultObj?.valid ?? preResultObj?.valid);
+        ptCtx.setPointCloudValid(resolveFileItemValid(currentData.result, currentData.preResult));
         ptCtx.setPointCloudResult(boxParamsList);
         ptCtx.setRectList(rectParamsList);
         // Update the box of 3D view

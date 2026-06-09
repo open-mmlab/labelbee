@@ -4,7 +4,7 @@ import styleString from '@/constant/styleString';
 import { ANNOTATION_ACTIONS } from '@/store/Actions';
 import { IFileItem } from '@/types/data';
 import { IStepInfo } from '@/types/step';
-import { jsonParser } from '@/utils';
+import { jsonParser, resolveFileItemValid } from '@/utils';
 import AnnotationDataUtils from '@/utils/AnnotationDataUtils';
 import { ConfigUtils } from '@/utils/ConfigUtils';
 import { composeResult, composeResultWithBasicImgInfo } from '@/utils/data';
@@ -468,7 +468,7 @@ export const annotationReducer = (
 
       const basicImgInfo = {
         rotate: fileResult.rotate ?? 0,
-        valid: fileResult.valid ?? true,
+        valid: resolveFileItemValid(imgList[nextIndex]?.result, imgList[nextIndex]?.preResult),
       };
 
       if (imgNode && imgError !== true) {

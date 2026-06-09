@@ -15,6 +15,22 @@ export const jsonParser = (content: any, defaultValue: any = {}) => {
   }
 };
 
+/**
+ * Resolve the effective `valid` flag for a file item.
+ *
+ * Priority: result.valid → preResult.valid → true (default)
+ *
+ * When a page only has pre-annotation data (result is empty), `result.valid`
+ * is undefined, so we fall back to `preResult.valid`. A final `?? true`
+ * prevents passing `undefined` into setPointCloudValid / basicImgInfo.valid,
+ * which would silently coerce to `true` and override a correct `false` value.
+ */
+export const resolveFileItemValid = (result?: string, preResult?: string): boolean => {
+  const resultObj = jsonParser(result);
+  const preResultObj = jsonParser(preResult);
+  return resultObj?.valid ?? preResultObj?.valid ?? true;
+};
+
 export const getNewNode = <T>(newNode: T, oldNode: T): T => {
   return newNode || _.isNull(newNode) ? newNode : oldNode;
 };

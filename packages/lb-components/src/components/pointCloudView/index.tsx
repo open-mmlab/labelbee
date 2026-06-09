@@ -34,7 +34,7 @@ import { DrawLayerSlot } from '@/types/main';
 import { PointCloudContext } from './PointCloudContext';
 import { EPointCloudPattern, PointCloudUtils } from '@labelbee/lb-utils';
 import { useCustomToolInstance } from '@/hooks/annotation';
-import { jsonParser } from '@/utils';
+import { jsonParser, resolveFileItemValid } from '@/utils';
 import { a2MapStateToProps, IA2MapStateProps } from '@/store/annotation/map';
 import classNames from 'classnames';
 import SideAndBackOverView from './components/sideAndBackOverView';
@@ -107,6 +107,9 @@ const PointCloudView: React.FC<IProps> = (props) => {
       ptCtx.setPointCloudSphereList(sphereParamsList);
       ptCtx.setRectList(rectList);
       ptCtx.setSegmentation(segmentation);
+      ptCtx.setPointCloudValid(
+        resolveFileItemValid(currentData?.result, currentData?.preResult),
+      );
     }
   }, [imgIndex]);
 
