@@ -36,7 +36,12 @@ import { useDispatch, useSelector } from '@/store/ctx';
 import { AppState } from '@/store';
 import StepUtils from '@/utils/StepUtils';
 import { EPointCloudBoxRenderTrigger } from '@/utils/ToolPointCloudBoxRenderHelper';
-import { jsonParser, getRectPointCloudBox, generatePointCloudBoxRects } from '@/utils';
+import {
+  jsonParser,
+  getRectPointCloudBox,
+  generatePointCloudBoxRects,
+  resolveFileItemValid,
+} from '@/utils';
 import type { GeneratePointCloudBoxRectsOptions } from '@/utils';
 import {
   PreDataProcess,
@@ -1353,9 +1358,8 @@ export const usePointCloudViews = (params?: IUsePointCloudViewsParams) => {
 
     mainViewInstance.updateTopCamera();
 
-    const resultObj = jsonParser(newData.result);
-    const preResultObj = jsonParser(newData.preResult);
-    const valid = resultObj?.valid ?? preResultObj?.valid ?? true;
+
+    const valid = resolveFileItemValid(newData.result, newData.preResult);
     ptCtx.setPointCloudValid(valid);
 
     // Clear other view data during initialization
