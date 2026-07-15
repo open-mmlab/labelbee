@@ -13,7 +13,7 @@ export interface ICustomToolInstance {
   exportData: () => [any, {}];
   exportCustomData: () => {};
   singleOn: (eventName: string, callback: (...args: any[]) => void) => void;
-  clearResult: () => void;
+  clearResult: (options?: { keepPreResult?: boolean }) => void | Promise<void>;
   on: (eventName: string, callback: (...args: any[]) => void) => void;
   unbind: () => void;
   setResult: (result: any) => void;
