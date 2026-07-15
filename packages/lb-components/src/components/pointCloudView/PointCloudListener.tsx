@@ -60,7 +60,7 @@ const PointCloudListener: React.FC<IProps> = ({
 
   const { updateRotate } = useRotate({ currentData });
   const { updateRotateEdge } = useRotateEdge({ currentData });
-  const { updatePointCloudData, topViewSelectedChanged } = usePointCloudViews({
+  const { updatePointCloudData, restorePreResult, topViewSelectedChanged } = usePointCloudViews({
     setResourceLoading,
   });
   const {
@@ -327,7 +327,18 @@ const PointCloudListener: React.FC<IProps> = ({
         }
       }
     };
-    toolInstanceRef.current.clearResult = () => {
+    toolInstanceRef.current.clearResult = async (options?: { keepPreResult?: boolean }) => {
+      if (options?.keepPreResult) {
+        try {
+          const restored = await restorePreResult?.();
+          if (!restored) {
+            message.error(t('ClearKeepPreAnnotationFailed'));
+          }
+        } catch {
+          message.error(t('ClearKeepPreAnnotationFailed'));
+        }
+        return;
+      }
       clearAllResult?.();
     };
 

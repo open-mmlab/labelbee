@@ -13,6 +13,9 @@ export interface IOperationConfig {
   forbidConfirm?: boolean; // 是否禁止二次确认
   forbidOperation?: boolean; // 禁止操作,会有置灰操作（该部分由用户自己更改 ImgSvg 进行展示）
   content?: React.ReactElement;
+  /** Explicit extra UI under Popconfirm title; only rendered when set (opt-in). */
+  confirmExtra?: React.ReactElement;
+  onConfirmVisibleChange?: (visible: boolean) => void;
 }
 
 // 禁止的样式
@@ -22,16 +25,25 @@ const forbidStyle = {
 
 const PopconfirmTitle = ({ info }: { info: IOperationConfig }) => {
   const { t } = useTranslation();
-  if (info.key.startsWith('sure')) {
-    return (
-      <div key={info.key}>
-        {`${t('ConfirmTo')}${info.name.slice(0)}？`}
-        {info?.content ? info.content : ''}
-      </div>
-    );
+  const title = info.key.startsWith('sure') ? (
+    <div key={info.key}>
+      {`${t('ConfirmTo')}${info.name.slice(0)}？`}
+      {info?.content ? info.content : ''}
+    </div>
+  ) : (
+    <span>{info.name}</span>
+  );
+
+  if (!info.confirmExtra) {
+    return title;
   }
 
-  return <span>{info.name}</span>;
+  return (
+    <div>
+      {title}
+      {info.confirmExtra}
+    </div>
+  );
 };
 
 const ActionIcon = ({ icon }: { icon: React.ReactElement | string }) => {
@@ -94,6 +106,7 @@ const ActionsConfirm: React.FC<{
         cancelText={t('Cancel')}
         getPopupContainer={() => ref.current ?? document.body}
         onConfirm={info.onClick}
+        onVisibleChange={info.onConfirmVisibleChange}
         overlayClassName={`${prefix}-pop-confirm`}
       >
         <div>

@@ -650,7 +650,8 @@ export const usePointCloudViews = (params?: IUsePointCloudViewsParams) => {
     history,
     linkageImageNameRectMap,
   } = ptCtx;
-  const { addHistory, initHistory, pushHistoryUnderUpdatePolygon } = useHistory();
+  const { addHistory, initHistory, pushHistoryUnderUpdatePolygon, pushHistoryWithList } =
+    useHistory();
   const { selectedPolygon } = usePolygon();
 
   const { getPointCloudSphereByID, updatePointCloudSphere, selectedSphere } = useSphere();
@@ -721,6 +722,7 @@ export const usePointCloudViews = (params?: IUsePointCloudViewsParams) => {
       topViewSelectedChanged: () => {},
       sideViewUpdateBox: () => {},
       backViewUpdateBox: () => {},
+      restorePreResult: async () => false,
     };
   }
 
@@ -1427,6 +1429,93 @@ export const usePointCloudViews = (params?: IUsePointCloudViewsParams) => {
     params?.setResourceLoading?.(false);
   };
 
+  /**
+   * Restore current frame to pre-annotation only (no PCD reload).
+   * @returns whether restore succeeded
+   */
+  const restorePreResult = async () => {
+    if (!currentData?.url || !mainViewInstance) {
+      return false;
+    }
+
+    const preStep = jsonParser(currentData.preResult)?.[POINT_CLOUD_DEFAULT_STEP];
+    if (!preStep) {
+      return false;
+    }
+
+    const resultObj = jsonParser(currentData.result || '{}');
+    resultObj[POINT_CLOUD_DEFAULT_STEP] = _.cloneDeep(preStep);
+    let resultString = JSON.stringify(resultObj);
+    const url = currentData.url;
+
+    SetAnnotationLoading(dispatch, true);
+    params?.setResourceLoading?.(true);
+
+    try {
+      setHighlight2DDataList([]);
+      setSelectedIDs(undefined);
+
+      mainViewInstance.clearAllBox();
+      mainViewInstance.clearAllSphere();
+
+      let boxParamsList: any[] = [];
+      let lineList: any[] = [];
+      let polygonList: any[] = [];
+      let sphereParamsList: IPointCloudSphere[] = [];
+
+      ptCtx.setPointCloudValid(resolveFileItemValid(resultString, currentData.preResult));
+      ptCtx.sideViewInstance?.clearAllData();
+      ptCtx.backViewInstance?.clearAllData();
+
+      boxParamsList = PointCloudUtils.getBoxParamsFromResultList(resultString);
+
+      if (boxParamsList?.length > 0 && config?.lowerLimitPointsNumInBox > 0) {
+        // @ts-ignore
+        boxParamsList = await mainViewInstance?.filterPreResult(url, config, boxParamsList);
+        const newDataResultObj = jsonParser(resultString);
+        newDataResultObj[POINT_CLOUD_DEFAULT_STEP].result = boxParamsList;
+        resultString = JSON.stringify(newDataResultObj);
+        ptCtx.setPointCloudResult(boxParamsList);
+      }
+
+      polygonList = PointCloudUtils.getPolygonListFromResultList(resultString);
+      lineList = PointCloudUtils.getLineListFromResultList(resultString);
+      sphereParamsList = PointCloudUtils.getSphereParamsFromResultList(resultString);
+      const { rectList } = PointCloudUtils.parsePointCloudCurrentResult(resultString);
+
+      // Context must be set here: unlike page-enter, imgIndex does not change to trigger PointCloudView sync.
+      ptCtx.setPointCloudResult(boxParamsList);
+      ptCtx.setPolygonList(polygonList);
+      ptCtx.setLineList(lineList);
+      ptCtx.setPointCloudSphereList(sphereParamsList);
+      ptCtx.setRectList(rectList);
+
+      topViewInstance.updateData(url, resultString, {
+        radius: config?.radius ?? DEFAULT_RADIUS,
+      });
+      mainViewInstance.generateBoxes(boxParamsList);
+      mainViewInstance.generateSpheres(sphereParamsList);
+
+      await ptCtx.syncAllViewPointCloudColor(
+        EPointCloudBoxRenderTrigger.Default,
+        boxParamsList,
+        [],
+      );
+
+      pushHistoryWithList({
+        pointCloudBoxList: boxParamsList,
+        polygonList,
+        lineList,
+        pointCloudSphereList: sphereParamsList,
+      });
+
+      return true;
+    } finally {
+      SetAnnotationLoading(dispatch, false);
+      params?.setResourceLoading?.(false);
+    }
+  };
+
   return {
     topViewAddSphere,
     topViewAddBox,
@@ -1442,6 +1531,7 @@ export const usePointCloudViews = (params?: IUsePointCloudViewsParams) => {
     pointCloudBoxListUpdated,
     initPointCloud3d,
     updatePointCloudData,
+    restorePreResult,
     updateViewsByDefaultSize,
     generateRects,
     update2DViewRect,
