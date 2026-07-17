@@ -52,7 +52,8 @@ export const VideoPlayerCtx = React.createContext<{
   toggleClipStatus: () => {},
 });
 
-const PER_INTERVAL = 300;
+const PER_INTERVAL_DEFAULT = 50;
+const PER_INTERVAL_SYNC = 300;
 const PER_FORWARD = 0.1;
 const PLAYBACK_RATES = [0.1, 0.2, 0.3, 0.4, 0.5, 1, 1.5, 2, 4, 6, 8, 16];
 
@@ -72,6 +73,8 @@ interface IVideoPlayerProps {
   toggleClipStatus?: () => void;
   drawLayerSlot?: any;
   updateCurrentTime?: (time: number) => void;
+  /** 开启后播放过程持续同步 currentTime（具身联动） */
+  syncTimeOnPlay?: boolean;
 }
 
 interface IVideoPlayerState {
@@ -209,26 +212,37 @@ export class VideoPlayer extends React.Component<IVideoPlayerProps, IVideoPlayer
       this.timeInterval = undefined;
     }
 
-    /** Due to speedrate can less than PER_INTERVAL, it need to set current time after stopped */
+    /** Due to speedrate can less than play interval, it need to set current time after stopped */
     if (this.videoElm) {
       this.setCurrentTime(this.videoElm.currentTime);
     }
   };
 
   public onVideoStart = () => {
+    const syncTimeOnPlay = this.props.syncTimeOnPlay === true;
+    const interval = syncTimeOnPlay ? PER_INTERVAL_SYNC : PER_INTERVAL_DEFAULT;
     this.timeInterval = window.setInterval(() => {
       if (this.videoElm) {
         try {
           if (this.videoElm?.buffered.length > 0) {
             const buffered = this.videoElm?.buffered.end(0);
-            this.setState({ buffered });
+            if (syncTimeOnPlay) {
+              this.setState({ buffered });
+            } else {
+              this.setState({
+                currentTime: decimalReserved(this.videoElm?.currentTime, 1),
+                buffered,
+              });
+            }
           }
-          this.props.updateCurrentTime?.(decimalReserved(this.videoElm?.currentTime, 1));
+          if (syncTimeOnPlay) {
+            this.props.updateCurrentTime?.(decimalReserved(this.videoElm?.currentTime, 1));
+          }
         } catch (error) {
           console.error(error);
         }
       }
-    }, PER_INTERVAL);
+    }, interval);
   };
 
   public resetVideoData = () => {

@@ -144,7 +144,14 @@ const VideoClipAnnotatedItem = ({
 
 const VideoClipAnnotatedList = (props: { toolInstance: any }) => {
   const { toolInstance } = props
-  const { selectedID, result, videoPlayer, clipStatus, updateSelectedSliceTimeProperty } = toolInstance?.exportContext || {}
+  const {
+    selectedID,
+    result,
+    videoPlayer,
+    clipStatus,
+    updateSelectedSliceTimeProperty,
+    linkageConfigurable,
+  } = toolInstance?.exportContext || {}
 
   const [_, forceRender] = useState(0);
   const listRef = useRef<HTMLDivElement>(null);
@@ -171,12 +178,14 @@ const VideoClipAnnotatedList = (props: { toolInstance: any }) => {
     [result, _],
   );
   const handleItemClick = (timeSliceProps: IVideoTimeSlice) => {
-    skipScrollRef.current = true;
+    if (linkageConfigurable) {
+      skipScrollRef.current = true;
+    }
     toolInstance.exportContext.onSelectedTimeSlice(timeSliceProps);
   };
 
   useLayoutEffect(() => {
-    if (!selectedID || !listRef.current) {
+    if (!linkageConfigurable || !selectedID || !listRef.current) {
       return;
     }
     if (skipScrollRef.current) {
@@ -187,7 +196,7 @@ const VideoClipAnnotatedList = (props: { toolInstance: any }) => {
     if (index >= 0) {
       listRef.current.children[index]?.scrollIntoView({ block: 'nearest' });
     }
-  }, [selectedID, _, resultList]);
+  }, [linkageConfigurable, selectedID, _, resultList]);
 
   if (!toolInstance?.exportContext) {
     return null
@@ -195,7 +204,7 @@ const VideoClipAnnotatedList = (props: { toolInstance: any }) => {
   return (
     <div>
       <div className={styles.timeSliceListHeader}>{t('AnnotatedList')}</div>
-      <VideoClipAnnotatedListWrapper scrollRef={listRef}>
+      <VideoClipAnnotatedListWrapper scrollRef={linkageConfigurable ? listRef : undefined}>
         {resultList?.map((timeSliceProps: IVideoTimeSlice, index: number) => (
           <VideoClipAnnotatedItem
             timeSliceProps={timeSliceProps}
