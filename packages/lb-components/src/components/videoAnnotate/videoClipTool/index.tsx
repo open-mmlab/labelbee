@@ -108,6 +108,7 @@ class VideoClipTool extends React.Component<IVideoClipProps, IState> {
       removeTimeSlice: this.removeTimeSlice,
       updateSelectedSliceTimeProperty: this.updateSelectedSliceTimeProperty,
       extraResult: this.state.extraResult,
+      linkageConfigurable: this.props.config?.linkageConfigurable === true,
     };
   }
   public fns: Map<string, any[]> = new Map();
@@ -511,7 +512,9 @@ class VideoClipTool extends React.Component<IVideoClipProps, IState> {
     this.setState({
       currentTime: time,
     });
-    this.selectTimeSliceByTime(time);
+    if (this.props.config?.linkageConfigurable === true) {
+      this.selectTimeSliceByTime(time);
+    }
   };
 
   /** 根据时间查找片段 */
@@ -623,6 +626,7 @@ class VideoClipTool extends React.Component<IVideoClipProps, IState> {
           toggleClipStatus={this.toggleClipStatus}
           addTime={this.addTime}
           updateCurrentTime={this.updateCurrentTime}
+          syncTimeOnPlay={this.props.config?.linkageConfigurable === true}
         />
         <VideoTimeSlicesOverVideo
           key={this.videoPlayer?.currentTime}
