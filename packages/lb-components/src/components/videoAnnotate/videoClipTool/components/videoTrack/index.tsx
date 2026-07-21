@@ -105,6 +105,7 @@ const VideoTrack = (props: IProps) => {
   const { duration: total } = useContext(VideoPlayerCtx)
 
   const containerRef = useRef<HTMLDivElement>(null);
+  const containerWidth = containerRef.current?.clientWidth || 0;
 
   const left = currentTime / total;
 
@@ -118,8 +119,18 @@ const VideoTrack = (props: IProps) => {
       const diffTime = Math.max((i.end || currentTime) - i.start, 0) / total;
       const styles: any = {
         backgroundColor: attributeColor,
-        left: toPercentage(i.start / total, 2),
-        width: toPercentage(i.end ? Math.max(diffTime, 0.001) : diffTime, 2),
+        // Use the same outer-container pixel coordinate system as the
+        // timeline. Percentage widths were based on the scrollable inner
+        // track, which made the snippet end drift from the playhead.
+        left: containerWidth
+          ? `${decimalReserved(containerWidth * (i.start / total), 0)}px`
+          : toPercentage(i.start / total, 2),
+        width: containerWidth
+          ? `${decimalReserved(
+              containerWidth * (i.end ? Math.max(diffTime, 0.001) : diffTime),
+              0,
+            )}px`
+          : toPercentage(i.end ? Math.max(diffTime, 0.001) : diffTime, 2),
         position: 'absolute',
         borderRadius: 5,
       };
@@ -138,7 +149,6 @@ const VideoTrack = (props: IProps) => {
   };
 
   const attributeColor = AttributeUtils.getAttributeColor(attribute, attributeList);
-  const containerWidth = containerRef.current?.clientWidth || 0;
 
   const transformX = decimalReserved(Math.max(containerWidth * left, 0), 0);
 
